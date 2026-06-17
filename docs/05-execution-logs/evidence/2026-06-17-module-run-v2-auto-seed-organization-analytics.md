@@ -17,6 +17,14 @@ The auto-seed transaction appended guarded pending implementation tasks for `org
 - `batch-206-organization-analytics-privacy-preserving-employee-statistics`: privacy-preserving employee statistics
 - `batch-207-organization-analytics-export-readiness-contracts-without-object-st`: export readiness contracts without object storage or external delivery
 
+## Readiness Anchors
+
+- implementationAutoSeedGate: satisfied by this guarded seed transaction.
+- localExperienceClosureGate: planned for seeded local implementation tasks.
+- seededImplementationTask: true for every candidate task listed above.
+- focused test plan: each seeded task must replace the placeholder with scoped local unit validation before closeout.
+- localFullLoopGate: L5
+
 ## Boundary
 
 - Cost Calibration Gate remains blocked.

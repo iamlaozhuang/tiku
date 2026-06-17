@@ -8414,7 +8414,7 @@ tasks:
       - automation_policy
     validationCommandLifecycle:
       - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
@@ -8426,7 +8426,7 @@ tasks:
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-205-organization-analytics-aggregate-only-organization-metrics
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -8546,7 +8546,7 @@ tasks:
       - automation_policy
     validationCommandLifecycle:
       - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
@@ -8558,7 +8558,7 @@ tasks:
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -8678,7 +8678,7 @@ tasks:
       - automation_policy
     validationCommandLifecycle:
       - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
@@ -8690,7 +8690,7 @@ tasks:
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-organization-analytics.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
