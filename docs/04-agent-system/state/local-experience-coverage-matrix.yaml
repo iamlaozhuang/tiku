@@ -183,6 +183,20 @@ lastEmployeeAnswerRepositoryContractTdd:
     employeeAnswerRuntimeRoutes: pending
     employeeAnswerEntrySurface: pending
     localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
+lastEmployeeAnswerRouteQueueMaterialization:
+  taskId: organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization
+  materializedAt: "2026-06-17T22:42:00-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: employee_answer_route_contract_tdd_materialized_as_next_ready_set_item
+  nextTask: organization-training-employee-answer-runtime-route-contract-tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization.md
+  boundarySummary:
+    employeeAnswerRepositoryContract: metadata_only_draft_and_submission_persistence_ready
+    employeeAnswerRuntimeRoutes: pending_next_ready_set_task
+    schemaImplementation: not_required_for_route_contract_if_no_raw_answer_or_answered_count_persistence_is_added
+    employeeAnswerEntrySurface: pending
+    localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -426,13 +440,13 @@ matrix:
     edition: advanced
     actor: employee
     entrySurface: not_found_employee_training_ui
-    apiSurface: organization_training_service_contract_only
+    apiSurface: employee_answer_route_contract_tdd_materialized_pending
     serviceSurface: src/server/services/organization-training-service.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/repositories/organization-training-repository.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization.md
     status: partial
     blockedGate: employee_answer_runtime_routes_ui_entry_and_local_full_flow_not_closed
     nextTask: organization-training-employee-answer-runtime-route-contract-tdd
