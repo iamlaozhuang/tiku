@@ -657,10 +657,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: organization_training_and_analytics_unit_evidence_partial
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
     status: partial
-    blockedGate: organization_portal_ui_privacy_export_deploy_blocked
-    nextTask: organization-portal-admin-local-entry-readiness-audit
+    blockedGate: organization_portal_admin_shell_entry_and_e2e_flow_not_closed
+    nextTask: organization-portal-admin-shell-entry-contract-tdd
   - useCaseId: UC-ADV-OPS-AUTH-QUOTA
     edition: advanced
     actor: ops_admin

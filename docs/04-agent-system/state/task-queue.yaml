@@ -15612,3 +15612,184 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
     lastFailurePath: null
     retryCount: 0
+  - id: organization-portal-admin-local-entry-readiness-audit
+    title: Organization portal admin local entry readiness audit
+    phase: organization-portal-admin-local-entry-readiness-audit
+    sourceStory: localExperienceClosureGate.organizationPortalAdminLocalEntryReadinessAudit
+    dependencies:
+      - organization-analytics-summary-local-flow-readiness-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested serial execution of recommended items 1-2-3 in the current 2026-06-18 prompt. This task is limited
+      to docs/state/readiness audit, focused local unit validation, e2e list-only discovery, and seeding the next local
+      portal shell task if needed. High-risk gates remain blocked.
+    targetExperienceChain: organization-portal-admin
+    useCaseIds:
+      - UC-ADV-ORG-PORTAL-ADMIN
+    executionProfile: local_readiness_audit
+    evidenceMode: full
+    validationPolicy: focused_unit_plus_e2e_list_and_readiness_gates
+    queueSelectionMode: user_directed_sequence
+    taskKind: readiness_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_keep_partial_seed_portal_shell_entry_contract_tdd
+    claimedAt: "2026-06-18T05:02:46-07:00"
+    closedAt: "2026-06-18T05:04:54-07:00"
+    branch: codex/local-experience-analytics-portal-sequence
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+      - src/app/(admin)/content/organization-training/page.tsx
+      - src/app/(student)/organization-training/page.tsx
+      - src/app/api/v1/organization-analytics/**
+      - src/features/admin/organization-training/**
+      - src/features/student/organization-training/**
+      - src/server/contracts/organization/organization-lifecycle-contract.ts
+      - tests/unit/organization/organization-auth-layering-lifecycle.test.ts
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - PR creation or force-push
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - dev server, Browser/Playwright runtime, full e2e runtime
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(organization-portal): audit admin local entry"
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization/organization-auth-layering-lifecycle.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/organization-analytics-route.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-portal-admin-local-entry-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-portal-admin-local-entry-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-portal-admin-local-entry-readiness-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-portal-admin-shell-entry-contract-tdd
+    title: Organization portal admin shell entry contract TDD
+    phase: organization-portal-admin-shell-entry-contract-tdd
+    sourceStory: localExperienceClosureGate.organizationPortalAdminShellEntryContractTdd
+    dependencies:
+      - organization-analytics-summary-ui-entry-contract-tdd
+      - organization-portal-admin-local-entry-readiness-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Seeded by `organization-portal-admin-local-entry-readiness-audit`. This future task should add a local admin
+      organization portal shell entry that follows current admin path habits and links only to locally supported
+      organization destinations. Release, provider, staging/prod, payment, external-service, schema, migration,
+      dependency, and Cost Calibration work remain blocked.
+    targetExperienceChain: organization-portal-admin
+    useCaseIds:
+      - UC-ADV-ORG-PORTAL-ADMIN
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_plus_e2e_list
+    queueSelectionMode: seeded_next_local_experience_gap
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    claimedAt: null
+    closedAt: null
+    branch: null
+    allowedFiles:
+      - src/app/(admin)/content/organization-portal/page.tsx
+      - src/features/admin/organization-portal/**
+      - tests/unit/organization-portal-admin-entry-surface.test.ts
+      - e2e/organization-portal-local-flow.spec.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "feat(organization-portal): add admin shell entry"
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-portal-admin-entry-surface.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    lastFailurePath: null
+    retryCount: 0

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-analytics-summary-local-flow-readiness-audit
-updatedAt: "2026-06-18T05:00:00-07:00"
+currentPhase: organization-portal-admin-local-entry-readiness-audit
+updatedAt: "2026-06-18T05:04:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -438,13 +438,13 @@ repository:
   lastKnownMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
   lastKnownOriginMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
 currentTask:
-  id: organization-analytics-summary-local-flow-readiness-audit
+  id: organization-portal-admin-local-entry-readiness-audit
   status: closed
-  result: pass_keep_partial_seed_ui_entry_contract_tdd
-  sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryLocalFlowReadinessAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+  result: pass_keep_partial_seed_portal_shell_entry_contract_tdd
+  sourceStory: localExperienceClosureGate.organizationPortalAdminLocalEntryReadinessAudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
   branch: codex/local-experience-analytics-portal-sequence
   commitSha: null
   prUrl: null
@@ -737,7 +737,7 @@ localExperienceClosure:
   status: organization_training_experience_closed_local_role_flow_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-analytics-summary-local-flow-readiness-audit
+  currentTaskId: organization-portal-admin-local-entry-readiness-audit
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -756,11 +756,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `organization-analytics-summary-local-flow-readiness-audit` closed with a keep-partial decision. Backend/API
-    analytics unit coverage is green after test-only nullable fixture repair, but admin UI entry and e2e evidence remain
-    missing, so the seeded next implementation task is `organization-analytics-summary-ui-entry-contract-tdd`. Continue
-    to `organization-portal-admin-local-entry-readiness-audit` for the user-requested serial item 3. Keep release,
-    staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration,
-    package/lockfile/dependency, destructive database operations, dev server, Browser/Playwright runtime, full e2e
-    runtime, and Cost Calibration Gate blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    `organization-portal-admin-local-entry-readiness-audit` closed with a keep-partial decision. Existing organization
+    training entry and organization analytics route evidence is green, but there is no organization portal admin shell
+    entry, portal UI surface, or portal e2e evidence. Recommended next work is
+    `organization-analytics-summary-ui-entry-contract-tdd`, then `organization-portal-admin-shell-entry-contract-tdd`.
+    Keep release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
+    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, dev server,
+    Browser/Playwright runtime, full e2e runtime, and Cost Calibration Gate blocked unless a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
