@@ -18,6 +18,33 @@ sourceReferences:
   capabilityCatalog: docs/01-requirements/traceability/capability-catalog.md
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
+currentFactRefresh:
+  taskId: unified-standard-advanced-current-coverage-refresh
+  refreshedAt: "2026-06-17T18:06:09-07:00"
+  requirementUseCaseCatalogCount: 32
+  coverageMatrixUseCaseCount: 32
+  missingUseCaseIds: []
+  extraUseCaseIds: []
+  statusSummary:
+    missing: 0
+    partial: 15
+    local_experience_ready: 7
+    experience_closed: 0
+    release_blocked: 10
+  sourceAnchors:
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/01-requirements/traceability/capability-catalog.md
+    - docs/01-requirements/traceability/unified-use-case-technical-matrix.md
+    - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    - docs/01-requirements/traceability/unified-edition-delta-matrix.md
+  e2eListOnly:
+    command: npm.cmd run test:e2e -- --list
+    specFiles: 11
+    listedTests: 28
+    runtimeExecuted: false
+  conclusion: >-
+    Formal use-case catalog coverage is complete at the `useCaseId` level. No row is marked `experience_closed`
+    because this task did not run localhost Browser or Playwright runtime validation.
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -200,7 +227,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md
     status: partial
     blockedGate: payment_env_secret_provider_cost_calibration_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: authorization-access-local-experience-readiness-audit
   - useCaseId: UC-ADV-AI-TASK-LIFECYCLE
     edition: advanced
     actor: personal_user_system_ops_admin
@@ -214,7 +241,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
     status: partial
     blockedGate: provider_worker_quota_cost_calibration_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: ai-task-and-provider-local-lifecycle-readiness-audit
   - useCaseId: UC-ADV-PERSONAL-AI-QUESTION-GENERATION
     edition: advanced
     actor: personal_user
@@ -228,7 +255,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
     status: partial
     blockedGate: local_contract_only_provider_and_durable_generation_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: personal-learning-ai-durable-local-flow-readiness-audit
   - useCaseId: UC-ADV-PERSONAL-AI-PAPER-GENERATION
     edition: advanced
     actor: personal_user
@@ -242,7 +269,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
     status: partial
     blockedGate: local_contract_only_provider_and_full_generated_paper_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: personal-learning-ai-durable-local-flow-readiness-audit
   - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     edition: advanced
     actor: organization_admin
@@ -284,7 +311,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/batch-205-organization-analytics-aggregate-only-organization-metrics.md
     status: partial
     blockedGate: organization_summary_ui_and_privacy_flow_not_closed
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: organization-analytics-summary-local-flow-readiness-audit
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin
@@ -298,7 +325,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
     status: partial
     blockedGate: organization_portal_ui_privacy_export_deploy_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: organization-portal-admin-local-entry-readiness-audit
   - useCaseId: UC-ADV-OPS-AUTH-QUOTA
     edition: advanced
     actor: ops_admin
@@ -312,7 +339,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
     status: partial
     blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: ops-governance-summary-local-flow-readiness-audit
   - useCaseId: UC-ADV-RETENTION-LOG-GOVERNANCE
     edition: advanced
     actor: ops_admin_audit_reviewer
@@ -326,7 +353,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
     status: partial
     blockedGate: raw_viewer_hard_delete_export_provider_deploy_blocked
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: ops-governance-summary-local-flow-readiness-audit
   - useCaseId: UC-ADV-FORMAL-CONTENT-SEPARATION
     edition: advanced
     actor: personal_user_organization_admin_content_admin_ops_admin
@@ -340,7 +367,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
     status: partial
     blockedGate: formal_adoption_review_required_before_formal_writes
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: formal-content-separation-local-readiness-audit
   - useCaseId: UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
     edition: future_scope
     actor: student
@@ -466,4 +493,4 @@ matrix:
     freshEvidence: docs/01-requirements/traceability/unified-standard-advanced-source-index.md
     status: release_blocked
     blockedGate: audit_artifact_only
-    nextTask: unified-standard-advanced-current-coverage-refresh
+    nextTask: none_audit_only_current_refresh_closed
