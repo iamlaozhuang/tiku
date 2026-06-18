@@ -643,10 +643,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
     status: partial
-    blockedGate: organization_summary_ui_and_privacy_flow_not_closed
-    nextTask: organization-analytics-summary-local-flow-readiness-audit
+    blockedGate: organization_summary_admin_ui_entry_and_e2e_flow_not_closed
+    nextTask: organization-analytics-summary-ui-entry-contract-tdd
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin

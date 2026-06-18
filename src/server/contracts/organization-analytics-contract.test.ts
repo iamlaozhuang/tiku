@@ -56,6 +56,8 @@ describe("organization analytics route contract", () => {
           minScore: 86,
           submittedTrend: [{ date: "2026-06-16", submittedCount: 1 }],
         },
+        formalLearningSummary: null,
+        quotaSummary: null,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
       });
@@ -79,6 +81,8 @@ describe("organization analytics route contract", () => {
           minScore: 86,
           submittedTrend: [{ date: "2026-06-16", submittedCount: 1 }],
         },
+        formalLearningSummary: null,
+        quotaSummary: null,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
       },

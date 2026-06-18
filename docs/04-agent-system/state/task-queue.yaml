@@ -15432,3 +15432,183 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
     lastFailurePath: null
     retryCount: 0
+  - id: organization-analytics-summary-local-flow-readiness-audit
+    title: Organization analytics summary local flow readiness audit
+    phase: organization-analytics-summary-local-flow-readiness-audit
+    sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryLocalFlowReadinessAudit
+    dependencies:
+      - local-experience-coverage-matrix-summary-count-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested serial execution of recommended items 1-2-3 in the current 2026-06-18 prompt. This task is limited
+      to docs/state/readiness audit, focused local unit validation, e2e list-only discovery, test-only repair for stale
+      nullable contract fixtures if focused validation fails, and seeding the next local UI task if needed. High-risk gates
+      remain blocked.
+    targetExperienceChain: organization-analytics-summary
+    useCaseIds:
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    executionProfile: local_readiness_audit
+    evidenceMode: full
+    validationPolicy: focused_unit_plus_e2e_list_and_readiness_gates
+    queueSelectionMode: user_directed_sequence
+    taskKind: readiness_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_keep_partial_seed_ui_entry_contract_tdd
+    claimedAt: "2026-06-18T04:54:33-07:00"
+    closedAt: "2026-06-18T05:00:00-07:00"
+    branch: codex/local-experience-analytics-portal-sequence
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+      - src/server/contracts/organization-analytics-contract.test.ts
+      - src/server/mappers/organization-analytics-mapper.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - src/app/api/v1/organization-analytics/**
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/validators/organization-analytics.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/models/organization-analytics.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/**/*.test.ts
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - PR creation or force-push
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - dev server, Browser/Playwright runtime, full e2e runtime
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(organization-analytics): audit summary local readiness"
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/contracts/organization-analytics-contract.test.ts src/server/validators/organization-analytics.test.ts src/server/mappers/organization-analytics-mapper.test.ts src/server/models/organization-analytics.test.ts src/server/repositories/organization-analytics-repository.test.ts src/server/services/organization-analytics-service.test.ts src/server/services/organization-analytics-route.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md src/server/contracts/organization-analytics-contract.test.ts src/server/mappers/organization-analytics-mapper.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-summary-local-flow-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-analytics-summary-local-flow-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-summary-local-flow-readiness-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-analytics-summary-ui-entry-contract-tdd
+    title: Organization analytics summary UI entry contract TDD
+    phase: organization-analytics-summary-ui-entry-contract-tdd
+    sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryUiEntryContractTdd
+    dependencies:
+      - organization-analytics-summary-local-flow-readiness-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Seeded by `organization-analytics-summary-local-flow-readiness-audit`. This future task should add a local admin UI
+      entry and unit/e2e-list evidence for organization analytics summary without release, provider, staging/prod,
+      payment, external-service, schema, migration, dependency, or Cost Calibration work.
+    targetExperienceChain: organization-analytics-summary
+    useCaseIds:
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_plus_e2e_list
+    queueSelectionMode: seeded_next_local_experience_gap
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    claimedAt: null
+    closedAt: null
+    branch: null
+    allowedFiles:
+      - src/app/(admin)/content/organization-analytics/page.tsx
+      - src/features/admin/organization-analytics/**
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - e2e/organization-analytics-local-flow.spec.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "feat(organization-analytics): add summary admin entry"
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    lastFailurePath: null
+    retryCount: 0
