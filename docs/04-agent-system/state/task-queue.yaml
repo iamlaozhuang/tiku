@@ -17178,6 +17178,86 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-guarded-goal-packet-v1.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-guarded-goal-packet-v1.md
     retryCount: 0
+  - id: mechanism-docs-queue-slimming-and-self-repair
+    title: Mechanism docs queue slimming and self repair
+    phase: mechanism-docs-queue-slimming-and-self-repair
+    sourceStory: mechanismTuning.queueSlimmingSelfRepairV1
+    dependencies:
+      - mechanism-guarded-goal-packet-v1
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved the mechanism task sequence: current tuning closeout, guarded goal v1, and queue
+      slimming/self-repair. This task implements diagnostic-only queue slimming/self-repair metrics. It does not archive
+      queue history, mutate task packets, touch product source, change dependencies, change schema, call
+      providers/models, run Browser/Playwright/e2e runtime, deploy, create PRs, force-push, or execute Cost Calibration
+      Gate.
+    taskKind: mechanism_tuning
+    moduleRunVersion: 2
+    executionProfile: docs_state_mechanism_tuning
+    evidenceMode: full
+    validationPolicy: mechanism_tuning
+    queueSelectionMode: explicit_current_task
+    status: closed
+    result: pass
+    branch: codex/mechanism-throughput-readiness-tuning
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.Smoke.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(agent): add queue slimming diagnostics"
+        approval: current_user_prompt_2026_06_18_mechanism_task_sequence
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/operating-manual.md docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md docs/05-execution-logs/evidence/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1 scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.Smoke.ps1 scripts/agent-system/Get-TikuProjectStatus.ps1 scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-docs-queue-slimming-and-self-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId mechanism-docs-queue-slimming-and-self-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+    retryCount: 0
   - id: standard-admin-ops-logs-local-experience-batch
     title: Standard admin ops logs local experience batch
     phase: standard-admin-ops-logs-local-experience-batch

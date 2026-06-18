@@ -324,6 +324,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
     decisionOutput: queueDrainDecision
     role: default executable entry for bounded queue drain; emits queueDrainDefaultEntry, queueDrainEntryContract, moduleApprovalWindowDecision, hardStopState, recoveryPacketRequired, and repo-external recoveryPacketPath rules while consuming runner and dispatcher decisions, enforcing wake budgets and repeated blocker fingerprints, and returning the next agent-layer action so each drained batch still passes serial execution, approved closeout, finalizer, and startup gates
+  - id: module-run-v2-queue-slimming-self-repair
+    path: scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    smokePath: scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.Smoke.ps1
+    decisionOutput: queueSlimmingDecision
+    role: read-only active queue slimming and safe self-repair classifier; reports terminal archive candidates outside the recovery window, mechanism docs/state task-packet metadata repair candidates, and high-risk blocked repair candidates without mutating queue state
   - id: module-run-v2-stop-economics
     path: scripts/agent-system/Get-ModuleRunV2StopEconomics.ps1
     smokePath: scripts/agent-system/Get-ModuleRunV2StopEconomics.Smoke.ps1

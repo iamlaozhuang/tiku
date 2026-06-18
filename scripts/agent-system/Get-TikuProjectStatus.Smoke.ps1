@@ -132,6 +132,7 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^projectStatusAction: keep_automation_paused_for_tuning$'
     Assert-Contains -Output $output -Pattern '^automationRegistrationDecision: planned_pause_for_tuning$'
     Assert-Contains -Output $output -Pattern '^nextActionDecision: planned_pause_for_tuning$'
+    Assert-Contains -Output $output -Pattern '^queueSlimmingDecision: clean$'
     Assert-Contains -Output $output -Pattern '^diagnosticOnly: true$'
     Assert-Contains -Output $output -Pattern 'Cost Calibration Gate remains blocked'
 

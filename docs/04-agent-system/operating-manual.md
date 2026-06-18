@@ -131,6 +131,11 @@ ready docs/state/audit-only tasks for guarded serial packet closeout when their 
 state/SOP/operating-manual/evidence/task-plan/audit paths, evidence and audit paths exist, and local commit closeout is
 task-scoped. Product or runtime scope must keep one task and one closeout. `local_full_flow` is always single-task only.
 
+Queue slimming/self-repair v1 is diagnostic-only. `Get-ModuleRunV2QueueSlimmingSelfRepair.ps1` reports terminal
+active-queue archive candidates outside the recovery window and separates safe mechanism docs/state task-packet metadata
+repair candidates from high-risk blocked candidates. It must not move queue history, edit task packets, touch product
+source, or apply high-risk repairs without a later task-scoped approval and closeout.
+
 When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval
 to resume automation, claim tasks, seed tasks, merge, push, deploy, call providers, or execute Cost Calibration Gate.

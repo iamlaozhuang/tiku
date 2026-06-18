@@ -99,7 +99,9 @@ relax safety gates.
    be read on demand by task id or capability gate.
 8. **Self-repair limits**: automatic repair may fill missing mechanism docs/state/task-packet metadata only. Product
    source, schema, dependency, provider, env/secret, staging/prod/cloud/deploy/payment, PR, force-push, destructive DB,
-   and Cost Calibration Gate remain approval-gated.
+   and Cost Calibration Gate remain approval-gated. The v1 implementation is diagnostic-only:
+   `Get-ModuleRunV2QueueSlimmingSelfRepair.ps1` reports active queue terminal archive candidates, safe metadata repair
+   candidates, and high-risk blocked repair candidates; it does not mutate queue state.
 
 ## Standard Profiles Under Consideration
 

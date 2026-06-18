@@ -158,6 +158,13 @@ $seedArgs = Join-Arguments -Values @(
 $seedResult = Invoke-DiagnosticScript -ScriptPath (Join-Path -Path $scriptRoot -ChildPath "Get-ModuleRunV2ImplementationSeedProposal.ps1") -Arguments $seedArgs
 Write-ToolSummary -Name "Seed Proposal" -Result $seedResult -Keys @("seedProposalDecision", "seedModule", "seedRequiredApproval")
 
+$queueSlimmingArgs = Join-Arguments -Values @(
+    "-ProjectStatePath", $ProjectStatePath,
+    "-QueuePath", $QueuePath
+)
+$queueSlimmingResult = Invoke-DiagnosticScript -ScriptPath (Join-Path -Path $scriptRoot -ChildPath "Get-ModuleRunV2QueueSlimmingSelfRepair.ps1") -Arguments $queueSlimmingArgs
+Write-ToolSummary -Name "Queue Slimming Self Repair" -Result $queueSlimmingResult -Keys @("queueSlimmingDecision", "archiveCandidateCount", "selfRepairCandidateCount", "highRiskRepairBlockedCount", "firstArchiveCandidates", "firstSelfRepairCandidates", "firstBlockedRepairCandidates", "applyMode")
+
 $nextActionDecision = Get-OutputValue -Output $nextActionResult.Output -Key "nextActionDecision"
 $nextExecutableTask = Get-OutputValue -Output $nextActionResult.Output -Key "nextExecutableTask"
 $nextActionRecommendedAction = Get-OutputValue -Output $nextActionResult.Output -Key "recommendedAction"
