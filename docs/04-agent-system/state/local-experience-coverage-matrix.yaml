@@ -27,8 +27,8 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: future-scope-non-goal-governance-packet
-  refreshedAt: "2026-06-18T13:00:53-07:00"
+  taskId: final-audit-gate-governance-packet
+  refreshedAt: "2026-06-18T13:14:56-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
@@ -796,7 +796,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
     status: release_blocked
     blockedGate: audit_artifact_only
     nextTask: none_audit_only
@@ -824,7 +824,7 @@ matrix:
     uiSurface: audit_only
     unitEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
     status: release_blocked
     blockedGate: audit_reference_only
     nextTask: none_audit_only
@@ -838,7 +838,7 @@ matrix:
     uiSurface: not_required
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
     status: release_blocked
     blockedGate: audit_artifact_only
     nextTask: none_audit_only_current_refresh_closed

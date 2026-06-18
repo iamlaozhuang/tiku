@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: future-scope-non-goal-governance-packet
-updatedAt: "2026-06-18T13:00:53-07:00"
+currentPhase: final-audit-gate-governance-packet
+updatedAt: "2026-06-18T13:20:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,17 +497,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 58bc22175c2c88d2a6c7cb7fa60aeebacdc470fb
-  lastKnownOriginMasterSha: 58bc22175c2c88d2a6c7cb7fa60aeebacdc470fb
+  lastKnownMasterSha: 316d2bdb7847f49e551b7550d73c53dd7d171259
+  lastKnownOriginMasterSha: 316d2bdb7847f49e551b7550d73c53dd7d171259
 currentTask:
-  id: future-scope-non-goal-governance-packet
+  id: final-audit-gate-governance-packet
   status: closed
   result: completed_or_blocked_resolved
-  sourceStory: userBoundedLocalExperiencePacket.futureScopeNonGoalGovernance
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
-  branch: codex/future-scope-non-goal-governance-packet
+  sourceStory: userBoundedLocalExperiencePacket.finalAuditGateGovernance
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
+  branch: codex/final-audit-gate-governance-packet
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -806,7 +806,7 @@ localExperienceClosure:
   status: future_scope_non_goal_governance_packet_resolved
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: future-scope-non-goal-governance-packet
+  currentTaskId: final-audit-gate-governance-packet
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -1075,15 +1075,42 @@ localExperienceClosure:
       exportFileGeneration: blocked
       stagingProdDeploy: blocked
       costCalibrationGate: blocked
+  currentFinalAuditGateGovernancePacket:
+    taskId: final-audit-gate-governance-packet
+    claimedAt: "2026-06-18T13:14:56-07:00"
+    closedAt: "2026-06-18T13:20:06-07:00"
+    targetExperienceChain: final-audit-gate-governance-packet
+    useCaseIds:
+      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+      - UC-GATE-CURRENT-CHECKPOINT
+      - UC-AUDIT-SOURCE-GOVERNANCE
+    decision: refresh_final_audit_gate_rows_release_blocked_with_fresh_governance_evidence
+    evidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
+    boundarySummary:
+      validation: pass_docs_state_module_closeout_prepush
+      experienceClosure: not_claimed_audit_gate_governance
+      releaseBlockedUseCases: UC-FUTURE-RUNTIME-CAPABILITY-LIST_UC-GATE-CURRENT-CHECKPOINT_UC-AUDIT-SOURCE-GOVERNANCE
+      globalUseCaseSummary: experience_closed_21_release_blocked_11
+      releaseReadiness: not_claimed
+      productSource: blocked
+      testOrE2E: blocked
+      providerModel: blocked
+      envSecret: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `future-scope-non-goal-governance-packet` records fresh governance evidence that the five future/non-goal rows remain
-    `release_blocked` and must not be treated as `experience_closed`. Continue only with docs/state validation,
-    local commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch cleanup under the
-    user's bounded packet approval. Do not seed a fifth packet unless the user provides a new packet prompt. Keep product
-    source, tests/e2e specs, `.env*`, schema/drizzle/migration, package/lockfile/dependency, provider/model, OCR/parser,
-    payment, export/file generation, staging/prod/cloud/deploy, external-service, PR, force-push, destructive database
-    operations, raw sensitive evidence, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    `final-audit-gate-governance-packet` refreshes the final three audit/gate rows and records the global 32 use case
+    summary. Keep the rows `release_blocked`; do not treat audit/gate governance as `experience_closed` or release
+    ready. Continue only with local commit, fast-forward merge to `master`, master gates, `origin/master` push, and
+    merged branch cleanup under the user's bounded packet approval. Keep product source, tests/e2e specs, `.env*`,
+    schema/drizzle/migration, package/lockfile/dependency, provider/model, payment, staging/prod/cloud/deploy,
+    external-service, PR, force-push, destructive database operations, raw sensitive evidence, and Cost Calibration Gate
+    blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
