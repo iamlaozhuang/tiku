@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-admin-ops-logs-local-experience-batch
-updatedAt: "2026-06-18T08:06:03-07:00"
+currentPhase: standard-core-student-local-full-flow-validation
+updatedAt: "2026-06-18T08:18:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
   lastKnownOriginMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
 currentTask:
-  id: standard-admin-ops-logs-local-experience-batch
+  id: standard-core-student-local-full-flow-validation
   status: closed
-  result: pass_keep_local_experience_ready_runtime_full_flow_required
-  sourceStory: localExperienceClosureGate.standardAdminOpsLogsReadySetBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
-  branch: codex/standard-admin-ops-logs-local-experience-batch
-  commitSha: 8a164f336371e93ae1d3270ec328824a87b1dee9
+  result: blocked_local_full_flow_validation_failure
+  sourceStory: localExperienceClosureGate.standardCoreStudentRuntimeFullFlow
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
+  branch: codex/standard-core-student-local-full-flow-validation
+  commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: null
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
 qualityGates:
   desired:
     - lint
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: pass_standard_admin_ops_logs_local_experience_batch
+    readiness: blocked_standard_core_student_local_full_flow_validation
     lint: pass
     typecheck: pass
-    unit: pass_standard_admin_ops_logs_focused_unit_3_files_17_tests
+    unit: pass_standard_core_student_focused_unit_7_files_68_tests
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_list_only_31_tests_14_files_no_runtime
+    e2e: blocked_targeted_local_full_flow_10_passed_2_failed
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -767,6 +767,7 @@ qualityGates:
     organizationPortalAdminExperienceClosureReadinessAudit: pass_experience_closed_for_local_portal_shell_only
     standardCoreStudentLocalExperienceBatch: pass_keep_local_experience_ready_runtime_full_flow_required
     standardAdminOpsLogsLocalExperienceBatch: pass_keep_local_experience_ready_runtime_full_flow_required
+    standardCoreStudentLocalFullFlowValidation: blocked_local_full_flow_validation_failure
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -802,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: standard_admin_ops_logs_local_experience_batch_completed_runtime_full_flow_pending
+  status: standard_core_student_local_full_flow_validation_blocked
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: standard-admin-ops-logs-local-experience-batch
+  currentTaskId: standard-core-student-local-full-flow-validation
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -920,6 +921,26 @@ localExperienceClosure:
       experienceClosure: not_claimed
       standardCoreRowsRemainingReady: 5
       costCalibrationGate: blocked
+  lastStandardCoreStudentLocalFullFlowValidation:
+    taskId: standard-core-student-local-full-flow-validation
+    validatedAt: "2026-06-18T08:18:43-07:00"
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    decision: blocked_local_full_flow_validation_no_experience_closed
+    nextTask: standard-core-student-local-full-flow-contract-repair
+    evidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
+    boundarySummary:
+      focusedUnit: passed_7_files_68_tests
+      e2eList: passed_31_tests_14_files_runtime_not_executed
+      localFullFlow: blocked_10_passed_2_failed
+      failedSpecs: local_business_flow_student_token_null_and_student_practice_resume_choice_missing
+      experienceClosure: blocked_until_repair_and_fresh_passing_full_flow
+      costCalibrationGate: blocked
   lastStandardAdminOpsLogsLocalExperienceBatch:
     taskId: standard-admin-ops-logs-local-experience-batch
     auditedAt: "2026-06-18T08:02:20-07:00"
@@ -940,12 +961,15 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `standard-admin-ops-logs-local-experience-batch` completed the second low-risk batch for
-    `UC-STD-ADMIN-OPS-LOGS`, after the student core batch completed the other five `local_experience_ready` rows. All
-    six rows now have fresh low-risk focused unit plus e2e-list evidence and remain `local_experience_ready` because
-    Browser/Playwright runtime full-flow was not in scope. Next recommended work is an explicitly approved local
-    runtime package: `standard-core-student-local-full-flow-validation` first, then
-    `standard-admin-ops-logs-local-full-flow-validation`. Keep release, staging/prod, provider/payment,
+    `standard-core-student-local-full-flow-validation` produced fresh localhost runtime evidence but blocked with two
+    targeted e2e failures: the local business flow still expects `tiku.localSessionToken` in localStorage while current
+    login tests require bearer tokens to stay out of browser storage, and the student practice/mock entry flow did not
+    reach `practice-resume-choice` with the current local runtime data. Do not run closure readiness audit for the five
+    standard student core rows yet. Next recommended work is the smallest repair task:
+    `standard-core-student-local-full-flow-contract-repair`, then rerun
+    `standard-core-student-local-full-flow-validation`, then run a separate closure readiness audit only if fresh runtime
+    evidence passes. `standard-admin-ops-logs-local-full-flow-validation` remains pending behind this student-core
+    blocker unless the user chooses to bypass the student-core sequence. Keep release, staging/prod, provider/payment,
     external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency,
     destructive database operations, and Cost Calibration Gate blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md

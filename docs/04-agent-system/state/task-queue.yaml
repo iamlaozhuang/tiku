@@ -16907,9 +16907,29 @@ tasks:
     queueSelectionMode: recommended_next_requires_explicit_runtime_approval
     taskKind: local_full_flow_validation
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: blocked_local_full_flow_validation_failure
+    claimedAt: "2026-06-18T08:14:56-07:00"
+    closedAt: "2026-06-18T08:18:43-07:00"
+    branch: codex/standard-core-student-local-full-flow-validation
+    humanApproval: >-
+      Current 2026-06-18 user prompt explicitly approves this task's localhost Browser/Playwright runtime validation
+      against existing specs `e2e/local-auth-route-guard.spec.ts`, `e2e/student-practice-mock-entry.spec.ts`, and
+      `e2e/local-business-flow.spec.ts`, plus local closeout commit, fast-forward merge to `master`, push to
+      `origin/master`, and short-branch cleanup. Product source fixes, e2e spec edits, `.env*`, package/lockfile/
+      dependency, schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment/external-service,
+      destructive database operations, PR, force-push, and Cost Calibration Gate remain blocked.
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      localE2EValidation: approved_local_only_existing_specs
+      e2eListOnly: allowed
+      focusedUnitValidation: allowed
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
     blockedGates:
-      - requires_explicit_localhost_runtime_approval_before_execution
+      - local_full_flow_validation_failed_session_storage_and_practice_resume_contract
       - release, staging/prod, cloud, deploy, payment, external-service
       - provider/model calls or provider configuration
       - schema/drizzle/migration changes
@@ -16931,13 +16951,59 @@ tasks:
       - e2e/student-practice-mock-entry.spec.ts
       - src/**
       - tests/**
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch*.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch*.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(standard): validate student local full flow"
+        approval: current_user_prompt_2026_06_18_local_full_flow
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     validationCommands:
       - npm.cmd run test:unit -- src/server/auth/session-route.test.ts src/server/auth/local-session-runtime.test.ts tests/unit/phase-8-student-authorization-redeem-runtime.test.ts src/server/services/practice-service.test.ts src/server/services/mock-exam-service.test.ts src/server/services/exam-report-service.test.ts src/server/services/mistake-book-service.test.ts
       - npm.cmd run test:e2e -- --list
       - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId standard-core-student-local-full-flow-validation
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
     retryCount: 0
   - id: standard-admin-ops-logs-local-experience-batch
     title: Standard admin ops logs local experience batch
