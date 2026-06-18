@@ -74,6 +74,7 @@ try {
     $queuePath = Join-Path -Path $stateRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
     $taskHistoryIndexPath = Join-Path -Path $stateRoot -ChildPath "task-history-index.yaml"
+    $executionProfileCatalogPath = Join-Path -Path $stateRoot -ChildPath "execution-profiles.yaml"
     $historicalEvidenceDebtPath = Join-Path -Path $stateRoot -ChildPath "historical-evidence-debt.yaml"
     $executionLogIndexPath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/execution-log-index.yaml"
     $completedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md"
@@ -98,6 +99,14 @@ currentTask:
   status: closed
   commitSha: $sha
 "@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+workPacket:
+  maxTasksPerPacket:
+    docs_state_lite: 3
+    local_full_flow: 1
+"@ | Set-Content -LiteralPath $executionProfileCatalogPath -Encoding UTF8
 
     @"
 schemaVersion: 1
@@ -252,6 +261,7 @@ entries:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -265,6 +275,8 @@ entries:
     Assert-Contains -Output $output -Pattern '^nextActionDecision: executable_task_found$'
     Assert-Contains -Output $output -Pattern '^nextExecutableTask: task-a$'
     Assert-Contains -Output $output -Pattern '^seedProposalDecision: not_checked$'
+    Assert-Contains -Output $output -Pattern '^guardedGoalPacketDecision: not_eligible$'
+    Assert-Contains -Output $output -Pattern '^goalPacketEligibleCount: 0$'
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
     Assert-Contains -Output $output -Pattern '^historicalQueueFindings: .*legacy_status_missing=1; legacy_terminal=1; knownBlockedValidation=1; unsupportedStatus=0; notBlockingCurrentRun=true$'
@@ -285,6 +297,7 @@ entries:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath `
                 -VerboseHistory
@@ -321,6 +334,7 @@ currentTask:
                 -ProjectStatePath $plannedPauseProjectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -366,6 +380,7 @@ tasks:
                 -QueuePath $historyQueuePath `
                 -MatrixPath $matrixPath `
                 -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -442,6 +457,7 @@ tasks:
                 -MatrixPath $matrixPath `
                 -LocalExperienceMatrixPath $localExperienceMatrixPath `
                 -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -490,6 +506,7 @@ tasks:
                 -MatrixPath $matrixPath `
                 -LocalExperienceMatrixPath $localExperienceMatrixPath `
                 -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -561,6 +578,7 @@ currentTask:
                 -QueuePath $seedQueuePath `
                 -MatrixPath $seedMatrixPath `
                 -LocalExperienceMatrixPath $missingLocalExperienceMatrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -669,6 +687,7 @@ currentTask:
                 -QueuePath $bridgeQueuePath `
                 -MatrixPath $bridgeMatrixPath `
                 -LocalExperienceMatrixPath $missingLocalExperienceMatrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )

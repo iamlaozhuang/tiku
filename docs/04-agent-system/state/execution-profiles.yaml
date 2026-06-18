@@ -300,6 +300,13 @@ workPacket:
     - schema_isolated
     - dependency_isolated
     - provider_local_smoke
+  guardedGoalPacket:
+    mode: guarded_serial_read_only_v1
+    docsStateAuditOnlyCloseout: packet_closeout_allowed_after_task_gates
+    productOrRuntimeScope: single_task_closeout_required
+    localFullFlow: single_task_only
+    forbiddenClaims:
+      - guarded goal packet diagnostics do not execute tasks, mutate queue state, run Browser/Playwright/e2e, merge, push, deploy, call providers, change dependencies, change schema, or execute Cost Calibration Gate
 localFullFlowGate:
   default: blocked_without_task_profile
   approvedValue: approved_localhost_only

@@ -199,6 +199,11 @@ scriptControls:
     smokePath: scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.Smoke.ps1
     decisionOutput: localExperienceSeedDecision
     role: guarded local experience seed template generator for repair, validation, and closure-readiness audit task packets; product-source repair apply mode requires explicit allowedFiles
+  - id: module-run-v2-guarded-goal-packet
+    path: scripts/agent-system/Test-ModuleRunV2GuardedGoalPacket.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2GuardedGoalPacket.Smoke.ps1
+    decisionOutput: guardedGoalPacketDecision
+    role: read-only guarded serial goal packet classifier for docs/state/audit-only packet closeout eligibility, product/runtime single-task closeout boundaries, and local_full_flow single-task-only guardrails; it does not execute tasks or mutate queue state
   - id: module-run-v2-unattended-readiness
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1

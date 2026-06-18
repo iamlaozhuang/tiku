@@ -40,34 +40,67 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Get-Indent {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Line)
+
+    if ($Line -match "^(\s*)") {
+        return $Matches[1].Length
+    }
+
+    return 0
+}
+
 function Get-TaskBlocks {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
-    $blocks = New-Object System.Collections.ArrayList
-    $current = $null
+    $blocks = New-Object System.Collections.Generic.List[object]
+    $currentId = ""
+    $currentLines = New-Object System.Collections.Generic.List[string]
+    $insideTasks = $false
+    $taskItemIndent = -1
 
     foreach ($line in $Lines) {
-        if ($line -match '^\s{2}- id:\s*(.+?)\s*$') {
-            if ($null -ne $current) {
-                [void]$blocks.Add($current)
+        if ($line -match "^tasks:\s*$") {
+            $insideTasks = $true
+            continue
+        }
+
+        if (-not $insideTasks) {
+            continue
+        }
+
+        if ($line -match "^(\s*)-\s+id:\s+(.+?)\s*$") {
+            $lineIndent = $Matches[1].Length
+            if ($taskItemIndent -lt 0) {
+                $taskItemIndent = $lineIndent
             }
 
-            $current = [pscustomobject]@{
-                Id = $Matches[1].Trim()
-                Lines = New-Object System.Collections.ArrayList
+            if ($lineIndent -eq $taskItemIndent) {
+                if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+                    $blocks.Add([pscustomobject]@{ Id = $currentId; Lines = $currentLines.ToArray() })
+                }
+
+                $currentId = $Matches[2].Trim()
+                $currentLines = New-Object System.Collections.Generic.List[string]
+                $currentLines.Add($line)
+                continue
             }
         }
 
-        if ($null -ne $current) {
-            [void]$current.Lines.Add($line)
+        if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+            if (-not [string]::IsNullOrWhiteSpace($line) -and (Get-Indent -Line $line) -lt $taskItemIndent) {
+                break
+            }
+
+            $currentLines.Add($line)
         }
     }
 
-    if ($null -ne $current) {
-        [void]$blocks.Add($current)
+    if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+        $blocks.Add([pscustomobject]@{ Id = $currentId; Lines = $currentLines.ToArray() })
     }
 
-    return $blocks
+    return $blocks.ToArray()
 }
 
 function Get-TaskBlock {
@@ -140,7 +173,7 @@ function Get-ProjectSection {
         [Parameter(Mandatory = $true)][string]$Key
     )
 
-    $section = New-Object System.Collections.ArrayList
+    $section = New-Object System.Collections.Generic.List[string]
     $inSection = $false
 
     foreach ($line in $Lines) {
@@ -154,11 +187,11 @@ function Get-ProjectSection {
                 break
             }
 
-            [void]$section.Add($line)
+            $section.Add($line)
         }
     }
 
-    return $section
+    return $section.ToArray()
 }
 
 function Get-ProjectScalar {
@@ -306,6 +339,44 @@ function Invoke-LocalExperienceNextTaskDiagnostic {
     }
 }
 
+function Invoke-GuardedGoalPacketDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$TaskHistoryIndexPath,
+        [Parameter(Mandatory = $true)][string]$ExecutionProfileCatalogPath
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2GuardedGoalPacket.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("guardedGoalPacketDecision: unavailable", "reason: guarded goal packet diagnostic script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -ProjectStatePath $ProjectStatePath `
+                -QueuePath $QueuePath `
+                -TaskHistoryIndexPath $TaskHistoryIndexPath `
+                -ExecutionProfileCatalogPath $ExecutionProfileCatalogPath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-DependencyTerminal {
     param(
         [Parameter(Mandatory = $false)][AllowNull()][object]$Blocks = @(),
@@ -363,8 +434,8 @@ function Test-DependencyTerminal {
 
 function Get-NextExecutableTask {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
-        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @()
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Blocks,
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][object[]]$HistoryBlocks = @()
     )
 
     $firstBlockedPending = ""
@@ -411,8 +482,8 @@ function Get-NextExecutableTask {
 
 function Get-ReadyExecutableTasks {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
-        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @()
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Blocks,
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][object[]]$HistoryBlocks = @()
     )
 
     $readyTasks = New-Object System.Collections.ArrayList
@@ -572,7 +643,7 @@ function Get-CatalogWorkPacketMaxTasks {
 
 function Get-QueueDiagnostics {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Blocks,
         [Parameter(Mandatory = $false)][hashtable]$ExecutionLogArchiveMap = @{},
         [Parameter(Mandatory = $false)][AllowEmptyCollection()][string[]]$HistoricalEvidenceDebtIds = @()
     )
@@ -728,7 +799,7 @@ function Test-EvidenceProvenance {
 
 function Get-MatrixDiagnostics {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Blocks,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$HistoryBlocks,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$MatrixLines
     )
@@ -912,8 +983,48 @@ $bridgeProposalDecision = "not_checked"
 $bridgeExperienceChain = "none"
 $bridgeCandidateTask = "none"
 $bridgeRequiredApproval = "none"
+$guardedGoalPacketDecision = "not_checked"
+$goalPacketEligibleCount = "0"
+$goalPacketSelectedCount = "0"
+$goalPacketTaskIds = "none"
+$goalPacketCloseoutMode = "none"
+$localFullFlowSingleTaskOnly = "false"
+$productSourceSingleTaskCloseout = "false"
 $recommendedHumanDecision = "none"
 $currentTaskTerminal = $currentTaskStatus -in @("done", "closed", "pushed", "merged")
+
+if ($findings.Count -eq 0 -and $profileCatalogPresent) {
+    $guardedGoalPacketResult = Invoke-GuardedGoalPacketDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -TaskHistoryIndexPath $TaskHistoryIndexPath -ExecutionProfileCatalogPath $ExecutionProfileCatalogPath
+    $guardedGoalPacketDecision = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "guardedGoalPacketDecision"
+    if ([string]::IsNullOrWhiteSpace($guardedGoalPacketDecision)) {
+        $guardedGoalPacketDecision = if ($guardedGoalPacketResult.ExitCode -eq 0) { "unknown" } else { "unavailable" }
+    }
+    $goalPacketEligibleCount = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "goalPacketEligibleCount"
+    if ([string]::IsNullOrWhiteSpace($goalPacketEligibleCount)) {
+        $goalPacketEligibleCount = "0"
+    }
+    $goalPacketSelectedCount = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "goalPacketSelectedCount"
+    if ([string]::IsNullOrWhiteSpace($goalPacketSelectedCount)) {
+        $goalPacketSelectedCount = "0"
+    }
+    $goalPacketTaskIds = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "goalPacketTaskIds"
+    if ([string]::IsNullOrWhiteSpace($goalPacketTaskIds)) {
+        $goalPacketTaskIds = "none"
+    }
+    $goalPacketCloseoutMode = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "goalPacketCloseoutMode"
+    if ([string]::IsNullOrWhiteSpace($goalPacketCloseoutMode)) {
+        $goalPacketCloseoutMode = "none"
+    }
+    $localFullFlowSingleTaskOnly = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "localFullFlowSingleTaskOnly"
+    if ([string]::IsNullOrWhiteSpace($localFullFlowSingleTaskOnly)) {
+        $localFullFlowSingleTaskOnly = "false"
+    }
+    $productSourceSingleTaskCloseout = Get-OutputValue -Output $guardedGoalPacketResult.Output -Key "productSourceSingleTaskCloseout"
+    if ([string]::IsNullOrWhiteSpace($productSourceSingleTaskCloseout)) {
+        $productSourceSingleTaskCloseout = "false"
+    }
+}
+
 if ($findings.Count -eq 0 -and $currentTaskTerminal) {
     $localExperienceProposalResult = Invoke-LocalExperienceNextTaskDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $LocalExperienceMatrixPath
     $localExperienceNextTaskDecision = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "localExperienceNextTaskDecision"
@@ -1131,7 +1242,13 @@ Write-Output "activeQueueNonTerminalCount: $activeQueueNonTerminalCount"
 Write-Output "blockedWithRepairCandidate: $((($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') -and ($localExperienceNextTaskDecision -in @('seed_required', 'existing_task_available', 'existing_task_blocked_or_nonterminal'))).ToString().ToLowerInvariant())"
 Write-Output "coverageRowsWaitingRepair: $(if ($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') { $localExperienceAffectedUseCaseCount } else { '0' })"
 Write-Output "coverageRowsWaitingClosure: $(if ($localExperienceCandidateKind -eq 'experience_closure_readiness_audit') { $localExperienceAffectedUseCaseCount } else { '0' })"
-Write-Output "goalPacketEligibleCount: 0"
+Write-Output "guardedGoalPacketDecision: $guardedGoalPacketDecision"
+Write-Output "goalPacketEligibleCount: $goalPacketEligibleCount"
+Write-Output "goalPacketSelectedCount: $goalPacketSelectedCount"
+Write-Output "goalPacketTaskIds: $goalPacketTaskIds"
+Write-Output "goalPacketCloseoutMode: $goalPacketCloseoutMode"
+Write-Output "localFullFlowSingleTaskOnly: $localFullFlowSingleTaskOnly"
+Write-Output "productSourceSingleTaskCloseout: $productSourceSingleTaskCloseout"
 Write-Output "bridgeProposalDecision: $bridgeProposalDecision"
 Write-Output "bridgeExperienceChain: $bridgeExperienceChain"
 Write-Output "bridgeCandidateTask: $bridgeCandidateTask"

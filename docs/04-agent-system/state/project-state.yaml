@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: mechanism-throughput-readiness-tuning
+currentPhase: mechanism-guarded-goal-packet-v1
 updatedAt: "2026-06-18T08:18:43-07:00"
 architecture:
   status: complete
@@ -500,13 +500,13 @@ repository:
   lastKnownMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
   lastKnownOriginMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
 currentTask:
-  id: mechanism-throughput-readiness-tuning
+  id: mechanism-guarded-goal-packet-v1
   status: closed
-  result: pass_for_implemented_scope
-  sourceStory: mechanismTuning.thirdRoundThroughputReadiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-throughput-readiness-tuning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md
+  result: pass
+  sourceStory: mechanismTuning.guardedGoalPacketV1
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-guarded-goal-packet-v1.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-guarded-goal-packet-v1.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-guarded-goal-packet-v1.md
   branch: codex/mechanism-throughput-readiness-tuning
   commitSha: null
   prUrl: null

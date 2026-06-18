@@ -125,7 +125,7 @@ if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
     $nextActionArgs += @("-TaskId", $TaskId)
 }
 $nextActionResult = Invoke-DiagnosticScript -ScriptPath (Join-Path -Path $scriptRoot -ChildPath "Get-TikuNextAction.ps1") -Arguments $nextActionArgs
-Write-ToolSummary -Name "Next Action" -Result $nextActionResult -Keys @("nextActionDecision", "nextExecutableTask", "localExperienceCandidateTask", "localExperienceSeedRequired", "localExperienceCandidateReady", "blockedWithRepairCandidate", "coverageRowsWaitingRepair", "coverageRowsWaitingClosure", "activeQueueNonTerminalCount", "goalPacketEligibleCount", "recommendedAction", "stopReason")
+Write-ToolSummary -Name "Next Action" -Result $nextActionResult -Keys @("nextActionDecision", "nextExecutableTask", "localExperienceCandidateTask", "localExperienceSeedRequired", "localExperienceCandidateReady", "blockedWithRepairCandidate", "coverageRowsWaitingRepair", "coverageRowsWaitingClosure", "activeQueueNonTerminalCount", "guardedGoalPacketDecision", "goalPacketEligibleCount", "goalPacketSelectedCount", "goalPacketCloseoutMode", "recommendedAction", "stopReason")
 
 $registrationArgs = Join-Arguments -Values @("-ProjectStatePath", $ProjectStatePath)
 if (-not [string]::IsNullOrWhiteSpace($AutomationRoot)) {

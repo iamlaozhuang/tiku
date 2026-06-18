@@ -90,7 +90,10 @@ relax safety gates.
    propose a seed without mutating the queue.
 6. **Guarded serial goal packet**: long-running or module-oriented work should start with `guarded_serial` packets.
    Product-source tasks remain one task and one closeout at a time. Docs/state/audit-only packets may use packet closeout
-   after their gates pass. `local_full_flow` remains single-task only.
+   after their gates pass. `local_full_flow` remains single-task only. The v1 implementation is a read-only gate:
+   `Test-ModuleRunV2GuardedGoalPacket.ps1` classifies eligible docs/state/audit-only packets, product/runtime
+   single-task closeout, and local full-flow single-task-only boundaries; `Get-TikuNextAction.ps1` surfaces the metrics
+   without changing queue priority.
 7. **Read-surface budget**: recovery should start from the operating manual, project state, task queue, source-of-truth
    index, and only the latest referenced evidence/audit. Deep SOPs, archived task blocks, and historical evidence should
    be read on demand by task id or capability gate.

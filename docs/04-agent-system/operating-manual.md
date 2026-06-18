@@ -126,6 +126,11 @@ allowed/blocked files, and redaction-safe evidence paths are present.
 Drain eligibility accepts `validationPolicy` as the current field and `validationProfile` as a legacy compatibility
 field. `local_full_flow` remains single-task only and must not be batched by queue drain or goal packet logic.
 
+Guarded goal packet v1 is read-only until a task explicitly adopts it. `Test-ModuleRunV2GuardedGoalPacket.ps1` may group
+ready docs/state/audit-only tasks for guarded serial packet closeout when their allowed files stay inside mechanism
+state/SOP/operating-manual/evidence/task-plan/audit paths, evidence and audit paths exist, and local commit closeout is
+task-scoped. Product or runtime scope must keep one task and one closeout. `local_full_flow` is always single-task only.
+
 When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval
 to resume automation, claim tasks, seed tasks, merge, push, deploy, call providers, or execute Cost Calibration Gate.
