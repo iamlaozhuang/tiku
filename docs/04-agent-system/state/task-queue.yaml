@@ -18470,3 +18470,117 @@ tasks:
     commitSha: null
     retryCount: 0
     lastFailurePath: null
+  - id: future-scope-non-goal-governance-packet
+    title: Future scope non-goal governance packet
+    phase: future-scope-non-goal-governance-packet
+    sourceStory: userBoundedLocalExperiencePacket.futureScopeNonGoalGovernance
+    dependencies:
+      - provider-rag-quota-governance-packet
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-18 user prompt to execute the fourth bounded packet only after the previous packet
+      reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
+      `codex/future-scope-non-goal-governance-packet`, seeding this docs/state governance work packet, creating task
+      plan/evidence/audit, updating project-state/task-queue/local-experience-coverage-matrix, running scoped
+      Prettier, git diff check, lint, typecheck, Module Run v2 readiness gates, local commit, fast-forward merge to
+      master, master gates, push origin/master, and merged short-branch cleanup. The approval does not permit product
+      source changes, tests or e2e spec changes, `.env*` or secret/env read/write/output, package/lockfile/dependency
+      changes, schema/drizzle/migration, real provider/model calls or provider configuration changes, OCR/parser,
+      payment, export, staging/prod/cloud/deploy, external-service, PR, force-push, destructive DB, Cost Calibration
+      Gate, or sensitive/private evidence.
+    targetExperienceChain: future-scope-non-goal-governance-packet
+    targetClosureItem: future scope non-goal governance resolution packet
+    behaviorBoundary: future-scope-non-goal::docs_state_governance_only
+    useCaseIds:
+      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+      - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+      - UC-FUTURE-ONLINE-PAYMENT
+      - UC-FUTURE-OCR-AUTO-IMPORT
+      - UC-FUTURE-ORG-DATA-EXPORT
+    executionProfile: local_experience_audit
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_bounded_packet_serial
+    taskKind: local_experience_packet
+    moduleRunVersion: 2
+    status: closed
+    result: completed_or_blocked_resolved
+    claimedAt: "2026-06-18T12:59:03-07:00"
+    validatedAt: "2026-06-18T13:00:53-07:00"
+    closedAt: "2026-06-18T13:00:53-07:00"
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      readRequirements: allowed
+      readEvidence: allowed
+      localE2EValidation: blocked
+      localFullFlowGate: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      paymentExternalService: blocked
+      ocrParserImplementation: blocked
+      exportFileGeneration: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
+      - docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId future-scope-non-goal-governance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
+    branch: codex/future-scope-non-goal-governance-packet
+    commitSha: null
+    retryCount: 0
+    lastFailurePath: null

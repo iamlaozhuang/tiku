@@ -27,8 +27,8 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: provider-rag-quota-governance-packet
-  refreshedAt: "2026-06-18T12:45:59-07:00"
+  taskId: future-scope-non-goal-governance-packet
+  refreshedAt: "2026-06-18T13:00:53-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
@@ -46,34 +46,33 @@ currentFactRefresh:
     - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
     - docs/01-requirements/traceability/unified-edition-delta-matrix.md
   e2eListOnly:
-    command: npm.cmd run test:e2e -- --list
-    specFiles: 14
-    listedTests: 31
+    command: not_run_not_required_for_docs_state_future_non_goal_governance_packet
+    specFiles: 0
+    listedTests: 0
     runtimeExecuted: false
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
-    provider-rag-quota governance packet rows after fresh redacted focused unit validation, e2e list discovery, and
-    approved existing local e2e validation. `UC-STD-KN-RECOMMENDATION` and `UC-STD-RAG-KNOWLEDGE-BASE` are local-only
-    experience closed; provider, vector provider, staging/prod, payment, external-service, and Cost Calibration release
-    gates remain blocked.
+    future-scope non-goal governance packet rows after fresh redacted docs/state evidence and audit. The five
+    future/non-goal rows remain `release_blocked` and are not local-experience closed. Provider, vector provider,
+    staging/prod, payment, external-service, OCR/parser, export/file generation, dependency, schema, env/secret, and
+    Cost Calibration release gates remain blocked.
 lastClosureReadinessAudit:
-  taskId: provider-rag-quota-governance-packet
-  auditedAt: "2026-06-18T12:45:59-07:00"
-  targetExperienceChain: provider-rag-quota-governance-packet
+  taskId: future-scope-non-goal-governance-packet
+  auditedAt: "2026-06-18T13:00:53-07:00"
+  targetExperienceChain: future-scope-non-goal-governance-packet
   useCaseIds:
-    - UC-STD-AI-SCORING-EXPLANATION
-    - UC-STD-KN-RECOMMENDATION
-    - UC-STD-RAG-KNOWLEDGE-BASE
-    - UC-ADV-OPS-AUTH-QUOTA
-    - UC-GATE-PROVIDER-STAGING-EXECUTION
-  decision: mark_kn_rag_experience_closed_and_refresh_release_blocked_provider_quota_gates
+    - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    - UC-FUTURE-ONLINE-PAYMENT
+    - UC-FUTURE-OCR-AUTO-IMPORT
+    - UC-FUTURE-ORG-DATA-EXPORT
+  decision: keep_future_scope_non_goal_rows_release_blocked_with_fresh_governance_evidence
   reason: >-
-    Fresh local evidence shows the packet's focused unit suite, e2e list discovery, and three approved existing local e2e
-    specs passed without source repair. The local-only recommendation and RAG resource knowledge flows are closed. AI
-    scoring/explanation provider execution, advanced ops quota/cost, and provider staging execution remain
-    `release_blocked` with fresh redacted approval-package evidence. Evidence does not include raw paper content, student
-    answer, plaintext redeem_code, provider payload, token, secret, environment value, or raw prompt/output.
-  evidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    Fresh governance evidence confirms these rows remain future scope or non-goals. The packet does not implement product
+    features and does not mark any future/non-goal row as `experience_closed`. Evidence preserves provider/model,
+    env/secret, schema/migration, dependency, OCR/parser, payment, export/file generation, staging/prod/cloud/deploy,
+    external-service, PR, force-push, destructive DB, raw sensitive evidence, and Cost Calibration blocks.
+  evidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -727,7 +726,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
     nextTask: none_future_non_goal
@@ -741,7 +740,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
     nextTask: none_future_non_goal
@@ -755,7 +754,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
     status: release_blocked
     blockedGate: payment_external_service_env_secret_deploy_blocked
     nextTask: none_future_non_goal
@@ -769,7 +768,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
     nextTask: none_future_non_goal
@@ -783,7 +782,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
     status: release_blocked
     blockedGate: export_file_generation_external_service_privacy_deploy_blocked
     nextTask: none_future_non_goal
