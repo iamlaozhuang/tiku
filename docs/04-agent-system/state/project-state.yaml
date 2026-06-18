@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: personal-learning-ai-local-experience-packet
-updatedAt: "2026-06-18T12:31:46-07:00"
+currentPhase: provider-rag-quota-governance-packet
+updatedAt: "2026-06-18T12:45:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,17 +497,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5c29465e6afe50516793d40148fff4c6d0f746d3
-  lastKnownOriginMasterSha: 5c29465e6afe50516793d40148fff4c6d0f746d3
+  lastKnownMasterSha: 58bc22175c2c88d2a6c7cb7fa60aeebacdc470fb
+  lastKnownOriginMasterSha: 58bc22175c2c88d2a6c7cb7fa60aeebacdc470fb
 currentTask:
-  id: personal-learning-ai-local-experience-packet
+  id: provider-rag-quota-governance-packet
   status: closed
-  result: pass_experience_closed_local_only
-  sourceStory: userBoundedLocalExperiencePacket.personalLearningAiLocalExperience
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-personal-learning-ai-local-experience-packet.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-personal-learning-ai-local-experience-packet.md
-  branch: codex/personal-learning-ai-local-experience-packet
+  result: completed_or_blocked_resolved
+  sourceStory: userBoundedLocalExperiencePacket.providerRagQuotaGovernance
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
+  branch: codex/provider-rag-quota-governance-packet
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: personal_learning_ai_local_experience_packet_experience_closed_local_only
+  status: provider_rag_quota_governance_packet_local_closure_and_release_blocked_gates_resolved
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: personal-learning-ai-local-experience-packet
+  currentTaskId: provider-rag-quota-governance-packet
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -1023,14 +1023,41 @@ localExperienceClosure:
       providerModel: blocked
       formalTargetWrites: blocked
       costCalibrationGate: blocked
+  currentProviderRagQuotaGovernancePacket:
+    taskId: provider-rag-quota-governance-packet
+    claimedAt: "2026-06-18T12:42:00-07:00"
+    closedAt: "2026-06-18T12:45:59-07:00"
+    targetExperienceChain: provider-rag-quota-governance-packet
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-STD-KN-RECOMMENDATION
+      - UC-STD-RAG-KNOWLEDGE-BASE
+      - UC-ADV-OPS-AUTH-QUOTA
+      - UC-GATE-PROVIDER-STAGING-EXECUTION
+    decision: mark_kn_rag_experience_closed_and_keep_provider_quota_gates_release_blocked
+    evidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
+    boundarySummary:
+      focusedUnit: pass_10_files_32_tests
+      e2eList: pass_31_tests_14_files
+      runtimeE2E: pass_3_existing_specs_5_tests
+      experienceClosure: local_only_for_kn_and_rag
+      releaseBlockedUseCases: UC-STD-AI-SCORING-EXPLANATION_UC-ADV-OPS-AUTH-QUOTA_UC-GATE-PROVIDER-STAGING-EXECUTION
+      releaseReadiness: not_claimed
+      providerModel: blocked
+      vectorProvider: blocked
+      quotaCostMeasurement: blocked
+      stagingProdDeploy: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `personal-learning-ai-local-experience-packet` is locally closed after fresh redacted focused unit validation, e2e
-    list, the four user-approved existing local e2e specs, evidence, audit, and coverage-matrix sync. Continue only with
-    local commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch cleanup under the
-    user's bounded packet approval. Keep release, staging/prod, provider/payment, external-service, deployment, PR,
-    force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database operations, e2e
-    spec edits, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    `provider-rag-quota-governance-packet` is locally resolved after fresh redacted focused unit validation, e2e list,
+    the three user-approved existing local e2e specs, evidence, audit, and coverage-matrix sync. Continue only with local
+    commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch cleanup under the
+    user's bounded packet approval. Do not seed a fourth packet unless the user provides a new packet prompt. Keep
+    release, provider/vector provider, staging/prod, payment, external-service, deployment, PR, force-push, `.env*`,
+    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, e2e spec edits, and Cost
+    Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md

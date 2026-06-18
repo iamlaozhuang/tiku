@@ -27,18 +27,18 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: personal-learning-ai-local-experience-packet
-  refreshedAt: "2026-06-18T12:29:24-07:00"
+  taskId: provider-rag-quota-governance-packet
+  refreshedAt: "2026-06-18T12:45:59-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 3
+    partial: 0
     local_experience_ready: 0
-    experience_closed: 19
-    release_blocked: 10
+    experience_closed: 21
+    release_blocked: 11
   sourceAnchors:
     - docs/01-requirements/use-cases/use-case-catalog.md
     - docs/01-requirements/traceability/capability-catalog.md
@@ -52,27 +52,28 @@ currentFactRefresh:
     runtimeExecuted: false
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
-    personal-learning-ai local experience packet rows that were marked `experience_closed` after fresh redacted focused
-    unit validation, e2e list discovery, and existing approved local e2e validation; release readiness is still not
-    implied by local experience closure.
+    provider-rag-quota governance packet rows after fresh redacted focused unit validation, e2e list discovery, and
+    approved existing local e2e validation. `UC-STD-KN-RECOMMENDATION` and `UC-STD-RAG-KNOWLEDGE-BASE` are local-only
+    experience closed; provider, vector provider, staging/prod, payment, external-service, and Cost Calibration release
+    gates remain blocked.
 lastClosureReadinessAudit:
-  taskId: personal-learning-ai-local-experience-packet
-  auditedAt: "2026-06-18T12:29:24-07:00"
-  targetExperienceChain: personal-learning-ai-local-experience-packet
+  taskId: provider-rag-quota-governance-packet
+  auditedAt: "2026-06-18T12:45:59-07:00"
+  targetExperienceChain: provider-rag-quota-governance-packet
   useCaseIds:
-    - UC-ADV-AUTH-CONTEXT-UPGRADE
-    - UC-ADV-AI-TASK-LIFECYCLE
-    - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
-    - UC-ADV-PERSONAL-AI-PAPER-GENERATION
-    - UC-ADV-FORMAL-CONTENT-SEPARATION
-  decision: mark_experience_closed_for_local_personal_learning_ai_packet_only
+    - UC-STD-AI-SCORING-EXPLANATION
+    - UC-STD-KN-RECOMMENDATION
+    - UC-STD-RAG-KNOWLEDGE-BASE
+    - UC-ADV-OPS-AUTH-QUOTA
+    - UC-GATE-PROVIDER-STAGING-EXECUTION
+  decision: mark_kn_rag_experience_closed_and_refresh_release_blocked_provider_quota_gates
   reason: >-
-    Fresh local evidence shows the packet's focused unit suite, e2e list discovery, and four existing approved local e2e
-    specs passed without source repair. Evidence is redacted and contains no raw paper content, student answer, plaintext
-    redeem_code, provider payload, token, secret, or environment value. The claim is local experience closure only and
-    does not imply release, staging/prod, provider/model, payment, deployment, formal target writes, PR, or Cost
-    Calibration readiness.
-  evidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    Fresh local evidence shows the packet's focused unit suite, e2e list discovery, and three approved existing local e2e
+    specs passed without source repair. The local-only recommendation and RAG resource knowledge flows are closed. AI
+    scoring/explanation provider execution, advanced ops quota/cost, and provider staging execution remain
+    `release_blocked` with fresh redacted approval-package evidence. Evidence does not include raw paper content, student
+    answer, plaintext redeem_code, provider payload, token, secret, environment value, or raw prompt/output.
+  evidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -516,7 +517,7 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
     status: release_blocked
     blockedGate: provider_call_env_secret_cost_calibration_staging_prod
     nextTask: provider_gate_approval_package_required
@@ -529,11 +530,11 @@ matrix:
     repositorySurface: src/server/repositories/knowledge-node-repository.ts
     uiSurface: src/app/(admin)/content/knowledge-nodes/page.tsx
     unitEvidence: tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
-    e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: partial
-    blockedGate: real_provider_rag_quality_gate_blocked
-    nextTask: standard-mvp-local-experience-readiness-audit
+    e2eEvidence: e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_real_provider_rag_quality_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-RAG-KNOWLEDGE-BASE
     edition: standard
     actor: ops_admin_content_admin_system
@@ -544,10 +545,10 @@ matrix:
     uiSurface: src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
     unitEvidence: tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts; src/server/services/rag-retrieval-service.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: partial
-    blockedGate: vector_provider_storage_real_rag_quality_gate_blocked
-    nextTask: standard-mvp-local-experience-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_vector_provider_storage_real_rag_quality_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-ADMIN-OPS-LOGS
     edition: standard
     actor: ops_admin_super_admin
@@ -684,10 +685,10 @@ matrix:
     uiSurface: existing_admin_ops_surfaces
     unitEvidence: src/server/services/ops-governance-authorization-quota-summary-service.test.ts
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
-    status: partial
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    status: release_blocked
     blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
-    nextTask: ops-governance-summary-local-flow-readiness-audit
+    nextTask: ops_auth_quota_cost_calibration_approval_package_required
   - useCaseId: UC-ADV-RETENTION-LOG-GOVERNANCE
     edition: advanced
     actor: ops_admin_audit_reviewer
@@ -810,7 +811,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
     nextTask: provider_staging_approval_package_required
