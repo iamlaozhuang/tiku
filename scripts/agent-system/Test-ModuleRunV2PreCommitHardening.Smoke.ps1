@@ -48,7 +48,7 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-commit hardening script: $scriptPath"
 }
 
-$taskId = "module-run-v2-docs-only-fast-lane-mechanism"
+$taskId = "module-run-v2-low-risk-experience-batch-mechanism-tuning"
 
 $allowedOutput = @(& $scriptPath -TaskId $taskId -ChangedFiles "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1")
 Assert-Contains -Output $allowedOutput -Pattern "Module Run v2 Pre-Commit Hardening"
@@ -65,6 +65,17 @@ $batchShadowOutput = @(
 Assert-Contains -Output $batchShadowOutput -Pattern "preCommitScopeMode: docs_only_batch"
 Assert-Contains -Output $batchShadowOutput -Pattern "docsOnlyBatchShadowDecision: would_block"
 Assert-Contains -Output $batchShadowOutput -Pattern "pre-commit hardening passed"
+
+$lowRiskBatchShadowOutput = @(
+    & $scriptPath `
+        -ChangedFiles "docs/05-execution-logs/evidence/missing-low-risk-experience-batch-smoke.md" `
+        -LowRiskExperienceBatchId "missing-low-risk-experience-batch-smoke" `
+        -LowRiskExperienceBatchMode shadow
+)
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "preCommitScopeMode: low_risk_experience_batch"
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "lowRiskExperienceBatchShadowDecision: would_block"
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "scopeScan: delegated_low_risk_experience_batch"
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "pre-commit hardening passed"
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE package.json" -Command {
     & $scriptPath -TaskId $taskId -ChangedFiles "package.json"

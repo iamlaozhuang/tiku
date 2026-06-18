@@ -106,6 +106,20 @@ Assert-Contains -Output $batchShadowOutput -Pattern "Docs-Only Batch Readiness"
 Assert-Contains -Output $batchShadowOutput -Pattern "docsOnlyBatchShadowDecision: would_block"
 Assert-Contains -Output $batchShadowOutput -Pattern "module-closeout readiness passed"
 
+$lowRiskBatchShadowOutput = @(
+    & $scriptPath `
+        -TaskId $taskId `
+        -ProjectStatePath $baselineProjectStatePath `
+        -QueuePath $baselineQueuePath `
+        -EvidencePath $existingEvidencePath `
+        -AuditReviewPath $existingAuditPath `
+        -LowRiskExperienceBatchId "missing-low-risk-experience-batch-smoke" `
+        -LowRiskExperienceBatchMode shadow
+)
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "Low-Risk Experience Batch Readiness"
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "lowRiskExperienceBatchShadowDecision: would_block"
+Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "module-closeout readiness passed"
+
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_EVIDENCE" -Command {
     & $scriptPath -TaskId $taskId -ProjectStatePath $baselineProjectStatePath -QueuePath $baselineQueuePath -EvidencePath "docs/05-execution-logs/evidence/missing-closeout-fixture.md" -AuditReviewPath $existingAuditPath
 }

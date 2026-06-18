@@ -15793,3 +15793,121 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
     lastFailurePath: null
     retryCount: 0
+  - id: module-run-v2-low-risk-experience-batch-mechanism-tuning
+    title: Module Run v2 low-risk experience batch mechanism tuning
+    phase: module-run-v2-low-risk-experience-batch-mechanism-tuning
+    sourceStory: mechanism.lowRiskExperienceBatchTuning
+    dependencies:
+      - organization-portal-admin-local-entry-readiness-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested implementation of the low-risk experience batch mechanism tuning plan in the current
+      2026-06-18 prompt. Scope is mechanism-only: execution profile catalog, SOP/operating manual, task queue template,
+      durable low-risk experience approval metadata, Module Run v2 readiness/closeout wrappers, smoke tests, and
+      docs/state/evidence. Release, staging/prod, provider/payment, external-service, dependency, schema/migration,
+      `.env*`, PR, force-push, and Cost Calibration Gate remain blocked.
+    targetExperienceChain: mechanism_low_risk_experience_batch
+    executionProfile: mechanism_low_risk
+    evidenceMode: full
+    validationPolicy: mechanism_smoke_plus_local_quality
+    queueSelectionMode: user_directed
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    claimedAt: "2026-06-18T05:25:10-07:00"
+    closedAt: null
+    branch: codex/module-run-v2-low-risk-experience-batch-tuning
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - scripts/agent-system/Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2LowRiskExperienceBatchReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - docs/05-execution-logs/task-plans/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+      - docs/05-execution-logs/evidence/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - PR creation or force-push
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - dev server, Browser/Playwright runtime, full e2e runtime
+      - Cost Calibration Gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LowRiskExperienceBatchReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/execution-profiles.yaml docs/04-agent-system/state/autodrive-control-schema.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/operating-manual.md docs/04-agent-system/sop/automation-loop.md docs/04-agent-system/sop/automated-advancement-governance.md docs/05-execution-logs/task-plans/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md docs/05-execution-logs/evidence/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md docs/05-execution-logs/audits-reviews/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md scripts/agent-system/Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1 scripts/agent-system/Test-ModuleRunV2LowRiskExperienceBatchReadiness.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1 scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1 scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1 scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-low-risk-experience-batch-mechanism-tuning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-low-risk-experience-batch-mechanism-tuning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-low-risk-experience-batch-mechanism-tuning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    lastFailurePath: null
+    retryCount: 0

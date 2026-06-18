@@ -25,6 +25,13 @@
     [string]$DocsOnlyBatchMode = "hard_block",
 
     [Parameter(Mandatory = $false)]
+    [string]$LowRiskExperienceBatchId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("shadow", "hard_block")]
+    [string]$LowRiskExperienceBatchMode = "hard_block",
+
+    [Parameter(Mandatory = $false)]
     [switch]$SkipScopeScan
 )
 
@@ -553,6 +560,67 @@ function Invoke-DocsOnlyBatchReadiness {
     }
 }
 
+function Invoke-LowRiskExperienceBatchReadiness {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BatchId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectStatePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$QueuePath,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    $batchScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $batchScriptPath)) {
+        Add-Finding "HARD_BLOCK_LOW_RISK_EXPERIENCE_BATCH_READINESS_SCRIPT_MISSING $batchScriptPath"
+        return
+    }
+
+    $batchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $batchScriptPath,
+        "-BatchId",
+        $BatchId,
+        "-Mode",
+        $Mode,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath
+    )
+
+    if ($Files.Count -gt 0) {
+        $batchArgs += "-ChangedFiles"
+        $batchArgs += $Files
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $batchOutput = @(& powershell.exe @batchArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    $batchOutput | ForEach-Object { Write-Output $_ }
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_LOW_RISK_EXPERIENCE_BATCH_READINESS_FAILED $BatchId"
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 Write-Section -Title "Module Run v2 Pre-Commit Hardening"
@@ -577,8 +645,13 @@ $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
 $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
 $isDocsOnlyBatchScope = -not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)
+$isLowRiskExperienceBatchScope = -not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isDocsOnlyBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
+    throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
+}
+
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -637,6 +710,10 @@ if ($isSeedTransactionScope) {
     $TaskId = "docs-only-batch:$DocsOnlyBatchId"
     $allowedFiles = @()
     $blockedFiles = @()
+} elseif ($isLowRiskExperienceBatchScope) {
+    $TaskId = "low-risk-experience-batch:$LowRiskExperienceBatchId"
+    $allowedFiles = @()
+    $blockedFiles = @()
 } else {
     $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     if ($taskBlock.Count -eq 0) {
@@ -648,7 +725,7 @@ if ($isSeedTransactionScope) {
 }
 
 Write-Output "taskId: $TaskId"
-Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } else { "task" })"
+Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
 Write-Output "filesToScan: $($filesToScan.Count)"
 
 Write-Section -Title "Module Run v2 Anchors"
@@ -668,12 +745,18 @@ if ($isDocsOnlyBatchScope) {
     Write-Section -Title "Docs-Only Batch Readiness"
     Invoke-DocsOnlyBatchReadiness -BatchId $DocsOnlyBatchId -Mode $DocsOnlyBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -Files $filesToScan
 }
+if ($isLowRiskExperienceBatchScope) {
+    Write-Section -Title "Low-Risk Experience Batch Readiness"
+    Invoke-LowRiskExperienceBatchReadiness -BatchId $LowRiskExperienceBatchId -Mode $LowRiskExperienceBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -Files $filesToScan
+}
 
 Write-Section -Title "Scope Scan"
 if ($SkipScopeScan) {
     Write-Output "scopeScan: skipped"
 } elseif ($isDocsOnlyBatchScope) {
     Write-Output "scopeScan: delegated_docs_only_batch"
+} elseif ($isLowRiskExperienceBatchScope) {
+    Write-Output "scopeScan: delegated_low_risk_experience_batch"
 } elseif ($filesToScan.Count -eq 0) {
     Write-Output "scopeScan: no changed files"
 } else {

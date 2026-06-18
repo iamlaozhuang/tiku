@@ -184,6 +184,13 @@ Local commit and remote push are separate decisions.
   `automation.unattendedControl.standingUnattendedLocalCloseoutApproval` counts as explicit task-scoped push approval
   only for local commit, fast-forward merge to `master`, push to `origin/master`, merged branch cleanup, and worktree
   parking after all required gates pass.
+- For bounded low-risk experience ready-set batches, a complete task `closeoutPolicy` materialized from
+  `automation.unattendedControl.standingLocalLowRiskExperienceAdvancementApproval` counts as explicit task-scoped
+  approval only when `executionProfile: local_low_risk_experience_batch`, parent/child evidence, low-risk batch
+  readiness, module closeout readiness, pre-push readiness, and blocked-files gates all pass. It allows local commit,
+  fast-forward merge to `master`, push to `origin/master`, merged branch cleanup, and worktree parking; it does not
+  approve runtime browser/e2e execution, production source fixture repair, PRs, force push, dependency, schema,
+  provider, env/secret, deploy, payment, external-service, or Cost Calibration Gate work.
 - Dependency, schema, migration, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, PR, force push, and Cost Calibration Gate actions always require fresh explicit approval.
 
 ## Product Closure Contribution

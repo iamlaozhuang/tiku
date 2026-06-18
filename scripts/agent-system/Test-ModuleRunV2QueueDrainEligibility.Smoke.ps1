@@ -47,6 +47,7 @@ function Write-Queue {
         [Parameter(Mandatory = $false)][switch]$IncludeDrainPolicy,
         [Parameter(Mandatory = $false)][string]$RiskProfile = "mechanism_low_risk",
         [Parameter(Mandatory = $false)][string]$TaskKind = "mechanism_hardening",
+        [Parameter(Mandatory = $false)][string]$ExecutionProfile = "",
         [Parameter(Mandatory = $false)][string[]]$RiskTypes = @("automation_policy"),
         [Parameter(Mandatory = $false)][string]$RequiredFreshApproval = "false",
         [Parameter(Mandatory = $false)][switch]$IncludeNestedTaskLocalId
@@ -73,6 +74,13 @@ function Write-Queue {
             "    reviewOutputs:",
             "      - id: nested-review-output",
             "        status: complete"
+        )
+    }
+
+    $executionProfileLines = @()
+    if (-not [string]::IsNullOrWhiteSpace($ExecutionProfile)) {
+        $executionProfileLines = @(
+            "    executionProfile: $ExecutionProfile"
         )
     }
 
@@ -103,7 +111,8 @@ function Write-Queue {
         "    title: Queue Drain Smoke",
         "    status: pending",
         "    taskKind: $TaskKind",
-        "    humanApproval: autoDriveLocalImplementationApproval: user-approved low-risk local implementation drain smoke. standingUnattendedLocalCloseoutApproval: user-approved local closeout smoke.",
+        $executionProfileLines,
+        "    humanApproval: autoDriveLocalImplementationApproval: user-approved low-risk local implementation drain smoke. standingUnattendedLocalCloseoutApproval: user-approved local closeout smoke. standingLocalLowRiskExperienceAdvancementApproval: user-approved low-risk experience batch smoke.",
         $drainPolicy,
         $nestedTaskLocalId,
         "    allowedFiles:",
@@ -188,6 +197,15 @@ try {
     }
     Assert-Contains -Output $implicitCodeOutput -Pattern "queueDrainEligibilityDecision: eligible"
     Assert-Contains -Output $implicitCodeOutput -Pattern "drainRiskProfile: low_risk_local_code"
+
+    Write-Queue -Path $queuePath -TaskId "experience-batch-task" -TaskKind "local_experience_batch" -ExecutionProfile "local_low_risk_experience_batch" -RiskTypes @("automation_policy", "local_validation", "evidence_redaction")
+    $experienceBatchOutput = @(& $scriptPath -TaskId "experience-batch-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath -MaxTasksPerWake 5)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Low-risk experience batch tasks should synthesize bounded queue drain eligibility.`n$($experienceBatchOutput -join "`n")"
+    }
+    Assert-Contains -Output $experienceBatchOutput -Pattern "queueDrainEligibilityDecision: eligible"
+    Assert-Contains -Output $experienceBatchOutput -Pattern "drainRiskProfile: low_risk_experience_batch"
+    Assert-Contains -Output $experienceBatchOutput -Pattern "autoRepairAllowance: test_only_contract_fixture_red_green"
 
     Write-Queue -Path $queuePath -TaskId "high-risk-task" -IncludeDrainPolicy -RiskTypes @("automation_policy", "env_secret")
     Invoke-ExpectFailure -ExpectedPattern "queueDrainEligibilityDecision: stop_for_hard_block" -Command {

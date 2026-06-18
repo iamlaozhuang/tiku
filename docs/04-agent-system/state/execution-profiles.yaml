@@ -63,6 +63,19 @@ validationPolicies:
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
+  low_risk_experience_batch:
+    requiredCommands:
+      - focused unit commands declared by changed child tasks or child keep-partial decision
+      - npm.cmd run test:e2e -- --list once per batch when validationDedup.e2eListOnce is true
+      - git diff --check
+      - npm.cmd run lint once per batch when validationDedup.lintTypecheckOnce is true
+      - npm.cmd run typecheck once per batch when validationDedup.lintTypecheckOnce is true
+      - Module Run v2 readiness gates once per batch when validationDedup.moduleReadinessOnce is true
+    fixtureRepairAllowance:
+      mode: test_only_contract_fixture
+      allowedPattern: src|tests/**/*.test.ts
+      requiresRedGreen: true
+      productionSource: blocked
   high_risk_isolated:
     requiredCommands:
       - task-specific gate command
@@ -148,6 +161,58 @@ profiles:
       - no provider payloads, raw prompts, or raw answers
       - no public identifier inventories, row data, or private data
       - no screenshots, traces, DOM dumps, or raw browser artifacts
+  local_low_risk_experience_batch:
+    evidenceMode: full
+    validationPolicy: low_risk_experience_batch
+    queueSelectionMode: ready_set
+    riskProfile: low_risk_experience_batch
+    taskKind: local_experience_batch
+    allowedTaskKinds:
+      - local_experience_batch
+      - local_experience_audit
+      - readiness_audit
+      - implementation
+      - implementation_tdd
+    allowedCapabilities:
+      - localReadinessAudit
+      - docsStateOnlyQueueMaintenance
+      - taskSeed
+      - focusedUnitValidation
+      - listE2ESpecs
+      - testOnlyContractFixtureRepair
+    validationDedupDefaults:
+      e2eListOnce: true
+      lintTypecheckOnce: true
+      moduleReadinessOnce: true
+    fixtureRepairAllowance:
+      mode: test_only_contract_fixture
+      filePattern: src|tests/**/*.test.ts
+      requiresRedGreen: true
+      productionSource: blocked
+    closeoutShape:
+      parentEvidence: required
+      childResultEvidence: required
+      allowedFiles: parent_child_union
+      blockedFiles: enforced_globally
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - localE2ERuntimeValidation
+      - localFullFlowGate
+      - costCalibrationGate
+      - productionSourceFixtureRepair
+    forbiddenActions:
+      - dev_server
+      - browser_or_playwright_runtime_validation
+      - full_e2e_suite
+      - provider_model_call
+      - schema_or_drizzle_or_migration_change
+      - package_or_lockfile_change
+      - env_secret_access_output_or_edit
+      - staging_prod_cloud_deploy_payment_external_service
+      - pr
+      - force_push
   local_unit_tdd:
     evidenceMode: full
     validationPolicy: local_unit
@@ -223,9 +288,11 @@ workPacket:
     - mechanism_low_risk
     - low_risk_local_code
     - repository_runtime_local
+    - low_risk_experience_batch
   maxTasksPerPacket:
     docs_state_lite: 6
     local_experience_audit: 2
+    local_low_risk_experience_batch: 5
     local_unit_tdd: 4
     repository_runtime_tdd: 3
     local_full_flow: 1

@@ -317,6 +317,13 @@ function Test-ProjectStateHasStandingLocalE2EApproval {
     return $content -match "(?s)standingLocalE2EValidationApproval:\s*.*?status:\s*approved"
 }
 
+function Test-ProjectStateHasStandingLocalLowRiskExperienceApproval {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $content = $Lines -join "`n"
+    return $content -match "(?s)standingLocalLowRiskExperienceAdvancementApproval:\s*.*?status:\s*approved"
+}
+
 function Test-BroadFocusedPlaceholderCommand {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Command)
 
@@ -489,7 +496,8 @@ function Test-LocalE2EValidationGate {
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ValidationLifecycleCommands,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedFiles,
-        [Parameter(Mandatory = $false)][bool]$IgnoreFocusedPlaceholderForNormalization = $false
+        [Parameter(Mandatory = $false)][bool]$IgnoreFocusedPlaceholderForNormalization = $false,
+        [Parameter(Mandatory = $false)][bool]$AllowListOnlyWithoutRuntimeCapability = $false
     )
 
     $allCommands = @(Get-RunnableValidationCommandTexts -ValidationCommands $ValidationCommands -ValidationLifecycleCommands $ValidationLifecycleCommands)
@@ -512,6 +520,18 @@ function Test-LocalE2EValidationGate {
             }
         }
         return
+    }
+
+    if ($AllowListOnlyWithoutRuntimeCapability) {
+        $nonListCommands = @(
+            $localE2ECommands | Where-Object { $_.Trim() -notmatch "^npm\.cmd\s+run\s+test:e2e\s+--\s+--list\s*$" }
+        )
+        if ($nonListCommands.Count -eq 0) {
+            foreach ($localE2ECommand in $localE2ECommands) {
+                Write-Output "OK_LOCAL_E2E_LIST_COMMAND $localE2ECommand"
+            }
+            return
+        }
     }
 
     if (-not (Test-ProjectStateHasStandingLocalE2EApproval -Lines $ProjectStateLines)) {
@@ -698,13 +718,13 @@ try {
     if ($validationCommands.Count -eq 0) {
         Add-Finding "HARD_BLOCK_MISSING_VALIDATION_COMMANDS $TaskId"
     }
-    if ($executionProfile -notin @("legacy_explicit", "docs_state_lite", "local_unit_tdd", "repository_runtime_tdd", "local_full_flow", "schema_isolated", "dependency_isolated", "provider_local_smoke")) {
+    if ($executionProfile -notin @("legacy_explicit", "docs_state_lite", "local_experience_audit", "local_unit_tdd", "repository_runtime_tdd", "local_full_flow", "local_low_risk_experience_batch", "schema_isolated", "dependency_isolated", "provider_local_smoke")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_EXECUTION_PROFILE $TaskId profile=$executionProfile"
     }
     if ($evidenceMode -notin @("full", "lite")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_EVIDENCE_MODE $TaskId evidenceMode=$evidenceMode"
     }
-    if ($validationPolicy -notin @("legacy_explicit", "docs_state", "local_unit", "runtime_unit", "local_full_flow", "high_risk_isolated")) {
+    if ($validationPolicy -notin @("legacy_explicit", "docs_state", "local_unit", "runtime_unit", "local_full_flow", "low_risk_experience_batch", "high_risk_isolated")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_VALIDATION_POLICY $TaskId validationPolicy=$validationPolicy"
     }
     if ($queueSelectionMode -notin @("legacy_explicit", "ready_set")) {
@@ -759,6 +779,9 @@ try {
         if ($blockedRiskTypes -contains $riskType.ToLowerInvariant()) {
             Add-Finding "HARD_BLOCK_RISK_GATE $riskType"
         }
+    }
+    if ($executionProfile -eq "local_low_risk_experience_batch" -and -not (Test-ProjectStateHasStandingLocalLowRiskExperienceApproval -Lines $projectStateLines)) {
+        Add-Finding "HARD_BLOCK_LOW_RISK_EXPERIENCE_STANDING_APPROVAL"
     }
     Test-ValidationCommandNormalizationGate -TaskBlock $taskBlock -ValidationCommands $validationCommands
 
@@ -826,7 +849,7 @@ try {
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+schemaMigration:\s*(blocked_without_task_approval|approved_migration_plan)\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_SCHEMA_MIGRATION"
     }
-    Test-LocalE2EValidationGate -ProjectStateLines $projectStateLines -TaskBlock $taskBlock -ValidationCommands $validationCommands -ValidationLifecycleCommands $validationLifecycleCommands -BlockedFiles $blockedFiles -IgnoreFocusedPlaceholderForNormalization:$script:normalizationRequired
+    Test-LocalE2EValidationGate -ProjectStateLines $projectStateLines -TaskBlock $taskBlock -ValidationCommands $validationCommands -ValidationLifecycleCommands $validationLifecycleCommands -BlockedFiles $blockedFiles -IgnoreFocusedPlaceholderForNormalization:$script:normalizationRequired -AllowListOnlyWithoutRuntimeCapability:($executionProfile -eq "local_low_risk_experience_batch")
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+costCalibrationGate:\s*blocked\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_COST_CALIBRATION_GATE"
     }

@@ -997,6 +997,68 @@ configuration, destructive database work, e2e, external-service actions, deploy,
 Cost Calibration Gate execution. Those still require fresh task-specific approval and must pass the local capability
 gate before any action.
 
+## Standing Local Low-Risk Experience Advancement Approval
+
+`project-state.yaml` may record a durable
+`automation.unattendedControl.standingLocalLowRiskExperienceAdvancementApproval`. This approval is for bounded
+ready-set experience advancement only. It reduces repeated governance work by letting a parent batch share list-only
+e2e, lint/typecheck, and Module Run readiness gates across child tasks while preserving child-level result evidence.
+
+The parent task must use:
+
+```yaml
+executionProfile: local_low_risk_experience_batch
+evidenceMode: full
+validationPolicy: low_risk_experience_batch
+queueSelectionMode: ready_set
+taskKind: local_experience_batch
+moduleRunVersion: 2
+lowRiskExperienceBatch:
+  id: <batch-id>
+  role: parent
+  children:
+    - <child-task-id>
+  validationDedup:
+    e2eListOnce: true
+    lintTypecheckOnce: true
+    moduleReadinessOnce: true
+  fixtureRepairAllowance:
+    mode: test_only_contract_fixture
+    requiresRedGreen: true
+closeoutPolicy:
+  localCommit:
+    approved: true
+  fastForwardMerge:
+    approved: true
+    targetBranch: master
+  push:
+    approved: true
+    target: origin/master
+  cleanup:
+    deleteShortBranch: true
+    parkWorktree: true
+    fetchPruneAfterPush: true
+```
+
+Each child task must record:
+
+- `lowRiskExperienceBatch.id` equal to the parent id;
+- `lowRiskExperienceBatch.role: child`;
+- `taskKind: local_experience_audit`, `readiness_audit`, `implementation`, or `implementation_tdd`;
+- `allowedFiles` and `blockedFiles` for its own scope;
+- `evidencePath`, `auditReviewPath`, and a child evidence result;
+- focused unit evidence, RED/GREEN evidence, or an explicit keep-partial decision.
+
+`Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1` is the hard gate. It checks the parent count, child topology,
+parent/child allowed-files union, global blocked files, parent/child evidence anchors, `npm.cmd run test:e2e -- --list`
+when de-duplicated, and RED/GREEN fixture repair evidence when test-only fixtures changed. Pre-commit, module-closeout,
+pre-push, approved closeout, and queue-drain scripts must call this helper for `local_low_risk_experience_batch` tasks.
+
+This approval does not approve production source fixture repair, runtime Browser/Playwright/e2e validation, full-flow
+execution, dev server startup, provider calls or configuration, env/secret access, dependency or lockfile changes,
+schema/migration work, destructive database work, staging/prod/cloud/deploy, payment, external-service actions, PRs,
+force push, or Cost Calibration Gate execution. Those remain separate approval packages.
+
 ## Standing Local E2E Validation Approval
 
 `project-state.yaml` may record a durable

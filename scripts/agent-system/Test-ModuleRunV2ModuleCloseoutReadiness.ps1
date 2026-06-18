@@ -31,7 +31,14 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateSet("shadow", "hard_block")]
-    [string]$DocsOnlyBatchMode = "hard_block"
+    [string]$DocsOnlyBatchMode = "hard_block",
+
+    [Parameter(Mandatory = $false)]
+    [string]$LowRiskExperienceBatchId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("shadow", "hard_block")]
+    [string]$LowRiskExperienceBatchMode = "hard_block"
 )
 
 $ErrorActionPreference = "Stop"
@@ -235,6 +242,33 @@ function Get-CurrentTaskId {
     return ""
 }
 
+function Get-LowRiskExperienceBatchId {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $flatBatchId = Get-ScalarValue -Block $TaskBlock -Key "lowRiskExperienceBatchId"
+    if (-not [string]::IsNullOrWhiteSpace($flatBatchId)) {
+        return $flatBatchId
+    }
+
+    $insideBatch = $false
+    foreach ($line in $TaskBlock) {
+        if ($line -match "^\s+lowRiskExperienceBatch:\s*$") {
+            $insideBatch = $true
+            continue
+        }
+
+        if ($insideBatch -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if ($insideBatch -and $line -match "^\s+id:\s*(.+)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
 function Test-RequiredPath {
     param(
         [Parameter(Mandatory = $true)]
@@ -379,6 +413,57 @@ function Invoke-DocsOnlyBatchReadiness {
     }
 }
 
+function Invoke-LowRiskExperienceBatchReadiness {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BatchId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectStatePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$QueuePath
+    )
+
+    $batchScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $batchScriptPath)) {
+        Add-Finding "HARD_BLOCK_LOW_RISK_EXPERIENCE_BATCH_READINESS_SCRIPT_MISSING $batchScriptPath"
+        return
+    }
+
+    $batchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $batchScriptPath,
+        "-BatchId",
+        $BatchId,
+        "-Mode",
+        $Mode,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath
+    )
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $batchOutput = @(& powershell.exe @batchArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    $batchOutput | ForEach-Object { Write-Output $_ }
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_LOW_RISK_EXPERIENCE_BATCH_READINESS_FAILED $BatchId"
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 Write-Section -Title "Module Run v2 Module Closeout Readiness"
@@ -414,6 +499,11 @@ if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
 
 if ([string]::IsNullOrWhiteSpace($AuditReviewPath)) {
     $AuditReviewPath = Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"
+}
+
+$executionProfile = Get-ScalarValue -Block $taskBlock -Key "executionProfile"
+if ([string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId) -and $executionProfile -eq "local_low_risk_experience_batch") {
+    $LowRiskExperienceBatchId = Get-LowRiskExperienceBatchId -TaskBlock $taskBlock
 }
 
 $validationLifecyclePhases = @(Get-ValidationLifecyclePhases -Block $taskBlock)
@@ -513,6 +603,10 @@ if (-not [string]::IsNullOrWhiteSpace($auditContent)) {
 if (-not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)) {
     Write-Section -Title "Docs-Only Batch Readiness"
     Invoke-DocsOnlyBatchReadiness -BatchId $DocsOnlyBatchId -Mode $DocsOnlyBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath
+}
+if (-not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)) {
+    Write-Section -Title "Low-Risk Experience Batch Readiness"
+    Invoke-LowRiskExperienceBatchReadiness -BatchId $LowRiskExperienceBatchId -Mode $LowRiskExperienceBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath
 }
 
 Write-Section -Title "Result"

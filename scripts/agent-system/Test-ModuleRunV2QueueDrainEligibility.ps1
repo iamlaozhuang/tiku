@@ -223,7 +223,8 @@ function Test-StructuredCloseoutPolicy {
         return $false
     }
 
-    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$" `
+        -or $taskText -match "(?ims)^\s+localCommit:\s*\r?\n\s+approved:\s*true\s*$"
     $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
     $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
     $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
@@ -309,20 +310,22 @@ try {
 
     $taskText = ($taskBlock -join "`n")
     $taskKind = Get-ScalarValue -Block $taskBlock -Key "taskKind"
+    $executionProfile = Get-ScalarValue -Block $taskBlock -Key "executionProfile"
     $hasDrainPolicy = $taskText -match "(?im)^\s+drainPolicy:\s*$"
     $usesDefaultLowRiskLocalCodeDrain = -not $hasDrainPolicy -and $taskKind -eq "implementation"
-    if (-not $hasDrainPolicy -and -not $usesDefaultLowRiskLocalCodeDrain) {
+    $usesDefaultLowRiskExperienceBatchDrain = -not $hasDrainPolicy -and $taskKind -eq "local_experience_batch" -and $executionProfile -eq "local_low_risk_experience_batch"
+    if (-not $hasDrainPolicy -and -not $usesDefaultLowRiskLocalCodeDrain -and -not $usesDefaultLowRiskExperienceBatchDrain) {
         Write-EligibilityResult -Decision "not_eligible" -ResolvedTaskId $TaskId -Reason "task has no drainPolicy; default is no drain" -ExitCode 0
     }
 
-    $drainEligible = if ($usesDefaultLowRiskLocalCodeDrain) { "true" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "drainEligible").ToLowerInvariant() }
-    $riskProfile = if ($usesDefaultLowRiskLocalCodeDrain) { "low_risk_local_code" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "riskProfile" }
-    $validationCostClass = if ($usesDefaultLowRiskLocalCodeDrain) { "standard" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "validationCostClass" }
-    $requiredFreshApproval = if ($usesDefaultLowRiskLocalCodeDrain) { "false" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "requiredFreshApproval").ToLowerInvariant() }
-    $maxTasksPerPolicy = if ($usesDefaultLowRiskLocalCodeDrain) { 2 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxTasksPerWake") -Default 1 }
-    $maxChangedFiles = if ($usesDefaultLowRiskLocalCodeDrain) { 20 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedFiles") -Default 20 }
-    $maxChangedLines = if ($usesDefaultLowRiskLocalCodeDrain) { 800 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedLines") -Default 800 }
-    $autoRepairAllowance = if ($usesDefaultLowRiskLocalCodeDrain) { "format_lint_evidence_once" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "autoRepairAllowance" }
+    $drainEligible = if ($usesDefaultLowRiskLocalCodeDrain -or $usesDefaultLowRiskExperienceBatchDrain) { "true" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "drainEligible").ToLowerInvariant() }
+    $riskProfile = if ($usesDefaultLowRiskLocalCodeDrain) { "low_risk_local_code" } elseif ($usesDefaultLowRiskExperienceBatchDrain) { "low_risk_experience_batch" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "riskProfile" }
+    $validationCostClass = if ($usesDefaultLowRiskExperienceBatchDrain) { "batch" } elseif ($usesDefaultLowRiskLocalCodeDrain) { "standard" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "validationCostClass" }
+    $requiredFreshApproval = if ($usesDefaultLowRiskLocalCodeDrain -or $usesDefaultLowRiskExperienceBatchDrain) { "false" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "requiredFreshApproval").ToLowerInvariant() }
+    $maxTasksPerPolicy = if ($usesDefaultLowRiskExperienceBatchDrain) { 5 } elseif ($usesDefaultLowRiskLocalCodeDrain) { 2 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxTasksPerWake") -Default 1 }
+    $maxChangedFiles = if ($usesDefaultLowRiskExperienceBatchDrain) { 40 } elseif ($usesDefaultLowRiskLocalCodeDrain) { 20 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedFiles") -Default 20 }
+    $maxChangedLines = if ($usesDefaultLowRiskExperienceBatchDrain) { 1200 } elseif ($usesDefaultLowRiskLocalCodeDrain) { 800 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedLines") -Default 800 }
+    $autoRepairAllowance = if ($usesDefaultLowRiskExperienceBatchDrain) { "test_only_contract_fixture_red_green" } elseif ($usesDefaultLowRiskLocalCodeDrain) { "format_lint_evidence_once" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "autoRepairAllowance" }
     if ([string]::IsNullOrWhiteSpace($validationCostClass)) {
         $validationCostClass = "standard"
     }
@@ -364,7 +367,7 @@ try {
         Write-EligibilityResult @resultBase -Decision "single_task_only" -Reason "risk profile is not eligible for multi-task drain in this phase" -ExitCode 0
     }
 
-    if ($riskProfile -notin @("docs_governance", "mechanism_low_risk", "low_risk_local_code")) {
+    if ($riskProfile -notin @("docs_governance", "mechanism_low_risk", "low_risk_local_code", "low_risk_experience_batch")) {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task uses blocked or unknown riskProfile: $riskProfile" -ExitCode 1
     }
 
@@ -403,7 +406,8 @@ try {
 
     $hasApprovalAnchor = $taskText -match "(?im)^\s+humanApproval:\s*.+" `
         -or $taskText -match "autoDriveLocalImplementationApproval" `
-        -or $taskText -match "standingUnattendedLocalCloseoutApproval"
+        -or $taskText -match "standingUnattendedLocalCloseoutApproval" `
+        -or $taskText -match "standingLocalLowRiskExperienceAdvancementApproval"
     if (-not $hasApprovalAnchor) {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task lacks an approval anchor" -ExitCode 1
     }

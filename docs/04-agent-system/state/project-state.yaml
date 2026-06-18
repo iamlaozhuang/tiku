@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-portal-admin-local-entry-readiness-audit
-updatedAt: "2026-06-18T05:04:54-07:00"
+currentPhase: module-run-v2-low-risk-experience-batch-mechanism-tuning
+updatedAt: "2026-06-18T05:53:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -120,6 +120,68 @@ automation:
         - cost_calibration_gate
       statement: >-
         User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved.
+    standingLocalLowRiskExperienceAdvancementApproval:
+      status: approved
+      approvedAt: "2026-06-18T05:44:00-07:00"
+      scope: bounded local low-risk experience ready-set batches only
+      appliesTo:
+        - executionProfile local_low_risk_experience_batch
+        - taskKind local_experience_batch
+        - parent task with lowRiskExperienceBatch.role parent and explicit children
+        - child tasks with local_experience_audit, readiness_audit, implementation, or implementation_tdd kind
+      allowedActions:
+        - create_short_lived_codex_branch
+        - create_task_plan_evidence_audit
+        - update_docs_state_task_queue_and_coverage_matrix
+        - run_local_readiness_audit
+        - run_focused_unit_tests
+        - run_npm_cmd_test_e2e_list_only
+        - repair_test_only_contract_fixture_files
+        - local_commit
+        - fast_forward_merge_to_master
+        - push_origin_master
+        - merged_short_branch_cleanup
+        - worktree_parking
+      requiredGates:
+        - repository_readiness
+        - low_risk_experience_batch_readiness
+        - allowedFiles_parent_child_union
+        - blockedFiles_enforcement
+        - fixture_repair_red_green_when_used
+        - redacted_parent_child_evidence
+        - audit_review
+        - module_closeout_readiness
+        - pre_push_readiness
+        - remote_divergence
+      fixtureRepairAllowance:
+        mode: test_only_contract_fixture
+        allowedFiles:
+          - src/**/*.test.ts
+          - tests/**/*.test.ts
+        requiresRedGreenEvidence: true
+        productionSource: blocked
+      validationDedup:
+        e2eListOnce: true
+        lintTypecheckOnce: true
+        moduleReadinessOnce: true
+      blockedWithoutFreshTaskApproval:
+        - env_secret
+        - provider_call
+        - provider_configuration
+        - dependency_package_lockfile_change
+        - schema_migration
+        - destructive_database_operation
+        - e2e_runtime
+        - browser_or_playwright_runtime
+        - dev_server
+        - external_service
+        - staging_prod_cloud_deploy
+        - payment
+        - pr
+        - force_push
+        - cost_calibration_gate
+      statement: >-
+        User approves bounded local low-risk experience advancement batches for ready-set work only when the task carries executionProfile local_low_risk_experience_batch, an explicit lowRiskExperienceBatch parent/children topology, structured closeoutPolicy, parent/child evidence and audit, RED/GREEN evidence for any test-only contract fixture repair, and hard-block passing low-risk batch, module closeout, pre-push, allowedFiles/blockedFiles, redaction, and remote-divergence gates. The approval includes local short branch, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked unless separately approved.
     standingLocalSchemaMigrationApproval:
       status: approved
       approvedAt: "2026-06-10T09:55:00-07:00"
@@ -438,15 +500,15 @@ repository:
   lastKnownMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
   lastKnownOriginMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
 currentTask:
-  id: organization-portal-admin-local-entry-readiness-audit
+  id: module-run-v2-low-risk-experience-batch-mechanism-tuning
   status: closed
-  result: pass_keep_partial_seed_portal_shell_entry_contract_tdd
-  sourceStory: localExperienceClosureGate.organizationPortalAdminLocalEntryReadinessAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
-  branch: codex/local-experience-analytics-portal-sequence
-  commitSha: null
+  result: null
+  sourceStory: mechanism.lowRiskExperienceBatchTuning
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+  branch: codex/module-run-v2-low-risk-experience-batch-tuning
+  commitSha: 91cbd27ed925a7c1b88a87b4833727af8463aa28
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -756,11 +818,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `organization-portal-admin-local-entry-readiness-audit` closed with a keep-partial decision. Existing organization
-    training entry and organization analytics route evidence is green, but there is no organization portal admin shell
-    entry, portal UI surface, or portal e2e evidence. Recommended next work is
-    `organization-analytics-summary-ui-entry-contract-tdd`, then `organization-portal-admin-shell-entry-contract-tdd`.
-    Keep release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
-    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, dev server,
-    Browser/Playwright runtime, full e2e runtime, and Cost Calibration Gate blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    `module-run-v2-low-risk-experience-batch-mechanism-tuning` is in progress to reduce low-risk local experience
+    readiness friction through a batch execution profile, test-only fixture repair allowance, validation de-duplication,
+    and durable low-risk experience advancement approval. Keep release, staging/prod, provider/payment, external-service,
+    deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database
+    operations, dev server, Browser/Playwright runtime, full e2e runtime, and Cost Calibration Gate blocked unless a
+    separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/task-plans/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md

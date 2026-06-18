@@ -22,7 +22,14 @@ param(
     [string]$CloseoutAuthorizationStatement = "",
 
     [Parameter(Mandatory = $false)]
-    [string]$RecoveryPacketHandoffRoot = ""
+    [string]$RecoveryPacketHandoffRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$LowRiskExperienceBatchId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("shadow", "hard_block")]
+    [string]$LowRiskExperienceBatchMode = "hard_block"
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,6 +78,33 @@ function Get-ScalarValue {
 
     foreach ($line in $Block) {
         if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.*)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
+function Get-LowRiskExperienceBatchId {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $flatBatchId = Get-ScalarValue -Block $TaskBlock -Key "lowRiskExperienceBatchId"
+    if (-not [string]::IsNullOrWhiteSpace($flatBatchId)) {
+        return $flatBatchId
+    }
+
+    $insideBatch = $false
+    foreach ($line in $TaskBlock) {
+        if ($line -match "^\s+lowRiskExperienceBatch:\s*$") {
+            $insideBatch = $true
+            continue
+        }
+
+        if ($insideBatch -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if ($insideBatch -and $line -match "^\s+id:\s*(.+)\s*$") {
             return $Matches[1].Trim()
         }
     }
@@ -290,6 +324,55 @@ function Invoke-CloseoutLocalToolingReadiness {
     }
 }
 
+function Invoke-LowRiskExperienceBatchReadiness {
+    param(
+        [Parameter(Mandatory = $true)][string]$BatchId,
+        [Parameter(Mandatory = $true)][string]$Mode,
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files
+    )
+
+    $batchScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $batchScriptPath)) {
+        throw "Missing low-risk experience batch readiness script: $batchScriptPath"
+    }
+
+    $batchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $batchScriptPath,
+        "-BatchId",
+        $BatchId,
+        "-Mode",
+        $Mode,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath
+    )
+    if ($Files.Count -gt 0) {
+        $batchArgs += "-ChangedFiles"
+        $batchArgs += $Files
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $batchOutput = @(& powershell.exe @batchArgs 2>&1)
+        $batchExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    $batchOutput | ForEach-Object { Write-Output $_ }
+    if ($batchExitCode -ne 0) {
+        throw "Low-risk experience batch readiness failed for $BatchId."
+    }
+}
+
 function Get-BranchWorktreePath {
     param([Parameter(Mandatory = $true)][string]$Branch)
 
@@ -344,7 +427,8 @@ function Test-StructuredCloseoutPolicy {
         return $false
     }
 
-    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$" `
+        -or $taskText -match "(?ims)^\s+localCommit:\s*\r?\n\s+approved:\s*true\s*$"
     $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
     $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
     $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
@@ -474,6 +558,11 @@ if ($taskBlock.Count -eq 0) {
 }
 
 $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
+$executionProfile = Get-ScalarValue -Block $taskBlock -Key "executionProfile"
+if ([string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId) -and $executionProfile -eq "local_low_risk_experience_batch") {
+    $LowRiskExperienceBatchId = Get-LowRiskExperienceBatchId -TaskBlock $taskBlock
+}
+$isLowRiskExperienceBatchScope = -not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)
 $hasStructuredCloseoutPolicy = Test-StructuredCloseoutPolicy -TaskBlock $taskBlock
 if ($taskStatus -notin @("done", "closed", "ready_for_closeout")) {
     throw "Approved closeout requires task status done, closed, or ready_for_closeout. Actual: $taskStatus"
@@ -502,15 +591,19 @@ if ($changedFiles.Count -eq 0 -and -not $cleanAheadBranch) {
     throw "Approved closeout found no changed files."
 }
 
-foreach ($changedFile in $changedFiles) {
-    $blockedPattern = Get-MatchingPattern -Path $changedFile -Patterns $blockedFiles
-    if (-not [string]::IsNullOrWhiteSpace($blockedPattern)) {
-        throw "Changed file is blocked for approved closeout: $changedFile matches $blockedPattern"
-    }
+if ($isLowRiskExperienceBatchScope) {
+    Invoke-LowRiskExperienceBatchReadiness -BatchId $LowRiskExperienceBatchId -Mode $LowRiskExperienceBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -Files $changedFiles
+} else {
+    foreach ($changedFile in $changedFiles) {
+        $blockedPattern = Get-MatchingPattern -Path $changedFile -Patterns $blockedFiles
+        if (-not [string]::IsNullOrWhiteSpace($blockedPattern)) {
+            throw "Changed file is blocked for approved closeout: $changedFile matches $blockedPattern"
+        }
 
-    $allowedPattern = Get-MatchingPattern -Path $changedFile -Patterns $allowedFiles
-    if ([string]::IsNullOrWhiteSpace($allowedPattern)) {
-        throw "Changed file is out of scope for approved closeout: $changedFile"
+        $allowedPattern = Get-MatchingPattern -Path $changedFile -Patterns $allowedFiles
+        if ([string]::IsNullOrWhiteSpace($allowedPattern)) {
+            throw "Changed file is out of scope for approved closeout: $changedFile"
+        }
     }
 }
 
@@ -523,12 +616,32 @@ Write-Output "branchCommitsAhead: $branchCommitsAhead"
 Write-Output "cleanAheadBranch: $($cleanAheadBranch.ToString().ToLowerInvariant())"
 
 $scriptRoot = $PSScriptRoot
-& (Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2ModuleCloseoutReadiness.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath
+$moduleCloseoutArgs = @{
+    TaskId           = $TaskId
+    ProjectStatePath = $ProjectStatePath
+    QueuePath        = $QueuePath
+    MatrixPath       = $MatrixPath
+}
+if ($isLowRiskExperienceBatchScope) {
+    $moduleCloseoutArgs["LowRiskExperienceBatchId"] = $LowRiskExperienceBatchId
+    $moduleCloseoutArgs["LowRiskExperienceBatchMode"] = $LowRiskExperienceBatchMode
+}
+& (Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2ModuleCloseoutReadiness.ps1") @moduleCloseoutArgs
 if ($LASTEXITCODE -ne 0) {
     throw "Module closeout readiness failed."
 }
 
-& (Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath
+$prePushArgs = @{
+    TaskId           = $TaskId
+    ProjectStatePath = $ProjectStatePath
+    QueuePath        = $QueuePath
+    MatrixPath       = $MatrixPath
+}
+if ($isLowRiskExperienceBatchScope) {
+    $prePushArgs["LowRiskExperienceBatchId"] = $LowRiskExperienceBatchId
+    $prePushArgs["LowRiskExperienceBatchMode"] = $LowRiskExperienceBatchMode
+}
+& (Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2PrePushReadiness.ps1") @prePushArgs
 if ($LASTEXITCODE -ne 0) {
     throw "Pre-push readiness failed."
 }

@@ -236,6 +236,11 @@ The first runtime task after planning must inventory `createUnavailable...` surf
   materialized from `standingUnattendedLocalCloseoutApproval` for an eligible low-risk Module Run v2 auto-seeded
   implementation task. This exception does not apply to PR creation/update, force push, deployment, production
   environment changes, or any high-risk capability.
+- For bounded local low-risk experience batches, explicit approval may also be a complete task `closeoutPolicy`
+  materialized from `standingLocalLowRiskExperienceAdvancementApproval`, but only when the task uses
+  `executionProfile: local_low_risk_experience_batch`, records a parent/child `lowRiskExperienceBatch` topology, and
+  passes `Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1` in hard-block mode. This approval covers local short
+  branch, local commit, fast-forward merge to `master`, push `origin/master`, cleanup, and worktree parking only.
 - Local commit, local merge, remote push, PR creation, and cleanup are separate decisions. Approval for one does not automatically approve the next.
 - Before pushing `master`, fetch the remote and verify the branch is not behind `origin/master`.
 - Evidence must record every approved remote action and its result.
@@ -262,6 +267,55 @@ post-merge evidence-only commit only when validation output or closeout facts we
 `project-state.yaml` SHA/handoff state must be repaired on disk, merge/push/cleanup failed and needs durable recovery
 facts, task policy explicitly requires persistent evidence, or a downstream gate requires a file-based artifact. For
 ordinary successful closeout, final handoff plus pre-push readiness is sufficient.
+
+## Low-Risk Experience Batch Template
+
+Use this parent/child shape when multiple ready-set experience tasks can share validation without weakening evidence:
+
+```yaml
+executionProfile: local_low_risk_experience_batch
+evidenceMode: full
+validationPolicy: low_risk_experience_batch
+queueSelectionMode: ready_set
+taskKind: local_experience_batch
+moduleRunVersion: 2
+lowRiskExperienceBatch:
+  id: <batch-id>
+  role: parent
+  children:
+    - <child-task-id>
+  validationDedup:
+    e2eListOnce: true
+    lintTypecheckOnce: true
+    moduleReadinessOnce: true
+  fixtureRepairAllowance:
+    mode: test_only_contract_fixture
+    requiresRedGreen: true
+closeoutPolicy:
+  localCommit:
+    approved: true
+  fastForwardMerge:
+    approved: true
+    targetBranch: master
+  push:
+    approved: true
+    target: origin/master
+  cleanup:
+    deleteShortBranch: true
+    parkWorktree: true
+    fetchPruneAfterPush: true
+```
+
+Child tasks must record `lowRiskExperienceBatch.id`, `role: child`, result evidence, a focused unit command or
+keep-partial decision, and RED/GREEN evidence when a test-only contract fixture was repaired. The parent evidence must
+record the batch range, `npm.cmd run test:e2e -- --list` when `e2eListOnce: true`, shared lint/typecheck/readiness
+commands when de-duplicated, `localFullLoopGate`, `threadRolloverGate`, `nextModuleRunCandidate`, blocked remainder,
+and `Cost Calibration Gate remains blocked`.
+
+The helper enforces the parent/child `allowedFiles` union plus global blocked files. Test-only fixture repair is limited
+to `.test.ts` files under `src/**` or `tests/**`; production source, `.env*`, dependency/lockfile, schema/migration,
+e2e runtime artifacts, Browser/Playwright runtime, dev server, provider, deploy, payment, external-service, PR, force
+push, and Cost Calibration Gate work remain blocked unless a separate task approval explicitly opens them.
 
 ## Project State Closeout Reconciliation
 

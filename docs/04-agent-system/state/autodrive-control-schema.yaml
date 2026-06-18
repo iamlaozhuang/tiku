@@ -76,6 +76,8 @@ executionProfiles:
   profiles:
     - legacy_explicit
     - docs_state_lite
+    - local_experience_audit
+    - local_low_risk_experience_batch
     - local_unit_tdd
     - repository_runtime_tdd
     - local_full_flow
@@ -91,6 +93,7 @@ executionProfiles:
     - local_unit
     - runtime_unit
     - local_full_flow
+    - low_risk_experience_batch
     - high_risk_isolated
   queueSelectionModes:
     - legacy_explicit
@@ -306,7 +309,7 @@ boundedQueueDrain:
             - none
             - format_lint_evidence_once
           default: none
-    executionRule: Missing drainPolicy defaults to not_eligible except for taskKind implementation tasks that satisfy the low-risk local implementation gate; those synthesize drainEligible true, riskProfile low_risk_local_code, validationCostClass standard, maxTasksPerWake 2, maxChangedFiles 20, maxChangedLines 800, and autoRepairAllowance format_lint_evidence_once. drainEligible true is accepted for docs_governance, mechanism_low_risk, and low_risk_local_code. single_task_only still returns single_task_only. High-risk riskTypes, requiredFreshApproval true, missing evidence/audit, missing validation surface, or missing structured closeoutPolicy hard-block drain.
+    executionRule: Missing drainPolicy defaults to not_eligible except for taskKind implementation tasks that satisfy the low-risk local implementation gate or taskKind local_experience_batch tasks with executionProfile local_low_risk_experience_batch. Implementation defaults synthesize drainEligible true, riskProfile low_risk_local_code, validationCostClass standard, maxTasksPerWake 2, maxChangedFiles 20, maxChangedLines 800, and autoRepairAllowance format_lint_evidence_once. Low-risk experience batch defaults synthesize drainEligible true, riskProfile low_risk_experience_batch, validationCostClass batch, maxTasksPerWake 5, maxChangedFiles 40, maxChangedLines 1200, and autoRepairAllowance test_only_contract_fixture_red_green. drainEligible true is accepted for docs_governance, mechanism_low_risk, low_risk_local_code, and low_risk_experience_batch. single_task_only still returns single_task_only. High-risk riskTypes, requiredFreshApproval true, missing approval anchor, missing evidence/audit, missing validation surface, or missing structured closeoutPolicy hard-block drain.
   supervisor:
     scriptPath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
@@ -518,6 +521,83 @@ standingUnattendedLocalCloseoutApproval:
     - force_push
     - cost_calibration_gate
   executionRule: The standing approval may be materialized only into auto-seeded low-risk implementation task closeoutPolicy during the seed transaction. It is not a general approval for mechanism repairs, manual tasks, PRs, force pushes, high-risk capabilities, or protected-branch editing outside approved closeout scripts.
+standingLocalLowRiskExperienceAdvancementApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingLocalLowRiskExperienceAdvancementApproval
+  purpose: Durable approval for bounded local low-risk experience advancement batches that reduce repeated ready-set validation noise without relaxing hard safety gates.
+  requiredStatus: approved
+  eligibleTaskFields:
+    executionProfile: local_low_risk_experience_batch
+    taskKind: local_experience_batch
+    requiredApprovalAnchors:
+      - standingLocalLowRiskExperienceAdvancementApproval
+      - lowRiskExperienceBatch
+      - closeoutPolicy
+  allowedLocalActions:
+    - create_short_lived_codex_branch
+    - create_task_plan_evidence_audit
+    - update_docs_state_task_queue_and_coverage_matrix
+    - run_local_readiness_audit
+    - run_focused_unit_tests
+    - run_npm_cmd_test_e2e_list_only
+    - repair_test_only_contract_fixture_files
+    - local_commit
+    - fast_forward_merge_to_master
+    - push_origin_master
+    - merged_short_branch_cleanup
+    - worktree_parking
+  fixtureRepairAllowance:
+    mode: test_only_contract_fixture
+    allowedFiles:
+      - src/**/*.test.ts
+      - tests/**/*.test.ts
+    requiresRedGreenEvidence: true
+    productionSource: blocked
+  generatedCloseoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: true
+      fetchPruneAfterPush: true
+  validationDedup:
+    e2eListOnce: true
+    lintTypecheckOnce: true
+    moduleReadinessOnce: true
+  requiredGates:
+    - repository_readiness
+    - low_risk_experience_batch_readiness
+    - allowedFiles_parent_child_union
+    - blockedFiles_enforcement
+    - fixture_repair_red_green_when_used
+    - redacted_parent_child_evidence
+    - audit_review
+    - module_closeout_readiness
+    - pre_push_readiness
+    - remote_divergence
+  blockedWithoutFreshTaskApproval:
+    - env_secret
+    - provider_call
+    - provider_configuration
+    - dependency_package_lockfile_change
+    - schema_migration
+    - destructive_database_operation
+    - e2e_runtime
+    - browser_or_playwright_runtime
+    - dev_server
+    - external_service
+    - staging_prod_cloud_deploy
+    - payment
+    - pr
+    - force_push
+    - cost_calibration_gate
+  executionRule: This approval may be materialized only into a parent low-risk experience batch task with child tasks explicitly named in lowRiskExperienceBatch.children. The batch helper must enforce parent/child allowedFiles union, global blockedFiles, child result evidence, e2e list de-dup, and test-only fixture RED/GREEN evidence before closeout scripts may commit, merge, push, or clean up. It does not approve production source fixture repair, runtime browser/e2e execution, full-flow execution, PRs, force pushes, deployments, provider work, env/secret access, dependency changes, schema/migration, external-service actions, payment work, or Cost Calibration Gate execution.
 standingDocsStateFastLaneCloseoutApproval:
   statePath: docs/04-agent-system/state/project-state.yaml
   durableKey: automation.unattendedControl.standingDocsStateFastLaneCloseoutApproval
@@ -861,6 +941,7 @@ forbiddenClaims:
   - This schema approves schema/migration only through standingLocalSchemaMigrationApproval plus task-scoped approved_migration_plan and capability gates.
   - This schema approves local e2e validation only through standingLocalE2EValidationApproval plus task-scoped approved_local_only_existing_specs and local-only command gates.
   - This schema approves local e2e smoke automation only through standingLocalE2ESmokeAllowlistApproval plus task-scoped localE2ESmokeTier safe_smoke and an allowlisted existing spec.
+  - This schema approves low-risk experience batch advancement only through standingLocalLowRiskExperienceAdvancementApproval plus task-scoped local_low_risk_experience_batch topology, parent/child evidence, test-only fixture RED/GREEN gates, and structured closeoutPolicy.
   - This schema approves destructive local Docker DB only through taskScopedDestructiveLocalDockerDbApproval plus task-scoped approved_destructive_local_dev_only and capability gates.
   - This schema does not approve dependency, deploy, PR, force push, staging/prod/cloud DB, env/secret, provider, or Cost Calibration Gate execution.
   - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval, standingDocsStateFastLaneCloseoutApproval, or fresh task-specific approval, after all readiness and pre-push gates pass.

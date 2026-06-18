@@ -65,6 +65,8 @@ automation:
   unattendedControl:
     standingLocalE2EValidationApproval:
       status: approved
+    standingLocalLowRiskExperienceAdvancementApproval:
+      status: approved
 "@
     }
 
@@ -260,6 +262,18 @@ try {
         throw "Approved local E2E schema fixture failed unexpectedly.`n$($approvedE2EOutput -join "`n")"
     }
     Assert-Contains -Output $approvedE2EOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+
+    $lowRiskBatchTaskBlock = $fullTaskBlock `
+        -replace "taskKind: implementation", "taskKind: local_experience_batch`n    executionProfile: local_low_risk_experience_batch`n    evidenceMode: full`n    validationPolicy: low_risk_experience_batch`n    queueSelectionMode: ready_set`n    humanApproval: standingLocalLowRiskExperienceAdvancementApproval smoke approval" `
+        -replace "validationCommands:\r?\n\s{6}- git diff --check", "validationCommands:`n      - npm.cmd run test:e2e -- --list`n      - git diff --check"
+    $lowRiskBatchFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $lowRiskBatchTaskBlock
+    $lowRiskBatchOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $lowRiskBatchFiles.StatePath -QueuePath $lowRiskBatchFiles.QueuePath -SchemaPath $lowRiskBatchFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Low-risk experience batch schema fixture failed unexpectedly.`n$($lowRiskBatchOutput -join "`n")"
+    }
+    Assert-Contains -Output $lowRiskBatchOutput -Pattern "executionProfile: local_low_risk_experience_batch"
+    Assert-Contains -Output $lowRiskBatchOutput -Pattern "OK_LOCAL_E2E_LIST_COMMAND npm\.cmd run test:e2e -- --list"
+    Assert-Contains -Output $lowRiskBatchOutput -Pattern "autodriveSchemaDecision: can_autodrive"
 
     $missingStandingE2EFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $approvedE2ETaskBlock -WithoutStandingLocalE2EApproval
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_STANDING_APPROVAL" -Command {
