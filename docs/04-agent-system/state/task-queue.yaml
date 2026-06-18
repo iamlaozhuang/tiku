@@ -14289,8 +14289,11 @@ tasks:
     queueSelectionMode: legacy_explicit
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass
+    claimedAt: "2026-06-18T00:22:11-07:00"
+    closedAt: "2026-06-18T00:46:38-07:00"
+    branch: codex/organization-training-local-experience-chain
     allowedFiles:
       - src/app/api/v1/organization-trainings/**
       - src/server/services/organization-training-route.ts

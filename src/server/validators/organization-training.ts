@@ -10,9 +10,11 @@ import {
   type OrganizationTrainingPublishQuestionInput,
   type OrganizationTrainingQuestionType,
   type OrganizationTrainingQuestionTypeSummary,
+  type OrganizationTrainingSourceContextType,
   type OrganizationTrainingTakedownInput,
   organizationTrainingAuditLogTargetResourceTypeValues,
   organizationTrainingQuestionTypeValues,
+  organizationTrainingSourceContextTypeValues,
 } from "../models/organization-training";
 import { subjectValues } from "../models/paper";
 
@@ -22,8 +24,14 @@ export const invalidOrganizationTrainingPublishInputMessage =
 export const invalidOrganizationTrainingTakedownInputMessage =
   "Invalid organization training takedown input.";
 
+export const invalidOrganizationTrainingManualDraftInputMessage =
+  "Invalid organization training manual draft input.";
+
 export const invalidOrganizationTrainingCopyToNewDraftInputMessage =
   "Invalid organization training copy-to-new-draft input.";
+
+export const invalidOrganizationTrainingSourceContextInputMessage =
+  "Invalid organization training source context input.";
 
 export const invalidOrganizationTrainingAuditLogReferenceInputMessage =
   "Invalid organization training audit_log reference input.";
@@ -44,6 +52,44 @@ export type OrganizationTrainingEmployeeAnswerSubmitRouteInput =
     scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
   };
 
+export type OrganizationTrainingManualDraftRouteInput = {
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  profession: (typeof professionValues)[number];
+  level: number;
+  subject: (typeof subjectValues)[number];
+  title: string;
+  description: string | null;
+  capabilityContext: OrganizationTrainingCapabilityContext;
+};
+
+export type OrganizationTrainingCopyToNewDraftRouteInput =
+  OrganizationTrainingCopyToNewDraftInput & {
+    authorizationPublicId: string;
+  };
+
+export type OrganizationTrainingSourceContextRouteItemInput = {
+  sourceType: OrganizationTrainingSourceContextType;
+  sourcePublicId: string;
+  title: string;
+  profession: (typeof professionValues)[number];
+  level: number;
+  subject: (typeof subjectValues)[number];
+  questionCount: number;
+  totalScore: number;
+  sourceStatus: string;
+};
+
+export type OrganizationTrainingSourceContextRouteInput = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  profession: (typeof professionValues)[number];
+  level: number;
+  capabilityContext: OrganizationTrainingCapabilityContext;
+  sourceContexts: OrganizationTrainingSourceContextRouteItemInput[];
+};
+
 export type OrganizationTrainingPublishValidationResult =
   | {
       success: true;
@@ -54,6 +100,16 @@ export type OrganizationTrainingPublishValidationResult =
       message: typeof invalidOrganizationTrainingPublishInputMessage;
     };
 
+export type OrganizationTrainingManualDraftValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingManualDraftRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingManualDraftInputMessage;
+    };
+
 export type OrganizationTrainingTakedownValidationResult =
   | {
       success: true;
@@ -62,6 +118,26 @@ export type OrganizationTrainingTakedownValidationResult =
   | {
       success: false;
       message: typeof invalidOrganizationTrainingTakedownInputMessage;
+    };
+
+export type OrganizationTrainingCopyToNewDraftRouteValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingCopyToNewDraftRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingCopyToNewDraftInputMessage;
+    };
+
+export type OrganizationTrainingSourceContextValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingSourceContextRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingSourceContextInputMessage;
     };
 
 export type OrganizationTrainingCopyToNewDraftValidationResult =
@@ -127,6 +203,20 @@ const forbiddenEmployeeAnswerPayloadKeys = [
   "analysis",
 ] as const;
 
+const forbiddenSourceMetadataPayloadKeys = [
+  "answerBody",
+  "answers",
+  "questions",
+  "questionBody",
+  "fullQuestionBody",
+  "fullPaperContent",
+  "standardAnswer",
+  "analysis",
+  "rawAnswer",
+  "rawPrompt",
+  "providerPayload",
+] as const;
+
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -167,6 +257,12 @@ function normalizeNonNegativeInteger(value: unknown): number | null {
 
 function hasForbiddenEmployeeAnswerPayload(value: JsonRecord): boolean {
   return forbiddenEmployeeAnswerPayloadKeys.some((payloadKey) =>
+    Object.hasOwn(value, payloadKey),
+  );
+}
+
+function hasForbiddenSourceMetadataPayload(value: JsonRecord): boolean {
+  return forbiddenSourceMetadataPayloadKeys.some((payloadKey) =>
     Object.hasOwn(value, payloadKey),
   );
 }
@@ -218,6 +314,17 @@ function isOrganizationTrainingQuestionType(
     typeof value === "string" &&
     organizationTrainingQuestionTypeValues.includes(
       value as OrganizationTrainingQuestionType,
+    )
+  );
+}
+
+function isOrganizationTrainingSourceContextType(
+  value: unknown,
+): value is OrganizationTrainingSourceContextType {
+  return (
+    typeof value === "string" &&
+    organizationTrainingSourceContextTypeValues.includes(
+      value as OrganizationTrainingSourceContextType,
     )
   );
 }
@@ -428,6 +535,57 @@ export function normalizeOrganizationTrainingPublishInput(
   };
 }
 
+export function normalizeOrganizationTrainingManualDraftInput(
+  input: unknown,
+): OrganizationTrainingManualDraftValidationResult {
+  if (!isRecord(input) || hasForbiddenSourceMetadataPayload(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingManualDraftInputMessage,
+    };
+  }
+
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+  const level = normalizePositiveInteger(input.level);
+  const title = normalizeRequiredText(input.title);
+  const description = normalizeOptionalText(input.description);
+  const capabilityContext = normalizeCapabilityContext(input.capabilityContext);
+
+  if (
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    !isProfession(input.profession) ||
+    level === null ||
+    !isSubject(input.subject) ||
+    title === null ||
+    capabilityContext === null
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingManualDraftInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      organizationPublicId,
+      authorizationPublicId,
+      profession: input.profession,
+      level,
+      subject: input.subject,
+      title,
+      description,
+      capabilityContext,
+    },
+  };
+}
+
 export function normalizeOrganizationTrainingTakedownInput(
   input: unknown,
 ): OrganizationTrainingTakedownValidationResult {
@@ -556,6 +714,145 @@ export function normalizeOrganizationTrainingCopyToNewDraftInput(
     value: {
       sourceVersionPublicId,
       newDraftTitle,
+    },
+  };
+}
+
+export function normalizeOrganizationTrainingCopyToNewDraftRouteInput(
+  input: unknown,
+): OrganizationTrainingCopyToNewDraftRouteValidationResult {
+  const copyInput = normalizeOrganizationTrainingCopyToNewDraftInput(input);
+
+  if (!copyInput.success || !isRecord(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingCopyToNewDraftInputMessage,
+    };
+  }
+
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+
+  if (authorizationPublicId === null) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingCopyToNewDraftInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      ...copyInput.value,
+      authorizationPublicId,
+    },
+  };
+}
+
+function normalizeSourceContextItem(
+  input: unknown,
+): OrganizationTrainingSourceContextRouteItemInput | null {
+  if (!isRecord(input) || hasForbiddenSourceMetadataPayload(input)) {
+    return null;
+  }
+
+  const sourcePublicId = normalizeRequiredText(input.sourcePublicId);
+  const title = normalizeRequiredText(input.title);
+  const level = normalizePositiveInteger(input.level);
+  const questionCount = normalizePositiveInteger(input.questionCount);
+  const totalScore = normalizeNonNegativeInteger(input.totalScore);
+  const sourceStatus = normalizeRequiredText(input.sourceStatus);
+
+  if (
+    !isOrganizationTrainingSourceContextType(input.sourceType) ||
+    sourcePublicId === null ||
+    title === null ||
+    !isProfession(input.profession) ||
+    level === null ||
+    !isSubject(input.subject) ||
+    questionCount === null ||
+    totalScore === null ||
+    sourceStatus === null
+  ) {
+    return null;
+  }
+
+  return {
+    sourceType: input.sourceType,
+    sourcePublicId,
+    title,
+    profession: input.profession,
+    level,
+    subject: input.subject,
+    questionCount,
+    totalScore,
+    sourceStatus,
+  };
+}
+
+function normalizeSourceContextItems(
+  input: unknown,
+): OrganizationTrainingSourceContextRouteItemInput[] | null {
+  if (!Array.isArray(input) || input.length === 0) {
+    return null;
+  }
+
+  const sourceContexts = input.map(normalizeSourceContextItem);
+
+  if (sourceContexts.some((sourceContext) => sourceContext === null)) {
+    return null;
+  }
+
+  return sourceContexts as OrganizationTrainingSourceContextRouteItemInput[];
+}
+
+export function normalizeOrganizationTrainingSourceContextInput(
+  input: unknown,
+): OrganizationTrainingSourceContextValidationResult {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingSourceContextInputMessage,
+    };
+  }
+
+  const draftPublicId = normalizeRequiredText(input.draftPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+  const level = normalizePositiveInteger(input.level);
+  const capabilityContext = normalizeCapabilityContext(input.capabilityContext);
+  const sourceContexts = normalizeSourceContextItems(input.sourceContexts);
+
+  if (
+    draftPublicId === null ||
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    !isProfession(input.profession) ||
+    level === null ||
+    capabilityContext === null ||
+    sourceContexts === null
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingSourceContextInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      draftPublicId,
+      organizationPublicId,
+      authorizationPublicId,
+      profession: input.profession,
+      level,
+      capabilityContext,
+      sourceContexts,
     },
   };
 }

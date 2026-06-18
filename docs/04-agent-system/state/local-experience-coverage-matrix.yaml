@@ -192,6 +192,23 @@ lastOrganizationTrainingLocalExperienceChainQueueMaterialization:
     localFullFlow: pending_after_entry_surfaces
     experienceClosure: audit_only_after_full_flow
     costCalibrationGate: blocked
+lastDraftSourceContextRuntimeContractTdd:
+  taskId: organization-training-draft-source-context-runtime-contract-tdd
+  closedAt: "2026-06-18T00:46:38-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+  decision: draft_source_context_runtime_route_contract_closed_no_experience_closed_claim
+  nextTask: organization-training-admin-employee-entry-surface-local-ui
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+  boundarySummary:
+    manualDraftRuntime: route_validator_repository_mapper_contract_ready
+    copyToNewDraftRuntime: route_source_version_question_type_summary_repository_contract_ready
+    sourceContextRuntime: route_validator_repository_mapper_contract_ready_metadata_only
+    schemaMigrationExecution: blocked_not_run
+    adminEmployeeEntrySurface: pending_next
+    localFullFlow: blocked_until_entry_surface_task_closes
+    experienceClosure: blocked_until_local_full_flow_and_closure_audit
+    costCalibrationGate: blocked
 lastEmployeeAnswerRepositoryQueueMaterialization:
   taskId: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
   materializedAt: "2026-06-17T22:07:07-07:00"
@@ -478,16 +495,16 @@ matrix:
     edition: advanced
     actor: organization_admin
     entrySurface: not_found_organization_ui
-    apiSurface: src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts
+    apiSurface: src/app/api/v1/organization-trainings/route.ts; src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts; src/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route.ts; src/app/api/v1/organization-trainings/[publicId]/source-contexts/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts; src/db/schema/organization-training.ts; drizzle/20260618063739_add_organization_training_draft_source_context.sql
     uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/repositories/organization-training-repository.test.ts; src/db/schema/organization-training.test.ts
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; src/server/mappers/organization-training-mapper.test.ts; src/db/schema/organization-training.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
     status: local_experience_ready
-    blockedGate: draft_source_context_runtime_repository_route_admin_ui_employee_routes_and_local_full_flow_not_closed
-    nextTask: organization-training-draft-source-context-runtime-contract-tdd
+    blockedGate: admin_employee_entry_surface_and_local_full_flow_not_closed
+    nextTask: organization-training-admin-employee-entry-surface-local-ui
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee

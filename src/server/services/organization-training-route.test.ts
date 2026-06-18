@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { POST as manualDraftRoutePost } from "@/app/api/v1/organization-trainings/route";
+import { POST as copyToNewDraftRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route";
+import { POST as sourceContextRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/source-contexts/route";
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
 import { POST as takeDownRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/take-down/route";
 import { POST as draftSaveRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/employee-answers/draft-save/route";
@@ -10,10 +13,14 @@ import { GET as visibleListRouteGet } from "@/app/api/v1/organization-trainings/
 import type { AuthContextDto } from "../contracts/auth-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
+  OrganizationTrainingSourceContextAttachmentDto,
 } from "../contracts/organization-training-contract";
 import type {
+  OrganizationTrainingCopyToNewDraftInput,
   OrganizationTrainingPublishInput,
+  OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import type { SessionService } from "./session-service";
@@ -54,6 +61,17 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
   ),
   findEmployeeAnswerByVersion: vi.fn(
     async (): Promise<EmployeeOrganizationTrainingAnswerDto | null> => null,
+  ),
+  lookupVersionQuestionTypeSummary: vi.fn(
+    async (): Promise<OrganizationTrainingQuestionTypeSummary | null> => ({
+      singleChoice: 1,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 1,
+    }),
+  ),
+  createManualDraft: vi.fn(
+    async (): Promise<OrganizationTrainingDraftDto> => createManualDraftDto(),
   ),
   publishVersion: vi.fn(
     async (): Promise<OrganizationTrainingPublishedVersionDto> => ({
@@ -100,6 +118,25 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
       takenDownAt: "2026-06-15T11:00:00.000Z",
       takedownReason: "outdated training",
     }),
+  ),
+  copyVersionToNewDraft: vi.fn(
+    async (): Promise<OrganizationTrainingDraftDto> =>
+      createManualDraftDto({
+        publicId: "organization_training_draft_copy_route_401",
+        title: "Refreshed route training",
+        questionCount: 1,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+      }),
+  ),
+  attachSourceContext: vi.fn(
+    async (): Promise<OrganizationTrainingSourceContextAttachmentDto> =>
+      createSourceContextAttachment(),
   ),
   saveEmployeeAnswerDraft: vi.fn(
     async (): Promise<EmployeeOrganizationTrainingAnswerDto> =>
@@ -222,6 +259,62 @@ function createPublishedVersion(
   };
 }
 
+function createManualDraftDto(
+  overrides: Partial<OrganizationTrainingDraftDto> = {},
+): OrganizationTrainingDraftDto {
+  return {
+    publicId: "organization_training_draft_route_401",
+    sourceTaskPublicId: null,
+    organizationPublicId: "organization_route_public_401",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "org_auth_route_public_401",
+    profession: "logistics",
+    level: 4,
+    subject: "theory",
+    title: "Route draft training",
+    description: null,
+    questionCount: 0,
+    totalScore: 0,
+    questionTypeSummary: {
+      singleChoice: 0,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 0,
+    },
+    evidenceStatus: "none",
+    validationStatus: "needs_review",
+    retentionStatus: "active",
+    createdAt: "2026-06-15T10:00:00.000Z",
+    expiresAt: null,
+    ...overrides,
+  };
+}
+
+function createSourceContextAttachment(
+  overrides: Partial<OrganizationTrainingSourceContextAttachmentDto> = {},
+): OrganizationTrainingSourceContextAttachmentDto {
+  return {
+    draftPublicId: publishPathPublicId,
+    organizationPublicId: "organization_route_public_401",
+    sourceContexts: [
+      {
+        sourceType: "paper",
+        sourcePublicId: "paper_route_public_401",
+        title: "Route paper source",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        questionCount: 1,
+        totalScore: 5,
+        sourceStatus: "published",
+        redactionStatus: "metadata_only",
+      },
+    ],
+    redactionStatus: "metadata_only",
+    ...overrides,
+  };
+}
+
 function createTakenDownVersion(
   overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
 ): OrganizationTrainingPublishedVersionDto {
@@ -253,6 +346,21 @@ function createTakedownInput(
   return {
     versionPublicId: takeDownPathPublicId,
     takedownReason: "outdated training",
+    ...overrides,
+  };
+}
+
+function createCopyInput(
+  overrides: Partial<
+    OrganizationTrainingCopyToNewDraftInput & {
+      authorizationPublicId: string;
+    }
+  > = {},
+) {
+  return {
+    sourceVersionPublicId: takeDownPathPublicId,
+    authorizationPublicId: "org_auth_route_public_401",
+    newDraftTitle: "Refreshed route training",
     ...overrides,
   };
 }
@@ -344,6 +452,45 @@ function createPublishRequest(
 ): Request {
   return new Request(
     `http://localhost/api/v1/organization-trainings/${publishPathPublicId}/publish`,
+    {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+function createManualDraftRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request("http://localhost/api/v1/organization-trainings", {
+    ...init,
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+function createCopyToNewDraftRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/copy-to-new-draft`,
+    {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+function createSourceContextRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${publishPathPublicId}/source-contexts`,
     {
       ...init,
       method: "POST",
@@ -487,6 +634,295 @@ function createTakeDownService(
 async function resolveJsonPayload(response: Response): Promise<unknown> {
   return response.json();
 }
+
+describe("organization training draft source-context route handlers", () => {
+  beforeEach(() => {
+    postgresOrganizationTrainingRepositoryFactoryMock.mockClear();
+    postgresOrganizationTrainingRepositoryFactoryMock.mockReturnValue(
+      runtimeRepositoryMock,
+    );
+    runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockClear();
+    runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockResolvedValue(
+      trustedLineage,
+    );
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockClear();
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockResolvedValue([
+      "organization_route_public_401",
+    ]);
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockClear();
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockResolvedValue(
+      createEmployeeVisibleVersion(),
+    );
+    runtimeRepositoryMock.lookupVersionQuestionTypeSummary.mockClear();
+    runtimeRepositoryMock.lookupVersionQuestionTypeSummary.mockResolvedValue({
+      singleChoice: 1,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 0,
+    });
+    runtimeRepositoryMock.createManualDraft.mockClear();
+    runtimeRepositoryMock.createManualDraft.mockResolvedValue(
+      createManualDraftDto(),
+    );
+    runtimeRepositoryMock.copyVersionToNewDraft.mockClear();
+    runtimeRepositoryMock.copyVersionToNewDraft.mockResolvedValue(
+      createManualDraftDto({
+        publicId: "organization_training_draft_copy_route_401",
+        title: "Refreshed route training",
+        questionCount: 1,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+      }),
+    );
+    runtimeRepositoryMock.attachSourceContext.mockClear();
+    runtimeRepositoryMock.attachSourceContext.mockResolvedValue(
+      createSourceContextAttachment(),
+    );
+  });
+
+  it("exports thin App Router entrypoints for manual draft, copy-to-new-draft, and source-context attachment", () => {
+    expect(manualDraftRoutePost).toEqual(expect.any(Function));
+    expect(copyToNewDraftRoutePost).toEqual(expect.any(Function));
+    expect(sourceContextRoutePost).toEqual(expect.any(Function));
+  });
+
+  it("creates a manual draft through the runtime route with a standard envelope", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.manualDraft.POST(
+      createManualDraftRequest(
+        {
+          organizationPublicId: "organization_route_public_401",
+          authorizationPublicId: "org_auth_route_public_401",
+          profession: "logistics",
+          level: 4,
+          subject: "theory",
+          title: "Route draft training",
+          description: null,
+          capabilityContext: {
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            canCreateOrganizationTraining: true,
+          },
+        },
+        {
+          headers: {
+            authorization: "Bearer organization_training_route_session_401",
+          },
+        },
+      ),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        draft: createManualDraftDto(),
+      },
+    });
+    expect(sessionService.requests).toEqual([
+      {
+        authorization: "Bearer organization_training_route_session_401",
+      },
+    ]);
+    expect(runtimeRepositoryMock.createManualDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "organization_training_draft",
+        organizationPublicId: "organization_route_public_401",
+        authorizationPublicId: "org_auth_route_public_401",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        title: "Route draft training",
+      }),
+    );
+  });
+
+  it("copies a source version to a new draft after resolving version metadata", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.copyToNewDraft.POST(
+      createCopyToNewDraftRequest(createCopyInput(), {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        draft: createManualDraftDto({
+          publicId: "organization_training_draft_copy_route_401",
+          title: "Refreshed route training",
+          questionCount: 1,
+          totalScore: 5,
+          questionTypeSummary: {
+            singleChoice: 1,
+            multiChoice: 0,
+            trueFalse: 0,
+            shortAnswer: 0,
+          },
+        }),
+      },
+    });
+    expect(
+      runtimeRepositoryMock.findPublishedVersionByPublicId,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+    });
+    expect(
+      runtimeRepositoryMock.lookupVersionQuestionTypeSummary,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+    });
+    expect(runtimeRepositoryMock.copyVersionToNewDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceVersionPublicId: takeDownPathPublicId,
+        authorizationPublicId: "org_auth_route_public_401",
+        newDraftTitle: "Refreshed route training",
+        contentType: "organization_training_draft",
+      }),
+    );
+  });
+
+  it("attaches metadata-only source context through the runtime route", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.sourceContextAttach.POST(
+      createSourceContextRequest(
+        {
+          draftPublicId: publishPathPublicId,
+          organizationPublicId: "organization_route_public_401",
+          authorizationPublicId: "org_auth_route_public_401",
+          profession: "logistics",
+          level: 4,
+          capabilityContext: {
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            canCreateOrganizationTraining: true,
+          },
+          sourceContexts: [
+            {
+              sourceType: "paper",
+              sourcePublicId: "paper_route_public_401",
+              title: "Route paper source",
+              profession: "logistics",
+              level: 4,
+              subject: "theory",
+              questionCount: 1,
+              totalScore: 5,
+              sourceStatus: "published",
+            },
+          ],
+        },
+        {
+          headers: {
+            authorization: "Bearer organization_training_route_session_401",
+          },
+        },
+      ),
+      createRouteContext(publishPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        context: createSourceContextAttachment(),
+      },
+    });
+    expect(runtimeRepositoryMock.attachSourceContext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "organization_training_source_context",
+        draftPublicId: publishPathPublicId,
+        organizationPublicId: "organization_route_public_401",
+        authorizationPublicId: "org_auth_route_public_401",
+        redactionStatus: "metadata_only",
+      }),
+    );
+    expect(serializedPayload).not.toContain("standardAnswer");
+    expect(serializedPayload).not.toContain("analysis");
+    expect(serializedPayload).not.toContain("providerPayload");
+  });
+
+  it("rejects malformed source context input without calling the store", async () => {
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+    });
+
+    const response = await handlers.sourceContextAttach.POST(
+      createSourceContextRequest({
+        draftPublicId: publishPathPublicId,
+        organizationPublicId: "organization_route_public_401",
+        authorizationPublicId: "org_auth_route_public_401",
+        profession: "logistics",
+        level: 4,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_route_public_401",
+            title: "Route paper source",
+            profession: "logistics",
+            level: 4,
+            subject: "theory",
+            questionCount: 1,
+            totalScore: 5,
+            sourceStatus: "published",
+            standardAnswer: "LEAK_STANDARD_ANSWER",
+          },
+        ],
+      }),
+      createRouteContext(publishPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+
+    expect(payload).toEqual({
+      code: 400087,
+      message: "Invalid organization training source context input.",
+      data: null,
+    });
+    expect(JSON.stringify(payload)).not.toContain("LEAK_STANDARD_ANSWER");
+    expect(runtimeRepositoryMock.attachSourceContext).not.toHaveBeenCalled();
+  });
+});
 
 describe("organization training publish route handlers", () => {
   beforeEach(() => {

@@ -11,7 +11,9 @@ import type {
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type {
+  OrganizationTrainingCopyToNewDraftInput,
   OrganizationTrainingPublishInput,
+  OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import {
@@ -21,17 +23,29 @@ import {
 import {
   invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
   invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
+  invalidOrganizationTrainingCopyToNewDraftInputMessage,
+  invalidOrganizationTrainingManualDraftInputMessage,
   invalidOrganizationTrainingPublishInputMessage,
+  invalidOrganizationTrainingSourceContextInputMessage,
   invalidOrganizationTrainingTakedownInputMessage,
+  normalizeOrganizationTrainingCopyToNewDraftRouteInput,
   normalizeOrganizationTrainingEmployeeAnswerDraftInput,
   normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
+  normalizeOrganizationTrainingManualDraftInput,
   normalizeOrganizationTrainingPublishInput,
+  normalizeOrganizationTrainingSourceContextInput,
   normalizeOrganizationTrainingTakedownInput,
+  type OrganizationTrainingCopyToNewDraftRouteInput,
+  type OrganizationTrainingManualDraftRouteInput,
+  type OrganizationTrainingSourceContextRouteInput,
 } from "../validators/organization-training";
 import {
   createOrganizationTrainingService,
   organizationTrainingEmployeeAnswerBlockedMessage,
+  organizationTrainingCopyToNewDraftBlockedMessage,
+  organizationTrainingManualDraftCreationBlockedMessage,
   organizationTrainingPublishBlockedMessage,
+  organizationTrainingSourceContextBlockedMessage,
   organizationTrainingTakedownBlockedMessage,
   type OrganizationTrainingAdminContext,
   type OrganizationTrainingEmployeeContext,
@@ -72,8 +86,11 @@ export type OrganizationTrainingTrustedPersistenceLineageLookup = (
 export type OrganizationTrainingAdminContextResolverInput = {
   request: Request;
   pathPublicId: string;
+  manualDraftInput?: OrganizationTrainingManualDraftRouteInput;
   publishInput?: OrganizationTrainingPublishInput;
   takedownInput?: OrganizationTrainingTakedownInput;
+  copyToNewDraftInput?: OrganizationTrainingCopyToNewDraftRouteInput;
+  sourceContextInput?: OrganizationTrainingSourceContextRouteInput;
 };
 
 export type OrganizationTrainingAdminContextResolver = (
@@ -83,8 +100,11 @@ export type OrganizationTrainingAdminContextResolver = (
 export type OrganizationTrainingVisibleOrganizationScopeResolverInput = {
   request: Request;
   pathPublicId: string;
+  manualDraftInput?: OrganizationTrainingManualDraftRouteInput;
   publishInput?: OrganizationTrainingPublishInput;
   takedownInput?: OrganizationTrainingTakedownInput;
+  copyToNewDraftInput?: OrganizationTrainingCopyToNewDraftRouteInput;
+  sourceContextInput?: OrganizationTrainingSourceContextRouteInput;
   adminPublicId: string;
 };
 
@@ -100,7 +120,9 @@ export type OrganizationTrainingRouteOptions = {
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
   resolvePublishedVersion?: OrganizationTrainingPublishedVersionResolver;
+  resolveSourceVersion?: OrganizationTrainingSourceVersionResolver;
   resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
+  resolveVersionQuestionTypeSummary?: OrganizationTrainingVersionQuestionTypeSummaryResolver;
 };
 
 export type OrganizationTrainingVersionOrganizationPublicIdResolverInput = {
@@ -121,7 +143,9 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "resolveEmployeeContext"
   | "resolveOrganizationAdminContext"
   | "resolvePublishedVersion"
+  | "resolveSourceVersion"
   | "resolveVersionOrganizationPublicId"
+  | "resolveVersionQuestionTypeSummary"
 > & {
   resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
@@ -155,6 +179,26 @@ export type OrganizationTrainingPublishedVersionResolver = (
   input: OrganizationTrainingPublishedVersionResolverInput,
 ) => Promise<OrganizationTrainingPublishedVersionDto | null>;
 
+export type OrganizationTrainingSourceVersionResolverInput = {
+  request: Request;
+  sourceVersionPublicId: string;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingSourceVersionResolver = (
+  input: OrganizationTrainingSourceVersionResolverInput,
+) => Promise<OrganizationTrainingPublishedVersionDto | null>;
+
+export type OrganizationTrainingVersionQuestionTypeSummaryResolverInput = {
+  request: Request;
+  sourceVersionPublicId: string;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingVersionQuestionTypeSummaryResolver = (
+  input: OrganizationTrainingVersionQuestionTypeSummaryResolverInput,
+) => Promise<OrganizationTrainingQuestionTypeSummary | null>;
+
 export type OrganizationTrainingEmployeeAnswerResolverInput = {
   request: Request;
   trainingVersionPublicId: string;
@@ -177,6 +221,9 @@ type OrganizationTrainingRouteService = Pick<
   Partial<
     Pick<
       OrganizationTrainingService,
+      | "createManualDraft"
+      | "copyVersionToNewDraft"
+      | "attachSourceContext"
       | "listEmployeeVisibleVersions"
       | "saveEmployeeAnswerDraft"
       | "submitEmployeeAnswer"
@@ -200,6 +247,22 @@ const employeeAnswerVersionPublicIdMismatchCode = 400073;
 const employeeAnswerContextUnavailableCode = 403074;
 const employeeAnswerVersionUnavailableCode = 404075;
 const employeeAnswerBlockedCode = 409076;
+const invalidManualDraftInputCode = 400077;
+const manualDraftAdminContextUnavailableCode = 403078;
+const manualDraftLineageUnavailableCode = 403079;
+const manualDraftBlockedCode = 409080;
+const invalidCopyToNewDraftInputCode = 400081;
+const copySourceVersionPublicIdMismatchCode = 400082;
+const copyAdminContextUnavailableCode = 403083;
+const copySourceVersionUnavailableCode = 404084;
+const copyQuestionTypeSummaryUnavailableCode = 404085;
+const copyLineageUnavailableCode = 403086;
+const copyBlockedCode = 409086;
+const invalidSourceContextInputCode = 400087;
+const sourceContextDraftPublicIdMismatchCode = 400088;
+const sourceContextAdminContextUnavailableCode = 403089;
+const sourceContextLineageUnavailableCode = 403090;
+const sourceContextBlockedCode = 409091;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
@@ -222,11 +285,41 @@ const takedownVersionOrganizationUnavailableMessage =
 const employeeAnswerVersionPublicIdMismatchMessage =
   "Organization training employee answer path public id must match request body.";
 
+const copySourceVersionPublicIdMismatchMessage =
+  "Organization training copy path public id must match request body.";
+
+const sourceContextDraftPublicIdMismatchMessage =
+  "Organization training source context path public id must match request body.";
+
 const employeeAnswerContextUnavailableMessage =
   "Organization training employee context is unavailable.";
 
 const employeeAnswerVersionUnavailableMessage =
   "Organization training employee training version is unavailable.";
+
+const manualDraftAdminContextUnavailableMessage =
+  "Organization training manual draft organization-admin actor context is unavailable.";
+
+const manualDraftLineageUnavailableMessage =
+  "Organization training manual draft lineage is unavailable.";
+
+const copyAdminContextUnavailableMessage =
+  "Organization training copy-to-new-draft organization-admin actor context is unavailable.";
+
+const copySourceVersionUnavailableMessage =
+  "Organization training copy-to-new-draft source version is unavailable.";
+
+const copyQuestionTypeSummaryUnavailableMessage =
+  "Organization training copy-to-new-draft source question type summary is unavailable.";
+
+const copyLineageUnavailableMessage =
+  "Organization training copy-to-new-draft lineage is unavailable.";
+
+const sourceContextAdminContextUnavailableMessage =
+  "Organization training source context organization-admin actor context is unavailable.";
+
+const sourceContextLineageUnavailableMessage =
+  "Organization training source context lineage is unavailable.";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -284,8 +377,40 @@ async function defaultResolvePublishedVersion(): Promise<null> {
   return null;
 }
 
+async function defaultResolveSourceVersion(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveVersionQuestionTypeSummary(): Promise<null> {
+  return null;
+}
+
 async function defaultResolveEmployeeAnswer(): Promise<null> {
   return null;
+}
+
+async function defaultManualDraftServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_manual_draft_input" as const,
+    message: organizationTrainingManualDraftCreationBlockedMessage,
+  };
+}
+
+async function defaultCopyToNewDraftServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_copy_to_new_draft_input" as const,
+    message: organizationTrainingCopyToNewDraftBlockedMessage,
+  };
+}
+
+async function defaultSourceContextServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_source_context_input" as const,
+    message: organizationTrainingSourceContextBlockedMessage,
+  };
 }
 
 async function defaultEmployeeVisibleVersionsServiceResult() {
@@ -333,7 +458,15 @@ function createSessionBackedOrganizationAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
   resolveVisibleOrganizationScope: OrganizationTrainingVisibleOrganizationScopeResolver,
 ): OrganizationTrainingAdminContextResolver {
-  return async ({ request, pathPublicId, publishInput, takedownInput }) => {
+  return async ({
+    request,
+    pathPublicId,
+    manualDraftInput,
+    publishInput,
+    takedownInput,
+    copyToNewDraftInput,
+    sourceContextInput,
+  }) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
     });
@@ -359,8 +492,11 @@ function createSessionBackedOrganizationAdminContextResolver(
       await resolveVisibleOrganizationScope({
         request,
         pathPublicId,
+        manualDraftInput,
         publishInput,
         takedownInput,
+        copyToNewDraftInput,
+        sourceContextInput,
         adminPublicId,
       }),
     );
@@ -393,6 +529,42 @@ function createEmployeeAnswerAuthorizationContext(
       canCreateOrganizationTraining: false,
       canAnswerOrganizationTraining: true,
       canViewOrganizationTrainingSummary: false,
+      canManageAuthorizationQuota: false,
+    },
+    blockedReason: null,
+  };
+}
+
+function createOrganizationTrainingAdminAuthorizationContext(input: {
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  profession: EffectiveAuthorizationContextDto["profession"];
+  level: number;
+  capabilityContext: {
+    effectiveEdition: "advanced";
+    authorizationSource: "org_auth";
+    canCreateOrganizationTraining: true;
+  };
+}): EffectiveAuthorizationContextDto {
+  return {
+    profession: input.profession,
+    level: input.level,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: input.capabilityContext.effectiveEdition,
+    authorizationSource: input.capabilityContext.authorizationSource,
+    authorizationPublicId: input.authorizationPublicId,
+    ownerType: "organization",
+    ownerPublicId: input.organizationPublicId,
+    organizationPublicId: input.organizationPublicId,
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: input.organizationPublicId,
+    capabilities: {
+      canGenerateAiQuestion: false,
+      canGenerateAiPaper: false,
+      canCreateOrganizationTraining:
+        input.capabilityContext.canCreateOrganizationTraining,
+      canAnswerOrganizationTraining: false,
+      canViewOrganizationTrainingSummary: true,
       canManageAuthorizationQuota: false,
     },
     blockedReason: null,
@@ -458,26 +630,21 @@ function createDefaultPersistenceLineageResolver(
 function createRuntimeOrganizationTrainingStore(
   repository: Pick<
     OrganizationTrainingStore,
+    | "createManualDraft"
     | "publishVersion"
     | "takeDownVersion"
+    | "copyVersionToNewDraft"
+    | "attachSourceContext"
     | "saveEmployeeAnswerDraft"
     | "submitEmployeeAnswer"
   >,
 ): OrganizationTrainingStore {
   return {
-    async createManualDraft() {
-      throw new Error("Organization training draft route is not configured.");
-    },
+    createManualDraft: repository.createManualDraft,
     publishVersion: repository.publishVersion,
     takeDownVersion: repository.takeDownVersion,
-    async copyVersionToNewDraft() {
-      throw new Error("Organization training copy route is not configured.");
-    },
-    async attachSourceContext() {
-      throw new Error(
-        "Organization training source context route is not configured.",
-      );
-    },
+    copyVersionToNewDraft: repository.copyVersionToNewDraft,
+    attachSourceContext: repository.attachSourceContext,
     async saveEmployeeAnswerDraft(answerDraftWrite) {
       return repository.saveEmployeeAnswerDraft(answerDraftWrite);
     },
@@ -534,6 +701,30 @@ function createRepositoryBackedPublishedVersionResolver(
     });
 }
 
+function createRepositoryBackedSourceVersionResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findPublishedVersionByPublicId"
+  >,
+): OrganizationTrainingSourceVersionResolver {
+  return async ({ sourceVersionPublicId }) =>
+    repository.findPublishedVersionByPublicId({
+      trainingVersionPublicId: sourceVersionPublicId,
+    });
+}
+
+function createRepositoryBackedVersionQuestionTypeSummaryResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "lookupVersionQuestionTypeSummary"
+  >,
+): OrganizationTrainingVersionQuestionTypeSummaryResolver {
+  return async ({ sourceVersionPublicId }) =>
+    repository.lookupVersionQuestionTypeSummary({
+      trainingVersionPublicId: sourceVersionPublicId,
+    });
+}
+
 function createRepositoryBackedEmployeeAnswerResolver(
   repository: Pick<
     OrganizationTrainingRepository,
@@ -551,6 +742,13 @@ function createInvalidPublishInputResponse(): ApiResponse<null> {
   return createErrorResponse(
     invalidPublishInputCode,
     invalidOrganizationTrainingPublishInputMessage,
+  );
+}
+
+function createInvalidManualDraftInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidManualDraftInputCode,
+    invalidOrganizationTrainingManualDraftInputMessage,
   );
 }
 
@@ -575,6 +773,20 @@ function createInvalidEmployeeAnswerSubmitInputResponse(): ApiResponse<null> {
   );
 }
 
+function createInvalidCopyToNewDraftInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidCopyToNewDraftInputCode,
+    invalidOrganizationTrainingCopyToNewDraftInputMessage,
+  );
+}
+
+function createInvalidSourceContextInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidSourceContextInputCode,
+    invalidOrganizationTrainingSourceContextInputMessage,
+  );
+}
+
 function createDraftPublicIdMismatchResponse(): ApiResponse<null> {
   return createErrorResponse(
     draftPublicIdMismatchCode,
@@ -596,6 +808,20 @@ function createEmployeeAnswerVersionPublicIdMismatchResponse(): ApiResponse<null
   );
 }
 
+function createCopySourceVersionPublicIdMismatchResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copySourceVersionPublicIdMismatchCode,
+    copySourceVersionPublicIdMismatchMessage,
+  );
+}
+
+function createSourceContextDraftPublicIdMismatchResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    sourceContextDraftPublicIdMismatchCode,
+    sourceContextDraftPublicIdMismatchMessage,
+  );
+}
+
 function createPublishLineageUnavailableResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishLineageUnavailableCode,
@@ -607,6 +833,20 @@ function createPublishAdminContextUnavailableResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishAdminContextUnavailableCode,
     publishAdminContextUnavailableMessage,
+  );
+}
+
+function createManualDraftAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    manualDraftAdminContextUnavailableCode,
+    manualDraftAdminContextUnavailableMessage,
+  );
+}
+
+function createManualDraftLineageUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    manualDraftLineageUnavailableCode,
+    manualDraftLineageUnavailableMessage,
   );
 }
 
@@ -638,10 +878,73 @@ function createEmployeeAnswerVersionUnavailableResponse(): ApiResponse<null> {
   );
 }
 
+function createCopyAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copyAdminContextUnavailableCode,
+    copyAdminContextUnavailableMessage,
+  );
+}
+
+function createCopySourceVersionUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copySourceVersionUnavailableCode,
+    copySourceVersionUnavailableMessage,
+  );
+}
+
+function createCopyQuestionTypeSummaryUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copyQuestionTypeSummaryUnavailableCode,
+    copyQuestionTypeSummaryUnavailableMessage,
+  );
+}
+
+function createCopyLineageUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copyLineageUnavailableCode,
+    copyLineageUnavailableMessage,
+  );
+}
+
+function createSourceContextAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    sourceContextAdminContextUnavailableCode,
+    sourceContextAdminContextUnavailableMessage,
+  );
+}
+
+function createSourceContextLineageUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    sourceContextLineageUnavailableCode,
+    sourceContextLineageUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
     organizationTrainingPublishBlockedMessage,
+  );
+}
+
+function createManualDraftBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    manualDraftBlockedCode,
+    organizationTrainingManualDraftCreationBlockedMessage,
+  );
+}
+
+function createCopyBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    copyBlockedCode,
+    organizationTrainingCopyToNewDraftBlockedMessage,
+  );
+}
+
+function createSourceContextBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    sourceContextBlockedCode,
+    organizationTrainingSourceContextBlockedMessage,
   );
 }
 
@@ -723,6 +1026,15 @@ export function createOrganizationTrainingRouteHandlers(
   organizationTrainingService: OrganizationTrainingRouteService,
   options: OrganizationTrainingRouteOptions = {},
 ) {
+  const createManualDraftService =
+    organizationTrainingService.createManualDraft ??
+    defaultManualDraftServiceResult;
+  const copyVersionToNewDraftService =
+    organizationTrainingService.copyVersionToNewDraft ??
+    defaultCopyToNewDraftServiceResult;
+  const attachSourceContextService =
+    organizationTrainingService.attachSourceContext ??
+    defaultSourceContextServiceResult;
   const listEmployeeVisibleVersionsService =
     organizationTrainingService.listEmployeeVisibleVersions ??
     defaultEmployeeVisibleVersionsServiceResult;
@@ -744,6 +1056,8 @@ export function createOrganizationTrainingRouteHandlers(
   const resolveOrganizationAdminContext =
     options.resolveOrganizationAdminContext ??
     defaultResolveOrganizationAdminContext;
+  const lookupTrustedPersistenceLineage =
+    options.lookupTrustedPersistenceLineage;
   const resolvePersistenceLineage =
     options.resolvePersistenceLineage ??
     createDefaultPersistenceLineageResolver(
@@ -754,8 +1068,75 @@ export function createOrganizationTrainingRouteHandlers(
     defaultResolveVersionOrganizationPublicId;
   const resolvePublishedVersion =
     options.resolvePublishedVersion ?? defaultResolvePublishedVersion;
+  const resolveSourceVersion =
+    options.resolveSourceVersion ?? defaultResolveSourceVersion;
+  const resolveVersionQuestionTypeSummary =
+    options.resolveVersionQuestionTypeSummary ??
+    defaultResolveVersionQuestionTypeSummary;
 
   return createRouteHandlersWithErrorEnvelope({
+    manualDraft: {
+      async POST(request: Request): Promise<Response> {
+        const input = normalizeOrganizationTrainingManualDraftInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(createInvalidManualDraftInputResponse());
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId: input.value.organizationPublicId,
+          manualDraftInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createManualDraftAdminContextUnavailableResponse(),
+          );
+        }
+
+        const lineage =
+          lookupTrustedPersistenceLineage === undefined
+            ? null
+            : await lookupTrustedPersistenceLineage({
+                adminContext,
+                organizationPublicId: input.value.organizationPublicId,
+                authorizationPublicId: input.value.authorizationPublicId,
+              });
+
+        if (lineage === null) {
+          return createJsonResponse(
+            createManualDraftLineageUnavailableResponse(),
+          );
+        }
+
+        const result = await createManualDraftService({
+          adminContext,
+          authorizationContext:
+            createOrganizationTrainingAdminAuthorizationContext(input.value),
+          draftInput: {
+            organizationPublicId: input.value.organizationPublicId,
+            profession: input.value.profession,
+            level: input.value.level,
+            subject: input.value.subject,
+            title: input.value.title,
+            description: input.value.description,
+          },
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createManualDraftBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            draft: result.draft,
+          }),
+        );
+      },
+    },
     employeeVisibleList: {
       async GET(request: Request): Promise<Response> {
         const employeeContext = await resolveEmployeeContext({
@@ -905,6 +1286,168 @@ export function createOrganizationTrainingRouteHandlers(
         return createJsonResponse(
           createSuccessResponse({
             version: result.version,
+          }),
+        );
+      },
+    },
+    copyToNewDraft: {
+      async POST(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingCopyToNewDraftRouteInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(createInvalidCopyToNewDraftInputResponse());
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.sourceVersionPublicId !== pathPublicId) {
+          return createJsonResponse(
+            createCopySourceVersionPublicIdMismatchResponse(),
+          );
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+          copyToNewDraftInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createCopyAdminContextUnavailableResponse(),
+          );
+        }
+
+        const sourceVersion = await resolveSourceVersion({
+          request,
+          sourceVersionPublicId: input.value.sourceVersionPublicId,
+          adminContext,
+        });
+
+        if (sourceVersion === null) {
+          return createJsonResponse(
+            createCopySourceVersionUnavailableResponse(),
+          );
+        }
+
+        const sourceQuestionTypeSummary =
+          await resolveVersionQuestionTypeSummary({
+            request,
+            sourceVersionPublicId: input.value.sourceVersionPublicId,
+            adminContext,
+          });
+
+        if (sourceQuestionTypeSummary === null) {
+          return createJsonResponse(
+            createCopyQuestionTypeSummaryUnavailableResponse(),
+          );
+        }
+
+        const lineage =
+          lookupTrustedPersistenceLineage === undefined
+            ? null
+            : await lookupTrustedPersistenceLineage({
+                adminContext,
+                organizationPublicId: sourceVersion.organizationPublicId,
+                authorizationPublicId: input.value.authorizationPublicId,
+              });
+
+        if (lineage === null) {
+          return createJsonResponse(createCopyLineageUnavailableResponse());
+        }
+
+        const copyInput: OrganizationTrainingCopyToNewDraftInput = {
+          sourceVersionPublicId: input.value.sourceVersionPublicId,
+          newDraftTitle: input.value.newDraftTitle,
+        };
+        const result = await copyVersionToNewDraftService({
+          adminContext,
+          authorizationPublicId: input.value.authorizationPublicId,
+          copyInput,
+          sourceVersion,
+          sourceQuestionTypeSummary,
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createCopyBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            draft: result.draft,
+          }),
+        );
+      },
+    },
+    sourceContextAttach: {
+      async POST(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingSourceContextInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(createInvalidSourceContextInputResponse());
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.draftPublicId !== pathPublicId) {
+          return createJsonResponse(
+            createSourceContextDraftPublicIdMismatchResponse(),
+          );
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+          sourceContextInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createSourceContextAdminContextUnavailableResponse(),
+          );
+        }
+
+        const lineage =
+          lookupTrustedPersistenceLineage === undefined
+            ? null
+            : await lookupTrustedPersistenceLineage({
+                adminContext,
+                organizationPublicId: input.value.organizationPublicId,
+                authorizationPublicId: input.value.authorizationPublicId,
+              });
+
+        if (lineage === null) {
+          return createJsonResponse(
+            createSourceContextLineageUnavailableResponse(),
+          );
+        }
+
+        const result = await attachSourceContextService({
+          adminContext,
+          authorizationContext:
+            createOrganizationTrainingAdminAuthorizationContext(input.value),
+          draftPublicId: input.value.draftPublicId,
+          organizationPublicId: input.value.organizationPublicId,
+          sourceContexts: input.value.sourceContexts,
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createSourceContextBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            context: result.context,
           }),
         );
       },
@@ -1126,6 +1669,12 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const resolvePublishedVersion =
     options.resolvePublishedVersion ??
     createRepositoryBackedPublishedVersionResolver(repository);
+  const resolveSourceVersion =
+    options.resolveSourceVersion ??
+    createRepositoryBackedSourceVersionResolver(repository);
+  const resolveVersionQuestionTypeSummary =
+    options.resolveVersionQuestionTypeSummary ??
+    createRepositoryBackedVersionQuestionTypeSummaryResolver(repository);
   const resolveEmployeeAnswer =
     options.resolveEmployeeAnswer ??
     createRepositoryBackedEmployeeAnswerResolver(repository);
@@ -1140,6 +1689,8 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       resolveEmployeeContext,
       listEmployeeVisibleVersions,
       resolvePublishedVersion,
+      resolveSourceVersion,
+      resolveVersionQuestionTypeSummary,
       resolveEmployeeAnswer,
       lookupTrustedPersistenceLineage:
         repository.lookupTrustedPersistenceLineage,

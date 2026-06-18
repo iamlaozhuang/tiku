@@ -16,7 +16,10 @@ import {
   normalizeOrganizationTrainingEmployeeAnswerDraftInput,
   normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingCopyToNewDraftInput,
+  normalizeOrganizationTrainingCopyToNewDraftRouteInput,
+  normalizeOrganizationTrainingManualDraftInput,
   normalizeOrganizationTrainingPublishInput,
+  normalizeOrganizationTrainingSourceContextInput,
   normalizeOrganizationTrainingTakedownInput,
 } from "./organization-training";
 
@@ -265,6 +268,198 @@ describe("organization training contract and validator scaffold", () => {
         newDraftTitle: "Refreshed training",
       }).success,
     ).toBe(false);
+  });
+
+  it("normalizes manual draft route input with org_auth capability context", () => {
+    expect(
+      normalizeOrganizationTrainingManualDraftInput({
+        organizationPublicId: " organization_public_123 ",
+        authorizationPublicId: " org_auth_public_123 ",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: " Safety training ",
+        description: "",
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      },
+    });
+
+    expect(
+      normalizeOrganizationTrainingManualDraftInput({
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        questions: [
+          {
+            standardAnswer: "LEAK_STANDARD_ANSWER",
+          },
+        ],
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("normalizes copy-to-new-draft route input with authorization public id", () => {
+    expect(
+      normalizeOrganizationTrainingCopyToNewDraftRouteInput({
+        sourceVersionPublicId: " training_version_public_123 ",
+        authorizationPublicId: " org_auth_public_123 ",
+        newDraftTitle: " Refreshed training ",
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        sourceVersionPublicId: "training_version_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        newDraftTitle: "Refreshed training",
+      },
+    });
+
+    expect(
+      normalizeOrganizationTrainingCopyToNewDraftRouteInput({
+        sourceVersionPublicId: "training_version_public_123",
+        newDraftTitle: "Refreshed training",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("normalizes source-context route input as metadata-only source references", () => {
+    expect(
+      normalizeOrganizationTrainingSourceContextInput({
+        draftPublicId: " training_draft_public_123 ",
+        organizationPublicId: " organization_public_123 ",
+        authorizationPublicId: " org_auth_public_123 ",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: " paper_public_123 ",
+            title: " Formal paper reference ",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+          },
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: " mock_exam_public_456 ",
+            title: " Mock exam reference ",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+          },
+        ],
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+          },
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: "mock_exam_public_456",
+            title: "Mock exam reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+          },
+        ],
+      },
+    });
+
+    const invalidSourceContextResult =
+      normalizeOrganizationTrainingSourceContextInput({
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+            standardAnswer: "LEAK_STANDARD_ANSWER",
+          },
+        ],
+      });
+
+    expect(invalidSourceContextResult.success).toBe(false);
+    expect(JSON.stringify(invalidSourceContextResult)).not.toContain(
+      "LEAK_STANDARD_ANSWER",
+    );
   });
 
   it("normalizes employee answer draft and submit metadata while rejecting raw answer payloads", () => {

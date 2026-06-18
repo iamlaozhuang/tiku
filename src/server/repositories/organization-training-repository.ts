@@ -9,25 +9,36 @@ import {
   orgAuthOrganization,
   organization,
   organizationTrainingAnswer,
+  organizationTrainingDraft,
+  organizationTrainingSourceContext,
   organizationTrainingVersion,
 } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingScopeSnapshotDto,
+  OrganizationTrainingSourceContextAttachmentDto,
 } from "../contracts/organization-training-contract";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
   OrganizationTrainingEmployeeAnswerSubmissionWrite,
+  OrganizationTrainingManualDraftWrite,
   OrganizationTrainingPublishedVersionPersistenceWrite,
+  OrganizationTrainingSourceContextWrite,
+  OrganizationTrainingVersionCopyToNewDraftWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
 import {
   mapOrganizationTrainingAnswerRowToDto,
+  mapOrganizationTrainingDraftRowToDto,
+  mapOrganizationTrainingSourceContextRowToDto,
   mapOrganizationTrainingVersionRowToDto,
   type OrganizationTrainingAnswerRow,
+  type OrganizationTrainingDraftRow,
+  type OrganizationTrainingSourceContextRow,
   type OrganizationTrainingVersionRow,
 } from "../mappers/organization-training-mapper";
 import {
@@ -36,10 +47,24 @@ import {
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
 
-export type { OrganizationTrainingAnswerRow, OrganizationTrainingVersionRow };
+export type {
+  OrganizationTrainingAnswerRow,
+  OrganizationTrainingDraftRow,
+  OrganizationTrainingSourceContextRow,
+  OrganizationTrainingVersionRow,
+};
 
 export type OrganizationTrainingPublishedVersionPersistenceInput =
   OrganizationTrainingPublishedVersionPersistenceWrite;
+
+export type OrganizationTrainingManualDraftPersistenceInput =
+  OrganizationTrainingManualDraftWrite;
+
+export type OrganizationTrainingVersionCopyToNewDraftPersistenceInput =
+  OrganizationTrainingVersionCopyToNewDraftWrite;
+
+export type OrganizationTrainingSourceContextPersistenceInput =
+  OrganizationTrainingSourceContextWrite;
 
 export type OrganizationTrainingEmployeeAnswerDraftPersistenceInput =
   OrganizationTrainingEmployeeAnswerDraftWrite;
@@ -65,6 +90,13 @@ export type OrganizationTrainingVersionInsertInput =
     versionNumber: number;
   };
 
+export type OrganizationTrainingDraftInsertInput =
+  OrganizationTrainingManualDraftPersistenceInput &
+    OrganizationTrainingTrustedPersistenceLineage & {
+      publicId: string;
+      sourceVersionPublicId: string | null;
+    };
+
 export type OrganizationTrainingTrustedPersistenceLineage = {
   organizationId: number;
   orgAuthId: number;
@@ -73,6 +105,39 @@ export type OrganizationTrainingTrustedPersistenceLineage = {
 export type OrganizationTrainingTrustedPersistenceLineageLookupInput = {
   organizationPublicId: string;
   authorizationPublicId: string;
+};
+
+export type OrganizationTrainingDraftPersistenceLineageLookupInput = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+};
+
+export type OrganizationTrainingDraftPersistenceLineage =
+  OrganizationTrainingTrustedPersistenceLineage & {
+    organizationTrainingDraftId: number;
+  };
+
+export type OrganizationTrainingSourceContextInsertInput = {
+  publicId: string;
+  organizationTrainingDraftId: number;
+  draftPublicId: string;
+  organizationId: number;
+  organizationPublicId: string;
+  orgAuthId: number;
+  authorizationSource: "org_auth";
+  authorizationPublicId: string;
+  sourceType: OrganizationTrainingSourceContextRow["source_type"];
+  sourcePublicId: string;
+  title: string;
+  profession: OrganizationTrainingSourceContextRow["profession"];
+  level: number;
+  subject: OrganizationTrainingSourceContextRow["subject"];
+  questionCount: number;
+  totalScore: number;
+  sourceStatus: string;
+  redactionStatus: "metadata_only";
+  formalUsagePolicy: OrganizationTrainingSourceContextRow["formal_usage_policy"];
 };
 
 export type OrganizationTrainingVisibleOrganizationScopeLookupInput = {
@@ -178,6 +243,9 @@ export type OrganizationTrainingVersionGateway = {
   findTrustedPersistenceLineageByPublicIds(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
+  findDraftPersistenceLineageByPublicIds(
+    input: OrganizationTrainingDraftPersistenceLineageLookupInput,
+  ): Promise<OrganizationTrainingDraftPersistenceLineage | null>;
   findVisibleOrganizationScopeSourceByAdminPublicId(
     adminPublicId: string,
   ): Promise<OrganizationTrainingVisibleOrganizationScopeSource | null>;
@@ -193,9 +261,18 @@ export type OrganizationTrainingVersionGateway = {
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
+  findVersionQuestionTypeSummaryByPublicId(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingVersionRow["question_type_summary"] | null>;
   findEmployeeAnswerByVersionPublicId(
     input: OrganizationTrainingEmployeeAnswerLookupInput,
   ): Promise<OrganizationTrainingAnswerRow | null>;
+  insertManualDraft(
+    input: OrganizationTrainingDraftInsertInput,
+  ): Promise<OrganizationTrainingDraftRow | null>;
+  insertSourceContexts(
+    input: OrganizationTrainingSourceContextInsertInput[],
+  ): Promise<OrganizationTrainingSourceContextRow[]>;
   insertPublishedVersion(
     input: OrganizationTrainingVersionInsertInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
@@ -220,6 +297,9 @@ export type OrganizationTrainingRepository = {
   lookupVersionOrganizationPublicId(
     input: OrganizationTrainingVersionOrganizationLookupInput,
   ): Promise<string | null>;
+  lookupVersionQuestionTypeSummary(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingVersionRow["question_type_summary"] | null>;
   listEmployeeVisibleVersions(
     input: OrganizationTrainingEmployeeVisibleVersionListInput,
   ): Promise<OrganizationTrainingPublishedVersionDto[]>;
@@ -232,6 +312,15 @@ export type OrganizationTrainingRepository = {
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
+  createManualDraft(
+    input: OrganizationTrainingManualDraftPersistenceInput,
+  ): Promise<OrganizationTrainingDraftDto>;
+  copyVersionToNewDraft(
+    input: OrganizationTrainingVersionCopyToNewDraftPersistenceInput,
+  ): Promise<OrganizationTrainingDraftDto>;
+  attachSourceContext(
+    input: OrganizationTrainingSourceContextPersistenceInput,
+  ): Promise<OrganizationTrainingSourceContextAttachmentDto>;
   saveEmployeeAnswerDraft(
     input: OrganizationTrainingEmployeeAnswerDraftPersistenceInput,
   ): Promise<EmployeeOrganizationTrainingAnswerDto>;
@@ -244,6 +333,8 @@ export type OrganizationTrainingRepository = {
 };
 
 export type OrganizationTrainingRepositoryOptions = {
+  createDraftPublicId?: () => string;
+  createSourceContextPublicId?: () => string;
   createVersionPublicId?: () => string;
   createAnswerPublicId?: () => string;
 };
@@ -301,10 +392,73 @@ const organizationTrainingAnswerSelection = {
   updated_at: organizationTrainingAnswer.updated_at,
 };
 
+const organizationTrainingDraftSelection = {
+  id: organizationTrainingDraft.id,
+  public_id: organizationTrainingDraft.public_id,
+  source_task_public_id: organizationTrainingDraft.source_task_public_id,
+  source_version_public_id: organizationTrainingDraft.source_version_public_id,
+  organization_id: organizationTrainingDraft.organization_id,
+  organization_public_id: organizationTrainingDraft.organization_public_id,
+  org_auth_id: organizationTrainingDraft.org_auth_id,
+  authorization_source: organizationTrainingDraft.authorization_source,
+  authorization_public_id: organizationTrainingDraft.authorization_public_id,
+  owner_type: organizationTrainingDraft.owner_type,
+  owner_public_id: organizationTrainingDraft.owner_public_id,
+  quota_owner_type: organizationTrainingDraft.quota_owner_type,
+  quota_owner_public_id: organizationTrainingDraft.quota_owner_public_id,
+  profession: organizationTrainingDraft.profession,
+  level: organizationTrainingDraft.level,
+  subject: organizationTrainingDraft.subject,
+  title: organizationTrainingDraft.title,
+  description: organizationTrainingDraft.description,
+  question_count: organizationTrainingDraft.question_count,
+  total_score: organizationTrainingDraft.total_score,
+  question_type_summary: organizationTrainingDraft.question_type_summary,
+  evidence_status: organizationTrainingDraft.evidence_status,
+  validation_status: organizationTrainingDraft.validation_status,
+  retention_status: organizationTrainingDraft.retention_status,
+  created_at: organizationTrainingDraft.created_at,
+  updated_at: organizationTrainingDraft.updated_at,
+  expires_at: organizationTrainingDraft.expires_at,
+};
+
+const organizationTrainingSourceContextSelection = {
+  id: organizationTrainingSourceContext.id,
+  public_id: organizationTrainingSourceContext.public_id,
+  organization_training_draft_id:
+    organizationTrainingSourceContext.organization_training_draft_id,
+  organization_training_draft_public_id:
+    organizationTrainingSourceContext.organization_training_draft_public_id,
+  organization_id: organizationTrainingSourceContext.organization_id,
+  organization_public_id:
+    organizationTrainingSourceContext.organization_public_id,
+  org_auth_id: organizationTrainingSourceContext.org_auth_id,
+  authorization_source: organizationTrainingSourceContext.authorization_source,
+  authorization_public_id:
+    organizationTrainingSourceContext.authorization_public_id,
+  source_type: organizationTrainingSourceContext.source_type,
+  source_public_id: organizationTrainingSourceContext.source_public_id,
+  title: organizationTrainingSourceContext.title,
+  profession: organizationTrainingSourceContext.profession,
+  level: organizationTrainingSourceContext.level,
+  subject: organizationTrainingSourceContext.subject,
+  question_count: organizationTrainingSourceContext.question_count,
+  total_score: organizationTrainingSourceContext.total_score,
+  source_status: organizationTrainingSourceContext.source_status,
+  redaction_status: organizationTrainingSourceContext.redaction_status,
+  formal_usage_policy: organizationTrainingSourceContext.formal_usage_policy,
+  created_at: organizationTrainingSourceContext.created_at,
+  updated_at: organizationTrainingSourceContext.updated_at,
+};
+
 export function createOrganizationTrainingRepository(
   gateway: OrganizationTrainingVersionGateway,
   options: OrganizationTrainingRepositoryOptions = {},
 ): OrganizationTrainingRepository {
+  const createDraftPublicId =
+    options.createDraftPublicId ?? createDefaultDraftPublicId;
+  const createSourceContextPublicId =
+    options.createSourceContextPublicId ?? createDefaultSourceContextPublicId;
   const createVersionPublicId =
     options.createVersionPublicId ?? createDefaultVersionPublicId;
   const createAnswerPublicId =
@@ -358,6 +512,16 @@ export function createOrganizationTrainingRepository(
       return organizationPublicId === null
         ? null
         : normalizeRequiredText(organizationPublicId);
+    },
+
+    async lookupVersionQuestionTypeSummary(input) {
+      const normalizedInput = normalizeVersionLookupInput(input);
+
+      if (normalizedInput === null) {
+        return null;
+      }
+
+      return gateway.findVersionQuestionTypeSummaryByPublicId(normalizedInput);
     },
 
     async listEmployeeVisibleVersions(input) {
@@ -416,6 +580,77 @@ export function createOrganizationTrainingRepository(
       }
 
       return mapOrganizationTrainingVersionRowToDto(insertedRow);
+    },
+
+    async createManualDraft(input) {
+      const draftInsertInput = await createManualDraftInsertInput(input, {
+        gateway,
+        publicId: createDraftPublicId(),
+      });
+
+      if (draftInsertInput === null) {
+        throw new Error("organization training draft persistence failed.");
+      }
+
+      const row = await gateway.insertManualDraft(draftInsertInput);
+
+      if (row === null) {
+        throw new Error("organization training draft persistence failed.");
+      }
+
+      return mapOrganizationTrainingDraftRowToDto(row);
+    },
+
+    async copyVersionToNewDraft(input) {
+      const draftInsertInput = await createCopyDraftInsertInput(input, {
+        gateway,
+        publicId: createDraftPublicId(),
+      });
+
+      if (draftInsertInput === null) {
+        throw new Error("organization training draft copy persistence failed.");
+      }
+
+      const row = await gateway.insertManualDraft(draftInsertInput);
+
+      if (row === null) {
+        throw new Error("organization training draft copy persistence failed.");
+      }
+
+      return mapOrganizationTrainingDraftRowToDto(row);
+    },
+
+    async attachSourceContext(input) {
+      const sourceContextInsertInputs = await createSourceContextInsertInputs(
+        input,
+        {
+          gateway,
+          createSourceContextPublicId,
+        },
+      );
+
+      if (sourceContextInsertInputs === null) {
+        throw new Error(
+          "organization training source context persistence failed.",
+        );
+      }
+
+      const rows = await gateway.insertSourceContexts(
+        sourceContextInsertInputs,
+      );
+
+      if (rows.length !== sourceContextInsertInputs.length) {
+        throw new Error(
+          "organization training source context persistence failed.",
+        );
+      }
+
+      return {
+        draftPublicId: input.draftPublicId,
+        organizationPublicId: input.organizationPublicId,
+        sourceContexts: rows.map(mapOrganizationTrainingSourceContextRowToDto),
+        redactionStatus: "metadata_only",
+      };
     },
 
     async saveEmployeeAnswerDraft(input) {
@@ -506,6 +741,9 @@ export function createPostgresOrganizationTrainingRepository(
     async findTrustedPersistenceLineageByPublicIds(input) {
       return findTrustedPersistenceLineageByPublicIds(getDatabase(), input);
     },
+    async findDraftPersistenceLineageByPublicIds(input) {
+      return findDraftPersistenceLineageByPublicIds(getDatabase(), input);
+    },
     async findVisibleOrganizationScopeSourceByAdminPublicId(adminPublicId) {
       return findVisibleOrganizationScopeSourceByAdminPublicId(
         getDatabase(),
@@ -530,8 +768,87 @@ export function createPostgresOrganizationTrainingRepository(
     async findPublishedVersionByPublicId(input) {
       return findPublishedVersionByPublicId(getDatabase(), input);
     },
+    async findVersionQuestionTypeSummaryByPublicId(input) {
+      return findVersionQuestionTypeSummaryByPublicId(getDatabase(), input);
+    },
     async findEmployeeAnswerByVersionPublicId(input) {
       return findEmployeeAnswerByVersionPublicId(getDatabase(), input);
+    },
+    async insertManualDraft(input) {
+      const createdAt = new Date(input.createdAt);
+      const [row] = await getDatabase()
+        .insert(organizationTrainingDraft)
+        .values({
+          public_id: input.publicId,
+          source_task_public_id: input.sourceTaskPublicId,
+          source_version_public_id: input.sourceVersionPublicId,
+          organization_id: input.organizationId,
+          organization_public_id: input.organizationPublicId,
+          org_auth_id: input.orgAuthId,
+          authorization_source: input.authorizationSource,
+          authorization_public_id: input.authorizationPublicId,
+          owner_type: input.ownerType,
+          owner_public_id: input.ownerPublicId,
+          quota_owner_type: input.quotaOwnerType,
+          quota_owner_public_id: input.quotaOwnerPublicId,
+          profession: input.profession,
+          level: input.level,
+          subject: input.subject,
+          title: input.title,
+          description: input.description,
+          question_count: input.questionCount,
+          total_score: String(input.totalScore),
+          question_type_summary: input.questionTypeSummary,
+          evidence_status: input.evidenceStatus,
+          validation_status: input.validationStatus,
+          retention_status: input.retentionStatus,
+          created_at: createdAt,
+          updated_at: createdAt,
+          expires_at:
+            input.expiresAt === null ? null : new Date(input.expiresAt),
+        })
+        .returning(organizationTrainingDraftSelection);
+
+      return (row as OrganizationTrainingDraftRow | undefined) ?? null;
+    },
+    async insertSourceContexts(input) {
+      if (input.length === 0) {
+        return [];
+      }
+
+      const createdAt = new Date();
+      const rows = await getDatabase()
+        .insert(organizationTrainingSourceContext)
+        .values(
+          input.map((sourceContextInput) => ({
+            public_id: sourceContextInput.publicId,
+            organization_training_draft_id:
+              sourceContextInput.organizationTrainingDraftId,
+            organization_training_draft_public_id:
+              sourceContextInput.draftPublicId,
+            organization_id: sourceContextInput.organizationId,
+            organization_public_id: sourceContextInput.organizationPublicId,
+            org_auth_id: sourceContextInput.orgAuthId,
+            authorization_source: sourceContextInput.authorizationSource,
+            authorization_public_id: sourceContextInput.authorizationPublicId,
+            source_type: sourceContextInput.sourceType,
+            source_public_id: sourceContextInput.sourcePublicId,
+            title: sourceContextInput.title,
+            profession: sourceContextInput.profession,
+            level: sourceContextInput.level,
+            subject: sourceContextInput.subject,
+            question_count: sourceContextInput.questionCount,
+            total_score: String(sourceContextInput.totalScore),
+            source_status: sourceContextInput.sourceStatus,
+            redaction_status: sourceContextInput.redactionStatus,
+            formal_usage_policy: sourceContextInput.formalUsagePolicy,
+            created_at: createdAt,
+            updated_at: createdAt,
+          })),
+        )
+        .returning(organizationTrainingSourceContextSelection);
+
+      return rows as OrganizationTrainingSourceContextRow[];
     },
     async insertPublishedVersion(input) {
       const [row] = await getDatabase()
@@ -706,9 +1023,10 @@ function normalizeTrustedPersistenceLineageLookupInput(
 }
 
 function normalizeTrustedPersistenceLineage(
-  persistenceLineage: OrganizationTrainingTrustedPersistenceLineage,
+  persistenceLineage: OrganizationTrainingTrustedPersistenceLineage | null,
 ): OrganizationTrainingTrustedPersistenceLineage | null {
   if (
+    persistenceLineage === null ||
     !Number.isInteger(persistenceLineage.organizationId) ||
     persistenceLineage.organizationId < 1 ||
     !Number.isInteger(persistenceLineage.orgAuthId) ||
@@ -721,6 +1039,230 @@ function normalizeTrustedPersistenceLineage(
     organizationId: persistenceLineage.organizationId,
     orgAuthId: persistenceLineage.orgAuthId,
   };
+}
+
+function normalizeDraftPersistenceLineage(
+  persistenceLineage: OrganizationTrainingDraftPersistenceLineage | null,
+): OrganizationTrainingDraftPersistenceLineage | null {
+  if (
+    persistenceLineage === null ||
+    !Number.isInteger(persistenceLineage.organizationTrainingDraftId) ||
+    persistenceLineage.organizationTrainingDraftId < 1
+  ) {
+    return null;
+  }
+
+  const trustedLineage = normalizeTrustedPersistenceLineage(persistenceLineage);
+
+  return trustedLineage === null
+    ? null
+    : {
+        ...trustedLineage,
+        organizationTrainingDraftId:
+          persistenceLineage.organizationTrainingDraftId,
+      };
+}
+
+function copyQuestionTypeSummary(
+  summary: OrganizationTrainingVersionRow["question_type_summary"],
+): OrganizationTrainingVersionRow["question_type_summary"] {
+  return {
+    singleChoice: summary.singleChoice,
+    multiChoice: summary.multiChoice,
+    trueFalse: summary.trueFalse,
+    shortAnswer: summary.shortAnswer,
+  };
+}
+
+function createDraftInsertInput(
+  input: OrganizationTrainingManualDraftPersistenceInput,
+  generated: {
+    publicId: string;
+    sourceVersionPublicId: string | null;
+    lineage: OrganizationTrainingTrustedPersistenceLineage;
+  },
+): OrganizationTrainingDraftInsertInput | null {
+  const publicId = normalizeRequiredText(generated.publicId);
+  const sourceTaskPublicId =
+    input.sourceTaskPublicId === null
+      ? null
+      : normalizeRequiredText(input.sourceTaskPublicId);
+  const sourceVersionPublicId =
+    generated.sourceVersionPublicId === null
+      ? null
+      : normalizeRequiredText(generated.sourceVersionPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+  const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const quotaOwnerPublicId = normalizeRequiredText(input.quotaOwnerPublicId);
+  const title = normalizeRequiredText(input.title);
+  const createdAt = normalizeRequiredText(input.createdAt);
+  const description =
+    input.description === null
+      ? null
+      : normalizeRequiredText(input.description);
+  const expiresAt =
+    input.expiresAt === null ? null : normalizeRequiredText(input.expiresAt);
+
+  if (
+    publicId === null ||
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    ownerPublicId === null ||
+    quotaOwnerPublicId === null ||
+    title === null ||
+    createdAt === null ||
+    input.contentType !== "organization_training_draft" ||
+    input.ownerType !== "organization" ||
+    input.quotaOwnerType !== "organization" ||
+    input.authorizationSource !== "org_auth" ||
+    input.questionCount < 0 ||
+    input.totalScore < 0
+  ) {
+    return null;
+  }
+
+  return {
+    ...input,
+    publicId,
+    sourceTaskPublicId,
+    sourceVersionPublicId,
+    organizationId: generated.lineage.organizationId,
+    organizationPublicId,
+    orgAuthId: generated.lineage.orgAuthId,
+    authorizationPublicId,
+    ownerPublicId,
+    quotaOwnerPublicId,
+    title,
+    description,
+    questionTypeSummary: copyQuestionTypeSummary(input.questionTypeSummary),
+    createdAt,
+    expiresAt,
+  };
+}
+
+async function createManualDraftInsertInput(
+  input: OrganizationTrainingManualDraftPersistenceInput,
+  generated: {
+    gateway: OrganizationTrainingVersionGateway;
+    publicId: string;
+  },
+): Promise<OrganizationTrainingDraftInsertInput | null> {
+  const lookupInput = normalizeTrustedPersistenceLineageLookupInput({
+    organizationPublicId: input.organizationPublicId,
+    authorizationPublicId: input.authorizationPublicId,
+  });
+
+  if (lookupInput === null) {
+    return null;
+  }
+
+  const lineage = normalizeTrustedPersistenceLineage(
+    await generated.gateway.findTrustedPersistenceLineageByPublicIds(
+      lookupInput,
+    ),
+  );
+
+  if (lineage === null) {
+    return null;
+  }
+
+  return createDraftInsertInput(input, {
+    publicId: generated.publicId,
+    sourceVersionPublicId: null,
+    lineage,
+  });
+}
+
+async function createCopyDraftInsertInput(
+  input: OrganizationTrainingVersionCopyToNewDraftPersistenceInput,
+  generated: {
+    gateway: OrganizationTrainingVersionGateway;
+    publicId: string;
+  },
+): Promise<OrganizationTrainingDraftInsertInput | null> {
+  const sourceVersionPublicId = normalizeRequiredText(
+    input.sourceVersionPublicId,
+  );
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+  const newDraftTitle = normalizeRequiredText(input.newDraftTitle);
+
+  if (
+    sourceVersionPublicId === null ||
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    newDraftTitle === null ||
+    input.contentType !== "organization_training_draft" ||
+    input.copyPolicy.preserveSourceVersion !== true ||
+    input.copyPolicy.preservePublishScopeSnapshot !== true ||
+    input.copyPolicy.createFreshDraftPublicId !== true ||
+    input.sourceVersion.publicId !== sourceVersionPublicId ||
+    input.sourceVersion.organizationPublicId !== organizationPublicId
+  ) {
+    return null;
+  }
+
+  const lookupInput = normalizeTrustedPersistenceLineageLookupInput({
+    organizationPublicId,
+    authorizationPublicId,
+  });
+
+  if (lookupInput === null) {
+    return null;
+  }
+
+  const lineage = normalizeTrustedPersistenceLineage(
+    await generated.gateway.findTrustedPersistenceLineageByPublicIds(
+      lookupInput,
+    ),
+  );
+
+  if (lineage === null) {
+    return null;
+  }
+
+  return createDraftInsertInput(
+    {
+      contentType: input.contentType,
+      ownerType: input.ownerType,
+      ownerPublicId: input.ownerPublicId,
+      quotaOwnerType: input.quotaOwnerType,
+      quotaOwnerPublicId: input.quotaOwnerPublicId,
+      sourceTaskPublicId: null,
+      organizationPublicId,
+      authorizationSource: "org_auth",
+      authorizationPublicId,
+      profession: input.sourceVersion.profession,
+      level: input.sourceVersion.level,
+      subject: input.sourceVersion.subject,
+      title: newDraftTitle,
+      description: input.sourceVersion.description,
+      questionCount: input.sourceVersion.questionCount,
+      totalScore: input.sourceVersion.totalScore,
+      questionTypeSummary: copyQuestionTypeSummary(
+        input.sourceQuestionTypeSummary,
+      ),
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt: input.createdAt,
+      expiresAt: null,
+    },
+    {
+      publicId: generated.publicId,
+      sourceVersionPublicId,
+      lineage,
+    },
+  );
 }
 
 function normalizeEmployeeVisibleVersionListInput(
@@ -1184,6 +1726,89 @@ function isFormalWritePolicyBlocked(
   );
 }
 
+function isSourceContextFormalUsagePolicyBlocked(
+  formalUsagePolicy: OrganizationTrainingSourceContextPersistenceInput["formalUsagePolicy"],
+): boolean {
+  return (
+    formalUsagePolicy.createFormalPaper ||
+    formalUsagePolicy.createMockExam ||
+    formalUsagePolicy.exposeQuestionBody ||
+    formalUsagePolicy.exposeStandardAnswer ||
+    formalUsagePolicy.exposeAnalysis ||
+    formalUsagePolicy.exposeProviderPayload
+  );
+}
+
+async function createSourceContextInsertInputs(
+  input: OrganizationTrainingSourceContextPersistenceInput,
+  generated: {
+    gateway: OrganizationTrainingVersionGateway;
+    createSourceContextPublicId: () => string;
+  },
+): Promise<OrganizationTrainingSourceContextInsertInput[] | null> {
+  const draftPublicId = normalizeRequiredText(input.draftPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+
+  if (
+    draftPublicId === null ||
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    input.contentType !== "organization_training_source_context" ||
+    input.authorizationSource !== "org_auth" ||
+    input.redactionStatus !== "metadata_only" ||
+    isSourceContextFormalUsagePolicyBlocked(input.formalUsagePolicy) ||
+    input.sourceContexts.length === 0
+  ) {
+    return null;
+  }
+
+  const lineage = normalizeDraftPersistenceLineage(
+    await generated.gateway.findDraftPersistenceLineageByPublicIds({
+      draftPublicId,
+      organizationPublicId,
+      authorizationPublicId,
+    }),
+  );
+
+  if (lineage === null) {
+    return null;
+  }
+
+  return input.sourceContexts.map((sourceContext) => ({
+    publicId: generated.createSourceContextPublicId(),
+    organizationTrainingDraftId: lineage.organizationTrainingDraftId,
+    draftPublicId,
+    organizationId: lineage.organizationId,
+    organizationPublicId,
+    orgAuthId: lineage.orgAuthId,
+    authorizationSource: "org_auth",
+    authorizationPublicId,
+    sourceType: sourceContext.sourceType,
+    sourcePublicId: sourceContext.sourcePublicId,
+    title: sourceContext.title,
+    profession: sourceContext.profession,
+    level: sourceContext.level,
+    subject: sourceContext.subject,
+    questionCount: sourceContext.questionCount,
+    totalScore: sourceContext.totalScore,
+    sourceStatus: sourceContext.sourceStatus,
+    redactionStatus: "metadata_only",
+    formalUsagePolicy: {
+      createFormalPaper: false,
+      createMockExam: false,
+      exposeQuestionBody: false,
+      exposeStandardAnswer: false,
+      exposeAnalysis: false,
+      exposeProviderPayload: false,
+    },
+  }));
+}
+
 async function findLatestVersionNumberByDraftPublicId(
   database: RuntimeDatabase,
   draftPublicId: string,
@@ -1228,6 +1853,44 @@ async function findTrustedPersistenceLineageByPublicIds(
   }
 
   return {
+    organizationId: row.organization_id,
+    orgAuthId: row.org_auth_id,
+  };
+}
+
+async function findDraftPersistenceLineageByPublicIds(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingDraftPersistenceLineageLookupInput,
+): Promise<OrganizationTrainingDraftPersistenceLineage | null> {
+  const [row] = await database
+    .select({
+      organization_training_draft_id: organizationTrainingDraft.id,
+      organization_id: organizationTrainingDraft.organization_id,
+      org_auth_id: organizationTrainingDraft.org_auth_id,
+    })
+    .from(organizationTrainingDraft)
+    .where(
+      and(
+        eq(organizationTrainingDraft.public_id, input.draftPublicId),
+        eq(
+          organizationTrainingDraft.organization_public_id,
+          input.organizationPublicId,
+        ),
+        eq(
+          organizationTrainingDraft.authorization_public_id,
+          input.authorizationPublicId,
+        ),
+        eq(organizationTrainingDraft.retention_status, "active"),
+      ),
+    )
+    .limit(1);
+
+  if (row === undefined) {
+    return null;
+  }
+
+  return {
+    organizationTrainingDraftId: row.organization_training_draft_id,
     organizationId: row.organization_id,
     orgAuthId: row.org_auth_id,
   };
@@ -1341,6 +2004,23 @@ async function findPublishedVersionByPublicId(
   return (row as OrganizationTrainingVersionRow | undefined) ?? null;
 }
 
+async function findVersionQuestionTypeSummaryByPublicId(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingVersionLookupInput,
+): Promise<OrganizationTrainingVersionRow["question_type_summary"] | null> {
+  const [row] = await database
+    .select({
+      question_type_summary: organizationTrainingVersion.question_type_summary,
+    })
+    .from(organizationTrainingVersion)
+    .where(
+      eq(organizationTrainingVersion.public_id, input.trainingVersionPublicId),
+    )
+    .limit(1);
+
+  return row?.question_type_summary ?? null;
+}
+
 async function findEmployeeAnswerByVersionPublicId(
   database: RuntimeDatabase,
   input: OrganizationTrainingEmployeeAnswerLookupInput,
@@ -1420,6 +2100,14 @@ function resolveNextVersionNumber(latestVersionNumber: number | null): number {
 
 function createDefaultVersionPublicId(): string {
   return `organization_training_version_${randomUUID()}`;
+}
+
+function createDefaultDraftPublicId(): string {
+  return `organization_training_draft_${randomUUID()}`;
+}
+
+function createDefaultSourceContextPublicId(): string {
+  return `organization_training_source_context_${randomUUID()}`;
 }
 
 function createDefaultAnswerPublicId(): string {

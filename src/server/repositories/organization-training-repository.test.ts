@@ -3,10 +3,17 @@ import { describe, expect, it, vi } from "vitest";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
   OrganizationTrainingEmployeeAnswerSubmissionWrite,
+  OrganizationTrainingManualDraftWrite,
   OrganizationTrainingPublishedVersionWrite,
+  OrganizationTrainingSourceContextWrite,
+  OrganizationTrainingVersionCopyToNewDraftWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
-import type { EmployeeOrganizationTrainingAnswerDto } from "../contracts/organization-training-contract";
+import type {
+  EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingDraftDto,
+  OrganizationTrainingSourceContextAttachmentDto,
+} from "../contracts/organization-training-contract";
 import {
   createOrganizationTrainingRepository,
   type OrganizationTrainingEmployeeAnswerLookupInput,
@@ -76,6 +83,86 @@ type EmployeeAnswerSubmissionUpsertInput = {
   submittedAt: string;
 };
 
+type DraftSourceContextRepositoryContract = {
+  createManualDraft(
+    draftWrite: OrganizationTrainingManualDraftWrite,
+  ): Promise<OrganizationTrainingDraftDto>;
+  copyVersionToNewDraft(
+    copyWrite: OrganizationTrainingVersionCopyToNewDraftWrite,
+  ): Promise<OrganizationTrainingDraftDto>;
+  attachSourceContext(
+    sourceContextWrite: OrganizationTrainingSourceContextWrite,
+  ): Promise<OrganizationTrainingSourceContextAttachmentDto>;
+};
+
+type DraftPersistenceLineage = {
+  organizationTrainingDraftId: number;
+  organizationId: number;
+  orgAuthId: number;
+};
+
+type ManualDraftInsertInput = {
+  publicId: string;
+  sourceTaskPublicId: string | null;
+  sourceVersionPublicId: string | null;
+  organizationId: number;
+  organizationPublicId: string;
+  orgAuthId: number;
+  authorizationSource: "org_auth";
+  authorizationPublicId: string;
+  ownerType: "organization";
+  ownerPublicId: string;
+  quotaOwnerType: "organization";
+  quotaOwnerPublicId: string;
+  profession: "monopoly" | "marketing" | "logistics";
+  level: number;
+  subject: "theory" | "skill";
+  title: string;
+  description: string | null;
+  questionCount: number;
+  totalScore: number;
+  questionTypeSummary: {
+    singleChoice: number;
+    multiChoice: number;
+    trueFalse: number;
+    shortAnswer: number;
+  };
+  evidenceStatus: "sufficient" | "weak" | "none";
+  validationStatus: "valid" | "invalid" | "needs_review";
+  retentionStatus: "active" | "expired_hidden";
+  createdAt: string;
+  expiresAt: string | null;
+};
+
+type SourceContextInsertInput = {
+  publicId: string;
+  organizationTrainingDraftId: number;
+  draftPublicId: string;
+  organizationId: number;
+  organizationPublicId: string;
+  orgAuthId: number;
+  authorizationSource: "org_auth";
+  authorizationPublicId: string;
+  sourceType: "paper" | "mock_exam";
+  sourcePublicId: string;
+  title: string;
+  profession: "monopoly" | "marketing" | "logistics";
+  level: number;
+  subject: "theory" | "skill";
+  questionCount: number;
+  totalScore: number;
+  sourceStatus: string;
+  redactionStatus: "metadata_only";
+  formalUsagePolicy: {
+    createFormalPaper: false;
+    createMockExam: false;
+    exposeQuestionBody: false;
+    exposeStandardAnswer: false;
+    exposeAnalysis: false;
+    exposeProviderPayload: false;
+  };
+};
+
 function createVersionWrite(
   overrides: Partial<OrganizationTrainingPublishedVersionWrite> = {},
 ): OrganizationTrainingPublishedVersionWrite {
@@ -113,6 +200,139 @@ function createVersionWrite(
     publishedAt: "2026-06-15T19:20:13.000Z",
     takenDownAt: null,
     takedownReason: null,
+    ...overrides,
+  };
+}
+
+function createManualDraftWrite(
+  overrides: Partial<OrganizationTrainingManualDraftWrite> = {},
+): OrganizationTrainingManualDraftWrite {
+  return {
+    contentType: "organization_training_draft",
+    ownerType: "organization",
+    ownerPublicId: "organization_public_123",
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: "organization_public_123",
+    sourceTaskPublicId: null,
+    organizationPublicId: "organization_public_123",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "org_auth_public_123",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    title: "Safety training draft",
+    description: null,
+    questionCount: 0,
+    totalScore: 0,
+    questionTypeSummary: {
+      singleChoice: 0,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 0,
+    },
+    evidenceStatus: "none",
+    validationStatus: "needs_review",
+    retentionStatus: "active",
+    createdAt: "2026-06-15T19:20:13.000Z",
+    expiresAt: null,
+    ...overrides,
+  };
+}
+
+function createCopyVersionToNewDraftWrite(
+  overrides: Partial<OrganizationTrainingVersionCopyToNewDraftWrite> = {},
+): OrganizationTrainingVersionCopyToNewDraftWrite {
+  return {
+    sourceVersionPublicId: "training_version_public_123",
+    organizationPublicId: "organization_public_123",
+    authorizationPublicId: "org_auth_public_123",
+    sourceVersion: {
+      publicId: "training_version_public_123",
+      draftPublicId: "training_draft_public_123",
+      versionNumber: 1,
+      organizationPublicId: "organization_public_123",
+      publishScopeSnapshot: {
+        organizationPublicIds: ["organization_public_123"],
+        capturedAt: "2026-06-15T19:20:13.000Z",
+      },
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Safety training",
+      description: null,
+      questionCount: 2,
+      totalScore: 5,
+      status: "published",
+      publishedAt: "2026-06-15T19:20:13.000Z",
+      takenDownAt: null,
+      takedownReason: null,
+    },
+    sourceQuestionTypeSummary: {
+      singleChoice: 1,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 1,
+    },
+    newDraftTitle: "Refreshed training",
+    contentType: "organization_training_draft",
+    ownerType: "organization",
+    ownerPublicId: "organization_public_123",
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: "organization_public_123",
+    createdAt: "2026-06-16T09:00:00.000Z",
+    copyPolicy: {
+      preserveSourceVersion: true,
+      preservePublishScopeSnapshot: true,
+      createFreshDraftPublicId: true,
+    },
+    ...overrides,
+  };
+}
+
+function createSourceContextWrite(
+  overrides: Partial<OrganizationTrainingSourceContextWrite> = {},
+): OrganizationTrainingSourceContextWrite {
+  return {
+    contentType: "organization_training_source_context",
+    draftPublicId: "training_draft_public_123",
+    organizationPublicId: "organization_public_123",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "org_auth_public_123",
+    sourceContexts: [
+      {
+        sourceType: "paper",
+        sourcePublicId: "paper_public_123",
+        title: "Formal paper reference",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 20,
+        totalScore: 100,
+        sourceStatus: "published",
+        redactionStatus: "metadata_only",
+      },
+      {
+        sourceType: "mock_exam",
+        sourcePublicId: "mock_exam_public_456",
+        title: "Mock exam reference",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 10,
+        totalScore: 50,
+        sourceStatus: "published",
+        redactionStatus: "metadata_only",
+      },
+    ],
+    formalUsagePolicy: {
+      createFormalPaper: false,
+      createMockExam: false,
+      exposeQuestionBody: false,
+      exposeStandardAnswer: false,
+      exposeAnalysis: false,
+      exposeProviderPayload: false,
+    },
+    redactionStatus: "metadata_only",
     ...overrides,
   };
 }
@@ -202,10 +422,15 @@ function createGateway(
     visibleOrganizationScopeSource?: OrganizationTrainingVisibleOrganizationScopeSource | null;
     versionOrganizationPublicId?: string | null;
     employeeAnswerPersistenceLineage?: EmployeeAnswerPersistenceLineage | null;
+    draftPersistenceLineage?: DraftPersistenceLineage | null;
+    manualDraftInsertResult?: "row" | "null";
+    sourceContextInsertResult?: "rows" | "empty";
     takedownUpdateResult?: "row" | "null";
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
+  let manualDraftInsertInputs: ManualDraftInsertInput[] = [];
+  let sourceContextInsertInputs: SourceContextInsertInput[][] = [];
   let takedownInputs: OrganizationTrainingVersionTakedownInput[] = [];
   let employeeAnswerDraftInputs: EmployeeAnswerDraftUpsertInput[] = [];
   let employeeAnswerSubmissionInputs: EmployeeAnswerSubmissionUpsertInput[] =
@@ -229,6 +454,10 @@ function createGateway(
   );
   const findEmployeeAnswerPersistenceLineageByPublicIds = vi.fn(
     async () => options.employeeAnswerPersistenceLineage ?? null,
+  );
+  const findDraftPersistenceLineageByPublicIds = vi.fn(
+    async (): Promise<DraftPersistenceLineage | null> =>
+      options.draftPersistenceLineage ?? null,
   );
   const listPublishedVersionsForEmployeeOrganization = vi.fn(
     async (input: OrganizationTrainingEmployeeVisibleVersionListInput) => {
@@ -300,6 +529,43 @@ function createGateway(
       };
     },
   );
+  const insertManualDraft = vi.fn(async (input: ManualDraftInsertInput) => {
+    manualDraftInsertInputs = [...manualDraftInsertInputs, input];
+
+    if (options.manualDraftInsertResult === "null") {
+      return null;
+    }
+
+    return {
+      id: 905,
+      public_id: input.publicId,
+      source_task_public_id: input.sourceTaskPublicId,
+      source_version_public_id: input.sourceVersionPublicId,
+      organization_id: input.organizationId,
+      organization_public_id: input.organizationPublicId,
+      org_auth_id: input.orgAuthId,
+      authorization_source: input.authorizationSource,
+      authorization_public_id: input.authorizationPublicId,
+      owner_type: input.ownerType,
+      owner_public_id: input.ownerPublicId,
+      quota_owner_type: input.quotaOwnerType,
+      quota_owner_public_id: input.quotaOwnerPublicId,
+      profession: input.profession,
+      level: input.level,
+      subject: input.subject,
+      title: input.title,
+      description: input.description,
+      question_count: input.questionCount,
+      total_score: String(input.totalScore),
+      question_type_summary: input.questionTypeSummary,
+      evidence_status: input.evidenceStatus,
+      validation_status: input.validationStatus,
+      retention_status: input.retentionStatus,
+      created_at: new Date(input.createdAt),
+      updated_at: new Date(input.createdAt),
+      expires_at: input.expiresAt === null ? null : new Date(input.expiresAt),
+    };
+  });
   const updateVersionTakedown = vi.fn(
     async (
       input: OrganizationTrainingVersionTakedownInput,
@@ -348,6 +614,40 @@ function createGateway(
         created_at: new Date("2026-06-15T19:20:13.000Z"),
         updated_at: new Date(input.takenDownAt),
       };
+    },
+  );
+  const insertSourceContexts = vi.fn(
+    async (inputs: SourceContextInsertInput[]) => {
+      sourceContextInsertInputs = [...sourceContextInsertInputs, inputs];
+
+      if (options.sourceContextInsertResult === "empty") {
+        return [];
+      }
+
+      return inputs.map((input, index) => ({
+        id: 906 + index,
+        public_id: input.publicId,
+        organization_training_draft_id: input.organizationTrainingDraftId,
+        organization_training_draft_public_id: input.draftPublicId,
+        organization_id: input.organizationId,
+        organization_public_id: input.organizationPublicId,
+        org_auth_id: input.orgAuthId,
+        authorization_source: input.authorizationSource,
+        authorization_public_id: input.authorizationPublicId,
+        source_type: input.sourceType,
+        source_public_id: input.sourcePublicId,
+        title: input.title,
+        profession: input.profession,
+        level: input.level,
+        subject: input.subject,
+        question_count: input.questionCount,
+        total_score: String(input.totalScore),
+        source_status: input.sourceStatus,
+        redaction_status: input.redactionStatus,
+        formal_usage_policy: input.formalUsagePolicy,
+        created_at: new Date("2026-06-16T09:00:00.000Z"),
+        updated_at: new Date("2026-06-16T09:00:00.000Z"),
+      }));
     },
   );
   const upsertEmployeeAnswerDraft = vi.fn(
@@ -405,14 +705,17 @@ function createGateway(
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
     findEmployeeAnswerPersistenceLineageByPublicIds,
+    findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
     findPublishedVersionByPublicId,
     findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
+    insertManualDraft,
+    insertSourceContexts,
     upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
-  } as OrganizationTrainingVersionGateway;
+  } as unknown as OrganizationTrainingVersionGateway;
 
   return {
     gateway,
@@ -421,14 +724,19 @@ function createGateway(
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
     findEmployeeAnswerPersistenceLineageByPublicIds,
+    findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
     findPublishedVersionByPublicId,
     findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
+    insertManualDraft,
+    insertSourceContexts,
     upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
     getInsertInputs: () => insertInputs,
+    getManualDraftInsertInputs: () => manualDraftInsertInputs,
+    getSourceContextInsertInputs: () => sourceContextInsertInputs,
     getTakedownInputs: () => takedownInputs,
     getEmployeeAnswerDraftInputs: () => employeeAnswerDraftInputs,
     getEmployeeAnswerSubmissionInputs: () => employeeAnswerSubmissionInputs,
@@ -516,6 +824,284 @@ function createEmployeeAnswerRow(
 }
 
 describe("organization training repository", () => {
+  it("creates a metadata-only manual draft with trusted organization authorization lineage", async () => {
+    const {
+      gateway,
+      findTrustedPersistenceLineageByPublicIds,
+      insertManualDraft,
+      getManualDraftInsertInputs,
+    } = createGateway({
+      trustedPersistenceLineage: {
+        organizationId: 501,
+        orgAuthId: 601,
+      },
+    });
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createDraftPublicId: () => "training_draft_public_999",
+    } as Parameters<typeof createOrganizationTrainingRepository>[1] & {
+      createDraftPublicId: () => string;
+    }) as DraftSourceContextRepositoryContract;
+
+    const result = await repository.createManualDraft(createManualDraftWrite());
+
+    expect(findTrustedPersistenceLineageByPublicIds).toHaveBeenCalledWith({
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
+    });
+    expect(insertManualDraft).toHaveBeenCalledWith({
+      contentType: "organization_training_draft",
+      publicId: "training_draft_public_999",
+      sourceTaskPublicId: null,
+      sourceVersionPublicId: null,
+      organizationId: 501,
+      organizationPublicId: "organization_public_123",
+      orgAuthId: 601,
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_123",
+      quotaOwnerType: "organization",
+      quotaOwnerPublicId: "organization_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Safety training draft",
+      description: null,
+      questionCount: 0,
+      totalScore: 0,
+      questionTypeSummary: {
+        singleChoice: 0,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt: "2026-06-15T19:20:13.000Z",
+      expiresAt: null,
+    });
+    expect(result).toEqual({
+      publicId: "training_draft_public_999",
+      sourceTaskPublicId: null,
+      organizationPublicId: "organization_public_123",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Safety training draft",
+      description: null,
+      questionCount: 0,
+      totalScore: 0,
+      questionTypeSummary: {
+        singleChoice: 0,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt: "2026-06-15T19:20:13.000Z",
+      expiresAt: null,
+    });
+
+    const serializedInsert = JSON.stringify(getManualDraftInsertInputs());
+
+    expect(serializedInsert).not.toContain("formalPaperPublicId");
+    expect(serializedInsert).not.toContain("mockExamPublicId");
+    expect(serializedInsert).not.toContain("answerRecordPublicId");
+    expect(serializedInsert).not.toContain("providerPayload");
+    expect(serializedInsert).not.toContain("rawPrompt");
+    expect(serializedInsert).not.toContain("rawAnswer");
+  });
+
+  it("copies a published version snapshot into a fresh draft without mutating the source version", async () => {
+    const { gateway, insertManualDraft, getManualDraftInsertInputs } =
+      createGateway({
+        trustedPersistenceLineage: {
+          organizationId: 501,
+          orgAuthId: 601,
+        },
+      });
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createDraftPublicId: () => "training_draft_copy_public_999",
+    } as Parameters<typeof createOrganizationTrainingRepository>[1] & {
+      createDraftPublicId: () => string;
+    }) as DraftSourceContextRepositoryContract;
+    const copyWrite = createCopyVersionToNewDraftWrite();
+    const sourceVersionBeforeCopy = structuredClone(copyWrite.sourceVersion);
+
+    const result = await repository.copyVersionToNewDraft(copyWrite);
+
+    expect(insertManualDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publicId: "training_draft_copy_public_999",
+        sourceVersionPublicId: "training_version_public_123",
+        organizationId: 501,
+        orgAuthId: 601,
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        title: "Refreshed training",
+        questionCount: 2,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 1,
+        },
+      }),
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        publicId: "training_draft_copy_public_999",
+        organizationPublicId: "organization_public_123",
+        title: "Refreshed training",
+        questionCount: 2,
+        totalScore: 5,
+      }),
+    );
+    expect(copyWrite.sourceVersion).toEqual(sourceVersionBeforeCopy);
+    expect(JSON.stringify(getManualDraftInsertInputs())).not.toContain(
+      "createFormalPaper",
+    );
+  });
+
+  it("attaches source context rows as metadata-only references for an existing draft", async () => {
+    const {
+      gateway,
+      findDraftPersistenceLineageByPublicIds,
+      insertSourceContexts,
+      getSourceContextInsertInputs,
+    } = createGateway({
+      draftPersistenceLineage: {
+        organizationTrainingDraftId: 801,
+        organizationId: 501,
+        orgAuthId: 601,
+      },
+    });
+    let sourceContextPublicIdIndex = 0;
+    const sourceContextPublicIds = [
+      "training_source_context_public_999",
+      "training_source_context_public_1000",
+    ];
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createSourceContextPublicId: () =>
+        sourceContextPublicIds[sourceContextPublicIdIndex++] ??
+        "training_source_context_public_extra",
+    } as Parameters<typeof createOrganizationTrainingRepository>[1] & {
+      createSourceContextPublicId: () => string;
+    }) as DraftSourceContextRepositoryContract;
+
+    const result = await repository.attachSourceContext(
+      createSourceContextWrite(),
+    );
+
+    expect(findDraftPersistenceLineageByPublicIds).toHaveBeenCalledWith({
+      draftPublicId: "training_draft_public_123",
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
+    });
+    expect(insertSourceContexts).toHaveBeenCalledWith([
+      {
+        publicId: "training_source_context_public_999",
+        organizationTrainingDraftId: 801,
+        draftPublicId: "training_draft_public_123",
+        organizationId: 501,
+        organizationPublicId: "organization_public_123",
+        orgAuthId: 601,
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        sourceType: "paper",
+        sourcePublicId: "paper_public_123",
+        title: "Formal paper reference",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 20,
+        totalScore: 100,
+        sourceStatus: "published",
+        redactionStatus: "metadata_only",
+        formalUsagePolicy: {
+          createFormalPaper: false,
+          createMockExam: false,
+          exposeQuestionBody: false,
+          exposeStandardAnswer: false,
+          exposeAnalysis: false,
+          exposeProviderPayload: false,
+        },
+      },
+      {
+        publicId: "training_source_context_public_1000",
+        organizationTrainingDraftId: 801,
+        draftPublicId: "training_draft_public_123",
+        organizationId: 501,
+        organizationPublicId: "organization_public_123",
+        orgAuthId: 601,
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        sourceType: "mock_exam",
+        sourcePublicId: "mock_exam_public_456",
+        title: "Mock exam reference",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 10,
+        totalScore: 50,
+        sourceStatus: "published",
+        redactionStatus: "metadata_only",
+        formalUsagePolicy: {
+          createFormalPaper: false,
+          createMockExam: false,
+          exposeQuestionBody: false,
+          exposeStandardAnswer: false,
+          exposeAnalysis: false,
+          exposeProviderPayload: false,
+        },
+      },
+    ]);
+    expect(result).toEqual({
+      draftPublicId: "training_draft_public_123",
+      organizationPublicId: "organization_public_123",
+      sourceContexts: [
+        {
+          sourceType: "paper",
+          sourcePublicId: "paper_public_123",
+          title: "Formal paper reference",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 20,
+          totalScore: 100,
+          sourceStatus: "published",
+          redactionStatus: "metadata_only",
+        },
+        {
+          sourceType: "mock_exam",
+          sourcePublicId: "mock_exam_public_456",
+          title: "Mock exam reference",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 50,
+          sourceStatus: "published",
+          redactionStatus: "metadata_only",
+        },
+      ],
+      redactionStatus: "metadata_only",
+    });
+
+    const serializedInsert = JSON.stringify(getSourceContextInsertInputs());
+
+    expect(serializedInsert).not.toContain("standardAnswer");
+    expect(serializedInsert).not.toContain("analysis");
+    expect(serializedInsert).not.toContain("providerPayload");
+    expect(serializedInsert).not.toContain("fullQuestionBody");
+  });
+
   it("creates a published version with next version number and internal lineage storage", async () => {
     const {
       gateway,

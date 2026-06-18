@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-local-experience-chain-queue-materialization
-updatedAt: "2026-06-18T00:10:47-07:00"
+currentPhase: organization-training-draft-source-context-runtime-contract-tdd
+updatedAt: "2026-06-18T00:46:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -438,13 +438,13 @@ repository:
   lastKnownMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
   lastKnownOriginMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
 currentTask:
-  id: organization-training-local-experience-chain-queue-materialization
+  id: organization-training-draft-source-context-runtime-contract-tdd
   status: closed
-  result: pass_docs_state_materialized_organization_training_local_experience_chain
-  sourceStory: localExperienceClosureGate.organizationTrainingLocalExperienceChain
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+  result: pass_tdd_draft_source_context_runtime_contract_no_experience_closed
+  sourceStory: localExperienceClosureGate.organizationTrainingDraftSourceContextRuntimeContract
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
   branch: codex/organization-training-local-experience-chain
   commitSha: null
   prUrl: null
@@ -728,10 +728,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_training_local_experience_chain_materialized_no_experience_closed
+  status: organization_training_draft_source_context_runtime_contract_closed_no_experience_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-training-local-experience-chain-queue-materialization
+  currentTaskId: organization-training-draft-source-context-runtime-contract-tdd
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -750,9 +750,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Organization-training local experience chain is materialized. Execute
-    `organization-training-draft-source-context-runtime-contract-tdd` first, then the admin/employee entry-surface UI
-    task, then the approved localhost-only local full-flow validation, then the closure readiness audit. Keep provider,
+    `organization-training-draft-source-context-runtime-contract-tdd` is locally closed on
+    `codex/organization-training-local-experience-chain` with RED/GREEN unit evidence for manual draft creation,
+    source-context attachment, and copy-to-new-draft runtime route/API contracts. Continue with
+    `organization-training-admin-employee-entry-surface-local-ui`, then localhost-only local full-flow validation and
+    closure readiness audit. Do not claim `experience_closed` until fresh local full-flow evidence exists. Keep provider,
     env, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database migration execution, and Cost
     Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md

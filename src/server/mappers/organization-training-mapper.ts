@@ -2,13 +2,18 @@ import type { OrganizationTrainingAnswerOrganizationSnapshotValue } from "@/db/s
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingScopeSnapshotDto,
+  OrganizationTrainingSourceContextDto,
 } from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
 import type {
   OrganizationTrainingAnswerStatus,
   OrganizationTrainingQuestionTypeSummary,
+  OrganizationTrainingRetentionStatus,
+  OrganizationTrainingSourceContextType,
+  OrganizationTrainingValidationStatus,
   OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
 import type { Subject } from "../models/paper";
@@ -61,6 +66,110 @@ export type OrganizationTrainingAnswerRow = {
   created_at: Date;
   updated_at: Date;
 };
+
+export type OrganizationTrainingDraftRow = {
+  id?: number;
+  public_id: string;
+  source_task_public_id: string | null;
+  source_version_public_id: string | null;
+  organization_id: number;
+  organization_public_id: string;
+  org_auth_id: number;
+  authorization_source: "org_auth";
+  authorization_public_id: string;
+  owner_type: "organization";
+  owner_public_id: string;
+  quota_owner_type: "organization";
+  quota_owner_public_id: string;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  title: string;
+  description: string | null;
+  question_count: number;
+  total_score: number | string;
+  question_type_summary: OrganizationTrainingQuestionTypeSummary;
+  evidence_status: "sufficient" | "weak" | "none";
+  validation_status: OrganizationTrainingValidationStatus;
+  retention_status: OrganizationTrainingRetentionStatus;
+  created_at: Date;
+  updated_at: Date;
+  expires_at: Date | null;
+};
+
+export type OrganizationTrainingSourceContextRow = {
+  id?: number;
+  public_id: string;
+  organization_training_draft_id: number;
+  organization_training_draft_public_id: string;
+  organization_id: number;
+  organization_public_id: string;
+  org_auth_id: number;
+  authorization_source: "org_auth";
+  authorization_public_id: string;
+  source_type: OrganizationTrainingSourceContextType;
+  source_public_id: string;
+  title: string;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  question_count: number;
+  total_score: number | string;
+  source_status: string;
+  redaction_status: "metadata_only";
+  formal_usage_policy: {
+    createFormalPaper: false;
+    createMockExam: false;
+    exposeQuestionBody: false;
+    exposeStandardAnswer: false;
+    exposeAnalysis: false;
+    exposeProviderPayload: false;
+  };
+  created_at: Date;
+  updated_at: Date;
+};
+
+export function mapOrganizationTrainingDraftRowToDto(
+  row: OrganizationTrainingDraftRow,
+): OrganizationTrainingDraftDto {
+  return {
+    publicId: row.public_id,
+    sourceTaskPublicId: row.source_task_public_id,
+    organizationPublicId: row.organization_public_id,
+    authorizationSource: row.authorization_source,
+    authorizationPublicId: row.authorization_public_id,
+    profession: row.profession,
+    level: row.level,
+    subject: row.subject,
+    title: row.title,
+    description: row.description,
+    questionCount: row.question_count,
+    totalScore: normalizeTotalScore(row.total_score),
+    questionTypeSummary: copyQuestionTypeSummary(row.question_type_summary),
+    evidenceStatus: row.evidence_status,
+    validationStatus: row.validation_status,
+    retentionStatus: row.retention_status,
+    createdAt: row.created_at.toISOString(),
+    expiresAt: row.expires_at?.toISOString() ?? null,
+  };
+}
+
+export function mapOrganizationTrainingSourceContextRowToDto(
+  row: OrganizationTrainingSourceContextRow,
+): OrganizationTrainingSourceContextDto {
+  return {
+    sourceType: row.source_type,
+    sourcePublicId: row.source_public_id,
+    title: row.title,
+    profession: row.profession,
+    level: row.level,
+    subject: row.subject,
+    questionCount: row.question_count,
+    totalScore: normalizeTotalScore(row.total_score),
+    sourceStatus: row.source_status,
+    redactionStatus: row.redaction_status,
+  };
+}
 
 export function mapOrganizationTrainingVersionRowToDto(
   row: OrganizationTrainingVersionRow,
@@ -125,6 +234,17 @@ function copyScopeSnapshot(
   return {
     organizationPublicIds: [...snapshot.organizationPublicIds],
     capturedAt: snapshot.capturedAt,
+  };
+}
+
+function copyQuestionTypeSummary(
+  summary: OrganizationTrainingQuestionTypeSummary,
+): OrganizationTrainingQuestionTypeSummary {
+  return {
+    singleChoice: summary.singleChoice,
+    multiChoice: summary.multiChoice,
+    trueFalse: summary.trueFalse,
+    shortAnswer: summary.shortAnswer,
   };
 }
 
