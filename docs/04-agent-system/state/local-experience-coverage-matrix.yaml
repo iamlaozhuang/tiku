@@ -1,0 +1,469 @@
+schemaVersion: 1
+generatedByTask: module-run-v2-local-experience-governance-hardening
+generatedAt: "2026-06-17T17:24:01-07:00"
+purpose: >-
+  Canonical local experience coverage matrix for deciding whether a standard or advanced use case is missing, partial,
+  ready for local experience validation, locally closed, or blocked by release/high-risk gates.
+statusModel:
+  allowed:
+    - missing
+    - partial
+    - local_experience_ready
+    - experience_closed
+    - release_blocked
+  experienceClosedRequiresFreshEvidence: true
+  releaseReadyIsNotImpliedByExperienceClosed: true
+sourceReferences:
+  useCaseCatalog: docs/01-requirements/use-cases/use-case-catalog.md
+  capabilityCatalog: docs/01-requirements/traceability/capability-catalog.md
+  technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
+  governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
+matrix:
+  - useCaseId: UC-STD-ACCOUNT-SESSION
+    edition: standard
+    actor: student_admin
+    entrySurface: src/app/(auth)/**
+    apiSurface: src/app/api/v1/sessions/route.ts
+    serviceSurface: src/server/auth/**; src/server/services/session-service.ts
+    repositorySurface: not_required_local_session_runtime
+    uiSurface: src/app/(auth)/login/page.tsx; src/app/(auth)/register/page.tsx
+    unitEvidence: src/server/auth/*.test.ts; tests/unit/student-login-ui.test.ts; tests/unit/student-register-ui.test.ts
+    e2eEvidence: e2e/local-auth-route-guard.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+    status: local_experience_ready
+    blockedGate: release_auth_hardening_and_staging_remain_blocked
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-PERSONAL-AUTH-REDEEM
+    edition: standard
+    actor: student_ops_admin
+    entrySurface: src/app/(student)/redeem-code/page.tsx; src/app/(admin)/ops/redeem-codes/page.tsx
+    apiSurface: src/app/api/v1/redeem-codes/**
+    serviceSurface: src/server/services/redeem-code-*.ts; src/server/services/student-authorization-redeem-runtime.ts
+    repositorySurface: src/server/repositories/redeem-code-repository.ts
+    uiSurface: src/features/student/profile/StudentProfileRedeemPage.tsx; src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+    unitEvidence: tests/unit/phase-8-student-authorization-redeem-runtime.test.ts; tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+    e2eEvidence: e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-11-ai-call-log-visibility-fix.md
+    status: local_experience_ready
+    blockedGate: cleartext_redeem_code_evidence_forbidden
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-ORG-AUTH-MANAGED
+    edition: standard
+    actor: ops_admin_employee_student
+    entrySurface: src/app/(admin)/ops/organizations/page.tsx
+    apiSurface: src/app/api/v1/organizations/**; src/app/api/v1/org-auths/**; src/app/api/v1/employees/**
+    serviceSurface: src/server/services/organization-auth-service.ts; src/server/services/employee-account-service.ts
+    repositorySurface: src/server/repositories/organization-auth-repository.ts; src/server/repositories/employee-account-repository.ts
+    uiSurface: src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+    unitEvidence: tests/unit/phase-11-system-ops-organization-management-loop.test.ts; tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts
+    e2eEvidence: e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+    status: partial
+    blockedGate: org_role_flow_browser_validation_requires_task_scope
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-QUESTION-MATERIAL-MANAGE
+    edition: standard
+    actor: content_admin
+    entrySurface: src/app/(admin)/content/questions/page.tsx; src/app/(admin)/content/materials/page.tsx
+    apiSurface: src/app/api/v1/questions/**; src/app/api/v1/materials/**
+    serviceSurface: src/server/services/question-service.ts; src/server/services/material-service.ts
+    repositorySurface: src/server/repositories/question-repository.ts; src/server/repositories/material-repository.ts
+    uiSurface: src/features/admin/question-material-management/**
+    unitEvidence: tests/unit/admin-question-material-ui.test.ts; src/server/services/question-service.test.ts; src/server/services/material-service.test.ts
+    e2eEvidence: e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: partial
+    blockedGate: full_question_type_authoring_and_browser_flow_not_freshly_closed
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-PAPER-LIFECYCLE
+    edition: standard
+    actor: content_admin_student
+    entrySurface: src/app/(admin)/content/papers/page.tsx
+    apiSurface: src/app/api/v1/papers/**; src/app/api/v1/exam-papers/**
+    serviceSurface: src/server/services/paper-*.ts; src/server/services/question-paper/**
+    repositorySurface: src/server/repositories/paper-*.ts
+    uiSurface: src/features/admin/paper-management/**
+    unitEvidence: tests/unit/admin-paper-ui.test.ts; tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts
+    e2eEvidence: e2e/content-action-closures.spec.ts; e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: partial
+    blockedGate: full_publish_copy_archive_browser_flow_not_freshly_closed
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-PRACTICE
+    edition: standard
+    actor: student
+    entrySurface: src/app/(student)/practice/page.tsx
+    apiSurface: src/app/api/v1/practices/**
+    serviceSurface: src/server/services/practice-service.ts; src/server/services/student-flow-runtime.ts
+    repositorySurface: src/server/repositories/practice-repository.ts
+    uiSurface: src/features/student/practice/StudentPracticePage.tsx
+    unitEvidence: src/server/services/practice-service.test.ts; tests/unit/student-practice-ui.test.ts
+    e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    status: local_experience_ready
+    blockedGate: offline_resume_and_skill_practice_depth_need_fresh_audit
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-MOCK-EXAM
+    edition: standard
+    actor: student
+    entrySurface: src/app/(student)/mock-exam/page.tsx
+    apiSurface: src/app/api/v1/mock-exams/**
+    serviceSurface: src/server/services/mock-exam-service.ts; src/server/services/student-flow-runtime.ts
+    repositorySurface: src/server/repositories/mock-exam-repository.ts
+    uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx
+    unitEvidence: src/server/services/mock-exam-service.test.ts; tests/unit/local-business-flow-mock-exam-isolation.test.ts
+    e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    status: local_experience_ready
+    blockedGate: provider_gated_subjective_scoring_and_full_flow_need_task_scope
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-REPORT-MISTAKE-BOOK
+    edition: standard
+    actor: student
+    entrySurface: src/app/(student)/exam-report/page.tsx; src/app/(student)/mistake-book/page.tsx
+    apiSurface: src/app/api/v1/exam-reports/**; src/app/api/v1/mistake-books/**
+    serviceSurface: src/server/services/exam-report-service.ts; src/server/services/mistake-book-service.ts
+    repositorySurface: src/server/repositories/exam-report-repository.ts; src/server/repositories/mistake-book-repository.ts
+    uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx; src/features/student/mistake-book/StudentMistakeBookPage.tsx
+    unitEvidence: src/server/services/exam-report-service.test.ts; src/server/services/mistake-book-service.test.ts; tests/unit/student-mistake-book-ui.test.ts
+    e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    status: local_experience_ready
+    blockedGate: report_knowledge_analysis_and_ai_retry_remain_provider_gated
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    edition: standard
+    actor: student_super_admin_system
+    entrySurface: student_practice_mock_exam_and_admin_model_config
+    apiSurface: src/app/api/v1/model-configs/**; provider-gated student AI action routes
+    serviceSurface: src/server/services/ai-mock-provider-runtime.ts; src/server/services/student-flow-runtime.ts
+    repositorySurface: src/server/repositories/ai-call-log-repository.ts
+    uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
+    unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
+    e2eEvidence: e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    status: release_blocked
+    blockedGate: provider_call_env_secret_cost_calibration_staging_prod
+    nextTask: provider_gate_approval_package_required
+  - useCaseId: UC-STD-KN-RECOMMENDATION
+    edition: standard
+    actor: content_admin_system
+    entrySurface: question_editing_and_knowledge_node_review_surfaces
+    apiSurface: src/app/api/v1/questions/[publicId]/recommend-knowledge-nodes/route.ts
+    serviceSurface: src/server/services/knowledge-recommendation-service.ts
+    repositorySurface: src/server/repositories/knowledge-node-repository.ts
+    uiSurface: src/app/(admin)/content/knowledge-nodes/page.tsx
+    unitEvidence: tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
+    e2eEvidence: not_found
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: partial
+    blockedGate: real_provider_rag_quality_gate_blocked
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-RAG-KNOWLEDGE-BASE
+    edition: standard
+    actor: ops_admin_content_admin_system
+    entrySurface: src/app/(admin)/ops/resources/page.tsx; src/app/(admin)/content/knowledge-nodes/page.tsx
+    apiSurface: src/app/api/v1/resources/**; src/app/api/v1/knowledge-nodes/**
+    serviceSurface: src/server/services/rag-resource-knowledge-runtime.ts; src/server/services/rag-*.ts
+    repositorySurface: src/server/repositories/rag-resource-repository.ts; src/server/repositories/knowledge-node-repository.ts
+    uiSurface: src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
+    unitEvidence: tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts; src/server/services/rag-retrieval-service.test.ts
+    e2eEvidence: e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: partial
+    blockedGate: vector_provider_storage_real_rag_quality_gate_blocked
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-STD-ADMIN-OPS-LOGS
+    edition: standard
+    actor: ops_admin_super_admin
+    entrySurface: src/app/(admin)/ops/**
+    apiSurface: src/app/api/v1/audit-logs/**; src/app/api/v1/ai-call-logs/**
+    serviceSurface: src/server/services/audit-log-*.ts; src/server/services/ai-call-log-*.ts
+    repositorySurface: src/server/repositories/audit-log-repository.ts; src/server/repositories/ai-call-log-repository.ts
+    uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; src/features/admin/**
+    unitEvidence: tests/unit/admin-ai-audit-log-ops-baseline.test.ts; tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+    e2eEvidence: e2e/admin-audit-navigation.spec.ts; e2e/local-business-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-11-ai-call-log-visibility-fix.md
+    status: local_experience_ready
+    blockedGate: raw_log_viewer_export_and_retention_execution_blocked
+    nextTask: standard-mvp-local-experience-readiness-audit
+  - useCaseId: UC-ADV-AUTH-CONTEXT-UPGRADE
+    edition: advanced
+    actor: personal_user_employee_org_admin_ops_admin
+    entrySurface: authorization_context_summary_surfaces
+    apiSurface: src/app/api/v1/authorizations/route.ts; src/app/api/v1/personal-auths/route.ts; src/app/api/v1/org-auths/**
+    serviceSurface: src/server/services/authorization-*.ts
+    repositorySurface: src/server/repositories/authorization-*.ts
+    uiSurface: existing_student_and_admin_authorization_surfaces
+    unitEvidence: src/server/services/*authorization*.test.ts; tests/unit/auth/session-personal-auth-boundary.test.ts
+    e2eEvidence: e2e/local-auth-route-guard.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md
+    status: partial
+    blockedGate: payment_env_secret_provider_cost_calibration_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-AI-TASK-LIFECYCLE
+    edition: advanced
+    actor: personal_user_system_ops_admin
+    entrySurface: personal_ai_generation_and_ai_call_log_surfaces
+    apiSurface: src/app/api/v1/personal-ai-generation-requests/route.ts
+    serviceSurface: src/server/services/personal-ai-generation-request-*.ts; src/server/services/ai-generation-task-*.ts
+    repositorySurface: src/server/repositories/personal-ai-generation-request-repository.ts
+    uiSurface: src/app/(student)/ai-generation/page.tsx
+    unitEvidence: src/server/services/personal-ai-generation-request-route.test.ts
+    e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
+    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    status: partial
+    blockedGate: provider_worker_quota_cost_calibration_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+    edition: advanced
+    actor: personal_user
+    entrySurface: src/app/(student)/ai-generation/page.tsx
+    apiSurface: src/app/api/v1/personal-ai-generation-requests/route.ts; src/app/api/v1/personal-ai-generation-results/**
+    serviceSurface: src/server/services/personal-ai-generation-*.ts
+    repositorySurface: src/server/repositories/personal-ai-generation-*.ts
+    uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    unitEvidence: src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx; src/server/services/personal-ai-generation-*.test.ts
+    e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
+    status: partial
+    blockedGate: local_contract_only_provider_and_durable_generation_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    edition: advanced
+    actor: personal_user
+    entrySurface: src/app/(student)/ai-generation/page.tsx
+    apiSurface: src/app/api/v1/personal-ai-generation-requests/route.ts; src/app/api/v1/personal-ai-generation-results/**
+    serviceSurface: src/server/services/personal-ai-generation-*.ts
+    repositorySurface: src/server/repositories/personal-ai-generation-*.ts
+    uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    unitEvidence: src/server/services/personal-ai-generation-*.test.ts
+    e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
+    status: partial
+    blockedGate: local_contract_only_provider_and_full_generated_paper_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    edition: advanced
+    actor: organization_admin
+    entrySurface: not_found_organization_ui
+    apiSurface: src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+    serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
+    repositorySurface: src/server/repositories/organization-training-repository.ts
+    uiSurface: not_found
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts
+    e2eEvidence: e2e/local-auth-route-guard.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    status: local_experience_ready
+    blockedGate: organization_ui_and_employee_browser_flow_not_closed
+    nextTask: module-run-v2-organization-training-l6-closure-readiness-audit
+  - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    edition: advanced
+    actor: employee
+    entrySurface: not_found_employee_training_ui
+    apiSurface: organization_training_service_contract_only
+    serviceSurface: src/server/services/organization-training-service.ts
+    repositorySurface: src/server/repositories/organization-training-repository.ts
+    uiSurface: not_found
+    unitEvidence: src/server/services/organization-training-service.test.ts
+    e2eEvidence: e2e/local-auth-route-guard.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    status: partial
+    blockedGate: employee_answer_browser_entry_not_found
+    nextTask: module-run-v2-organization-training-l6-closure-readiness-audit
+  - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
+    edition: advanced
+    actor: organization_admin
+    entrySurface: not_found_organization_analytics_ui
+    apiSurface: src/app/api/v1/organization-analytics/**
+    serviceSurface: src/server/services/organization-analytics-service.ts; src/server/services/organization-analytics-route.ts
+    repositorySurface: src/server/repositories/organization-analytics-repository.ts
+    uiSurface: not_found
+    unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts
+    e2eEvidence: not_found
+    freshEvidence: docs/05-execution-logs/evidence/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+    status: partial
+    blockedGate: organization_summary_ui_and_privacy_flow_not_closed
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
+    edition: advanced
+    actor: organization_admin
+    entrySurface: not_found_organization_portal
+    apiSurface: organization_training_and_analytics_api_surfaces_partial
+    serviceSurface: organization_training_and_analytics_services_partial
+    repositorySurface: organization_training_and_analytics_repositories_partial
+    uiSurface: not_found
+    unitEvidence: organization_training_and_analytics_unit_evidence_partial
+    e2eEvidence: not_found
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+    status: partial
+    blockedGate: organization_portal_ui_privacy_export_deploy_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-OPS-AUTH-QUOTA
+    edition: advanced
+    actor: ops_admin
+    entrySurface: ops_governance_summary_surfaces
+    apiSurface: not_found_quota_api
+    serviceSurface: src/server/services/ops-governance-authorization-quota-summary-service.ts
+    repositorySurface: summary_contract_only
+    uiSurface: existing_admin_ops_surfaces
+    unitEvidence: src/server/services/ops-governance-authorization-quota-summary-service.test.ts
+    e2eEvidence: not_found
+    freshEvidence: docs/05-execution-logs/evidence/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    status: partial
+    blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-RETENTION-LOG-GOVERNANCE
+    edition: advanced
+    actor: ops_admin_audit_reviewer
+    entrySurface: src/app/(admin)/ops/ai-audit-logs/page.tsx
+    apiSurface: src/app/api/v1/audit-logs/**; src/app/api/v1/ai-call-logs/**
+    serviceSurface: src/server/services/ops-governance-log-retention-redaction-contracts-service.ts
+    repositorySurface: src/server/repositories/audit-log-repository.ts; src/server/repositories/ai-call-log-repository.ts
+    uiSurface: src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+    unitEvidence: src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts; tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+    e2eEvidence: e2e/admin-audit-navigation.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    status: partial
+    blockedGate: raw_viewer_hard_delete_export_provider_deploy_blocked
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-ADV-FORMAL-CONTENT-SEPARATION
+    edition: advanced
+    actor: personal_user_organization_admin_content_admin_ops_admin
+    entrySurface: personal_ai_and_organization_training_domain_surfaces
+    apiSurface: personal-ai-generation-results_and_organization-trainings_surfaces
+    serviceSurface: personal_ai_generation_and_organization_training_services
+    repositorySurface: personal_ai_generation_and_organization_training_repositories
+    uiSurface: personal_ai_generation_ui_partial; organization_ui_not_found
+    unitEvidence: src/server/services/personal-ai-generation-formal-adoption-service.test.ts; src/server/services/organization-training-service.test.ts
+    e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+    status: partial
+    blockedGate: formal_adoption_review_required_before_formal_writes
+    nextTask: unified-standard-advanced-current-coverage-refresh
+  - useCaseId: UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    edition: future_scope
+    actor: student
+    entrySurface: advanced_personal_ai_only
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: future_non_goal_for_standard
+    nextTask: none_future_non_goal
+  - useCaseId: UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    edition: future_scope
+    actor: organization_admin
+    entrySurface: not_in_standard_mvp
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: future_non_goal_for_standard
+    nextTask: none_future_non_goal
+  - useCaseId: UC-FUTURE-ONLINE-PAYMENT
+    edition: future_scope
+    actor: payer_ops_admin
+    entrySurface: not_in_current_release
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: payment_external_service_env_secret_deploy_blocked
+    nextTask: none_future_non_goal
+  - useCaseId: UC-FUTURE-OCR-AUTO-IMPORT
+    edition: future_scope
+    actor: content_admin_ops_admin
+    entrySurface: not_in_current_release
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
+    nextTask: none_future_non_goal
+  - useCaseId: UC-FUTURE-ORG-DATA-EXPORT
+    edition: future_scope
+    actor: organization_admin
+    entrySurface: not_in_current_release
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: export_file_generation_external_service_privacy_deploy_blocked
+    nextTask: none_future_non_goal
+  - useCaseId: UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    edition: audit_only
+    actor: platform_governance
+    entrySurface: not_product_surface
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: audit_artifact_only
+    nextTask: none_audit_only
+  - useCaseId: UC-GATE-PROVIDER-STAGING-EXECUTION
+    edition: blocked_gate
+    actor: platform_governance
+    entrySurface: not_product_surface
+    apiSurface: blocked_by_governance
+    serviceSurface: blocked_by_governance
+    repositorySurface: blocked_by_governance
+    uiSurface: blocked_by_governance
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/use-cases/use-case-catalog.md
+    status: release_blocked
+    blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
+    nextTask: provider_staging_approval_package_required
+  - useCaseId: UC-GATE-CURRENT-CHECKPOINT
+    edition: audit_only
+    actor: platform_governance
+    entrySurface: not_product_surface
+    apiSurface: audit_only
+    serviceSurface: audit_only
+    repositorySurface: audit_only
+    uiSurface: audit_only
+    unitEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    e2eEvidence: not_required
+    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    status: release_blocked
+    blockedGate: audit_reference_only
+    nextTask: none_audit_only
+  - useCaseId: UC-AUDIT-SOURCE-GOVERNANCE
+    edition: audit_only
+    actor: platform_governance
+    entrySurface: docs/01-requirements/traceability/**
+    apiSurface: not_required
+    serviceSurface: not_required
+    repositorySurface: not_required
+    uiSurface: not_required
+    unitEvidence: not_required
+    e2eEvidence: not_required
+    freshEvidence: docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    status: release_blocked
+    blockedGate: audit_artifact_only
+    nextTask: unified-standard-advanced-current-coverage-refresh

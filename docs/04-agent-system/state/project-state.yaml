@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-organization-training-local-role-flow-smoke-validation
-updatedAt: "2026-06-17T16:44:51-07:00"
+currentPhase: module-run-v2-local-experience-authorization-package-hardening
+updatedAt: "2026-06-17T17:50:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -32,6 +32,8 @@ automation:
   taskQueueArchivalIndexSopPath: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
   activeQueueSlimmingPlanPath: docs/04-agent-system/sop/active-queue-slimming-plan.md
   threadRolloverHandoffSopPath: docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+  localExperienceClosureGovernanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
+  localExperienceCoverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -433,16 +435,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
-  lastKnownOriginMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
+  lastKnownMasterSha: 31c1bd34d244d29b8ea575f02385e1bac8a3caa7
+  lastKnownOriginMasterSha: 31c1bd34d244d29b8ea575f02385e1bac8a3caa7
 currentTask:
-  id: module-run-v2-organization-training-local-role-flow-smoke-validation
+  id: module-run-v2-local-experience-authorization-package-hardening
   status: closed
-  sourceStory: localExperienceClosureGate.organizationTrainingRoleFlowSmokeValidation
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
-  branch: codex/organization-training-local-role-flow-smoke-validation
+  sourceStory: localExperienceClosureGate.authorizationPackageHardening
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-local-experience-authorization-package-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-experience-authorization-package-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-experience-authorization-package-hardening.md
+  branch: codex/local-experience-governance-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -679,6 +681,8 @@ qualityGates:
     moduleRunV2NextExperienceChainReadinessAudit: pass_docs_state_next_chain_readiness_audit
     moduleRunV2OrganizationTrainingLocalRoleFlowPlanning: pass_docs_state_l6_role_flow_planning
     moduleRunV2OrganizationTrainingLocalRoleFlowSmokeValidation: pass_localhost_route_guard_and_org_training_unit_smoke
+    moduleRunV2LocalExperienceGovernanceHardening: pass_docs_state_local_experience_governance
+    moduleRunV2LocalExperienceAuthorizationPackageHardening: pass_docs_state_authorization_package_hardening
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -713,15 +717,34 @@ mechanismTuning:
   conservativeCleanupBoundary: >-
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
+localExperienceClosure:
+  status: authorization_package_hardened
+  governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
+  coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+  currentTaskId: module-run-v2-local-experience-authorization-package-hardening
+  nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
+  authorizationPackageTemplateStatus: hardened
+  recommendationRule: >-
+    Handoff recommendations should prefer coverage matrix rows that can advance from `partial` to
+    `local_experience_ready` to `experience_closed`; service-only, contract-only, local_contract_only, and seed-complete
+    evidence are not sufficient for an experience-closed recommendation.
+  blockedGates:
+    - env_secret
+    - provider_model_call
+    - schema_drizzle_migration
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy_payment_external_service
+    - browser_playwright_runtime_validation_without_local_full_flow_task
+    - cost_calibration_gate
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Recommended next task is `module-run-v2-organization-training-l6-closure-readiness-audit`, a docs-state audit for
-    the `organization-training-experience` L6 local role-flow chain. It should reconcile the role-flow planning evidence,
-    this localhost-only smoke validation, and existing organization-training service/route unit evidence to decide
-    whether the chain can move to closure or still needs one more narrow local task. It must not edit product source,
-    tests, e2e, scripts, schema/drizzle, package/lockfiles, or dependencies, and must not run Browser, Playwright, dev
-    server, full e2e, provider/model, staging/prod/cloud/deploy/payment/external-service, PR/force-push, raw data
-    exposure, or Cost Calibration Gate work.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    Recommended next task is `unified-standard-advanced-current-coverage-refresh`, a `local_experience_audit` task that
+    refreshes `docs/04-agent-system/state/local-experience-coverage-matrix.yaml` from standard and advanced requirement
+    sources, source/test/e2e surface inventory, and existing redacted evidence. It should mark each use case as
+    `missing`, `partial`, `local_experience_ready`, `experience_closed`, or `release_blocked`, and every `partial` row
+    must name a next task. It must not edit product source, tests, e2e, scripts, schema/drizzle, package/lockfiles, or
+    dependencies, and must not run Browser, Playwright runtime validation, dev server, full e2e, provider/model,
+    staging/prod/cloud/deploy/payment/external-service, PR/force-push, raw data exposure, or Cost Calibration Gate work.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-experience-governance-hardening.md

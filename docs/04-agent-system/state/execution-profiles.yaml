@@ -104,6 +104,50 @@ profiles:
       - localE2EValidation
       - localFullFlowGate
       - costCalibrationGate
+  local_experience_audit:
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    riskProfile: mechanism_low_risk
+    allowedTaskKinds:
+      - docs_only
+      - mechanism_maintenance
+      - local_experience_audit
+    allowedCapabilities:
+      - docsStateOnlyQueueMaintenance
+      - readRequirements
+      - readSource
+      - readTests
+      - readEvidence
+      - readonlyDiagnostics
+      - listE2ESpecs
+    allowedReadOnlyActions:
+      - read requirements, traceability, source, tests, e2e specs, evidence, audit, and state files
+      - run Get-TikuProjectStatus.ps1
+      - run Get-TikuNextAction.ps1 -VerboseHistory
+      - run read-only diagnostics
+      - run npm.cmd run test:e2e -- --list
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - localE2EValidation
+      - localFullFlowGate
+      - costCalibrationGate
+    forbiddenActions:
+      - dev_server
+      - browser_or_playwright_runtime_validation
+      - full_e2e_suite
+      - provider_model_call
+      - schema_or_drizzle_or_migration_change
+      - package_or_lockfile_change
+      - env_secret_access_output_or_edit
+      - staging_prod_cloud_deploy_payment_external_service
+    evidenceBoundary:
+      - no secrets, tokens, cookies, Authorization headers, or database URLs
+      - no provider payloads, raw prompts, or raw answers
+      - no public identifier inventories, row data, or private data
+      - no screenshots, traces, DOM dumps, or raw browser artifacts
   local_unit_tdd:
     evidenceMode: full
     validationPolicy: local_unit
@@ -181,6 +225,7 @@ workPacket:
     - repository_runtime_local
   maxTasksPerPacket:
     docs_state_lite: 6
+    local_experience_audit: 2
     local_unit_tdd: 4
     repository_runtime_tdd: 3
     local_full_flow: 1
