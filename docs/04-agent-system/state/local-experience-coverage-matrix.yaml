@@ -155,6 +155,22 @@ lastDraftSourceContextSchemaApprovalPackage:
     copyToNewDraftPersistence: schema_gate_prepared
     schemaImplementation: pending_fresh_schema_isolated_approval
     localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
+lastDraftSourceContextSchemaMigration:
+  taskId: organization-training-draft-source-context-schema-migration
+  closedAt: "2026-06-17T23:55:30-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+  decision: schema_migration_closed_no_experience_closed_claim
+  nextTask: seed_organization_training_draft_source_context_runtime_contract_tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+  migrationFile: drizzle/20260618063739_add_organization_training_draft_source_context.sql
+  boundarySummary:
+    manualDraftPersistence: additive_metadata_only_schema_generated
+    sourceContextPersistence: additive_metadata_only_schema_generated
+    copyToNewDraftPersistence: source_lineage_metadata_available
+    migrationExecution: blocked_not_run
+    localCommit: closeout_approved
+    localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
 lastEmployeeAnswerRepositoryQueueMaterialization:
   taskId: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
   materializedAt: "2026-06-17T22:07:07-07:00"
@@ -443,14 +459,14 @@ matrix:
     entrySurface: not_found_organization_ui
     apiSurface: src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
-    repositorySurface: src/server/repositories/organization-training-repository.ts
+    repositorySurface: src/server/repositories/organization-training-repository.ts; src/db/schema/organization-training.ts; drizzle/20260618063739_add_organization_training_draft_source_context.sql
     uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/repositories/organization-training-repository.test.ts
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/repositories/organization-training-repository.test.ts; src/db/schema/organization-training.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
     status: local_experience_ready
-    blockedGate: draft_source_context_schema_migration_admin_ui_employee_routes_and_local_full_flow_not_closed
-    nextTask: organization-training-draft-source-context-schema-migration
+    blockedGate: draft_source_context_runtime_repository_route_admin_ui_employee_routes_and_local_full_flow_not_closed
+    nextTask: seed_organization_training_draft_source_context_runtime_contract_tdd
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee

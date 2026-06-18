@@ -32,6 +32,13 @@ describe("organization training publish-version persistence schema", () => {
     schemaExports.organizationTrainingAnswer as
       | Parameters<typeof getTableConfig>[0]
       | undefined;
+  const organizationTrainingDraft = schemaExports.organizationTrainingDraft as
+    | Parameters<typeof getTableConfig>[0]
+    | undefined;
+  const organizationTrainingSourceContext =
+    schemaExports.organizationTrainingSourceContext as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
 
   it("registers organization training version lifecycle status values", () => {
     expect(schemaExports.organizationTrainingVersionStatusValues).toEqual([
@@ -240,6 +247,203 @@ describe("organization training publish-version persistence schema", () => {
       [
         ...getIndexNames(organizationTrainingAnswer),
         ...getForeignKeyNames(organizationTrainingAnswer),
+      ].every((identifierName) => identifierName.length <= 63),
+    ).toBe(true);
+  });
+
+  it("defines a metadata-only draft table for manual creation and copy lineage", () => {
+    expect(organizationTrainingDraft).toBeDefined();
+
+    if (organizationTrainingDraft === undefined) {
+      return;
+    }
+
+    expect(getTableName(organizationTrainingDraft)).toBe(
+      "organization_training_draft",
+    );
+    expect(getColumnNames(organizationTrainingDraft)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "source_task_public_id",
+        "source_version_public_id",
+        "organization_id",
+        "organization_public_id",
+        "org_auth_id",
+        "authorization_source",
+        "authorization_public_id",
+        "owner_type",
+        "owner_public_id",
+        "quota_owner_type",
+        "quota_owner_public_id",
+        "profession",
+        "level",
+        "subject",
+        "title",
+        "description",
+        "question_count",
+        "total_score",
+        "question_type_summary",
+        "evidence_status",
+        "validation_status",
+        "retention_status",
+        "created_at",
+        "updated_at",
+        "expires_at",
+      ]),
+    );
+  });
+
+  it("keeps draft persistence free of formal paper and provider payload columns", () => {
+    expect(organizationTrainingDraft).toBeDefined();
+
+    if (organizationTrainingDraft === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(organizationTrainingDraft)).not.toEqual(
+      expect.arrayContaining([
+        "question_id",
+        "paper_id",
+        "mock_exam_id",
+        "answer_record_id",
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_answer",
+        "raw_generated_content",
+        "generated_content",
+        "standard_answer",
+        "analysis",
+        "question_body",
+      ]),
+    );
+  });
+
+  it("adds draft lookup, lineage, lifecycle, and scope indexes with named foreign keys", () => {
+    expect(organizationTrainingDraft).toBeDefined();
+
+    if (organizationTrainingDraft === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(organizationTrainingDraft)).toEqual(
+      expect.arrayContaining([
+        "udx_organization_training_draft_public_id",
+        "idx_organization_training_draft_organization_id",
+        "idx_organization_training_draft_org_auth_id",
+        "idx_organization_training_draft_scope",
+        "idx_organization_training_draft_retention",
+        "idx_organization_training_draft_source_task",
+        "idx_organization_training_draft_source_version",
+      ]),
+    );
+    expect(getForeignKeyNames(organizationTrainingDraft)).toEqual(
+      expect.arrayContaining([
+        "fk_organization_training_draft_organization",
+        "fk_organization_training_draft_org_auth",
+      ]),
+    );
+    expect(
+      [
+        ...getIndexNames(organizationTrainingDraft),
+        ...getForeignKeyNames(organizationTrainingDraft),
+      ].every((identifierName) => identifierName.length <= 63),
+    ).toBe(true);
+  });
+
+  it("defines a metadata-only source context table for draft source attachments", () => {
+    expect(organizationTrainingSourceContext).toBeDefined();
+
+    if (organizationTrainingSourceContext === undefined) {
+      return;
+    }
+
+    expect(getTableName(organizationTrainingSourceContext)).toBe(
+      "organization_training_source_context",
+    );
+    expect(getColumnNames(organizationTrainingSourceContext)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "organization_training_draft_id",
+        "organization_training_draft_public_id",
+        "organization_id",
+        "organization_public_id",
+        "org_auth_id",
+        "authorization_source",
+        "authorization_public_id",
+        "source_type",
+        "source_public_id",
+        "title",
+        "profession",
+        "level",
+        "subject",
+        "question_count",
+        "total_score",
+        "source_status",
+        "redaction_status",
+        "formal_usage_policy",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+  });
+
+  it("keeps source context persistence free of formal and raw content columns", () => {
+    expect(organizationTrainingSourceContext).toBeDefined();
+
+    if (organizationTrainingSourceContext === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(organizationTrainingSourceContext)).not.toEqual(
+      expect.arrayContaining([
+        "question_id",
+        "paper_id",
+        "mock_exam_id",
+        "answer_record_id",
+        "question_body",
+        "standard_answer",
+        "analysis",
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_answer",
+        "raw_generated_content",
+        "generated_content",
+      ]),
+    );
+  });
+
+  it("adds source context lookup indexes and named foreign keys", () => {
+    expect(organizationTrainingSourceContext).toBeDefined();
+
+    if (organizationTrainingSourceContext === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(organizationTrainingSourceContext)).toEqual(
+      expect.arrayContaining([
+        "udx_organization_training_source_context_public_id",
+        "udx_organization_training_source_context_draft_source",
+        "idx_organization_training_source_context_draft_id",
+        "idx_organization_training_source_context_organization_id",
+        "idx_organization_training_source_context_org_auth_id",
+        "idx_organization_training_source_context_source",
+      ]),
+    );
+    expect(getForeignKeyNames(organizationTrainingSourceContext)).toEqual(
+      expect.arrayContaining([
+        "fk_organization_training_source_context_draft",
+        "fk_organization_training_source_context_organization",
+        "fk_organization_training_source_context_org_auth",
+      ]),
+    );
+    expect(
+      [
+        ...getIndexNames(organizationTrainingSourceContext),
+        ...getForeignKeyNames(organizationTrainingSourceContext),
       ].every((identifierName) => identifierName.length <= 63),
     ).toBe(true);
   });

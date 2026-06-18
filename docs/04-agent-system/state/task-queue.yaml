@@ -14054,6 +14054,17 @@ tasks:
       separately approved by the task, and must not modify runtime route/service/repository/UI code, package/lockfile/
       dependencies, provider/model configuration, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
       external-service work, PR, force-push, or Cost Calibration Gate.
+    humanApproval: >-
+      Approved by the current 2026-06-17 user prompt: "批准执行". The approval permits claiming this queued
+      schema_isolated task and running its local schemaMigration capability gate. It does not approve database
+      connection, migration execution, local commit, fast-forward merge, push, PR, force-push, staging/prod/cloud work,
+      dependency changes, provider/model work, Browser/Playwright runtime, full e2e, or Cost Calibration Gate.
+    closeoutApproval: >-
+      Approved by the current 2026-06-17 user prompt: "批准 closeout:
+      允许为该任务创建本地提交、合入 master、推送 origin/master、清理短分支". This approves local commit,
+      fast-forward merge to master, push to origin/master, and cleanup of the merged short branch only. PR, force-push,
+      database connection, migration execution, staging/prod/cloud/deploy/payment/external-service, provider/model,
+      Browser/Playwright runtime, full e2e, dependency changes, and Cost Calibration Gate remain blocked.
     targetExperienceChain: organization-training-experience
     useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     executionProfile: schema_isolated
@@ -14062,8 +14073,13 @@ tasks:
     queueSelectionMode: legacy_explicit
     taskKind: local_schema_migration
     moduleRunVersion: 2
-    status: pending
-    result: null
+    schemaMigration: approved_migration_plan
+    status: closed
+    result: pass_schema_migration_closed_no_experience_closed
+    claimedAt: "2026-06-17T23:31:00-07:00"
+    validatedAt: "2026-06-17T23:42:00-07:00"
+    closedAt: "2026-06-17T23:55:30-07:00"
+    branch: codex/organization-training-draft-source-context-schema-migration
     allowedFiles:
       - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
@@ -14120,12 +14136,12 @@ tasks:
       - PR
       - force push
     closeoutPolicy:
-      localCommit: requires_fresh_approval_after_validation
+      localCommit: approved_after_validation_by_current_closeout_prompt
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
@@ -14139,3 +14155,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-draft-source-context-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-draft-source-context-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-draft-source-context-schema-migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    lastFailurePath: null
+    retryCount: 0
