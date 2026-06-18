@@ -27,8 +27,8 @@ currentFactRefresh:
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 14
-    local_experience_ready: 4
+    partial: 12
+    local_experience_ready: 6
     experience_closed: 4
     release_blocked: 10
   sourceAnchors:
