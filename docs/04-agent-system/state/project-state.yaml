@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-runtime-api-gap-boundary-audit
-updatedAt: "2026-06-17T18:58:07-07:00"
+currentPhase: organization-training-version-takedown-runtime-route-contract-tdd
+updatedAt: "2026-06-17T20:32:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -435,16 +435,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d684ec064a7d2f853a49998940684f1338994846
-  lastKnownOriginMasterSha: d684ec064a7d2f853a49998940684f1338994846
+  lastKnownMasterSha: d06e2662c55ec5cd7eb26aae9c7a5d54e13a5b8c
+  lastKnownOriginMasterSha: d06e2662c55ec5cd7eb26aae9c7a5d54e13a5b8c
 currentTask:
-  id: organization-training-runtime-api-gap-boundary-audit
+  id: organization-training-version-takedown-runtime-route-contract-tdd
   status: closed
-  sourceStory: localExperienceClosureGate.organizationTrainingRuntimeApiGapBoundaryAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
-  branch: codex/organization-training-runtime-api-gap-boundary-audit
+  sourceStory: localExperienceClosureGate.organizationTrainingVersionTakedownRuntimeRouteContractTdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+  branch: codex/organization-training-version-takedown-runtime-route-contract-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -687,6 +687,7 @@ qualityGates:
     moduleRunV2OrganizationTrainingL6ClosureReadinessAudit: pass_docs_state_keep_not_experience_closed
     organizationTrainingAdminEmployeeEntrySurfacePlanning: pass_docs_state_seeded_runtime_entry_surface_queue
     organizationTrainingRuntimeApiGapBoundaryAudit: pass_docs_state_split_schema_and_no_schema_route_sequence
+    organizationTrainingVersionTakedownRuntimeRouteContractTdd: pass_tdd_route_repository_contract_no_schema_no_runtime_e2e
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -722,10 +723,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_training_runtime_api_gap_boundary_audit_closed
+  status: organization_training_version_takedown_runtime_route_contract_tdd_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-training-runtime-api-gap-boundary-audit
+  currentTaskId: organization-training-version-takedown-runtime-route-contract-tdd
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -744,11 +745,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Recommended next task is `organization-training-version-takedown-runtime-route-contract-tdd`, a local_unit_tdd task
-    that should close the no-schema version takedown route/repository/API contract gap first. Draft/source-context and
-    copy-to-new-draft persistence require a separate schema approval package before implementation, while employee
-    answer repository and route work can follow using metadata-only existing answer schema if the implementation keeps
-    raw answer content blocked. It must not claim `experience_closed` and must keep provider/model, env/secret,
-    schema/drizzle/migration, dependency/package/lockfile, staging/prod/cloud/deploy/payment/external-service, PR/
-    force-push, raw data exposure, full e2e, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+    Recommended next task is `organization-training-employee-answer-runtime-repository-contract-tdd`, a local_unit_tdd
+    task that should close metadata-only employee answer repository persistence using the existing answer schema while
+    keeping raw answer content blocked. Organization-training version takedown runtime route/repository contract is now
+    closed, but `experience_closed` remains blocked until employee answer runtime routes, admin/employee UI entry
+    surfaces, draft/source-context schema-gated work, and a future approved localhost-only full-flow validation are done.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md

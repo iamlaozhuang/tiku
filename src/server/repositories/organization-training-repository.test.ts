@@ -1,11 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { OrganizationTrainingPublishedVersionWrite } from "../services/organization-training-service";
+import type {
+  OrganizationTrainingPublishedVersionWrite,
+  OrganizationTrainingVersionTakedownWrite,
+} from "../services/organization-training-service";
 import {
   createOrganizationTrainingRepository,
   type OrganizationTrainingTrustedPersistenceLineage,
+  type OrganizationTrainingVersionTakedownInput,
   type OrganizationTrainingVersionGateway,
   type OrganizationTrainingVersionInsertInput,
+  type OrganizationTrainingVersionRow,
   type OrganizationTrainingVisibleOrganizationScopeSource,
 } from "./organization-training-repository";
 
@@ -50,14 +55,37 @@ function createVersionWrite(
   };
 }
 
+function createTakedownWrite(
+  overrides: Partial<OrganizationTrainingVersionTakedownWrite> = {},
+): OrganizationTrainingVersionTakedownWrite {
+  return {
+    versionPublicId: "training_version_public_123",
+    organizationPublicId: "organization_public_123",
+    status: "taken_down",
+    takenDownAt: "2026-06-16T08:00:00.000Z",
+    takedownReason: "manual owner takedown",
+    accessPolicy: {
+      allowNewAnswers: false,
+      allowDraftSaves: false,
+      allowQuestionDetailReentry: false,
+      employeeHistoryVisibility: "own_summary_only",
+      preserveHistory: true,
+    },
+    ...overrides,
+  };
+}
+
 function createGateway(
   options: {
     latestVersionNumber?: number | null;
     trustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineage | null;
     visibleOrganizationScopeSource?: OrganizationTrainingVisibleOrganizationScopeSource | null;
+    versionOrganizationPublicId?: string | null;
+    takedownUpdateResult?: "row" | "null";
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
+  let takedownInputs: OrganizationTrainingVersionTakedownInput[] = [];
   const findLatestVersionNumberByDraftPublicId = vi.fn(
     async () => options.latestVersionNumber ?? null,
   );
@@ -66,6 +94,9 @@ function createGateway(
   );
   const findVisibleOrganizationScopeSourceByAdminPublicId = vi.fn(
     async () => options.visibleOrganizationScopeSource ?? null,
+  );
+  const findVersionOrganizationPublicIdByVersionPublicId = vi.fn(
+    async () => options.versionOrganizationPublicId ?? null,
   );
   const insertPublishedVersion = vi.fn(
     async (input: OrganizationTrainingVersionInsertInput) => {
@@ -104,11 +135,63 @@ function createGateway(
       };
     },
   );
+  const updateVersionTakedown = vi.fn(
+    async (
+      input: OrganizationTrainingVersionTakedownInput,
+    ): Promise<OrganizationTrainingVersionRow | null> => {
+      takedownInputs = [...takedownInputs, input];
+
+      if (options.takedownUpdateResult === "null") {
+        return null;
+      }
+
+      return {
+        id: 902,
+        public_id: input.versionPublicId,
+        draft_public_id: "training_draft_public_123",
+        version_number: 1,
+        organization_id: 501,
+        organization_public_id: input.organizationPublicId,
+        org_auth_id: 601,
+        authorization_source: "org_auth",
+        authorization_public_id: "org_auth_public_123",
+        owner_type: "organization",
+        owner_public_id: input.organizationPublicId,
+        quota_owner_type: "organization",
+        quota_owner_public_id: input.organizationPublicId,
+        publish_scope_snapshot: {
+          organizationPublicIds: ["organization_public_123"],
+          capturedAt: "2026-06-15T19:20:13.000Z",
+        },
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+        question_count: 2,
+        total_score: "5",
+        question_type_summary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 1,
+        },
+        version_status: input.status,
+        published_at: new Date("2026-06-15T19:20:13.000Z"),
+        taken_down_at: new Date(input.takenDownAt),
+        takedown_reason: input.takedownReason,
+        created_at: new Date("2026-06-15T19:20:13.000Z"),
+        updated_at: new Date(input.takenDownAt),
+      };
+    },
+  );
   const gateway: OrganizationTrainingVersionGateway = {
     findLatestVersionNumberByDraftPublicId,
     findTrustedPersistenceLineageByPublicIds,
     findVisibleOrganizationScopeSourceByAdminPublicId,
+    findVersionOrganizationPublicIdByVersionPublicId,
     insertPublishedVersion,
+    updateVersionTakedown,
   };
 
   return {
@@ -116,8 +199,11 @@ function createGateway(
     findLatestVersionNumberByDraftPublicId,
     findTrustedPersistenceLineageByPublicIds,
     findVisibleOrganizationScopeSourceByAdminPublicId,
+    findVersionOrganizationPublicIdByVersionPublicId,
     insertPublishedVersion,
+    updateVersionTakedown,
     getInsertInputs: () => insertInputs,
+    getTakedownInputs: () => takedownInputs,
   };
 }
 
@@ -294,6 +380,75 @@ describe("organization training repository", () => {
 
     expect(result).toBeNull();
     expect(findTrustedPersistenceLineageByPublicIds).not.toHaveBeenCalled();
+  });
+
+  it("looks up a version organization public id from a trimmed version public id", async () => {
+    const { gateway, findVersionOrganizationPublicIdByVersionPublicId } =
+      createGateway({
+        versionOrganizationPublicId: "organization_public_123",
+      });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupVersionOrganizationPublicId({
+      versionPublicId: " training_version_public_123 ",
+    });
+
+    expect(
+      findVersionOrganizationPublicIdByVersionPublicId,
+    ).toHaveBeenCalledWith("training_version_public_123");
+    expect(result).toBe("organization_public_123");
+  });
+
+  it("does not query version organization when the version public id is blank", async () => {
+    const { gateway, findVersionOrganizationPublicIdByVersionPublicId } =
+      createGateway({
+        versionOrganizationPublicId: "organization_public_123",
+      });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupVersionOrganizationPublicId({
+      versionPublicId: " ",
+    });
+
+    expect(result).toBeNull();
+    expect(
+      findVersionOrganizationPublicIdByVersionPublicId,
+    ).not.toHaveBeenCalled();
+  });
+
+  it("takes down a version with lifecycle metadata without persisting runtime access policy", async () => {
+    const { gateway, updateVersionTakedown, getTakedownInputs } =
+      createGateway();
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.takeDownVersion(createTakedownWrite());
+
+    expect(updateVersionTakedown).toHaveBeenCalledWith({
+      versionPublicId: "training_version_public_123",
+      organizationPublicId: "organization_public_123",
+      status: "taken_down",
+      takenDownAt: "2026-06-16T08:00:00.000Z",
+      takedownReason: "manual owner takedown",
+    });
+    expect(result).toMatchObject({
+      publicId: "training_version_public_123",
+      organizationPublicId: "organization_public_123",
+      status: "taken_down",
+      takenDownAt: "2026-06-16T08:00:00.000Z",
+      takedownReason: "manual owner takedown",
+    });
+    expect(JSON.stringify(getTakedownInputs())).not.toContain(
+      "allowNewAnswers",
+    );
+  });
+
+  it("fails closed when takedown persistence cannot update a matching version", async () => {
+    const { gateway } = createGateway({ takedownUpdateResult: "null" });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    await expect(
+      repository.takeDownVersion(createTakedownWrite()),
+    ).rejects.toThrow("organization training version takedown failed.");
   });
 
   it("rejects invalid trusted internal lineage returned by the gateway", async () => {

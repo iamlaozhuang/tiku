@@ -11,7 +11,10 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
-import type { OrganizationTrainingPublishedVersionPersistenceWrite } from "../services/organization-training-service";
+import type {
+  OrganizationTrainingPublishedVersionPersistenceWrite,
+  OrganizationTrainingVersionTakedownWrite,
+} from "../services/organization-training-service";
 import {
   mapOrganizationTrainingVersionRowToDto,
   type OrganizationTrainingVersionRow,
@@ -26,6 +29,18 @@ export type { OrganizationTrainingVersionRow };
 
 export type OrganizationTrainingPublishedVersionPersistenceInput =
   OrganizationTrainingPublishedVersionPersistenceWrite;
+
+export type OrganizationTrainingVersionOrganizationLookupInput = {
+  versionPublicId: string;
+};
+
+export type OrganizationTrainingVersionTakedownPersistenceInput =
+  OrganizationTrainingVersionTakedownWrite;
+
+export type OrganizationTrainingVersionTakedownInput = Omit<
+  OrganizationTrainingVersionTakedownPersistenceInput,
+  "accessPolicy"
+>;
 
 export type OrganizationTrainingVersionInsertInput =
   OrganizationTrainingPublishedVersionPersistenceInput & {
@@ -68,8 +83,14 @@ export type OrganizationTrainingVersionGateway = {
   findVisibleOrganizationScopeSourceByAdminPublicId(
     adminPublicId: string,
   ): Promise<OrganizationTrainingVisibleOrganizationScopeSource | null>;
+  findVersionOrganizationPublicIdByVersionPublicId(
+    versionPublicId: string,
+  ): Promise<string | null>;
   insertPublishedVersion(
     input: OrganizationTrainingVersionInsertInput,
+  ): Promise<OrganizationTrainingVersionRow | null>;
+  updateVersionTakedown(
+    input: OrganizationTrainingVersionTakedownInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
 };
 
@@ -80,8 +101,14 @@ export type OrganizationTrainingRepository = {
   lookupTrustedPersistenceLineage(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
+  lookupVersionOrganizationPublicId(
+    input: OrganizationTrainingVersionOrganizationLookupInput,
+  ): Promise<string | null>;
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
+  ): Promise<OrganizationTrainingPublishedVersionDto>;
+  takeDownVersion(
+    input: OrganizationTrainingVersionTakedownPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
 };
 
@@ -160,6 +187,23 @@ export function createOrganizationTrainingRepository(
         : normalizeTrustedPersistenceLineage(persistenceLineage);
     },
 
+    async lookupVersionOrganizationPublicId(input) {
+      const versionPublicId = normalizeRequiredText(input.versionPublicId);
+
+      if (versionPublicId === null) {
+        return null;
+      }
+
+      const organizationPublicId =
+        await gateway.findVersionOrganizationPublicIdByVersionPublicId(
+          versionPublicId,
+        );
+
+      return organizationPublicId === null
+        ? null
+        : normalizeRequiredText(organizationPublicId);
+    },
+
     async publishVersion(input) {
       const latestVersionNumber =
         await gateway.findLatestVersionNumberByDraftPublicId(
@@ -176,6 +220,22 @@ export function createOrganizationTrainingRepository(
       }
 
       return mapOrganizationTrainingVersionRowToDto(insertedRow);
+    },
+
+    async takeDownVersion(input) {
+      const takedownInput = createVersionTakedownInput(input);
+
+      if (takedownInput === null) {
+        throw new Error("organization training version takedown failed.");
+      }
+
+      const updatedRow = await gateway.updateVersionTakedown(takedownInput);
+
+      if (updatedRow === null) {
+        throw new Error("organization training version takedown failed.");
+      }
+
+      return mapOrganizationTrainingVersionRowToDto(updatedRow);
     },
   };
 }
@@ -202,6 +262,12 @@ export function createPostgresOrganizationTrainingRepository(
       return findVisibleOrganizationScopeSourceByAdminPublicId(
         getDatabase(),
         adminPublicId,
+      );
+    },
+    async findVersionOrganizationPublicIdByVersionPublicId(versionPublicId) {
+      return findVersionOrganizationPublicIdByVersionPublicId(
+        getDatabase(),
+        versionPublicId,
       );
     },
     async insertPublishedVersion(input) {
@@ -237,6 +303,30 @@ export function createPostgresOrganizationTrainingRepository(
           created_at: new Date(input.publishedAt),
           updated_at: new Date(input.publishedAt),
         })
+        .returning(organizationTrainingVersionSelection);
+
+      return (row as OrganizationTrainingVersionRow | undefined) ?? null;
+    },
+    async updateVersionTakedown(input) {
+      const takenDownAt = new Date(input.takenDownAt);
+      const [row] = await getDatabase()
+        .update(organizationTrainingVersion)
+        .set({
+          version_status: input.status,
+          taken_down_at: takenDownAt,
+          takedown_reason: input.takedownReason,
+          updated_at: takenDownAt,
+        })
+        .where(
+          and(
+            eq(organizationTrainingVersion.public_id, input.versionPublicId),
+            eq(
+              organizationTrainingVersion.organization_public_id,
+              input.organizationPublicId,
+            ),
+            eq(organizationTrainingVersion.version_status, "published"),
+          ),
+        )
         .returning(organizationTrainingVersionSelection);
 
       return (row as OrganizationTrainingVersionRow | undefined) ?? null;
@@ -413,6 +503,33 @@ function createVersionInsertInput(
   };
 }
 
+function createVersionTakedownInput(
+  input: OrganizationTrainingVersionTakedownPersistenceInput,
+): OrganizationTrainingVersionTakedownInput | null {
+  const versionPublicId = normalizeRequiredText(input.versionPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const takedownReason = normalizeRequiredText(input.takedownReason);
+
+  if (
+    versionPublicId === null ||
+    organizationPublicId === null ||
+    takedownReason === null ||
+    input.status !== "taken_down"
+  ) {
+    return null;
+  }
+
+  return {
+    versionPublicId,
+    organizationPublicId,
+    status: input.status,
+    takenDownAt: input.takenDownAt,
+    takedownReason,
+  };
+}
+
 async function findLatestVersionNumberByDraftPublicId(
   database: RuntimeDatabase,
   draftPublicId: string,
@@ -513,6 +630,22 @@ async function findVisibleOrganizationScopeSourceByAdminPublicId(
       }),
     ),
   };
+}
+
+async function findVersionOrganizationPublicIdByVersionPublicId(
+  database: RuntimeDatabase,
+  versionPublicId: string,
+): Promise<string | null> {
+  const [row] = await database
+    .select({
+      organization_public_id:
+        organizationTrainingVersion.organization_public_id,
+    })
+    .from(organizationTrainingVersion)
+    .where(eq(organizationTrainingVersion.public_id, versionPublicId))
+    .limit(1);
+
+  return row?.organization_public_id ?? null;
 }
 
 function resolveNextVersionNumber(latestVersionNumber: number | null): number {

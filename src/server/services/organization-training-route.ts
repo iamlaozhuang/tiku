@@ -5,18 +5,24 @@ import {
 } from "../contracts/api-response";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
-import type { OrganizationTrainingPublishInput } from "../models/organization-training";
+import type {
+  OrganizationTrainingPublishInput,
+  OrganizationTrainingTakedownInput,
+} from "../models/organization-training";
 import {
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
 import {
   invalidOrganizationTrainingPublishInputMessage,
+  invalidOrganizationTrainingTakedownInputMessage,
   normalizeOrganizationTrainingPublishInput,
+  normalizeOrganizationTrainingTakedownInput,
 } from "../validators/organization-training";
 import {
   createOrganizationTrainingService,
   organizationTrainingPublishBlockedMessage,
+  organizationTrainingTakedownBlockedMessage,
   type OrganizationTrainingAdminContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingService,
@@ -55,7 +61,8 @@ export type OrganizationTrainingTrustedPersistenceLineageLookup = (
 export type OrganizationTrainingAdminContextResolverInput = {
   request: Request;
   pathPublicId: string;
-  publishInput: OrganizationTrainingPublishInput;
+  publishInput?: OrganizationTrainingPublishInput;
+  takedownInput?: OrganizationTrainingTakedownInput;
 };
 
 export type OrganizationTrainingAdminContextResolver = (
@@ -65,7 +72,8 @@ export type OrganizationTrainingAdminContextResolver = (
 export type OrganizationTrainingVisibleOrganizationScopeResolverInput = {
   request: Request;
   pathPublicId: string;
-  publishInput: OrganizationTrainingPublishInput;
+  publishInput?: OrganizationTrainingPublishInput;
+  takedownInput?: OrganizationTrainingTakedownInput;
   adminPublicId: string;
 };
 
@@ -77,11 +85,23 @@ export type OrganizationTrainingRouteOptions = {
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
+  resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
 };
+
+export type OrganizationTrainingVersionOrganizationPublicIdResolverInput = {
+  request: Request;
+  pathPublicId: string;
+  takedownInput: OrganizationTrainingTakedownInput;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingVersionOrganizationPublicIdResolver = (
+  input: OrganizationTrainingVersionOrganizationPublicIdResolverInput,
+) => Promise<string | null>;
 
 export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
-  "resolveOrganizationAdminContext"
+  "resolveOrganizationAdminContext" | "resolveVersionOrganizationPublicId"
 > & {
   resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
@@ -97,6 +117,11 @@ const draftPublicIdMismatchCode = 400062;
 const publishAdminContextUnavailableCode = 403063;
 const publishLineageUnavailableCode = 403064;
 const publishBlockedCode = 409065;
+const invalidTakedownInputCode = 400066;
+const versionPublicIdMismatchCode = 400067;
+const takedownAdminContextUnavailableCode = 403068;
+const takedownVersionOrganizationUnavailableCode = 403069;
+const takedownBlockedCode = 409070;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
@@ -106,6 +131,15 @@ const publishAdminContextUnavailableMessage =
 
 const publishLineageUnavailableMessage =
   "Organization training publish lineage is unavailable.";
+
+const versionPublicIdMismatchMessage =
+  "Organization training takedown path public id must match request body.";
+
+const takedownAdminContextUnavailableMessage =
+  "Organization training takedown organization-admin actor context is unavailable.";
+
+const takedownVersionOrganizationUnavailableMessage =
+  "Organization training takedown version organization is unavailable.";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -119,7 +153,11 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
 
-function normalizeRequiredText(value: string): string | null {
+function normalizeRequiredText(value: string | null): string | null {
+  if (value === null) {
+    return null;
+  }
+
   const trimmedValue = value.trim();
 
   return trimmedValue.length > 0 ? trimmedValue : null;
@@ -138,6 +176,10 @@ async function defaultResolvePersistenceLineage(): Promise<null> {
 }
 
 async function defaultResolveOrganizationAdminContext(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveVersionOrganizationPublicId(): Promise<null> {
   return null;
 }
 
@@ -170,7 +212,7 @@ function createSessionBackedOrganizationAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
   resolveVisibleOrganizationScope: OrganizationTrainingVisibleOrganizationScopeResolver,
 ): OrganizationTrainingAdminContextResolver {
-  return async ({ request, pathPublicId, publishInput }) => {
+  return async ({ request, pathPublicId, publishInput, takedownInput }) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
     });
@@ -197,6 +239,7 @@ function createSessionBackedOrganizationAdminContextResolver(
         request,
         pathPublicId,
         publishInput,
+        takedownInput,
         adminPublicId,
       }),
     );
@@ -223,18 +266,17 @@ function createDefaultPersistenceLineageResolver(
 }
 
 function createRuntimeOrganizationTrainingStore(
-  repository: Pick<OrganizationTrainingStore, "publishVersion">,
+  repository: Pick<
+    OrganizationTrainingStore,
+    "publishVersion" | "takeDownVersion"
+  >,
 ): OrganizationTrainingStore {
   return {
     async createManualDraft() {
       throw new Error("Organization training draft route is not configured.");
     },
     publishVersion: repository.publishVersion,
-    async takeDownVersion() {
-      throw new Error(
-        "Organization training takedown route is not configured.",
-      );
-    },
+    takeDownVersion: repository.takeDownVersion,
     async copyVersionToNewDraft() {
       throw new Error("Organization training copy route is not configured.");
     },
@@ -266,6 +308,18 @@ function createRepositoryBackedVisibleOrganizationScopeResolver(
     repository.lookupVisibleOrganizationScope({ adminPublicId });
 }
 
+function createRepositoryBackedVersionOrganizationPublicIdResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "lookupVersionOrganizationPublicId"
+  >,
+): OrganizationTrainingVersionOrganizationPublicIdResolver {
+  return async ({ takedownInput }) =>
+    repository.lookupVersionOrganizationPublicId({
+      versionPublicId: takedownInput.versionPublicId,
+    });
+}
+
 function createInvalidPublishInputResponse(): ApiResponse<null> {
   return createErrorResponse(
     invalidPublishInputCode,
@@ -273,10 +327,24 @@ function createInvalidPublishInputResponse(): ApiResponse<null> {
   );
 }
 
+function createInvalidTakedownInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidTakedownInputCode,
+    invalidOrganizationTrainingTakedownInputMessage,
+  );
+}
+
 function createDraftPublicIdMismatchResponse(): ApiResponse<null> {
   return createErrorResponse(
     draftPublicIdMismatchCode,
     draftPublicIdMismatchMessage,
+  );
+}
+
+function createVersionPublicIdMismatchResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    versionPublicIdMismatchCode,
+    versionPublicIdMismatchMessage,
   );
 }
 
@@ -294,10 +362,31 @@ function createPublishAdminContextUnavailableResponse(): ApiResponse<null> {
   );
 }
 
+function createTakedownAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    takedownAdminContextUnavailableCode,
+    takedownAdminContextUnavailableMessage,
+  );
+}
+
+function createTakedownVersionOrganizationUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    takedownVersionOrganizationUnavailableCode,
+    takedownVersionOrganizationUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
     organizationTrainingPublishBlockedMessage,
+  );
+}
+
+function createTakedownBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    takedownBlockedCode,
+    organizationTrainingTakedownBlockedMessage,
   );
 }
 
@@ -364,7 +453,7 @@ export function createOrganizationTrainingPersistenceLineageResolver(
 export function createOrganizationTrainingRouteHandlers(
   organizationTrainingService: Pick<
     OrganizationTrainingService,
-    "publishVersion"
+    "publishVersion" | "takeDownVersion"
   >,
   options: OrganizationTrainingRouteOptions = {},
 ) {
@@ -376,6 +465,9 @@ export function createOrganizationTrainingRouteHandlers(
     createDefaultPersistenceLineageResolver(
       options.lookupTrustedPersistenceLineage,
     );
+  const resolveVersionOrganizationPublicId =
+    options.resolveVersionOrganizationPublicId ??
+    defaultResolveVersionOrganizationPublicId;
 
   return createRouteHandlersWithErrorEnvelope({
     publish: {
@@ -436,6 +528,69 @@ export function createOrganizationTrainingRouteHandlers(
         );
       },
     },
+    takeDown: {
+      async POST(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingTakedownInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(createInvalidTakedownInputResponse());
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.versionPublicId !== pathPublicId) {
+          return createJsonResponse(createVersionPublicIdMismatchResponse());
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+          takedownInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createTakedownAdminContextUnavailableResponse(),
+          );
+        }
+
+        const versionOrganizationPublicId = normalizeRequiredText(
+          await resolveVersionOrganizationPublicId({
+            request,
+            pathPublicId,
+            takedownInput: input.value,
+            adminContext,
+          }),
+        );
+
+        if (versionOrganizationPublicId === null) {
+          return createJsonResponse(
+            createTakedownVersionOrganizationUnavailableResponse(),
+          );
+        }
+
+        const result = await organizationTrainingService.takeDownVersion({
+          adminContext,
+          versionOrganizationPublicId,
+          takedownInput: input.value,
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createTakedownBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            version: result.version,
+          }),
+        );
+      },
+    },
   });
 }
 
@@ -453,6 +608,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       sessionService,
       resolveVisibleOrganizationScope,
     );
+  const resolveVersionOrganizationPublicId =
+    options.resolveVersionOrganizationPublicId ??
+    createRepositoryBackedVersionOrganizationPublicIdResolver(repository);
 
   return createOrganizationTrainingRouteHandlers(
     createOrganizationTrainingService(
@@ -460,6 +618,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
     ),
     {
       resolveOrganizationAdminContext,
+      resolveVersionOrganizationPublicId,
       lookupTrustedPersistenceLineage:
         repository.lookupTrustedPersistenceLineage,
     },

@@ -1,17 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
+import { POST as takeDownRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/take-down/route";
 
 import type { AuthContextDto } from "../contracts/auth-contract";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
-import type { OrganizationTrainingPublishInput } from "../models/organization-training";
+import type {
+  OrganizationTrainingPublishInput,
+  OrganizationTrainingTakedownInput,
+} from "../models/organization-training";
 import type { SessionService } from "./session-service";
 import {
   organizationTrainingPublishBlockedMessage,
+  organizationTrainingTakedownBlockedMessage,
   type OrganizationTrainingAdminContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingPublishVersionCommand,
   type OrganizationTrainingService,
+  type OrganizationTrainingTakeDownVersionCommand,
 } from "./organization-training-service";
 import {
   createOrganizationTrainingRouteHandlers,
@@ -27,6 +33,9 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
     organizationId: 501,
     orgAuthId: 601,
   })),
+  lookupVersionOrganizationPublicId: vi.fn(
+    async () => "organization_route_public_401",
+  ),
   publishVersion: vi.fn(
     async (): Promise<OrganizationTrainingPublishedVersionDto> => ({
       publicId: "organization_training_version_route_401",
@@ -48,6 +57,29 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
       publishedAt: "2026-06-15T10:00:00.000Z",
       takenDownAt: null,
       takedownReason: null,
+    }),
+  ),
+  takeDownVersion: vi.fn(
+    async (): Promise<OrganizationTrainingPublishedVersionDto> => ({
+      publicId: "organization_training_version_route_401",
+      draftPublicId: "organization_training_draft_route_401",
+      versionNumber: 1,
+      organizationPublicId: "organization_route_public_401",
+      publishScopeSnapshot: {
+        organizationPublicIds: [] as string[],
+        capturedAt: "2026-06-15T10:00:00.000Z",
+      },
+      profession: "logistics",
+      level: 4,
+      subject: "theory",
+      title: "Route publish training",
+      description: "Route publish description",
+      questionCount: 1,
+      totalScore: 5,
+      status: "taken_down",
+      publishedAt: "2026-06-15T10:00:00.000Z",
+      takenDownAt: "2026-06-15T11:00:00.000Z",
+      takedownReason: "outdated training",
     }),
   ),
 }));
@@ -72,6 +104,7 @@ const trustedAdminContext: OrganizationTrainingAdminContext = {
 };
 
 const publishPathPublicId = "organization_training_draft_route_401";
+const takeDownPathPublicId = "organization_training_version_route_401";
 type CurrentSessionRequest = Parameters<SessionService["getCurrentSession"]>[0];
 type CurrentSessionResult = Awaited<
   ReturnType<SessionService["getCurrentSession"]>
@@ -149,6 +182,28 @@ function createPublishedVersion(
   };
 }
 
+function createTakenDownVersion(
+  overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  return createPublishedVersion({
+    publicId: takeDownPathPublicId,
+    status: "taken_down",
+    takenDownAt: "2026-06-15T11:00:00.000Z",
+    takedownReason: "outdated training",
+    ...overrides,
+  });
+}
+
+function createTakedownInput(
+  overrides: Partial<OrganizationTrainingTakedownInput> = {},
+): OrganizationTrainingTakedownInput {
+  return {
+    versionPublicId: takeDownPathPublicId,
+    takedownReason: "outdated training",
+    ...overrides,
+  };
+}
+
 function createAdminAuthContext(
   overrides: Partial<AuthContextDto["user"]> = {},
 ): AuthContextDto {
@@ -201,6 +256,20 @@ function createPublishRequest(
   );
 }
 
+function createTakeDownRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/take-down`,
+    {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
 function createRouteContext(publicId = publishPathPublicId) {
   return {
     params: Promise.resolve({
@@ -220,7 +289,7 @@ function createPublishService(
     success: true,
     version: createPublishedVersion(),
   },
-): Pick<OrganizationTrainingService, "publishVersion"> & {
+): Pick<OrganizationTrainingService, "publishVersion" | "takeDownVersion"> & {
   commands: OrganizationTrainingPublishVersionCommand[];
 } {
   const commands: OrganizationTrainingPublishVersionCommand[] = [];
@@ -228,6 +297,38 @@ function createPublishService(
   return {
     commands,
     async publishVersion(command) {
+      commands.push(command);
+
+      return result;
+    },
+    async takeDownVersion() {
+      throw new Error("Unexpected organization training takedown command.");
+    },
+  };
+}
+
+function createTakeDownService(
+  result:
+    | { success: true; version: OrganizationTrainingPublishedVersionDto }
+    | {
+        success: false;
+        reason: "invalid_takedown_input";
+        message: typeof organizationTrainingTakedownBlockedMessage;
+      } = {
+    success: true,
+    version: createTakenDownVersion(),
+  },
+): Pick<OrganizationTrainingService, "publishVersion" | "takeDownVersion"> & {
+  commands: OrganizationTrainingTakeDownVersionCommand[];
+} {
+  const commands: OrganizationTrainingTakeDownVersionCommand[] = [];
+
+  return {
+    commands,
+    async publishVersion() {
+      throw new Error("Unexpected organization training publish command.");
+    },
+    async takeDownVersion(command) {
       commands.push(command);
 
       return result;
@@ -253,9 +354,17 @@ describe("organization training publish route handlers", () => {
     runtimeRepositoryMock.lookupVisibleOrganizationScope.mockResolvedValue([
       "organization_route_public_401",
     ]);
+    runtimeRepositoryMock.lookupVersionOrganizationPublicId.mockClear();
+    runtimeRepositoryMock.lookupVersionOrganizationPublicId.mockResolvedValue(
+      "organization_route_public_401",
+    );
     runtimeRepositoryMock.publishVersion.mockClear();
     runtimeRepositoryMock.publishVersion.mockResolvedValue(
       createPublishedVersion(),
+    );
+    runtimeRepositoryMock.takeDownVersion.mockClear();
+    runtimeRepositoryMock.takeDownVersion.mockResolvedValue(
+      createTakenDownVersion(),
     );
   });
 
@@ -791,12 +900,17 @@ describe("organization training publish route handlers", () => {
   });
 
   it("redacts unexpected service failures behind the standard runtime error envelope", async () => {
-    const publishService: Pick<OrganizationTrainingService, "publishVersion"> =
-      {
-        async publishVersion() {
-          throw new Error("database stack with private row details");
-        },
-      };
+    const publishService: Pick<
+      OrganizationTrainingService,
+      "publishVersion" | "takeDownVersion"
+    > = {
+      async publishVersion() {
+        throw new Error("database stack with private row details");
+      },
+      async takeDownVersion() {
+        throw new Error("Unexpected organization training takedown command.");
+      },
+    };
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
@@ -820,5 +934,289 @@ describe("organization training publish route handlers", () => {
     });
     expect(serializedPayload).not.toContain("database stack");
     expect(serializedPayload).not.toContain("private row details");
+  });
+});
+
+describe("organization training takedown route handlers", () => {
+  beforeEach(() => {
+    postgresOrganizationTrainingRepositoryFactoryMock.mockClear();
+    postgresOrganizationTrainingRepositoryFactoryMock.mockReturnValue(
+      runtimeRepositoryMock,
+    );
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockClear();
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockResolvedValue([
+      "organization_route_public_401",
+    ]);
+    runtimeRepositoryMock.lookupVersionOrganizationPublicId.mockClear();
+    runtimeRepositoryMock.lookupVersionOrganizationPublicId.mockResolvedValue(
+      "organization_route_public_401",
+    );
+    runtimeRepositoryMock.takeDownVersion.mockClear();
+    runtimeRepositoryMock.takeDownVersion.mockResolvedValue(
+      createTakenDownVersion(),
+    );
+  });
+
+  it("exports a thin POST handler from the App Router take-down entrypoint", () => {
+    expect(takeDownRoutePost).toEqual(expect.any(Function));
+  });
+
+  it("returns a success envelope after resolving trusted version organization scope", async () => {
+    const takeDownService = createTakeDownService();
+    const resolverInputs: unknown[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(takeDownService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async resolveVersionOrganizationPublicId(input) {
+        resolverInputs.push({
+          pathPublicId: input.pathPublicId,
+          takedownInput: input.takedownInput,
+          adminContext: input.adminContext,
+        });
+
+        return "organization_route_public_401";
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput()),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createTakenDownVersion(),
+      },
+    });
+    expect(resolverInputs).toEqual([
+      {
+        pathPublicId: takeDownPathPublicId,
+        takedownInput: createTakedownInput(),
+        adminContext: trustedAdminContext,
+      },
+    ]);
+    expect(takeDownService.commands).toEqual([
+      {
+        adminContext: trustedAdminContext,
+        versionOrganizationPublicId: "organization_route_public_401",
+        takedownInput: createTakedownInput(),
+      },
+    ]);
+    expect(serializedPayload).not.toMatch(
+      /"id":|"organizationId":|"orgAuthId":/,
+    );
+  });
+
+  it("wires version organization lookup and repository takedown into the runtime route", async () => {
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput()),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createTakenDownVersion(),
+      },
+    });
+    expect(
+      runtimeRepositoryMock.lookupVersionOrganizationPublicId,
+    ).toHaveBeenCalledWith({
+      versionPublicId: takeDownPathPublicId,
+    });
+    expect(runtimeRepositoryMock.takeDownVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        versionPublicId: takeDownPathPublicId,
+        organizationPublicId: "organization_route_public_401",
+        status: "taken_down",
+        takedownReason: "outdated training",
+      }),
+    );
+  });
+
+  it("derives takedown organization-admin context from runtime session with visible organization scope", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    let visibleScopeInputs: Omit<
+      OrganizationTrainingVisibleOrganizationScopeResolverInput,
+      "request"
+    >[] = [];
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      async resolveVisibleOrganizationScope(input) {
+        visibleScopeInputs = [
+          ...visibleScopeInputs,
+          {
+            adminPublicId: input.adminPublicId,
+            pathPublicId: input.pathPublicId,
+            takedownInput: input.takedownInput,
+          },
+        ];
+
+        return ["organization_route_public_401"];
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput(), {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createTakenDownVersion(),
+      },
+    });
+    expect(sessionService.requests).toEqual([
+      {
+        authorization: "Bearer organization_training_route_session_401",
+      },
+    ]);
+    expect(visibleScopeInputs).toEqual([
+      {
+        adminPublicId: "organization_admin_route_public_401",
+        pathPublicId: takeDownPathPublicId,
+        takedownInput: createTakedownInput(),
+      },
+    ]);
+  });
+
+  it("rejects a path and body version public id mismatch before resolving version organization", async () => {
+    const takeDownService = createTakeDownService();
+    const resolverInputs: unknown[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(takeDownService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async resolveVersionOrganizationPublicId(input) {
+        resolverInputs.push(input);
+
+        return "organization_route_public_401";
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(
+        createTakedownInput({
+          versionPublicId: "organization_training_version_route_mismatch",
+        }),
+      ),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 400067,
+      message:
+        "Organization training takedown path public id must match request body.",
+      data: null,
+    });
+    expect(resolverInputs).toEqual([]);
+    expect(takeDownService.commands).toEqual([]);
+  });
+
+  it("blocks takedown when organization-admin actor context is unavailable", async () => {
+    const takeDownService = createTakeDownService();
+    const handlers = createOrganizationTrainingRouteHandlers(takeDownService, {
+      async resolveVersionOrganizationPublicId() {
+        return "organization_route_public_401";
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput()),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403068,
+      message:
+        "Organization training takedown organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(takeDownService.commands).toEqual([]);
+  });
+
+  it("blocks takedown when the trusted version organization cannot be resolved", async () => {
+    const takeDownService = createTakeDownService();
+    const handlers = createOrganizationTrainingRouteHandlers(takeDownService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async resolveVersionOrganizationPublicId() {
+        return null;
+      },
+    });
+
+    const response = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput()),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403069,
+      message:
+        "Organization training takedown version organization is unavailable.",
+      data: null,
+    });
+    expect(takeDownService.commands).toEqual([]);
+  });
+
+  it("returns invalid and blocked envelopes without leaking runtime details", async () => {
+    const takeDownService = createTakeDownService({
+      success: false,
+      reason: "invalid_takedown_input",
+      message: organizationTrainingTakedownBlockedMessage,
+    });
+    const handlers = createOrganizationTrainingRouteHandlers(takeDownService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async resolveVersionOrganizationPublicId() {
+        return "organization_route_public_401";
+      },
+    });
+
+    const invalidResponse = await handlers.takeDown.POST(
+      createTakeDownRequest({
+        versionPublicId: takeDownPathPublicId,
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const blockedResponse = await handlers.takeDown.POST(
+      createTakeDownRequest(createTakedownInput()),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(invalidResponse)).resolves.toEqual({
+      code: 400066,
+      message: "Invalid organization training takedown input.",
+      data: null,
+    });
+    await expect(resolveJsonPayload(blockedResponse)).resolves.toEqual({
+      code: 409070,
+      message: organizationTrainingTakedownBlockedMessage,
+      data: null,
+    });
   });
 });

@@ -127,6 +127,20 @@ lastRuntimeApiGapBoundaryAudit:
     - taskId: organization-training-admin-employee-local-full-flow-validation
       profile: local_full_flow
       purpose: Run approved localhost-only admin-to-employee flow after API and UI entries exist.
+lastVersionTakedownRuntimeRouteContractTdd:
+  taskId: organization-training-version-takedown-runtime-route-contract-tdd
+  validatedAt: "2026-06-17T20:32:53-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+  decision: version_takedown_runtime_route_contract_closed_no_experience_closed_claim
+  nextTask: organization-training-employee-answer-runtime-repository-contract-tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+  boundarySummary:
+    publishRuntime: existing_publish_route_and_repository_wiring
+    versionTakedownRuntime: closed_route_repository_contract_no_schema_change
+    employeeAnswerRuntime: repository_and_routes_missing
+    draftAndSourceContextRuntime: schema_gate_required_before_runtime_persistence
+    localFullFlow: blocked_until_runtime_api_and_ui_entry_surfaces_exist
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -356,16 +370,16 @@ matrix:
     edition: advanced
     actor: organization_admin
     entrySurface: not_found_organization_ui
-    apiSurface: src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+    apiSurface: src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts
     uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/repositories/organization-training-repository.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
     status: local_experience_ready
-    blockedGate: draft_source_context_schema_gate_admin_routes_ui_and_local_full_flow_not_closed
-    nextTask: organization-training-version-takedown-runtime-route-contract-tdd
+    blockedGate: draft_source_context_schema_gate_admin_ui_employee_routes_and_local_full_flow_not_closed
+    nextTask: organization-training-draft-source-context-schema-approval-package
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
