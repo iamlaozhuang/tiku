@@ -1,9 +1,13 @@
+import type { OrganizationTrainingAnswerOrganizationSnapshotValue } from "@/db/schema";
+
 import type {
+  EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingScopeSnapshotDto,
 } from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
 import type {
+  OrganizationTrainingAnswerStatus,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
@@ -40,6 +44,24 @@ export type OrganizationTrainingVersionRow = {
   updated_at: Date;
 };
 
+export type OrganizationTrainingAnswerRow = {
+  id?: number;
+  public_id: string;
+  organization_training_version_id: number;
+  organization_training_version_public_id: string;
+  employee_id: number;
+  employee_public_id: string;
+  organization_id: number;
+  organization_public_id: string;
+  organization_training_answer_status: OrganizationTrainingAnswerStatus;
+  score: number | string | null;
+  total_score: number | string;
+  submitted_at: Date | null;
+  answer_organization_snapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export function mapOrganizationTrainingVersionRowToDto(
   row: OrganizationTrainingVersionRow,
 ): OrganizationTrainingPublishedVersionDto {
@@ -63,6 +85,40 @@ export function mapOrganizationTrainingVersionRowToDto(
   };
 }
 
+export function mapOrganizationTrainingAnswerRowToDto(
+  row: OrganizationTrainingAnswerRow,
+): EmployeeOrganizationTrainingAnswerDto {
+  const score = normalizeNullableScore(row.score);
+  const totalScore = normalizeTotalScore(row.total_score);
+  const scoreSummary =
+    score === null
+      ? null
+      : {
+          score,
+          totalScore,
+        };
+
+  return {
+    publicId: row.public_id,
+    trainingVersionPublicId: row.organization_training_version_public_id,
+    employeePublicId: row.employee_public_id,
+    organizationPublicId: row.organization_public_id,
+    answerOrganizationSnapshot: {
+      organizationPublicIds: [
+        row.answer_organization_snapshot.organizationPublicId,
+      ],
+      capturedAt: row.answer_organization_snapshot.capturedAt,
+    },
+    answerStatus: row.organization_training_answer_status,
+    scoreSummary,
+    submittedAt: row.submitted_at?.toISOString() ?? null,
+    resultSummaryVisible:
+      row.organization_training_answer_status !== "in_progress" &&
+      row.submitted_at !== null &&
+      scoreSummary !== null,
+  };
+}
+
 function copyScopeSnapshot(
   snapshot: OrganizationTrainingScopeSnapshotDto,
 ): OrganizationTrainingScopeSnapshotDto {
@@ -78,4 +134,12 @@ function normalizeTotalScore(totalScore: number | string): number {
   }
 
   return Number(totalScore);
+}
+
+function normalizeNullableScore(score: number | string | null): number | null {
+  if (score === null) {
+    return null;
+  }
+
+  return normalizeTotalScore(score);
 }

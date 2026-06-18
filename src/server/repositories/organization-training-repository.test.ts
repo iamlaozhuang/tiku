@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type {
+  OrganizationTrainingEmployeeAnswerDraftWrite,
+  OrganizationTrainingEmployeeAnswerSubmissionWrite,
   OrganizationTrainingPublishedVersionWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
+import type { EmployeeOrganizationTrainingAnswerDto } from "../contracts/organization-training-contract";
 import {
   createOrganizationTrainingRepository,
   type OrganizationTrainingTrustedPersistenceLineage,
@@ -13,6 +16,62 @@ import {
   type OrganizationTrainingVersionRow,
   type OrganizationTrainingVisibleOrganizationScopeSource,
 } from "./organization-training-repository";
+
+type EmployeeAnswerRepositoryContract = {
+  saveEmployeeAnswerDraft(
+    answerDraftWrite: OrganizationTrainingEmployeeAnswerDraftWrite,
+  ): Promise<EmployeeOrganizationTrainingAnswerDto>;
+  submitEmployeeAnswer(
+    answerSubmissionWrite: OrganizationTrainingEmployeeAnswerSubmissionWrite,
+  ): Promise<EmployeeOrganizationTrainingAnswerDto>;
+};
+
+type EmployeeAnswerPersistenceLineage = {
+  organizationTrainingVersionId: number;
+  employeeId: number;
+  organizationId: number;
+  organizationName: string;
+  totalScore: number;
+};
+
+type EmployeeAnswerDraftUpsertInput = {
+  publicId: string;
+  organizationTrainingVersionId: number;
+  trainingVersionPublicId: string;
+  employeeId: number;
+  employeePublicId: string;
+  organizationId: number;
+  organizationPublicId: string;
+  answerOrganizationSnapshot: {
+    organizationPublicId: string;
+    organizationName: string;
+    capturedAt: string;
+  };
+  answerStatus: "in_progress";
+  score: null;
+  totalScore: number;
+  submittedAt: null;
+  savedAt: string;
+};
+
+type EmployeeAnswerSubmissionUpsertInput = {
+  publicId: string;
+  organizationTrainingVersionId: number;
+  trainingVersionPublicId: string;
+  employeeId: number;
+  employeePublicId: string;
+  organizationId: number;
+  organizationPublicId: string;
+  answerOrganizationSnapshot: {
+    organizationPublicId: string;
+    organizationName: string;
+    capturedAt: string;
+  };
+  answerStatus: "submitted";
+  score: number;
+  totalScore: number;
+  submittedAt: string;
+};
 
 function createVersionWrite(
   overrides: Partial<OrganizationTrainingPublishedVersionWrite> = {},
@@ -55,6 +114,64 @@ function createVersionWrite(
   };
 }
 
+function createEmployeeAnswerDraftWrite(
+  overrides: Partial<OrganizationTrainingEmployeeAnswerDraftWrite> = {},
+): OrganizationTrainingEmployeeAnswerDraftWrite {
+  return {
+    contentType: "organization_training_answer_draft",
+    trainingVersionPublicId: "training_version_public_123",
+    employeePublicId: "employee_public_123",
+    organizationPublicId: "organization_public_123",
+    answerOrganizationSnapshot: {
+      organizationPublicIds: ["organization_public_123"],
+      capturedAt: "2026-06-16T09:00:00.000Z",
+    },
+    answerStatus: "in_progress",
+    answeredQuestionCount: 1,
+    scoreSummary: null,
+    savedAt: "2026-06-16T09:00:00.000Z",
+    submittedAt: null,
+    formalWritePolicy: {
+      createPractice: false,
+      createMockExam: false,
+      createFormalAnswerRecord: false,
+      createExamReport: false,
+      createMistakeBook: false,
+    },
+    ...overrides,
+  };
+}
+
+function createEmployeeAnswerSubmissionWrite(
+  overrides: Partial<OrganizationTrainingEmployeeAnswerSubmissionWrite> = {},
+): OrganizationTrainingEmployeeAnswerSubmissionWrite {
+  return {
+    contentType: "organization_training_answer_record",
+    trainingVersionPublicId: "training_version_public_123",
+    employeePublicId: "employee_public_123",
+    organizationPublicId: "organization_public_123",
+    answerOrganizationSnapshot: {
+      organizationPublicIds: ["organization_public_123"],
+      capturedAt: "2026-06-16T09:05:00.000Z",
+    },
+    answerStatus: "submitted",
+    answeredQuestionCount: 2,
+    scoreSummary: {
+      score: 4,
+      totalScore: 5,
+    },
+    submittedAt: "2026-06-16T09:05:00.000Z",
+    formalWritePolicy: {
+      createPractice: false,
+      createMockExam: false,
+      createFormalAnswerRecord: false,
+      createExamReport: false,
+      createMistakeBook: false,
+    },
+    ...overrides,
+  };
+}
+
 function createTakedownWrite(
   overrides: Partial<OrganizationTrainingVersionTakedownWrite> = {},
 ): OrganizationTrainingVersionTakedownWrite {
@@ -81,11 +198,15 @@ function createGateway(
     trustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineage | null;
     visibleOrganizationScopeSource?: OrganizationTrainingVisibleOrganizationScopeSource | null;
     versionOrganizationPublicId?: string | null;
+    employeeAnswerPersistenceLineage?: EmployeeAnswerPersistenceLineage | null;
     takedownUpdateResult?: "row" | "null";
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
   let takedownInputs: OrganizationTrainingVersionTakedownInput[] = [];
+  let employeeAnswerDraftInputs: EmployeeAnswerDraftUpsertInput[] = [];
+  let employeeAnswerSubmissionInputs: EmployeeAnswerSubmissionUpsertInput[] =
+    [];
   const findLatestVersionNumberByDraftPublicId = vi.fn(
     async () => options.latestVersionNumber ?? null,
   );
@@ -97,6 +218,9 @@ function createGateway(
   );
   const findVersionOrganizationPublicIdByVersionPublicId = vi.fn(
     async () => options.versionOrganizationPublicId ?? null,
+  );
+  const findEmployeeAnswerPersistenceLineageByPublicIds = vi.fn(
+    async () => options.employeeAnswerPersistenceLineage ?? null,
   );
   const insertPublishedVersion = vi.fn(
     async (input: OrganizationTrainingVersionInsertInput) => {
@@ -185,14 +309,66 @@ function createGateway(
       };
     },
   );
+  const upsertEmployeeAnswerDraft = vi.fn(
+    async (input: EmployeeAnswerDraftUpsertInput) => {
+      employeeAnswerDraftInputs = [...employeeAnswerDraftInputs, input];
+
+      return {
+        id: 903,
+        public_id: input.publicId,
+        organization_training_version_id: input.organizationTrainingVersionId,
+        organization_training_version_public_id: input.trainingVersionPublicId,
+        employee_id: input.employeeId,
+        employee_public_id: input.employeePublicId,
+        organization_id: input.organizationId,
+        organization_public_id: input.organizationPublicId,
+        organization_training_answer_status: input.answerStatus,
+        score: input.score,
+        total_score: String(input.totalScore),
+        submitted_at: input.submittedAt,
+        answer_organization_snapshot: input.answerOrganizationSnapshot,
+        created_at: new Date(input.savedAt),
+        updated_at: new Date(input.savedAt),
+      };
+    },
+  );
+  const upsertEmployeeAnswerSubmission = vi.fn(
+    async (input: EmployeeAnswerSubmissionUpsertInput) => {
+      employeeAnswerSubmissionInputs = [
+        ...employeeAnswerSubmissionInputs,
+        input,
+      ];
+
+      return {
+        id: 904,
+        public_id: input.publicId,
+        organization_training_version_id: input.organizationTrainingVersionId,
+        organization_training_version_public_id: input.trainingVersionPublicId,
+        employee_id: input.employeeId,
+        employee_public_id: input.employeePublicId,
+        organization_id: input.organizationId,
+        organization_public_id: input.organizationPublicId,
+        organization_training_answer_status: input.answerStatus,
+        score: String(input.score),
+        total_score: String(input.totalScore),
+        submitted_at: new Date(input.submittedAt),
+        answer_organization_snapshot: input.answerOrganizationSnapshot,
+        created_at: new Date(input.submittedAt),
+        updated_at: new Date(input.submittedAt),
+      };
+    },
+  );
   const gateway: OrganizationTrainingVersionGateway = {
     findLatestVersionNumberByDraftPublicId,
     findTrustedPersistenceLineageByPublicIds,
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
+    findEmployeeAnswerPersistenceLineageByPublicIds,
     insertPublishedVersion,
+    upsertEmployeeAnswerDraft,
+    upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
-  };
+  } as OrganizationTrainingVersionGateway;
 
   return {
     gateway,
@@ -200,10 +376,15 @@ function createGateway(
     findTrustedPersistenceLineageByPublicIds,
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
+    findEmployeeAnswerPersistenceLineageByPublicIds,
     insertPublishedVersion,
+    upsertEmployeeAnswerDraft,
+    upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
     getInsertInputs: () => insertInputs,
     getTakedownInputs: () => takedownInputs,
+    getEmployeeAnswerDraftInputs: () => employeeAnswerDraftInputs,
+    getEmployeeAnswerSubmissionInputs: () => employeeAnswerSubmissionInputs,
   };
 }
 
@@ -449,6 +630,166 @@ describe("organization training repository", () => {
     await expect(
       repository.takeDownVersion(createTakedownWrite()),
     ).rejects.toThrow("organization training version takedown failed.");
+  });
+
+  it("saves employee answer draft as metadata-only repository state", async () => {
+    const {
+      gateway,
+      findEmployeeAnswerPersistenceLineageByPublicIds,
+      upsertEmployeeAnswerDraft,
+      getEmployeeAnswerDraftInputs,
+    } = createGateway({
+      employeeAnswerPersistenceLineage: {
+        organizationTrainingVersionId: 801,
+        employeeId: 701,
+        organizationId: 501,
+        organizationName: "Test Organization",
+        totalScore: 5,
+      },
+    });
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createAnswerPublicId: () => "training_answer_public_999",
+    } as Parameters<typeof createOrganizationTrainingRepository>[1] & {
+      createAnswerPublicId: () => string;
+    }) as EmployeeAnswerRepositoryContract;
+
+    const result = await repository.saveEmployeeAnswerDraft(
+      createEmployeeAnswerDraftWrite(),
+    );
+
+    expect(
+      findEmployeeAnswerPersistenceLineageByPublicIds,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+    expect(upsertEmployeeAnswerDraft).toHaveBeenCalledWith({
+      publicId: "training_answer_public_999",
+      organizationTrainingVersionId: 801,
+      trainingVersionPublicId: "training_version_public_123",
+      employeeId: 701,
+      employeePublicId: "employee_public_123",
+      organizationId: 501,
+      organizationPublicId: "organization_public_123",
+      answerOrganizationSnapshot: {
+        organizationPublicId: "organization_public_123",
+        organizationName: "Test Organization",
+        capturedAt: "2026-06-16T09:00:00.000Z",
+      },
+      answerStatus: "in_progress",
+      score: null,
+      totalScore: 5,
+      submittedAt: null,
+      savedAt: "2026-06-16T09:00:00.000Z",
+    });
+    expect(result).toEqual({
+      publicId: "training_answer_public_999",
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+      answerOrganizationSnapshot: {
+        organizationPublicIds: ["organization_public_123"],
+        capturedAt: "2026-06-16T09:00:00.000Z",
+      },
+      answerStatus: "in_progress",
+      scoreSummary: null,
+      submittedAt: null,
+      resultSummaryVisible: false,
+    });
+
+    const serializedDraftInput = JSON.stringify(getEmployeeAnswerDraftInputs());
+
+    expect(serializedDraftInput).not.toContain("answeredQuestionCount");
+    expect(serializedDraftInput).not.toContain("formalWritePolicy");
+    expect(serializedDraftInput).not.toContain("answerRecordPublicId");
+    expect(serializedDraftInput).not.toContain("practicePublicId");
+    expect(serializedDraftInput).not.toContain("mockExamPublicId");
+    expect(serializedDraftInput).not.toContain("providerPayload");
+    expect(serializedDraftInput).not.toContain("rawPrompt");
+    expect(serializedDraftInput).not.toContain("rawAnswer");
+  });
+
+  it("submits employee answer metadata with score summary only", async () => {
+    const {
+      gateway,
+      findEmployeeAnswerPersistenceLineageByPublicIds,
+      upsertEmployeeAnswerSubmission,
+      getEmployeeAnswerSubmissionInputs,
+    } = createGateway({
+      employeeAnswerPersistenceLineage: {
+        organizationTrainingVersionId: 801,
+        employeeId: 701,
+        organizationId: 501,
+        organizationName: "Test Organization",
+        totalScore: 5,
+      },
+    });
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createAnswerPublicId: () => "training_answer_public_999",
+    } as Parameters<typeof createOrganizationTrainingRepository>[1] & {
+      createAnswerPublicId: () => string;
+    }) as EmployeeAnswerRepositoryContract;
+
+    const result = await repository.submitEmployeeAnswer(
+      createEmployeeAnswerSubmissionWrite(),
+    );
+
+    expect(
+      findEmployeeAnswerPersistenceLineageByPublicIds,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+    expect(upsertEmployeeAnswerSubmission).toHaveBeenCalledWith({
+      publicId: "training_answer_public_999",
+      organizationTrainingVersionId: 801,
+      trainingVersionPublicId: "training_version_public_123",
+      employeeId: 701,
+      employeePublicId: "employee_public_123",
+      organizationId: 501,
+      organizationPublicId: "organization_public_123",
+      answerOrganizationSnapshot: {
+        organizationPublicId: "organization_public_123",
+        organizationName: "Test Organization",
+        capturedAt: "2026-06-16T09:05:00.000Z",
+      },
+      answerStatus: "submitted",
+      score: 4,
+      totalScore: 5,
+      submittedAt: "2026-06-16T09:05:00.000Z",
+    });
+    expect(result).toEqual({
+      publicId: "training_answer_public_999",
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+      answerOrganizationSnapshot: {
+        organizationPublicIds: ["organization_public_123"],
+        capturedAt: "2026-06-16T09:05:00.000Z",
+      },
+      answerStatus: "submitted",
+      scoreSummary: {
+        score: 4,
+        totalScore: 5,
+      },
+      submittedAt: "2026-06-16T09:05:00.000Z",
+      resultSummaryVisible: true,
+    });
+
+    const serializedSubmissionInput = JSON.stringify(
+      getEmployeeAnswerSubmissionInputs(),
+    );
+
+    expect(serializedSubmissionInput).not.toContain("answeredQuestionCount");
+    expect(serializedSubmissionInput).not.toContain("formalWritePolicy");
+    expect(serializedSubmissionInput).not.toContain("answerRecordPublicId");
+    expect(serializedSubmissionInput).not.toContain("practicePublicId");
+    expect(serializedSubmissionInput).not.toContain("mockExamPublicId");
+    expect(serializedSubmissionInput).not.toContain("providerPayload");
+    expect(serializedSubmissionInput).not.toContain("rawPrompt");
+    expect(serializedSubmissionInput).not.toContain("rawAnswer");
   });
 
   it("rejects invalid trusted internal lineage returned by the gateway", async () => {

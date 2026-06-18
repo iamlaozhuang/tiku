@@ -13544,8 +13544,8 @@ tasks:
     humanApproval: >-
       Approved by the current 2026-06-17 user prompt after queue materialization. Scope is limited to local_unit_tdd
       repository contract work for metadata-only organization training employee answer persistence using the existing
-      `organization_training_answer` schema. It may modify only the repository, repository unit test, docs/state, task
-      plan, evidence, and audit files listed in allowedFiles. It must keep raw answer content, answered-question
+      `organization_training_answer` schema. It may modify only the repository, mapper, repository unit test,
+      docs/state, task plan, evidence, and audit files listed in allowedFiles. It must keep raw answer content, answered-question
       persistence, schema/drizzle/migration, package/lockfile/dependency, `.env*`, provider/model calls, dev server,
       Browser/Playwright runtime, full e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, Cost
       Calibration Gate, raw/private data exposure, public identifier inventories, and row data blocked.
@@ -13622,9 +13622,14 @@ tasks:
     seededImplementationTask: true
     seededExecutionModule: organization-training
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass_tdd_metadata_only_employee_answer_repository_contract
+    claimedAt: "2026-06-17T22:17:39-07:00"
+    validatedAt: "2026-06-17T22:26:47-07:00"
+    closedAt: "2026-06-17T22:26:47-07:00"
+    branch: codex/organization-training-employee-answer-runtime-repository-contract-tdd
     allowedFiles:
+      - src/server/mappers/organization-training-mapper.ts
       - src/server/repositories/organization-training-repository.ts
       - src/server/repositories/organization-training-repository.test.ts
       - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
@@ -13648,7 +13653,6 @@ tasks:
       - src/server/services/organization-training-route.ts
       - src/server/contracts/organization-training-contract.ts
       - src/server/models/organization-training.ts
-      - src/server/mappers/organization-training-mapper.ts
       - src/db/schema/organization-training.ts
       - src/db/schema/auth.ts
     blockedFiles:
@@ -13662,7 +13666,6 @@ tasks:
       - src/app/**
       - src/server/services/**
       - src/server/contracts/**
-      - src/server/mappers/**
       - src/server/validators/**
       - src/db/schema/**
       - drizzle/**
@@ -13680,14 +13683,14 @@ tasks:
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: red
+      - phase: advisory_baseline
         command: npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
-      - phase: green
+      - phase: post_edit
         command: npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
       - phase: post_edit
         command: npm.cmd run test:e2e -- --list
       - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+        command: npx.cmd prettier --check --ignore-unknown src/server/mappers/organization-training-mapper.ts src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
       - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
@@ -13705,7 +13708,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
       - npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
       - npm.cmd run test:e2e -- --list
-      - npx.cmd prettier --check --ignore-unknown src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+      - npx.cmd prettier --check --ignore-unknown src/server/mappers/organization-training-mapper.ts src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check

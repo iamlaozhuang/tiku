@@ -167,6 +167,22 @@ lastEmployeeAnswerRepositoryQueueMaterialization:
     employeeAnswerRuntime: repository_contract_tdd_pending
     schemaImplementation: not_required_for_metadata_only_answer_status_score_and_snapshot
     localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
+lastEmployeeAnswerRepositoryContractTdd:
+  taskId: organization-training-employee-answer-runtime-repository-contract-tdd
+  closedAt: "2026-06-17T22:26:47-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: metadata_only_employee_answer_repository_contract_ready_no_experience_closed_claim
+  nextTask: organization-training-employee-answer-runtime-route-contract-tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+  boundarySummary:
+    employeeAnswerRepositoryContract: metadata_only_draft_and_submission_persistence_ready
+    answerSnapshotPersistence: schema_shape_preserved_with_mapper_back_to_service_dto
+    rawAnswerPersistence: blocked
+    answeredQuestionCountPersistence: blocked
+    employeeAnswerRuntimeRoutes: pending
+    employeeAnswerEntrySurface: pending
+    localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -414,12 +430,12 @@ matrix:
     serviceSurface: src/server/services/organization-training-service.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts
     uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/repositories/organization-training-repository.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
     status: partial
-    blockedGate: employee_answer_repository_routes_ui_entry_and_local_full_flow_not_closed
-    nextTask: organization-training-employee-answer-runtime-repository-contract-tdd
+    blockedGate: employee_answer_runtime_routes_ui_entry_and_local_full_flow_not_closed
+    nextTask: organization-training-employee-answer-runtime-route-contract-tdd
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
