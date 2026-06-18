@@ -650,17 +650,17 @@ matrix:
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin
-    entrySurface: not_found_organization_portal
-    apiSurface: organization_training_and_analytics_api_surfaces_partial
-    serviceSurface: organization_training_and_analytics_services_partial
-    repositorySurface: organization_training_and_analytics_repositories_partial
-    uiSurface: not_found
-    unitEvidence: organization_training_and_analytics_unit_evidence_partial
-    e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
-    status: partial
-    blockedGate: organization_portal_admin_shell_entry_and_e2e_flow_not_closed
-    nextTask: organization-portal-admin-shell-entry-contract-tdd
+    entrySurface: src/app/(admin)/content/organization-portal/page.tsx
+    apiSurface: src/app/api/v1/organization-trainings/**; src/app/api/v1/organization-analytics/**
+    serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts; src/server/services/organization-analytics-service.ts; src/server/services/organization-analytics-route.ts
+    repositorySurface: src/server/repositories/organization-training-repository.ts; src/server/repositories/organization-analytics-repository.ts
+    uiSurface: src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+    unitEvidence: tests/unit/organization-portal-admin-entry-surface.test.ts; tests/unit/organization-training-admin-entry-surface.test.ts; tests/unit/organization-analytics-admin-entry-surface.test.ts
+    e2eEvidence: e2e/organization-portal-local-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    status: local_experience_ready
+    blockedGate: organization_portal_browser_runtime_full_flow_not_run
+    nextTask: organization-portal-admin-local-full-flow-validation
   - useCaseId: UC-ADV-OPS-AUTH-QUOTA
     edition: advanced
     actor: ops_admin

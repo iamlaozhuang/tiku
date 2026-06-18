@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-analytics-summary-ui-entry-contract-tdd
-updatedAt: "2026-06-18T06:10:27-07:00"
+currentPhase: organization-portal-admin-shell-entry-contract-tdd
+updatedAt: "2026-06-18T06:25:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,18 +497,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 59e819b3300404a48d8deef0182dbbc84c448455
-  lastKnownOriginMasterSha: 59e819b3300404a48d8deef0182dbbc84c448455
+  lastKnownMasterSha: 62e4ba2cbb4911d915b4bbdc4f0111e9ebea446e
+  lastKnownOriginMasterSha: 62e4ba2cbb4911d915b4bbdc4f0111e9ebea446e
 currentTask:
-  id: organization-analytics-summary-ui-entry-contract-tdd
+  id: organization-portal-admin-shell-entry-contract-tdd
   status: closed
   result: pass
-  sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryUiEntryContractTdd
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
-  branch: codex/organization-analytics-summary-ui-entry-contract-tdd
-  commitSha: 59e819b3300404a48d8deef0182dbbc84c448455
+  sourceStory: localExperienceClosureGate.organizationPortalAdminShellEntryContractTdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+  branch: codex/organization-portal-admin-shell-entry-contract-tdd
+  commitSha: 62e4ba2cbb4911d915b4bbdc4f0111e9ebea446e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: pass_organization_analytics_summary_ui_entry_contract_tdd
+    readiness: pass_organization_portal_admin_shell_entry_contract_tdd
     lint: pass
     typecheck: pass
-    unit: pass_organization_analytics_route_and_admin_entry_surface
+    unit: pass_organization_portal_admin_entry_surface
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_list_only_organization_analytics_local_flow_30_tests
+    e2e: pass_list_only_organization_portal_local_flow_31_tests
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -762,6 +762,7 @@ qualityGates:
     organizationTrainingAccumulatedChainApprovedCloseout: pass_approved_closeout_validated_for_commit_merge_push_cleanup
     localExperienceCoverageMatrixSummaryCountRepair: pass_docs_state_matrix_summary_counts_repaired
     organizationAnalyticsSummaryUiEntryContractTdd: pass_local_unit_ui_entry_e2e_list_no_runtime_e2e
+    organizationPortalAdminShellEntryContractTdd: pass_local_unit_shell_entry_e2e_list_no_runtime_e2e
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -800,7 +801,7 @@ localExperienceClosure:
   status: organization_training_experience_closed_local_role_flow_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-analytics-summary-ui-entry-contract-tdd
+  currentTaskId: organization-portal-admin-shell-entry-contract-tdd
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -819,10 +820,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After `organization-analytics-summary-ui-entry-contract-tdd` closeout, continue with
-    `organization-portal-admin-shell-entry-contract-tdd` to add the local admin organization portal shell entry that
-    links only to locally supported organization destinations. Keep release, staging/prod, provider/payment,
-    external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency,
-    destructive database operations, dev server, Browser/Playwright runtime, full e2e runtime, and Cost Calibration Gate
-    blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    After `organization-portal-admin-shell-entry-contract-tdd` closeout, the next recommended work is an explicit
+    organization portal local full-flow validation approval package or task. It should decide whether to run
+    Browser/Playwright runtime validation for `/content/organization-portal` linking to organization training and
+    organization analytics. Keep release, staging/prod, provider/payment, external-service, deployment, PR, force-push,
+    `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and Cost
+    Calibration Gate blocked unless a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
