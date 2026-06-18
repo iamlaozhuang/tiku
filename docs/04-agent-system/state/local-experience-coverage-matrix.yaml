@@ -141,6 +141,20 @@ lastVersionTakedownRuntimeRouteContractTdd:
     employeeAnswerRuntime: repository_and_routes_missing
     draftAndSourceContextRuntime: schema_gate_required_before_runtime_persistence
     localFullFlow: blocked_until_runtime_api_and_ui_entry_surfaces_exist
+lastDraftSourceContextSchemaApprovalPackage:
+  taskId: organization-training-draft-source-context-schema-approval-package
+  validatedAt: "2026-06-17T21:19:37-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+  decision: schema_approval_package_closed_no_schema_change
+  nextTask: organization-training-draft-source-context-schema-migration
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
+  boundarySummary:
+    manualDraftPersistence: schema_gate_prepared
+    sourceContextPersistence: schema_gate_prepared
+    copyToNewDraftPersistence: schema_gate_prepared
+    schemaImplementation: pending_fresh_schema_isolated_approval
+    localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -376,10 +390,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/repositories/organization-training-repository.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
     status: local_experience_ready
-    blockedGate: draft_source_context_schema_gate_admin_ui_employee_routes_and_local_full_flow_not_closed
-    nextTask: organization-training-draft-source-context-schema-approval-package
+    blockedGate: draft_source_context_schema_migration_admin_ui_employee_routes_and_local_full_flow_not_closed
+    nextTask: organization-training-draft-source-context-schema-migration
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
