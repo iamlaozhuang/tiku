@@ -61,6 +61,11 @@ clean up the short branch before starting the repair task. This closeout records
 - EXPECTED BLOCK: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-analytics-summary-local-full-flow-validation`
   rejected the task because the evidence result is not pass. That is expected for this user-approved blocked-evidence
   closeout package and does not convert the failed local full-flow into a success claim.
+- POST-MERGE HANDOFF REPAIR: the first push attempt after fast-forward merge was blocked by
+  `HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master` because the blocked task status did not allow state SHA ancestry.
+  The task status was therefore closed while keeping the blocked result
+  `blocked_by_organization_analytics_access_denied_403185`, so the closeout package can push the documented blocked
+  state without claiming validation success.
 
 ## Decision
 

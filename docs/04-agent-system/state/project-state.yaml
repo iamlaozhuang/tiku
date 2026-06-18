@@ -501,7 +501,7 @@ repository:
   lastKnownOriginMasterSha: e47f5ed48308d0fe0267a9d882bc6d0ac831a0de
 currentTask:
   id: organization-analytics-summary-local-full-flow-validation
-  status: blocked_validation_failure
+  status: closed
   result: blocked_by_organization_analytics_access_denied_403185
   sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryLocalFullFlowValidation
   planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
