@@ -17581,3 +17581,104 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
     retryCount: 0
+
+  - id: standard-core-student-local-full-flow-validation-rerun
+    title: standard core student local full flow validation rerun
+    phase: standard-core-student-local-full-flow-validation-rerun
+    sourceStory: localExperienceMechanismSeed.local_full_flow_validation
+    dependencies:
+      - standard-core-student-local-full-flow-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved the serial standard student core chain on 2026-06-18: rerun
+      `standard-core-student-local-full-flow-validation` after the contract repair, then enter closure readiness audit only
+      if fresh local runtime evidence passes. This rerun is localhost-only and limited to existing specs
+      `e2e/local-auth-route-guard.spec.ts`, `e2e/student-practice-mock-entry.spec.ts`, and
+      `e2e/local-business-flow.spec.ts`. Product source fixes, e2e spec edits, `.env*`, package/lockfile/dependency,
+      schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment/external-service, destructive database
+      operations, PR, force-push, and Cost Calibration Gate remain blocked.
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: ready_set
+    taskKind: local_full_flow_validation
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_local_full_flow_validation_failure
+    claimedAt: "2026-06-18T10:24:05-07:00"
+    closedAt: "2026-06-18T10:28:30-07:00"
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      localE2EValidation: approved_local_only_existing_specs
+      e2eListOnly: allowed
+      focusedUnitValidation: allowed
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+      - e2e/local-auth-route-guard.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - src/**
+      - tests/**
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(standard): rerun student local full flow"
+        approval: current_user_prompt_2026_06_18_serial_standard_student_core_chain
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-login-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-validation-rerun
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-validation-rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    retryCount: 0
