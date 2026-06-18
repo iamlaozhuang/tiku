@@ -96,6 +96,20 @@ export type OrganizationTrainingEmployeeAnswerPersistenceLineageLookupInput = {
   organizationPublicId: string;
 };
 
+export type OrganizationTrainingEmployeeVisibleVersionListInput = {
+  employeePublicId: string;
+  organizationPublicId: string;
+};
+
+export type OrganizationTrainingVersionLookupInput = {
+  trainingVersionPublicId: string;
+};
+
+export type OrganizationTrainingEmployeeAnswerLookupInput =
+  OrganizationTrainingVersionLookupInput & {
+    employeePublicId: string;
+  };
+
 export type OrganizationTrainingEmployeeAnswerPersistenceLineage = {
   organizationTrainingVersionId: number;
   employeeId: number;
@@ -173,6 +187,15 @@ export type OrganizationTrainingVersionGateway = {
   findEmployeeAnswerPersistenceLineageByPublicIds(
     input: OrganizationTrainingEmployeeAnswerPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingEmployeeAnswerPersistenceLineage | null>;
+  listPublishedVersionsForEmployeeOrganization(
+    input: OrganizationTrainingEmployeeVisibleVersionListInput,
+  ): Promise<OrganizationTrainingVersionRow[]>;
+  findPublishedVersionByPublicId(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingVersionRow | null>;
+  findEmployeeAnswerByVersionPublicId(
+    input: OrganizationTrainingEmployeeAnswerLookupInput,
+  ): Promise<OrganizationTrainingAnswerRow | null>;
   insertPublishedVersion(
     input: OrganizationTrainingVersionInsertInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
@@ -197,6 +220,15 @@ export type OrganizationTrainingRepository = {
   lookupVersionOrganizationPublicId(
     input: OrganizationTrainingVersionOrganizationLookupInput,
   ): Promise<string | null>;
+  listEmployeeVisibleVersions(
+    input: OrganizationTrainingEmployeeVisibleVersionListInput,
+  ): Promise<OrganizationTrainingPublishedVersionDto[]>;
+  findPublishedVersionByPublicId(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingPublishedVersionDto | null>;
+  findEmployeeAnswerByVersion(
+    input: OrganizationTrainingEmployeeAnswerLookupInput,
+  ): Promise<EmployeeOrganizationTrainingAnswerDto | null>;
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
@@ -328,6 +360,46 @@ export function createOrganizationTrainingRepository(
         : normalizeRequiredText(organizationPublicId);
     },
 
+    async listEmployeeVisibleVersions(input) {
+      const normalizedInput = normalizeEmployeeVisibleVersionListInput(input);
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const rows =
+        await gateway.listPublishedVersionsForEmployeeOrganization(
+          normalizedInput,
+        );
+
+      return rows.map(mapOrganizationTrainingVersionRowToDto);
+    },
+
+    async findPublishedVersionByPublicId(input) {
+      const normalizedInput = normalizeVersionLookupInput(input);
+
+      if (normalizedInput === null) {
+        return null;
+      }
+
+      const row = await gateway.findPublishedVersionByPublicId(normalizedInput);
+
+      return row === null ? null : mapOrganizationTrainingVersionRowToDto(row);
+    },
+
+    async findEmployeeAnswerByVersion(input) {
+      const normalizedInput = normalizeEmployeeAnswerLookupInput(input);
+
+      if (normalizedInput === null) {
+        return null;
+      }
+
+      const row =
+        await gateway.findEmployeeAnswerByVersionPublicId(normalizedInput);
+
+      return row === null ? null : mapOrganizationTrainingAnswerRowToDto(row);
+    },
+
     async publishVersion(input) {
       const latestVersionNumber =
         await gateway.findLatestVersionNumberByDraftPublicId(
@@ -451,6 +523,15 @@ export function createPostgresOrganizationTrainingRepository(
         getDatabase(),
         input,
       );
+    },
+    async listPublishedVersionsForEmployeeOrganization(input) {
+      return listPublishedVersionsForEmployeeOrganization(getDatabase(), input);
+    },
+    async findPublishedVersionByPublicId(input) {
+      return findPublishedVersionByPublicId(getDatabase(), input);
+    },
+    async findEmployeeAnswerByVersionPublicId(input) {
+      return findEmployeeAnswerByVersionPublicId(getDatabase(), input);
     },
     async insertPublishedVersion(input) {
       const [row] = await getDatabase()
@@ -639,6 +720,54 @@ function normalizeTrustedPersistenceLineage(
   return {
     organizationId: persistenceLineage.organizationId,
     orgAuthId: persistenceLineage.orgAuthId,
+  };
+}
+
+function normalizeEmployeeVisibleVersionListInput(
+  input: OrganizationTrainingEmployeeVisibleVersionListInput,
+): OrganizationTrainingEmployeeVisibleVersionListInput | null {
+  const employeePublicId = normalizeRequiredText(input.employeePublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+
+  if (employeePublicId === null || organizationPublicId === null) {
+    return null;
+  }
+
+  return {
+    employeePublicId,
+    organizationPublicId,
+  };
+}
+
+function normalizeVersionLookupInput(
+  input: OrganizationTrainingVersionLookupInput,
+): OrganizationTrainingVersionLookupInput | null {
+  const trainingVersionPublicId = normalizeRequiredText(
+    input.trainingVersionPublicId,
+  );
+
+  return trainingVersionPublicId === null
+    ? null
+    : {
+        trainingVersionPublicId,
+      };
+}
+
+function normalizeEmployeeAnswerLookupInput(
+  input: OrganizationTrainingEmployeeAnswerLookupInput,
+): OrganizationTrainingEmployeeAnswerLookupInput | null {
+  const versionInput = normalizeVersionLookupInput(input);
+  const employeePublicId = normalizeRequiredText(input.employeePublicId);
+
+  if (versionInput === null || employeePublicId === null) {
+    return null;
+  }
+
+  return {
+    ...versionInput,
+    employeePublicId,
   };
 }
 
@@ -1171,6 +1300,70 @@ async function findVersionOrganizationPublicIdByVersionPublicId(
     .limit(1);
 
   return row?.organization_public_id ?? null;
+}
+
+async function listPublishedVersionsForEmployeeOrganization(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingEmployeeVisibleVersionListInput,
+): Promise<OrganizationTrainingVersionRow[]> {
+  const rows = await database
+    .select(organizationTrainingVersionSelection)
+    .from(organizationTrainingVersion)
+    .innerJoin(
+      employee,
+      eq(employee.organization_id, organizationTrainingVersion.organization_id),
+    )
+    .innerJoin(organization, eq(employee.organization_id, organization.id))
+    .where(
+      and(
+        eq(employee.public_id, input.employeePublicId),
+        eq(organization.public_id, input.organizationPublicId),
+        eq(organizationTrainingVersion.version_status, "published"),
+      ),
+    )
+    .orderBy(desc(organizationTrainingVersion.published_at));
+
+  return rows as OrganizationTrainingVersionRow[];
+}
+
+async function findPublishedVersionByPublicId(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingVersionLookupInput,
+): Promise<OrganizationTrainingVersionRow | null> {
+  const [row] = await database
+    .select(organizationTrainingVersionSelection)
+    .from(organizationTrainingVersion)
+    .where(
+      eq(organizationTrainingVersion.public_id, input.trainingVersionPublicId),
+    )
+    .limit(1);
+
+  return (row as OrganizationTrainingVersionRow | undefined) ?? null;
+}
+
+async function findEmployeeAnswerByVersionPublicId(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingEmployeeAnswerLookupInput,
+): Promise<OrganizationTrainingAnswerRow | null> {
+  const [row] = await database
+    .select(organizationTrainingAnswerSelection)
+    .from(organizationTrainingAnswer)
+    .where(
+      and(
+        eq(
+          organizationTrainingAnswer.organization_training_version_public_id,
+          input.trainingVersionPublicId,
+        ),
+        eq(
+          organizationTrainingAnswer.employee_public_id,
+          input.employeePublicId,
+        ),
+      ),
+    )
+    .orderBy(desc(organizationTrainingAnswer.updated_at))
+    .limit(1);
+
+  return (row as OrganizationTrainingAnswerRow | undefined) ?? null;
 }
 
 async function findEmployeeAnswerPersistenceLineageByPublicIds(

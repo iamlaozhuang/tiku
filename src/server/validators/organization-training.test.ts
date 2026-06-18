@@ -13,6 +13,8 @@ import {
   organizationTrainingSensitiveAdminSummaryFieldValues,
 } from "../models/organization-training";
 import {
+  normalizeOrganizationTrainingEmployeeAnswerDraftInput,
+  normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingCopyToNewDraftInput,
   normalizeOrganizationTrainingPublishInput,
   normalizeOrganizationTrainingTakedownInput,
@@ -263,6 +265,71 @@ describe("organization training contract and validator scaffold", () => {
         newDraftTitle: "Refreshed training",
       }).success,
     ).toBe(false);
+  });
+
+  it("normalizes employee answer draft and submit metadata while rejecting raw answer payloads", () => {
+    expect(
+      normalizeOrganizationTrainingEmployeeAnswerDraftInput({
+        trainingVersionPublicId: " training_version_public_123 ",
+        answeredQuestionCount: 2,
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+      },
+    });
+
+    expect(
+      normalizeOrganizationTrainingEmployeeAnswerSubmitInput({
+        trainingVersionPublicId: " training_version_public_123 ",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      },
+    });
+
+    const rawAnswer = "redacted";
+    const invalidDraftResult =
+      normalizeOrganizationTrainingEmployeeAnswerDraftInput({
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        rawAnswer,
+      });
+    const invalidSubmitResult =
+      normalizeOrganizationTrainingEmployeeAnswerSubmitInput({
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        providerPayload: rawAnswer,
+      });
+
+    expect(invalidDraftResult).toEqual({
+      success: false,
+      message: "Invalid organization training employee answer draft input.",
+    });
+    expect(invalidSubmitResult).toEqual({
+      success: false,
+      message: "Invalid organization training employee answer submit input.",
+    });
+    expect(JSON.stringify(invalidDraftResult)).not.toContain(rawAnswer);
+    expect(JSON.stringify(invalidSubmitResult)).not.toContain(rawAnswer);
   });
 
   it("keeps DTO shapes public-id based and summary-only for admin visibility", () => {

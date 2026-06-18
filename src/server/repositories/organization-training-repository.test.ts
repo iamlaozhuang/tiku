@@ -9,8 +9,11 @@ import type {
 import type { EmployeeOrganizationTrainingAnswerDto } from "../contracts/organization-training-contract";
 import {
   createOrganizationTrainingRepository,
+  type OrganizationTrainingEmployeeAnswerLookupInput,
+  type OrganizationTrainingEmployeeVisibleVersionListInput,
   type OrganizationTrainingTrustedPersistenceLineage,
   type OrganizationTrainingVersionTakedownInput,
+  type OrganizationTrainingVersionLookupInput,
   type OrganizationTrainingVersionGateway,
   type OrganizationTrainingVersionInsertInput,
   type OrganizationTrainingVersionRow,
@@ -207,6 +210,11 @@ function createGateway(
   let employeeAnswerDraftInputs: EmployeeAnswerDraftUpsertInput[] = [];
   let employeeAnswerSubmissionInputs: EmployeeAnswerSubmissionUpsertInput[] =
     [];
+  let employeeVisibleVersionListInputs: OrganizationTrainingEmployeeVisibleVersionListInput[] =
+    [];
+  let versionLookupInputs: OrganizationTrainingVersionLookupInput[] = [];
+  let employeeAnswerLookupInputs: OrganizationTrainingEmployeeAnswerLookupInput[] =
+    [];
   const findLatestVersionNumberByDraftPublicId = vi.fn(
     async () => options.latestVersionNumber ?? null,
   );
@@ -221,6 +229,39 @@ function createGateway(
   );
   const findEmployeeAnswerPersistenceLineageByPublicIds = vi.fn(
     async () => options.employeeAnswerPersistenceLineage ?? null,
+  );
+  const listPublishedVersionsForEmployeeOrganization = vi.fn(
+    async (input: OrganizationTrainingEmployeeVisibleVersionListInput) => {
+      employeeVisibleVersionListInputs = [
+        ...employeeVisibleVersionListInputs,
+        input,
+      ];
+
+      return [createVersionRow()];
+    },
+  );
+  const findPublishedVersionByPublicId = vi.fn(
+    async (
+      input: OrganizationTrainingVersionLookupInput,
+    ): Promise<OrganizationTrainingVersionRow | null> => {
+      versionLookupInputs = [...versionLookupInputs, input];
+
+      return createVersionRow({
+        public_id: input.trainingVersionPublicId,
+      });
+    },
+  );
+  const findEmployeeAnswerByVersionPublicId = vi.fn(
+    async (
+      input: OrganizationTrainingEmployeeAnswerLookupInput,
+    ): Promise<EmployeeAnswerRow | null> => {
+      employeeAnswerLookupInputs = [...employeeAnswerLookupInputs, input];
+
+      return createEmployeeAnswerRow({
+        organization_training_version_public_id: input.trainingVersionPublicId,
+        employee_public_id: input.employeePublicId,
+      });
+    },
   );
   const insertPublishedVersion = vi.fn(
     async (input: OrganizationTrainingVersionInsertInput) => {
@@ -364,6 +405,9 @@ function createGateway(
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
     findEmployeeAnswerPersistenceLineageByPublicIds,
+    listPublishedVersionsForEmployeeOrganization,
+    findPublishedVersionByPublicId,
+    findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
     upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
@@ -377,6 +421,9 @@ function createGateway(
     findVisibleOrganizationScopeSourceByAdminPublicId,
     findVersionOrganizationPublicIdByVersionPublicId,
     findEmployeeAnswerPersistenceLineageByPublicIds,
+    listPublishedVersionsForEmployeeOrganization,
+    findPublishedVersionByPublicId,
+    findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
     upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
@@ -385,6 +432,86 @@ function createGateway(
     getTakedownInputs: () => takedownInputs,
     getEmployeeAnswerDraftInputs: () => employeeAnswerDraftInputs,
     getEmployeeAnswerSubmissionInputs: () => employeeAnswerSubmissionInputs,
+    getEmployeeVisibleVersionListInputs: () => employeeVisibleVersionListInputs,
+    getVersionLookupInputs: () => versionLookupInputs,
+    getEmployeeAnswerLookupInputs: () => employeeAnswerLookupInputs,
+  };
+}
+
+type EmployeeAnswerRow = Awaited<
+  ReturnType<
+    OrganizationTrainingVersionGateway["findEmployeeAnswerByVersionPublicId"]
+  >
+>;
+
+function createVersionRow(
+  overrides: Partial<OrganizationTrainingVersionRow> = {},
+): OrganizationTrainingVersionRow {
+  return {
+    id: 901,
+    public_id: "training_version_public_123",
+    draft_public_id: "training_draft_public_123",
+    version_number: 1,
+    organization_id: 501,
+    organization_public_id: "organization_public_123",
+    org_auth_id: 601,
+    authorization_source: "org_auth",
+    authorization_public_id: "org_auth_public_123",
+    owner_type: "organization",
+    owner_public_id: "organization_public_123",
+    quota_owner_type: "organization",
+    quota_owner_public_id: "organization_public_123",
+    publish_scope_snapshot: {
+      organizationPublicIds: ["organization_public_123"],
+      capturedAt: "2026-06-15T19:20:13.000Z",
+    },
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    title: "Safety training",
+    description: null,
+    question_count: 2,
+    total_score: "5",
+    question_type_summary: {
+      singleChoice: 1,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 1,
+    },
+    version_status: "published",
+    published_at: new Date("2026-06-15T19:20:13.000Z"),
+    taken_down_at: null,
+    takedown_reason: null,
+    created_at: new Date("2026-06-15T19:20:13.000Z"),
+    updated_at: new Date("2026-06-15T19:20:13.000Z"),
+    ...overrides,
+  };
+}
+
+function createEmployeeAnswerRow(
+  overrides: Partial<NonNullable<EmployeeAnswerRow>> = {},
+): NonNullable<EmployeeAnswerRow> {
+  return {
+    id: 903,
+    public_id: "training_answer_public_123",
+    organization_training_version_id: 801,
+    organization_training_version_public_id: "training_version_public_123",
+    employee_id: 701,
+    employee_public_id: "employee_public_123",
+    organization_id: 501,
+    organization_public_id: "organization_public_123",
+    organization_training_answer_status: "submitted",
+    score: "4",
+    total_score: "5",
+    submitted_at: new Date("2026-06-16T09:05:00.000Z"),
+    answer_organization_snapshot: {
+      organizationPublicId: "organization_public_123",
+      organizationName: "Test Organization",
+      capturedAt: "2026-06-16T09:05:00.000Z",
+    },
+    created_at: new Date("2026-06-16T09:00:00.000Z"),
+    updated_at: new Date("2026-06-16T09:05:00.000Z"),
+    ...overrides,
   };
 }
 
@@ -790,6 +917,88 @@ describe("organization training repository", () => {
     expect(serializedSubmissionInput).not.toContain("providerPayload");
     expect(serializedSubmissionInput).not.toContain("rawPrompt");
     expect(serializedSubmissionInput).not.toContain("rawAnswer");
+  });
+
+  it("lists employee visible versions and finds readonly answer summaries by public identifiers", async () => {
+    const {
+      gateway,
+      listPublishedVersionsForEmployeeOrganization,
+      findPublishedVersionByPublicId,
+      findEmployeeAnswerByVersionPublicId,
+      getEmployeeVisibleVersionListInputs,
+      getVersionLookupInputs,
+      getEmployeeAnswerLookupInputs,
+    } = createGateway();
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const versions = await repository.listEmployeeVisibleVersions({
+      employeePublicId: " employee_public_123 ",
+      organizationPublicId: " organization_public_123 ",
+    });
+    const version = await repository.findPublishedVersionByPublicId({
+      trainingVersionPublicId: " training_version_public_123 ",
+    });
+    const answer = await repository.findEmployeeAnswerByVersion({
+      trainingVersionPublicId: " training_version_public_123 ",
+      employeePublicId: " employee_public_123 ",
+    });
+
+    expect(listPublishedVersionsForEmployeeOrganization).toHaveBeenCalledWith({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+    expect(findPublishedVersionByPublicId).toHaveBeenCalledWith({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+    expect(findEmployeeAnswerByVersionPublicId).toHaveBeenCalledWith({
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+    });
+    expect(getEmployeeVisibleVersionListInputs()).toEqual([
+      {
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_public_123",
+      },
+    ]);
+    expect(getVersionLookupInputs()).toEqual([
+      {
+        trainingVersionPublicId: "training_version_public_123",
+      },
+    ]);
+    expect(getEmployeeAnswerLookupInputs()).toEqual([
+      {
+        trainingVersionPublicId: "training_version_public_123",
+        employeePublicId: "employee_public_123",
+      },
+    ]);
+    expect(versions).toEqual([
+      expect.objectContaining({
+        publicId: "training_version_public_123",
+        status: "published",
+      }),
+    ]);
+    expect(version).toEqual(
+      expect.objectContaining({
+        publicId: "training_version_public_123",
+      }),
+    );
+    expect(answer).toEqual({
+      publicId: "training_answer_public_123",
+      trainingVersionPublicId: "training_version_public_123",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+      answerOrganizationSnapshot: {
+        organizationPublicIds: ["organization_public_123"],
+        capturedAt: "2026-06-16T09:05:00.000Z",
+      },
+      answerStatus: "submitted",
+      scoreSummary: {
+        score: 4,
+        totalScore: 5,
+      },
+      submittedAt: "2026-06-16T09:05:00.000Z",
+      resultSummaryVisible: true,
+    });
   });
 
   it("rejects invalid trusted internal lineage returned by the gateway", async () => {

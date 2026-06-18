@@ -3,6 +3,11 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import type {
+  EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingPublishedVersionDto,
+} from "../contracts/organization-training-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type {
@@ -14,16 +19,22 @@ import {
   type OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
 import {
+  invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
+  invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
   invalidOrganizationTrainingPublishInputMessage,
   invalidOrganizationTrainingTakedownInputMessage,
+  normalizeOrganizationTrainingEmployeeAnswerDraftInput,
+  normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingPublishInput,
   normalizeOrganizationTrainingTakedownInput,
 } from "../validators/organization-training";
 import {
   createOrganizationTrainingService,
+  organizationTrainingEmployeeAnswerBlockedMessage,
   organizationTrainingPublishBlockedMessage,
   organizationTrainingTakedownBlockedMessage,
   type OrganizationTrainingAdminContext,
+  type OrganizationTrainingEmployeeContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingService,
   type OrganizationTrainingStore,
@@ -82,9 +93,13 @@ export type OrganizationTrainingVisibleOrganizationScopeResolver = (
 ) => Promise<readonly string[] | null>;
 
 export type OrganizationTrainingRouteOptions = {
+  listEmployeeVisibleVersions?: OrganizationTrainingEmployeeVisibleVersionsReader;
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
+  resolveEmployeeAnswer?: OrganizationTrainingEmployeeAnswerResolver;
+  resolveEmployeeContext?: OrganizationTrainingEmployeeContextResolver;
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
+  resolvePublishedVersion?: OrganizationTrainingPublishedVersionResolver;
   resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
 };
 
@@ -101,16 +116,73 @@ export type OrganizationTrainingVersionOrganizationPublicIdResolver = (
 
 export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
-  "resolveOrganizationAdminContext" | "resolveVersionOrganizationPublicId"
+  | "listEmployeeVisibleVersions"
+  | "resolveEmployeeAnswer"
+  | "resolveEmployeeContext"
+  | "resolveOrganizationAdminContext"
+  | "resolvePublishedVersion"
+  | "resolveVersionOrganizationPublicId"
 > & {
   resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
 
+export type OrganizationTrainingEmployeeContextResolverInput = {
+  request: Request;
+  pathPublicId: string | null;
+};
+
+export type OrganizationTrainingEmployeeContextResolver = (
+  input: OrganizationTrainingEmployeeContextResolverInput,
+) => Promise<OrganizationTrainingEmployeeContext | null>;
+
+export type OrganizationTrainingEmployeeVisibleVersionsReaderInput = {
+  request: Request;
+  employeeContext: OrganizationTrainingEmployeeContext;
+};
+
+export type OrganizationTrainingEmployeeVisibleVersionsReader = (
+  input: OrganizationTrainingEmployeeVisibleVersionsReaderInput,
+) => Promise<OrganizationTrainingPublishedVersionDto[]>;
+
+export type OrganizationTrainingPublishedVersionResolverInput = {
+  request: Request;
+  trainingVersionPublicId: string;
+  employeeContext: OrganizationTrainingEmployeeContext;
+};
+
+export type OrganizationTrainingPublishedVersionResolver = (
+  input: OrganizationTrainingPublishedVersionResolverInput,
+) => Promise<OrganizationTrainingPublishedVersionDto | null>;
+
+export type OrganizationTrainingEmployeeAnswerResolverInput = {
+  request: Request;
+  trainingVersionPublicId: string;
+  employeeContext: OrganizationTrainingEmployeeContext;
+};
+
+export type OrganizationTrainingEmployeeAnswerResolver = (
+  input: OrganizationTrainingEmployeeAnswerResolverInput,
+) => Promise<EmployeeOrganizationTrainingAnswerDto | null>;
+
 type OrganizationTrainingRuntimeAdminRole =
   | "super_admin"
   | "ops_admin"
   | "content_admin";
+
+type OrganizationTrainingRouteService = Pick<
+  OrganizationTrainingService,
+  "publishVersion" | "takeDownVersion"
+> &
+  Partial<
+    Pick<
+      OrganizationTrainingService,
+      | "listEmployeeVisibleVersions"
+      | "saveEmployeeAnswerDraft"
+      | "submitEmployeeAnswer"
+      | "getEmployeeAnswerReadonlySummary"
+    >
+  >;
 
 const invalidPublishInputCode = 400061;
 const draftPublicIdMismatchCode = 400062;
@@ -122,6 +194,12 @@ const versionPublicIdMismatchCode = 400067;
 const takedownAdminContextUnavailableCode = 403068;
 const takedownVersionOrganizationUnavailableCode = 403069;
 const takedownBlockedCode = 409070;
+const invalidEmployeeAnswerDraftInputCode = 400071;
+const invalidEmployeeAnswerSubmitInputCode = 400072;
+const employeeAnswerVersionPublicIdMismatchCode = 400073;
+const employeeAnswerContextUnavailableCode = 403074;
+const employeeAnswerVersionUnavailableCode = 404075;
+const employeeAnswerBlockedCode = 409076;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
@@ -140,6 +218,15 @@ const takedownAdminContextUnavailableMessage =
 
 const takedownVersionOrganizationUnavailableMessage =
   "Organization training takedown version organization is unavailable.";
+
+const employeeAnswerVersionPublicIdMismatchMessage =
+  "Organization training employee answer path public id must match request body.";
+
+const employeeAnswerContextUnavailableMessage =
+  "Organization training employee context is unavailable.";
+
+const employeeAnswerVersionUnavailableMessage =
+  "Organization training employee training version is unavailable.";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -181,6 +268,40 @@ async function defaultResolveOrganizationAdminContext(): Promise<null> {
 
 async function defaultResolveVersionOrganizationPublicId(): Promise<null> {
   return null;
+}
+
+async function defaultResolveEmployeeContext(): Promise<null> {
+  return null;
+}
+
+async function defaultListEmployeeVisibleVersions(): Promise<
+  OrganizationTrainingPublishedVersionDto[]
+> {
+  return [];
+}
+
+async function defaultResolvePublishedVersion(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveEmployeeAnswer(): Promise<null> {
+  return null;
+}
+
+async function defaultEmployeeVisibleVersionsServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_employee_context" as const,
+    message: organizationTrainingEmployeeAnswerBlockedMessage,
+  };
+}
+
+async function defaultEmployeeAnswerServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_employee_context" as const,
+    message: organizationTrainingEmployeeAnswerBlockedMessage,
+  };
 }
 
 function isOrganizationTrainingRuntimeAdminRole(
@@ -251,6 +372,75 @@ function createSessionBackedOrganizationAdminContextResolver(
   };
 }
 
+function createEmployeeAnswerAuthorizationContext(
+  organizationPublicId: string,
+): EffectiveAuthorizationContextDto {
+  return {
+    profession: "logistics",
+    level: 4,
+    contextDisplayStatus: "display_only",
+    effectiveEdition: "advanced",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "organization_training_employee_answer_runtime",
+    ownerType: "organization",
+    ownerPublicId: organizationPublicId,
+    organizationPublicId,
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: organizationPublicId,
+    capabilities: {
+      canGenerateAiQuestion: false,
+      canGenerateAiPaper: false,
+      canCreateOrganizationTraining: false,
+      canAnswerOrganizationTraining: true,
+      canViewOrganizationTrainingSummary: false,
+      canManageAuthorizationQuota: false,
+    },
+    blockedReason: null,
+  };
+}
+
+function createSessionBackedOrganizationTrainingEmployeeContextResolver(
+  sessionService: Pick<SessionService, "getCurrentSession">,
+): OrganizationTrainingEmployeeContextResolver {
+  return async ({ request }) => {
+    const sessionResponse = await sessionService.getCurrentSession({
+      authorization: getRequestAuthorization(request),
+    });
+
+    if (sessionResponse.code !== 0 || sessionResponse.data === null) {
+      return null;
+    }
+
+    if (sessionResponse.data.user.userType !== "employee") {
+      return null;
+    }
+
+    const rawEmployeePublicId = sessionResponse.data.user.employeePublicId;
+    const rawOrganizationPublicId =
+      sessionResponse.data.user.organizationPublicId;
+    const employeePublicId =
+      typeof rawEmployeePublicId === "string"
+        ? normalizeRequiredText(rawEmployeePublicId)
+        : null;
+    const organizationPublicId =
+      typeof rawOrganizationPublicId === "string"
+        ? normalizeRequiredText(rawOrganizationPublicId)
+        : null;
+
+    if (employeePublicId === null || organizationPublicId === null) {
+      return null;
+    }
+
+    return {
+      employeePublicId,
+      currentOrganizationPublicId: organizationPublicId,
+      visibleOrganizationPublicIds: [organizationPublicId],
+      authorizationContext:
+        createEmployeeAnswerAuthorizationContext(organizationPublicId),
+    };
+  };
+}
+
 function createDefaultPersistenceLineageResolver(
   lookupTrustedPersistenceLineage:
     | OrganizationTrainingTrustedPersistenceLineageLookup
@@ -268,7 +458,10 @@ function createDefaultPersistenceLineageResolver(
 function createRuntimeOrganizationTrainingStore(
   repository: Pick<
     OrganizationTrainingStore,
-    "publishVersion" | "takeDownVersion"
+    | "publishVersion"
+    | "takeDownVersion"
+    | "saveEmployeeAnswerDraft"
+    | "submitEmployeeAnswer"
   >,
 ): OrganizationTrainingStore {
   return {
@@ -285,15 +478,11 @@ function createRuntimeOrganizationTrainingStore(
         "Organization training source context route is not configured.",
       );
     },
-    async saveEmployeeAnswerDraft() {
-      throw new Error(
-        "Organization training employee answer draft route is not configured.",
-      );
+    async saveEmployeeAnswerDraft(answerDraftWrite) {
+      return repository.saveEmployeeAnswerDraft(answerDraftWrite);
     },
-    async submitEmployeeAnswer() {
-      throw new Error(
-        "Organization training employee answer submit route is not configured.",
-      );
+    async submitEmployeeAnswer(answerSubmissionWrite) {
+      return repository.submitEmployeeAnswer(answerSubmissionWrite);
     },
   };
 }
@@ -320,6 +509,44 @@ function createRepositoryBackedVersionOrganizationPublicIdResolver(
     });
 }
 
+function createRepositoryBackedEmployeeVisibleVersionsReader(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "listEmployeeVisibleVersions"
+  >,
+): OrganizationTrainingEmployeeVisibleVersionsReader {
+  return async ({ employeeContext }) =>
+    repository.listEmployeeVisibleVersions({
+      employeePublicId: employeeContext.employeePublicId,
+      organizationPublicId: employeeContext.currentOrganizationPublicId,
+    });
+}
+
+function createRepositoryBackedPublishedVersionResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findPublishedVersionByPublicId"
+  >,
+): OrganizationTrainingPublishedVersionResolver {
+  return async ({ trainingVersionPublicId }) =>
+    repository.findPublishedVersionByPublicId({
+      trainingVersionPublicId,
+    });
+}
+
+function createRepositoryBackedEmployeeAnswerResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findEmployeeAnswerByVersion"
+  >,
+): OrganizationTrainingEmployeeAnswerResolver {
+  return async ({ trainingVersionPublicId, employeeContext }) =>
+    repository.findEmployeeAnswerByVersion({
+      trainingVersionPublicId,
+      employeePublicId: employeeContext.employeePublicId,
+    });
+}
+
 function createInvalidPublishInputResponse(): ApiResponse<null> {
   return createErrorResponse(
     invalidPublishInputCode,
@@ -334,6 +561,20 @@ function createInvalidTakedownInputResponse(): ApiResponse<null> {
   );
 }
 
+function createInvalidEmployeeAnswerDraftInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidEmployeeAnswerDraftInputCode,
+    invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
+  );
+}
+
+function createInvalidEmployeeAnswerSubmitInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidEmployeeAnswerSubmitInputCode,
+    invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
+  );
+}
+
 function createDraftPublicIdMismatchResponse(): ApiResponse<null> {
   return createErrorResponse(
     draftPublicIdMismatchCode,
@@ -345,6 +586,13 @@ function createVersionPublicIdMismatchResponse(): ApiResponse<null> {
   return createErrorResponse(
     versionPublicIdMismatchCode,
     versionPublicIdMismatchMessage,
+  );
+}
+
+function createEmployeeAnswerVersionPublicIdMismatchResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    employeeAnswerVersionPublicIdMismatchCode,
+    employeeAnswerVersionPublicIdMismatchMessage,
   );
 }
 
@@ -376,10 +624,31 @@ function createTakedownVersionOrganizationUnavailableResponse(): ApiResponse<nul
   );
 }
 
+function createEmployeeAnswerContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    employeeAnswerContextUnavailableCode,
+    employeeAnswerContextUnavailableMessage,
+  );
+}
+
+function createEmployeeAnswerVersionUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    employeeAnswerVersionUnavailableCode,
+    employeeAnswerVersionUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
     organizationTrainingPublishBlockedMessage,
+  );
+}
+
+function createEmployeeAnswerBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    employeeAnswerBlockedCode,
+    organizationTrainingEmployeeAnswerBlockedMessage,
   );
 }
 
@@ -451,12 +720,27 @@ export function createOrganizationTrainingPersistenceLineageResolver(
 }
 
 export function createOrganizationTrainingRouteHandlers(
-  organizationTrainingService: Pick<
-    OrganizationTrainingService,
-    "publishVersion" | "takeDownVersion"
-  >,
+  organizationTrainingService: OrganizationTrainingRouteService,
   options: OrganizationTrainingRouteOptions = {},
 ) {
+  const listEmployeeVisibleVersionsService =
+    organizationTrainingService.listEmployeeVisibleVersions ??
+    defaultEmployeeVisibleVersionsServiceResult;
+  const saveEmployeeAnswerDraftService =
+    organizationTrainingService.saveEmployeeAnswerDraft ??
+    defaultEmployeeAnswerServiceResult;
+  const submitEmployeeAnswerService =
+    organizationTrainingService.submitEmployeeAnswer ??
+    defaultEmployeeAnswerServiceResult;
+  const getEmployeeAnswerReadonlySummaryService =
+    organizationTrainingService.getEmployeeAnswerReadonlySummary ??
+    defaultEmployeeAnswerServiceResult;
+  const listEmployeeVisibleVersions =
+    options.listEmployeeVisibleVersions ?? defaultListEmployeeVisibleVersions;
+  const resolveEmployeeAnswer =
+    options.resolveEmployeeAnswer ?? defaultResolveEmployeeAnswer;
+  const resolveEmployeeContext =
+    options.resolveEmployeeContext ?? defaultResolveEmployeeContext;
   const resolveOrganizationAdminContext =
     options.resolveOrganizationAdminContext ??
     defaultResolveOrganizationAdminContext;
@@ -468,8 +752,42 @@ export function createOrganizationTrainingRouteHandlers(
   const resolveVersionOrganizationPublicId =
     options.resolveVersionOrganizationPublicId ??
     defaultResolveVersionOrganizationPublicId;
+  const resolvePublishedVersion =
+    options.resolvePublishedVersion ?? defaultResolvePublishedVersion;
 
   return createRouteHandlersWithErrorEnvelope({
+    employeeVisibleList: {
+      async GET(request: Request): Promise<Response> {
+        const employeeContext = await resolveEmployeeContext({
+          request,
+          pathPublicId: null,
+        });
+
+        if (employeeContext === null) {
+          return createJsonResponse(
+            createEmployeeAnswerContextUnavailableResponse(),
+          );
+        }
+
+        const result = await listEmployeeVisibleVersionsService({
+          employeeContext,
+          sourceVersions: await listEmployeeVisibleVersions({
+            request,
+            employeeContext,
+          }),
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            versions: result.versions,
+          }),
+        );
+      },
+    },
     publish: {
       async POST(
         request: Request,
@@ -591,6 +909,192 @@ export function createOrganizationTrainingRouteHandlers(
         );
       },
     },
+    employeeAnswerDraftSave: {
+      async POST(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingEmployeeAnswerDraftInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(
+            createInvalidEmployeeAnswerDraftInputResponse(),
+          );
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.trainingVersionPublicId !== pathPublicId) {
+          return createJsonResponse(
+            createEmployeeAnswerVersionPublicIdMismatchResponse(),
+          );
+        }
+
+        const employeeContext = await resolveEmployeeContext({
+          request,
+          pathPublicId,
+        });
+
+        if (employeeContext === null) {
+          return createJsonResponse(
+            createEmployeeAnswerContextUnavailableResponse(),
+          );
+        }
+
+        const version = await resolvePublishedVersion({
+          request,
+          trainingVersionPublicId: input.value.trainingVersionPublicId,
+          employeeContext,
+        });
+
+        if (version === null) {
+          return createJsonResponse(
+            createEmployeeAnswerVersionUnavailableResponse(),
+          );
+        }
+
+        const result = await saveEmployeeAnswerDraftService({
+          employeeContext,
+          version,
+          answerInput: input.value,
+          existingAnswer: await resolveEmployeeAnswer({
+            request,
+            trainingVersionPublicId: input.value.trainingVersionPublicId,
+            employeeContext,
+          }),
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            answer: result.answer,
+          }),
+        );
+      },
+    },
+    employeeAnswerSubmit: {
+      async POST(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingEmployeeAnswerSubmitInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(
+            createInvalidEmployeeAnswerSubmitInputResponse(),
+          );
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.trainingVersionPublicId !== pathPublicId) {
+          return createJsonResponse(
+            createEmployeeAnswerVersionPublicIdMismatchResponse(),
+          );
+        }
+
+        const employeeContext = await resolveEmployeeContext({
+          request,
+          pathPublicId,
+        });
+
+        if (employeeContext === null) {
+          return createJsonResponse(
+            createEmployeeAnswerContextUnavailableResponse(),
+          );
+        }
+
+        const version = await resolvePublishedVersion({
+          request,
+          trainingVersionPublicId: input.value.trainingVersionPublicId,
+          employeeContext,
+        });
+
+        if (version === null) {
+          return createJsonResponse(
+            createEmployeeAnswerVersionUnavailableResponse(),
+          );
+        }
+
+        const result = await submitEmployeeAnswerService({
+          employeeContext,
+          version,
+          answerInput: input.value,
+          existingAnswer: await resolveEmployeeAnswer({
+            request,
+            trainingVersionPublicId: input.value.trainingVersionPublicId,
+            employeeContext,
+          }),
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            answer: result.answer,
+          }),
+        );
+      },
+    },
+    employeeAnswerReadonlySummary: {
+      async GET(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const pathPublicId = await resolvePathPublicId(context);
+        const employeeContext = await resolveEmployeeContext({
+          request,
+          pathPublicId,
+        });
+
+        if (employeeContext === null) {
+          return createJsonResponse(
+            createEmployeeAnswerContextUnavailableResponse(),
+          );
+        }
+
+        const version = await resolvePublishedVersion({
+          request,
+          trainingVersionPublicId: pathPublicId,
+          employeeContext,
+        });
+
+        if (version === null) {
+          return createJsonResponse(
+            createEmployeeAnswerVersionUnavailableResponse(),
+          );
+        }
+
+        const result = await getEmployeeAnswerReadonlySummaryService({
+          employeeContext,
+          version,
+          existingAnswer: await resolveEmployeeAnswer({
+            request,
+            trainingVersionPublicId: pathPublicId,
+            employeeContext,
+          }),
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            answer: result.answer,
+          }),
+        );
+      },
+    },
   });
 }
 
@@ -611,6 +1115,20 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const resolveVersionOrganizationPublicId =
     options.resolveVersionOrganizationPublicId ??
     createRepositoryBackedVersionOrganizationPublicIdResolver(repository);
+  const resolveEmployeeContext =
+    options.resolveEmployeeContext ??
+    createSessionBackedOrganizationTrainingEmployeeContextResolver(
+      sessionService,
+    );
+  const listEmployeeVisibleVersions =
+    options.listEmployeeVisibleVersions ??
+    createRepositoryBackedEmployeeVisibleVersionsReader(repository);
+  const resolvePublishedVersion =
+    options.resolvePublishedVersion ??
+    createRepositoryBackedPublishedVersionResolver(repository);
+  const resolveEmployeeAnswer =
+    options.resolveEmployeeAnswer ??
+    createRepositoryBackedEmployeeAnswerResolver(repository);
 
   return createOrganizationTrainingRouteHandlers(
     createOrganizationTrainingService(
@@ -619,6 +1137,10 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
     {
       resolveOrganizationAdminContext,
       resolveVersionOrganizationPublicId,
+      resolveEmployeeContext,
+      listEmployeeVisibleVersions,
+      resolvePublishedVersion,
+      resolveEmployeeAnswer,
       lookupTrustedPersistenceLineage:
         repository.lookupTrustedPersistenceLineage,
     },

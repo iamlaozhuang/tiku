@@ -2,9 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
 import { POST as takeDownRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/take-down/route";
+import { POST as draftSaveRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/employee-answers/draft-save/route";
+import { GET as readonlySummaryRouteGet } from "@/app/api/v1/organization-trainings/[publicId]/employee-answers/readonly-summary/route";
+import { POST as submitRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/employee-answers/submit/route";
+import { GET as visibleListRouteGet } from "@/app/api/v1/organization-trainings/visible-list/route";
 
 import type { AuthContextDto } from "../contracts/auth-contract";
-import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
+import type {
+  EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingPublishedVersionDto,
+} from "../contracts/organization-training-contract";
 import type {
   OrganizationTrainingPublishInput,
   OrganizationTrainingTakedownInput,
@@ -35,6 +42,18 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
   })),
   lookupVersionOrganizationPublicId: vi.fn(
     async () => "organization_route_public_401",
+  ),
+  listEmployeeVisibleVersions: vi.fn(
+    async (): Promise<OrganizationTrainingPublishedVersionDto[]> => [
+      createEmployeeVisibleVersion(),
+    ],
+  ),
+  findPublishedVersionByPublicId: vi.fn(
+    async (): Promise<OrganizationTrainingPublishedVersionDto | null> =>
+      createEmployeeVisibleVersion(),
+  ),
+  findEmployeeAnswerByVersion: vi.fn(
+    async (): Promise<EmployeeOrganizationTrainingAnswerDto | null> => null,
   ),
   publishVersion: vi.fn(
     async (): Promise<OrganizationTrainingPublishedVersionDto> => ({
@@ -81,6 +100,27 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
       takenDownAt: "2026-06-15T11:00:00.000Z",
       takedownReason: "outdated training",
     }),
+  ),
+  saveEmployeeAnswerDraft: vi.fn(
+    async (): Promise<EmployeeOrganizationTrainingAnswerDto> =>
+      createEmployeeAnswer({
+        answerStatus: "in_progress",
+        scoreSummary: null,
+        submittedAt: null,
+        resultSummaryVisible: false,
+      }),
+  ),
+  submitEmployeeAnswer: vi.fn(
+    async (): Promise<EmployeeOrganizationTrainingAnswerDto> =>
+      createEmployeeAnswer({
+        answerStatus: "submitted",
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: "2026-06-16T09:05:00.000Z",
+        resultSummaryVisible: true,
+      }),
   ),
 }));
 
@@ -194,6 +234,19 @@ function createTakenDownVersion(
   });
 }
 
+function createEmployeeVisibleVersion(
+  overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  return createPublishedVersion({
+    publicId: takeDownPathPublicId,
+    publishScopeSnapshot: {
+      organizationPublicIds: ["organization_route_public_401"],
+      capturedAt: "2026-06-15T10:00:00.000Z",
+    },
+    ...overrides,
+  });
+}
+
 function createTakedownInput(
   overrides: Partial<OrganizationTrainingTakedownInput> = {},
 ): OrganizationTrainingTakedownInput {
@@ -224,6 +277,49 @@ function createAdminAuthContext(
     session: {
       expiresAt: "2026-06-16T11:00:00.000Z",
     },
+  };
+}
+
+function createEmployeeAuthContext(
+  overrides: Partial<AuthContextDto["user"]> = {},
+): AuthContextDto {
+  return {
+    user: {
+      publicId: "employee_user_route_public_401",
+      phone: "13900000002",
+      name: "Route Employee",
+      userType: "employee",
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: "employee_route_public_401",
+      organizationPublicId: "organization_route_public_401",
+      adminPublicId: null,
+      adminRoles: [],
+      ...overrides,
+    },
+    session: {
+      expiresAt: "2026-06-16T11:00:00.000Z",
+    },
+  };
+}
+
+function createEmployeeAnswer(
+  overrides: Partial<EmployeeOrganizationTrainingAnswerDto> = {},
+): EmployeeOrganizationTrainingAnswerDto {
+  return {
+    publicId: "organization_training_answer_route_401",
+    trainingVersionPublicId: takeDownPathPublicId,
+    employeePublicId: "employee_route_public_401",
+    organizationPublicId: "organization_route_public_401",
+    answerOrganizationSnapshot: {
+      organizationPublicIds: ["organization_route_public_401"],
+      capturedAt: "2026-06-16T09:00:00.000Z",
+    },
+    answerStatus: "in_progress",
+    scoreSummary: null,
+    submittedAt: null,
+    resultSummaryVisible: false,
+    ...overrides,
   };
 }
 
@@ -266,6 +362,58 @@ function createTakeDownRequest(
       ...init,
       method: "POST",
       body: JSON.stringify(body),
+    },
+  );
+}
+
+function createVisibleListRequest(
+  init: Omit<RequestInit, "method"> = {},
+): Request {
+  return new Request(
+    "http://localhost/api/v1/organization-trainings/visible-list",
+    {
+      ...init,
+      method: "GET",
+    },
+  );
+}
+
+function createEmployeeAnswerDraftSaveRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/employee-answers/draft-save`,
+    {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+function createEmployeeAnswerSubmitRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/employee-answers/submit`,
+    {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+function createEmployeeAnswerReadonlySummaryRequest(
+  init: Omit<RequestInit, "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${takeDownPathPublicId}/employee-answers/readonly-summary`,
+    {
+      ...init,
+      method: "GET",
     },
   );
 }
@@ -358,6 +506,16 @@ describe("organization training publish route handlers", () => {
     runtimeRepositoryMock.lookupVersionOrganizationPublicId.mockResolvedValue(
       "organization_route_public_401",
     );
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockClear();
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockResolvedValue([
+      createEmployeeVisibleVersion(),
+    ]);
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockClear();
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockResolvedValue(
+      createEmployeeVisibleVersion(),
+    );
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockClear();
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockResolvedValue(null);
     runtimeRepositoryMock.publishVersion.mockClear();
     runtimeRepositoryMock.publishVersion.mockResolvedValue(
       createPublishedVersion(),
@@ -365,6 +523,22 @@ describe("organization training publish route handlers", () => {
     runtimeRepositoryMock.takeDownVersion.mockClear();
     runtimeRepositoryMock.takeDownVersion.mockResolvedValue(
       createTakenDownVersion(),
+    );
+    runtimeRepositoryMock.saveEmployeeAnswerDraft.mockClear();
+    runtimeRepositoryMock.saveEmployeeAnswerDraft.mockResolvedValue(
+      createEmployeeAnswer(),
+    );
+    runtimeRepositoryMock.submitEmployeeAnswer.mockClear();
+    runtimeRepositoryMock.submitEmployeeAnswer.mockResolvedValue(
+      createEmployeeAnswer({
+        answerStatus: "submitted",
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: "2026-06-16T09:05:00.000Z",
+        resultSummaryVisible: true,
+      }),
     );
   });
 
@@ -934,6 +1108,293 @@ describe("organization training publish route handlers", () => {
     });
     expect(serializedPayload).not.toContain("database stack");
     expect(serializedPayload).not.toContain("private row details");
+  });
+});
+
+describe("organization training employee answer route handlers", () => {
+  beforeEach(() => {
+    postgresOrganizationTrainingRepositoryFactoryMock.mockClear();
+    postgresOrganizationTrainingRepositoryFactoryMock.mockReturnValue(
+      runtimeRepositoryMock,
+    );
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockClear();
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockResolvedValue([
+      createEmployeeVisibleVersion(),
+    ]);
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockClear();
+    runtimeRepositoryMock.findPublishedVersionByPublicId.mockResolvedValue(
+      createEmployeeVisibleVersion(),
+    );
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockClear();
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockResolvedValue(null);
+    runtimeRepositoryMock.saveEmployeeAnswerDraft.mockClear();
+    runtimeRepositoryMock.saveEmployeeAnswerDraft.mockResolvedValue(
+      createEmployeeAnswer(),
+    );
+    runtimeRepositoryMock.submitEmployeeAnswer.mockClear();
+    runtimeRepositoryMock.submitEmployeeAnswer.mockResolvedValue(
+      createEmployeeAnswer({
+        answerStatus: "submitted",
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: "2026-06-16T09:05:00.000Z",
+        resultSummaryVisible: true,
+      }),
+    );
+  });
+
+  it("exports thin App Router entrypoints for visible-list, draft-save, submit, and readonly-summary", () => {
+    expect(visibleListRouteGet).toEqual(expect.any(Function));
+    expect(draftSaveRoutePost).toEqual(expect.any(Function));
+    expect(submitRoutePost).toEqual(expect.any(Function));
+    expect(readonlySummaryRouteGet).toEqual(expect.any(Function));
+  });
+
+  it("lists visible assigned training versions for an employee session with the standard envelope", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.employeeVisibleList.GET(
+      createVisibleListRequest({
+        headers: {
+          authorization: "Bearer organization_training_employee_session_401",
+        },
+      }),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        versions: [createEmployeeVisibleVersion()],
+      },
+    });
+    expect(sessionService.requests).toEqual([
+      {
+        authorization: "Bearer organization_training_employee_session_401",
+      },
+    ]);
+    expect(
+      runtimeRepositoryMock.listEmployeeVisibleVersions,
+    ).toHaveBeenCalledWith({
+      employeePublicId: "employee_route_public_401",
+      organizationPublicId: "organization_route_public_401",
+    });
+  });
+
+  it("saves an employee answer draft through the runtime route without persisting raw answer content", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.employeeAnswerDraftSave.POST(
+      createEmployeeAnswerDraftSaveRequest(
+        {
+          trainingVersionPublicId: takeDownPathPublicId,
+          answeredQuestionCount: 1,
+        },
+        {
+          headers: {
+            authorization: "Bearer organization_training_employee_session_401",
+          },
+        },
+      ),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedDraftWrite = JSON.stringify(
+      runtimeRepositoryMock.saveEmployeeAnswerDraft.mock.calls,
+    );
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        answer: createEmployeeAnswer(),
+      },
+    });
+    expect(
+      runtimeRepositoryMock.findPublishedVersionByPublicId,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+    });
+    expect(
+      runtimeRepositoryMock.findEmployeeAnswerByVersion,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+      employeePublicId: "employee_route_public_401",
+    });
+    expect(runtimeRepositoryMock.saveEmployeeAnswerDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "organization_training_answer_draft",
+        trainingVersionPublicId: takeDownPathPublicId,
+        employeePublicId: "employee_route_public_401",
+        organizationPublicId: "organization_route_public_401",
+        answeredQuestionCount: 1,
+        scoreSummary: null,
+        submittedAt: null,
+      }),
+    );
+    expect(serializedDraftWrite).not.toContain("rawAnswer");
+    expect(serializedDraftWrite).not.toContain("providerPayload");
+    expect(serializedDraftWrite).not.toContain("answerRecordPublicId");
+  });
+
+  it("submits an employee answer summary through the runtime route", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.employeeAnswerSubmit.POST(
+      createEmployeeAnswerSubmitRequest(
+        {
+          trainingVersionPublicId: takeDownPathPublicId,
+          answeredQuestionCount: 1,
+          scoreSummary: {
+            score: 4,
+            totalScore: 5,
+          },
+        },
+        {
+          headers: {
+            authorization: "Bearer organization_training_employee_session_401",
+          },
+        },
+      ),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        answer: createEmployeeAnswer({
+          answerStatus: "submitted",
+          scoreSummary: {
+            score: 4,
+            totalScore: 5,
+          },
+          submittedAt: "2026-06-16T09:05:00.000Z",
+          resultSummaryVisible: true,
+        }),
+      },
+    });
+    expect(runtimeRepositoryMock.submitEmployeeAnswer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentType: "organization_training_answer_record",
+        trainingVersionPublicId: takeDownPathPublicId,
+        employeePublicId: "employee_route_public_401",
+        organizationPublicId: "organization_route_public_401",
+        answeredQuestionCount: 1,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      }),
+    );
+  });
+
+  it("returns an employee readonly answer summary without raw answer fields", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    runtimeRepositoryMock.findEmployeeAnswerByVersion.mockResolvedValueOnce(
+      createEmployeeAnswer({
+        answerStatus: "submitted",
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: "2026-06-16T09:05:00.000Z",
+        resultSummaryVisible: true,
+      }),
+    );
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.employeeAnswerReadonlySummary.GET(
+      createEmployeeAnswerReadonlySummaryRequest({
+        headers: {
+          authorization: "Bearer organization_training_employee_session_401",
+        },
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        answer: createEmployeeAnswer({
+          answerStatus: "read_only",
+          scoreSummary: {
+            score: 4,
+            totalScore: 5,
+          },
+          submittedAt: "2026-06-16T09:05:00.000Z",
+          resultSummaryVisible: true,
+        }),
+      },
+    });
+    expect(serializedPayload).not.toContain("standardAnswer");
+    expect(serializedPayload).not.toContain("rawAnswer");
+    expect(serializedPayload).not.toContain("providerPayload");
+    expect(serializedPayload).not.toMatch(/"id":|"employeeId":/);
+  });
+
+  it("rejects malformed employee answer payloads with a generic envelope", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.employeeAnswerDraftSave.POST(
+      createEmployeeAnswerDraftSaveRequest({
+        trainingVersionPublicId: takeDownPathPublicId,
+        answeredQuestionCount: 1,
+        rawAnswer: "redacted",
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 400071,
+      message: "Invalid organization training employee answer draft input.",
+      data: null,
+    });
+    expect(serializedPayload).not.toContain("redacted");
+    expect(
+      runtimeRepositoryMock.saveEmployeeAnswerDraft,
+    ).not.toHaveBeenCalled();
   });
 });
 

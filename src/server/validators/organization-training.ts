@@ -1,5 +1,6 @@
 import { evidenceStatusValues } from "../models/ai-rag";
 import { professionValues } from "../models/auth";
+import type { EmployeeOrganizationTrainingScoreSummaryDto } from "../contracts/organization-training-contract";
 import {
   type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingAuditLogTargetResourceType,
@@ -26,6 +27,22 @@ export const invalidOrganizationTrainingCopyToNewDraftInputMessage =
 
 export const invalidOrganizationTrainingAuditLogReferenceInputMessage =
   "Invalid organization training audit_log reference input.";
+
+export const invalidOrganizationTrainingEmployeeAnswerDraftInputMessage =
+  "Invalid organization training employee answer draft input.";
+
+export const invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage =
+  "Invalid organization training employee answer submit input.";
+
+export type OrganizationTrainingEmployeeAnswerDraftRouteInput = {
+  trainingVersionPublicId: string;
+  answeredQuestionCount: number;
+};
+
+export type OrganizationTrainingEmployeeAnswerSubmitRouteInput =
+  OrganizationTrainingEmployeeAnswerDraftRouteInput & {
+    scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
+  };
 
 export type OrganizationTrainingPublishValidationResult =
   | {
@@ -67,6 +84,26 @@ export type OrganizationTrainingAuditLogReferenceValidationResult =
       message: typeof invalidOrganizationTrainingAuditLogReferenceInputMessage;
     };
 
+export type OrganizationTrainingEmployeeAnswerDraftValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingEmployeeAnswerDraftRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingEmployeeAnswerDraftInputMessage;
+    };
+
+export type OrganizationTrainingEmployeeAnswerSubmitValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingEmployeeAnswerSubmitRouteInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage;
+    };
+
 type JsonRecord = Record<string, unknown>;
 
 const organizationTrainingQuestionTypeSummaryKeyByType: Record<
@@ -78,6 +115,17 @@ const organizationTrainingQuestionTypeSummaryKeyByType: Record<
   true_false: "trueFalse",
   short_answer: "shortAnswer",
 };
+
+const forbiddenEmployeeAnswerPayloadKeys = [
+  "answerBody",
+  "answers",
+  "questionAnswers",
+  "rawAnswer",
+  "providerPayload",
+  "rawPrompt",
+  "standardAnswer",
+  "analysis",
+] as const;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -115,6 +163,12 @@ function normalizeNonNegativeInteger(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value >= 0
     ? value
     : null;
+}
+
+function hasForbiddenEmployeeAnswerPayload(value: JsonRecord): boolean {
+  return forbiddenEmployeeAnswerPayloadKeys.some((payloadKey) =>
+    Object.hasOwn(value, payloadKey),
+  );
 }
 
 function normalizePublicIdList(value: unknown): string[] | null {
@@ -399,6 +453,78 @@ export function normalizeOrganizationTrainingTakedownInput(
     value: {
       versionPublicId,
       takedownReason,
+    },
+  };
+}
+
+export function normalizeOrganizationTrainingEmployeeAnswerDraftInput(
+  input: unknown,
+): OrganizationTrainingEmployeeAnswerDraftValidationResult {
+  if (!isRecord(input) || hasForbiddenEmployeeAnswerPayload(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
+    };
+  }
+
+  const trainingVersionPublicId = normalizeRequiredText(
+    input.trainingVersionPublicId,
+  );
+  const answeredQuestionCount = normalizePositiveInteger(
+    input.answeredQuestionCount,
+  );
+
+  if (trainingVersionPublicId === null || answeredQuestionCount === null) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      trainingVersionPublicId,
+      answeredQuestionCount,
+    },
+  };
+}
+
+export function normalizeOrganizationTrainingEmployeeAnswerSubmitInput(
+  input: unknown,
+): OrganizationTrainingEmployeeAnswerSubmitValidationResult {
+  const draftInput =
+    normalizeOrganizationTrainingEmployeeAnswerDraftInput(input);
+
+  if (
+    !draftInput.success ||
+    !isRecord(input) ||
+    !isRecord(input.scoreSummary)
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
+    };
+  }
+
+  const score = normalizeNonNegativeInteger(input.scoreSummary.score);
+  const totalScore = normalizeNonNegativeInteger(input.scoreSummary.totalScore);
+
+  if (score === null || totalScore === null) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      ...draftInput.value,
+      scoreSummary: {
+        score,
+        totalScore,
+      },
     },
   };
 }

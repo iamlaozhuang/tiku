@@ -197,6 +197,21 @@ lastEmployeeAnswerRouteQueueMaterialization:
     schemaImplementation: not_required_for_route_contract_if_no_raw_answer_or_answered_count_persistence_is_added
     employeeAnswerEntrySurface: pending
     localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
+lastEmployeeAnswerRouteContractTdd:
+  taskId: organization-training-employee-answer-runtime-route-contract-tdd
+  closedAt: "2026-06-17T23:18:31-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: employee_answer_route_contract_ready_no_experience_closed_claim
+  nextTask: organization-training-employee-answer-entry-surface-local-ui
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
+  boundarySummary:
+    employeeAnswerRepositoryContract: metadata_only_draft_and_submission_persistence_ready
+    employeeAnswerRuntimeRoutes: visible_list_draft_save_submit_readonly_summary_ready
+    rawAnswerPersistence: blocked
+    answeredQuestionCountPersistence: blocked
+    employeeAnswerEntrySurface: pending
+    localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -440,16 +455,16 @@ matrix:
     edition: advanced
     actor: employee
     entrySurface: not_found_employee_training_ui
-    apiSurface: employee_answer_route_contract_tdd_materialized_pending
-    serviceSurface: src/server/services/organization-training-service.ts
+    apiSurface: src/app/api/v1/organization-trainings/visible-list/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft-save/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/submit/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/readonly-summary/route.ts
+    serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts
     uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/repositories/organization-training-repository.test.ts
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
     status: partial
-    blockedGate: employee_answer_runtime_routes_ui_entry_and_local_full_flow_not_closed
-    nextTask: organization-training-employee-answer-runtime-route-contract-tdd
+    blockedGate: employee_answer_ui_entry_and_local_full_flow_not_closed
+    nextTask: organization-training-employee-answer-entry-surface-local-ui
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
