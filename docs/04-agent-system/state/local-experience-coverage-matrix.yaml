@@ -390,10 +390,10 @@ matrix:
     uiSurface: src/app/(auth)/login/page.tsx; src/app/(auth)/register/page.tsx
     unitEvidence: src/server/auth/*.test.ts; tests/unit/student-login-ui.test.ts; tests/unit/student-register-ui.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
     status: local_experience_ready
-    blockedGate: release_auth_hardening_and_staging_remain_blocked
-    nextTask: standard-mvp-local-experience-readiness-audit
+    blockedGate: standard_core_student_runtime_full_flow_validation_pending
+    nextTask: standard-core-student-local-full-flow-validation
   - useCaseId: UC-STD-PERSONAL-AUTH-REDEEM
     edition: standard
     actor: student_ops_admin
@@ -404,10 +404,10 @@ matrix:
     uiSurface: src/features/student/profile/StudentProfileRedeemPage.tsx; src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
     unitEvidence: tests/unit/phase-8-student-authorization-redeem-runtime.test.ts; tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-11-ai-call-log-visibility-fix.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
     status: local_experience_ready
-    blockedGate: cleartext_redeem_code_evidence_forbidden
-    nextTask: standard-mvp-local-experience-readiness-audit
+    blockedGate: standard_core_student_runtime_full_flow_validation_pending
+    nextTask: standard-core-student-local-full-flow-validation
   - useCaseId: UC-STD-ORG-AUTH-MANAGED
     edition: standard
     actor: ops_admin_employee_student
@@ -460,10 +460,10 @@ matrix:
     uiSurface: src/features/student/practice/StudentPracticePage.tsx
     unitEvidence: src/server/services/practice-service.test.ts; tests/unit/student-practice-ui.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
     status: local_experience_ready
-    blockedGate: offline_resume_and_skill_practice_depth_need_fresh_audit
-    nextTask: standard-mvp-local-experience-readiness-audit
+    blockedGate: standard_core_student_runtime_full_flow_validation_pending
+    nextTask: standard-core-student-local-full-flow-validation
   - useCaseId: UC-STD-MOCK-EXAM
     edition: standard
     actor: student
@@ -474,10 +474,10 @@ matrix:
     uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx
     unitEvidence: src/server/services/mock-exam-service.test.ts; tests/unit/local-business-flow-mock-exam-isolation.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
     status: local_experience_ready
-    blockedGate: provider_gated_subjective_scoring_and_full_flow_need_task_scope
-    nextTask: standard-mvp-local-experience-readiness-audit
+    blockedGate: standard_core_student_runtime_full_flow_validation_pending
+    nextTask: standard-core-student-local-full-flow-validation
   - useCaseId: UC-STD-REPORT-MISTAKE-BOOK
     edition: standard
     actor: student
@@ -488,10 +488,10 @@ matrix:
     uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx; src/features/student/mistake-book/StudentMistakeBookPage.tsx
     unitEvidence: src/server/services/exam-report-service.test.ts; src/server/services/mistake-book-service.test.ts; tests/unit/student-mistake-book-ui.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
     status: local_experience_ready
-    blockedGate: report_knowledge_analysis_and_ai_retry_remain_provider_gated
-    nextTask: standard-mvp-local-experience-readiness-audit
+    blockedGate: standard_core_student_runtime_full_flow_validation_pending
+    nextTask: standard-core-student-local-full-flow-validation
   - useCaseId: UC-STD-AI-SCORING-EXPLANATION
     edition: standard
     actor: student_super_admin_system

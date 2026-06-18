@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
-updatedAt: "2026-06-18T07:38:08-07:00"
+currentPhase: standard-core-student-local-experience-batch
+updatedAt: "2026-06-18T07:49:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,18 +497,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ffcb2c3f9537a4bd39465b3b5da0bdc860e401a1
-  lastKnownOriginMasterSha: ffcb2c3f9537a4bd39465b3b5da0bdc860e401a1
+  lastKnownMasterSha: 00532e6d7d96ed77abbf6740de957fef12cd67d2
+  lastKnownOriginMasterSha: 00532e6d7d96ed77abbf6740de957fef12cd67d2
 currentTask:
-  id: local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
+  id: standard-core-student-local-experience-batch
   status: closed
-  result: pass_docs_state_matrix_summary_counts_repaired_after_analytics_closure
-  sourceStory: localExperienceClosureGate.coverageMatrixSummaryCountRepairAfterAnalyticsClosure
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-local-experience-coverage-matrix-summary-count-repair-after-analytics-closure.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair-after-analytics-closure.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair-after-analytics-closure.md
-  branch: codex/local-experience-coverage-summary-count-repair
-  commitSha: ffcb2c3f9537a4bd39465b3b5da0bdc860e401a1
+  result: pass_keep_local_experience_ready_runtime_full_flow_required
+  sourceStory: localExperienceClosureGate.standardCoreStudentReadySetBatch
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-experience-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch.md
+  branch: codex/standard-core-local-experience-batch
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: pass_organization_portal_admin_shell_entry_contract_tdd
+    readiness: pass_standard_core_student_local_experience_batch
     lint: pass
     typecheck: pass
-    unit: pass_organization_portal_admin_entry_surface
+    unit: pass_standard_core_student_focused_unit_16_files_126_tests
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_list_only_organization_portal_local_flow_31_tests
+    e2e: pass_list_only_31_tests_14_files_no_runtime
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -765,6 +765,7 @@ qualityGates:
     organizationPortalAdminShellEntryContractTdd: pass_local_unit_shell_entry_e2e_list_no_runtime_e2e
     organizationPortalAdminLocalFullFlowValidation: pass_scoped_local_full_flow_no_experience_closed_claim
     organizationPortalAdminExperienceClosureReadinessAudit: pass_experience_closed_for_local_portal_shell_only
+    standardCoreStudentLocalExperienceBatch: pass_keep_local_experience_ready_runtime_full_flow_required
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -800,10 +801,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_analytics_summary_experience_closed_local_only
+  status: standard_core_student_local_experience_batch_completed_runtime_full_flow_pending
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
+  currentTaskId: standard-core-student-local-experience-batch
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -898,14 +899,35 @@ localExperienceClosure:
       experienceClosure: local_only
       releaseReadiness: not_claimed
       costCalibrationGate: blocked
+  lastStandardCoreStudentLocalExperienceBatch:
+    taskId: standard-core-student-local-experience-batch
+    auditedAt: "2026-06-18T07:49:20-07:00"
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    decision: keep_local_experience_ready_and_seed_student_core_runtime_full_flow
+    nextTask: standard-core-student-local-full-flow-validation
+    evidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
+    boundarySummary:
+      focusedUnit: passed_16_files_126_tests
+      e2eList: passed_31_tests_14_files_runtime_not_executed
+      localFullFlow: blocked_until_explicit_runtime_task
+      experienceClosure: not_claimed
+      standardCoreRowsRemainingReady: 5
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `organization-analytics-summary-experience-closure-readiness-audit` marks `UC-ADV-ORG-ANALYTICS-SUMMARY`
-    `experience_closed` for local experience only. Next recommended work should return to the coverage matrix and queue
-    the remaining `local_experience_ready` or high-value `partial` use cases as low-risk local experience batches. Keep
-    release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
-    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and Cost Calibration Gate
-    blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    `standard-core-student-local-experience-batch` grouped the five standard student core `local_experience_ready` rows,
+    passed shared focused unit validation and a single e2e list, and intentionally kept the rows at
+    `local_experience_ready` because Browser/Playwright runtime full-flow was not in scope. Next recommended work is
+    `standard-core-student-local-full-flow-validation` when explicit local runtime approval is desired, then the
+    separate `standard-admin-ops-logs-local-experience-batch`. Keep release, staging/prod, provider/payment,
+    external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency,
+    destructive database operations, and Cost Calibration Gate blocked unless a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
