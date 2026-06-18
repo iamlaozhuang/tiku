@@ -40,6 +40,9 @@ canonicalStateFiles:
   - id: advanced-edition-domain-module-run-matrix
     path: docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
     role: source-of-truth matrix for domain-level Module Run boundaries, batch grouping, validation, evidence, and stop conditions
+  - id: local-experience-coverage-matrix
+    path: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    role: source-of-truth matrix for user-use-case local experience status, fresh local evidence, blocked gates, and next local experience repair or closure tasks
   - id: ai-task-and-provider-auto-seed-approval-decision
     path: docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
     role: current human decision entry for the ai-task-and-provider seed proposal; pending_human_decision means diagnostics may show proposal availability but agents must keep automation paused and must not apply seed transactions
@@ -77,6 +80,13 @@ factOwnership:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     rule: profile catalog values classify task envelopes only; they do not authorize high-risk actions without task-scoped approval and capability gates.
+  - fact: local experience use-case status, blocked full-flow repair candidate, local closure audit candidate, and coverage-row nextTask aggregation
+    sourcePath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+    rule: local experience next-task diagnostics may prefer coverage/handoff repair candidates over unrelated pending tasks, but they remain proposal-only until a queued task materializes scope, approval, evidence, and closeout policy.
   - fact: registered legacy-unavailable evidence references and non-evidence boundary
     sourcePath: docs/04-agent-system/state/historical-evidence-debt.yaml
     derivedSummaries:
@@ -174,6 +184,21 @@ scriptControls:
     smokePath: scripts/agent-system/Get-TikuNextAction.Smoke.ps1
     decisionOutput: nextActionDecision
     role: read-only next-action diagnostic for the active Tiku mechanism; reports repository posture, current task, queue decision, next executable task, validation need, blocked gates, recommended action, stop reason, planned pause, and proposal-only seed bridge summary without claiming tasks, mutating durable state, applying seed transactions, or executing Cost Calibration Gate
+  - id: module-run-v2-common-helper
+    path: scripts/agent-system/ModuleRunV2.Common.ps1
+    smokePath: none
+    decisionOutput: helper_only
+    role: shared prefixed helper functions for stable Module Run v2 task parsing, closeout policy compatibility, validation surface compatibility, and evidence result classification; high-frequency scripts adopt it gradually
+  - id: module-run-v2-local-experience-next-task-proposal
+    path: scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+    smokePath: scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.Smoke.ps1
+    decisionOutput: localExperienceNextTaskDecision
+    role: read-only coverage-aware next-task proposal that ranks handoff and local-experience coverage matrix repair candidates before unrelated pending tasks; it does not mutate queue state
+  - id: module-run-v2-local-experience-task-seed
+    path: scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.ps1
+    smokePath: scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.Smoke.ps1
+    decisionOutput: localExperienceSeedDecision
+    role: guarded local experience seed template generator for repair, validation, and closure-readiness audit task packets; product-source repair apply mode requires explicit allowedFiles
   - id: module-run-v2-unattended-readiness
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1

@@ -50,7 +50,8 @@ function Write-Queue {
         [Parameter(Mandatory = $false)][string]$ExecutionProfile = "",
         [Parameter(Mandatory = $false)][string[]]$RiskTypes = @("automation_policy"),
         [Parameter(Mandatory = $false)][string]$RequiredFreshApproval = "false",
-        [Parameter(Mandatory = $false)][switch]$IncludeNestedTaskLocalId
+        [Parameter(Mandatory = $false)][switch]$IncludeNestedTaskLocalId,
+        [Parameter(Mandatory = $false)][switch]$UseValidationPolicyOnly
     )
 
     $drainPolicy = @()
@@ -127,7 +128,7 @@ function Write-Queue {
         "      - drizzle/**",
         "    riskTypes:",
         $riskTypeLines,
-        "    validationProfile: mechanism-hardening",
+        $(if ($UseValidationPolicyOnly) { "    validationPolicy: docs_state" } else { "    validationProfile: mechanism-hardening" }),
         "    validationCommands:",
         "      - git diff --check",
         "    closeoutPolicy:",
@@ -167,6 +168,13 @@ try {
     Assert-Contains -Output $eligibleOutput -Pattern "queueDrainEligibilityDecision: eligible"
     Assert-Contains -Output $eligibleOutput -Pattern "drainRiskProfile: mechanism_low_risk"
     Assert-Contains -Output $eligibleOutput -Pattern "maxTasksThisWake: 2"
+
+    Write-Queue -Path $queuePath -TaskId "validation-policy-task" -IncludeDrainPolicy -UseValidationPolicyOnly
+    $validationPolicyOutput = @(& $scriptPath -TaskId "validation-policy-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath -MaxTasksPerWake 2)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Expected validationPolicy-only task to pass queue drain eligibility.`n$($validationPolicyOutput -join "`n")"
+    }
+    Assert-Contains -Output $validationPolicyOutput -Pattern "queueDrainEligibilityDecision: eligible"
 
     Write-Queue -Path $queuePath -TaskId "nested-id-task" -IncludeDrainPolicy -IncludeNestedTaskLocalId
     $nestedOutput = @(& $scriptPath -TaskId "nested-id-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath -MaxTasksPerWake 2)

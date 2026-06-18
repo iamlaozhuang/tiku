@@ -67,6 +67,37 @@ Tune the agent mechanism so local work can move farther under explicit, inspecta
 15. **High-risk isolated lanes**: schema, dependency, provider, deploy, payment, and external-service work remain
     separate lanes with fresh approval and isolated commits.
 
+## Third-Round Throughput And Read-Surface Directions
+
+The third-round tuning direction is driven by fresh local full-flow evidence on 2026-06-18: the standard student core
+chain produced valid blocked evidence and a concrete repair candidate, but the generic queue selector still preferred an
+unrelated pending admin full-flow validation. This is a mechanism correctness and throughput problem, not a reason to
+relax safety gates.
+
+1. **Document-synchronized implementation**: every mechanism behavior change must update this SOP or the operating
+   manual, update `mechanism-source-of-truth-index.yaml` when new scripts or rules are introduced, and write task
+   plan/evidence/audit records. Mechanism behavior must not live only in chat or script diffs.
+2. **Gradual common helper extraction**: shared parsing and policy helpers should use `ModuleRunV2.*` names and be
+   adopted by high-frequency scripts first. Do not rewrite every legacy script in one pass merely to remove duplication.
+3. **Blocked evidence closeout**: validation tasks may close out with `blocked` results only when evidence records the
+   failed command, failure summary, next minimal repair, hard-gate remainder, and the audit verdict explicitly says
+   `APPROVE_BLOCKED_EVIDENCE_CLOSEOUT`. This never marks a user experience `experience_closed`.
+4. **Coverage-aware next action**: local experience coverage matrix and project handoff repair candidates outrank
+   unrelated ordinary pending tasks. A blocked local full-flow chain should recommend the smallest repair seed before
+   moving to another local experience chain, unless the user explicitly chooses to bypass it.
+5. **Local experience seed templates**: repair, validation, and closure-readiness audit task packets should be generated
+   from templates. Product-source repair templates require explicit allowed files before queue mutation; diagnostics may
+   propose a seed without mutating the queue.
+6. **Guarded serial goal packet**: long-running or module-oriented work should start with `guarded_serial` packets.
+   Product-source tasks remain one task and one closeout at a time. Docs/state/audit-only packets may use packet closeout
+   after their gates pass. `local_full_flow` remains single-task only.
+7. **Read-surface budget**: recovery should start from the operating manual, project state, task queue, source-of-truth
+   index, and only the latest referenced evidence/audit. Deep SOPs, archived task blocks, and historical evidence should
+   be read on demand by task id or capability gate.
+8. **Self-repair limits**: automatic repair may fill missing mechanism docs/state/task-packet metadata only. Product
+   source, schema, dependency, provider, env/secret, staging/prod/cloud/deploy/payment, PR, force-push, destructive DB,
+   and Cost Calibration Gate remain approval-gated.
+
 ## Standard Profiles Under Consideration
 
 | Profile                  | Intended scope                                                   | Default evidence | Key blocked gates                                          |

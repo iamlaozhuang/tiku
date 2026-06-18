@@ -17,6 +17,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$commonScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "ModuleRunV2.Common.ps1"
+if (Test-Path -LiteralPath $commonScriptPath) {
+    . $commonScriptPath
+}
+
 function Write-Section {
     param([Parameter(Mandatory = $true)][string]$Title)
 
@@ -412,11 +417,15 @@ try {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task lacks an approval anchor" -ExitCode 1
     }
 
-    $validationProfile = Get-ScalarValue -Block $taskBlock -Key "validationProfile"
+    if (Get-Command -Name Get-ModuleRunV2ValidationSurface -ErrorAction SilentlyContinue) {
+        $validationProfile = Get-ModuleRunV2ValidationSurface -TaskBlock $taskBlock
+    } else {
+        $validationProfile = Get-ScalarValue -Block $taskBlock -Key "validationProfile"
+    }
     $validationCommands = @(Get-ListValues -Block $taskBlock -Key "validationCommands")
     $hasValidationLifecycle = $taskText -match "(?im)^\s+validationCommandLifecycle:\s*$"
     if ([string]::IsNullOrWhiteSpace($validationProfile)) {
-        Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task has no validationProfile" -ExitCode 1
+        Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task has no validationPolicy or validationProfile" -ExitCode 1
     }
     if ($validationCommands.Count -eq 0 -and -not $hasValidationLifecycle) {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task has no validation command surface" -ExitCode 1
@@ -428,7 +437,12 @@ try {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task lacks evidencePath or auditReviewPath" -ExitCode 1
     }
 
-    if (-not (Test-StructuredCloseoutPolicy -TaskBlock $taskBlock)) {
+    $hasStructuredCloseoutPolicy = if (Get-Command -Name Test-ModuleRunV2CloseoutPolicy -ErrorAction SilentlyContinue) {
+        Test-ModuleRunV2CloseoutPolicy -TaskBlock $taskBlock
+    } else {
+        Test-StructuredCloseoutPolicy -TaskBlock $taskBlock
+    }
+    if (-not $hasStructuredCloseoutPolicy) {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task lacks structured closeoutPolicy" -ExitCode 1
     }
 

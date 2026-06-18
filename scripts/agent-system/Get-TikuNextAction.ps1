@@ -16,6 +16,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
+    [string]$LocalExperienceMatrixPath = "docs\04-agent-system\state\local-experience-coverage-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
 
     [Parameter(Mandatory = $false)]
@@ -241,6 +245,42 @@ function Invoke-LocalExperienceBridgeDiagnostic {
     if (-not (Test-Path -LiteralPath $scriptPath)) {
         return [pscustomobject]@{
             Output = @("bridgeProposalDecision: unavailable", "bridgeProposalReason: local experience bridge proposal script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -ProjectStatePath $ProjectStatePath `
+                -QueuePath $QueuePath `
+                -MatrixPath $MatrixPath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
+function Invoke-LocalExperienceNextTaskDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("localExperienceNextTaskDecision: unavailable", "reason: local experience next-task proposal script is missing")
             ExitCode = 1
         }
     }
@@ -845,6 +885,12 @@ $readySetTaskIds = @()
 if ($queueSelectionMode -eq "ready_set") {
     $readySetTaskIds = @(Get-ReadyExecutableTasks -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks)
 }
+$activeQueueNonTerminalCount = @(
+    $taskBlocks | Where-Object {
+        $status = Get-ScalarValue -Block $_.Lines -Key "status"
+        $status -notin @("closed", "done", "merged", "pushed")
+    }
+).Count
 $validationCommands = @()
 if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
     $validationCommands = @(Get-ListValues -Block $nextTask.Block -Key "validationCommands")
@@ -853,12 +899,83 @@ if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
 $seedProposalDecision = "not_checked"
 $seedModule = "none"
 $seedRequiredApproval = "none"
+$localExperienceNextTaskDecision = "not_checked"
+$localExperienceCandidateTask = "none"
+$localExperienceCandidateKind = "none"
+$localExperienceAffectedUseCaseCount = "0"
+$localExperienceAffectedUseCaseIds = "none"
+$localExperienceSeedRequired = "false"
+$localExperienceReason = "none"
+$localExperienceCandidateReady = "false"
+$localExperienceCandidateBlockedReasons = "none"
 $bridgeProposalDecision = "not_checked"
 $bridgeExperienceChain = "none"
 $bridgeCandidateTask = "none"
 $bridgeRequiredApproval = "none"
 $recommendedHumanDecision = "none"
 $currentTaskTerminal = $currentTaskStatus -in @("done", "closed", "pushed", "merged")
+if ($findings.Count -eq 0 -and $currentTaskTerminal) {
+    $localExperienceProposalResult = Invoke-LocalExperienceNextTaskDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $LocalExperienceMatrixPath
+    $localExperienceNextTaskDecision = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "localExperienceNextTaskDecision"
+    if ([string]::IsNullOrWhiteSpace($localExperienceNextTaskDecision)) {
+        $localExperienceNextTaskDecision = if ($localExperienceProposalResult.ExitCode -eq 0) { "unknown" } else { "unavailable" }
+    }
+    $localExperienceCandidateTask = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "candidateTaskId"
+    if ([string]::IsNullOrWhiteSpace($localExperienceCandidateTask)) {
+        $localExperienceCandidateTask = "none"
+    }
+    $localExperienceCandidateKind = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "candidateTaskKind"
+    if ([string]::IsNullOrWhiteSpace($localExperienceCandidateKind)) {
+        $localExperienceCandidateKind = "none"
+    }
+    $localExperienceAffectedUseCaseCount = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "affectedUseCaseCount"
+    if ([string]::IsNullOrWhiteSpace($localExperienceAffectedUseCaseCount)) {
+        $localExperienceAffectedUseCaseCount = "0"
+    }
+    $localExperienceAffectedUseCaseIds = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "affectedUseCaseIds"
+    if ([string]::IsNullOrWhiteSpace($localExperienceAffectedUseCaseIds)) {
+        $localExperienceAffectedUseCaseIds = "none"
+    }
+    $localExperienceSeedRequired = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "seedRequired"
+    if ([string]::IsNullOrWhiteSpace($localExperienceSeedRequired)) {
+        $localExperienceSeedRequired = "false"
+    }
+    $localExperienceReason = Get-OutputValue -Output $localExperienceProposalResult.Output -Key "reason"
+    if ([string]::IsNullOrWhiteSpace($localExperienceReason)) {
+        $localExperienceReason = "none"
+    }
+    if ($localExperienceNextTaskDecision -eq "seed_required") {
+        $recommendedHumanDecision = "seed_local_experience_repair_or_choose_bypass"
+    } elseif ($localExperienceNextTaskDecision -eq "existing_task_available") {
+        $localExperienceCandidateBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $localExperienceCandidateTask)
+        $candidateDependencyBlockedReasons = New-Object System.Collections.ArrayList
+        if ($localExperienceCandidateBlock.Count -eq 0) {
+            [void]$candidateDependencyBlockedReasons.Add("candidate_task_missing:$localExperienceCandidateTask")
+        } else {
+            $candidateStatus = Get-ScalarValue -Block $localExperienceCandidateBlock -Key "status"
+            if ($candidateStatus -ne "pending") {
+                if ([string]::IsNullOrWhiteSpace($candidateStatus)) {
+                    $candidateStatus = "missing_status"
+                }
+                [void]$candidateDependencyBlockedReasons.Add("candidate_status_not_pending:${localExperienceCandidateTask}:$candidateStatus")
+            } else {
+                $candidateDependencies = @(Get-ListValues -Block $localExperienceCandidateBlock -Key "dependencies")
+                foreach ($dependency in $candidateDependencies) {
+                    [void](Test-DependencyTerminal -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks -DependencyId $dependency -BlockedReasons $candidateDependencyBlockedReasons)
+                }
+            }
+        }
+
+        if ($candidateDependencyBlockedReasons.Count -eq 0) {
+            $localExperienceCandidateReady = "true"
+            $recommendedHumanDecision = "claim_local_experience_candidate_or_choose_bypass"
+        } else {
+            $localExperienceCandidateBlockedReasons = Join-OrNone -Values @($candidateDependencyBlockedReasons)
+            $recommendedHumanDecision = "resolve_local_experience_candidate_dependency_or_choose_bypass"
+        }
+    }
+}
+
 if ($findings.Count -eq 0 -and [string]::IsNullOrWhiteSpace($nextTaskId) -and $currentTaskTerminal) {
     $seedProposalResult = Invoke-SeedProposalDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath
     $seedProposalDecision = Get-OutputValue -Output $seedProposalResult.Output -Key "seedProposalDecision"
@@ -924,6 +1041,27 @@ if ($plannedPauseActive) {
     $decision = "current_task_active"
     $recommendedAction = "finish_current_task_closeout:$currentTaskId"
     $stopReason = "current_task_not_closed:${currentTaskId}:$currentTaskStatus"
+} elseif ($localExperienceNextTaskDecision -eq "seed_required" -and $localExperienceSeedRequired -eq "true" -and $localExperienceCandidateTask -ne "none") {
+    $decision = "local_experience_task_seed_required"
+    $recommendedAction = "request_local_experience_task_seed:$localExperienceCandidateTask"
+    $stopReason = "local_experience_seed_required"
+    $nextTaskId = ""
+    $validationCommands = @()
+} elseif ($localExperienceNextTaskDecision -eq "existing_task_available" -and $localExperienceCandidateTask -ne "none" -and $localExperienceCandidateReady -eq "true") {
+    $decision = if ($isDirty) { "local_experience_task_found_with_dirty_worktree" } else { "local_experience_task_found" }
+    $recommendedAction = if ($isDirty) { "close_current_changes_before_next_task:$localExperienceCandidateTask" } else { "claim_or_plan_next_task:$localExperienceCandidateTask" }
+    $nextTaskId = $localExperienceCandidateTask
+    $localExperienceCandidateBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $localExperienceCandidateTask)
+    if ($localExperienceCandidateBlock.Count -gt 0) {
+        $validationCommands = @(Get-ListValues -Block $localExperienceCandidateBlock -Key "validationCommands")
+    }
+    $stopReason = if ($isDirty) { "dirty_worktree_advisory" } else { "none" }
+} elseif ($localExperienceNextTaskDecision -eq "existing_task_available" -and $localExperienceCandidateTask -ne "none") {
+    $decision = "local_experience_task_blocked"
+    $recommendedAction = "resolve_dependency_or_status_block:$localExperienceCandidateTask"
+    $nextTaskId = ""
+    $validationCommands = @()
+    $stopReason = "local_experience_candidate_blocked:$localExperienceCandidateBlockedReasons"
 } elseif (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
     $decision = if ($isDirty) { "executable_task_found_with_dirty_worktree" } else { "executable_task_found" }
     $recommendedAction = if ($isDirty) { "close_current_changes_before_next_task:$nextTaskId" } else { "claim_or_plan_next_task:$nextTaskId" }
@@ -980,6 +1118,20 @@ Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId
 Write-Output "seedProposalDecision: $seedProposalDecision"
 Write-Output "seedModule: $seedModule"
 Write-Output "seedRequiredApproval: $seedRequiredApproval"
+Write-Output "localExperienceNextTaskDecision: $localExperienceNextTaskDecision"
+Write-Output "localExperienceCandidateTask: $localExperienceCandidateTask"
+Write-Output "localExperienceCandidateKind: $localExperienceCandidateKind"
+Write-Output "localExperienceAffectedUseCaseCount: $localExperienceAffectedUseCaseCount"
+Write-Output "localExperienceAffectedUseCaseIds: $localExperienceAffectedUseCaseIds"
+Write-Output "localExperienceSeedRequired: $localExperienceSeedRequired"
+Write-Output "localExperienceReason: $localExperienceReason"
+Write-Output "localExperienceCandidateReady: $localExperienceCandidateReady"
+Write-Output "localExperienceCandidateBlockedReasons: $localExperienceCandidateBlockedReasons"
+Write-Output "activeQueueNonTerminalCount: $activeQueueNonTerminalCount"
+Write-Output "blockedWithRepairCandidate: $((($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') -and ($localExperienceNextTaskDecision -in @('seed_required', 'existing_task_available', 'existing_task_blocked_or_nonterminal'))).ToString().ToLowerInvariant())"
+Write-Output "coverageRowsWaitingRepair: $(if ($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') { $localExperienceAffectedUseCaseCount } else { '0' })"
+Write-Output "coverageRowsWaitingClosure: $(if ($localExperienceCandidateKind -eq 'experience_closure_readiness_audit') { $localExperienceAffectedUseCaseCount } else { '0' })"
+Write-Output "goalPacketEligibleCount: 0"
 Write-Output "bridgeProposalDecision: $bridgeProposalDecision"
 Write-Output "bridgeExperienceChain: $bridgeExperienceChain"
 Write-Output "bridgeCandidateTask: $bridgeCandidateTask"

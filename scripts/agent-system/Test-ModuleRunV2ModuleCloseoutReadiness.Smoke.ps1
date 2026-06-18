@@ -269,6 +269,34 @@ tasks:
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+
+    @"
+Result: blocked_validation_failure
+Batch range: blocked evidence closeout fixture
+RED: runtime validation found a real local full-flow gap.
+GREEN: blocked; targeted local full-flow runtime validation failed.
+Commit: abcdef1
+localFullLoopGate: approved_localhost_only
+threadRolloverGate: no thread rollover required
+nextModuleRunCandidate: blocked-local-flow-contract-repair
+Blocked remainder: closure readiness audit and Cost Calibration Gate remain blocked.
+Runtime Failure Summary: targeted local full-flow command failed.
+Cost Calibration Gate remains blocked
+closeout-validation
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+    Set-Content -LiteralPath $auditPath -Value "Verdict: APPROVE_BLOCKED_EVIDENCE_CLOSEOUT" -Encoding UTF8
+
+    $blockedCloseoutOutput = @(
+        & $scriptPath `
+            -TaskId "lifecycle-task" `
+            -ProjectStatePath $statePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    )
+    Assert-Contains -Output $blockedCloseoutOutput -Pattern "evidenceResultClass: blocked"
+    Assert-Contains -Output $blockedCloseoutOutput -Pattern "OK_BLOCKED_EVIDENCE_CLOSEOUT_APPROVED"
+    Assert-Contains -Output $blockedCloseoutOutput -Pattern "OK_BLOCKED_FAILURE_SUMMARY_RECORDED"
+    Assert-Contains -Output $blockedCloseoutOutput -Pattern "module-closeout readiness passed"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

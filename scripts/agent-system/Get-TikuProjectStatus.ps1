@@ -125,7 +125,7 @@ if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
     $nextActionArgs += @("-TaskId", $TaskId)
 }
 $nextActionResult = Invoke-DiagnosticScript -ScriptPath (Join-Path -Path $scriptRoot -ChildPath "Get-TikuNextAction.ps1") -Arguments $nextActionArgs
-Write-ToolSummary -Name "Next Action" -Result $nextActionResult -Keys @("nextActionDecision", "nextExecutableTask", "recommendedAction", "stopReason")
+Write-ToolSummary -Name "Next Action" -Result $nextActionResult -Keys @("nextActionDecision", "nextExecutableTask", "localExperienceCandidateTask", "localExperienceSeedRequired", "localExperienceCandidateReady", "blockedWithRepairCandidate", "coverageRowsWaitingRepair", "coverageRowsWaitingClosure", "activeQueueNonTerminalCount", "goalPacketEligibleCount", "recommendedAction", "stopReason")
 
 $registrationArgs = Join-Arguments -Values @("-ProjectStatePath", $ProjectStatePath)
 if (-not [string]::IsNullOrWhiteSpace($AutomationRoot)) {
@@ -192,6 +192,15 @@ if ($nextActionDecision -eq "planned_pause_for_tuning" -or $registrationDecision
     $projectStatusDecision = "can_continue"
     $projectStatusAction = "claim_or_plan_next_task:$nextExecutableTask"
     $projectStatusReason = "a pending executable task is available"
+    $safeToProceed = -not $isDirty
+} elseif ($nextActionDecision -eq "local_experience_task_seed_required") {
+    $projectStatusDecision = "local_experience_task_seed_required"
+    $projectStatusAction = if ([string]::IsNullOrWhiteSpace($nextActionRecommendedAction)) { "request_local_experience_task_seed" } else { $nextActionRecommendedAction }
+    $projectStatusReason = "coverage and handoff identify a local experience repair candidate that is not seeded"
+} elseif ($nextActionDecision -in @("local_experience_task_found", "local_experience_task_found_with_dirty_worktree")) {
+    $projectStatusDecision = "can_continue"
+    $projectStatusAction = if ([string]::IsNullOrWhiteSpace($nextActionRecommendedAction)) { "claim_or_plan_next_task:$nextExecutableTask" } else { $nextActionRecommendedAction }
+    $projectStatusReason = "coverage and handoff identify a pending local experience candidate"
     $safeToProceed = -not $isDirty
 } elseif ($nextActionDecision -eq "local_experience_bridge_proposal_available") {
     $projectStatusDecision = "local_experience_bridge_proposal_available"

@@ -30,8 +30,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 4. This manual.
 5. `docs/04-agent-system/state/project-state.yaml`.
 6. `docs/04-agent-system/state/task-queue.yaml`.
-7. Latest task plan, evidence, and audit review referenced by durable state.
-8. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
+7. `docs/04-agent-system/state/mechanism-source-of-truth-index.yaml`.
+8. Latest task plan, evidence, and audit review referenced by durable state.
+9. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
 
 ## Single Source Of Truth Rules
 
@@ -76,6 +77,18 @@ Select the next task only when:
 
 If no task qualifies, report `no-executable-task-seed-or-approve-next-task` instead of speculating.
 
+## Local Experience Repair Selection Rule
+
+When the current task is terminal and local full-flow evidence is blocked, first inspect the current handoff and
+`docs/04-agent-system/state/local-experience-coverage-matrix.yaml` before selecting an unrelated pending task. If those
+sources identify an unseeded repair candidate, report `request_local_experience_task_seed:<taskId>`. If the candidate is
+already pending and dependency-satisfied, prefer that candidate over unrelated ready work. This rule preserves queue
+discipline while preventing valid blocked evidence from being bypassed accidentally.
+
+Blocked validation closeout is valid only for validation tasks with redacted evidence, a failure summary, a next minimal
+repair, blocked-gate remainder, and an audit verdict of `APPROVE_BLOCKED_EVIDENCE_CLOSEOUT`. It does not mark any row
+`experience_closed`.
+
 ## Bounded Queue Drain Rule
 
 Use `Invoke-ModuleRunV2QueueDrainSupervisor.ps1` as the default executable entry for queue-drain automation. The
@@ -109,6 +122,9 @@ required, validation fails, evidence/audit is missing, blocked files are touched
 seen, or the wake exceeds its task/time/diff budgets. Low-risk product-code implementation tasks without an explicit
 `drainPolicy` are treated as `low_risk_local_code` only after approval anchors, structured closeout, validation surface,
 allowed/blocked files, and redaction-safe evidence paths are present.
+
+Drain eligibility accepts `validationPolicy` as the current field and `validationProfile` as a legacy compatibility
+field. `local_full_flow` remains single-task only and must not be batched by queue drain or goal packet logic.
 
 When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval

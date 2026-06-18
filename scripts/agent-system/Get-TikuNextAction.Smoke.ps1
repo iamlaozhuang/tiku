@@ -360,7 +360,7 @@ tasks:
 
     Push-Location -LiteralPath $repoPath
     try {
-        $historyOutput = @(
+    $historyOutput = @(
             & $scriptPath `
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $historyQueuePath `
@@ -378,6 +378,131 @@ tasks:
     Assert-Contains -Output $historyOutput -Pattern '^recommendedAction: claim_or_plan_next_task:task-archived-dependency$'
     Assert-Contains -Output $historyOutput -Pattern '^stopReason: none$'
 
+    $localExperienceMatrixPath = Join-Path -Path $stateRoot -ChildPath "local-experience-coverage-matrix.yaml"
+    $localExperienceProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-local-experience.yaml"
+    $blockedLocalExperienceQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-local-experience-blocked.yaml"
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $sha
+  lastKnownOriginMasterSha: $sha
+currentTask:
+  id: local-experience-closed
+  status: closed
+  commitSha: $sha
+handoff:
+  nextRecommendedTask: standard-core-student-local-full-flow-contract-repair
+"@ | Set-Content -LiteralPath $localExperienceProjectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+rows:
+  - useCaseId: UC-STD-ACCOUNT-SESSION
+    status: local_experience_ready
+    nextTask: standard-core-student-local-full-flow-contract-repair
+  - useCaseId: UC-STD-PRACTICE
+    status: partial
+    nextTask: standard-core-student-local-full-flow-contract-repair
+"@ | Set-Content -LiteralPath $localExperienceMatrixPath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: local-experience-closed
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: standard-core-student-local-full-flow-contract-repair
+    status: pending
+    dependencies:
+      - missing-local-experience-dependency
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/student-repair.md
+  - id: unrelated-ready-task
+    status: pending
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/unrelated-ready-task.md
+"@ | Set-Content -LiteralPath $blockedLocalExperienceQueuePath -Encoding UTF8
+
+    & git -C $repoPath add docs | Out-Null
+    & git -C $repoPath commit -m "chore(smoke): add blocked local experience fixture" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit blocked local experience fixture."
+    }
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $blockedLocalExperienceOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $localExperienceProjectStatePath `
+                -QueuePath $blockedLocalExperienceQueuePath `
+                -MatrixPath $matrixPath `
+                -LocalExperienceMatrixPath $localExperienceMatrixPath `
+                -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^localExperienceNextTaskDecision: existing_task_available$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^localExperienceCandidateTask: standard-core-student-local-full-flow-contract-repair$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^localExperienceCandidateReady: false$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^localExperienceCandidateBlockedReasons: dependency_missing:missing-local-experience-dependency$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^nextActionDecision: local_experience_task_blocked$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^nextExecutableTask: none$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^recommendedAction: resolve_dependency_or_status_block:standard-core-student-local-full-flow-contract-repair$'
+    Assert-Contains -Output $blockedLocalExperienceOutput -Pattern '^stopReason: local_experience_candidate_blocked:dependency_missing:missing-local-experience-dependency$'
+
+    $readyLocalExperienceQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-local-experience-ready.yaml"
+    @"
+schemaVersion: 1
+tasks:
+  - id: local-experience-closed
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: standard-core-student-local-full-flow-contract-repair
+    status: pending
+    dependencies: []
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/student-repair.md
+"@ | Set-Content -LiteralPath $readyLocalExperienceQueuePath -Encoding UTF8
+
+    & git -C $repoPath add docs | Out-Null
+    & git -C $repoPath commit -m "chore(smoke): add ready local experience fixture" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit ready local experience fixture."
+    }
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $readyLocalExperienceOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $localExperienceProjectStatePath `
+                -QueuePath $readyLocalExperienceQueuePath `
+                -MatrixPath $matrixPath `
+                -LocalExperienceMatrixPath $localExperienceMatrixPath `
+                -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $readyLocalExperienceOutput -Pattern '^localExperienceCandidateReady: true$'
+    Assert-Contains -Output $readyLocalExperienceOutput -Pattern '^nextActionDecision: local_experience_task_found$'
+    Assert-Contains -Output $readyLocalExperienceOutput -Pattern '^nextExecutableTask: standard-core-student-local-full-flow-contract-repair$'
+    Assert-Contains -Output $readyLocalExperienceOutput -Pattern '^recommendedAction: claim_or_plan_next_task:standard-core-student-local-full-flow-contract-repair$'
+
+    $missingLocalExperienceMatrixPath = Join-Path -Path $stateRoot -ChildPath "missing-local-experience-coverage-matrix.yaml"
     $seedQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-seed.yaml"
     $seedMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-seed.yaml"
     @"
@@ -435,6 +560,7 @@ currentTask:
                 -ProjectStatePath $seedProjectStatePath `
                 -QueuePath $seedQueuePath `
                 -MatrixPath $seedMatrixPath `
+                -LocalExperienceMatrixPath $missingLocalExperienceMatrixPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
@@ -542,6 +668,7 @@ currentTask:
                 -ProjectStatePath $bridgeProjectStatePath `
                 -QueuePath $bridgeQueuePath `
                 -MatrixPath $bridgeMatrixPath `
+                -LocalExperienceMatrixPath $missingLocalExperienceMatrixPath `
                 -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )

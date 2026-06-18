@@ -43,6 +43,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$commonScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "ModuleRunV2.Common.ps1"
+if (Test-Path -LiteralPath $commonScriptPath) {
+    . $commonScriptPath
+}
+
 function Write-Section {
     param(
         [Parameter(Mandatory = $true)]
@@ -552,7 +557,23 @@ if (Test-Path -LiteralPath $AuditReviewPath) {
 }
 
 if (-not [string]::IsNullOrWhiteSpace($evidenceContent)) {
-    Test-ContentPattern -Content $evidenceContent -Pattern "(?m)result:\s*pass|Passed:" -MissingCode "HARD_BLOCK_EVIDENCE_NOT_PASS" -OkCode "OK_EVIDENCE_PASS_RECORDED"
+    $evidenceResultClass = if (Get-Command -Name Get-ModuleRunV2EvidenceResultClass -ErrorAction SilentlyContinue) {
+        Get-ModuleRunV2EvidenceResultClass -Content $evidenceContent
+    } else {
+        if ($evidenceContent -match "(?m)result:\s*pass|Passed:") { "pass" } elseif ($evidenceContent -match "(?im)result:\s*blocked|blocked_validation_failure") { "blocked" } else { "unknown" }
+    }
+    $blockedEvidenceCloseoutApproved = $evidenceResultClass -eq "blocked" -and $auditContent -match "APPROVE_BLOCKED_EVIDENCE_CLOSEOUT"
+    Write-Output "evidenceResultClass: $evidenceResultClass"
+
+    if ($evidenceResultClass -eq "pass") {
+        Write-Output "OK_EVIDENCE_PASS_RECORDED"
+    } elseif ($blockedEvidenceCloseoutApproved) {
+        Write-Output "OK_BLOCKED_EVIDENCE_CLOSEOUT_APPROVED"
+        Test-ContentPattern -Content $evidenceContent -Pattern "(?is)Runtime Failure Summary|Blocking Findings|failed|failure" -MissingCode "HARD_BLOCK_BLOCKED_EVIDENCE_MISSING_FAILURE_SUMMARY" -OkCode "OK_BLOCKED_FAILURE_SUMMARY_RECORDED"
+        Test-ContentPattern -Content $evidenceContent -Pattern "(?is)nextModuleRunCandidate|Recommended smallest follow-up repair task|Recommended smallest follow-up task" -MissingCode "HARD_BLOCK_BLOCKED_EVIDENCE_MISSING_NEXT_REPAIR" -OkCode "OK_BLOCKED_NEXT_REPAIR_RECORDED"
+    } else {
+        Add-Finding "HARD_BLOCK_EVIDENCE_NOT_PASS"
+    }
     Test-ContentPattern -Content $evidenceContent -Pattern "Cost Calibration Gate remains blocked" -MissingCode "HARD_BLOCK_MISSING_COST_GATE_STATEMENT" -OkCode "OK_COST_GATE_RECORDED"
 
     foreach ($validationCommand in $validationCommands) {

@@ -17005,6 +17005,96 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
     retryCount: 0
+  - id: mechanism-throughput-readiness-tuning
+    title: Mechanism throughput readiness tuning
+    phase: mechanism-throughput-readiness-tuning
+    sourceStory: mechanismTuning.thirdRoundThroughputReadiness
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved advancing the mechanism task sequence: current tuning closeout, guarded goal v1, and
+      queue slimming/self-repair. This task closes out the already implemented throughput readiness tuning scope only:
+      document-synchronized plan capture, blocked evidence closeout normalization, and local-experience repair routing
+      plus seed templates. Guarded serial goal v1 and full queue slimming/self-repair remain separate follow-up tasks.
+    taskKind: mechanism_tuning
+    moduleRunVersion: 2
+    executionProfile: docs_state_mechanism_tuning
+    evidenceMode: full
+    validationPolicy: mechanism_tuning
+    queueSelectionMode: explicit_current_task
+    status: closed
+    result: pass_for_implemented_scope
+    branch: codex/mechanism-throughput-readiness-tuning
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-mechanism-throughput-readiness-tuning.md
+      - docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md
+      - scripts/agent-system/ModuleRunV2.Common.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.Smoke.ps1
+      - scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.ps1
+      - scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.Smoke.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(agent): tune mechanism throughput readiness"
+        approval: current_user_prompt_2026_06_18_mechanism_task_sequence
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceNextTaskProposal.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2LocalExperienceTaskSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/operating-manual.md docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-mechanism-throughput-readiness-tuning.md docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md scripts/agent-system/ModuleRunV2.Common.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceNextTaskProposal.Smoke.ps1 scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.ps1 scripts/agent-system/New-ModuleRunV2LocalExperienceTaskSeed.Smoke.ps1 scripts/agent-system/Get-TikuNextAction.ps1 scripts/agent-system/Get-TikuNextAction.Smoke.ps1 scripts/agent-system/Get-TikuProjectStatus.ps1 scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1 scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-throughput-readiness-tuning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId mechanism-throughput-readiness-tuning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-throughput-readiness-tuning.md
+    retryCount: 0
   - id: standard-admin-ops-logs-local-experience-batch
     title: Standard admin ops logs local experience batch
     phase: standard-admin-ops-logs-local-experience-batch

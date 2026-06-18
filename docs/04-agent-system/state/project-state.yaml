@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-core-student-local-full-flow-validation
+currentPhase: mechanism-throughput-readiness-tuning
 updatedAt: "2026-06-18T08:18:43-07:00"
 architecture:
   status: complete
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
   lastKnownOriginMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
 currentTask:
-  id: standard-core-student-local-full-flow-validation
+  id: mechanism-throughput-readiness-tuning
   status: closed
-  result: blocked_local_full_flow_validation_failure
-  sourceStory: localExperienceClosureGate.standardCoreStudentRuntimeFullFlow
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
-  branch: codex/standard-core-student-local-full-flow-validation
+  result: pass_for_implemented_scope
+  sourceStory: mechanismTuning.thirdRoundThroughputReadiness
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-mechanism-throughput-readiness-tuning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md
+  branch: codex/mechanism-throughput-readiness-tuning
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint
