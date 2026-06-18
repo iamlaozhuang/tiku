@@ -12,6 +12,7 @@ import {
 } from "../contracts/contact-config-contract";
 import { ADMIN_AUTH_OPERATION_ERROR_CODES } from "../contracts/admin-user-org-auth-ops-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
@@ -120,7 +121,7 @@ async function resolveContactConfigAdminActor(
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): Promise<ContactConfigAdminActor | null> {
   const sessionResponse = await sessionService.getCurrentSession({
-    authorization: request.headers.get("authorization"),
+    authorization: getRequestAuthorization(request),
   });
 
   if (sessionResponse.code !== 0 || sessionResponse.data === null) {

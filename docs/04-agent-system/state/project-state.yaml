@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-core-student-experience-closure-readiness-audit
-updatedAt: "2026-06-18T11:17:51-07:00"
+currentPhase: admin-content-ops-local-experience-packet
+updatedAt: "2026-06-18T12:06:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,17 +497,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
-  lastKnownOriginMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
+  lastKnownMasterSha: fddef3417a628f5118741c1fd3b6865a7e871f0a
+  lastKnownOriginMasterSha: fddef3417a628f5118741c1fd3b6865a7e871f0a
 currentTask:
-  id: standard-core-student-experience-closure-readiness-audit
+  id: admin-content-ops-local-experience-packet
   status: closed
-  result: mark_experience_closed_local_only
-  sourceStory: localExperienceClosureGate.standardCoreStudentExperienceClosureReadinessAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
-  branch: codex/mechanism-throughput-readiness-tuning
+  result: pass_experience_closed_local_only
+  sourceStory: userBoundedLocalExperiencePacket.adminContentOpsLogsOrgAuthQuestionMaterialPaperRetention
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-admin-content-ops-local-experience-packet.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-admin-content-ops-local-experience-packet.md
+  branch: codex/admin-content-ops-local-experience-packet
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: pass_standard_core_student_experience_closure_local_only
+    readiness: pass_admin_content_ops_local_experience_packet
     lint: pass
     typecheck: pass
-    unit: pass_standard_core_student_focused_unit_10_files_76_tests
+    unit: pass_admin_content_ops_focused_unit_18_files_99_tests
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_targeted_local_full_flow_12_passed
+    e2e: pass_admin_content_ops_existing_local_e2e_11_tests
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: standard_core_student_experience_closed_local_only
+  status: admin_content_ops_local_experience_packet_experience_closed_local_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: standard-core-student-experience-closure-readiness-audit
+  currentTaskId: admin-content-ops-local-experience-packet
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -978,15 +978,36 @@ localExperienceClosure:
       experienceClosure: not_claimed
       standardAdminOpsLogsRowsRemainingReady: 1
       costCalibrationGate: blocked
+  currentAdminContentOpsLocalExperiencePacket:
+    taskId: admin-content-ops-local-experience-packet
+    claimedAt: "2026-06-18T11:53:14-07:00"
+    closedAt: "2026-06-18T12:06:27-07:00"
+    targetExperienceChain: admin-content-ops-local-experience-packet
+    useCaseIds:
+      - UC-STD-ADMIN-OPS-LOGS
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-STD-QUESTION-MATERIAL-MANAGE
+      - UC-STD-PAPER-LIFECYCLE
+      - UC-ADV-RETENTION-LOG-GOVERNANCE
+    decision: mark_experience_closed_for_local_admin_content_ops_packet_only
+    evidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-admin-content-ops-local-experience-packet.md
+    boundarySummary:
+      localFullFlow: approved_localhost_only_existing_specs
+      focusedUnit: pass_18_files_99_tests
+      e2eList: pass_31_tests_14_files
+      runtimeE2E: pass_4_existing_specs_11_tests
+      experienceClosure: local_only
+      releaseReadiness: not_claimed
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `standard-core-student-experience-closure-readiness-audit` marked the five standard student core rows
-    `experience_closed` for local experience only after fresh passing local full-flow evidence. No commit, merge, push, or
-    branch cleanup was performed. Next action requires user direction: either continue another local experience queue item
-    or explicitly authorize the later merge/push/cleanup phase for the accumulated student chain. Keep release,
-    staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration,
-    package/lockfile/dependency, destructive database operations, e2e spec edits, and Cost Calibration Gate blocked unless
-    a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    `admin-content-ops-local-experience-packet` is locally closed after fresh redacted focused unit validation, e2e list,
+    the four user-approved existing local e2e specs, evidence, audit, and coverage-matrix sync. Continue only with
+    closeout gates, local commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch
+    cleanup under the user's bounded packet approval. Keep release, staging/prod, provider/payment, external-service,
+    deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database
+    operations, e2e spec edits, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md

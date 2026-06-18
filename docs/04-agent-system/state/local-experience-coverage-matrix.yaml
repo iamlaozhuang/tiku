@@ -1,9 +1,17 @@
 schemaVersion: 1
 generatedByTask: module-run-v2-local-experience-governance-hardening
 generatedAt: "2026-06-17T17:24:01-07:00"
+moduleRunVersion: 2
 purpose: >-
   Canonical local experience coverage matrix for deciding whether a standard or advanced use case is missing, partial,
   ready for local experience validation, locally closed, or blocked by release/high-risk gates.
+threadRolloverGate:
+  decision: not_required_for_current_packet_closeout
+  reason: current packet remains within this thread through evidence, audit, state sync, commit, merge, push, and cleanup.
+automationHandoffPolicy:
+  decision: local_only_packet_handoff_not_required_before_closeout
+  nextModuleRunCandidate: next_partial_or_local_experience_ready_matrix_row_after_packet_closeout
+costCalibrationGateStatement: Cost Calibration Gate remains blocked.
 statusModel:
   allowed:
     - missing
@@ -19,17 +27,17 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: unified-standard-advanced-current-coverage-refresh
-  refreshedAt: "2026-06-17T18:06:09-07:00"
+  taskId: admin-content-ops-local-experience-packet
+  refreshedAt: "2026-06-18T12:06:27-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 12
-    local_experience_ready: 6
-    experience_closed: 4
+    partial: 8
+    local_experience_ready: 0
+    experience_closed: 14
     release_blocked: 10
   sourceAnchors:
     - docs/01-requirements/use-cases/use-case-catalog.md
@@ -39,26 +47,31 @@ currentFactRefresh:
     - docs/01-requirements/traceability/unified-edition-delta-matrix.md
   e2eListOnly:
     command: npm.cmd run test:e2e -- --list
-    specFiles: 11
-    listedTests: 28
+    specFiles: 14
+    listedTests: 31
     runtimeExecuted: false
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
-    organization-training and organization-analytics local role-flow rows that were later marked `experience_closed`;
-    release readiness is still not implied by local experience closure.
+    admin-content-ops local experience packet rows that were marked `experience_closed` after fresh redacted focused unit
+    and existing local e2e validation; release readiness is still not implied by local experience closure.
 lastClosureReadinessAudit:
-  taskId: organization-analytics-summary-experience-closure-readiness-audit
-  auditedAt: "2026-06-18T07:26:43-07:00"
-  targetExperienceChain: organization-analytics-summary
+  taskId: admin-content-ops-local-experience-packet
+  auditedAt: "2026-06-18T12:06:27-07:00"
+  targetExperienceChain: admin-content-ops-local-experience-packet
   useCaseIds:
-    - UC-ADV-ORG-ANALYTICS-SUMMARY
-  decision: mark_experience_closed_for_local_analytics_summary_only
+    - UC-STD-ADMIN-OPS-LOGS
+    - UC-STD-ORG-AUTH-MANAGED
+    - UC-STD-QUESTION-MATERIAL-MANAGE
+    - UC-STD-PAPER-LIFECYCLE
+    - UC-ADV-RETENTION-LOG-GOVERNANCE
+  decision: mark_experience_closed_for_local_admin_content_ops_packet_only
   reason: >-
-    Fresh local full-flow evidence shows an organization admin can enter the organization analytics surface, submit the
-    dashboard summary form, receive the aggregate-only analytics API result, and avoid exposing internal ids or sensitive
-    browser text. The claim is local experience closure only and does not imply release, staging/prod, provider, payment,
-    or Cost Calibration readiness.
-  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    Fresh local evidence shows the packet's focused unit suite, e2e list discovery, and four existing approved local e2e
+    specs passed after a minimal contact_config browser-session repair. Evidence is redacted and contains no raw paper
+    content, student answer, plaintext redeem_code, provider payload, token, secret, or environment value. The claim is
+    local experience closure only and does not imply release, staging/prod, provider, payment, deployment, PR, or Cost
+    Calibration readiness.
+  evidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -418,10 +431,10 @@ matrix:
     uiSurface: src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
     unitEvidence: tests/unit/phase-11-system-ops-organization-management-loop.test.ts; tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts
     e2eEvidence: e2e/role-based-acceptance/role-based-full-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
-    status: partial
-    blockedGate: org_role_flow_browser_validation_requires_task_scope
-    nextTask: standard-mvp-local-experience-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-QUESTION-MATERIAL-MANAGE
     edition: standard
     actor: content_admin
@@ -432,10 +445,10 @@ matrix:
     uiSurface: src/features/admin/question-material-management/**
     unitEvidence: tests/unit/admin-question-material-ui.test.ts; src/server/services/question-service.test.ts; src/server/services/material-service.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: partial
-    blockedGate: full_question_type_authoring_and_browser_flow_not_freshly_closed
-    nextTask: standard-mvp-local-experience-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-PAPER-LIFECYCLE
     edition: standard
     actor: content_admin_student
@@ -446,10 +459,10 @@ matrix:
     uiSurface: src/features/admin/paper-management/**
     unitEvidence: tests/unit/admin-paper-ui.test.ts; tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts
     e2eEvidence: e2e/content-action-closures.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: partial
-    blockedGate: full_publish_copy_archive_browser_flow_not_freshly_closed
-    nextTask: standard-mvp-local-experience-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-PRACTICE
     edition: standard
     actor: student
@@ -544,10 +557,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; src/features/admin/**
     unitEvidence: tests/unit/admin-ai-audit-log-ops-baseline.test.ts; tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
     e2eEvidence: e2e/admin-audit-navigation.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
-    status: local_experience_ready
-    blockedGate: standard_admin_ops_logs_runtime_full_flow_validation_pending
-    nextTask: standard-admin-ops-logs-local-full-flow-validation
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-AUTH-CONTEXT-UPGRADE
     edition: advanced
     actor: personal_user_employee_org_admin_ops_admin
@@ -684,10 +697,10 @@ matrix:
     uiSurface: src/features/admin/admin-ops-management/AdminOpsManagement.tsx
     unitEvidence: src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts; tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
     e2eEvidence: e2e/admin-audit-navigation.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    status: partial
-    blockedGate: raw_viewer_hard_delete_export_provider_deploy_blocked
-    nextTask: ops-governance-summary-local-flow-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_staging_prod_provider_payment_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-FORMAL-CONTENT-SEPARATION
     edition: advanced
     actor: personal_user_organization_admin_content_admin_ops_admin

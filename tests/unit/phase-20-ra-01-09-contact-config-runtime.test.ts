@@ -4,6 +4,10 @@ import {
   createContactConfigRuntimeRouteHandlers,
   type ContactConfigRuntimeRepositories,
 } from "@/server/services/contact-config-service";
+import {
+  COOKIE_BACKED_SESSION_AUTHORIZATION,
+  SESSION_COOKIE_NAME,
+} from "@/server/auth/session-cookie";
 
 const baseContactConfig = {
   publicId: "contact-config-local-purchase-guidance",
@@ -42,12 +46,12 @@ const updatedContactConfig = {
 
 function createSessionService(
   roles: ("super_admin" | "ops_admin" | "content_admin")[],
-  token = "admin-session-token",
+  sessionValue = "admin-session-marker",
 ) {
   return {
     getCurrentSession: vi.fn(
       async (input: { authorization: string | null }) => {
-        expect(input.authorization).toBe(`Bearer ${token}`);
+        expect(input.authorization).toBe(`Bearer ${sessionValue}`);
 
         return {
           code: 0,
@@ -91,7 +95,19 @@ function createRequest(method: "GET" | "PUT", body?: unknown) {
   return new Request("http://localhost/api/v1/contact-configs", {
     body: body === undefined ? undefined : JSON.stringify(body),
     headers: {
-      authorization: "Bearer admin-session-token",
+      authorization: "Bearer admin-session-marker",
+      "content-type": "application/json",
+    },
+    method,
+  });
+}
+
+function createCookieBackedRequest(method: "GET" | "PUT", body?: unknown) {
+  return new Request("http://localhost/api/v1/contact-configs", {
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: {
+      authorization: COOKIE_BACKED_SESSION_AUTHORIZATION,
+      cookie: `${SESSION_COOKIE_NAME}=admin-session-marker`,
       "content-type": "application/json",
     },
     method,
@@ -166,13 +182,13 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
         targetResourceType: "contact_config",
       }),
     );
-    expect(JSON.stringify(putPayload)).not.toContain("admin-session-token");
+    expect(JSON.stringify(putPayload)).not.toContain("admin-session-marker");
     expect(
       JSON.stringify(
         vi.mocked(repositories.auditLogRepository!.appendAuditLog).mock
           .calls[0],
       ),
-    ).not.toContain("admin-session-token");
+    ).not.toContain("admin-session-marker");
   });
 
   it("denies content_admin contact_config updates before repository mutation", async () => {
@@ -203,5 +219,50 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     expect(
       repositories.auditLogRepository?.appendAuditLog,
     ).not.toHaveBeenCalled();
+  });
+
+  it("accepts cookie-backed admin marker for browser runtime reads and updates", async () => {
+    const repositories = createRepositories();
+    const sessionService = createSessionService(["super_admin"]);
+    const handlers = createContactConfigRuntimeRouteHandlers({
+      repositories,
+      sessionService,
+    });
+
+    const getResponse = await handlers.contactConfigs.GET(
+      createCookieBackedRequest("GET"),
+    );
+    const getPayload = await getResponse.json();
+
+    expect(getPayload).toMatchObject({
+      code: 0,
+      data: {
+        contactConfig: {
+          publicId: "contact-config-local-purchase-guidance",
+        },
+      },
+    });
+
+    const putResponse = await handlers.contactConfigs.PUT(
+      createCookieBackedRequest("PUT", {
+        title: "Updated purchase support",
+        summary: "Use the verified operations channel for local purchases.",
+        channels: updatedContactConfig.channels,
+        safetyNotice: updatedContactConfig.safetyNotice,
+      }),
+    );
+    const putPayload = await putResponse.json();
+
+    expect(putPayload).toMatchObject({
+      code: 0,
+      data: {
+        contactConfig: {
+          title: "Updated purchase support",
+        },
+      },
+    });
+    expect(sessionService.getCurrentSession).toHaveBeenCalledWith({
+      authorization: "Bearer admin-session-marker",
+    });
   });
 });
