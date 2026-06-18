@@ -657,10 +657,10 @@ matrix:
     uiSurface: src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
     unitEvidence: tests/unit/organization-portal-admin-entry-surface.test.ts; tests/unit/organization-training-admin-entry-surface.test.ts; tests/unit/organization-analytics-admin-entry-surface.test.ts
     e2eEvidence: e2e/organization-portal-local-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-full-flow-validation.md
     status: local_experience_ready
-    blockedGate: organization_portal_browser_runtime_full_flow_not_run
-    nextTask: organization-portal-admin-local-full-flow-validation
+    blockedGate: organization_portal_experience_closure_readiness_audit_pending
+    nextTask: organization-portal-admin-experience-closure-readiness-audit
   - useCaseId: UC-ADV-OPS-AUTH-QUOTA
     edition: advanced
     actor: ops_admin
