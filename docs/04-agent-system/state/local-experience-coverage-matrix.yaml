@@ -27,17 +27,17 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: admin-content-ops-local-experience-packet
-  refreshedAt: "2026-06-18T12:06:27-07:00"
+  taskId: personal-learning-ai-local-experience-packet
+  refreshedAt: "2026-06-18T12:29:24-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 8
+    partial: 3
     local_experience_ready: 0
-    experience_closed: 14
+    experience_closed: 19
     release_blocked: 10
   sourceAnchors:
     - docs/01-requirements/use-cases/use-case-catalog.md
@@ -52,26 +52,27 @@ currentFactRefresh:
     runtimeExecuted: false
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
-    admin-content-ops local experience packet rows that were marked `experience_closed` after fresh redacted focused unit
-    and existing local e2e validation; release readiness is still not implied by local experience closure.
+    personal-learning-ai local experience packet rows that were marked `experience_closed` after fresh redacted focused
+    unit validation, e2e list discovery, and existing approved local e2e validation; release readiness is still not
+    implied by local experience closure.
 lastClosureReadinessAudit:
-  taskId: admin-content-ops-local-experience-packet
-  auditedAt: "2026-06-18T12:06:27-07:00"
-  targetExperienceChain: admin-content-ops-local-experience-packet
+  taskId: personal-learning-ai-local-experience-packet
+  auditedAt: "2026-06-18T12:29:24-07:00"
+  targetExperienceChain: personal-learning-ai-local-experience-packet
   useCaseIds:
-    - UC-STD-ADMIN-OPS-LOGS
-    - UC-STD-ORG-AUTH-MANAGED
-    - UC-STD-QUESTION-MATERIAL-MANAGE
-    - UC-STD-PAPER-LIFECYCLE
-    - UC-ADV-RETENTION-LOG-GOVERNANCE
-  decision: mark_experience_closed_for_local_admin_content_ops_packet_only
+    - UC-ADV-AUTH-CONTEXT-UPGRADE
+    - UC-ADV-AI-TASK-LIFECYCLE
+    - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+    - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    - UC-ADV-FORMAL-CONTENT-SEPARATION
+  decision: mark_experience_closed_for_local_personal_learning_ai_packet_only
   reason: >-
     Fresh local evidence shows the packet's focused unit suite, e2e list discovery, and four existing approved local e2e
-    specs passed after a minimal contact_config browser-session repair. Evidence is redacted and contains no raw paper
-    content, student answer, plaintext redeem_code, provider payload, token, secret, or environment value. The claim is
-    local experience closure only and does not imply release, staging/prod, provider, payment, deployment, PR, or Cost
+    specs passed without source repair. Evidence is redacted and contains no raw paper content, student answer, plaintext
+    redeem_code, provider payload, token, secret, or environment value. The claim is local experience closure only and
+    does not imply release, staging/prod, provider/model, payment, deployment, formal target writes, PR, or Cost
     Calibration readiness.
-  evidence: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+  evidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -571,10 +572,10 @@ matrix:
     uiSurface: existing_student_and_admin_authorization_surfaces
     unitEvidence: src/server/services/*authorization*.test.ts; tests/unit/auth/session-personal-auth-boundary.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md
-    status: partial
-    blockedGate: payment_env_secret_provider_cost_calibration_blocked
-    nextTask: authorization-access-local-experience-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_payment_env_secret_provider_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-AI-TASK-LIFECYCLE
     edition: advanced
     actor: personal_user_system_ops_admin
@@ -585,10 +586,10 @@ matrix:
     uiSurface: src/app/(student)/ai-generation/page.tsx
     unitEvidence: src/server/services/personal-ai-generation-request-route.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
-    status: partial
-    blockedGate: provider_worker_quota_cost_calibration_blocked
-    nextTask: ai-task-and-provider-local-lifecycle-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_provider_worker_quota_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-PERSONAL-AI-QUESTION-GENERATION
     edition: advanced
     actor: personal_user
@@ -599,10 +600,10 @@ matrix:
     uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
     unitEvidence: src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx; src/server/services/personal-ai-generation-*.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
-    status: partial
-    blockedGate: local_contract_only_provider_and_durable_generation_blocked
-    nextTask: personal-learning-ai-durable-local-flow-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_provider_durable_generation_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-PERSONAL-AI-PAPER-GENERATION
     edition: advanced
     actor: personal_user
@@ -613,10 +614,10 @@ matrix:
     uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
     unitEvidence: src/server/services/personal-ai-generation-*.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
-    status: partial
-    blockedGate: local_contract_only_provider_and_full_generated_paper_blocked
-    nextTask: personal-learning-ai-durable-local-flow-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_provider_full_generated_paper_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     edition: advanced
     actor: organization_admin
@@ -711,10 +712,10 @@ matrix:
     uiSurface: personal_ai_generation_ui_partial; organization_ui_not_found
     unitEvidence: src/server/services/personal-ai-generation-formal-adoption-service.test.ts; src/server/services/organization-training-service.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
-    status: partial
-    blockedGate: formal_adoption_review_required_before_formal_writes
-    nextTask: formal-content-separation-local-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_formal_target_writes_provider_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
     edition: future_scope
     actor: student

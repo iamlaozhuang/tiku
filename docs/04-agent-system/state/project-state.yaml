@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-content-ops-local-experience-packet
-updatedAt: "2026-06-18T12:06:27-07:00"
+currentPhase: personal-learning-ai-local-experience-packet
+updatedAt: "2026-06-18T12:31:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,17 +497,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fddef3417a628f5118741c1fd3b6865a7e871f0a
-  lastKnownOriginMasterSha: fddef3417a628f5118741c1fd3b6865a7e871f0a
+  lastKnownMasterSha: 5c29465e6afe50516793d40148fff4c6d0f746d3
+  lastKnownOriginMasterSha: 5c29465e6afe50516793d40148fff4c6d0f746d3
 currentTask:
-  id: admin-content-ops-local-experience-packet
+  id: personal-learning-ai-local-experience-packet
   status: closed
   result: pass_experience_closed_local_only
-  sourceStory: userBoundedLocalExperiencePacket.adminContentOpsLogsOrgAuthQuestionMaterialPaperRetention
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-admin-content-ops-local-experience-packet.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-admin-content-ops-local-experience-packet.md
-  branch: codex/admin-content-ops-local-experience-packet
+  sourceStory: userBoundedLocalExperiencePacket.personalLearningAiLocalExperience
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-personal-learning-ai-local-experience-packet.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-personal-learning-ai-local-experience-packet.md
+  branch: codex/personal-learning-ai-local-experience-packet
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: pass_admin_content_ops_local_experience_packet
+    readiness: pass_personal_learning_ai_local_experience_packet
     lint: pass
     typecheck: pass
-    unit: pass_admin_content_ops_focused_unit_18_files_99_tests
+    unit: pass_personal_learning_ai_focused_unit_32_files_225_tests
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_admin_content_ops_existing_local_e2e_11_tests
+    e2e: pass_personal_learning_ai_existing_local_e2e_13_tests
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: admin_content_ops_local_experience_packet_experience_closed_local_only
+  status: personal_learning_ai_local_experience_packet_experience_closed_local_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: admin-content-ops-local-experience-packet
+  currentTaskId: personal-learning-ai-local-experience-packet
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -1000,14 +1000,37 @@ localExperienceClosure:
       experienceClosure: local_only
       releaseReadiness: not_claimed
       costCalibrationGate: blocked
+  currentPersonalLearningAiLocalExperiencePacket:
+    taskId: personal-learning-ai-local-experience-packet
+    claimedAt: "2026-06-18T12:25:01-07:00"
+    closedAt: "2026-06-18T12:31:46-07:00"
+    targetExperienceChain: personal-learning-ai-local-experience-packet
+    useCaseIds:
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-AI-TASK-LIFECYCLE
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+      - UC-ADV-FORMAL-CONTENT-SEPARATION
+    decision: mark_experience_closed_for_local_personal_learning_ai_packet_only
+    evidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-personal-learning-ai-local-experience-packet.md
+    boundarySummary:
+      focusedUnit: pass_32_files_225_tests
+      e2eList: pass_31_tests_14_files
+      runtimeE2E: pass_4_existing_specs_13_tests
+      experienceClosure: local_only
+      releaseReadiness: not_claimed
+      providerModel: blocked
+      formalTargetWrites: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `admin-content-ops-local-experience-packet` is locally closed after fresh redacted focused unit validation, e2e list,
-    the four user-approved existing local e2e specs, evidence, audit, and coverage-matrix sync. Continue only with
-    closeout gates, local commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch
-    cleanup under the user's bounded packet approval. Keep release, staging/prod, provider/payment, external-service,
-    deployment, PR, force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database
-    operations, e2e spec edits, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    `personal-learning-ai-local-experience-packet` is locally closed after fresh redacted focused unit validation, e2e
+    list, the four user-approved existing local e2e specs, evidence, audit, and coverage-matrix sync. Continue only with
+    local commit, fast-forward merge to `master`, master gates, `origin/master` push, and merged branch cleanup under the
+    user's bounded packet approval. Keep release, staging/prod, provider/payment, external-service, deployment, PR,
+    force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database operations, e2e
+    spec edits, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
