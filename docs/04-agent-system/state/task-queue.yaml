@@ -16939,3 +16939,212 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation.md
     retryCount: 0
+  - id: standard-admin-ops-logs-local-experience-batch
+    title: Standard admin ops logs local experience batch
+    phase: standard-admin-ops-logs-local-experience-batch
+    sourceStory: localExperienceClosureGate.standardAdminOpsLogsReadySetBatch
+    dependencies:
+      - standard-core-student-local-experience-batch
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a separate second low-risk local experience batch for `UC-STD-ADMIN-OPS-LOGS`, avoiding mixing
+      admin ops/logs with the standard student core chain. This task consumes
+      `standingLocalLowRiskExperienceAdvancementApproval` with structured closeoutPolicy for local short branch, task
+      plan/evidence/audit, docs/state/coverage matrix updates, focused unit validation, one `test:e2e -- --list`,
+      local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. Browser/Playwright
+      runtime, full e2e, dev server, product source changes, `.env*`, package/lockfile/dependency, schema/drizzle/
+      migration, provider/model, staging/prod/cloud/deploy, payment, external-service, PR, force-push, destructive DB,
+      and Cost Calibration Gate remain blocked.
+    targetExperienceChain: standard-admin-ops-logs
+    useCaseIds:
+      - UC-STD-ADMIN-OPS-LOGS
+    executionProfile: local_low_risk_experience_batch
+    evidenceMode: full
+    validationPolicy: low_risk_experience_batch
+    queueSelectionMode: ready_set
+    taskKind: local_experience_batch
+    moduleRunVersion: 2
+    lowRiskExperienceBatch:
+      id: standard-admin-ops-logs-local-experience-batch
+      role: parent
+      children:
+        - standard-admin-ops-logs-local-experience-audit
+      validationDedup:
+        e2eListOnce: true
+        lintTypecheckOnce: true
+        moduleReadinessOnce: true
+      fixtureRepairAllowance:
+        mode: test_only_contract_fixture
+        requiresRedGreen: true
+    status: closed
+    result: pass_keep_local_experience_ready_runtime_full_flow_required
+    claimedAt: "2026-06-18T08:00:00-07:00"
+    closedAt: "2026-06-18T08:02:20-07:00"
+    branch: codex/standard-admin-ops-logs-local-experience-batch
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch*.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch*.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-05-25-phase-11-ai-call-log-visibility-fix.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - Browser/Playwright runtime validation
+      - full e2e suite
+      - dev server
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - PR creation or force-push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(standard): batch admin ops logs local experience readiness"
+        approval: standingLocalLowRiskExperienceAdvancementApproval
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx"
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch.md docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LowRiskExperienceBatchReadiness.ps1 -BatchId standard-admin-ops-logs-local-experience-batch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-admin-ops-logs-local-experience-batch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId standard-admin-ops-logs-local-experience-batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: standard-admin-ops-logs-local-experience-audit
+    title: Standard admin ops logs local experience audit
+    phase: standard-admin-ops-logs-local-experience-batch
+    sourceStory: localExperienceClosureGate.standardAdminOpsLogsReadySetBatch
+    dependencies:
+      - standard-admin-ops-logs-local-experience-batch
+    taskKind: local_experience_audit
+    moduleRunVersion: 2
+    lowRiskExperienceBatch:
+      id: standard-admin-ops-logs-local-experience-batch
+      role: child
+    status: closed
+    result: keep_local_experience_ready_runtime_full_flow_required
+    useCaseIds:
+      - UC-STD-ADMIN-OPS-LOGS
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch*.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch*.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+  - id: standard-admin-ops-logs-local-full-flow-validation
+    title: Standard admin ops logs local full-flow validation
+    phase: standard-admin-ops-logs-local-full-flow-validation
+    sourceStory: localExperienceClosureGate.standardAdminOpsLogsRuntimeFullFlow
+    dependencies:
+      - standard-admin-ops-logs-local-experience-batch
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Seeded by `standard-admin-ops-logs-local-experience-batch` because low-risk batch evidence is not enough to mark
+      `UC-STD-ADMIN-OPS-LOGS` `experience_closed`. Execution requires a separate local full-flow task scope and
+      approval to run Browser/Playwright runtime against existing local e2e specs. Release, staging/prod,
+      provider/model, payment, external-service, dependency, schema/migration, `.env*`, destructive database
+      operations, PR, force-push, and Cost Calibration Gate remain blocked.
+    targetExperienceChain: standard-admin-ops-logs
+    useCaseIds:
+      - UC-STD-ADMIN-OPS-LOGS
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: recommended_next_requires_explicit_runtime_approval
+    taskKind: local_full_flow_validation
+    moduleRunVersion: 2
+    status: pending
+    blockedGates:
+      - requires_explicit_localhost_runtime_approval_before_execution
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - PR creation or force-push
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    readOnlyAllowedFiles:
+      - e2e/admin-audit-navigation.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - src/**
+      - tests/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx"
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/admin-audit-navigation.spec.ts e2e/local-business-flow.spec.ts
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    retryCount: 0
