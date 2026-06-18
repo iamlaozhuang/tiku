@@ -636,17 +636,17 @@ matrix:
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
-    entrySurface: not_found_organization_analytics_ui
+    entrySurface: src/app/(admin)/content/organization-analytics/page.tsx
     apiSurface: src/app/api/v1/organization-analytics/**
     serviceSurface: src/server/services/organization-analytics-service.ts; src/server/services/organization-analytics-route.ts
     repositorySurface: src/server/repositories/organization-analytics-repository.ts
-    uiSurface: not_found
-    unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts
-    e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
-    status: partial
-    blockedGate: organization_summary_admin_ui_entry_and_e2e_flow_not_closed
-    nextTask: organization-analytics-summary-ui-entry-contract-tdd
+    uiSurface: src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+    unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts; tests/unit/organization-analytics-admin-entry-surface.test.ts
+    e2eEvidence: e2e/organization-analytics-local-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    status: local_experience_ready
+    blockedGate: organization_summary_browser_runtime_full_flow_not_run
+    nextTask: organization-portal-admin-shell-entry-contract-tdd
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin
