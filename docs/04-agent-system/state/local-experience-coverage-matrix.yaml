@@ -28,8 +28,8 @@ currentFactRefresh:
   statusSummary:
     missing: 0
     partial: 14
-    local_experience_ready: 5
-    experience_closed: 3
+    local_experience_ready: 4
+    experience_closed: 4
     release_blocked: 10
   sourceAnchors:
     - docs/01-requirements/use-cases/use-case-catalog.md
@@ -44,22 +44,21 @@ currentFactRefresh:
     runtimeExecuted: false
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
-    organization-training local role-flow rows that were later marked `experience_closed`; release readiness is still not
-    implied by local experience closure.
+    organization-training and organization-analytics local role-flow rows that were later marked `experience_closed`;
+    release readiness is still not implied by local experience closure.
 lastClosureReadinessAudit:
-  taskId: organization-training-experience-closure-readiness-audit
-  auditedAt: "2026-06-18T04:10:37-07:00"
-  targetExperienceChain: organization-training-experience
+  taskId: organization-analytics-summary-experience-closure-readiness-audit
+  auditedAt: "2026-06-18T07:26:43-07:00"
+  targetExperienceChain: organization-analytics-summary
   useCaseIds:
-    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
-    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-  decision: mark_experience_closed_for_local_role_flow_only
+    - UC-ADV-ORG-ANALYTICS-SUMMARY
+  decision: mark_experience_closed_for_local_analytics_summary_only
   reason: >-
-    Fresh local full-flow evidence shows the organization admin can enter the admin organization-training surface,
-    create a draft, bind source context metadata, publish/copy training, and an employee in scope can reach visible-list,
-    draft-save, submit, and readonly-summary. The claim is local experience closure only and does not imply release,
-    staging/prod, provider, payment, or Cost Calibration readiness.
-  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    Fresh local full-flow evidence shows an organization admin can enter the organization analytics surface, submit the
+    dashboard summary form, receive the aggregate-only analytics API result, and avoid exposing internal ids or sensitive
+    browser text. The claim is local experience closure only and does not imply release, staging/prod, provider, payment,
+    or Cost Calibration readiness.
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -643,10 +642,10 @@ matrix:
     uiSurface: src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
     unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts; tests/unit/organization-analytics-admin-entry-surface.test.ts
     e2eEvidence: e2e/organization-analytics-local-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
-    status: local_experience_ready
-    blockedGate: organization_analytics_experience_closure_readiness_audit_pending
-    nextTask: organization-analytics-summary-experience-closure-readiness-audit
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_staging_prod_provider_payment_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin

@@ -16276,11 +16276,11 @@ tasks:
     queueSelectionMode: seeded_next_local_experience_gap
     taskKind: readiness_audit
     moduleRunVersion: 2
-    status: pending
-    result: null
-    claimedAt: null
-    closedAt: null
-    branch: null
+    status: closed
+    result: pass_experience_closed_for_local_analytics_summary_only
+    claimedAt: "2026-06-18T07:26:43-07:00"
+    closedAt: "2026-06-18T07:26:43-07:00"
+    branch: codex/organization-analytics-summary-experience-closure-readiness-audit
     allowedFiles:
       - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
