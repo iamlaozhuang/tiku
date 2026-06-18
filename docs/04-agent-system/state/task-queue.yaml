@@ -14400,15 +14400,18 @@ tasks:
     queueSelectionMode: legacy_explicit
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass
+    claimedAt: "2026-06-18T01:00:12-07:00"
+    closedAt: "2026-06-18T01:15:29-07:00"
+    branch: codex/organization-training-local-experience-chain
     allowedFiles:
       - src/app/(admin)/organization-training/**
       - src/app/(student)/organization-training/**
       - src/features/admin/organization-training/**
       - src/features/student/organization-training/**
       - src/features/student/studentRuntimeApi.ts
-      - tests/unit/organization-training-*.test.tsx
+      - tests/unit/organization-training-*.test.ts
       - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -14460,9 +14463,9 @@ tasks:
         deleteShortBranch: false
         fetchPruneAfterPush: true
     validationCommands:
-      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.tsx tests/unit/organization-training-employee-entry-surface.test.tsx
+      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
       - npm.cmd run test:e2e -- --list
-      - npx.cmd prettier --check --ignore-unknown 'src/app/(admin)/organization-training' 'src/app/(student)/organization-training' src/features/admin/organization-training src/features/student/organization-training src/features/student/studentRuntimeApi.ts tests/unit/organization-training-admin-entry-surface.test.tsx tests/unit/organization-training-employee-entry-surface.test.tsx docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+      - npx.cmd prettier --check --ignore-unknown 'src/app/(admin)/organization-training' 'src/app/(student)/organization-training' src/features/admin/organization-training src/features/student/organization-training src/features/student/studentRuntimeApi.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check

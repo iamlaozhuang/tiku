@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: organization-training-draft-source-context-runtime-contract-tdd
-updatedAt: "2026-06-18T00:46:38-07:00"
+updatedAt: "2026-06-18T01:00:12-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -438,13 +438,13 @@ repository:
   lastKnownMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
   lastKnownOriginMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
 currentTask:
-  id: organization-training-draft-source-context-runtime-contract-tdd
+  id: organization-training-admin-employee-entry-surface-local-ui
   status: closed
-  result: pass_tdd_draft_source_context_runtime_contract_no_experience_closed
-  sourceStory: localExperienceClosureGate.organizationTrainingDraftSourceContextRuntimeContract
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+  result: pass
+  sourceStory: localExperienceClosureGate.organizationTrainingAdminEmployeeEntrySurface
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
   branch: codex/organization-training-local-experience-chain
   commitSha: null
   prUrl: null
@@ -693,6 +693,7 @@ qualityGates:
     organizationTrainingEmployeeAnswerRepositoryQueueMaterialization: pass_docs_state_materialized_employee_answer_repository_tdd
     organizationTrainingEmployeeAnswerRepositoryContractTdd: pass_tdd_metadata_only_employee_answer_repository_contract_no_schema_no_runtime_e2e
     organizationTrainingEmployeeAnswerRouteQueueMaterialization: pass_docs_state_materialized_employee_answer_route_contract_tdd_as_next_ready_set_item
+    organizationTrainingAdminEmployeeEntrySurfaceLocalUi: pass_local_unit_ui_entry_surfaces_no_runtime_e2e
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -728,10 +729,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_training_draft_source_context_runtime_contract_closed_no_experience_closed
+  status: organization_training_admin_employee_entry_surface_local_ui_closed_no_experience_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-training-draft-source-context-runtime-contract-tdd
+  currentTaskId: organization-training-admin-employee-entry-surface-local-ui
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -750,11 +751,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `organization-training-draft-source-context-runtime-contract-tdd` is locally closed on
-    `codex/organization-training-local-experience-chain` with RED/GREEN unit evidence for manual draft creation,
-    source-context attachment, and copy-to-new-draft runtime route/API contracts. Continue with
-    `organization-training-admin-employee-entry-surface-local-ui`, then localhost-only local full-flow validation and
-    closure readiness audit. Do not claim `experience_closed` until fresh local full-flow evidence exists. Keep provider,
-    env, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database migration execution, and Cost
-    Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    `organization-training-admin-employee-entry-surface-local-ui` is locally closed on
+    `codex/organization-training-local-experience-chain` with local unit UI evidence only. Proceed to
+    `organization-training-admin-employee-local-full-flow-validation` to create/run the approved localhost-only scoped
+    Playwright flow. Do not claim `experience_closed`; closure readiness audit remains pending after local full-flow
+    evidence. Keep provider, env, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database migration
+    execution, and Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md

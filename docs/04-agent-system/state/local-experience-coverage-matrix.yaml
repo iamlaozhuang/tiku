@@ -209,6 +209,22 @@ lastDraftSourceContextRuntimeContractTdd:
     localFullFlow: blocked_until_entry_surface_task_closes
     experienceClosure: blocked_until_local_full_flow_and_closure_audit
     costCalibrationGate: blocked
+lastAdminEmployeeEntrySurfaceLocalUi:
+  taskId: organization-training-admin-employee-entry-surface-local-ui
+  closedAt: "2026-06-18T01:15:29-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: admin_employee_entry_surface_closed_no_experience_closed_claim
+  nextTask: organization-training-admin-employee-local-full-flow-validation
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+  boundarySummary:
+    adminEntrySurface: local_unit_ui_ready_for_manual_draft_source_context_copy
+    employeeEntrySurface: local_unit_ui_ready_for_visible_list_draft_submit_readonly_summary
+    localFullFlow: pending_next
+    experienceClosure: blocked_until_local_full_flow_and_closure_audit
+    costCalibrationGate: blocked
 lastEmployeeAnswerRepositoryQueueMaterialization:
   taskId: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
   materializedAt: "2026-06-17T22:07:07-07:00"
@@ -494,31 +510,31 @@ matrix:
   - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     edition: advanced
     actor: organization_admin
-    entrySurface: not_found_organization_ui
+    entrySurface: src/app/(admin)/organization-training/page.tsx
     apiSurface: src/app/api/v1/organization-trainings/route.ts; src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts; src/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route.ts; src/app/api/v1/organization-trainings/[publicId]/source-contexts/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts; src/db/schema/organization-training.ts; drizzle/20260618063739_add_organization_training_draft_source_context.sql
-    uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; src/server/mappers/organization-training-mapper.test.ts; src/db/schema/organization-training.test.ts
+    uiSurface: src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; src/server/mappers/organization-training-mapper.test.ts; src/db/schema/organization-training.test.ts; tests/unit/organization-training-admin-entry-surface.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
     status: local_experience_ready
-    blockedGate: admin_employee_entry_surface_and_local_full_flow_not_closed
-    nextTask: organization-training-admin-employee-entry-surface-local-ui
+    blockedGate: local_full_flow_not_closed
+    nextTask: organization-training-admin-employee-local-full-flow-validation
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
-    entrySurface: not_found_employee_training_ui
+    entrySurface: src/app/(student)/organization-training/page.tsx
     apiSurface: src/app/api/v1/organization-trainings/visible-list/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/draft-save/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/submit/route.ts; src/app/api/v1/organization-trainings/[publicId]/employee-answers/readonly-summary/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts
-    uiSurface: not_found
-    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts
+    uiSurface: src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+    unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; tests/unit/organization-training-employee-entry-surface.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
-    status: partial
-    blockedGate: employee_answer_ui_entry_and_local_full_flow_not_closed
-    nextTask: organization-training-admin-employee-entry-surface-local-ui
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    status: local_experience_ready
+    blockedGate: local_full_flow_not_closed
+    nextTask: organization-training-admin-employee-local-full-flow-validation
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
