@@ -13415,6 +13415,308 @@ tasks:
     result: pass_docs_state_schema_approval_package_seeded
     lastFailurePath: null
     retryCount: 0
+  - id: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    title: Organization training employee answer runtime repository contract TDD queue materialization
+    phase: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    sourceStory: localExperienceClosureGate.organizationTrainingEmployeeAnswerRepositoryQueueMaterialization
+    dependencies:
+      - organization-training-draft-source-context-schema-approval-package
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-17 user prompt: "按机制规范，下一步执行：
+      organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization 然后紧接着执行：
+      organization-training-employee-answer-runtime-repository-contract-tdd". This task is docs/state-only and
+      materializes the implementation task as a full pending queue entry before execution. Product source, tests, e2e,
+      scripts, schema/drizzle/migration, package/lockfile/dependency, `.env*`, provider/model calls, dev server,
+      Browser/Playwright runtime, full e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, Cost
+      Calibration Gate, raw/private data exposure, public identifier inventories, and row data remain blocked.
+    targetExperienceChain: organization-training-experience
+    useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_materialized_employee_answer_repository_tdd
+    claimedAt: "2026-06-17T22:07:07-07:00"
+    validatedAt: "2026-06-17T22:07:07-07:00"
+    closedAt: "2026-06-17T22:07:07-07:00"
+    branch: codex/organization-training-employee-answer-repository-queue-materialization
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state_only
+      - queue_materialization
+      - evidence_redaction
+    blockedRemainder:
+      - employee_answer_repository_contract_tdd
+      - employee_answer_runtime_route
+      - employee_answer_entry_surface
+      - approved_local_full_flow_validation
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-training-employee-answer-runtime-repository-contract-tdd
+    title: Organization training employee answer runtime repository contract TDD
+    phase: organization-training-employee-answer-runtime-repository-contract-tdd
+    sourceStory: localExperienceClosureGate.organizationTrainingEmployeeAnswerRepositoryContractTdd
+    dependencies:
+      - organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-17 user prompt after queue materialization. Scope is limited to local_unit_tdd
+      repository contract work for metadata-only organization training employee answer persistence using the existing
+      `organization_training_answer` schema. It may modify only the repository, repository unit test, docs/state, task
+      plan, evidence, and audit files listed in allowedFiles. It must keep raw answer content, answered-question
+      persistence, schema/drizzle/migration, package/lockfile/dependency, `.env*`, provider/model calls, dev server,
+      Browser/Playwright runtime, full e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, Cost
+      Calibration Gate, raw/private data exposure, public identifier inventories, and row data blocked.
+    autoDriveLocalImplementationApproval: >-
+      Current user prompt approves this local_unit_tdd task after queue materialization. Standing low-risk local
+      implementation closeout may be used only after RED/GREEN evidence, scoped validation, module closeout, and
+      pre-push readiness gates pass.
+    targetExperienceChain: organization-training-experience
+    targetClosureItem: organization-training employee answer repository contract
+    behaviorBoundary: organization-training::employee_answer_repository_contract
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/traceability/unified-use-case-technical-matrix.md
+    useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    useCases:
+      - employee answer metadata can be saved as in-progress using existing organization_training_answer schema
+      - employee answer metadata can be submitted with score summary and submitted timestamp
+      - repository contract does not persist raw answers, prompt data, provider payloads, or answered-question counts
+    acceptanceScenarios:
+      - focused repository test fails before implementation for employee answer draft save
+      - focused repository test fails before implementation for employee answer submission
+      - repository writes only metadata fields supported by current schema
+      - repository maps database rows to EmployeeOrganizationTrainingAnswerDto without exposing numeric IDs or row data
+      - duplicate employee/version attempts use the existing unique version employee boundary
+    nonGoals:
+      - employee answer runtime route
+      - employee answer UI entry surface
+      - manual draft/source context/copy-to-new-draft schema or runtime
+      - raw answer body persistence
+      - answered-question count persistence
+      - browser or Playwright runtime validation
+      - schema/drizzle/migration, dependency, provider, env, deploy, PR, force-push, Cost Calibration Gate
+    targetStatusTransition: partial_to_repository_contract_ready_no_experience_closed_claim
+    actor: employee
+    entrySurface: repository_runtime_only
+    freshEvidenceRequirement: >-
+      Evidence must include RED/GREEN focused unit test results, scoped formatter/lint/typecheck, e2e list-only
+      discovery, readiness gates, redaction boundary, and explicit statement that `experience_closed` remains blocked.
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: not_used
+    blockedRemainder:
+      - employee_answer_runtime_route
+      - employee_answer_entry_surface
+      - approved_local_full_flow_validation
+      - admin_draft_source_context_schema_migration
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        fetchPruneAfterPush: true
+    capabilities:
+      localUnitTdd: approved_by_current_user_prompt_2026-06-17
+      e2eListOnly: allowed
+      schemaMigration: blocked_not_used
+      localFullFlowGate: blocked_not_used
+      providerCall: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    taskKind: implementation
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    allowedFiles:
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/traceability/unified-use-case-technical-matrix.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/db/schema/organization-training.ts
+      - src/db/schema/auth.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_implementation
+      - local_unit_validation
+      - repository_contract
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: red
+        command: npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
+      - phase: green
+        command: npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npm.cmd run test:unit -- src/server/repositories/organization-training-repository.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-employee-answer-runtime-repository-contract-tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    lastFailurePath: null
+    retryCount: 0
   - id: organization-training-draft-source-context-schema-migration
     title: Organization training draft source context schema migration
     phase: organization-training-draft-source-context-schema-migration
