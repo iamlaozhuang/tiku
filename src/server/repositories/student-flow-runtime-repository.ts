@@ -12,6 +12,7 @@ import {
   inArray,
   lte,
   or,
+  sql,
   type SQL,
 } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -237,6 +238,11 @@ function createPostgresPracticeRepository(
             eq(practice.paper_public_id, query.paperPublicId),
             eq(practice.practice_status, "in_progress"),
           ),
+        )
+        .orderBy(
+          sql`${practice.last_answered_at} desc nulls last`,
+          desc(practice.updated_at),
+          desc(practice.started_at),
         )
         .limit(1);
 

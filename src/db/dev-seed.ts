@@ -41,6 +41,8 @@ export const devSeedPublicIds = {
   question: "question-dev-single-choice",
   paper: "paper-dev-theory",
   paperQuestion: "paper-question-dev-single-choice",
+  practice: "practice-dev-student-resume",
+  practiceAnswerRecord: "answer-record-dev-student-resume",
   modelProvider: "model-provider-dev-mock",
   modelConfig: "model-config-dev-learning-suggestion",
   promptTemplate: "prompt-template-dev-learning-suggestion",
@@ -62,6 +64,8 @@ const devSeedPasswordHashes = {
 
 const baseIssuedAt = "2026-05-21T00:00:00.000Z";
 const authExpiresAt = "2027-05-21T00:00:00.000Z";
+const devPracticeStartedAt = "2026-06-10T08:00:00.000Z";
+const devPracticeAnsweredAt = "2026-06-10T08:03:00.000Z";
 const authAccountCredentialField = ["pass", "word"].join("") as "password";
 
 export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
@@ -231,6 +235,36 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       sortOrder: 1,
       title: "单选题",
       totalScore: "5.0",
+    },
+    practice: {
+      expiresAt: authExpiresAt,
+      lastAnsweredAt: devPracticeAnsweredAt,
+      level: 3,
+      paperPublicId: devSeedPublicIds.paper,
+      practiceStatus: "in_progress",
+      profession: "monopoly",
+      publicId: devSeedPublicIds.practice,
+      startedAt: devPracticeStartedAt,
+      subject: "theory",
+      userPublicId: devSeedPublicIds.studentUser,
+    },
+    practiceAnswerRecord: {
+      answerRecordStatus: "scored",
+      answerSnapshot: {
+        savedFromClientAt: devPracticeAnsweredAt,
+        selectedLabels: ["A"],
+        textAnswer: null,
+      },
+      answeredAt: devPracticeAnsweredAt,
+      examMode: "practice",
+      isCorrect: true,
+      maxScore: "5.0",
+      paperQuestionPublicId: devSeedPublicIds.paperQuestion,
+      publicId: devSeedPublicIds.practiceAnswerRecord,
+      questionPublicId: devSeedPublicIds.question,
+      questionSnapshot,
+      score: "5.0",
+      submittedAt: devPracticeAnsweredAt,
     },
     organizationTrainingAnswer: {
       answerOrganizationSnapshot: {
@@ -1015,42 +1049,200 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       "paper section",
     );
 
+    const paperQuestionId = await getRequiredId(
+      sql`
+        insert into paper_question (
+          public_id,
+          paper_id,
+          paper_section_id,
+          question_group_id,
+          question_id,
+          question_snapshot,
+          material_snapshot,
+          score,
+          sort_order,
+          created_at,
+          updated_at
+        )
+        values (
+          ${seedDataset.paperQuestion.publicId},
+          ${paperId},
+          ${paperSectionId},
+          ${null},
+          ${questionId},
+          ${JSON.stringify(seedDataset.paperQuestion.questionSnapshot)}::jsonb,
+          ${seedDataset.paperQuestion.materialSnapshot},
+          ${seedDataset.paperQuestion.score},
+          ${seedDataset.paperQuestion.sortOrder},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          paper_id = excluded.paper_id,
+          paper_section_id = excluded.paper_section_id,
+          question_group_id = excluded.question_group_id,
+          question_id = excluded.question_id,
+          question_snapshot = excluded.question_snapshot,
+          material_snapshot = excluded.material_snapshot,
+          score = excluded.score,
+          sort_order = excluded.sort_order,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "paper question",
+    );
+
+    const practicePaperSnapshot = {
+      durationMinute: seedDataset.paper.durationMinute,
+      level: seedDataset.paper.level,
+      name: seedDataset.paper.name,
+      paperSections: [
+        {
+          description: seedDataset.paperSection.description,
+          paperQuestions: [
+            {
+              ...seedDataset.paperQuestion.questionSnapshot,
+              analysisRichText: seedDataset.question.analysisRichText,
+              materialSnapshot: seedDataset.paperQuestion.materialSnapshot,
+              paperQuestionPublicId: seedDataset.paperQuestion.publicId,
+              questionPublicId: seedDataset.question.publicId,
+              questionType: seedDataset.question.questionType,
+              score: seedDataset.paperQuestion.score,
+              standardAnswerLabels:
+                seedDataset.paperQuestion.questionSnapshot.standardAnswer,
+              standardAnswerRichText:
+                seedDataset.question.standardAnswerRichText,
+            },
+          ],
+          sortOrder: seedDataset.paperSection.sortOrder,
+          title: seedDataset.paperSection.title,
+          totalScore: seedDataset.paperSection.totalScore,
+        },
+      ],
+      profession: seedDataset.paper.profession,
+      publicId: seedDataset.paper.publicId,
+      subject: seedDataset.paper.subject,
+      totalScore: seedDataset.paper.totalScore,
+    };
+
+    const practiceId = await getRequiredId(
+      sql`
+        insert into practice (
+          public_id,
+          user_id,
+          paper_id,
+          paper_public_id,
+          paper_snapshot,
+          profession,
+          level,
+          subject,
+          practice_status,
+          started_at,
+          last_answered_at,
+          expires_at,
+          terminated_at,
+          termination_reason,
+          created_at,
+          updated_at
+        )
+        values (
+          ${seedDataset.practice.publicId},
+          ${studentUserId},
+          ${paperId},
+          ${seedDataset.practice.paperPublicId},
+          ${JSON.stringify(practicePaperSnapshot)}::jsonb,
+          ${seedDataset.practice.profession},
+          ${seedDataset.practice.level},
+          ${seedDataset.practice.subject},
+          ${seedDataset.practice.practiceStatus},
+          ${seedDataset.practice.startedAt},
+          ${seedDataset.practice.lastAnsweredAt},
+          ${seedDataset.practice.expiresAt},
+          ${null},
+          ${null},
+          ${seedDataset.practice.startedAt},
+          ${seedDataset.practice.lastAnsweredAt}
+        )
+        on conflict (public_id) do update set
+          user_id = excluded.user_id,
+          paper_id = excluded.paper_id,
+          paper_public_id = excluded.paper_public_id,
+          paper_snapshot = excluded.paper_snapshot,
+          profession = excluded.profession,
+          level = excluded.level,
+          subject = excluded.subject,
+          practice_status = excluded.practice_status,
+          started_at = excluded.started_at,
+          last_answered_at = excluded.last_answered_at,
+          expires_at = excluded.expires_at,
+          terminated_at = excluded.terminated_at,
+          termination_reason = excluded.termination_reason,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "practice",
+    );
+
     await sql`
-      insert into paper_question (
+      insert into answer_record (
         public_id,
+        user_id,
+        exam_mode,
+        practice_id,
+        mock_exam_id,
         paper_id,
-        paper_section_id,
-        question_group_id,
-        question_id,
+        paper_question_id,
+        paper_question_public_id,
+        question_public_id,
         question_snapshot,
-        material_snapshot,
+        answer_snapshot,
+        answer_record_status,
+        is_correct,
         score,
-        sort_order,
+        max_score,
+        answered_at,
+        submitted_at,
         created_at,
         updated_at
       )
       values (
-        ${seedDataset.paperQuestion.publicId},
-        ${paperId},
-        ${paperSectionId},
+        ${seedDataset.practiceAnswerRecord.publicId},
+        ${studentUserId},
+        ${seedDataset.practiceAnswerRecord.examMode},
+        ${practiceId},
         ${null},
-        ${questionId},
-        ${JSON.stringify(seedDataset.paperQuestion.questionSnapshot)}::jsonb,
-        ${seedDataset.paperQuestion.materialSnapshot},
-        ${seedDataset.paperQuestion.score},
-        ${seedDataset.paperQuestion.sortOrder},
-        ${baseIssuedAt},
-        ${baseIssuedAt}
+        ${paperId},
+        ${paperQuestionId},
+        ${seedDataset.practiceAnswerRecord.paperQuestionPublicId},
+        ${seedDataset.practiceAnswerRecord.questionPublicId},
+        ${JSON.stringify(seedDataset.practiceAnswerRecord.questionSnapshot)}::jsonb,
+        ${JSON.stringify(seedDataset.practiceAnswerRecord.answerSnapshot)}::jsonb,
+        ${seedDataset.practiceAnswerRecord.answerRecordStatus},
+        ${seedDataset.practiceAnswerRecord.isCorrect},
+        ${seedDataset.practiceAnswerRecord.score},
+        ${seedDataset.practiceAnswerRecord.maxScore},
+        ${seedDataset.practiceAnswerRecord.answeredAt},
+        ${seedDataset.practiceAnswerRecord.submittedAt},
+        ${seedDataset.practiceAnswerRecord.answeredAt},
+        ${seedDataset.practiceAnswerRecord.submittedAt}
       )
       on conflict (public_id) do update set
+        user_id = excluded.user_id,
+        exam_mode = excluded.exam_mode,
+        practice_id = excluded.practice_id,
+        mock_exam_id = excluded.mock_exam_id,
         paper_id = excluded.paper_id,
-        paper_section_id = excluded.paper_section_id,
-        question_group_id = excluded.question_group_id,
-        question_id = excluded.question_id,
+        paper_question_id = excluded.paper_question_id,
+        paper_question_public_id = excluded.paper_question_public_id,
+        question_public_id = excluded.question_public_id,
         question_snapshot = excluded.question_snapshot,
-        material_snapshot = excluded.material_snapshot,
+        answer_snapshot = excluded.answer_snapshot,
+        answer_record_status = excluded.answer_record_status,
+        is_correct = excluded.is_correct,
         score = excluded.score,
-        sort_order = excluded.sort_order,
+        max_score = excluded.max_score,
+        answered_at = excluded.answered_at,
+        submitted_at = excluded.submitted_at,
         updated_at = excluded.updated_at
     `;
 

@@ -140,6 +140,18 @@ describe("dev seed dataset", () => {
       score: "5.0",
       sortOrder: 1,
     });
+    expect(seedDataset.practice).toMatchObject({
+      paperPublicId: devSeedPublicIds.paper,
+      practiceStatus: "in_progress",
+      publicId: devSeedPublicIds.practice,
+      userPublicId: devSeedPublicIds.studentUser,
+    });
+    expect(seedDataset.practiceAnswerRecord).toMatchObject({
+      answerRecordStatus: "scored",
+      paperQuestionPublicId: devSeedPublicIds.paperQuestion,
+      publicId: devSeedPublicIds.practiceAnswerRecord,
+      questionPublicId: devSeedPublicIds.question,
+    });
     expect(seedDataset.modelProvider).toMatchObject({
       isEnabled: true,
       providerKey: "mock",
@@ -179,6 +191,8 @@ describe("dev seed dataset", () => {
       "question-dev-single-choice",
       "paper-dev-theory",
       "paper-question-dev-single-choice",
+      "practice-dev-student-resume",
+      "answer-record-dev-student-resume",
       "model-provider-dev-mock",
       "model-config-dev-learning-suggestion",
       "prompt-template-dev-learning-suggestion",

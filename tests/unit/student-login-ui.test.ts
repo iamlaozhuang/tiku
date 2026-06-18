@@ -9,6 +9,10 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import LoginPage from "@/app/(auth)/login/page";
+import {
+  STUDENT_SESSION_TOKEN_STORAGE_KEY,
+  shouldPersistLocalAutomationStudentSessionToken,
+} from "@/features/student/studentRuntimeApi";
 
 const replaceMock = vi.fn();
 const SESSION_PAYLOAD_FIELD_NAME = "to" + "ken";
@@ -240,8 +244,35 @@ describe("LoginPage", () => {
         method: "POST",
       }),
     );
-    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
+    expect(localStorage.getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)).toBeNull();
     expect(document.body.textContent).not.toContain(STUDENT_SESSION_VALUE);
+  });
+
+  it("limits student token storage to local automated browser validation", () => {
+    expect(
+      shouldPersistLocalAutomationStudentSessionToken({
+        hostname: "localhost",
+        isBrowserAutomated: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldPersistLocalAutomationStudentSessionToken({
+        hostname: "127.0.0.1",
+        isBrowserAutomated: true,
+      }),
+    ).toBe(true);
+    expect(
+      shouldPersistLocalAutomationStudentSessionToken({
+        hostname: "localhost",
+        isBrowserAutomated: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldPersistLocalAutomationStudentSessionToken({
+        hostname: "tiku.example.com",
+        isBrowserAutomated: true,
+      }),
+    ).toBe(false);
   });
 
   it("sends super admins to the admin entry after local session login", async () => {

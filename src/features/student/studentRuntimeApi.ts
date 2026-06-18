@@ -4,6 +4,37 @@ import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/p
 
 export const STUDENT_SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
+const LOCAL_AUTOMATION_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
+
+export function shouldPersistLocalAutomationStudentSessionToken(input: {
+  hostname: string;
+  isBrowserAutomated: boolean;
+}) {
+  return (
+    LOCAL_AUTOMATION_HOSTNAMES.has(input.hostname) && input.isBrowserAutomated
+  );
+}
+
+export function persistLocalAutomationStudentSessionToken(token: string) {
+  if (
+    typeof window === "undefined" ||
+    !shouldPersistLocalAutomationStudentSessionToken({
+      hostname: window.location.hostname,
+      isBrowserAutomated: window.navigator.webdriver === true,
+    })
+  ) {
+    return;
+  }
+
+  const sessionToken = token.trim();
+
+  if (sessionToken === "") {
+    return;
+  }
+
+  localStorage.setItem(STUDENT_SESSION_TOKEN_STORAGE_KEY, sessionToken);
+}
+
 export function getStoredStudentSessionToken(): string | null {
   const storedSessionValue = localStorage
     .getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)

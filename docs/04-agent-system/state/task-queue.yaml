@@ -17436,7 +17436,10 @@ tasks:
     queueSelectionMode: recommended_next_requires_explicit_runtime_approval
     taskKind: local_full_flow_validation
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
+    claimedAt: "2026-06-18T10:05:55-07:00"
+    closedAt: "2026-06-18T10:16:35-07:00"
     blockedGates:
       - requires_explicit_localhost_runtime_approval_before_execution
       - release, staging/prod, cloud, deploy, payment, external-service
@@ -17466,4 +17469,115 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    retryCount: 0
+
+  - id: standard-core-student-local-full-flow-contract-repair
+    title: Standard core student local full-flow contract repair
+    phase: standard-core-student-local-full-flow-contract-repair
+    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
+    dependencies:
+      - standard-core-student-local-full-flow-validation
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved the serial standard student core chain on 2026-06-18: seed
+      `standard-core-student-local-full-flow-contract-repair`, execute the smallest product repair, rerun
+      `standard-core-student-local-full-flow-validation`, then enter closure readiness audit only if fresh runtime
+      evidence passes. This repair task may edit only the explicit student runtime/session contract files, focused unit
+      tests, docs/state/task plan/evidence/audit. It must not edit e2e specs, package/lockfiles/dependencies, `.env*`,
+      schema/drizzle/migrations, provider/model configuration, staging/prod/cloud/deploy/payment/external-service code,
+      destructive DB operations, PRs, force-push, or Cost Calibration Gate.
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
+    evidenceMode: full
+    validationPolicy: local_unit_plus_scoped_local_full_flow
+    queueSelectionMode: ready_set
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    claimedAt: "2026-06-18T10:05:55-07:00"
+    closedAt: "2026-06-18T10:16:35-07:00"
+    capabilities:
+      localFullFlowGate: blocked_until_validation_task
+      localE2EValidation: blocked_until_validation_task
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+      - src/app/(auth)/login/page.tsx
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - src/features/student/studentRuntimeApi.ts
+      - src/features/student/practice/StudentPracticePage.tsx
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx
+      - src/features/student/mistake-book/StudentMistakeBookPage.tsx
+      - src/server/repositories/student-flow-runtime-repository.ts
+      - src/server/services/student-flow-runtime.ts
+      - tests/unit/student-practice-ui.test.ts
+      - tests/unit/student-mock-exam-report-ui.test.ts
+      - tests/unit/student-mistake-book-ui.test.ts
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
+      - src/**
+      - tests/unit/**
+      - e2e/local-auth-route-guard.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "fix(student): repair local full-flow session contract"
+        approval: current_user_prompt_2026_06_18_serial_standard_student_core_chain
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-login-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
+      - npm.cmd run test:e2e -- --list
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-contract-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-contract-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
     retryCount: 0
