@@ -45,6 +45,19 @@ currentFactRefresh:
   conclusion: >-
     Formal use-case catalog coverage is complete at the `useCaseId` level. No row is marked `experience_closed`
     because this task did not run localhost Browser or Playwright runtime validation.
+lastClosureReadinessAudit:
+  taskId: module-run-v2-organization-training-l6-closure-readiness-audit
+  auditedAt: "2026-06-17T18:24:56-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: keep_not_experience_closed
+  reason: >-
+    Service-level lifecycle and focused validation exist, but organization-training L6 local closure still lacks
+    admin and employee entry surfaces, complete runtime route coverage beyond publish, and an approved admin-to-employee
+    browser role-flow. Route-guard smoke and service unit evidence are not sufficient for `experience_closed`.
+  evidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -280,10 +293,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
     status: local_experience_ready
-    blockedGate: organization_ui_and_employee_browser_flow_not_closed
-    nextTask: module-run-v2-organization-training-l6-closure-readiness-audit
+    blockedGate: admin_employee_entry_surfaces_and_runtime_routes_not_closed
+    nextTask: organization-training-admin-employee-entry-surface-planning
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
@@ -294,10 +307,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
     status: partial
-    blockedGate: employee_answer_browser_entry_not_found
-    nextTask: module-run-v2-organization-training-l6-closure-readiness-audit
+    blockedGate: employee_answer_api_ui_and_browser_entry_not_found
+    nextTask: organization-training-admin-employee-entry-surface-planning
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin

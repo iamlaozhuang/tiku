@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-standard-advanced-current-coverage-refresh
-updatedAt: "2026-06-17T18:06:09-07:00"
+currentPhase: module-run-v2-organization-training-l6-closure-readiness-audit
+updatedAt: "2026-06-17T18:24:56-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -435,16 +435,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 10a7451b8e3d7b5773a88c9bbe3a4510c8de9c99
-  lastKnownOriginMasterSha: 10a7451b8e3d7b5773a88c9bbe3a4510c8de9c99
+  lastKnownMasterSha: e4022cec5cda4e7baa2bce2410d464461f4b931b
+  lastKnownOriginMasterSha: e4022cec5cda4e7baa2bce2410d464461f4b931b
 currentTask:
-  id: unified-standard-advanced-current-coverage-refresh
+  id: module-run-v2-organization-training-l6-closure-readiness-audit
   status: closed
-  sourceStory: localExperienceClosureGate.coverageMatrixRefresh
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
-  branch: codex/unified-coverage-refresh
+  sourceStory: localExperienceClosureGate.organizationTrainingL6ClosureReadinessAudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+  branch: codex/organization-training-l6-closure-readiness-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -684,6 +684,7 @@ qualityGates:
     moduleRunV2LocalExperienceGovernanceHardening: pass_docs_state_local_experience_governance
     moduleRunV2LocalExperienceAuthorizationPackageHardening: pass_docs_state_authorization_package_hardening
     unifiedStandardAdvancedCurrentCoverageRefresh: pass_docs_state_current_fact_matrix_refresh
+    moduleRunV2OrganizationTrainingL6ClosureReadinessAudit: pass_docs_state_keep_not_experience_closed
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -719,10 +720,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: coverage_refresh_closed
+  status: organization_training_l6_readiness_audit_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: unified-standard-advanced-current-coverage-refresh
+  currentTaskId: module-run-v2-organization-training-l6-closure-readiness-audit
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -741,10 +742,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Recommended next task is `module-run-v2-organization-training-l6-closure-readiness-audit`, a
-    `local_experience_audit` task that should decide whether organization-training can move from
-    `local_experience_ready` toward `experience_closed`, or whether a narrower local full-flow task must be split first.
-    It must not edit product source, tests, e2e, scripts, schema/drizzle, package/lockfiles, or dependencies, and must
-    not run Browser, Playwright runtime validation, dev server, full e2e, provider/model,
-    staging/prod/cloud/deploy/payment/external-service, PR/force-push, raw data exposure, or Cost Calibration Gate work.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
+    Recommended next task is `organization-training-admin-employee-entry-surface-planning`, a docs/state planning task
+    that should split the narrow implementation path for organization admin training entry, employee training answer
+    entry, and the missing runtime route/API surfaces before any future local_full_flow browser role-flow validation.
+    It must not claim `experience_closed` and must keep provider/model, env/secret, schema/drizzle/migration,
+    dependency/package/lockfile, staging/prod/cloud/deploy/payment/external-service, PR/force-push, raw data exposure,
+    full e2e, and Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
