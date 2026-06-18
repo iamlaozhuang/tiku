@@ -89,6 +89,44 @@ lastEntrySurfacePlanning:
     - taskId: organization-training-admin-employee-local-full-flow-validation
       profile: local_full_flow
       purpose: Run the approved localhost-only admin-to-employee role flow after runtime and UI entry surfaces exist.
+lastRuntimeApiGapBoundaryAudit:
+  taskId: organization-training-runtime-api-gap-boundary-audit
+  auditedAt: "2026-06-17T18:58:07-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: split_no_schema_takedown_first
+  nextTask: organization-training-version-takedown-runtime-route-contract-tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+  boundarySummary:
+    publishRuntime: existing_publish_route_and_repository_wiring
+    versionTakedownRuntime: schema_supported_route_and_repository_missing
+    employeeAnswerRuntime: schema_mostly_supported_repository_and_routes_missing
+    draftAndSourceContextRuntime: schema_gate_required_before_runtime_persistence
+    localFullFlow: blocked_until_runtime_api_and_ui_entry_surfaces_exist
+  plannedNextQueue:
+    - taskId: organization-training-version-takedown-runtime-route-contract-tdd
+      profile: local_unit_tdd
+      purpose: Close the no-schema version takedown route/repository/API contract gap first.
+    - taskId: organization-training-employee-answer-runtime-repository-contract-tdd
+      profile: local_unit_tdd
+      purpose: Close metadata-only employee answer repository persistence using existing answer schema.
+    - taskId: organization-training-employee-answer-runtime-route-contract-tdd
+      profile: local_unit_tdd
+      purpose: Close employee visible-list, draft-save, submit, and readonly-summary route/API contract gaps.
+    - taskId: organization-training-draft-source-context-schema-approval-package
+      profile: docs_state_lite
+      purpose: Prepare a schema approval package for manual draft, source context, and copy-to-new-draft persistence.
+    - taskId: organization-training-admin-entry-surface-local-ui
+      profile: local_unit_tdd
+      purpose: Add the organization admin entry surface after required runtime admin APIs exist.
+    - taskId: organization-training-employee-answer-entry-surface-local-ui
+      profile: local_unit_tdd
+      purpose: Add the employee training answer entry surface after employee answer APIs exist.
+    - taskId: organization-training-admin-employee-local-full-flow-validation
+      profile: local_full_flow
+      purpose: Run approved localhost-only admin-to-employee flow after API and UI entries exist.
 matrix:
   - useCaseId: UC-STD-ACCOUNT-SESSION
     edition: standard
@@ -324,10 +362,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-admin-employee-entry-surface-planning.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
     status: local_experience_ready
-    blockedGate: admin_entry_surface_runtime_admin_routes_and_local_full_flow_not_closed
-    nextTask: organization-training-runtime-api-gap-boundary-audit
+    blockedGate: draft_source_context_schema_gate_admin_routes_ui_and_local_full_flow_not_closed
+    nextTask: organization-training-version-takedown-runtime-route-contract-tdd
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
@@ -338,10 +376,10 @@ matrix:
     uiSurface: not_found
     unitEvidence: src/server/services/organization-training-service.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-admin-employee-entry-surface-planning.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
     status: partial
-    blockedGate: employee_answer_runtime_routes_ui_entry_and_local_full_flow_not_closed
-    nextTask: organization-training-runtime-api-gap-boundary-audit
+    blockedGate: employee_answer_repository_routes_ui_entry_and_local_full_flow_not_closed
+    nextTask: organization-training-employee-answer-runtime-repository-contract-tdd
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
