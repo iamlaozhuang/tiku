@@ -43,7 +43,7 @@ export function getStoredSessionToken(): string | null {
 export function createAdminAuthHeaders(
   sessionToken: string | null,
 ): Record<string, string> {
-  if (sessionToken === null || sessionToken === COOKIE_BACKED_SESSION_TOKEN) {
+  if (sessionToken === null) {
     return {};
   }
 

@@ -3,6 +3,7 @@ import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
 
 export const STUDENT_SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
+export const COOKIE_BACKED_SESSION_MARKER = "__cookie_backed_session__";
 
 const LOCAL_AUTOMATION_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
 
@@ -33,6 +34,17 @@ export function persistLocalAutomationStudentSessionToken(token: string) {
   }
 
   localStorage.setItem(STUDENT_SESSION_TOKEN_STORAGE_KEY, sessionToken);
+}
+
+export function persistCookieBackedSessionMarker() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.setItem(
+    STUDENT_SESSION_TOKEN_STORAGE_KEY,
+    COOKIE_BACKED_SESSION_MARKER,
+  );
 }
 
 export function getStoredStudentSessionToken(): string | null {

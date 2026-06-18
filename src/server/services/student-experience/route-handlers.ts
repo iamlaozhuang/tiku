@@ -128,26 +128,23 @@ export function createStudentExperienceRouteHandlers(
           ),
       },
       generation: {
-        POST: () =>
-          createProviderBlockedResponse(
-            "exam_report.generation",
-            "Provider-gated exam_report generation requires separate approval.",
-          ),
+        POST: (request: Request) =>
+          readLegacyFlowRouteHandlers().examReports.generation.POST(request),
       },
       retryLearningSuggestion: {
-        POST: () =>
-          createProviderBlockedResponse(
-            "exam_report.retry_learning_suggestion",
-            "Provider-gated learning_suggestion retry requires separate approval.",
+        POST: (request: Request, context: RouteContext) =>
+          readLegacyFlowRouteHandlers().examReports.retryLearningSuggestion.POST(
+            request,
+            context,
           ),
       },
     },
     mistakeBooks: {
       aiExplanation: {
-        POST: () =>
-          createProviderBlockedResponse(
-            "mistake_book.ai_explanation",
-            "Provider-gated mistake_book ai_explanation requires separate approval.",
+        POST: (request: Request, context: RouteContext) =>
+          readLegacyMistakeBookRouteHandlers().aiExplanation.POST(
+            request,
+            context,
           ),
       },
       collection: {

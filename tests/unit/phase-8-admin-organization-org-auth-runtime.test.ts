@@ -7,6 +7,8 @@ import {
 import type { SessionService } from "@/server/services/session-service";
 
 const now = new Date("2026-05-22T10:00:00.000Z");
+const testAdminSessionCredential = "admin-session-token";
+const expectedAdminAuthorization = `Bearer ${testAdminSessionCredential}`;
 
 function createSessionService(role: "super_admin" | "content_admin") {
   return {
@@ -14,7 +16,7 @@ function createSessionService(role: "super_admin" | "content_admin") {
       throw new Error("login should not be called by admin org auth runtime");
     },
     async getCurrentSession(input) {
-      if (input.authorization !== "Bearer admin-session-token") {
+      if (input.authorization !== expectedAdminAuthorization) {
         return {
           code: 401001,
           message: "Unauthorized.",
@@ -123,6 +125,15 @@ function createRepositories(): AdminOrganizationOrgAuthRuntimeRepositories {
       };
     },
   };
+}
+
+function createCookieBackedAdminRequest(url: string) {
+  return new Request(url, {
+    headers: {
+      authorization: "Bearer __cookie_backed_session__",
+      cookie: `tiku_session=${encodeURIComponent(testAdminSessionCredential)}`,
+    },
+  });
 }
 
 describe("phase 8 admin organization org auth runtime", () => {
@@ -237,6 +248,57 @@ describe("phase 8 admin organization org auth runtime", () => {
     expect(combinedPayload).not.toContain("authUserId");
     expect(combinedPayload).not.toContain("password");
     expect(combinedPayload).not.toContain("admin-session-token");
+  });
+
+  it("resolves organization, org_auth, and employee lists from cookie-backed admin sessions", async () => {
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    const organizationsResponse = await handlers.organizations.collection.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/organizations?page=1&pageSize=20",
+      ),
+    );
+    const orgAuthsResponse = await handlers.orgAuths.collection.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/org-auths?page=1&pageSize=20",
+      ),
+    );
+    const employeesResponse = await handlers.employees.collection.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/employees?page=1&pageSize=20",
+      ),
+    );
+
+    await expect(organizationsResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        organizations: [
+          expect.objectContaining({ publicId: "organization-public-001" }),
+        ],
+      },
+      message: "ok",
+    });
+    await expect(orgAuthsResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        orgAuths: [
+          expect.objectContaining({ publicId: "org-auth-public-001" }),
+        ],
+      },
+      message: "ok",
+    });
+    await expect(employeesResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        employees: [
+          expect.objectContaining({ publicId: "employee-public-001" }),
+        ],
+      },
+      message: "ok",
+    });
   });
 
   it("keeps mutation routes authenticated but safely unavailable in this slice", async () => {

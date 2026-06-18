@@ -1,4 +1,5 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -198,7 +199,7 @@ async function resolveAdminActor(
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): Promise<AdminOrganizationOrgAuthActor | null> {
   const sessionResponse = await sessionService.getCurrentSession({
-    authorization: request.headers.get("authorization"),
+    authorization: getRequestAuthorization(request),
   });
 
   if (sessionResponse.code !== 0 || sessionResponse.data === null) {

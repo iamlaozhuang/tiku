@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import LoginPage from "@/app/(auth)/login/page";
 import {
+  COOKIE_BACKED_SESSION_MARKER,
   STUDENT_SESSION_TOKEN_STORAGE_KEY,
   shouldPersistLocalAutomationStudentSessionToken,
 } from "@/features/student/studentRuntimeApi";
@@ -289,6 +290,30 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
+  });
+
+  it("replaces a stale local automation student token with a cookie-backed marker after admin login", async () => {
+    localStorage.setItem(
+      STUDENT_SESSION_TOKEN_STORAGE_KEY,
+      STUDENT_SESSION_VALUE,
+    );
+    mockSessionResponse(adminLoginPayload);
+
+    render(createElement(LoginPage));
+
+    fireEvent.change(screen.getByLabelText("手机号"), {
+      target: { value: "13900000001" },
+    });
+    fireEvent.change(screen.getByLabelText("密码"), {
+      target: { value: "TikuDevAdmin#2026" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    expect(localStorage.getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)).toBe(
+      COOKIE_BACKED_SESSION_MARKER,
+    );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 });

@@ -7,6 +7,8 @@ import {
 import type { SessionService } from "@/server/services/session-service";
 
 const now = new Date("2026-05-22T10:00:00.000Z");
+const testAdminSessionCredential = "admin-session-token";
+const expectedAdminAuthorization = `Bearer ${testAdminSessionCredential}`;
 
 function createSessionService(role: "super_admin" | "content_admin") {
   return {
@@ -16,7 +18,7 @@ function createSessionService(role: "super_admin" | "content_admin") {
       );
     },
     async getCurrentSession(input) {
-      if (input.authorization !== "Bearer admin-session-token") {
+      if (input.authorization !== expectedAdminAuthorization) {
         return {
           code: 401001,
           message: "Unauthorized.",
@@ -100,6 +102,15 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
       };
     },
   };
+}
+
+function createCookieBackedAdminRequest(url: string) {
+  return new Request(url, {
+    headers: {
+      authorization: "Bearer __cookie_backed_session__",
+      cookie: `tiku_session=${encodeURIComponent(testAdminSessionCredential)}`,
+    },
+  });
 }
 
 describe("phase 8 admin redeem code runtime", () => {
@@ -190,6 +201,31 @@ describe("phase 8 admin redeem code runtime", () => {
     expect(serializedPayload).not.toContain("authUserId");
     expect(serializedPayload).not.toContain("password");
     expect(serializedPayload).not.toContain("admin-session-token");
+  });
+
+  it("resolves redeem_code summaries from cookie-backed admin sessions", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    const response = await handlers.redeemCodes.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/redeem-codes?page=1&pageSize=20",
+      ),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        redeemCodes: [
+          expect.objectContaining({
+            publicId: "redeem-code-public-001",
+          }),
+        ],
+      },
+      message: "ok",
+    });
   });
 
   it("generates one local redeem_code with plaintext only in the creation response", async () => {

@@ -1,4 +1,5 @@
 import { createLocalSessionRuntime } from "@/server/auth/local-session-runtime";
+import { getRequestAuthorization } from "@/server/auth/session-cookie";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -148,7 +149,7 @@ async function resolveReadableAdminActor(
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): Promise<AdminLogActor | ApiResponse<null>> {
   const sessionResponse = await sessionService.getCurrentSession({
-    authorization: request.headers.get("authorization"),
+    authorization: getRequestAuthorization(request),
   });
 
   if (sessionResponse.code !== 0 || sessionResponse.data === null) {

@@ -78,7 +78,6 @@ const userDetailUnavailableResponse = createErrorResponse(
   503603,
   "Admin user detail runtime is not configured.",
 );
-const cookieBackedSessionAuthorization = "Bearer __cookie_backed_session__";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -99,13 +98,10 @@ function isAdminFlowRole(role: string): role is AdminFlowRole {
 }
 
 function getAdminFlowAuthorization(request: Request): string | null {
-  const authorization = request.headers.get("authorization");
+  const authorization = request.headers.get("authorization")?.trim() ?? null;
 
-  if (
-    authorization !== null &&
-    authorization !== cookieBackedSessionAuthorization
-  ) {
-    return authorization;
+  if (authorization === null || authorization === "") {
+    return null;
   }
 
   return getRequestAuthorization(request);

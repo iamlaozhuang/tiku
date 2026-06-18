@@ -4,6 +4,7 @@ import {
   fetchAdminApi,
   getStoredSessionToken,
 } from "@/features/admin/content-admin-runtime";
+import { getRequestAuthorization } from "@/server/auth/session-cookie";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
@@ -54,6 +55,15 @@ function createJsonResponse(payload: unknown) {
 function createCookieRequest(path: string) {
   return new Request(`http://localhost${path}`, {
     headers: {
+      authorization: `Bearer ${cookieBackedSessionToken}`,
+      cookie: `tiku_session=${encodeURIComponent(testCookieCredential)}`,
+    },
+  });
+}
+
+function createRawCookieRequest(path: string) {
+  return new Request(`http://localhost${path}`, {
+    headers: {
       cookie: `tiku_session=${encodeURIComponent(testCookieCredential)}`,
     },
   });
@@ -75,7 +85,7 @@ afterEach(() => {
 });
 
 describe("Phase 22 content admin cookie-backed session repair", () => {
-  it("uses same-origin cookies when no local bearer token exists", async () => {
+  it("uses an explicit cookie-backed marker when no local bearer token exists", async () => {
     localStorage.removeItem("tiku.localSessionToken");
     const fetchMock = vi.fn(async () =>
       createJsonResponse(adminSessionPayload),
@@ -91,7 +101,9 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
       "/api/v1/sessions",
       expect.objectContaining({
         credentials: "same-origin",
-        headers: {},
+        headers: {
+          authorization: `Bearer ${cookieBackedSessionToken}`,
+        },
       }),
     );
   });
@@ -115,6 +127,23 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
         },
       }),
     );
+  });
+
+  it("resolves cookie-backed marker headers through the session cookie", () => {
+    const request = new Request("http://localhost/api/v1/sessions", {
+      headers: {
+        authorization: `Bearer ${cookieBackedSessionToken}`,
+        cookie: `tiku_session=${encodeURIComponent(testCookieCredential)}`,
+      },
+    });
+
+    expect(getRequestAuthorization(request)).toBe(expectedCookieAuthorization);
+  });
+
+  it("keeps raw cookie-only session checks compatible with route guards", () => {
+    expect(
+      getRequestAuthorization(createRawCookieRequest("/api/v1/sessions")),
+    ).toBe(expectedCookieAuthorization);
   });
 
   it("resolves question/material runtime admin actors from session cookies", async () => {
@@ -198,6 +227,40 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
       authorization: expectedCookieAuthorization,
     });
     expect(listPapers).toHaveBeenCalled();
+  });
+
+  it("keeps raw cookie-only admin-flow user reads unauthenticated", async () => {
+    const sessionService = createCookieBackedSessionService();
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories: {
+        aiAuditLogRepository: {},
+        auditLogRepository: {},
+        contentKnowledgeRepository: {},
+        userOrgAuthRepository: {
+          listUsers: vi.fn(async () => ({
+            pagination: {
+              page: 1,
+              pageSize: 20,
+              sortBy: "updatedAt",
+              sortOrder: "desc",
+              total: 0,
+            },
+            users: [],
+          })),
+        },
+      } as never,
+      sessionService,
+    });
+
+    const response = await handlers.users.collection.GET(
+      createRawCookieRequest("/api/v1/users"),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 401001,
+      data: null,
+      message: "Admin session is required.",
+    });
   });
 
   it("resolves resource/knowledge runtime admin actors from session cookies", async () => {

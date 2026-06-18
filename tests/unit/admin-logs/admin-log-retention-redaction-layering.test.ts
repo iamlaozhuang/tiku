@@ -16,16 +16,15 @@ type AdminRole = "super_admin" | "ops_admin" | "content_admin";
 
 const rawSensitiveMarker =
   "RAW_PROMPT_PROVIDER_RESPONSE_TOKEN_SECRET_DATABASE_URL";
+const testAdminSessionCredential = "synthetic-admin-session";
+const expectedAdminAuthorization = `Bearer ${testAdminSessionCredential}`;
 
 function createAdminSessionService(
   role: AdminRole | null,
 ): Pick<SessionService, "getCurrentSession"> {
   return {
     async getCurrentSession(input) {
-      if (
-        input.authorization !== "Bearer synthetic-admin-session" ||
-        role === null
-      ) {
+      if (input.authorization !== expectedAdminAuthorization || role === null) {
         return {
           code: 401001,
           data: null,
@@ -56,6 +55,15 @@ function createAdminSessionService(
       };
     },
   };
+}
+
+function createCookieBackedAdminRequest(url: string) {
+  return new Request(url, {
+    headers: {
+      authorization: "Bearer __cookie_backed_session__",
+      cookie: `tiku_session=${encodeURIComponent(testAdminSessionCredential)}`,
+    },
+  });
 }
 
 describe("admin log retention, redaction, and layering repair", () => {
@@ -151,6 +159,50 @@ describe("admin log retention, redaction, and layering repair", () => {
     expect(serializedPayload).not.toContain("internalNumericId");
     expect(serializedPayload).not.toContain("rawRequestBody");
     expect(serializedPayload).not.toContain("databaseUrl");
+  });
+
+  it("resolves audit_log and ai_call_log reads from cookie-backed admin sessions", async () => {
+    const auditLogHandlers = createAuditLogRouteHandlers({
+      repository: createInMemoryAuditLogRepository({ auditLogs: [] }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+    const aiCallLogHandlers = createAiCallLogRouteHandlers({
+      repository: createInMemoryAiCallLogRepository({ aiCallLogs: [] }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const auditLogResponse = await auditLogHandlers.collection.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/audit-logs?page=1&pageSize=20",
+      ),
+    );
+    const aiCallLogResponse = await aiCallLogHandlers.aiCallLogs.GET(
+      createCookieBackedAdminRequest(
+        "http://localhost/api/v1/ai-call-logs?page=1&pageSize=20",
+      ),
+    );
+    const aiCallLogSummaryResponse =
+      await aiCallLogHandlers.aiCallLogSummary.GET(
+        createCookieBackedAdminRequest(
+          "http://localhost/api/v1/ai-call-logs/summary?page=1&pageSize=20",
+        ),
+      );
+
+    await expect(auditLogResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: { auditLogs: [] },
+      message: "ok",
+    });
+    await expect(aiCallLogResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: { aiCallLogs: [] },
+      message: "ok",
+    });
+    await expect(aiCallLogSummaryResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: { dailySummaries: [] },
+      message: "ok",
+    });
   });
 
   it("returns scoped ai_call_log list and summary responses without raw provider payloads", async () => {

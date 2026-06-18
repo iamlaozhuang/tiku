@@ -15,11 +15,14 @@ import {
   ADMIN_AI_AUDIT_LOG_SORT_FIELDS,
   createAdminAiAuditLogListQuery,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
+import type { ApiResponse } from "@/server/contracts/api-response";
+import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import {
   createAdminAiAuditLogOpsService,
   createUnavailableAdminAiAuditLogOpsService,
 } from "@/server/services/admin-ai-audit-log-ops-service";
 import { createAdminAiAuditLogOpsRouteHandlers } from "@/server/services/admin-ai-audit-log-ops-route";
+import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
 
 afterEach(() => {
   cleanup();
@@ -257,6 +260,112 @@ describe("admin ai and audit log ops baseline", () => {
       message: "ok",
       data: null,
     });
+  });
+
+  it("resolves model config runtime reads from cookie-backed admin session markers", async () => {
+    const sessionCredential = "admin-session-token";
+    const adminSessionResponse: ApiResponse<AuthContextDto | null> = {
+      code: 0,
+      message: "ok",
+      data: {
+        session: {
+          expiresAt: "2027-05-22T10:00:00.000Z",
+        },
+        user: {
+          publicId: "admin-user-public-001",
+          phone: "13800000001",
+          name: "Admin User",
+          userType: null,
+          status: "active",
+          lockedUntilAt: null,
+          employeePublicId: null,
+          organizationPublicId: null,
+          adminPublicId: "admin-public-001",
+          adminRoles: ["super_admin"],
+        },
+      },
+    };
+    const unauthorizedSessionResponse: ApiResponse<AuthContextDto | null> = {
+      code: 401001,
+      message: "Unauthorized.",
+      data: null,
+    };
+    const getCurrentSession = vi.fn(
+      async (input: {
+        authorization: string | null;
+      }): Promise<ApiResponse<AuthContextDto | null>> =>
+        input.authorization === `Bearer ${sessionCredential}`
+          ? adminSessionResponse
+          : unauthorizedSessionResponse,
+    );
+    const listModelConfigs = vi.fn(async (query) => ({
+      modelConfigs: [
+        {
+          publicId: "model-config-public-cookie",
+          providerPublicId: "model-provider-public-cookie",
+          providerDisplayName: "Local Mock",
+          providerKey: "mock",
+          modelName: "local-model",
+          modelAlias: "local-model",
+          displayName: "Cookie-backed model config",
+          aiFuncType: "ai_scoring",
+          apiKeyDisplay: null,
+          secretStatus: "not_configured",
+          maskedSecret: null,
+          fallbackModelConfigPublicId: null,
+          isEnabled: true,
+          status: "enabled",
+          fallbackPriority: 1,
+          snapshotPolicy: "redacted_metadata",
+          configVersion: 1,
+          timeoutSecond: 5,
+          maxRetryCount: 1,
+          updatedAt: "2026-05-26T00:00:00.000Z",
+        },
+      ],
+      pagination: {
+        page: query.page,
+        pageSize: query.pageSize,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+        total: 1,
+      },
+    }));
+    const handlers = createAdminAiAuditLogRuntimeRouteHandlers({
+      repositories: {
+        appendAiCallLog: vi.fn(),
+        listAiCallLogs: vi.fn(),
+        listModelConfigs,
+        summarizeAiCallLogs: vi.fn(),
+      } as never,
+      sessionService: { getCurrentSession },
+    });
+
+    const response = await handlers.modelConfigs.GET(
+      new Request("http://localhost/api/v1/model-configs?page=1&pageSize=20", {
+        headers: {
+          authorization: "Bearer __cookie_backed_session__",
+          cookie: `tiku_session=${encodeURIComponent(sessionCredential)}`,
+        },
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        modelConfigs: [
+          expect.objectContaining({
+            publicId: "model-config-public-cookie",
+            providerKey: "mock",
+          }),
+        ],
+      },
+      message: "ok",
+    });
+    expect(getCurrentSession).toHaveBeenCalledWith({
+      authorization: `Bearer ${sessionCredential}`,
+    });
+    expect(listModelConfigs).toHaveBeenCalled();
   });
 
   it("loads runtime APIs into model configuration management without raw payloads", async () => {

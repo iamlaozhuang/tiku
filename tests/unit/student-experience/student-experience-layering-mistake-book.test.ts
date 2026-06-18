@@ -214,6 +214,138 @@ describe("unified repair student experience layering and mistake book scope", ()
     expect(retryScoringCalled).toBe(false);
   });
 
+  it(
+    "delegates local exam report and mistake-book AI explanation handlers to legacy runtime",
+    async () => {
+      const routeHandlersSourcePath = expectAllowedSourceExists(
+        "src/server/services/student-experience/route-handlers.ts",
+      );
+      const { createStudentExperienceRouteHandlers } = await import(
+        pathToFileURL(routeHandlersSourcePath).href
+      );
+      const calls: string[] = [];
+      const handlers = createStudentExperienceRouteHandlers({
+        legacyFlowRouteHandlers: {
+          examReports: {
+            generation: {
+              async POST() {
+                calls.push("exam_report.generation");
+
+                return Response.json({
+                  code: 0,
+                  message: "ok",
+                  data: {
+                    examReport: {
+                      publicId: "exam-report-public-001",
+                    },
+                  },
+                });
+              },
+            },
+            retryLearningSuggestion: {
+              async POST() {
+                calls.push("exam_report.retry_learning_suggestion");
+
+                return Response.json({
+                  code: 0,
+                  message: "ok",
+                  data: null,
+                });
+              },
+            },
+          },
+        },
+        legacyMistakeBookRouteHandlers: {
+          aiExplanation: {
+            async POST() {
+              calls.push("mistake_book.ai_explanation");
+
+              return Response.json({
+                code: 0,
+                message: "ok",
+                data: {
+                  aiExplanation: {
+                    explanationStatus: "explained",
+                    explanationText: "local explanation",
+                    keyPoints: [],
+                    learningSuggestion: null,
+                    insufficientEvidenceMessage: null,
+                    evidenceStatus: "none",
+                    citations: [],
+                    promptTemplateKey: "ai_explanation_v1",
+                    promptTemplateVersion: 1,
+                  },
+                },
+              });
+            },
+          },
+        },
+      });
+
+      await expect(
+        (
+          await handlers.examReports.generation.POST(
+            new Request("http://localhost/api/v1/exam-reports", {
+              method: "POST",
+              body: JSON.stringify({
+                mockExamPublicId: "mock-exam-public-001",
+              }),
+            }),
+          )
+        ).json(),
+      ).resolves.toEqual({
+        code: 0,
+        message: "ok",
+        data: {
+          examReport: {
+            publicId: "exam-report-public-001",
+          },
+        },
+      });
+
+      await expect(
+        (
+          await handlers.examReports.retryLearningSuggestion.POST(
+            new Request(
+              "http://localhost/api/v1/exam-reports/exam-report-public-001/retry-learning-suggestion",
+              { method: "POST" },
+            ),
+            createRouteContext("exam-report-public-001"),
+          )
+        ).json(),
+      ).resolves.toEqual({
+        code: 0,
+        message: "ok",
+        data: null,
+      });
+
+      await expect(
+        (
+          await handlers.mistakeBooks.aiExplanation.POST(
+            new Request(
+              "http://localhost/api/v1/mistake-books/mistake-book-public-001/ai-explanation",
+              { method: "POST" },
+            ),
+            createRouteContext("mistake-book-public-001"),
+          )
+        ).json(),
+      ).resolves.toMatchObject({
+        code: 0,
+        data: {
+          aiExplanation: {
+            explanationStatus: "explained",
+          },
+        },
+      });
+      expect(calls).toEqual([
+        "exam_report.generation",
+        "exam_report.retry_learning_suggestion",
+        "mistake_book.ai_explanation",
+      ]);
+    },
+    STUDENT_EXPERIENCE_LAYERING_TEST_TIMEOUT_MS,
+  );
+
   it("marks standard student route pages with scoped UI coverage", () => {
     const pageBoundarySource = expectAllowedSourceExists(
       "src/app/(student)/student-experience-page-boundary.ts",

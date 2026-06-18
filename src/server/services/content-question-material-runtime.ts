@@ -96,7 +96,6 @@ const questionNotFoundResponse = createErrorResponse(
   404202,
   "Question does not exist.",
 );
-const cookieBackedSessionAuthorization = "Bearer __cookie_backed_session__";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -115,17 +114,6 @@ function canManageContent(actor: ContentAdminActor): boolean {
 }
 
 function getContentAdminAuthorization(request: Request): string | null {
-  if (
-    request.headers.get("authorization")?.trim() ===
-    cookieBackedSessionAuthorization
-  ) {
-    const headers = new Headers(request.headers);
-
-    headers.delete("authorization");
-
-    return getRequestAuthorization(new Request(request.url, { headers }));
-  }
-
   return getRequestAuthorization(request);
 }
 

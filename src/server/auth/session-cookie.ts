@@ -1,4 +1,6 @@
 export const SESSION_COOKIE_NAME = "tiku_session";
+export const COOKIE_BACKED_SESSION_AUTHORIZATION =
+  "Bearer __cookie_backed_session__";
 
 function isSecureRequest(request: Request): boolean {
   return new URL(request.url).protocol === "https:";
@@ -60,9 +62,14 @@ function readSessionCookie(cookieHeader: string | null): string | null {
 
 export function getRequestAuthorization(request: Request): string | null {
   const authorization = request.headers.get("authorization");
+  const normalizedAuthorization = authorization?.trim() ?? null;
 
-  if (authorization !== null && authorization.trim() !== "") {
-    return authorization;
+  if (
+    normalizedAuthorization !== null &&
+    normalizedAuthorization !== "" &&
+    normalizedAuthorization !== COOKIE_BACKED_SESSION_AUTHORIZATION
+  ) {
+    return normalizedAuthorization;
   }
 
   const sessionCredential = readSessionCookie(request.headers.get("cookie"));

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-core-student-local-full-flow-validation-rerun
-updatedAt: "2026-06-18T10:24:05-07:00"
+currentPhase: standard-core-student-experience-closure-readiness-audit
+updatedAt: "2026-06-18T11:17:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
   lastKnownOriginMasterSha: aa6d1558ae4017343ac45757c8237bc4c16084cd
 currentTask:
-  id: standard-core-student-local-full-flow-validation-rerun
+  id: standard-core-student-experience-closure-readiness-audit
   status: closed
-  result: blocked_local_full_flow_validation_failure
-  sourceStory: localExperienceMechanismSeed.local_full_flow_validation
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+  result: mark_experience_closed_local_only
+  sourceStory: localExperienceClosureGate.standardCoreStudentExperienceClosureReadinessAudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
   branch: codex/mechanism-throughput-readiness-tuning
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint
@@ -525,12 +525,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-18"
-    readiness: blocked_standard_core_student_local_full_flow_validation
+    readiness: pass_standard_core_student_experience_closure_local_only
     lint: pass
     typecheck: pass
-    unit: pass_standard_core_student_focused_unit_7_files_68_tests
+    unit: pass_standard_core_student_focused_unit_10_files_76_tests
     build: skipped_batch_175_no_env_secret_access
-    e2e: blocked_targeted_local_full_flow_10_passed_2_failed
+    e2e: pass_targeted_local_full_flow_12_passed
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: standard_core_student_local_full_flow_validation_blocked
+  status: standard_core_student_experience_closed_local_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: standard-core-student-local-full-flow-validation
+  currentTaskId: standard-core-student-experience-closure-readiness-audit
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -922,8 +922,8 @@ localExperienceClosure:
       standardCoreRowsRemainingReady: 5
       costCalibrationGate: blocked
   lastStandardCoreStudentLocalFullFlowValidation:
-    taskId: standard-core-student-local-full-flow-validation-rerun
-    validatedAt: "2026-06-18T10:28:30-07:00"
+    taskId: standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    validatedAt: "2026-06-18T11:12:56-07:00"
     targetExperienceChain: standard-core-student
     useCaseIds:
       - UC-STD-ACCOUNT-SESSION
@@ -931,16 +931,36 @@ localExperienceClosure:
       - UC-STD-PRACTICE
       - UC-STD-MOCK-EXAM
       - UC-STD-REPORT-MISTAKE-BOOK
-    decision: blocked_local_full_flow_validation_no_experience_closed
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-    evidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    decision: local_full_flow_passed_no_experience_closed_claim
+    nextTask: standard-core-student-experience-closure-readiness-audit
+    evidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
     boundarySummary:
-      focusedUnit: passed_6_files_69_tests
-      e2eList: passed_31_tests_14_files_runtime_not_executed
-      localFullFlow: blocked_10_passed_2_failed
-      previousFailedSpecsMovedForward: local_business_flow_student_token_and_student_practice_resume_choice
-      failedSpecs: local_business_flow_report_exam_report_missing_and_student_practice_mistake_book_ai_explanation_not_ok
-      experienceClosure: blocked_until_report_ai_explanation_repair_and_fresh_passing_full_flow
+      focusedUnit: passed_10_files_76_tests
+      e2eList: passed_31_tests_14_files
+      localFullFlow: passed_12_tests_local_auth_student_practice_mock_entry_local_business_flow
+      previousFailedSpecsMovedForward: report_payload_mistake_book_ai_explanation_content_admin_heading_ops_cookie_marker_and_rest_guard
+      failedSpecs: none
+      experienceClosure: blocked_until_closure_readiness_audit
+      costCalibrationGate: blocked
+  lastStandardCoreStudentExperienceClosureReadinessAudit:
+    taskId: standard-core-student-experience-closure-readiness-audit
+    auditedAt: "2026-06-18T11:17:51-07:00"
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    decision: mark_experience_closed_for_local_student_core_only
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
+    evidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    boundarySummary:
+      localFullFlowEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      localFullFlow: passed_12_tests_local_auth_student_practice_mock_entry_local_business_flow
+      focusedUnit: passed_10_files_76_tests
+      experienceClosure: local_only
+      releaseReadiness: not_claimed
       costCalibrationGate: blocked
   lastStandardAdminOpsLogsLocalExperienceBatch:
     taskId: standard-admin-ops-logs-local-experience-batch
@@ -962,15 +982,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `standard-core-student-local-full-flow-validation-rerun` produced fresh localhost runtime evidence after repair
-    commit `c166b77e`. The previous session-token and practice-resume failures moved forward, but the rerun remains
-    blocked with two new targeted failures: `local-business-flow` does not receive `data.examReport.publicId` from the
-    exam report creation step, and `student-practice-mock-entry` receives a non-OK response from
-    `/api/v1/mistake-books/{publicId}/ai-explanation`. Do not run closure readiness audit for the five standard student
-    core rows yet. Next recommended work is the smallest repair task:
-    `standard-core-student-local-full-flow-report-ai-explanation-contract-repair`, then rerun
-    `standard-core-student-local-full-flow-validation`, then run a separate closure readiness audit only if fresh runtime
-    evidence passes. Keep release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
-    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and Cost Calibration Gate
-    blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    `standard-core-student-experience-closure-readiness-audit` marked the five standard student core rows
+    `experience_closed` for local experience only after fresh passing local full-flow evidence. No commit, merge, push, or
+    branch cleanup was performed. Next action requires user direction: either continue another local experience queue item
+    or explicitly authorize the later merge/push/cleanup phase for the accumulated student chain. Keep release,
+    staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration,
+    package/lockfile/dependency, destructive database operations, e2e spec edits, and Cost Calibration Gate blocked unless
+    a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md

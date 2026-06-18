@@ -390,10 +390,10 @@ matrix:
     uiSurface: src/app/(auth)/login/page.tsx; src/app/(auth)/register/page.tsx
     unitEvidence: src/server/auth/*.test.ts; tests/unit/student-login-ui.test.ts; tests/unit/student-register-ui.test.ts
     e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    status: local_experience_ready
-    blockedGate: standard_core_student_local_full_flow_blocked_report_and_mistake_book_ai_explanation_contract
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-PERSONAL-AUTH-REDEEM
     edition: standard
     actor: student_ops_admin
@@ -404,10 +404,10 @@ matrix:
     uiSurface: src/features/student/profile/StudentProfileRedeemPage.tsx; src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
     unitEvidence: tests/unit/phase-8-student-authorization-redeem-runtime.test.ts; tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    status: local_experience_ready
-    blockedGate: standard_core_student_local_full_flow_blocked_report_and_mistake_book_ai_explanation_contract
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-ORG-AUTH-MANAGED
     edition: standard
     actor: ops_admin_employee_student
@@ -460,10 +460,10 @@ matrix:
     uiSurface: src/features/student/practice/StudentPracticePage.tsx
     unitEvidence: src/server/services/practice-service.test.ts; tests/unit/student-practice-ui.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    status: local_experience_ready
-    blockedGate: standard_core_student_local_full_flow_blocked_report_and_mistake_book_ai_explanation_contract
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-MOCK-EXAM
     edition: standard
     actor: student
@@ -474,10 +474,10 @@ matrix:
     uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx
     unitEvidence: src/server/services/mock-exam-service.test.ts; tests/unit/local-business-flow-mock-exam-isolation.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    status: local_experience_ready
-    blockedGate: standard_core_student_local_full_flow_blocked_report_and_mistake_book_ai_explanation_contract
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-REPORT-MISTAKE-BOOK
     edition: standard
     actor: student
@@ -488,10 +488,10 @@ matrix:
     uiSurface: src/features/student/mock-exam/StudentMockExamReportPage.tsx; src/features/student/mistake-book/StudentMistakeBookPage.tsx
     unitEvidence: src/server/services/exam-report-service.test.ts; src/server/services/mistake-book-service.test.ts; tests/unit/student-mistake-book-ui.test.ts
     e2eEvidence: e2e/student-practice-mock-entry.spec.ts; e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    status: local_experience_ready
-    blockedGate: standard_core_student_local_full_flow_blocked_report_and_mistake_book_ai_explanation_contract
-    nextTask: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: none
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-STD-AI-SCORING-EXPLANATION
     edition: standard
     actor: student_super_admin_system

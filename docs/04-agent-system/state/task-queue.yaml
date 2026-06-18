@@ -6715,7 +6715,6 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
     status: closed
     retryCount: 0
-
   - id: batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
     title: Module Run v2 ai-task-and-provider implementation seed
     phase: batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
@@ -17681,4 +17680,372 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    retryCount: 0
+
+  - id: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    title: standard core student local full flow report ai explanation contract repair
+    phase: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
+    dependencies:
+      - standard-core-student-local-full-flow-validation-rerun
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved the serial standard student core chain on 2026-06-18: seed
+      `standard-core-student-local-full-flow-report-ai-explanation-contract-repair`, execute the smallest product repair
+      for exam report creation payload and mistake-book AI explanation OK response, rerun
+      `standard-core-student-local-full-flow-validation`, then enter closure readiness audit only if fresh runtime
+      evidence passes. This repair task may edit only the explicit report, mistake-book AI explanation, focused unit test,
+      docs/state/task plan/evidence/audit files. It must not edit e2e specs, package/lockfiles/dependencies, `.env*`,
+      schema/drizzle/migrations, provider/model configuration, staging/prod/cloud/deploy/payment/external-service code,
+      destructive DB operations, PRs, force-push, or Cost Calibration Gate.
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
+    evidenceMode: full
+    validationPolicy: local_unit_plus_scoped_local_full_flow
+    queueSelectionMode: ready_set
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_local_full_flow_validation_failure
+    claimedAt: "2026-06-18T10:39:34-07:00"
+    closedAt: "2026-06-18T10:48:00-07:00"
+    capabilities:
+      localFullFlowGate: blocked_until_validation_task
+      localE2EValidation: blocked_until_validation_task
+      e2eListOnly: allowed
+      focusedUnitValidation: allowed
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - src/server/contracts/exam-report-contract.ts
+      - src/server/contracts/mistake-book-contract.ts
+      - src/server/mappers/exam-report-mapper.ts
+      - src/server/mappers/mistake-book-mapper.ts
+      - src/server/services/exam-report-service.ts
+      - src/server/services/exam-report-service.test.ts
+      - src/server/services/exam-report-route.ts
+      - src/server/services/exam-report-route.test.ts
+      - src/server/services/mistake-book-service.ts
+      - src/server/services/mistake-book-service.test.ts
+      - src/server/services/mistake-book-route.ts
+      - src/server/services/mistake-book-route.test.ts
+      - src/server/services/student-experience/route-handlers.ts
+      - src/server/services/student-flow-runtime.ts
+      - src/server/services/student-mistake-book-runtime.ts
+      - src/server/repositories/student-flow-runtime-repository.ts
+      - src/server/repositories/exam-report-repository.ts
+      - src/server/repositories/mistake-book-repository.ts
+      - tests/unit/student-mock-exam-report-ui.test.ts
+      - tests/unit/student-mistake-book-ui.test.ts
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts
+      - tests/unit/phase-8-student-mistake-book-runtime.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+      - e2e/local-auth-route-guard.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - src/app/api/v1/exam-reports/route.ts
+      - src/app/api/v1/mistake-books/[publicId]/ai-explanation/route.ts
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx
+      - src/features/student/mistake-book/StudentMistakeBookPage.tsx
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - scripts/**
+    closeoutPolicy:
+      localCommit:
+        approved: false
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/exam-report-service.test.ts src/server/services/exam-report-route.test.ts src/server/services/mistake-book-service.test.ts src/server/services/mistake-book-route.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts tests/unit/phase-8-student-mistake-book-runtime.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    retryCount: 0
+
+  - id: standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    title: standard core student local full flow content admin heading contract repair
+    phase: standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
+    dependencies:
+      - standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User reaffirmed on 2026-06-18 that the serial standard student core repair should continue after the blocked
+      report/AI-explanation evidence. This task is the smallest follow-up repair for the content admin heading contract
+      that blocks `e2e/local-business-flow.spec.ts` after `/content/questions`. The dirty worktree is an intentional
+      carryover from the immediately preceding report/AI-explanation repair on the same student chain; those files remain
+      in allowedFiles only so the chain can continue without commit, merge, push, or branch cleanup. Product edits are
+      limited to the explicit admin content route/UI/guard surfaces and focused unit tests listed below. E2E specs,
+      `.env*`, package/lockfile/dependency, schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment/
+      external-service, destructive DB, PR, force-push, branch cleanup, merge, push, and Cost Calibration Gate remain
+      blocked.
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
+    evidenceMode: full
+    validationPolicy: local_unit_plus_scoped_local_full_flow
+    queueSelectionMode: ready_set
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: passed_local_full_flow_validation_no_experience_closed_claim
+    claimedAt: "2026-06-18T10:52:12-07:00"
+    closedAt: "2026-06-18T11:12:56-07:00"
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      localE2EValidation: approved_local_only_existing_specs
+      e2eListOnly: allowed
+      focusedUnitValidation: allowed
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - src/server/services/student-experience/route-handlers.ts
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - src/app/(admin)/content/questions/page.tsx
+      - src/app/(admin)/content/materials/page.tsx
+      - src/app/(auth)/login/page.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagement.ts
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/features/admin/content-admin-runtime.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/admin-ai-audit-log-runtime.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/services/admin-redeem-code-runtime.ts
+      - src/server/services/ai-call-log/route-handlers.ts
+      - src/server/services/audit-log/route-handlers.ts
+      - src/server/services/content-question-material-runtime.ts
+      - src/server/services/paper-composition-lifecycle-runtime.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/protected-route-guard-ui.test.ts
+      - tests/unit/student-login-ui.test.ts
+      - tests/unit/phase-22-content-admin-cookie-session-repair.test.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - e2e/local-auth-route-guard.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/app/(admin)/content/papers/page.tsx
+      - src/app/(admin)/content/knowledge-nodes/page.tsx
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: false
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/protected-route-guard-ui.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/phase-22-content-admin-cookie-session-repair.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-content-admin-heading-contract-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+    retryCount: 0
+
+  - id: standard-core-student-experience-closure-readiness-audit
+    title: standard core student experience closure readiness audit
+    phase: standard-core-student-experience-closure-readiness-audit
+    sourceStory: localExperienceClosureGate.standardCoreStudentExperienceClosureReadinessAudit
+    dependencies:
+      - standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    taskKind: readiness_audit
+    moduleRunVersion: 2
+    targetExperienceChain: standard-core-student
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    executionProfile: local_readiness_audit
+    evidenceMode: full
+    validationPolicy: docs_state_audit
+    queueSelectionMode: ready_set
+    status: closed
+    result: mark_experience_closed_local_only
+    claimedAt: "2026-06-18T11:13:00-07:00"
+    closedAt: "2026-06-18T11:17:51-07:00"
+    capabilities:
+      localExperienceClosureAudit: allowed
+      e2eRuntime: blocked_consumes_existing_fresh_evidence
+      providerCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+      - src/app/(auth)/login/page.tsx
+      - src/features/admin/content-admin-runtime.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/services/admin-ai-audit-log-runtime.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/services/admin-redeem-code-runtime.ts
+      - src/server/services/ai-call-log/route-handlers.ts
+      - src/server/services/audit-log/route-handlers.ts
+      - src/server/services/content-question-material-runtime.ts
+      - src/server/services/paper-composition-lifecycle-runtime.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - src/server/services/student-experience/route-handlers.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+      - tests/unit/phase-22-content-admin-cookie-session-repair.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: false
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: true
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-experience-closure-readiness-audit.md docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-experience-closure-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-experience-closure-readiness-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
     retryCount: 0
