@@ -31,6 +31,11 @@ export const devSeedPublicIds = {
   superAdmin: "admin-dev-super-admin",
   studentUser: "user-dev-student",
   organization: "org-dev-province",
+  orgAuth: "org-auth-dev-analytics",
+  employeeUser: "user-dev-employee",
+  employee: "employee-dev-analytics",
+  organizationTrainingVersion: "organization-training-version-dev-analytics",
+  organizationTrainingAnswer: "organization-training-answer-dev-analytics",
   redeemCode: "redeem-code-dev-student",
   personalAuth: "personal-auth-dev-student",
   question: "question-dev-single-choice",
@@ -114,6 +119,20 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       createdAt: baseIssuedAt,
       organizationPublicId: devSeedPublicIds.organization,
     },
+    employee: {
+      createdAt: baseIssuedAt,
+      organizationPublicId: devSeedPublicIds.organization,
+      publicId: devSeedPublicIds.employee,
+      userPublicId: devSeedPublicIds.employeeUser,
+    },
+    employeeUser: {
+      authUserId: null,
+      name: "Local analytics employee",
+      phone: "13900000003",
+      publicId: devSeedPublicIds.employeeUser,
+      status: "active",
+      userType: "employee",
+    },
     authAccounts: [
       {
         accountId: devSeedPublicIds.superAdminAuthUser,
@@ -168,6 +187,24 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       remark: "Phase 7 local dev seed organization",
       status: "active",
     },
+    orgAuth: {
+      accountQuota: 10,
+      authScopeType: "current_and_descendants",
+      expiresAt: authExpiresAt,
+      level: 3,
+      name: "Local analytics organization authorization",
+      profession: "monopoly",
+      publicId: devSeedPublicIds.orgAuth,
+      purchaserOrganizationPublicId: devSeedPublicIds.organization,
+      startsAt: baseIssuedAt,
+      status: "active",
+      usedQuota: 1,
+    },
+    orgAuthOrganization: {
+      createdAt: baseIssuedAt,
+      orgAuthPublicId: devSeedPublicIds.orgAuth,
+      organizationPublicId: devSeedPublicIds.organization,
+    },
     paper: {
       durationMinute: 30,
       level: 3,
@@ -194,6 +231,54 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       sortOrder: 1,
       title: "单选题",
       totalScore: "5.0",
+    },
+    organizationTrainingAnswer: {
+      answerOrganizationSnapshot: {
+        capturedAt: baseIssuedAt,
+        organizationName: "Local Province Tobacco Company",
+        organizationPublicId: devSeedPublicIds.organization,
+      },
+      employeePublicId: devSeedPublicIds.employee,
+      organizationPublicId: devSeedPublicIds.organization,
+      organizationTrainingAnswerStatus: "submitted",
+      organizationTrainingVersionPublicId:
+        devSeedPublicIds.organizationTrainingVersion,
+      publicId: devSeedPublicIds.organizationTrainingAnswer,
+      score: "86.0",
+      submittedAt: "2026-06-10T09:00:00.000Z",
+      totalScore: "100.0",
+    },
+    organizationTrainingVersion: {
+      authorizationPublicId: devSeedPublicIds.orgAuth,
+      authorizationSource: "org_auth",
+      description: "Local analytics aggregate source",
+      draftPublicId: "organization-training-draft-dev-analytics",
+      level: 3,
+      organizationPublicId: devSeedPublicIds.organization,
+      orgAuthPublicId: devSeedPublicIds.orgAuth,
+      ownerPublicId: devSeedPublicIds.organization,
+      ownerType: "organization",
+      profession: "monopoly",
+      publishedAt: baseIssuedAt,
+      publishScopeSnapshot: {
+        capturedAt: baseIssuedAt,
+        organizationPublicIds: [devSeedPublicIds.organization],
+      },
+      publicId: devSeedPublicIds.organizationTrainingVersion,
+      questionCount: 1,
+      questionTypeSummary: {
+        multiChoice: 0,
+        shortAnswer: 0,
+        singleChoice: 1,
+        trueFalse: 0,
+      },
+      quotaOwnerPublicId: devSeedPublicIds.organization,
+      quotaOwnerType: "organization",
+      subject: "theory",
+      title: "Local analytics training",
+      totalScore: "100.0",
+      versionNumber: 1,
+      versionStatus: "published",
     },
     personalAuth: {
       expiresAt: authExpiresAt,
@@ -386,6 +471,37 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       on conflict (user_id) do update set updated_at = excluded.updated_at
     `;
 
+    const employeeUserId = await getRequiredId(
+      sql`
+        insert into "user" (public_id, auth_user_id, phone, name, user_type, status, login_failed_count, locked_until_at, disabled_at, created_at, updated_at)
+        values (
+          ${seedDataset.employeeUser.publicId},
+          ${seedDataset.employeeUser.authUserId},
+          ${seedDataset.employeeUser.phone},
+          ${seedDataset.employeeUser.name},
+          ${seedDataset.employeeUser.userType},
+          ${seedDataset.employeeUser.status},
+          ${0},
+          ${null},
+          ${null},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          auth_user_id = excluded.auth_user_id,
+          phone = excluded.phone,
+          name = excluded.name,
+          user_type = excluded.user_type,
+          status = excluded.status,
+          login_failed_count = excluded.login_failed_count,
+          locked_until_at = excluded.locked_until_at,
+          disabled_at = excluded.disabled_at,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "employee user",
+    );
+
     const organizationId = await getRequiredId(
       sql`
         insert into organization (public_id, name, org_tier, parent_organization_id, status, contact_name, contact_phone, remark, created_at, updated_at)
@@ -423,6 +539,226 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
         ${seedDataset.adminOrganization.createdAt}
       )
       on conflict (admin_id, organization_id) do nothing
+    `;
+
+    const employeeId = await getRequiredId(
+      sql`
+        insert into employee (public_id, user_id, organization_id, created_at, updated_at)
+        values (
+          ${seedDataset.employee.publicId},
+          ${employeeUserId},
+          ${organizationId},
+          ${seedDataset.employee.createdAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          user_id = excluded.user_id,
+          organization_id = excluded.organization_id,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "employee",
+    );
+
+    const orgAuthId = await getRequiredId(
+      sql`
+        insert into org_auth (
+          public_id,
+          name,
+          purchaser_organization_id,
+          auth_scope_type,
+          profession,
+          level,
+          account_quota,
+          used_quota,
+          starts_at,
+          expires_at,
+          status,
+          cancelled_at,
+          created_at,
+          updated_at
+        )
+        values (
+          ${seedDataset.orgAuth.publicId},
+          ${seedDataset.orgAuth.name},
+          ${organizationId},
+          ${seedDataset.orgAuth.authScopeType},
+          ${seedDataset.orgAuth.profession},
+          ${seedDataset.orgAuth.level},
+          ${seedDataset.orgAuth.accountQuota},
+          ${seedDataset.orgAuth.usedQuota},
+          ${seedDataset.orgAuth.startsAt},
+          ${seedDataset.orgAuth.expiresAt},
+          ${seedDataset.orgAuth.status},
+          ${null},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          name = excluded.name,
+          purchaser_organization_id = excluded.purchaser_organization_id,
+          auth_scope_type = excluded.auth_scope_type,
+          profession = excluded.profession,
+          level = excluded.level,
+          account_quota = excluded.account_quota,
+          used_quota = excluded.used_quota,
+          starts_at = excluded.starts_at,
+          expires_at = excluded.expires_at,
+          status = excluded.status,
+          cancelled_at = excluded.cancelled_at,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "org auth",
+    );
+
+    await sql`
+      insert into org_auth_organization (org_auth_id, organization_id, created_at)
+      values (
+        ${orgAuthId},
+        ${organizationId},
+        ${seedDataset.orgAuthOrganization.createdAt}
+      )
+      on conflict (org_auth_id, organization_id) do nothing
+    `;
+
+    const organizationTrainingVersionId = await getRequiredId(
+      sql`
+        insert into organization_training_version (
+          public_id,
+          draft_public_id,
+          version_number,
+          organization_id,
+          organization_public_id,
+          org_auth_id,
+          authorization_source,
+          authorization_public_id,
+          owner_type,
+          owner_public_id,
+          quota_owner_type,
+          quota_owner_public_id,
+          publish_scope_snapshot,
+          profession,
+          level,
+          subject,
+          title,
+          description,
+          question_count,
+          total_score,
+          question_type_summary,
+          version_status,
+          published_at,
+          taken_down_at,
+          takedown_reason,
+          created_at,
+          updated_at
+        )
+        values (
+          ${seedDataset.organizationTrainingVersion.publicId},
+          ${seedDataset.organizationTrainingVersion.draftPublicId},
+          ${seedDataset.organizationTrainingVersion.versionNumber},
+          ${organizationId},
+          ${seedDataset.organizationTrainingVersion.organizationPublicId},
+          ${orgAuthId},
+          ${seedDataset.organizationTrainingVersion.authorizationSource},
+          ${seedDataset.organizationTrainingVersion.authorizationPublicId},
+          ${seedDataset.organizationTrainingVersion.ownerType},
+          ${seedDataset.organizationTrainingVersion.ownerPublicId},
+          ${seedDataset.organizationTrainingVersion.quotaOwnerType},
+          ${seedDataset.organizationTrainingVersion.quotaOwnerPublicId},
+          ${JSON.stringify(seedDataset.organizationTrainingVersion.publishScopeSnapshot)}::jsonb,
+          ${seedDataset.organizationTrainingVersion.profession},
+          ${seedDataset.organizationTrainingVersion.level},
+          ${seedDataset.organizationTrainingVersion.subject},
+          ${seedDataset.organizationTrainingVersion.title},
+          ${seedDataset.organizationTrainingVersion.description},
+          ${seedDataset.organizationTrainingVersion.questionCount},
+          ${seedDataset.organizationTrainingVersion.totalScore},
+          ${JSON.stringify(seedDataset.organizationTrainingVersion.questionTypeSummary)}::jsonb,
+          ${seedDataset.organizationTrainingVersion.versionStatus},
+          ${seedDataset.organizationTrainingVersion.publishedAt},
+          ${null},
+          ${null},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          draft_public_id = excluded.draft_public_id,
+          version_number = excluded.version_number,
+          organization_id = excluded.organization_id,
+          organization_public_id = excluded.organization_public_id,
+          org_auth_id = excluded.org_auth_id,
+          authorization_source = excluded.authorization_source,
+          authorization_public_id = excluded.authorization_public_id,
+          owner_type = excluded.owner_type,
+          owner_public_id = excluded.owner_public_id,
+          quota_owner_type = excluded.quota_owner_type,
+          quota_owner_public_id = excluded.quota_owner_public_id,
+          publish_scope_snapshot = excluded.publish_scope_snapshot,
+          profession = excluded.profession,
+          level = excluded.level,
+          subject = excluded.subject,
+          title = excluded.title,
+          description = excluded.description,
+          question_count = excluded.question_count,
+          total_score = excluded.total_score,
+          question_type_summary = excluded.question_type_summary,
+          version_status = excluded.version_status,
+          published_at = excluded.published_at,
+          taken_down_at = excluded.taken_down_at,
+          takedown_reason = excluded.takedown_reason,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "organization training version",
+    );
+
+    await sql`
+      insert into organization_training_answer (
+        public_id,
+        organization_training_version_id,
+        organization_training_version_public_id,
+        employee_id,
+        employee_public_id,
+        organization_id,
+        organization_public_id,
+        organization_training_answer_status,
+        score,
+        total_score,
+        submitted_at,
+        answer_organization_snapshot,
+        created_at,
+        updated_at
+      )
+      values (
+        ${seedDataset.organizationTrainingAnswer.publicId},
+        ${organizationTrainingVersionId},
+        ${seedDataset.organizationTrainingAnswer.organizationTrainingVersionPublicId},
+        ${employeeId},
+        ${seedDataset.organizationTrainingAnswer.employeePublicId},
+        ${organizationId},
+        ${seedDataset.organizationTrainingAnswer.organizationPublicId},
+        ${seedDataset.organizationTrainingAnswer.organizationTrainingAnswerStatus},
+        ${seedDataset.organizationTrainingAnswer.score},
+        ${seedDataset.organizationTrainingAnswer.totalScore},
+        ${seedDataset.organizationTrainingAnswer.submittedAt},
+        ${JSON.stringify(seedDataset.organizationTrainingAnswer.answerOrganizationSnapshot)}::jsonb,
+        ${baseIssuedAt},
+        ${baseIssuedAt}
+      )
+      on conflict (public_id) do update set
+        organization_training_version_id = excluded.organization_training_version_id,
+        organization_training_version_public_id = excluded.organization_training_version_public_id,
+        employee_id = excluded.employee_id,
+        employee_public_id = excluded.employee_public_id,
+        organization_id = excluded.organization_id,
+        organization_public_id = excluded.organization_public_id,
+        organization_training_answer_status = excluded.organization_training_answer_status,
+        score = excluded.score,
+        total_score = excluded.total_score,
+        submitted_at = excluded.submitted_at,
+        answer_organization_snapshot = excluded.answer_organization_snapshot,
+        updated_at = excluded.updated_at
     `;
 
     const redeemCodeId = await getRequiredId(
@@ -829,7 +1165,13 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
         (select count(*)::int from admin where public_id = ${devSeedPublicIds.superAdmin}) as admin_count,
         (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id = ${devSeedPublicIds.superAdmin} and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.studentUser}) as student_user_count,
+        (select count(*)::int from "user" where public_id = ${devSeedPublicIds.employeeUser}) as employee_user_count,
         (select count(*)::int from organization where public_id = ${devSeedPublicIds.organization}) as organization_count,
+        (select count(*)::int from employee where public_id = ${devSeedPublicIds.employee}) as employee_count,
+        (select count(*)::int from org_auth where public_id = ${devSeedPublicIds.orgAuth}) as org_auth_count,
+        (select count(*)::int from org_auth_organization oao inner join org_auth oa on oao.org_auth_id = oa.id inner join organization o on oao.organization_id = o.id where oa.public_id = ${devSeedPublicIds.orgAuth} and o.public_id = ${devSeedPublicIds.organization}) as org_auth_organization_count,
+        (select count(*)::int from organization_training_version where public_id = ${devSeedPublicIds.organizationTrainingVersion}) as organization_training_version_count,
+        (select count(*)::int from organization_training_answer where public_id = ${devSeedPublicIds.organizationTrainingAnswer}) as organization_training_answer_count,
         (select count(*)::int from personal_auth where public_id = ${devSeedPublicIds.personalAuth}) as personal_auth_count,
         (select count(*)::int from paper where public_id = ${devSeedPublicIds.paper}) as paper_count,
         (select count(*)::int from paper_question where public_id = ${devSeedPublicIds.paperQuestion}) as paper_question_count,

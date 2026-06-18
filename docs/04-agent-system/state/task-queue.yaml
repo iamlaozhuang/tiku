@@ -16151,14 +16151,14 @@ tasks:
     queueSelectionMode: recommended_unblock_requires_explicit_approval
     taskKind: local_fixture_contract_repair
     moduleRunVersion: 2
-    localDockerDatabase: requires_explicit_local_dev_approval
+    localDockerDatabase: approved_local_dev_only
     destructiveLocalDockerDatabase: blocked
     localE2EValidation: approved_local_only_existing_specs_after_task_approval
-    status: pending
-    result: null
-    claimedAt: null
-    closedAt: null
-    branch: null
+    status: closed
+    result: pass_local_fixture_repaired_and_analytics_full_flow_passed
+    claimedAt: "2026-06-18T07:12:48-07:00"
+    closedAt: "2026-06-18T07:21:24-07:00"
+    branch: codex/organization-analytics-admin-visible-scope-local-fixture-contract-repair
     allowedFiles:
       - src/db/dev-seed.ts
       - src/db/dev-seed.test.ts
@@ -16221,15 +16221,19 @@ tasks:
       - force push
       - Cost Calibration Gate
     closeoutPolicy:
-      localCommit: not_approved_until_task_execution_is_explicitly_approved
+      localCommit:
+        approved: true
+        message: "fix(organization-analytics): repair local analytics fixture"
+        approval: fresh_user_repair_execution_2026_06_18
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: false
+        deleteShortBranch: true
+        parkWorktree: true
         fetchPruneAfterPush: true
     validationCommands:
       - npm.cmd run test:unit -- src/db/dev-seed.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
@@ -16248,6 +16252,110 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    retryCount: 0
+  - id: organization-analytics-summary-experience-closure-readiness-audit
+    title: Organization analytics summary experience closure readiness audit
+    phase: organization-analytics-summary-experience-closure-readiness-audit
+    sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryExperienceClosureReadinessAudit
+    dependencies:
+      - organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Seeded by `organization-analytics-admin-visible-scope-local-fixture-contract-repair` after fresh scoped local
+      full-flow evidence passed. This task performs docs/state readiness audit only and decides whether
+      `UC-ADV-ORG-ANALYTICS-SUMMARY` can be marked `experience_closed` for local experience. It must not run
+      Browser/Playwright runtime, full e2e, dev server, release, staging/prod, provider/model, payment,
+      external-service, dependency, schema/migration, `.env*`, destructive database operations, PR, force-push, or Cost
+      Calibration Gate without separate approval.
+    targetExperienceChain: organization-analytics-summary
+    useCaseIds:
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    executionProfile: local_readiness_audit
+    evidenceMode: full
+    validationPolicy: focused_unit_plus_e2e_list_and_readiness_gates
+    queueSelectionMode: seeded_next_local_experience_gap
+    taskKind: readiness_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    claimedAt: null
+    closedAt: null
+    branch: null
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+      - src/app/(admin)/content/organization-analytics/page.tsx
+      - src/features/admin/organization-analytics/**
+      - src/app/api/v1/organization-analytics/**
+      - e2e/organization-analytics-local-flow.spec.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - Browser/Playwright runtime validation
+      - full e2e suite
+      - dev server
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - PR creation or force-push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(organization-analytics): close local experience audit"
+        approval: fresh_user_closure_readiness_audit_2026_06_18
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-summary-experience-closure-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-analytics-summary-experience-closure-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-summary-experience-closure-readiness-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    lastFailurePath: null
     retryCount: 0
   - id: module-run-v2-low-risk-experience-batch-mechanism-tuning
     title: Module Run v2 low-risk experience batch mechanism tuning

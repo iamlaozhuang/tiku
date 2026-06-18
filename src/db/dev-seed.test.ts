@@ -70,6 +70,48 @@ describe("dev seed dataset", () => {
         organizationPublicId: devSeedPublicIds.organization,
       }),
     );
+    expect(seedDataset).toHaveProperty(
+      "orgAuth",
+      expect.objectContaining({
+        authScopeType: "current_and_descendants",
+        publicId: "org-auth-dev-analytics",
+        status: "active",
+      }),
+    );
+    expect(seedDataset).toHaveProperty(
+      "employeeUser",
+      expect.objectContaining({
+        publicId: "user-dev-employee",
+        status: "active",
+        userType: "employee",
+      }),
+    );
+    expect(seedDataset).toHaveProperty(
+      "employee",
+      expect.objectContaining({
+        organizationPublicId: devSeedPublicIds.organization,
+        publicId: "employee-dev-analytics",
+      }),
+    );
+    expect(seedDataset).toHaveProperty(
+      "organizationTrainingVersion",
+      expect.objectContaining({
+        organizationPublicId: devSeedPublicIds.organization,
+        publicId: "organization-training-version-dev-analytics",
+        versionStatus: "published",
+      }),
+    );
+    expect(seedDataset).toHaveProperty(
+      "organizationTrainingAnswer",
+      expect.objectContaining({
+        employeePublicId: "employee-dev-analytics",
+        organizationPublicId: devSeedPublicIds.organization,
+        organizationTrainingAnswerStatus: "submitted",
+        publicId: "organization-training-answer-dev-analytics",
+        score: "86.0",
+        totalScore: "100.0",
+      }),
+    );
     expect(seedDataset.personalAuth).toMatchObject({
       profession: "monopoly",
       publicId: devSeedPublicIds.personalAuth,
@@ -127,6 +169,11 @@ describe("dev seed dataset", () => {
       "admin-dev-super-admin",
       "user-dev-student",
       "org-dev-province",
+      "org-auth-dev-analytics",
+      "user-dev-employee",
+      "employee-dev-analytics",
+      "organization-training-version-dev-analytics",
+      "organization-training-answer-dev-analytics",
       "redeem-code-dev-student",
       "personal-auth-dev-student",
       "question-dev-single-choice",
