@@ -27,8 +27,8 @@ currentFactRefresh:
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 15
-    local_experience_ready: 7
+    partial: 17
+    local_experience_ready: 5
     experience_closed: 0
     release_blocked: 10
   sourceAnchors:
@@ -46,18 +46,19 @@ currentFactRefresh:
     Formal use-case catalog coverage is complete at the `useCaseId` level. No row is marked `experience_closed`
     because this task did not run localhost Browser or Playwright runtime validation.
 lastClosureReadinessAudit:
-  taskId: module-run-v2-organization-training-l6-closure-readiness-audit
-  auditedAt: "2026-06-17T18:24:56-07:00"
+  taskId: organization-training-experience-closure-readiness-audit
+  auditedAt: "2026-06-18T04:10:37-07:00"
   targetExperienceChain: organization-training-experience
   useCaseIds:
     - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-  decision: keep_not_experience_closed
+  decision: mark_experience_closed_for_local_role_flow_only
   reason: >-
-    Service-level lifecycle and focused validation exist, but organization-training L6 local closure still lacks
-    admin and employee entry surfaces, complete runtime route coverage beyond publish, and an approved admin-to-employee
-    browser role-flow. Route-guard smoke and service unit evidence are not sufficient for `experience_closed`.
-  evidence: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+    Fresh local full-flow evidence shows the organization admin can enter the admin organization-training surface,
+    create a draft, bind source context metadata, publish/copy training, and an employee in scope can reach visible-list,
+    draft-save, submit, and readonly-summary. The claim is local experience closure only and does not imply release,
+    staging/prod, provider, payment, or Cost Calibration readiness.
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
 lastEntrySurfacePlanning:
   taskId: organization-training-admin-employee-entry-surface-planning
   plannedAt: "2026-06-17T18:44:27-07:00"
@@ -224,6 +225,102 @@ lastAdminEmployeeEntrySurfaceLocalUi:
     employeeEntrySurface: local_unit_ui_ready_for_visible_list_draft_submit_readonly_summary
     localFullFlow: pending_next
     experienceClosure: blocked_until_local_full_flow_and_closure_audit
+    costCalibrationGate: blocked
+lastAdminEmployeeLocalFullFlowValidation:
+  taskId: organization-training-admin-employee-local-full-flow-validation
+  validatedAt: "2026-06-18T03:55:34-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: local_full_flow_passed_after_source_context_ui_response_key_repair_no_experience_closed_claim
+  nextTask: organization-training-experience-closure-readiness-audit
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-source-context-ui-response-key-contract-repair.md
+  boundarySummary:
+    localFullFlow: passed_after_source_context_ui_response_key_repair
+    adminEntryRoute: src/app/(admin)/content/organization-training/page.tsx
+    employeeEntryRoute: src/app/(student)/organization-training/page.tsx
+    routeCollision: repaired_by_admin_content_route_move
+    routeRepair: completed_by_organization_training_entry_route_path_contract_repair
+    manualDraftRuntime: passed_after_seed_admin_visible_scope_repair
+    sourceContextRuntime: api_returned_success_data_context
+    sourceContextUi: repaired_reads_context_response_key
+    copyToNewDraftRuntime: passed
+    employeeAnswerRuntime: visible_list_draft_save_submit_readonly_summary_passed
+    schemaMigrationExecution: applied_local_dev
+    adminVisibleScope: repaired_seed_admin_visible_root
+    experienceClosure: blocked_until_closure_readiness_audit
+    costCalibrationGate: blocked
+lastOrganizationTrainingAdminVisibleScopeLocalFixtureContractRepair:
+  taskId: organization-training-admin-visible-scope-local-fixture-contract-repair
+  repairedAt: "2026-06-18T03:09:53-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: local_seed_admin_visible_scope_repaired_full_flow_blocked_source_context_ui_mapping_no_experience_closed_claim
+  nextTask: organization-training-admin-source-context-ui-response-key-contract-repair
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+  boundarySummary:
+    localSeedAdminVisibleScope: repaired_admin_organization_relation
+    e2eOrganizationSelection: deterministic_seed_visible_organization
+    localFullFlow: progressed_past_manual_draft_409080_then_blocked_source_context_ui_mapping
+    sourceContextRuntime: api_success
+    sourceContextUi: reads_attachment_but_route_returns_context
+    experienceClosure: blocked_until_local_full_flow_green_and_closure_audit
+    costCalibrationGate: blocked
+lastOrganizationTrainingAdminSourceContextUiResponseKeyContractRepair:
+  taskId: organization-training-admin-source-context-ui-response-key-contract-repair
+  repairedAt: "2026-06-18T03:55:34-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: admin_source_context_ui_response_key_repaired_full_flow_passed_no_experience_closed_claim
+  nextTask: organization-training-experience-closure-readiness-audit
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-source-context-ui-response-key-contract-repair.md
+  boundarySummary:
+    sourceContextRouteContract: data_context
+    sourceContextUiContract: reads_data_context
+    adminUnitSurface: passed
+    localFullFlow: passed_admin_draft_source_copy_employee_answer
+    experienceClosure: pending_closure_readiness_audit
+    costCalibrationGate: blocked
+lastOrganizationTrainingEntryRoutePathContractRepair:
+  taskId: organization-training-entry-route-path-contract-repair
+  repairedAt: "2026-06-18T02:08:59-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: route_path_repaired_full_flow_blocked_by_manual_draft_runtime_500_no_experience_closed_claim
+  nextTask: organization-training-draft-source-context-local-migration-execution-approval
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
+  boundarySummary:
+    adminEntryRoute: src/app/(admin)/content/organization-training/page.tsx
+    employeeEntryRoute: src/app/(student)/organization-training/page.tsx
+    routeCollision: repaired
+    localFullFlow: superseded_by_local_migration_rerun_blocked_409080
+    schemaMigrationExecution: applied_local_dev_after_followup
+    experienceClosure: blocked_until_local_full_flow_green_and_closure_audit
+    costCalibrationGate: blocked
+lastOrganizationTrainingDraftSourceContextLocalMigrationExecution:
+  taskId: organization-training-draft-source-context-local-migration-execution-approval
+  executedAt: "2026-06-18T02:51:30-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: local_migration_applied_full_flow_blocked_admin_visible_scope_409080_no_experience_closed_claim
+  nextTask: organization-training-admin-visible-scope-local-fixture-contract-repair
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+  boundarySummary:
+    schemaMigrationExecution: applied_local_dev
+    organizationTrainingDraftTable: present
+    organizationTrainingSourceContextTable: present
+    localFullFlow: blocked_by_admin_visible_scope_409080
+    adminVisibleScope: seed_admin_has_no_visible_root
+    experienceClosure: blocked_until_local_full_flow_green_and_closure_audit
     costCalibrationGate: blocked
 lastEmployeeAnswerRepositoryQueueMaterialization:
   taskId: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
@@ -510,17 +607,17 @@ matrix:
   - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     edition: advanced
     actor: organization_admin
-    entrySurface: src/app/(admin)/organization-training/page.tsx
+    entrySurface: src/app/(admin)/content/organization-training/page.tsx
     apiSurface: src/app/api/v1/organization-trainings/route.ts; src/app/api/v1/organization-trainings/[publicId]/publish/route.ts; src/app/api/v1/organization-trainings/[publicId]/take-down/route.ts; src/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route.ts; src/app/api/v1/organization-trainings/[publicId]/source-contexts/route.ts
     serviceSurface: src/server/services/organization-training-service.ts; src/server/services/organization-training-route.ts
     repositorySurface: src/server/repositories/organization-training-repository.ts; src/db/schema/organization-training.ts; drizzle/20260618063739_add_organization_training_draft_source_context.sql
     uiSurface: src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; src/server/mappers/organization-training-mapper.test.ts; src/db/schema/organization-training.test.ts; tests/unit/organization-training-admin-entry-surface.test.ts
-    e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
-    status: local_experience_ready
-    blockedGate: local_full_flow_not_closed
-    nextTask: organization-training-admin-employee-local-full-flow-validation
+    e2eEvidence: e2e/organization-training-local-full-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_staging_prod_provider_payment_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
@@ -530,11 +627,11 @@ matrix:
     repositorySurface: src/server/repositories/organization-training-repository.ts
     uiSurface: src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
     unitEvidence: src/server/services/organization-training-service.test.ts; src/server/services/organization-training-route.test.ts; src/server/validators/organization-training.test.ts; src/server/repositories/organization-training-repository.test.ts; tests/unit/organization-training-employee-entry-surface.test.ts
-    e2eEvidence: e2e/local-auth-route-guard.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
-    status: local_experience_ready
-    blockedGate: local_full_flow_not_closed
-    nextTask: organization-training-admin-employee-local-full-flow-validation
+    e2eEvidence: e2e/organization-training-local-full-flow.spec.ts
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    status: experience_closed
+    blockedGate: release_ready_not_implied_staging_prod_provider_payment_cost_calibration_blocked
+    nextTask: release_gate_approval_package_required_if_release_scope_requested
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin

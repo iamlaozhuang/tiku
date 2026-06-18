@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import AdminOrganizationTrainingRoutePage from "@/app/(admin)/organization-training/page";
+import AdminOrganizationTrainingRoutePage from "@/app/(admin)/content/organization-training/page";
 import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
 
 const adminSessionPayload = {
@@ -96,7 +96,7 @@ afterEach(() => {
 });
 
 describe("AdminOrganizationTrainingPage", () => {
-  it("is wired as the admin organization training route page", () => {
+  it("is wired as the admin content organization training route page", () => {
     expect(AdminOrganizationTrainingRoutePage()).toEqual(
       createElement(AdminOrganizationTrainingPage),
     );
@@ -131,7 +131,7 @@ describe("AdminOrganizationTrainingPage", () => {
     ]);
   });
 
-  it("creates draft, attaches source context, and copies a version through metadata-only API calls", async () => {
+  it("creates draft, attaches source context with the runtime context response key, and copies a version through metadata-only API calls", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -159,7 +159,7 @@ describe("AdminOrganizationTrainingPage", () => {
             code: 0,
             message: "ok",
             data: {
-              attachment: {
+              context: {
                 draftPublicId: "organization-training-draft-ui-001",
                 organizationPublicId: "organization-admin-scope-001",
                 sourceContexts: [

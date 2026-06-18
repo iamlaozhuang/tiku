@@ -285,7 +285,7 @@ export function AdminOrganizationTrainingPage() {
 
     try {
       const response = await mutateAdminOrganizationTrainingApi<{
-        attachment: OrganizationTrainingSourceContextAttachmentDto;
+        context: OrganizationTrainingSourceContextAttachmentDto;
       }>(
         `/api/v1/organization-trainings/${lastDraft.publicId}/source-contexts`,
         sessionToken,
@@ -302,7 +302,7 @@ export function AdminOrganizationTrainingPage() {
       }
 
       const sourcePublicId =
-        response.data.attachment.sourceContexts[0]?.sourcePublicId ??
+        response.data.context.sourceContexts[0]?.sourcePublicId ??
         values.sourcePublicId;
       setMessage(`来源 ${sourcePublicId} 已绑定`);
     } catch {

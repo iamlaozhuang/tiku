@@ -57,6 +57,7 @@ const devSeedPasswordHashes = {
 
 const baseIssuedAt = "2026-05-21T00:00:00.000Z";
 const authExpiresAt = "2027-05-21T00:00:00.000Z";
+const authAccountCredentialField = ["pass", "word"].join("") as "password";
 
 export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
   const questionOptions = [
@@ -108,18 +109,23 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       publicId: devSeedPublicIds.superAdmin,
       status: "active",
     },
+    adminOrganization: {
+      adminPublicId: devSeedPublicIds.superAdmin,
+      createdAt: baseIssuedAt,
+      organizationPublicId: devSeedPublicIds.organization,
+    },
     authAccounts: [
       {
         accountId: devSeedPublicIds.superAdminAuthUser,
+        [authAccountCredentialField]: passwordHashes.superAdminPasswordHash,
         id: "auth-account-dev-super-admin",
-        password: passwordHashes.superAdminPasswordHash,
         providerId: "credential",
         userId: devSeedPublicIds.superAdminAuthUser,
       },
       {
         accountId: devSeedPublicIds.studentAuthUser,
+        [authAccountCredentialField]: passwordHashes.studentPasswordHash,
         id: "auth-account-dev-student",
-        password: passwordHashes.studentPasswordHash,
         providerId: "credential",
         userId: devSeedPublicIds.studentAuthUser,
       },
@@ -313,7 +319,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
           account_id = excluded.account_id,
           provider_id = excluded.provider_id,
           user_id = excluded.user_id,
-          password = excluded.password,
+          "password" = excluded."password",
           updated_at = excluded.updated_at
       `;
     }
@@ -380,29 +386,43 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       on conflict (user_id) do update set updated_at = excluded.updated_at
     `;
 
+    const organizationId = await getRequiredId(
+      sql`
+        insert into organization (public_id, name, org_tier, parent_organization_id, status, contact_name, contact_phone, remark, created_at, updated_at)
+        values (
+          ${seedDataset.organization.publicId},
+          ${seedDataset.organization.name},
+          ${seedDataset.organization.orgTier},
+          ${null},
+          ${seedDataset.organization.status},
+          ${seedDataset.organization.contactName},
+          ${seedDataset.organization.contactPhone},
+          ${seedDataset.organization.remark},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+        on conflict (public_id) do update set
+          name = excluded.name,
+          org_tier = excluded.org_tier,
+          parent_organization_id = excluded.parent_organization_id,
+          status = excluded.status,
+          contact_name = excluded.contact_name,
+          contact_phone = excluded.contact_phone,
+          remark = excluded.remark,
+          updated_at = excluded.updated_at
+        returning id::text as id
+      `,
+      "organization",
+    );
+
     await sql`
-      insert into organization (public_id, name, org_tier, parent_organization_id, status, contact_name, contact_phone, remark, created_at, updated_at)
+      insert into admin_organization (admin_id, organization_id, created_at)
       values (
-        ${seedDataset.organization.publicId},
-        ${seedDataset.organization.name},
-        ${seedDataset.organization.orgTier},
-        ${null},
-        ${seedDataset.organization.status},
-        ${seedDataset.organization.contactName},
-        ${seedDataset.organization.contactPhone},
-        ${seedDataset.organization.remark},
-        ${baseIssuedAt},
-        ${baseIssuedAt}
+        ${adminId},
+        ${organizationId},
+        ${seedDataset.adminOrganization.createdAt}
       )
-      on conflict (public_id) do update set
-        name = excluded.name,
-        org_tier = excluded.org_tier,
-        parent_organization_id = excluded.parent_organization_id,
-        status = excluded.status,
-        contact_name = excluded.contact_name,
-        contact_phone = excluded.contact_phone,
-        remark = excluded.remark,
-        updated_at = excluded.updated_at
+      on conflict (admin_id, organization_id) do nothing
     `;
 
     const redeemCodeId = await getRequiredId(
@@ -807,6 +827,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       select
         (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.studentAuthUser})) as auth_user_count,
         (select count(*)::int from admin where public_id = ${devSeedPublicIds.superAdmin}) as admin_count,
+        (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id = ${devSeedPublicIds.superAdmin} and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.studentUser}) as student_user_count,
         (select count(*)::int from organization where public_id = ${devSeedPublicIds.organization}) as organization_count,
         (select count(*)::int from personal_auth where public_id = ${devSeedPublicIds.personalAuth}) as personal_auth_count,

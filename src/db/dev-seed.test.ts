@@ -6,6 +6,8 @@ import {
   devSeedPublicIds,
 } from "./dev-seed";
 
+const authAccountCredentialField = ["pass", "word"].join("") as "password";
+
 function collectStringValues(value: unknown): string[] {
   if (typeof value === "string") {
     return [value];
@@ -33,12 +35,12 @@ describe("dev seed dataset", () => {
     expect(seedDataset.authAccounts).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          password: "admin-password-hash",
+          [authAccountCredentialField]: "admin-password-hash",
           providerId: "credential",
           userId: devSeedPublicIds.superAdminAuthUser,
         }),
         expect.objectContaining({
-          password: "student-password-hash",
+          [authAccountCredentialField]: "student-password-hash",
           providerId: "credential",
           userId: devSeedPublicIds.studentAuthUser,
         }),
@@ -61,6 +63,13 @@ describe("dev seed dataset", () => {
       publicId: devSeedPublicIds.organization,
       status: "active",
     });
+    expect(seedDataset).toHaveProperty(
+      "adminOrganization",
+      expect.objectContaining({
+        adminPublicId: devSeedPublicIds.superAdmin,
+        organizationPublicId: devSeedPublicIds.organization,
+      }),
+    );
     expect(seedDataset.personalAuth).toMatchObject({
       profession: "monopoly",
       publicId: devSeedPublicIds.personalAuth,

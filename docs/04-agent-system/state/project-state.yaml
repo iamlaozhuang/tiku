@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-draft-source-context-runtime-contract-tdd
-updatedAt: "2026-06-18T01:00:12-07:00"
+currentPhase: organization-training-accumulated-chain-approved-closeout
+updatedAt: "2026-06-18T04:36:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -438,13 +438,13 @@ repository:
   lastKnownMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
   lastKnownOriginMasterSha: 8127c0c81230de0f090c810c4a0358816cd183f8
 currentTask:
-  id: organization-training-admin-employee-entry-surface-local-ui
+  id: organization-training-accumulated-chain-approved-closeout
   status: closed
-  result: pass
-  sourceStory: localExperienceClosureGate.organizationTrainingAdminEmployeeEntrySurface
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+  result: pass_approved_closeout_validated_for_commit_merge_push_cleanup
+  sourceStory: localExperienceClosureGate.organizationTrainingAccumulatedChainApprovedCloseout
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
   branch: codex/organization-training-local-experience-chain
   commitSha: null
   prUrl: null
@@ -694,6 +694,10 @@ qualityGates:
     organizationTrainingEmployeeAnswerRepositoryContractTdd: pass_tdd_metadata_only_employee_answer_repository_contract_no_schema_no_runtime_e2e
     organizationTrainingEmployeeAnswerRouteQueueMaterialization: pass_docs_state_materialized_employee_answer_route_contract_tdd_as_next_ready_set_item
     organizationTrainingAdminEmployeeEntrySurfaceLocalUi: pass_local_unit_ui_entry_surfaces_no_runtime_e2e
+    organizationTrainingAdminSourceContextUiResponseKeyContractRepair: pass_local_unit_and_scoped_full_flow_no_experience_closed
+    organizationTrainingExperienceClosureReadinessAudit: pass_experience_closed_for_local_role_flow_only
+    organizationTrainingAccumulatedChainCloseoutPrecommitScopeRecovery: pass_precommit_scope_recovered_no_commit_closeout_approval_required
+    organizationTrainingAccumulatedChainApprovedCloseout: pass_approved_closeout_validated_for_commit_merge_push_cleanup
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -729,10 +733,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_training_admin_employee_entry_surface_local_ui_closed_no_experience_closed
+  status: organization_training_experience_closed_local_role_flow_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-training-admin-employee-entry-surface-local-ui
+  currentTaskId: organization-training-accumulated-chain-approved-closeout
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -742,7 +746,7 @@ localExperienceClosure:
   blockedGates:
     - env_secret
     - provider_model_call
-    - schema_drizzle_migration
+    - schema_drizzle_migration_except_completed_current_local_dev_migration_execution
     - dependency_package_lockfile_change
     - staging_prod_cloud_deploy_payment_external_service
     - browser_playwright_runtime_validation_without_local_full_flow_task
@@ -751,10 +755,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `organization-training-admin-employee-entry-surface-local-ui` is locally closed on
-    `codex/organization-training-local-experience-chain` with local unit UI evidence only. Proceed to
-    `organization-training-admin-employee-local-full-flow-validation` to create/run the approved localhost-only scoped
-    Playwright flow. Do not claim `experience_closed`; closure readiness audit remains pending after local full-flow
-    evidence. Keep provider, env, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database migration
-    execution, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    `organization-training-accumulated-chain-approved-closeout` closed its local readiness package with scoped unit,
+    e2e list-only, formatting, lint, typecheck, diff, Module Run v2 pre-commit, module-closeout, and pre-push readiness
+    passing. Approved Git closeout actions are local commit, fast-forward merge to `master`, push `origin/master`, and
+    merged short-branch cleanup. After Git closeout, continue the use-case matrix with the next non-release local
+    experience row. Keep release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
+    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, dev server,
+    Browser/Playwright runtime, full e2e runtime, and Cost Calibration Gate blocked unless a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
