@@ -27,9 +27,9 @@ currentFactRefresh:
   extraUseCaseIds: []
   statusSummary:
     missing: 0
-    partial: 17
-    local_experience_ready: 5
-    experience_closed: 0
+    partial: 14
+    local_experience_ready: 6
+    experience_closed: 2
     release_blocked: 10
   sourceAnchors:
     - docs/01-requirements/use-cases/use-case-catalog.md
@@ -43,8 +43,9 @@ currentFactRefresh:
     listedTests: 28
     runtimeExecuted: false
   conclusion: >-
-    Formal use-case catalog coverage is complete at the `useCaseId` level. No row is marked `experience_closed`
-    because this task did not run localhost Browser or Playwright runtime validation.
+    Formal use-case catalog coverage is complete at the `useCaseId` level. Current summary counts include the
+    organization-training local role-flow rows that were later marked `experience_closed`; release readiness is still not
+    implied by local experience closure.
 lastClosureReadinessAudit:
   taskId: organization-training-experience-closure-readiness-audit
   auditedAt: "2026-06-18T04:10:37-07:00"

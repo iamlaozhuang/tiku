@@ -15344,3 +15344,91 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
     lastFailurePath: null
     retryCount: 0
+  - id: local-experience-coverage-matrix-summary-count-repair
+    title: Local experience coverage matrix summary count repair
+    phase: local-experience-coverage-matrix-summary-count-repair
+    sourceStory: localExperienceClosureGate.coverageMatrixSummaryCountRepair
+    dependencies:
+      - organization-training-accumulated-chain-approved-closeout
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested serial execution of recommended items 1-2-3 in the current 2026-06-18 prompt. This task is limited
+      to docs/state-only matrix summary count repair and local validation. High-risk gates remain blocked.
+    targetExperienceChain: local-experience-coverage
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: docs_state_only
+    evidenceMode: full
+    validationPolicy: docs_state_readiness_gates
+    queueSelectionMode: user_directed_sequence
+    taskKind: docs_state_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_matrix_summary_counts_repaired
+    claimedAt: "2026-06-18T04:51:03-07:00"
+    closedAt: "2026-06-18T04:52:47-07:00"
+    branch: codex/local-experience-analytics-portal-sequence
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - release, staging/prod, cloud, deploy, payment, external-service
+      - provider/model calls or provider configuration
+      - PR creation or force-push
+      - schema/drizzle/migration changes
+      - package/lockfile/dependency changes
+      - "`.env*` changes or secret/env reads"
+      - destructive database operations
+      - dev server, Browser/Playwright runtime, full e2e runtime
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(local-experience): repair coverage summary counts"
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-coverage-matrix-summary-count-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-coverage-matrix-summary-count-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-coverage-matrix-summary-count-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    lastFailurePath: null
+    retryCount: 0
