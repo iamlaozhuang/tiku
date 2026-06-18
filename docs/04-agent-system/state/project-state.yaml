@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-portal-admin-local-full-flow-validation
-updatedAt: "2026-06-18T06:41:48-07:00"
+currentPhase: organization-portal-admin-experience-closure-readiness-audit
+updatedAt: "2026-06-18T06:51:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,18 +497,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1f6348f97642441e68c3be23224e03531a9c9d34
-  lastKnownOriginMasterSha: 1f6348f97642441e68c3be23224e03531a9c9d34
+  lastKnownMasterSha: 12e44b7341722efca7dc588598a646208dc79704
+  lastKnownOriginMasterSha: 12e44b7341722efca7dc588598a646208dc79704
 currentTask:
-  id: organization-portal-admin-local-full-flow-validation
+  id: organization-portal-admin-experience-closure-readiness-audit
   status: closed
-  result: pass_scoped_local_full_flow_no_experience_closed_claim
-  sourceStory: localExperienceClosureGate.organizationPortalAdminLocalFullFlowValidation
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-local-full-flow-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-full-flow-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-full-flow-validation.md
-  branch: codex/organization-portal-admin-local-full-flow-validation
-  commitSha: 1f6348f97642441e68c3be23224e03531a9c9d34
+  result: pass_experience_closed_for_local_portal_shell_only
+  sourceStory: localExperienceClosureGate.organizationPortalAdminExperienceClosureReadinessAudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+  branch: codex/organization-portal-admin-experience-closure-readiness-audit
+  commitSha: 12e44b7341722efca7dc588598a646208dc79704
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -764,6 +764,7 @@ qualityGates:
     organizationAnalyticsSummaryUiEntryContractTdd: pass_local_unit_ui_entry_e2e_list_no_runtime_e2e
     organizationPortalAdminShellEntryContractTdd: pass_local_unit_shell_entry_e2e_list_no_runtime_e2e
     organizationPortalAdminLocalFullFlowValidation: pass_scoped_local_full_flow_no_experience_closed_claim
+    organizationPortalAdminExperienceClosureReadinessAudit: pass_experience_closed_for_local_portal_shell_only
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -799,10 +800,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: organization_training_experience_closed_local_role_flow_only
+  status: organization_portal_admin_experience_closed_local_shell_only
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: organization-portal-admin-local-full-flow-validation
+  currentTaskId: organization-portal-admin-experience-closure-readiness-audit
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -833,14 +834,29 @@ localExperienceClosure:
       sensitiveBrowserText: redaction_checked_by_spec
       experienceClosure: blocked_until_closure_readiness_audit
       costCalibrationGate: blocked
+  lastOrganizationPortalAdminExperienceClosureReadinessAudit:
+    taskId: organization-portal-admin-experience-closure-readiness-audit
+    auditedAt: "2026-06-18T06:49:41-07:00"
+    targetExperienceChain: organization-portal-admin
+    useCaseIds:
+      - UC-ADV-ORG-PORTAL-ADMIN
+    decision: mark_experience_closed_for_local_portal_shell_only
+    nextTask: organization-analytics-summary-local-full-flow-validation
+    evidence: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+    boundarySummary:
+      localFullFlow: passed_portal_shell_entry_runtime
+      roleFlow: organization_admin_loads_portal_and_supported_destinations
+      experienceClosure: local_only
+      releaseReadiness: not_claimed
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After `organization-portal-admin-local-full-flow-validation`, the next recommended work is
-    `organization-portal-admin-experience-closure-readiness-audit`. It should use the fresh local full-flow evidence to
-    decide whether `UC-ADV-ORG-PORTAL-ADMIN` can move from `local_experience_ready` to `experience_closed`; keep
-    Browser/Playwright runtime, full e2e, release, staging/prod, provider/payment, external-service, deployment, PR,
-    force-push, `.env*`, schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and
-    Cost Calibration Gate blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-full-flow-validation.md
+    After `organization-portal-admin-experience-closure-readiness-audit`, the next recommended work is
+    `organization-analytics-summary-local-full-flow-validation`, followed by
+    `organization-analytics-summary-experience-closure-readiness-audit` if the scoped local full-flow passes. Keep
+    release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
+    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and Cost Calibration Gate
+    blocked unless a separate task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
