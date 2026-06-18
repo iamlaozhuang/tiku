@@ -14160,3 +14160,506 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-17-organization-training-draft-source-context-schema-migration.md
     lastFailurePath: null
     retryCount: 0
+  - id: organization-training-local-experience-chain-queue-materialization
+    title: Organization training local experience chain queue materialization
+    phase: organization-training-local-experience-chain-queue-materialization
+    sourceStory: localExperienceClosureGate.organizationTrainingLocalExperienceChain
+    dependencies:
+      - organization-training-draft-source-context-schema-migration
+      - organization-training-employee-answer-runtime-route-contract-tdd
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-18 user prompt: "按机制规范，按你推荐的顺序执行 1-5，然后推荐下一步工作内容。" This approves
+      materializing the recommended local organization-training experience chain and executing the resulting local
+      tasks in order. It does not approve PR, force-push, dependency/package/lockfile changes, `.env*`, provider/model,
+      staging/prod/cloud/deploy/payment/external-service, database migration execution, or Cost Calibration Gate.
+    targetExperienceChain: organization-training-experience
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: legacy_explicit
+    taskKind: docs_state_queue_materialization
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_materialized_organization_training_local_experience_chain
+    claimedAt: "2026-06-18T00:10:47-07:00"
+    closedAt: "2026-06-18T00:10:47-07:00"
+    branch: codex/organization-training-local-experience-chain
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/contracts/organization-training-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - schema/drizzle/migration changes
+      - database connection or migration execution
+      - provider/model calls or provider configuration
+      - dependency changes
+      - dev server or Browser/Playwright runtime
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_current_execution_prompt
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-local-experience-chain-queue-materialization.md docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-local-experience-chain-queue-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-local-experience-chain-queue-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-local-experience-chain-queue-materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-training-draft-source-context-runtime-contract-tdd
+    title: Organization training draft source context runtime contract TDD
+    phase: organization-training-draft-source-context-runtime-contract-tdd
+    sourceStory: localExperienceClosureGate.organizationTrainingDraftSourceContextRuntimeContract
+    dependencies:
+      - organization-training-local-experience-chain-queue-materialization
+      - organization-training-draft-source-context-schema-migration
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending local_unit_tdd implementation task approved by the current 2026-06-18 user prompt for local execution only.
+      Scope is limited to manual draft, source-context attachment, and copy-to-new-draft repository/service route/API
+      contract wiring using existing schema. It must not change schema/drizzle/migration files, package/lockfile,
+      `.env*`, provider/model configuration, dev server, Browser/Playwright runtime, full e2e, staging/prod/cloud/
+      deploy/payment/external-service, PR, force-push, database migration execution, or Cost Calibration Gate.
+    targetExperienceChain: organization-training-experience
+    useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: legacy_explicit
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    allowedFiles:
+      - src/app/api/v1/organization-trainings/**
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/server/models/organization-training.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - src/db/schema/organization-training.ts
+      - docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - schema/drizzle/migration changes
+      - database connection or migration execution
+      - provider/model calls or provider configuration
+      - raw answer persistence
+      - dependency changes
+      - dev server or Browser/Playwright runtime
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_current_execution_prompt
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown src/app/api/v1/organization-trainings src/server/services/organization-training-route.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.ts src/server/validators/organization-training.test.ts src/server/contracts/organization-training-contract.ts src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.ts src/server/mappers/organization-training-mapper.test.ts src/server/models/organization-training.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-draft-source-context-runtime-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-draft-source-context-runtime-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-draft-source-context-runtime-contract-tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-training-admin-employee-entry-surface-local-ui
+    title: Organization training admin employee entry surface local UI
+    phase: organization-training-admin-employee-entry-surface-local-ui
+    sourceStory: localExperienceClosureGate.organizationTrainingAdminEmployeeEntrySurface
+    dependencies:
+      - organization-training-draft-source-context-runtime-contract-tdd
+      - organization-training-employee-answer-runtime-route-contract-tdd
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending local_unit_tdd UI task approved by the current 2026-06-18 user prompt for local execution only. Scope is
+      limited to organization admin and employee entry surfaces backed by local API contract clients. It must not change
+      schema/drizzle/migration files, package/lockfile, `.env*`, provider/model configuration, dev server,
+      Browser/Playwright runtime, full e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database
+      migration execution, or Cost Calibration Gate.
+    targetExperienceChain: organization-training-experience
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: legacy_explicit
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    allowedFiles:
+      - src/app/(admin)/organization-training/**
+      - src/app/(student)/organization-training/**
+      - src/features/admin/organization-training/**
+      - src/features/student/organization-training/**
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/organization-training-*.test.tsx
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - src/app/api/v1/organization-trainings/**
+      - src/server/contracts/organization-training-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/server/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - server/schema/migration changes
+      - database connection or migration execution
+      - provider/model calls or provider configuration
+      - dependency changes
+      - dev server or Browser/Playwright runtime
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_current_execution_prompt
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.tsx tests/unit/organization-training-employee-entry-surface.test.tsx
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown 'src/app/(admin)/organization-training' 'src/app/(student)/organization-training' src/features/admin/organization-training src/features/student/organization-training src/features/student/studentRuntimeApi.ts tests/unit/organization-training-admin-entry-surface.test.tsx tests/unit/organization-training-employee-entry-surface.test.tsx docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-employee-entry-surface-local-ui
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-employee-entry-surface-local-ui
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-employee-entry-surface-local-ui
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-training-admin-employee-local-full-flow-validation
+    title: Organization training admin employee local full flow validation
+    phase: organization-training-admin-employee-local-full-flow-validation
+    sourceStory: localExperienceClosureGate.organizationTrainingAdminEmployeeLocalFullFlowValidation
+    dependencies:
+      - organization-training-admin-employee-entry-surface-local-ui
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending localhost-only local_full_flow task approved by the current 2026-06-18 user prompt. This task may create
+      and run a scoped Playwright e2e flow against local dev/test runtime only. It must not read or modify `.env*`, use
+      staging/prod/cloud/deploy/payment/external-service, provider/model calls, dependency changes, PR, force-push,
+      database migration execution, or Cost Calibration Gate.
+    targetExperienceChain: organization-training-experience
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: legacy_explicit
+    taskKind: validation
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    allowedFiles:
+      - e2e/organization-training-local-full-flow.spec.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - src/app/(admin)/organization-training/**
+      - src/app/(student)/organization-training/**
+      - src/features/admin/organization-training/**
+      - src/features/student/organization-training/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - schema/drizzle/migration changes
+      - database connection or migration execution
+      - provider/model calls or provider configuration
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_current_execution_prompt
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown e2e/organization-training-local-full-flow.spec.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-employee-local-full-flow-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-employee-local-full-flow-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-employee-local-full-flow-validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    lastFailurePath: null
+    retryCount: 0
+  - id: organization-training-experience-closure-readiness-audit
+    title: Organization training experience closure readiness audit
+    phase: organization-training-experience-closure-readiness-audit
+    sourceStory: localExperienceClosureGate.organizationTrainingExperienceClosureReadinessAudit
+    dependencies:
+      - organization-training-admin-employee-local-full-flow-validation
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending docs/state audit task approved by the current 2026-06-18 user prompt. It may evaluate whether fresh local
+      full-flow evidence supports `experience_closed`, but must not claim closure if any required runtime/UI/local
+      flow evidence is absent. It must not modify product source, e2e specs, schema/drizzle/migration, package/lockfile,
+      `.env*`, provider/model, staging/prod/cloud/deploy/payment/external-service, PR, force-push, database migration
+      execution, or Cost Calibration Gate.
+    targetExperienceChain: organization-training-experience
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: local_experience_audit
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: legacy_explicit
+    taskKind: local_experience_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source changes
+      - e2e spec changes
+      - schema/drizzle/migration changes
+      - database connection or migration execution
+      - provider/model calls or provider configuration
+      - dependency changes
+      - dev server or Browser/Playwright runtime
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_current_execution_prompt
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-experience-closure-readiness-audit.md docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-experience-closure-readiness-audit.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-experience-closure-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-experience-closure-readiness-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-experience-closure-readiness-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    lastFailurePath: null
+    retryCount: 0

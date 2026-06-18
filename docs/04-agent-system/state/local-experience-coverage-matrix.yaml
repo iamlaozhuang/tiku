@@ -171,6 +171,27 @@ lastDraftSourceContextSchemaMigration:
     migrationExecution: blocked_not_run
     localCommit: closeout_approved
     localFullFlow: blocked_until_runtime_api_ui_and_approved_localhost_validation_exist
+lastOrganizationTrainingLocalExperienceChainQueueMaterialization:
+  taskId: organization-training-local-experience-chain-queue-materialization
+  materializedAt: "2026-06-18T00:10:47-07:00"
+  targetExperienceChain: organization-training-experience
+  useCaseIds:
+    - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+    - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+  decision: local_experience_chain_materialized_no_experience_closed_claim
+  nextTask: organization-training-draft-source-context-runtime-contract-tdd
+  evidence: docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+  plannedSequence:
+    - organization-training-draft-source-context-runtime-contract-tdd
+    - organization-training-admin-employee-entry-surface-local-ui
+    - organization-training-admin-employee-local-full-flow-validation
+    - organization-training-experience-closure-readiness-audit
+  boundarySummary:
+    runtimeContract: pending_first
+    entrySurface: pending_after_runtime_contract
+    localFullFlow: pending_after_entry_surfaces
+    experienceClosure: audit_only_after_full_flow
+    costCalibrationGate: blocked
 lastEmployeeAnswerRepositoryQueueMaterialization:
   taskId: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
   materializedAt: "2026-06-17T22:07:07-07:00"
@@ -466,7 +487,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
     status: local_experience_ready
     blockedGate: draft_source_context_runtime_repository_route_admin_ui_employee_routes_and_local_full_flow_not_closed
-    nextTask: seed_organization_training_draft_source_context_runtime_contract_tdd
+    nextTask: organization-training-draft-source-context-runtime-contract-tdd
   - useCaseId: UC-ADV-EMPLOYEE-TRAINING-ANSWER
     edition: advanced
     actor: employee
@@ -480,7 +501,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
     status: partial
     blockedGate: employee_answer_ui_entry_and_local_full_flow_not_closed
-    nextTask: organization-training-employee-answer-entry-surface-local-ui
+    nextTask: organization-training-admin-employee-entry-surface-local-ui
   - useCaseId: UC-ADV-ORG-ANALYTICS-SUMMARY
     edition: advanced
     actor: organization_admin
