@@ -643,10 +643,10 @@ matrix:
     uiSurface: src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
     unitEvidence: src/server/services/organization-analytics-service.test.ts; src/server/services/organization-analytics-route.test.ts; tests/unit/organization-analytics-admin-entry-surface.test.ts
     e2eEvidence: e2e/organization-analytics-local-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
     status: local_experience_ready
-    blockedGate: organization_summary_browser_runtime_full_flow_not_run
-    nextTask: organization-portal-admin-shell-entry-contract-tdd
+    blockedGate: organization_analytics_visible_scope_403185_local_full_flow_blocked
+    nextTask: organization-analytics-admin-visible-scope-local-fixture-contract-repair
   - useCaseId: UC-ADV-ORG-PORTAL-ADMIN
     edition: advanced
     actor: organization_admin

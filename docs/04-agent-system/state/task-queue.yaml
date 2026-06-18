@@ -16032,8 +16032,11 @@ tasks:
     queueSelectionMode: user_directed_recommended_sequence
     taskKind: validation
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: blocked_validation_failure
+    result: blocked_by_organization_analytics_access_denied_403185
+    claimedAt: "2026-06-18T06:53:41-07:00"
+    closedAt: "2026-06-18T07:00:49-07:00"
+    branch: codex/organization-analytics-summary-local-full-flow-validation
     capabilities:
       localFullFlowGate: approved_localhost_only
       localE2EValidation: approved_local_only_existing_specs
@@ -16095,7 +16098,8 @@ tasks:
     closeoutPolicy:
       localCommit:
         approved: true
-        message: "chore(organization-analytics): validate local full flow"
+        message: "chore(organization-analytics): record blocked local full flow"
+        approval: fresh_user_blocked_evidence_closeout_2026_06_18
       fastForwardMerge:
         approved: true
         targetBranch: master
@@ -16119,7 +16123,131 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
-    lastFailurePath: null
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    retryCount: 1
+  - id: organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    title: Organization analytics admin visible scope local fixture contract repair
+    phase: organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    sourceStory: localExperienceClosureGate.organizationAnalyticsAdminVisibleScopeLocalFixtureContractRepair
+    sourceFailureTask: organization-analytics-summary-local-full-flow-validation
+    dependencies:
+      - organization-portal-admin-experience-closure-readiness-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Recommended after `organization-analytics-summary-local-full-flow-validation` reached the analytics summary API but
+      received response code `403185`. The user explicitly approved executing this repair in the current 2026-06-18
+      prompt. Execution is limited to inspecting and repairing only the local seed admin visible organization scope
+      fixture or the scoped e2e organization selection contract, then rerunning the targeted local analytics full-flow.
+      It must not output
+      database URLs, secrets, tokens, row data, or public ID inventories; modify `.env*`, schema/drizzle/migration,
+      package/lockfiles/dependencies, provider/model configuration, staging/prod/cloud/deploy/payment/external-service
+      surfaces; create PRs; force-push; perform destructive database operations; or run Cost Calibration Gate.
+    targetExperienceChain: organization-analytics-summary
+    useCaseIds:
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    executionProfile: local_seed_fixture_tdd_plus_scoped_local_full_flow
+    evidenceMode: full
+    validationPolicy: local_unit_plus_idempotent_local_seed_plus_scoped_local_full_flow
+    queueSelectionMode: recommended_unblock_requires_explicit_approval
+    taskKind: local_fixture_contract_repair
+    moduleRunVersion: 2
+    localDockerDatabase: requires_explicit_local_dev_approval
+    destructiveLocalDockerDatabase: blocked
+    localE2EValidation: approved_local_only_existing_specs_after_task_approval
+    status: pending
+    result: null
+    claimedAt: null
+    closedAt: null
+    branch: null
+    allowedFiles:
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - e2e/organization-analytics-local-flow.spec.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - src/app/(admin)/content/organization-analytics/page.tsx
+      - src/features/admin/organization-analytics/**
+      - src/app/api/v1/organization-analytics/**
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - scripts/db/Seed-DevDatabase.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/features/**
+      - src/components/**
+      - src/hooks/**
+      - src/server/repositories/**
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-route.ts
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - schema/drizzle/migration changes
+      - drizzle-kit push
+      - destructive database operations
+      - database URL, secret, token, row data, or public ID inventory evidence output
+      - product source changes outside local seed fixture
+      - server implementation changes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - provider/model calls or provider configuration
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: not_approved_until_task_execution_is_explicitly_approved
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-analytics-admin-visible-scope-local-fixture-contract-repair -Capability localDockerDatabase -Intent use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - npm.cmd run test:e2e -- e2e/organization-analytics-local-flow.spec.ts --list
+      - npm.cmd run test:e2e -- e2e/organization-analytics-local-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-analytics-local-flow.spec.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-admin-visible-scope-local-fixture-contract-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-analytics-admin-visible-scope-local-fixture-contract-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
     retryCount: 0
   - id: module-run-v2-low-risk-experience-batch-mechanism-tuning
     title: Module Run v2 low-risk experience batch mechanism tuning

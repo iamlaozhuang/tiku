@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-portal-admin-experience-closure-readiness-audit
-updatedAt: "2026-06-18T06:51:47-07:00"
+currentPhase: organization-analytics-summary-local-full-flow-validation
+updatedAt: "2026-06-18T07:00:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -497,21 +497,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 12e44b7341722efca7dc588598a646208dc79704
-  lastKnownOriginMasterSha: 12e44b7341722efca7dc588598a646208dc79704
+  lastKnownMasterSha: e47f5ed48308d0fe0267a9d882bc6d0ac831a0de
+  lastKnownOriginMasterSha: e47f5ed48308d0fe0267a9d882bc6d0ac831a0de
 currentTask:
-  id: organization-portal-admin-experience-closure-readiness-audit
-  status: closed
-  result: pass_experience_closed_for_local_portal_shell_only
-  sourceStory: localExperienceClosureGate.organizationPortalAdminExperienceClosureReadinessAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
-  branch: codex/organization-portal-admin-experience-closure-readiness-audit
-  commitSha: 12e44b7341722efca7dc588598a646208dc79704
+  id: organization-analytics-summary-local-full-flow-validation
+  status: blocked_validation_failure
+  result: blocked_by_organization_analytics_access_denied_403185
+  sourceStory: localExperienceClosureGate.organizationAnalyticsSummaryLocalFullFlowValidation
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+  branch: codex/organization-analytics-summary-local-full-flow-validation
+  commitSha: null
   prUrl: null
-  retryCount: 0
-  lastFailurePath: null
+  retryCount: 1
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
 qualityGates:
   desired:
     - lint
@@ -849,14 +849,33 @@ localExperienceClosure:
       experienceClosure: local_only
       releaseReadiness: not_claimed
       costCalibrationGate: blocked
+  lastOrganizationAnalyticsSummaryLocalFullFlowValidation:
+    taskId: organization-analytics-summary-local-full-flow-validation
+    validatedAt: "2026-06-18T07:00:49-07:00"
+    targetExperienceChain: organization-analytics-summary
+    useCaseIds:
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    decision: blocked_validation_failure_no_experience_closed
+    nextTask: organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    evidence: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    boundarySummary:
+      focusedUnit: passed_route_and_entry_surface
+      localFullFlow: blocked_by_summary_api_code_403185
+      firstAttempt: blocked_by_next_turbopack_font_startup_timeout
+      diagnosticRerun: local_webpack_dev_server_reached_api_then_access_denied
+      experienceClosure: blocked_until_repair_and_fresh_passing_full_flow
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After `organization-portal-admin-experience-closure-readiness-audit`, the next recommended work is
-    `organization-analytics-summary-local-full-flow-validation`, followed by
-    `organization-analytics-summary-experience-closure-readiness-audit` if the scoped local full-flow passes. Keep
-    release, staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`,
-    schema/drizzle/migration, package/lockfile/dependency, destructive database operations, and Cost Calibration Gate
-    blocked unless a separate task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+    `organization-analytics-summary-local-full-flow-validation` is blocked after focused unit tests passed but the
+    scoped local full-flow reached `/api/v1/organization-analytics/summary` and returned code `403185`. The next
+    recommended work is the repair task requiring explicit approval before execution,
+    `organization-analytics-admin-visible-scope-local-fixture-contract-repair`, followed by rerunning
+    `organization-analytics-summary-local-full-flow-validation` and only then
+    `organization-analytics-summary-experience-closure-readiness-audit` if fresh full-flow evidence passes. Keep release,
+    staging/prod, provider/payment, external-service, deployment, PR, force-push, `.env*`, schema/drizzle/migration,
+    package/lockfile/dependency, destructive database operations, and Cost Calibration Gate blocked unless a separate
+    task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
