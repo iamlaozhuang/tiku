@@ -1,5 +1,129 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-provider-smoke-runner-base-url-config
+    title: AP-01 Qwen provider smoke runner base URL config
+    phase: ap-01-qwen-provider-smoke-runner-base-url-config
+    sourceStory: userApprovedQwenRunnerBaseUrlConfigNoProviderCall
+    dependencies:
+      - ap-01-qwen-provider-config-approval-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User gave fresh approval to open `ap-01-qwen-provider-smoke-runner-base-url-config` and add explicit Alibaba base
+      URL support to the provider smoke runner only. Verification is limited to dry-run, focused unit tests, lint,
+      typecheck, formatting, and mechanism gates. Codex must not read or modify `.env*`, must not execute any
+      provider/model call, must not retry Qwen, and must keep Cost Calibration Gate, staging/prod/cloud/deploy,
+      payment/external-service, dependency, schema/migration, e2e runtime, PR, push, force-push, and raw sensitive
+      evidence blocked. A fresh separate task is required before any one-request Qwen retry.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: closed
+    result: qwen_runner_base_url_config_ready_retry_blocked
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-provider-smoke-runner-base-url-config
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    nextApprovalRequired: fresh_qwen_one_request_retry_after_base_url_config
+    capabilities:
+      localUnitTest: allowed
+      dryRunProviderSmokeCommandShape: allowed_no_provider_call
+      providerConfigurationRunnerWiring: approved_local_smoke_runner_only
+      envLocalRead: blocked
+      envLocalWrite: blocked
+      envSecretOutput: blocked
+      providerCall: blocked
+      providerRetry: blocked
+      costCalibrationGate: blocked
+      productSourceChange: scoped_smoke_runner_only
+      testChange: scoped_existing_runner_unit_test_only
+      e2eSpecChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    runnerConfigBoundary:
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: alibaba
+      explicitBaseUrlCliArg: --base-url
+      intendedBaseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+      model: qwen-plus
+      providerCallDuringTask: blocked
+      dryRunAllowed: true
+      nextRetryRequiresFreshTask: true
+    blockedCapabilities:
+      - envLocalRead
+      - envFileWriteByCodex
+      - envSecretOutput
+      - providerCall
+      - providerRetry
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - productSourceOutsideSmokeRunner
+      - e2eRuntime
+      - pr
+      - push
+      - forcePush
+      - costCalibrationGate
+    allowedFiles:
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-config-approval-package.md
+      - node_modules/@ai-sdk/alibaba/dist/index.d.ts
+      - node_modules/@ai-sdk/alibaba/dist/index.mjs
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --base-url https://dashscope.aliyuncs.com/compatible-mode/v1 --max-requests 1 --timeout-ms 30000 --dry-run
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+      - npx.cmd prettier --check --ignore-unknown scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-provider-smoke-runner-base-url-config
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-provider-smoke-runner-base-url-config
   - id: ap-01-qwen-provider-config-approval-package
     title: AP-01 Qwen provider config approval package
     phase: ap-01-qwen-provider-config-approval-package

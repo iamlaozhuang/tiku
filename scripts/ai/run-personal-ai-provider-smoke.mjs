@@ -33,6 +33,7 @@ export function buildCliConfig(argv) {
   );
   const dryRunRequested = parsedArgs.has("dry-run");
   const executeRequested = parsedArgs.has("execute");
+  const baseUrl = readOptionalOption(parsedArgs, "base-url");
 
   if (!supportedProviders.includes(provider)) {
     throw new Error(`Unsupported provider: ${provider}`);
@@ -50,7 +51,7 @@ export function buildCliConfig(argv) {
     throw new Error("--timeout-ms must be between 1000 and 120000.");
   }
 
-  if (provider === "openai_compatible" && !parsedArgs.get("base-url")) {
+  if (provider === "openai_compatible" && !baseUrl) {
     throw new Error("--base-url is required for openai_compatible smoke runs.");
   }
 
@@ -62,7 +63,7 @@ export function buildCliConfig(argv) {
     maxRequests,
     maxOutputTokens: providerSmokeMaxOutputTokens,
     timeoutMs,
-    baseUrl: parsedArgs.get("base-url") ?? null,
+    baseUrl,
     providerName: parsedArgs.get("provider-name") ?? "openai_compatible",
   };
 }
@@ -75,6 +76,7 @@ export async function runProviderSmokeSandbox(config, dependencies = {}) {
     maxRequests: config.maxRequests,
     maxOutputTokens: config.maxOutputTokens,
     timeoutMs: config.timeoutMs,
+    baseUrlHost: resolveBaseUrlHost(config.baseUrl),
   };
 
   if (config.mode === "dry_run") {
@@ -225,22 +227,41 @@ function requireOption(parsedArgs, optionName) {
   return optionValue;
 }
 
+function readOptionalOption(parsedArgs, optionName) {
+  if (!parsedArgs.has(optionName)) {
+    return null;
+  }
+
+  const optionValue = parsedArgs.get(optionName);
+
+  if (!optionValue || optionValue === "true") {
+    throw new Error(`Missing required --${optionName}.`);
+  }
+
+  return optionValue;
+}
+
 function readSecretFromProcessEnv(envKey) {
   return process.env[envKey] ?? null;
 }
 
-async function createProviderModel(config) {
+export async function createProviderModel(config, dependencies = {}) {
   if (config.provider === "alibaba") {
-    const { createAlibaba } = await import("@ai-sdk/alibaba");
+    const createAlibaba =
+      dependencies.createAlibaba ??
+      (await import("@ai-sdk/alibaba")).createAlibaba;
     const providerFactory = createAlibaba({
       ...createCredentialSettings(config.providerCredential),
+      ...createBaseUrlSettings(config.baseUrl),
       includeUsage: true,
     });
 
     return providerFactory.languageModel(config.model);
   }
 
-  const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
+  const createOpenAICompatible =
+    dependencies.createOpenAICompatible ??
+    (await import("@ai-sdk/openai-compatible")).createOpenAICompatible;
   const baseURL = resolveOpenAiCompatibleBaseUrl(config);
   const providerFactory = createOpenAICompatible({
     ...createCredentialSettings(config.providerCredential),
@@ -256,8 +277,24 @@ function resolveOpenAiCompatibleBaseUrl(config) {
   return config.baseUrl ?? "";
 }
 
+function createBaseUrlSettings(baseUrl) {
+  return baseUrl ? { baseURL: baseUrl } : {};
+}
+
 function createCredentialSettings(providerCredential) {
   return Object.fromEntries([["api" + "Key", providerCredential]]);
+}
+
+function resolveBaseUrlHost(baseUrl) {
+  if (!baseUrl) {
+    return null;
+  }
+
+  try {
+    return new URL(baseUrl).host;
+  } catch {
+    return "invalid_url";
+  }
 }
 
 function summarizeUsage(usage) {

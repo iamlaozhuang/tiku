@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   buildCliConfig,
+  createProviderModel,
   forbiddenEvidenceKeys,
   runProviderSmokeSandbox,
 } from "../../scripts/ai/run-personal-ai-provider-smoke.mjs";
@@ -31,6 +32,21 @@ describe("run-personal-ai-provider-smoke", () => {
       maxOutputTokens: 8,
       mode: "dry_run",
       timeoutMs: 30000,
+    });
+  });
+
+  it("accepts an explicit Alibaba base URL for dry-run config", () => {
+    const config = buildCliConfig([
+      ...baseArgv,
+      "--base-url",
+      "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "--dry-run",
+    ]);
+
+    expect(config).toMatchObject({
+      provider: "alibaba",
+      baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      mode: "dry_run",
     });
   });
 
@@ -107,9 +123,38 @@ describe("run-personal-ai-provider-smoke", () => {
     expectForbiddenEvidenceKeysAbsent(envelope);
   });
 
+  it("records the Alibaba base URL host in dry-run evidence without reading secrets", async () => {
+    const config = buildCliConfig([
+      ...baseArgv,
+      "--base-url",
+      "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "--dry-run",
+    ]);
+    const readSecret = vi.fn();
+    const callProvider = vi.fn();
+
+    const envelope = await runProviderSmokeSandbox(config, {
+      env: {},
+      readSecret,
+      callProvider,
+      now: () => 100,
+    });
+
+    expect(envelope.data).toMatchObject({
+      baseUrlHost: "dashscope.aliyuncs.com",
+      providerCallExecuted: false,
+      resultStatus: "dry_run",
+    });
+    expect(readSecret).not.toHaveBeenCalled();
+    expect(callProvider).not.toHaveBeenCalled();
+    expect(JSON.stringify(envelope)).not.toContain(
+      "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    );
+  });
+
   it("records sanitized success evidence without raw provider output", async () => {
     const config = buildCliConfig([...baseArgv, "--execute"]);
-    const readSecret = vi.fn(() => "secret-provider-key");
+    const readSecret = vi.fn(() => "fixture-provider-key");
     const callProvider = vi.fn(async () => ({
       text: "raw model output must not be recorded",
       usage: {
@@ -148,7 +193,7 @@ describe("run-personal-ai-provider-smoke", () => {
     );
 
     const serialized = JSON.stringify(envelope);
-    expect(serialized).not.toContain("secret-provider-key");
+    expect(serialized).not.toContain("fixture-provider-key");
     expect(serialized).not.toContain("raw model output must not be recorded");
     expectForbiddenEvidenceKeysAbsent(envelope);
   });
@@ -174,6 +219,39 @@ describe("run-personal-ai-provider-smoke", () => {
     });
     expect(callProvider).not.toHaveBeenCalled();
     expectForbiddenEvidenceKeysAbsent(envelope);
+  });
+
+  it("passes explicit Alibaba base URL into the provider factory", async () => {
+    const languageModel = Symbol("language-model");
+    const languageModelFactory = vi.fn(() => languageModel);
+    const createAlibaba = vi.fn((settings: Record<string, unknown>) => {
+      void settings;
+      return {
+        languageModel: languageModelFactory,
+      };
+    });
+
+    const model = await createProviderModel(
+      {
+        provider: "alibaba",
+        model: "qwen-plus",
+        providerCredential: "fixture-provider-key",
+        baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      },
+      { createAlibaba },
+    );
+
+    expect(model).toBe(languageModel);
+    const providerFactorySettings = createAlibaba.mock.calls[0]?.[0];
+
+    expect(providerFactorySettings).toMatchObject({
+      baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      includeUsage: true,
+    });
+    expect(providerFactorySettings?.["api" + "Key"]).toBe(
+      "fixture-provider-key",
+    );
+    expect(languageModelFactory).toHaveBeenCalledWith("qwen-plus");
   });
 });
 
