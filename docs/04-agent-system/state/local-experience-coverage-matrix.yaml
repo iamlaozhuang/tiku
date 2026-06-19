@@ -516,10 +516,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
     status: release_blocked
-    blockedGate: route_integrated_provider_one_request_pass_user_visible_persistence_cost_calibration_staging_prod_blocked
-    nextTask: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+    blockedGate: user_visible_result_materialization_approved_implementation_provider_cost_calibration_staging_prod_blocked
+    nextTask: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
   - useCaseId: UC-STD-KN-RECOMMENDATION
     edition: standard
     actor: content_admin_system
@@ -600,10 +600,10 @@ matrix:
     uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
     unitEvidence: src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx; src/server/services/personal-ai-generation-*.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
     status: experience_closed
-    blockedGate: release_ready_not_implied_provider_durable_generation_cost_calibration_blocked
-    nextTask: release_gate_approval_package_required_if_release_scope_requested
+    blockedGate: user_visible_result_materialization_approved_provider_durable_generation_cost_calibration_blocked
+    nextTask: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
   - useCaseId: UC-ADV-PERSONAL-AI-PAPER-GENERATION
     edition: advanced
     actor: personal_user
@@ -614,10 +614,10 @@ matrix:
     uiSurface: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
     unitEvidence: src/server/services/personal-ai-generation-*.test.ts
     e2eEvidence: e2e/personal-ai-generation-local-request.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
     status: experience_closed
-    blockedGate: release_ready_not_implied_provider_full_generated_paper_cost_calibration_blocked
-    nextTask: release_gate_approval_package_required_if_release_scope_requested
+    blockedGate: user_visible_result_materialization_approved_provider_full_generated_paper_cost_calibration_blocked
+    nextTask: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
   - useCaseId: UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
     edition: advanced
     actor: organization_admin
