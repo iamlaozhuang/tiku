@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-10-current-checkpoint-audit-target-detailing
+currentPhase: ap-11-source-governance-change-control-detailing
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-10-current-checkpoint-audit-target-detailing
+  id: ap-11-source-governance-change-control-detailing
   status: closed
-  result: pass_l0_current_checkpoint_audit_target_package_no_source_test_e2e_repair
-  sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP10
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
-  branch: codex/ap-10-current-checkpoint-audit-target-detailing
+  result: pass_l0_source_governance_change_control_no_source_rewrite_no_sensitive_evidence
+  sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP11
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-11-source-governance-change-control-detailing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-detailing.md
+  branch: codex/ap-11-source-governance-change-control-detailing
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: ap_10_current_checkpoint_audit_target_detailing_closed
+  status: ap_11_source_governance_change_control_detailing_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: ap-10-current-checkpoint-audit-target-detailing
+  currentTaskId: ap-11-source-governance-change-control-detailing
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -3311,18 +3311,63 @@ localExperienceClosure:
       dependencyIntroduction: blocked
       rawSensitiveEvidence: blocked
       costCalibrationGate: blocked
+  currentAp11SourceGovernanceChangeControlDetailing:
+    taskId: ap-11-source-governance-change-control-detailing
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-11
+    useCaseIds:
+      - UC-AUDIT-SOURCE-GOVERNANCE
+    decision: pass_l0_source_governance_change_control_no_source_rewrite_no_sensitive_evidence
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-detailing.md
+    boundarySummary:
+      validation: pass_docs_state_governance_change_control
+      packageMaterialization: AP11_source_governance_change_control_detailing
+      matrixStatus: release_blocked
+      sourceGovernanceRewriteExecuted: false
+      sensitiveEvidenceCollected: false
+      exactFutureFreshApprovalRequired: true
+      nextRecommendedTask: manual-fresh-approval-review-for-blocked-l1-l2-l3-items
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      productSourceChanged: false
+      requirementSourceChanged: false
+      adrChanged: false
+      standardChanged: false
+      testSourceChanged: false
+      e2eSpecChanged: false
+      scriptChanged: false
+      schemaMigrationChanged: false
+      sourceGovernanceRewrite: blocked
+      formalAdoption: blocked
+      sourceRequirementChange: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      envSecretOutput: blocked
+      databaseUrlRead: blocked
+      databaseUrlOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      providerModelCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      rawSensitiveEvidence: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-10 L0 current checkpoint audit target detailing is current and keeps UC-GATE-CURRENT-CHECKPOINT release-blocked
-    without source/test/e2e repair. The fastest safe next task is `ap-11-source-governance-change-control-detailing` as
-    an L0 source governance change-control package. L0 docs/state governance can be batched; L1/L2 local-only work
-    requires exact allowed files, commands, redaction evidence, rollback, and stop conditions; L3
-    provider/cost/staging/prod/deploy/payment/OCR/export/schema/dependency/source/test/high-risk work remains blocked
-    until fresh approval. Raw prompt/response/model output/provider payload/error/key/token/full database URL remain
+    AP-11 L0 source governance change-control detailing is current and keeps UC-AUDIT-SOURCE-GOVERNANCE
+    release-blocked without source governance rewrite or sensitive evidence collection. AP-02 through AP-11 L0 detailing
+    is complete for the blocked-use-case acceleration packet. Stop next and present the L1/L2/L3 fresh approval choices;
+    do not execute provider/cost/staging/prod/deploy/payment/OCR/export/schema/dependency/source/test/high-risk work
+    without fresh approval. Raw prompt/response/model output/provider payload/error/key/token/full database URL remain
     barred from evidence and persistence. Additional provider calls, retry, streaming, Cost Calibration Gate,
     staging/prod/cloud/deploy, payment, external-service, PR, force-push, dependency, schema/migration,
     source/test/script/e2e changes, Browser/Playwright runtime unless separately approved, destructive DB work, DB reads,
-    DB writes, raw SQL, and formal adoption remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+    DB writes, raw SQL, formal adoption, source governance rewrite, and sensitive evidence collection remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md

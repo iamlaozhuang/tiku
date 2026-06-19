@@ -263,6 +263,26 @@ lastAp10CurrentCheckpointAuditTargetDetailing:
     - database_read_write
     - env_secret
     - raw_sensitive_evidence
+lastAp11SourceGovernanceChangeControlDetailing:
+  taskId: ap-11-source-governance-change-control-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-AUDIT-SOURCE-GOVERNANCE
+  decision: pass_l0_source_governance_change_control_keep_rewrite_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-detailing.md
+  matrixStatus: release_blocked
+  sourceGovernanceRewriteExecuted: false
+  nextRecommendedTask: manual-fresh-approval-review-for-blocked-l1-l2-l3-items
+  blockedGates:
+    - source_governance_rewrite
+    - source_requirement_change
+    - formal_adoption
+    - sensitive_evidence
+    - source_test_e2e_change
+    - database_read_write
+    - env_secret
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -1045,7 +1065,7 @@ matrix:
     uiSurface: not_required
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
     status: release_blocked
-    blockedGate: audit_artifact_only
-    nextTask: ap-11-source-governance-change-approval-package
+    blockedGate: source_governance_rewrite_sensitive_evidence_requires_fresh_approval
+    nextTask: ap-11-source-governance-change-control-fresh-approval-required
