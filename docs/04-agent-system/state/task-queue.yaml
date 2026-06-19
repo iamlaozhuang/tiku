@@ -1,5 +1,161 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    title: AP-02 ops auth quota cost calibration L1/L2 exact-scope package
+    phase: ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    sourceStory: userApprovedAp02L1L2ExactScopeDocsOnlyPackage
+    dependencies:
+      - ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
+      - ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved continuing the recommended AP-02 route after the AP-02 fresh-approval-required seed. This task may
+      create one docs-only AP-02 L1/L2 exact-scope package and update project-state, task-queue, and local-experience
+      coverage matrix. It may name future exact source/test files and commands for review, but it must not execute L1/L2
+      repair, provider/model calls, Cost Calibration Gate, payment/external-service, DB read/write, `.env*`, deploy,
+      schema/migration, dependency/package/lockfile, PR, force push, or sensitive evidence work.
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-02-L1-L2-EXACT-SCOPE
+    useCaseIds:
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: docs_state_l1_l2_exact_scope_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_approved_followup_seed
+    status: closed
+    result: pass_l0_ap02_l1_l2_exact_scope_package_no_execution
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    nextRecommendedTask: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required
+    nextApprovalRequired: user_fresh_approval_before_any_l1_l2_or_l3_execution
+    futureL1L2CandidateScope:
+      candidateAllowedFiles:
+        - src/server/services/ops-governance-authorization-quota-summary-service.ts
+        - src/server/services/ops-governance-authorization-quota-summary-service.test.ts
+        - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+        - docs/04-agent-system/state/project-state.yaml
+        - docs/04-agent-system/state/task-queue.yaml
+        - docs/05-execution-logs/task-plans/<future-ap02-l1-l2-task>.md
+        - docs/05-execution-logs/evidence/<future-ap02-l1-l2-task>.md
+        - docs/05-execution-logs/audits-reviews/<future-ap02-l1-l2-task>.md
+      candidateCommands:
+        - npm.cmd run test:unit -- src/server/services/ops-governance-authorization-quota-summary-service.test.ts
+        - npm.cmd run lint
+        - npm.cmd run typecheck
+        - git diff --check
+      l3StillBlocked:
+        - providerModelCall
+        - costCalibrationGate
+        - paymentExternalService
+        - databaseRead
+        - databaseWrite
+        - envLocalRead
+        - stagingProdDeploy
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      freshApprovalTextMaterialization: approved
+      futureExactScopeDrafting: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      currentSourceChange: blocked
+      currentTestChange: blocked
+      sourceTestE2eScriptChange: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      providerModelCall: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      rawSensitiveEvidence: blocked
+    blockedCapabilities:
+      - currentSourceChange
+      - currentTestChange
+      - sourceTestE2eScriptChange
+      - providerModelCall
+      - costCalibrationGate
+      - paymentExternalService
+      - envLocalRead
+      - envSecretOutput
+      - databaseRead
+      - databaseWrite
+      - schemaMigration
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - rawSensitiveEvidence
+      - pr
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-fresh-approval-required.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+
   - id: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
     title: AP-02 ops auth quota cost calibration fresh approval required seed
     phase: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
