@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: blocked-gates-approval-package-materialization
-updatedAt: "2026-06-18T19:21:12-07:00"
+currentPhase: local-machine-phase-0-1-validation
+updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-ai-scoring-provider-execution-approval-package
+  id: local-machine-phase-0-1-validation
   status: closed
-  result: minimum_approval_package_ready_execution_blocked
-  sourceStory: userApprovalPackageSeed.AP01
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
-  branch: codex/ap-serial-approval-package-execution
+  result: blocked_by_local_tiku_migration_ledger_drift_and_unit_failures
+  sourceStory: userDirectedLocalMachinePhase01Validation
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-phase-0-1-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-phase-0-1-validation.md
+  branch: codex/local-machine-phase-0-1-validation
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: null
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
 qualityGates:
   desired:
     - lint
