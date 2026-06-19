@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-in-app-ai-runtime-bridge-implementation
+currentPhase: ap-01-qwen-in-app-ai-one-request-execution-approval
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-in-app-ai-runtime-bridge-implementation
+  id: ap-01-qwen-in-app-ai-one-request-execution-approval
   status: closed
-  result: pass_default_blocked_runtime_bridge_provider_call_false_env_secret_false
-  sourceStory: userRequestedQwenInAppAiRuntimeBridgeImplementation
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
-  branch: codex/ap-01-qwen-in-app-ai-runtime-bridge-implementation
+  result: pass_docs_state_one_request_execution_approval_no_call
+  sourceStory: userFreshApprovedQwenInAppAiOneRequestExecutionApproval
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+  branch: codex/ap-01-qwen-in-app-ai-one-request-execution-approval
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1979,15 +1979,67 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenInAppAiOneRequestExecutionApproval:
+    taskId: ap-01-qwen-in-app-ai-one-request-execution-approval
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: pass_docs_state_one_request_execution_approval_no_call
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+    boundarySummary:
+      validation: pass_docs_state_approval_no_env_read_no_provider_call
+      packageMaterialization: AP01_qwen_in_app_ai_one_request_execution_approval
+      matrixStatus: release_blocked
+      approvedNextTask: ap-01-qwen-in-app-ai-one-request-execution
+      candidateUiRoute: /ai-generation
+      candidateSubmitRoute: POST /api/v1/personal-ai-generation-requests
+      candidateRequestMode: local_browser_experience
+      runtimeBridgePrecondition: pass_default_blocked_runtime_bridge_provider_call_false_env_secret_false
+      provider: openai_compatible
+      providerName: alibaba-qwen
+      model: qwen3.7-max
+      baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+      baseUrlHost: dashscope.aliyuncs.com
+      envKeyAlias: ALIBABA_API_KEY
+      envLocalReadThisTask: false
+      providerCallExecutedThisTask: false
+      approvedNextProviderRequestCount: 1
+      nextMaxRequests: 1
+      nextMaxRetries: 0
+      nextTimeoutMs: 30000
+      nextMaxOutputTokens: 32
+      nextMaxSpendUsd: 0.10
+      nextStreaming: blocked
+      nextFormalCostCalibrationGate: blocked
+      stopIfTotalTokensGreaterThan: 2000
+      stopIfReasoningTokensGreaterThan: 1800
+      sampleMaterialScope: local_dev_fixture_like_single_question_only
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawErrorText: blocked
+      rawModelOutput: blocked
+      providerPayload: blocked
+      rawQuestionAnswerAnalysisMaterial: blocked
+      providerRetry: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen in-app AI runtime bridge implementation is complete with a default-blocked `runtimeBridge` field. Focused
-    unit validation passed with providerCallExecuted=false, envSecretAccessed=false, providerConfigurationRead=false,
-    retry/streaming/cost calibration disabled, and client request body unable to enable the controlled runner. The next
-    recommended task is `ap-01-qwen-in-app-ai-one-request-execution-approval`, which must be a fresh approval for exactly
-    one real in-app Qwen request if the user wants to proceed. Keep real provider execution, additional provider calls,
-    Cost Calibration Gate, staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive
-    evidence, dependency, schema/migration, and `.env*` writes blocked until that approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
+    AP-01 Qwen in-app AI one-request execution approval is materialized. The next recommended task is
+    `ap-01-qwen-in-app-ai-one-request-execution`, limited to exactly one local in-app Qwen request using
+    `openai_compatible` / `alibaba-qwen` / `qwen3.7-max`, base URL
+    `https://dashscope.aliyuncs.com/compatible-mode/v1`, `ALIBABA_API_KEY` alias only, maxRequests=1, maxRetries=0,
+    timeoutMs=30000, maxOutputTokens=32, maxSpendUsd=0.10, streaming blocked, and redacted evidence only. Keep additional
+    provider calls, retry, Cost Calibration Gate, staging/prod/cloud/deploy, payment, external-service, PR, push,
+    force-push, raw sensitive evidence, dependency, schema/migration, and `.env*` writes blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
