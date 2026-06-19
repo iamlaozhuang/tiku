@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-route-integrated-provider-one-request-execution-approval
+currentPhase: ap-01-qwen-route-integrated-provider-one-request-execution
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-route-integrated-provider-one-request-execution-approval
+  id: ap-01-qwen-route-integrated-provider-one-request-execution
   status: closed
-  result: pass_docs_state_route_integrated_one_request_execution_approval_no_call
-  sourceStory: userFreshApprovedQwenRouteIntegratedProviderOneRequestExecutionApproval
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
-  branch: codex/ap-01-qwen-route-integrated-provider-one-request-execution-approval
+  result: pass_route_integrated_one_request_qwen_provider_succeeded_redacted
+  sourceStory: userApprovedNextTaskAfterQwenRouteIntegratedOneRequestApproval
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+  branch: codex/ap-01-qwen-route-integrated-provider-one-request-execution
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -2227,15 +2227,73 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenRouteIntegratedProviderOneRequestExecution:
+    taskId: ap-01-qwen-route-integrated-provider-one-request-execution
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: pass_route_integrated_one_request_qwen_provider_succeeded_redacted
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+    boundarySummary:
+      validation: pass_one_request_route_integrated_qwen_provider_redacted
+      packageMaterialization: AP01_qwen_route_integrated_provider_one_request_execution
+      matrixStatus: release_blocked
+      targetRouteService: src/server/services/personal-ai-generation-request-route.ts
+      targetSubmitRoute: POST /api/v1/personal-ai-generation-requests
+      targetMode: local_browser_experience
+      provider: openai_compatible
+      providerName: alibaba-qwen
+      model: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      envKeyAlias: ALIBABA_API_KEY
+      maxRequests: 1
+      maxRetries: 0
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      maxSpendUsd: 0.10
+      providerCallExecuted: true
+      envLocalRead: true
+      providerConfigurationRead: true
+      providerRetryAttempted: false
+      providerStreamingEnabled: false
+      costCalibrationExecuted: false
+      requestCount: 1
+      resultStatus: pass
+      failureCategory: null
+      durationMs: 9796
+      usageSummary:
+        inputTokens: 26
+        outputTokens: 482
+        totalTokens: 508
+        reasoningTokens: 476
+        cachedInputTokens: 0
+      redactionStatus: passed
+      nextRecommendedTask: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawErrorText: blocked
+      rawModelOutput: blocked
+      providerPayload: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen route-integrated provider one-request execution approval is materialized. The next recommended task is
-    `ap-01-qwen-route-integrated-provider-one-request-execution`, scoped to executing exactly one real local
-    route-integrated Qwen request through the server-side controlled path with qwen3.7-max, Beijing compatible base URL,
-    maxRequests=1, maxRetries=0, maxOutputTokens=8, timeoutMs=30000, and maxSpendUsd=0.10. Evidence must remain sanitized
-    and must not include raw prompt, raw response, raw error, key, provider payload, or `.env*` content. Additional calls,
-    retry, streaming, Cost Calibration Gate, staging/prod/cloud/deploy, payment, external-service, PR, push, force-push,
-    dependency, and schema/migration remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
+    AP-01 Qwen route-integrated provider one-request execution passed with exactly one real local route-integrated Qwen
+    request through the server-side controlled path. The next recommended task is
+    `ap-01-qwen-route-integrated-user-visible-result-materialization-approval`, a docs-only approval package to define
+    whether and how provider output may become user-visible or persisted while preserving prompt/response/payload
+    redaction. Additional calls, retry, streaming, Cost Calibration Gate, staging/prod/cloud/deploy, payment,
+    external-service, PR, push, force-push, dependency, and schema/migration remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
