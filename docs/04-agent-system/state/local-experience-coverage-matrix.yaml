@@ -56,6 +56,34 @@ currentFactRefresh:
     future/non-goal rows remain `release_blocked` and are not local-experience closed. Provider, vector provider,
     staging/prod, payment, external-service, OCR/parser, export/file generation, dependency, schema, env/secret, and
     Cost Calibration release gates remain blocked.
+lastBlockedUseCaseAccelerationGovernancePacket:
+  taskId: blocked-use-case-acceleration-governance-packet
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  evidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+  decision: refresh_ap02_to_ap11_acceleration_boundaries_keep_release_blocked
+  ap01Status: local_experience_closed_release_blocked
+  ap02ToAp11Status: release_blocked
+  nextRecommendedTask: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+  accelerationTiers:
+    l0DocsStateGovernance: preapproved_for_followup_packets
+    l1LocalLowRiskSourceUnit: requires_exact_allowed_files_and_commands
+    l2LocalhostRuntimeOrLocalDb: requires_localhost_or_local_db_boundary
+    l3ExternalCostReleaseGate: blocked_requires_fresh_approval
+  blockedGates:
+    - provider_model_call
+    - env_secret
+    - cost_calibration_gate
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - ocr_parser_execution
+    - export_file_generation_execution
+    - schema_migration
+    - dependency_package_lockfile_change
+    - source_test_e2e_script_change_without_task_scope
+    - destructive_database_operation
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -684,7 +712,7 @@ matrix:
     uiSurface: existing_admin_ops_surfaces
     unitEvidence: src/server/services/ops-governance-authorization-quota-summary-service.test.ts
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
     nextTask: ap-02-ops-auth-quota-cost-calibration-approval-package
@@ -726,7 +754,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
     nextTask: ap-04-standard-ai-generation-scope-change-approval-package
@@ -740,7 +768,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
     nextTask: ap-05-standard-org-self-service-scope-change-approval-package
@@ -754,7 +782,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: payment_external_service_env_secret_deploy_blocked
     nextTask: ap-06-online-payment-approval-package
@@ -768,7 +796,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
     nextTask: ap-07-ocr-auto-import-approval-package
@@ -782,7 +810,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: export_file_generation_external_service_privacy_deploy_blocked
     nextTask: ap-08-org-data-export-approval-package
@@ -796,7 +824,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: audit_artifact_only
     nextTask: ap-09-runtime-capability-list-approval-package
@@ -810,7 +838,7 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
     nextTask: ap-03-provider-staging-execution-approval-package
@@ -824,7 +852,7 @@ matrix:
     uiSurface: audit_only
     unitEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: audit_reference_only
     nextTask: ap-10-current-checkpoint-audit-repair-approval-package
@@ -838,7 +866,7 @@ matrix:
     uiSurface: not_required
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
     status: release_blocked
     blockedGate: audit_artifact_only
     nextTask: ap-11-source-governance-change-approval-package

@@ -1,5 +1,182 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: blocked-use-case-acceleration-governance-packet
+    title: Blocked use case acceleration governance packet
+    phase: blocked-use-case-acceleration-governance-packet
+    sourceStory: userRequestedBlockedUseCaseAccelerationPackage
+    dependencies:
+      - ap-01-qwen-local-experience-merge-push-cleanup
+      - blocked-gates-approval-package-materialization
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested executing the recommended acceleration package for the blocked use cases. This task may refresh
+      AP-02 through AP-11 docs/state/governance approval-package boundaries, summarize AP-01 as locally closed but
+      release-blocked, update project-state, task-queue, and coverage matrix anchors, run local docs/state gates, create
+      a local commit, fast-forward merge to master, push origin/master, and clean the merged short branch. It must not
+      read `.env*`, execute provider/model calls, read/write DB data, modify product source/tests/e2e/scripts/schema/
+      migrations/package files/lockfiles, run Browser/Playwright, create a PR, force push, deploy, execute payment/OCR/
+      export/external-service work, perform formal adoption, or open Cost Calibration Gate.
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageIds:
+      - AP-01
+      - AP-02
+      - AP-03
+      - AP-04
+      - AP-05
+      - AP-06
+      - AP-07
+      - AP-08
+      - AP-09
+      - AP-10
+      - AP-11
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-OPS-AUTH-QUOTA
+      - UC-GATE-PROVIDER-STAGING-EXECUTION
+      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+      - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+      - UC-FUTURE-ONLINE-PAYMENT
+      - UC-FUTURE-OCR-AUTO-IMPORT
+      - UC-FUTURE-ORG-DATA-EXPORT
+      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+      - UC-GATE-CURRENT-CHECKPOINT
+      - UC-AUDIT-SOURCE-GOVERNANCE
+    taskKind: docs_state_acceleration_packet
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_packet
+    status: closed
+    result: pass_docs_state_blocked_use_case_acceleration_packet
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/blocked-use-case-acceleration-governance-packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    nextRecommendedTask: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    accelerationModel:
+      l0DocsStateGovernance: preapproved_for_followup_packets
+      l1LocalLowRiskSourceUnit: allowed_only_when_exact_allowed_files_and_commands_are_declared
+      l2LocalhostRuntimeOrLocalDb: allowed_only_when_localhost_or_local_db_boundary_is_declared
+      l3ExternalCostReleaseGate: blocked_requires_fresh_approval
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      productSourceChange: blocked
+      testChange: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      scriptChange: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      providerCall: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      destructiveDatabaseOperation: blocked
+      rawSql: blocked
+      paymentExternalService: blocked
+      stagingProdDeploy: blocked
+      formalAdoption: blocked
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - envLocalRead
+      - envSecretOutput
+      - envFileWriteByCodex
+      - databaseUrlRead
+      - databaseUrlOutput
+      - databaseRead
+      - databaseWrite
+      - destructiveDatabaseOperation
+      - rawSql
+      - providerCall
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeExecution
+      - costCalibrationGate
+      - productSourceChange
+      - testChange
+      - scriptChange
+      - e2eRuntime
+      - browserPlaywrightRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - rawSensitiveEvidence
+      - formalAdoption
+      - pr
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-local-experience-closeout-audit.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-local-experience-merge-push-cleanup.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId blocked-use-case-acceleration-governance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId blocked-use-case-acceleration-governance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId blocked-use-case-acceleration-governance-packet
+
   - id: ap-01-qwen-local-experience-merge-push-cleanup
     title: AP-01 Qwen local experience merge push cleanup
     phase: ap-01-qwen-local-experience-merge-push-cleanup
@@ -25422,9 +25599,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_next_L3_blocked
+    nextAcceleratedTask: ap-02-ops-auth-quota-cost-calibration-approval-detailing
     nextApprovalRequired: quota_unit_ledger_cost_source_measurement_scope_and_redacted_evidence
     blockedCapabilities:
       - providerCall
@@ -25443,9 +25622,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_next_L3_blocked
+    nextAcceleratedTask: ap-03-provider-staging-execution-approval-detailing
     nextApprovalRequired: staging_resource_provider_ceiling_command_list_rollback_owner_acceptance
     blockedCapabilities:
       - providerCall
@@ -25465,9 +25646,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_product_decision_next_L3_blocked
+    nextAcceleratedTask: ap-04-standard-ai-generation-scope-decision-detailing
     nextApprovalRequired: product_scope_change_provider_env_quota_cost_formal_adoption
     blockedCapabilities:
       - productSourceChange
@@ -25486,9 +25669,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_product_privacy_decision_next_L3_blocked
+    nextAcceleratedTask: ap-05-standard-org-self-service-scope-decision-detailing
     nextApprovalRequired: product_scope_change_privacy_schema_api_ui_deploy_data_boundary
     blockedCapabilities:
       - productSourceChange
@@ -25507,9 +25692,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_payment_decision_next_L3_blocked
+    nextAcceleratedTask: ap-06-online-payment-provider-boundary-detailing
     nextApprovalRequired: payment_provider_refund_invoice_settlement_reconciliation_env_deploy
     blockedCapabilities:
       - paymentExternalService
@@ -25528,9 +25715,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_ocr_boundary_next_L3_blocked
+    nextAcceleratedTask: ap-07-ocr-auto-import-provider-boundary-detailing
     nextApprovalRequired: ocr_parser_provider_storage_schema_dependency_import_rollback
     blockedCapabilities:
       - providerCall
@@ -25549,9 +25738,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_export_boundary_next_L3_blocked
+    nextAcceleratedTask: ap-08-org-data-export-boundary-detailing
     nextApprovalRequired: export_format_file_generation_download_privacy_permission_audit_deploy
     blockedCapabilities:
       - productSourceChange
@@ -25570,9 +25761,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_audit_inventory_next_L1_blocked_until_files_named
+    nextAcceleratedTask: ap-09-runtime-capability-list-inventory-detailing
     nextApprovalRequired: capability_model_api_ui_data_model_allowed_files_validation_rollback
     blockedCapabilities:
       - productSourceChange
@@ -25590,9 +25783,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_audit_target_next_L1_blocked_until_files_named
+    nextAcceleratedTask: ap-10-current-checkpoint-audit-target-detailing
     nextApprovalRequired: exact_audit_target_allowed_source_test_e2e_files_validation_stop_conditions
     blockedCapabilities:
       - productSourceChange
@@ -25611,9 +25806,11 @@ tasks:
     moduleRunVersion: 2
     status: blocked
     result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    accelerationTier: L0_governance_policy_next_L3_blocked
+    nextAcceleratedTask: ap-11-source-governance-change-control-detailing
     nextApprovalRequired: source_ids_catalog_matrix_rows_requirement_change_rules_blocked_gates
     blockedCapabilities:
       - productSourceChange
