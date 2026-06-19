@@ -1,5 +1,137 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-04-standard-ai-generation-scope-decision-detailing
+    title: AP-04 standard AI generation scope decision detailing
+    phase: ap-04-standard-ai-generation-scope-decision-detailing
+    sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP04
+    dependencies:
+      - ap-09-runtime-capability-list-inventory-detailing
+      - blocked-use-case-acceleration-governance-packet
+    sourceSeedTask: ap-04-standard-ai-generation-scope-change-approval-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved L0 docs/state/governance decision detailing for AP-04 in the current 2026-06-19 prompt. This task
+      may create AP-04 task plan/evidence/audit files, update project-state, task-queue, and local-experience coverage
+      matrix, and document product-scope options for standard edition AI generation. It must not adopt a product scope
+      change, edit source/tests/e2e/scripts/schema/migrations/package files/lockfiles, call providers, access DB data,
+      open Cost Calibration Gate, deploy, perform formal adoption, create a PR, force push, or emit sensitive evidence.
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-04
+    useCaseIds:
+      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    taskKind: docs_state_product_scope_decision
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_packet
+    status: closed
+    result: pass_l0_product_scope_decision_options_no_scope_change_no_source_no_provider
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-04-standard-ai-generation-scope-decision-detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    nextRecommendedTask: ap-05-standard-org-self-service-scope-decision-detailing
+    nextApprovalRequired: ap04_product_scope_change_requires_explicit_user_choice_and_fresh_approval
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      productScopeChange: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      scriptChange: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      providerCall: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      formalAdoption: blocked
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - productScopeChange
+      - productSourceChange
+      - providerCall
+      - envLocalRead
+      - envSecretOutput
+      - databaseRead
+      - databaseWrite
+      - sourceTestE2eScriptChange
+      - schemaMigration
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+      - formalAdoption
+      - rawSensitiveEvidence
+      - pr
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-04-standard-ai-generation-scope-decision-detailing
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-04-standard-ai-generation-scope-decision-detailing
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-04-standard-ai-generation-scope-decision-detailing
+
   - id: ap-09-runtime-capability-list-inventory-detailing
     title: AP-09 runtime capability list inventory detailing
     phase: ap-09-runtime-capability-list-inventory-detailing
