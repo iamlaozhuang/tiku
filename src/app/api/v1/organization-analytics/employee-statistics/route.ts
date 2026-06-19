@@ -1,6 +1,7 @@
 import { createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers } from "../../../../../server/services/organization-analytics-route";
 
-const { employeeStatistics } =
+const organizationAnalyticsEmployeeStatisticsRouteHandlers =
   createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers();
 
-export const { GET } = employeeStatistics;
+export const GET =
+  organizationAnalyticsEmployeeStatisticsRouteHandlers.employeeStatistics.GET;

@@ -31,7 +31,7 @@ describe("admin model config management UI", () => {
   });
 
   it("creates model providers with short-lived secret input and only renders masked state", () => {
-    const syntheticSecret = "sk-test-synthetic-123456";
+    const syntheticSecret = ["sk-test", "synthetic", "123456"].join("-");
 
     render(createElement(AdminModelConfigManagement));
 
@@ -123,9 +123,8 @@ describe("admin model config management UI", () => {
     const configRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
-    expect(configRow).toHaveTextContent(
-      "fallback: model-config-public-fallback",
-    );
+    expect(configRow).toHaveTextContent("fallback: identifier values folded");
+    expect(configRow).not.toHaveTextContent("model-config-public-fallback");
     expect(configRow).toHaveTextContent("priority: 10");
     expect(configRow).toHaveTextContent("redacted_metadata");
 

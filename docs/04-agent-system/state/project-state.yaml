@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-machine-fresh-db-phase-1-validation-rerun
+currentPhase: local-machine-unit-failure-repair-before-full-phase-1
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: local-machine-fresh-db-phase-1-validation-rerun
+  id: local-machine-unit-failure-repair-before-full-phase-1
   status: closed
-  result: blocked_by_stable_unit_failures_after_fresh_db_validation
-  sourceStory: localMachinePhase01ValidationFollowUp
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
-  branch: codex/local-machine-fresh-db-phase-1-validation-rerun
+  result: passed_full_phase_1_after_unit_repairs
+  sourceStory: localMachineFreshDbPhase1ValidationRerunFollowUp
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+  branch: codex/local-machine-phase-1-unit-repair-and-rerun
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint
@@ -524,13 +524,13 @@ qualityGates:
     - unit
     - build
   lastRun:
-    date: "2026-06-18"
-    readiness: pass_personal_learning_ai_local_experience_packet
+    date: "2026-06-19"
+    readiness: pass_local_machine_unit_repair_fresh_db_phase_1_validation
     lint: pass
     typecheck: pass
-    unit: pass_personal_learning_ai_focused_unit_32_files_225_tests
-    build: skipped_batch_175_no_env_secret_access
-    e2e: pass_personal_learning_ai_existing_local_e2e_13_tests
+    unit: pass_full_unit_286_files_1203_tests
+    build: pass_next_build
+    e2e: pass_full_e2e_31_tests
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -1164,10 +1164,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 `ap-01-ai-scoring-provider-execution-approval-package` has a minimum approval package and remains blocked
-    waiting for task-specific fresh approval with exact provider/model target, allowed files, commands, rollback,
-    request/cost ceilings, and redaction evidence boundary. Do not execute provider/model calls or continue AP-02 from
-    this run. Keep product source, tests/e2e specs, `.env*`, schema/drizzle/migration, package/lockfile/dependency,
-    provider/model, payment, staging/prod/cloud/deploy, external-service, PR, force-push, destructive database
-    operations, raw sensitive evidence, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    Local machine phase 1 now passes on a fresh disposable local dev database after repairing the two stable unit
+    failures. Next recommended work is an approval-package selection decision: either prepare AP-01 real provider/model
+    smoke execution with exact provider/model, route/files, request and cost ceilings, rollback, and redaction
+    requirements, or keep provider gates blocked and continue local-only product polish. Keep dependency, schema,
+    migration, `.env*`, staging/prod/cloud/deploy, payment, external-service, PR, force-push, raw sensitive evidence,
+    and Cost Calibration Gate blocked unless a fresh task approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
