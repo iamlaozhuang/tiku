@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-machine-phase-0-1-validation
+currentPhase: local-machine-fresh-db-phase-1-validation-rerun
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,18 +500,18 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: local-machine-phase-0-1-validation
+  id: local-machine-fresh-db-phase-1-validation-rerun
   status: closed
-  result: blocked_by_local_tiku_migration_ledger_drift_and_unit_failures
-  sourceStory: userDirectedLocalMachinePhase01Validation
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-phase-0-1-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-phase-0-1-validation.md
-  branch: codex/local-machine-phase-0-1-validation
+  result: blocked_by_stable_unit_failures_after_fresh_db_validation
+  sourceStory: localMachinePhase01ValidationFollowUp
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+  branch: codex/local-machine-fresh-db-phase-1-validation-rerun
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
 qualityGates:
   desired:
     - lint

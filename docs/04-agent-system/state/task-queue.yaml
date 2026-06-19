@@ -1,5 +1,179 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: local-machine-fresh-db-phase-1-validation-rerun
+    title: Local machine fresh DB phase 1 validation rerun
+    phase: local-machine-fresh-db-phase-1-validation-rerun
+    sourceStory: localMachinePhase01ValidationFollowUp
+    dependencies:
+      - local-machine-phase-0-1-validation
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested a new task for `local-machine-fresh-db-phase-1-validation-rerun` after the prior local
+      phase 0 + phase 1 validation was blocked by the existing `tiku` database migration ledger drift. Scope is limited
+      to creating a fresh disposable local dev database inside the existing Docker `tiku-postgres` service, running
+      reviewed existing Drizzle migrations through `drizzle-kit migrate` with a process-scoped redacted `DATABASE_URL`,
+      running existing dev seed and validation data prep against that same fresh local database, running full local
+      lint/typecheck/unit/e2e/build validation, recording redacted evidence, docs/state/evidence/audit updates, and one
+      local commit. The task must not modify `.env*`, product source, test source, schema, migration files, scripts,
+      package files, or lockfiles. It must not repair the existing `tiku` migration ledger, run `drizzle-kit push`, run
+      raw SQL migration repair, call real providers, touch staging/prod/cloud/deploy/payment/external services, push,
+      merge, create a PR, force-push, or execute Cost Calibration Gate work.
+    targetExperienceChain: local-machine-validation-baseline
+    useCaseIds:
+      - UC-GATE-CURRENT-CHECKPOINT
+    executionProfile: local_fresh_db_full_validation
+    evidenceMode: full_redacted
+    validationPolicy: local_fresh_db_phase_1_full_validation
+    queueSelectionMode: user_directed_followup_task
+    taskKind: validation
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_by_stable_unit_failures_after_fresh_db_validation
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/local-machine-fresh-db-phase-1-validation-rerun
+    capabilities:
+      localDockerDatabase: approved_localhost_only
+      freshLocalDatabaseCreate: approved_create_new_disposable_local_dev_database
+      localEnvRead: approved_secret_safe_runtime_only_no_value_output
+      processScopedDatabaseUrl: approved_redacted_fresh_local_dev_only
+      localSchemaMigrationExecution: approved_existing_drizzle_migrate_local_dev_only
+      localDevSeed: approved_existing_seed_local_dev_only
+      localE2EValidation: approved_full_local_suite_for_this_task
+      localBuild: approved_local_only
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      sourceChange: blocked
+      testSourceChange: blocked
+      stagingProdCloudDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    freshLocalDatabase:
+      databaseAlias: tiku_fresh_phase1_202606182307
+      targetHostClass: loopback_docker_compose
+      secretHandling: process_scoped_database_url_not_recorded
+      destructiveOperation: none
+      existingTikuLedgerRepair: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/fresh-local-dev-db-validation-playbook.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
+      - compose.yaml
+      - drizzle.config.ts
+      - package.json
+      - playwright.config.ts
+      - scripts/db/Seed-DevDatabase.ps1
+      - scripts/local/Invoke-ValidationDataPrep.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - rawfiles/**
+      - .runtime/**
+      - .worktrees/**
+    blockedGates:
+      - product source changes
+      - test source changes
+      - schema/drizzle/migration file changes
+      - dependency/package/lockfile changes
+      - existing `tiku` migration ledger repair
+      - raw SQL migration repair or `drizzle-kit push`
+      - destructive database operations against existing databases
+      - real provider/model calls or provider configuration
+      - staging/prod/cloud/deploy work
+      - payment or external-service work
+      - "`.env*` changes, copies, or value output"
+      - PR creation, merge, push, or force-push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "chore(local): rerun phase 1 on fresh db"
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - git status --short --branch
+      - docker compose up -d tiku-postgres
+      - docker compose exec -T tiku-postgres createdb -U tiku tiku_fresh_phase1_202606182307
+      - npx.cmd drizzle-kit migrate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\local\Invoke-ValidationDataPrep.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-machine-fresh-db-phase-1-validation-rerun
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-machine-fresh-db-phase-1-validation-rerun -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: git status --short --branch
+      - phase: post_edit
+        command: docker compose up -d tiku-postgres
+      - phase: post_edit
+        command: docker compose exec -T tiku-postgres createdb -U tiku tiku_fresh_phase1_202606182307
+      - phase: post_edit
+        command: npx.cmd drizzle-kit migrate
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\local\Invoke-ValidationDataPrep.ps1
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run test:e2e
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-machine-fresh-db-phase-1-validation-rerun
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-machine-fresh-db-phase-1-validation-rerun -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    retryCount: 0
   - id: local-machine-phase-0-1-validation
     title: Local machine phase 0 and phase 1 full validation
     phase: local-machine-phase-0-1-validation
