@@ -1,5 +1,201 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    title: AP-01 Qwen user-visible result local readback closeout approval
+    phase: ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    sourceStory: userRequestedQwenUserVisibleResultLocalReadbackCloseoutApproval
+    dependencies:
+      - ap-01-qwen-user-visible-result-local-db-persistence-execution
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a docs-only approval task for local readback and user-visible verification of the redacted result
+      persisted by AP-01. This approval task must not read `.env.local`, must not read or output `DATABASE_URL`, must not
+      query or write DB rows, must not execute provider/model calls, and must not modify source, tests, scripts, e2e
+      specs, schema, migrations, package files, lockfiles, provider configuration, staging/prod/cloud/deploy resources,
+      or `.env*`. The next execution task may perform local-only, read-only DB/API/service readback through existing
+      result collection/detail and student UI data-shape paths, with evidence limited to sanitized counts/status and
+      redaction-state checks. Extra provider calls, Cost Calibration Gate, staging/prod/deploy, formal adoption, PR,
+      push, and force-push remain blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    taskKind: docs_state_approval
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_local_readback_closeout_approval_no_db_read_no_provider_call
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    nextRecommendedTask: ap-01-qwen-user-visible-result-local-readback-closeout-execution
+    capabilities:
+      docsStateOnlyApproval: allowed
+      envLocalReadThisTask: blocked
+      databaseUrlReadThisTask: blocked
+      databaseReadThisTask: blocked
+      databaseWriteThisTask: blocked
+      providerCallThisTask: blocked
+      nextExecutionEnvLocalRead: approved_database_url_alias_only
+      nextExecutionDatabaseUrlRead: approved_local_database_url_alias_only
+      nextExecutionDatabaseRead: approved_readonly_local_readback_only
+      nextExecutionDatabaseWrite: blocked
+      nextExecutionProviderCall: blocked
+      nextExecutionUserVisibleVerification: approved_existing_dto_shape_only
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      modelChangeExecution: blocked
+      rawSensitiveEvidence: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDatabaseOperation: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      scriptChange: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      formalAdoption: blocked
+    executionApprovalBoundary:
+      approvedNextTask: ap-01-qwen-user-visible-result-local-readback-closeout-execution
+      targetCollectionRoute: src/app/api/v1/personal-ai-generation-results/route.ts
+      targetDetailRoute: src/app/api/v1/personal-ai-generation-results/[publicId]/route.ts
+      targetRouteHandlers: src/server/services/personal-ai-generation-result-route.ts
+      targetHistoryService: src/server/services/personal-ai-generation-result-history-service.ts
+      targetRepository: src/server/repositories/personal-ai-generation-result-repository.ts
+      targetStudentUi: src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      targetMode: local_readback_user_visible_data_shape
+      env:
+        envFile: .env.local
+        envKeyAlias: DATABASE_URL
+        allowedUse: local_readonly_db_connection_only
+        allowedTargetClass: localhost_or_127_0_0_1_or_local_docker_tiku_postgres
+      provider:
+        modelProvider: openai_compatible
+        providerName: alibaba-qwen
+        modelName: qwen3.7-max
+        providerCall: blocked
+        maxRequests: 0
+      approvedReadbackChecks:
+        - validate_DATABASE_URL_targets_local_loopback_or_local_docker_only
+        - verify_collection_readback_count_only
+        - verify_detail_readback_status_only
+        - verify_redacted_snapshot_visibility
+        - verify_masked_preview_only
+        - verify_formal_adoption_blocked
+        - verify_student_ui_consumes_existing_redacted_dto_shape
+      requiredRuntimeControls:
+        providerCallExecuted: false
+        maxProviderRequests: 0
+        databaseWriteExecuted: false
+        stopIfProviderCallWouldBeRequired: true
+        stopIfDatabaseTargetNotLocal: true
+        stopIfDatabaseWriteWouldBeRequired: true
+        stopIfRawOutputWouldBePersistedOrRecorded: true
+        existingReadbackPathOnly: true
+        evidenceRecordsCountsStatusAndFieldPresenceOnly: true
+        formalAdoptionBlocked: true
+      stopConditions:
+        - missing_database_url
+        - database_url_not_local_dev
+        - local_db_unavailable
+        - persisted_redacted_result_not_found
+        - existing_readback_path_requires_source_change
+        - provider_call_required
+        - database_write_required
+        - raw_sensitive_output_would_enter_evidence
+        - schema_dependency_or_migration_change_needed
+      nextTaskIfBlocked: ap-01-qwen-user-visible-result-local-readback-gap-diagnosis
+    blockedCapabilities:
+      - envSecretOutput
+      - envFileWriteByCodex
+      - databaseUrlOutput
+      - databaseWrite
+      - providerCall
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeExecution
+      - costCalibrationGate
+      - productSourceChange
+      - testChange
+      - scriptChange
+      - e2eRuntime
+      - browserPlaywrightRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - formalAdoption
+      - pr
+      - push
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+      - src/app/api/v1/personal-ai-generation-results/route.ts
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/route.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-user-visible-result-local-readback-closeout-approval
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-user-visible-result-local-readback-closeout-approval
   - id: ap-01-qwen-user-visible-result-local-db-persistence-execution
     title: AP-01 Qwen user-visible result local DB persistence execution
     phase: ap-01-qwen-user-visible-result-local-db-persistence-execution
