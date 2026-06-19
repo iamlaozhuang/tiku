@@ -1,5 +1,216 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-user-visible-result-local-db-persistence-execution
+    title: AP-01 Qwen user-visible result local DB persistence execution
+    phase: ap-01-qwen-user-visible-result-local-db-persistence-execution
+    sourceStory: userRequestedContinueAfterLocalDbPersistenceApproval
+    dependencies:
+      - ap-01-qwen-user-visible-result-local-db-persistence-approval
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved continuing after the fresh local DB persistence approval. This execution task may read `.env.local`
+      in process only for the `DATABASE_URL` alias, may validate the target is local/dev, may create or reuse a minimal
+      local `ai_generation_task` fixture if required for the FK, and may create or reuse one already redacted
+      `personal_ai_generation_result` draft through the existing service/repository path. It must not execute any
+      provider/model call, must not output `.env*` contents or full `DATABASE_URL`, must not persist raw prompt, raw
+      response, raw model output, provider payload, raw error text, key, token, Authorization header, or raw DB row data,
+      and must not modify source, tests, scripts, e2e specs, schema, migrations, package files, lockfiles, provider
+      configuration, staging/prod/cloud/deploy resources, or `.env*`. Cost Calibration Gate, additional provider calls,
+      retry, streaming, staging/prod/deploy, PR, push, and force-push remain blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    taskKind: local_database_persistence_execution
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_db_persistence_created_redacted_result_no_provider_call
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-user-visible-result-local-db-persistence-execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    nextRecommendedTask: ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    capabilities:
+      envLocalRead: approved_database_url_alias_only
+      databaseUrlRead: approved_local_database_url_alias_only
+      databaseWrite: approved_redacted_draft_result_local_only
+      providerCall: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      modelChangeExecution: blocked
+      rawProviderOutputPersistence: blocked
+      rawSensitiveEvidence: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDatabaseOperation: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      scriptChange: blocked
+      e2eRuntime: blocked
+      formalAdoption: blocked
+    executionBoundary:
+      targetPersistenceService: src/server/services/personal-ai-generation-result-persistence-service.ts
+      targetRepository: src/server/repositories/personal-ai-generation-result-repository.ts
+      targetMaterializationService: src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      targetRuntimeDatabase: src/server/repositories/runtime-database.ts
+      targetTables:
+        - ai_generation_task
+        - personal_ai_generation_result
+      targetMode: local_database_persistence
+      env:
+        envFile: .env.local
+        envKeyAlias: DATABASE_URL
+        allowedUse: local_db_connection_only
+        allowedTargetClass: localhost_or_127_0_0_1_or_local_docker_tiku_postgres
+      provider:
+        modelProvider: openai_compatible
+        providerName: alibaba-qwen
+        modelName: qwen3.7-max
+        providerCall: blocked
+        maxRequests: 0
+      approvedDatabaseOperations:
+        - read_DATABASE_URL_from_env_local_in_process_only
+        - validate_DATABASE_URL_targets_local_loopback_or_local_docker_only
+        - create_minimal_ai_generation_task_fixture_if_missing
+        - create_or_reuse_personal_ai_generation_result_draft
+        - attach_result_public_id_to_ai_generation_task
+        - verify_counts_and_status_only
+      requiredRuntimeControls:
+        providerCallExecuted: false
+        maxProviderRequests: 0
+        stopIfProviderCallWouldBeRequired: true
+        stopIfDatabaseTargetNotLocal: true
+        stopIfRawOutputWouldBePersisted: true
+        stopIfSchemaMigrationRequired: true
+        stopIfSourceChangeRequired: true
+        existingPersistencePathOnly: true
+        evidenceRecordsCountsOnly: true
+        formalAdoptionBlocked: true
+      stopConditions:
+        - missing_database_url
+        - database_url_not_local_dev
+        - local_db_unavailable
+        - required_table_missing
+        - existing_path_cannot_persist_without_source_change
+        - redaction_violation_before_persistence
+        - provider_call_required
+        - schema_dependency_or_migration_change_needed
+        - raw_sensitive_output_would_enter_evidence_or_persistence
+      nextTaskIfBlocked: ap-01-qwen-user-visible-result-local-db-persistence-gap-diagnosis
+    validationResult:
+      providerCallExecuted: false
+      maxProviderRequests: 0
+      envLocalRead: true
+      databaseUrlRead: true
+      databaseUrlOutput: false
+      databaseTargetClass: local_loopback
+      requiredTablesPresent: true
+      parentFixtureStatus: created
+      persistenceStatus: created
+      parentTaskCountBefore: 0
+      parentTaskCountAfter: 1
+      resultRowCountBefore: 0
+      resultRowCountAfter: 1
+      resultRowDelta: 1
+      attachedTaskCount: 1
+      redactionStatus: redacted
+      contentVisibility: redacted_snapshot
+      evidenceStatus: weak
+      citationCount: 0
+      formalAdoptionStatus: blocked
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - envSecretOutput
+      - envFileWriteByCodex
+      - databaseUrlOutput
+      - providerCall
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeExecution
+      - costCalibrationGate
+      - productSourceChange
+      - testChange
+      - scriptChange
+      - e2eRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - formalAdoption
+      - pr
+      - push
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - .env.local
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
+      - src/server/services/personal-ai-generation-result-persistence-service.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/personal-ai-generation-request-flow-service.ts
+      - src/db/schema/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - node_modules\.bin\tsx.cmd --tsconfig tsconfig.json - <redacted local DB persistence runner via stdin>
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-user-visible-result-local-db-persistence-execution
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-user-visible-result-local-db-persistence-execution
   - id: ap-01-qwen-user-visible-result-local-db-persistence-approval
     title: AP-01 Qwen user-visible result local DB persistence approval
     phase: ap-01-qwen-user-visible-result-local-db-persistence-approval
