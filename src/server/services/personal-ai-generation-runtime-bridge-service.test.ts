@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
-import { buildPersonalAiGenerationRuntimeBridgeReadModel } from "./personal-ai-generation-runtime-bridge-service";
+import {
+  buildPersonalAiGenerationRuntimeBridgeReadModel,
+  buildPersonalAiGenerationRuntimeBridgeReadModelForRoute,
+  type PersonalAiGenerationRuntimeBridgeControl,
+} from "./personal-ai-generation-runtime-bridge-service";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 
 function createBaseInput() {
@@ -120,5 +124,104 @@ describe("personal AI generation runtime bridge service", () => {
       costCalibrationExecuted: false,
       blockedReasons: ["real_provider_execution_requires_fresh_approval"],
     });
+  });
+
+  it("materializes a redacted route-integrated result only through server-side controlled runner dependencies", async () => {
+    const persistedInputs: unknown[] = [];
+    const runtimeBridgeControl: PersonalAiGenerationRuntimeBridgeControl = {
+      bridgeMode: "controlled_runner",
+      explicitLocalSwitchPresent: true,
+      resultMaterialization: {
+        materializationMode: "fake_sanitized_in_memory_output",
+        resultPublicId: "ai_generation_result_public_bridge_121",
+        contentDigest: "sha256:bridge_materialized_digest_121",
+        contentPreviewMasked: "masked local result preview",
+        evidenceStatus: "none",
+        citationCount: 0,
+        persistDraftResult: async (input: unknown) => {
+          persistedInputs.push(input);
+
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              persistenceStatus: "created",
+              result: {
+                resultPublicId: "ai_generation_result_public_bridge_121",
+                taskPublicId: "ai_generation_task_public_bridge_121",
+                requestPublicId: "personal_ai_request_public_bridge_121",
+                taskType: "ai_question_generation",
+                status: "draft",
+                persistedAt: "2026-06-19T00:00:00.000Z",
+                contentReference: {
+                  contentDigest: "sha256:bridge_materialized_digest_121",
+                  contentPreviewMasked: "masked local result preview",
+                  contentVisibility: "redacted_snapshot",
+                  redactionStatus: "redacted",
+                },
+                evidenceReference: {
+                  evidenceStatus: "none",
+                  citationCount: 0,
+                  aiCallLogPublicId: null,
+                  redactionStatus: "redacted",
+                },
+                formalAdoption: {
+                  isBlocked: true,
+                  status: "blocked",
+                },
+              },
+            },
+          };
+        },
+      },
+    };
+
+    const bridge =
+      await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
+        createRequestFlow(),
+        {
+          runtimeBridgeControl,
+        },
+      );
+    const serializedBridge = JSON.stringify(bridge);
+
+    expect(bridge).toMatchObject({
+      bridgeStatus: "controlled_runner_ready",
+      bridgeMode: "controlled_runner",
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      resultMaterializationSummary: {
+        materializationStatus: "created",
+        resultPublicId: "ai_generation_result_public_bridge_121",
+        contentDigest: "sha256:bridge_materialized_digest_121",
+        contentPreviewMasked: "masked local result preview",
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+        evidenceStatus: "none",
+        citationCount: 0,
+        formalAdoptionStatus: "blocked",
+      },
+    });
+    expect(persistedInputs).toEqual([
+      expect.objectContaining({
+        resultPublicId: "ai_generation_result_public_bridge_121",
+        taskPublicId: "ai_generation_task_public_bridge_121",
+        ownerPublicId: "student_public_bridge_121",
+        taskType: "ai_question_generation",
+        contentDigest: "sha256:bridge_materialized_digest_121",
+        contentPreviewMasked: "masked local result preview",
+        evidenceStatus: "none",
+        citationCount: 0,
+        aiCallLogPublicId: null,
+        contentRedactedSnapshot: expect.objectContaining({
+          redactionStatus: "redacted",
+          contentVisibility: "redacted_snapshot",
+        }),
+      }),
+    ]);
+    expect(serializedBridge).not.toContain("provider payload");
+    expect(serializedBridge).not.toContain("raw prompt");
+    expect(serializedBridge).not.toContain("raw response");
   });
 });

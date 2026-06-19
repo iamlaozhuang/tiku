@@ -8,11 +8,17 @@ import {
   type PersonalAiGenerationRouteIntegratedProviderExecutionControl,
   type PersonalAiGenerationRouteIntegratedProviderExecutionOutcome,
 } from "./personal-ai-generation-route-integrated-provider-execution-service";
+import {
+  createDefaultBlockedRouteIntegratedResultMaterializationSummary,
+  materializeRouteIntegratedRedactedResult,
+  type PersonalAiGenerationRouteIntegratedResultMaterializationControl,
+} from "./personal-ai-generation-route-integrated-result-materialization-service";
 
 export type PersonalAiGenerationRuntimeBridgeControl = {
   bridgeMode: "controlled_runner";
   explicitLocalSwitchPresent: true;
   providerExecution?: PersonalAiGenerationRouteIntegratedProviderExecutionControl;
+  resultMaterialization?: PersonalAiGenerationRouteIntegratedResultMaterializationControl;
 };
 
 export type PersonalAiGenerationRuntimeBridgeOptions = {
@@ -95,6 +101,8 @@ function buildPersonalAiGenerationRuntimeBridgeDto(
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
     providerExecutionSummary: executionOutcome.executionSummary,
+    resultMaterializationSummary:
+      createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
     blockedReasons: isControlledRunnerEnabled
       ? ["real_provider_execution_requires_fresh_approval"]
       : [
@@ -122,8 +130,40 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     options.runtimeBridgeControl.explicitLocalSwitchPresent;
   const providerExecutionControl =
     options.runtimeBridgeControl?.providerExecution;
+  const resultMaterializationControl =
+    options.runtimeBridgeControl?.resultMaterialization;
 
-  if (!isControlledRunnerEnabled || providerExecutionControl === undefined) {
+  if (
+    !isControlledRunnerEnabled ||
+    (providerExecutionControl === undefined &&
+      resultMaterializationControl === undefined)
+  ) {
+    return buildPersonalAiGenerationRuntimeBridgeReadModel(
+      requestFlow,
+      options,
+    );
+  }
+
+  if (
+    providerExecutionControl === undefined &&
+    resultMaterializationControl !== undefined
+  ) {
+    const bridge = buildPersonalAiGenerationRuntimeBridgeReadModel(
+      requestFlow,
+      options,
+    );
+
+    return {
+      ...bridge,
+      resultMaterializationSummary:
+        await materializeRouteIntegratedRedactedResult(
+          requestFlow,
+          resultMaterializationControl,
+        ),
+    };
+  }
+
+  if (providerExecutionControl === undefined) {
     return buildPersonalAiGenerationRuntimeBridgeReadModel(
       requestFlow,
       options,
@@ -154,6 +194,8 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
     providerExecutionSummary: executionOutcome.executionSummary,
+    resultMaterializationSummary:
+      createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
     blockedReasons: executionOutcome.providerCallExecuted
       ? []
       : ["real_provider_execution_requires_fresh_approval"],

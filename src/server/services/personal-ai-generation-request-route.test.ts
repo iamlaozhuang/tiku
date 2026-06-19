@@ -530,6 +530,10 @@ describe("personal AI generation request route handlers", () => {
           explicitLocalSwitchPresent: false,
           providerCallExecuted: false,
           envSecretAccessed: false,
+          resultMaterializationSummary: {
+            materializationStatus: "not_requested",
+            failureCategory: "not_requested",
+          },
         },
       },
     });
@@ -675,6 +679,110 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedPayload).not.toContain("synthetic-test-credential");
     expect(serializedPayload).not.toContain("provider payload");
     expect(serializedPayload).not.toContain("generated content");
+  });
+
+  it("materializes only redacted result references from server-side route dependencies", async () => {
+    const persistedInputs: unknown[] = [];
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          resultMaterialization: {
+            materializationMode: "fake_sanitized_in_memory_output",
+            resultPublicId: "ai_generation_result_public_route_123",
+            contentDigest: "sha256:route_materialized_digest_123",
+            contentPreviewMasked: "masked route result preview",
+            evidenceStatus: "none",
+            citationCount: 0,
+            persistDraftResult: async (input) => {
+              persistedInputs.push(input);
+
+              return {
+                code: 0,
+                message: "ok",
+                data: {
+                  persistenceStatus: "created",
+                  result: {
+                    resultPublicId: "ai_generation_result_public_route_123",
+                    taskPublicId: "ai_generation_task_public_route_123",
+                    requestPublicId: "personal_ai_request_public_route_123",
+                    taskType: "ai_question_generation",
+                    status: "draft",
+                    persistedAt: "2026-06-19T00:00:00.000Z",
+                    contentReference: {
+                      contentDigest: "sha256:route_materialized_digest_123",
+                      contentPreviewMasked: "masked route result preview",
+                      contentVisibility: "redacted_snapshot",
+                      redactionStatus: "redacted",
+                    },
+                    evidenceReference: {
+                      evidenceStatus: "none",
+                      citationCount: 0,
+                      aiCallLogPublicId: null,
+                      redactionStatus: "redacted",
+                    },
+                    formalAdoption: {
+                      isBlocked: true,
+                      status: "blocked",
+                    },
+                  },
+                },
+              };
+            },
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeBridge: {
+          bridgeStatus: "controlled_runner_ready",
+          bridgeMode: "controlled_runner",
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          resultMaterializationSummary: {
+            materializationStatus: "created",
+            resultPublicId: "ai_generation_result_public_route_123",
+            contentDigest: "sha256:route_materialized_digest_123",
+            contentPreviewMasked: "masked route result preview",
+            contentVisibility: "redacted_snapshot",
+            redactionStatus: "redacted",
+            evidenceStatus: "none",
+            citationCount: 0,
+            formalAdoptionStatus: "blocked",
+          },
+        },
+      },
+    });
+    expect(persistedInputs).toEqual([
+      expect.objectContaining({
+        resultPublicId: "ai_generation_result_public_route_123",
+        taskPublicId: "ai_generation_task_public_route_123",
+        ownerPublicId: userContext.userPublicId,
+        taskType: "ai_question_generation",
+        contentDigest: "sha256:route_materialized_digest_123",
+        contentPreviewMasked: "masked route result preview",
+        evidenceStatus: "none",
+        citationCount: 0,
+      }),
+    ]);
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("raw prompt");
+    expect(serializedPayload).not.toContain("raw response");
+    expect(serializedPayload).not.toContain("raw error");
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
   });
 
   it("persists local browser POST metadata with session-normalized ownership public ids", async () => {

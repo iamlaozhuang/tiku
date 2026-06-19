@@ -1,4 +1,5 @@
 import type {
+  EvidenceStatus,
   RedactedContentSnapshot,
   RedactedJsonObject,
 } from "../models/ai-rag";
@@ -25,6 +26,24 @@ export type PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto = {
     providerErrorCode: string | null;
   } | null;
   redactionStatus: "redacted";
+};
+
+export type PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto = {
+  materializationStatus: "not_requested" | "created" | "reused" | "blocked";
+  failureCategory:
+    | "not_requested"
+    | "redaction_violation"
+    | "persistence_unavailable"
+    | "unsupported_task_type"
+    | null;
+  resultPublicId: string | null;
+  contentDigest: string | null;
+  contentPreviewMasked: string | null;
+  contentVisibility: "redacted_snapshot";
+  redactionStatus: "redacted";
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  formalAdoptionStatus: "blocked";
 };
 
 export type PersonalAiGenerationRuntimeBridgeDto = {
@@ -56,5 +75,6 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
     providerErrorPayload: RedactedJsonObject | null;
   };
   providerExecutionSummary: PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto;
+  resultMaterializationSummary: PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto;
   blockedReasons: PersonalAiGenerationRuntimeBridgeBlockedReason[];
 };

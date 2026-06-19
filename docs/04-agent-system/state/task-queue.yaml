@@ -1,5 +1,183 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    title: AP-01 Qwen route-integrated user-visible result materialization implementation
+    phase: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    sourceStory: userRequestedQwenRouteIntegratedUserVisibleResultMaterializationImplementation
+    dependencies:
+      - ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested execution of the approved AP-01 Qwen route-integrated user-visible result materialization
+      implementation. Scope allows only local controlled runtime bridge/result materialization changes using fake or
+      sanitized in-memory output. The task must not read `.env.local`, must not execute any real Qwen/provider/model
+      call, must not expose raw prompt/response/error/payload/model output/key/token/database URL, and must keep Cost
+      Calibration Gate, additional provider calls, staging/prod/cloud/deploy, schema/migration, dependency, app route,
+      e2e runtime, PR, push, and force-push blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass_redacted_result_materialization_controlled_runner_no_provider_call
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    capabilities:
+      redactedUserVisibleMaterialization: approved_scoped_fake_sanitized_output_only
+      personalAiGenerationResultDraftPersistenceInput: approved_redacted_snapshot_digest_masked_preview_only
+      serverSideControlledRunner: approved_scoped
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      envFileWriteByCodex: blocked
+      realProviderCall: blocked
+      fakeSanitizedInMemoryOutput: allowed
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      modelChangeExecution: blocked
+      costCalibrationGate: blocked
+      productSourceChange: approved_scoped_server_services_only
+      focusedUnitTestChange: approved_scoped
+      e2eSpecChange: blocked
+      appRouteChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    implementationBoundary:
+      targetRouteService: src/server/services/personal-ai-generation-request-route.ts
+      targetRuntimeBridgeService: src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      targetResultTable: personal_ai_generation_result
+      targetResultPersistenceService: src/server/services/personal-ai-generation-result-persistence-service.ts
+      provider:
+        modelProvider: openai_compatible
+        providerName: alibaba-qwen
+        modelName: qwen3.7-max
+        baseUrlHost: dashscope.aliyuncs.com
+        envKeyAlias: ALIBABA_API_KEY
+      allowedUserVisibleFields:
+        - contentPreviewMasked
+        - contentDigest
+        - contentVisibility
+        - redactionStatus
+        - evidenceStatus
+        - citationCount
+      requiredRuntimeControls:
+        defaultProviderCallBlocked: true
+        clientBodyCannotEnableMaterialization: true
+        serverSideExplicitLocalMaterializationControlRequired: true
+        implementationRealProviderCallExecuted: false
+        implementationEnvLocalRead: false
+        formalAdoptionBlocked: true
+        rawExposureBlocksMaterialization: true
+      nextRecommendedTask: ap-01-qwen-user-visible-result-one-request-materialization-approval
+    validationResult:
+      focusedUnitTests: pass_25_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      diffCheck: pass
+      providerCallExecuted: false
+      envSecretAccessed: false
+      materializationMode: fake_sanitized_in_memory_output_only
+      resultMaterializationSummary: redacted_snapshot_digest_masked_preview_only
+      formalAdoption: blocked
+    blockedCapabilities:
+      - envLocalRead
+      - envSecretOutput
+      - envFileWriteByCodex
+      - realProviderCall
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeExecution
+      - costCalibrationGate
+      - appRouteChange
+      - e2eRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - formalAdoption
+      - pr
+      - push
+      - forcePush
+    allowedFiles:
+      - src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
+      - src/db/schema/ai-rag.ts
+      - src/server/models/personal-ai-generation-result.ts
+      - src/server/validators/personal-ai-generation-result-persistence.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/services/personal-ai-generation-result-persistence-service.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - tests/**
+      - src/app/**
+      - src/features/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-route-integrated-result-materialization-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts src/server/services/personal-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+      - npx.cmd prettier --check --ignore-unknown src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts src/server/services/personal-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
   - id: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
     title: AP-01 Qwen route-integrated user-visible result materialization approval
     phase: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
