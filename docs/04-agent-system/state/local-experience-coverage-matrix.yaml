@@ -516,10 +516,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-deepseek-env-local-prep.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
     status: release_blocked
-    blockedGate: provider_call_env_secret_cost_calibration_staging_prod
-    nextTask: ap-01-provider-smoke-execution-deepseek-env-local-ready
+    blockedGate: second_provider_cost_calibration_staging_prod_provider_configuration
+    nextTask: ap-01-provider-smoke-execution-qwen-approval
   - useCaseId: UC-STD-KN-RECOMMENDATION
     edition: standard
     actor: content_admin_system

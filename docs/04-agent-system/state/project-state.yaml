@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-deepseek-env-local-prep
+currentPhase: ap-01-provider-smoke-execution-deepseek-env-local-ready
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-deepseek-env-local-prep
+  id: ap-01-provider-smoke-execution-deepseek-env-local-ready
   status: closed
-  result: env_local_manual_write_handoff_ready_provider_call_blocked
-  sourceStory: userRequestedManualDeepseekKeyInEnvLocalBeforeNextProviderSmoke
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-deepseek-env-local-prep.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-deepseek-env-local-prep.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-deepseek-env-local-prep.md
-  branch: codex/ap-01-deepseek-env-local-prep
+  result: deepseek_provider_smoke_pass_env_local_redacted
+  sourceStory: userConfirmedDeepseekKeyWrittenToEnvLocal
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+  branch: codex/ap-01-provider-smoke-execution-deepseek-env-local-ready
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1283,15 +1283,52 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01ProviderSmokeExecutionDeepseekEnvLocalReady:
+    taskId: ap-01-provider-smoke-execution-deepseek-env-local-ready
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: deepseek_provider_smoke_pass_env_local_redacted
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+    boundarySummary:
+      validation: pass_deepseek_one_request_redacted_env_local_smoke
+      packageMaterialization: AP01_deepseek_env_local_provider_smoke_execution
+      execution: one_deepseek_provider_smoke_pass
+      matrixStatus: release_blocked
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: openai_compatible
+      providerName: deepseek
+      model: deepseek-v4-flash
+      baseUrlHost: api.deepseek.com
+      envKeyAlias: DEEPSEEK_API_KEY
+      envSource: .env.local_present_redacted
+      maxRequests: 1
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      retryLimit: 0
+      maxSpendUsd: 0.05
+      requestCount: 1
+      providerCallExecuted: true
+      resultStatus: pass
+      failureCategory: none
+      usageSummary: input_18_output_8_total_26_reasoning_8_cached_input_0
+      secondProvider: blocked
+      providerConfiguration: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 DeepSeek provider smoke execution remains blocked until the user manually adds DEEPSEEK_API_KEY to local-only
-    `.env.local` and confirms it in chat without sharing the secret value. Recommended next work is
-    ap-01-provider-smoke-execution-deepseek-env-local-ready, with fresh approval to read only DEEPSEEK_API_KEY from
-    `.env.local`, inject it into the child process environment, and run exactly one redacted DeepSeek deepseek-v4-flash
-    smoke. Do not run Qwen until DeepSeek produces accepted passing smoke evidence. Keep provider configuration,
-    staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence, and Cost
-    Calibration Gate blocked until a later task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-deepseek-env-local-prep.md
+    AP-01 DeepSeek provider smoke passed under task ap-01-provider-smoke-execution-deepseek-env-local-ready with exactly
+    one redacted DeepSeek deepseek-v4-flash request using DEEPSEEK_API_KEY from local-only `.env.local`. Recommended next
+    work is AP-01 Qwen second-provider smoke approval/execution, but only after fresh approval. Keep provider
+    configuration, staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence,
+    and Cost Calibration Gate blocked until a later task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
