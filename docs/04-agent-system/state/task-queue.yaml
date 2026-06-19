@@ -1,5 +1,137 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-provider-smoke-execution-qwen-approval
+    title: AP-01 provider smoke execution Qwen approval
+    phase: ap-01-provider-smoke-execution-qwen-approval
+    sourceStory: userRequestedQwenSecondProviderApprovalAndEnvLocalGuidance
+    dependencies:
+      - ap-01-provider-smoke-execution-deepseek-env-local-ready
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a new AP-01 Qwen provider smoke execution approval task and asked for guidance on where and how to
+      write the Qwen key before running the second provider. This task is docs/state/evidence/audit only. It may define
+      the Qwen provider/model/env key/request/cost/redaction boundary and tell the user to manually write
+      ALIBABA_API_KEY to local-only `.env.local`. Codex must not read, write, print, copy, stage, or commit `.env*`
+      content in this task. Qwen provider execution, provider configuration, application route execution, DB writes,
+      Cost Calibration Gate, staging/prod/cloud/deploy, payment/external-service, dependency, schema/migration, product
+      source, tests/e2e changes, PR, push, force-push, destructive DB, and raw sensitive evidence remain blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: docs_state_secret_handoff_preparation
+    moduleRunVersion: 2
+    status: closed
+    result: qwen_provider_smoke_approval_ready_execution_blocked
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-provider-smoke-execution-qwen-approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    nextApprovalRequired: user_confirms_alibaba_api_key_written_then_fresh_qwen_env_local_read_and_one_provider_smoke_execution
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      userManagedEnvLocalWrite: acknowledged_outside_codex_outside_git
+      envLocalRead: blocked_until_next_fresh_task
+      envSecretOutput: blocked
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      dryRunProviderSmokeCommandShape: allowed
+      costCalibrationGate: blocked
+      providerConfiguration: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    envLocalPreparationBoundary:
+      localFileAlias: .env.local
+      allowedUserManualLineShape: ALIBABA_API_KEY=<your Alibaba Cloud Bailian/DashScope API key>
+      codexEnvFileRead: blocked
+      codexEnvFileWrite: blocked
+      codexSecretOutput: blocked
+      gitIgnoreCheckRequired: true
+      nextTaskCandidate: ap-01-provider-smoke-execution-qwen-env-local-ready
+    providerSmokeExecutionBoundary:
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: alibaba
+      envKeyAlias: ALIBABA_API_KEY
+      model: qwen-plus
+      maxRequests: 1
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      retryLimit: 0
+      maxSpendUsd: 0.05
+      providerExecution: blocked_until_next_fresh_task
+      evidenceMode: redacted_envelope_only
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - envLocalReadDuringApproval
+      - envFileWriteByCodex
+      - envSecretOutput
+      - providerCall
+      - providerConfiguration
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - package.json
+      - .gitignore
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - git check-ignore -v .env.local
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-provider-smoke-execution-qwen-approval -Capability providerKey -Intent declare_adapter
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-provider-smoke-execution-qwen-approval -Capability providerCall -Intent declare_adapter
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-provider-smoke-execution-qwen-approval
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-provider-smoke-execution-qwen-approval
   - id: ap-01-provider-smoke-execution-deepseek-env-local-ready
     title: AP-01 provider smoke execution DeepSeek env.local ready
     phase: ap-01-provider-smoke-execution-deepseek-env-local-ready
