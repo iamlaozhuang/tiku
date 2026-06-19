@@ -124,6 +124,25 @@ lastAp03ProviderStagingExecutionApprovalDetailing:
     - schema_migration
     - dependency_package_lockfile_change
     - raw_sensitive_evidence
+lastAp06OnlinePaymentProviderBoundaryDetailing:
+  taskId: ap-06-online-payment-provider-boundary-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-ONLINE-PAYMENT
+  decision: pass_l0_docs_state_payment_boundary_detailing_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-07-ocr-auto-import-provider-boundary-detailing
+  blockedGates:
+    - payment_external_service
+    - env_secret
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - database_read_write
+    - schema_migration
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -822,10 +841,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
     status: release_blocked
     blockedGate: payment_external_service_env_secret_deploy_blocked
-    nextTask: ap-06-online-payment-approval-package
+    nextTask: ap-06-online-payment-execution-fresh-approval-required
   - useCaseId: UC-FUTURE-OCR-AUTO-IMPORT
     edition: future_scope
     actor: content_admin_ops_admin
