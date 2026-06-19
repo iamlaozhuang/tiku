@@ -222,6 +222,27 @@ lastAp04StandardAiGenerationScopeDecisionDetailing:
     - cost_calibration_gate
     - formal_adoption
     - raw_sensitive_evidence
+lastAp05StandardOrgSelfServiceScopeDecisionDetailing:
+  taskId: ap-05-standard-org-self-service-scope-decision-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+  decision: pass_l0_product_privacy_scope_decision_options_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+  matrixStatus: release_blocked
+  currentScope: future_non_goal_for_standard
+  productScopeChanged: false
+  nextRecommendedTask: ap-10-current-checkpoint-audit-target-detailing
+  blockedGates:
+    - product_scope_change
+    - product_source_change
+    - api_ui_data_model_change
+    - schema_migration
+    - privacy_data_access
+    - staging_prod_cloud_deploy
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -906,10 +927,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
-    nextTask: ap-05-standard-org-self-service-scope-change-approval-package
+    nextTask: ap-05-standard-org-self-service-scope-change-user-choice-required
   - useCaseId: UC-FUTURE-ONLINE-PAYMENT
     edition: future_scope
     actor: payer_ops_admin
