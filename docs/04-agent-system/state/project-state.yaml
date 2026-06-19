@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+currentPhase: ap-01-qwen-in-app-ai-runtime-bridge-approval
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+  id: ap-01-qwen-in-app-ai-runtime-bridge-approval
   status: closed
-  result: pass_docs_only_in_app_ai_approval_detailing_real_call_blocked
-  sourceStory: userRequestedQwenCostCalibrationAndInAppAiExperienceApprovalDetailing
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
-  branch: codex/ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+  result: pass_bridge_implementation_boundary_approved_provider_call_blocked
+  sourceStory: userFreshApprovedQwenInAppAiRuntimeBridgeApproval
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+  branch: codex/ap-01-qwen-in-app-ai-runtime-bridge-approval
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1895,16 +1895,58 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenInAppAiRuntimeBridgeApproval:
+    taskId: ap-01-qwen-in-app-ai-runtime-bridge-approval
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: pass_bridge_implementation_boundary_approved_provider_call_blocked
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+    boundarySummary:
+      validation: pass_docs_state_bridge_boundary_approval_no_env_read_no_provider_call
+      packageMaterialization: AP01_qwen_in_app_ai_runtime_bridge_approval
+      matrixStatus: release_blocked
+      candidateUiRoute: /ai-generation
+      candidateSubmitRoute: POST /api/v1/personal-ai-generation-requests
+      candidateRequestMode: local_browser_experience
+      currentRuntimeStatus: local_contract_only
+      approvedNextTask: ap-01-qwen-in-app-ai-runtime-bridge-implementation
+      approvedBridgeScope: local_only_default_blocked_runtime_bridge_or_equivalent_controlled_runner
+      acceptableOptionA: runtime_bridge_to_existing_ai_explanation_hint_runner_abstraction
+      acceptableOptionB: controlled_runner_with_explicit_non_ui_route_evidence
+      requiredProviderCallExecuted: false
+      requiredEnvSecretAccessed: false
+      bridgeRequiresExplicitLocalSwitch: true
+      deterministicFakeRunnerOrProviderCallBlockedRunnerOnly: true
+      nextFreshApprovalAfterBridge: one_real_in_app_qwen_request_only
+      providerCallExecutedThisTask: false
+      envLocalReadThisTask: false
+      productSourceChangedThisTask: false
+      testChangedThisTask: false
+      realInAppQwenExecution: blocked
+      providerCall: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfiguration: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen cost calibration and in-app AI approval detailing is now documented. The candidate student route is
-    `/ai-generation` with submit route `POST /api/v1/personal-ai-generation-requests`, but the current application path
-    remains `local_contract_only` and does not yet execute a real provider-backed in-app request. The next recommended
-    task is `ap-01-qwen-in-app-ai-runtime-bridge-approval` or an explicitly equivalent controlled-runner approval, with
-    no provider call during bridge implementation. Keep real in-app AI execution, additional provider calls, retries,
-    Cost Calibration Gate, staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive
-    evidence, dependency, schema/migration, product source, test/e2e changes, and `.env.local` edits by Codex blocked
-    until fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
+    AP-01 Qwen in-app AI runtime bridge approval is now documented. The next recommended task is
+    `ap-01-qwen-in-app-ai-runtime-bridge-implementation`, limited to a local-only, default-blocked runtime bridge or an
+    explicitly equivalent controlled runner. The implementation must keep providerCallExecuted=false,
+    envSecretAccessed=false, no `.env.local` read, no provider retry/streaming, no Cost Calibration Gate, and no real
+    Qwen request. After the bridge implementation validates, open a separate fresh approval for exactly one real in-app
+    Qwen request. Keep real provider execution, additional provider calls, Cost Calibration Gate, staging/prod/cloud/deploy,
+    payment, external-service, PR, push, force-push, raw sensitive evidence, dependency, schema/migration, and `.env*`
+    writes blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
