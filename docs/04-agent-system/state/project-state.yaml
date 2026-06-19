@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: blocked-use-case-acceleration-governance-packet
+currentPhase: ap-02-ops-auth-quota-cost-calibration-approval-detailing
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: blocked-use-case-acceleration-governance-packet
+  id: ap-02-ops-auth-quota-cost-calibration-approval-detailing
   status: closed
-  result: pass_docs_state_blocked_use_case_acceleration_packet
-  sourceStory: userRequestedBlockedUseCaseAccelerationPackage
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
-  branch: codex/blocked-use-case-acceleration-governance-packet
+  result: pass_l0_docs_state_approval_detailing_no_cost_gate_no_provider_no_payment
+  sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP02
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+  branch: codex/ap-02-ops-auth-quota-cost-calibration-approval-detailing
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: blocked_use_case_acceleration_governance_packet_closed
+  status: ap_02_ops_auth_quota_cost_calibration_approval_detailing_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: blocked-use-case-acceleration-governance-packet
+  currentTaskId: ap-02-ops-auth-quota-cost-calibration-approval-detailing
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -2908,18 +2908,66 @@ localExperienceClosure:
       browserPlaywrightRuntime: blocked
       formalAdoption: blocked
       costCalibrationGate: blocked
+  currentAp02OpsAuthQuotaCostCalibrationApprovalDetailing:
+    taskId: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-02
+    useCaseIds:
+      - UC-ADV-OPS-AUTH-QUOTA
+    decision: pass_l0_docs_state_approval_detailing_no_cost_gate_no_provider_no_payment
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+    boundarySummary:
+      validation: pass_docs_state_l0_detailing
+      packageMaterialization: AP02_ops_auth_quota_cost_calibration_approval_detailing
+      matrixStatus: release_blocked
+      quotaLedgerDefinedForFutureApproval: true
+      costMeasurementSourceDefinedForFutureApproval: true
+      redactedEvidenceRulesDefined: true
+      l3FreshApprovalRequired: true
+      nextRecommendedTask: ap-03-provider-staging-execution-approval-detailing
+      providerCallExecutedThisTask: false
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      paymentExternalServiceExecutedThisTask: false
+      productSourceChanged: false
+      testSourceChanged: false
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawErrorText: blocked
+      rawModelOutput: blocked
+      providerPayload: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      envSecretOutput: blocked
+      databaseUrlRead: blocked
+      databaseUrlOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      formalAdoption: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Blocked use case acceleration governance packet is current. AP-02 through AP-11 have refreshed acceleration
-    boundaries and AP-01 is summarized as local-experience closed but release-blocked. The fastest safe next task is
-    `ap-02-ops-auth-quota-cost-calibration-approval-detailing` as an L0 docs/state package. L0 docs/state governance can
-    be batched; L1/L2 local-only work requires exact allowed files, commands, redaction evidence, and stop conditions;
+    AP-02 L0 ops auth quota cost calibration approval detailing is current and keeps UC-ADV-OPS-AUTH-QUOTA
+    release-blocked. The fastest safe next task is `ap-03-provider-staging-execution-approval-detailing` as an L0
+    docs/state package. L0 docs/state governance can be batched; L1/L2 local-only work requires exact allowed files,
+    commands, redaction evidence, and stop conditions;
     L3 provider/cost/staging/prod/deploy/payment/OCR/export/schema/dependency/source/test/high-risk work remains blocked
     until fresh approval. Raw prompt/response/model output/provider payload/error/key/token/full database URL remain
     barred from evidence and persistence. Additional provider calls, retry, streaming, Cost Calibration Gate,
     staging/prod/cloud/deploy, payment, external-service, PR, force-push, dependency, schema/migration,
     source/test/script/e2e changes, Browser/Playwright runtime unless separately approved, destructive DB work, DB reads,
     DB writes, raw SQL, and formal adoption remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md

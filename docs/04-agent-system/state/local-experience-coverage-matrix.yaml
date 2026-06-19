@@ -84,6 +84,26 @@ lastBlockedUseCaseAccelerationGovernancePacket:
     - source_test_e2e_script_change_without_task_scope
     - destructive_database_operation
     - raw_sensitive_evidence
+lastAp02OpsAuthQuotaCostCalibrationApprovalDetailing:
+  taskId: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-ADV-OPS-AUTH-QUOTA
+  decision: pass_l0_docs_state_approval_detailing_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-03-provider-staging-execution-approval-detailing
+  blockedGates:
+    - provider_model_call
+    - env_secret
+    - cost_calibration_gate
+    - payment_external_service
+    - database_read_write
+    - staging_prod_cloud_deploy
+    - source_test_e2e_script_change
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -712,10 +732,10 @@ matrix:
     uiSurface: existing_admin_ops_surfaces
     unitEvidence: src/server/services/ops-governance-authorization-quota-summary-service.test.ts
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
     status: release_blocked
     blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
-    nextTask: ap-02-ops-auth-quota-cost-calibration-approval-package
+    nextTask: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
   - useCaseId: UC-ADV-RETENTION-LOG-GOVERNANCE
     edition: advanced
     actor: ops_admin_audit_reviewer
