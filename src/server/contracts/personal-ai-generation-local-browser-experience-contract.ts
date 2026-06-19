@@ -14,6 +14,7 @@ import type {
   PersonalAiGenerationResultContentVisibility,
   PersonalAiGenerationResultReferenceRedactionStatus,
 } from "../models/personal-ai-generation-result-reference";
+import type { PersonalAiGenerationRuntimeBridgeDto } from "./personal-ai-generation-runtime-bridge-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "./personal-ai-generation-request-flow-contract";
 
 export type PersonalAiGenerationLocalBrowserExperienceDto = {
@@ -47,5 +48,6 @@ export type PersonalAiGenerationLocalBrowserExperienceDto = {
     errorState: PersonalAiGenerationLocalBrowserStateSupport;
     permissionBlockedState: PersonalAiGenerationLocalBrowserStateSupport;
   };
+  runtimeBridge: PersonalAiGenerationRuntimeBridgeDto;
   requestFlow: PersonalAiGenerationRequestFlowDto;
 };

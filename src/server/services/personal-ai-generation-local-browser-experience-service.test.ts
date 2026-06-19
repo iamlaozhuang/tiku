@@ -96,6 +96,26 @@ describe("personal AI generation local browser experience service", () => {
           errorState: "supported",
           permissionBlockedState: "supported",
         },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_blocked",
+          bridgeMode: "default_blocked",
+          runnerMode: "provider_call_blocked_runner",
+          explicitLocalSwitchPresent: false,
+          realProviderExecutionApproved: false,
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          providerRetryAttempted: false,
+          providerStreamingEnabled: false,
+          costCalibrationExecuted: false,
+          redactionStatus: "redacted",
+          blockedReasons: [
+            "explicit_local_switch_required",
+            "provider_call_blocked",
+            "env_secret_access_blocked",
+            "real_provider_execution_requires_fresh_approval",
+          ],
+        },
         requestFlow: {
           flowStatus: "accepted",
           contextSelection: {
@@ -119,6 +139,39 @@ describe("personal AI generation local browser experience service", () => {
     expect(serializedResult).not.toContain(input.omittedProviderFixture);
     expect(serializedResult).not.toContain(input.omittedTokenFixture);
     expect(serializedResult).not.toContain(input.omittedPaperFixture);
+  });
+
+  it("can expose a controlled runner bridge without provider or env access", () => {
+    expect(
+      buildPersonalAiGenerationLocalBrowserExperienceReadModel(
+        createBaseInput(),
+        {
+          runtimeBridgeControl: {
+            bridgeMode: "controlled_runner",
+            explicitLocalSwitchPresent: true,
+          },
+        },
+      ),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        runtimeStatus: "local_contract_only",
+        runtimeBridge: {
+          bridgeStatus: "controlled_runner_ready",
+          bridgeMode: "controlled_runner",
+          runnerMode: "deterministic_fake_runner",
+          explicitLocalSwitchPresent: true,
+          realProviderExecutionApproved: false,
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          providerRetryAttempted: false,
+          providerStreamingEnabled: false,
+          costCalibrationExecuted: false,
+          blockedReasons: ["real_provider_execution_requires_fresh_approval"],
+        },
+      },
+    });
   });
 
   it("maps rejected request policy to blocked local browser states", () => {

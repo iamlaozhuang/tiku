@@ -482,10 +482,92 @@ describe("personal AI generation request route handlers", () => {
           errorState: "supported",
           permissionBlockedState: "supported",
         },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_blocked",
+          bridgeMode: "default_blocked",
+          runnerMode: "provider_call_blocked_runner",
+          explicitLocalSwitchPresent: false,
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          blockedReasons: [
+            "explicit_local_switch_required",
+            "provider_call_blocked",
+            "env_secret_access_blocked",
+            "real_provider_execution_requires_fresh_approval",
+          ],
+        },
         requestFlow: {
           request: {
             userPublicId: "resolver_user_public_123",
           },
+        },
+      },
+    });
+  });
+
+  it("does not allow the client request body to enable the runtime bridge", async () => {
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+        },
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        runtimeBridge: {
+          bridgeStatus: "provider_call_blocked",
+          bridgeMode: "default_blocked",
+          explicitLocalSwitchPresent: false,
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+        },
+      },
+    });
+  });
+
+  it("exposes controlled runner state only from server-side route dependencies", async () => {
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        runtimeBridge: {
+          bridgeStatus: "controlled_runner_ready",
+          bridgeMode: "controlled_runner",
+          runnerMode: "deterministic_fake_runner",
+          explicitLocalSwitchPresent: true,
+          realProviderExecutionApproved: false,
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          providerRetryAttempted: false,
+          providerStreamingEnabled: false,
+          costCalibrationExecuted: false,
+          blockedReasons: ["real_provider_execution_requires_fresh_approval"],
         },
       },
     });

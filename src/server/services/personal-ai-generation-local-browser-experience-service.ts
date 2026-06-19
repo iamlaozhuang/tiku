@@ -10,10 +10,15 @@ import {
   resolvePersonalAiGenerationLocalBrowserRequestStateStatus,
   resolvePersonalAiGenerationLocalBrowserResultStateStatus,
 } from "../models/personal-ai-generation-local-browser-experience";
+import {
+  buildPersonalAiGenerationRuntimeBridgeReadModel,
+  type PersonalAiGenerationRuntimeBridgeOptions,
+} from "./personal-ai-generation-runtime-bridge-service";
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
 
 function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
   requestFlow: PersonalAiGenerationRequestFlowDto,
+  options: PersonalAiGenerationRuntimeBridgeOptions,
 ): PersonalAiGenerationLocalBrowserExperienceDto {
   const resultReference = requestFlow.resultReference.resultReference;
 
@@ -55,12 +60,17 @@ function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
       errorState: "supported",
       permissionBlockedState: "supported",
     },
+    runtimeBridge: buildPersonalAiGenerationRuntimeBridgeReadModel(
+      requestFlow,
+      options,
+    ),
     requestFlow,
   };
 }
 
 export function buildPersonalAiGenerationLocalBrowserExperienceReadModel(
   input: unknown,
+  options: PersonalAiGenerationRuntimeBridgeOptions = {},
 ): ApiResponse<PersonalAiGenerationLocalBrowserExperienceDto | null> {
   const requestFlow = buildPersonalAiGenerationRequestFlowReadModel(input);
 
@@ -71,6 +81,7 @@ export function buildPersonalAiGenerationLocalBrowserExperienceReadModel(
   return createSuccessResponse(
     mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
       requestFlow.data,
+      options,
     ),
   );
 }

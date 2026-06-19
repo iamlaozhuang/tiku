@@ -14,6 +14,7 @@ import {
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
 import { buildPersonalAiGenerationLocalBrowserExperienceReadModel } from "./personal-ai-generation-local-browser-experience-service";
+import type { PersonalAiGenerationRuntimeBridgeControl } from "./personal-ai-generation-runtime-bridge-service";
 import type { SessionService } from "./session-service";
 
 export type PersonalAiGenerationRequestUserContext = {
@@ -32,6 +33,7 @@ type PersonalAiGenerationRequestRouteRepository = Pick<
 
 export type PersonalAiGenerationRequestRouteDependencies = {
   requestRepository?: PersonalAiGenerationRequestRouteRepository;
+  runtimeBridgeControl?: PersonalAiGenerationRuntimeBridgeControl;
   now?: () => Date;
 };
 
@@ -322,6 +324,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
 ) {
   const requestRepository =
     dependencies.requestRepository ?? emptyRequestRepository;
+  const runtimeBridgeControl = dependencies.runtimeBridgeControl;
   const now = dependencies.now ?? (() => new Date());
 
   return createRouteHandlersWithErrorEnvelope({
@@ -395,6 +398,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             return createJsonResponse(
               buildPersonalAiGenerationLocalBrowserExperienceReadModel(
                 localBrowserRequestInput,
+                { runtimeBridgeControl },
               ),
             );
           }
