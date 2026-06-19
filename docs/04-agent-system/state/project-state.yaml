@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-provider-smoke-execution-base-url-ready
+currentPhase: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-provider-smoke-execution-base-url-ready
-  status: blocked
-  result: blocked_qwen_base_url_provider_error_redacted
-  sourceStory: userFreshApprovedQwenBaseUrlProviderSmokeExecution
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
-  branch: codex/ap-01-qwen-provider-smoke-execution-base-url-ready
+  id: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
+  status: closed
+  result: qwen_base_url_failure_diagnosis_complete_retry_blocked
+  sourceStory: userRequestedQwenBaseUrlFailureReadOnlyDiagnosis
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+  branch: codex/ap-01-qwen-provider-smoke-base-url-failure-diagnosis
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -806,7 +806,7 @@ localExperienceClosure:
   status: future_scope_non_goal_governance_packet_resolved
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: blocked-gates-approval-package-materialization
+  currentTaskId: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -1489,15 +1489,51 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenProviderSmokeBaseUrlFailureDiagnosis:
+    taskId: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: qwen_base_url_failure_diagnosis_complete_retry_blocked
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+    boundarySummary:
+      validation: pass_read_only_docs_state_official_docs_local_runner_provider_inspection
+      packageMaterialization: AP01_qwen_base_url_failure_diagnosis
+      execution: no_provider_call_retry_blocked_until_fresh_approval
+      matrixStatus: release_blocked
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: alibaba
+      model: qwen-plus
+      envKeyAlias: ALIBABA_API_KEY
+      diagnosedBaseUrlHost: dashscope.aliyuncs.com
+      officialBeijingOpenAiCompatiblePath: /compatible-mode/v1/chat/completions
+      localRunnerAlignment: explicit_base_url_passed_to_create_alibaba
+      localProviderPackageAlignment: alibaba_provider_uses_chat_completions_path
+      likelyRemainingCause: account_region_workspace_model_permission_or_key_type
+      nextBeforeRetry: user_console_region_workspace_model_permission_confirmation
+      nextRetryCandidate: ap-01-qwen-openai-compatible-one-request-isolation-smoke
+      providerCallExecuted: false
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      providerRetry: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen one-request smoke with explicit Alibaba base URL executed exactly once and returned sanitized
-    provider_error with requestCount 1, providerCallExecuted true, and redactionStatus passed. Recommended next work is
-    ap-01-qwen-provider-smoke-base-url-failure-diagnosis: docs/read-only diagnosis of provider/model/base URL/key-region
-    alignment and local runner invocation boundaries, without reading secret values or sending another provider request.
-    Keep Qwen retry/additional provider execution, Cost Calibration Gate, staging/prod/cloud/deploy, payment,
-    external-service, PR, push, force-push, raw sensitive evidence, dependency, schema/migration, product source, and
-    test/e2e changes blocked unless a later task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
+    AP-01 Qwen read-only failure diagnosis completed without reading `.env.local` secret values and without sending a
+    provider request. Local runner/provider wiring aligns with Alibaba Cloud OpenAI-compatible Chat Completions when the
+    explicit Beijing base URL is supplied; remaining likely causes are Alibaba Cloud account-side key region, workspace
+    or sub-workspace mismatch, missing `qwen-plus` model permission/entitlement, key type, or model/API-mode mismatch.
+    Recommended next work is user console confirmation of region, workspace, model permission, and exact base URL; after
+    that, open a fresh one-request Qwen retry task, preferably an `openai_compatible` isolation smoke only if the console
+    checks confirm the endpoint and model. Keep Qwen retry/additional provider execution, Cost Calibration Gate,
+    staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence, dependency,
+    schema/migration, product source, and test/e2e changes blocked unless a later task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
