@@ -18812,17 +18812,76 @@ tasks:
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
     status: blocked
-    result: approval_package_seeded_execution_blocked
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    result: blocked_waiting_fresh_approval_minimum_package_ready
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
     nextApprovalRequired: exact_provider_model_route_allowed_files_request_cost_redaction_and_rollback
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      approvalPackageMaterialization: allowed
+      readRequirements: allowed
+      readEvidence: allowed
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
     blockedCapabilities:
       - providerCall
       - envSecretAccess
       - stagingProdDeploy
       - paymentExternalService
       - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-ai-scoring-provider-execution-approval-package -Capability providerKey -Intent declare_adapter
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-ai-scoring-provider-execution-approval-package -Capability providerCall -Intent declare_adapter
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-ai-scoring-provider-execution-approval-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-ai-scoring-provider-execution-approval-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-01-ai-scoring-provider-execution-approval-package
   - id: ap-02-ops-auth-quota-cost-calibration-approval-package
     title: AP-02 ops auth quota cost calibration approval package
     phase: blocked-gates-approval-package-materialization

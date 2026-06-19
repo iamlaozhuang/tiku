@@ -497,17 +497,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 876cd48d3a087e6a655ac8b37b77df8450df6461
-  lastKnownOriginMasterSha: 876cd48d3a087e6a655ac8b37b77df8450df6461
+  lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
+  lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: blocked-gates-approval-package-materialization
-  status: closed
-  result: approval_packages_materialized_execution_blocked
-  sourceStory: userApprovalPackageSeed.AP00ToAP11
-  planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
-  branch: codex/blocked-gates-approval-packages
+  id: ap-01-ai-scoring-provider-execution-approval-package
+  status: blocked
+  result: blocked_waiting_fresh_approval_minimum_package_ready
+  sourceStory: userApprovalPackageSeed.AP01
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+  branch: codex/ap-serial-approval-package-execution
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1137,14 +1137,37 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentApprovalPackageSerialExecution:
+    taskId: ap-01-ai-scoring-provider-execution-approval-package
+    evaluatedAt: "2026-06-18T19:46:09-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: blocked_waiting_fresh_approval_minimum_package_ready
+    evidence: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+    boundarySummary:
+      validation: pass_docs_state_module_closeout_prepush
+      packageMaterialization: AP01_minimum_approval_package_ready
+      execution: blocked_until_exact_provider_model_route_allowed_files_request_cost_redaction_and_rollback
+      matrixStatus: release_blocked
+      productSource: blocked
+      testOrE2E: blocked
+      providerModel: blocked
+      envSecret: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `blocked-gates-approval-package-materialization` seeds AP-00 through AP-11 as docs/state approval packages. AP-01
-    through AP-11 remain execution-blocked until a later prompt selects one package and restates exact target, allowed
-    files, commands, rollback/stop points, data boundary, and redaction rules. Keep product source, tests/e2e specs,
-    `.env*`, schema/drizzle/migration, package/lockfile/dependency, provider/model, payment,
-    staging/prod/cloud/deploy, external-service, PR, force-push, destructive database operations, raw sensitive
-    evidence, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    AP-01 `ap-01-ai-scoring-provider-execution-approval-package` has a minimum approval package and remains blocked
+    waiting for task-specific fresh approval with exact provider/model target, allowed files, commands, rollback,
+    request/cost ceilings, and redaction evidence boundary. Do not execute provider/model calls or continue AP-02 from
+    this run. Keep product source, tests/e2e specs, `.env*`, schema/drizzle/migration, package/lockfile/dependency,
+    provider/model, payment, staging/prod/cloud/deploy, external-service, PR, force-push, destructive database
+    operations, raw sensitive evidence, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
