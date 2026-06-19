@@ -182,6 +182,25 @@ lastAp08OrgDataExportBoundaryDetailing:
     - external_service
     - staging_prod_cloud_deploy
     - raw_sensitive_evidence
+lastAp09RuntimeCapabilityListInventoryDetailing:
+  taskId: ap-09-runtime-capability-list-inventory-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+  decision: pass_l0_docs_state_runtime_capability_inventory_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-04-standard-ai-generation-scope-decision-detailing
+  blockedGates:
+    - product_source_change
+    - api_ui_data_model_change
+    - schema_migration
+    - dependency_package_lockfile_change
+    - test_e2e_script_change
+    - runtime_validation
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -922,10 +941,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
     status: release_blocked
     blockedGate: audit_artifact_only
-    nextTask: ap-09-runtime-capability-list-approval-package
+    nextTask: ap-09-runtime-capability-implementation-exact-scope-required
   - useCaseId: UC-GATE-PROVIDER-STAGING-EXECUTION
     edition: blocked_gate
     actor: platform_governance
