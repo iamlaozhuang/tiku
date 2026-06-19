@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-console-permission-remediation-handoff
+currentPhase: ap-01-qwen-one-request-post-console-remediation-retry-approval
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-console-permission-remediation-handoff
-  status: closed
-  result: qwen_console_permission_handoff_ready_retry_blocked
-  sourceStory: userRequestedQwenConsolePermissionRemediationHandoff
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
-  branch: codex/ap-01-qwen-console-permission-remediation-handoff
+  id: ap-01-qwen-one-request-post-console-remediation-retry-approval
+  status: blocked
+  result: blocked_qwen_post_console_retry_http_403_provider_error_code_null_redacted
+  sourceStory: userFreshApprovedQwenPostConsoleRemediationOneRequestRetry
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+  branch: codex/ap-01-qwen-one-request-post-console-remediation-retry-approval
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1683,16 +1683,65 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenOneRequestPostConsoleRemediationRetryApproval:
+    taskId: ap-01-qwen-one-request-post-console-remediation-retry-approval
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: blocked_qwen_post_console_retry_http_403_provider_error_code_null_redacted
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+    boundarySummary:
+      validation: blocked_one_request_post_console_retry_http_403_provider_error_code_null
+      packageMaterialization: AP01_qwen_post_console_remediation_retry
+      execution: one_qwen_openai_compatible_retry_failed_http_403
+      matrixStatus: release_blocked
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: openai_compatible
+      providerName: alibaba-qwen
+      model: qwen-plus
+      modelChange: blocked_without_future_fresh_approval
+      envKeyAlias: ALIBABA_API_KEY
+      envSource: .env.local_scoped_alibaba_api_key_only
+      baseUrlHost: dashscope.aliyuncs.com
+      maxRequests: 1
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      retryLimit: 0
+      maxSpendUsd: 0.05
+      requestCount: 1
+      providerCallExecuted: true
+      resultStatus: fail
+      failureCategory: provider_error
+      providerErrorSummary:
+        httpStatus: 403
+        providerErrorCode: null
+      durationMs: 399
+      usageSummary: null
+      redactionStatus: passed
+      likelyRemainingCause: exact_api_model_id_key_workspace_or_openai_compatible_permission
+      nextModuleRunCandidate: ap-01-qwen-exact-model-id-and-key-permission-handoff
+      rawErrorText: blocked
+      providerRetry: blocked
+      additionalProviderExecution: blocked
+      providerConfiguration: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen console permission remediation handoff is ready. The user-provided Bailian/DashScope screenshot confirms
-    region `华北2（北京）`, workspace `TIKUProject`, and visible model authorization for `Qwen3.7-Plus`,
-    `Qwen3.7-Max`, and `Qwen3.6-Plus`, but it does not confirm the local `ALIBABA_API_KEY` workspace binding, exact
-    `qwen-plus` API model alias availability, or OpenAI-compatible endpoint permission. Recommended next work is user
-    console remediation/confirmation, then a fresh-approved one-request retry task
-    `ap-01-qwen-one-request-post-console-remediation-retry-approval`. Keep Qwen retry/additional provider execution,
-    provider configuration change, Cost Calibration Gate, staging/prod/cloud/deploy, payment, external-service, PR,
-    push, force-push, raw sensitive evidence, dependency, schema/migration, product source, and test/e2e changes blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
+    AP-01 Qwen one-request post-console-remediation retry executed exactly one request and stopped with sanitized
+    `providerErrorSummary.httpStatus: 403` and `providerErrorSummary.providerErrorCode: null`. The retry used
+    `openai_compatible/alibaba-qwen/qwen-plus` and did not change model id. Recommended next work is a docs-only
+    `ap-01-qwen-exact-model-id-and-key-permission-handoff` task to confirm the exact API model id shown by Bailian API
+    reference/model detail and the API key workspace/endpoint permission before any further retry. Keep model changes,
+    Qwen retry, additional provider execution, provider configuration change, Cost Calibration Gate,
+    staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence, dependency,
+    schema/migration, product source, and test/e2e changes blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
