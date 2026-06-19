@@ -1,5 +1,141 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-provider-smoke-execution-approval-detailing
+    title: AP-01 provider smoke execution approval detailing
+    phase: ap-01-provider-smoke-execution-approval-detailing
+    sourceStory: userDirectedAp01ProviderSmokeApprovalDetailing
+    dependencies:
+      - ap-01-ai-scoring-provider-execution-approval-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested preparing for real AI interface experience by detailing AP-01 provider smoke execution approval.
+      Scope is limited to clarifying DeepSeek and Qwen provider/model targets, call entrypoint, request ceiling, spend
+      ceiling, rollback, and evidence redaction boundary. The task may run dry-run command-shape validation only. Real
+      provider/model calls, provider configuration, `.env*` read/write/output, secret/env value disclosure, Cost
+      Calibration Gate, staging/prod/cloud/deploy, payment/external-service, dependency, schema/migration, product
+      source, test source, e2e, PR, push, force-push, destructive DB, and raw sensitive evidence remain blocked until
+      fresh task-specific approval.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: high_risk_approval_detailing
+    moduleRunVersion: 2
+    status: closed
+    result: provider_smoke_approval_detailing_ready_execution_blocked
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-provider-smoke-approval-detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    nextApprovalRequired: exact_provider_smoke_execute_command_request_spend_rollback_redaction_approval
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      approvalDetailing: allowed
+      readRequirements: allowed
+      readEvidence: allowed
+      dryRunProviderSmokeCommandShape: allowed
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      providerConfiguration: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    providerSmokeApprovalBoundary:
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      deepSeek:
+        provider: openai_compatible
+        providerName: deepseek
+        baseUrl: https://api.deepseek.com
+        envKeyAlias: DEEPSEEK_API_KEY
+        model: deepseek-v4-flash
+      qwen:
+        provider: alibaba
+        envKeyAlias: ALIBABA_API_KEY
+        model: qwen-plus
+      maxRequestsPerProvider: 1
+      maxTotalRequestsIfBothProvidersApproved: 2
+      timeoutMsPerProvider: 30000
+      retryLimit: 0
+      maxSpendOneProviderUsd: 0.05
+      maxSpendBothProvidersUsd: 0.10
+      evidenceMode: redacted_envelope_only
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - providerCall
+      - providerConfiguration
+      - envSecretAccess
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - scripts/local/Invoke-DeepSeekProviderSmoke.ps1
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - tests/unit/phase-10-local-deepseek-provider-smoke-runtime.test.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name deepseek --base-url https://api.deepseek.com --model deepseek-v4-flash --env-key DEEPSEEK_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-provider-smoke-execution-approval-detailing -Capability providerKey -Intent declare_adapter
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId ap-01-provider-smoke-execution-approval-detailing -Capability providerCall -Intent declare_adapter
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts tests/unit/phase-10-local-deepseek-provider-smoke-runtime.test.ts
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-provider-smoke-execution-approval-detailing
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-provider-smoke-execution-approval-detailing
   - id: local-machine-unit-failure-repair-before-full-phase-1
     title: Local machine unit failure repair before full phase 1
     phase: local-machine-unit-failure-repair-before-full-phase-1

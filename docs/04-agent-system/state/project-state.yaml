@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-machine-unit-failure-repair-before-full-phase-1
+currentPhase: ap-01-provider-smoke-execution-approval-detailing
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: local-machine-unit-failure-repair-before-full-phase-1
+  id: ap-01-provider-smoke-execution-approval-detailing
   status: closed
-  result: passed_full_phase_1_after_unit_repairs
-  sourceStory: localMachineFreshDbPhase1ValidationRerunFollowUp
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
-  branch: codex/local-machine-phase-1-unit-repair-and-rerun
+  result: provider_smoke_approval_detailing_ready_execution_blocked
+  sourceStory: userDirectedAp01ProviderSmokeApprovalDetailing
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+  branch: codex/ap-01-provider-smoke-approval-detailing
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1160,14 +1160,46 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01ProviderSmokeApprovalDetailing:
+    taskId: ap-01-provider-smoke-execution-approval-detailing
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: provider_smoke_approval_detailing_ready_execution_blocked
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    boundarySummary:
+      validation: pass_docs_state_dry_run_unit_lint_typecheck_module_closeout
+      packageMaterialization: AP01_provider_smoke_detailing_ready
+      execution: blocked_until_fresh_exact_provider_smoke_execute_approval
+      matrixStatus: release_blocked
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      deepSeekProvider: openai_compatible_deepseek_deepseek_v4_flash
+      qwenProvider: alibaba_qwen_plus
+      maxRequestsPerProvider: 1
+      maxTotalRequestsIfBothProvidersApproved: 2
+      timeoutMsPerProvider: 30000
+      retryLimit: 0
+      maxSpendBothProvidersUsd: 0.10
+      productSource: blocked
+      testOrE2E: blocked
+      providerModel: blocked
+      providerConfiguration: blocked
+      envSecret: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Local machine phase 1 now passes on a fresh disposable local dev database after repairing the two stable unit
-    failures. Next recommended work is an approval-package selection decision: either prepare AP-01 real provider/model
-    smoke execution with exact provider/model, route/files, request and cost ceilings, rollback, and redaction
-    requirements, or keep provider gates blocked and continue local-only product polish. Keep dependency, schema,
-    migration, `.env*`, staging/prod/cloud/deploy, payment, external-service, PR, force-push, raw sensitive evidence,
-    and Cost Calibration Gate blocked unless a fresh task approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+    AP-01 provider smoke approval detailing is prepared for DeepSeek and Qwen, but execution remains blocked. Recommended
+    next work is either a tiny smoke harness hardening task to add an explicit output token cap before real spend, or a
+    fresh AP-01 provider smoke execution approval that names exactly one or both approved execute commands, max requests,
+    max spend, rollback, and redaction boundaries. Keep provider/model calls, provider configuration, `.env*`,
+    staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence, and Cost
+    Calibration Gate blocked until the next task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
