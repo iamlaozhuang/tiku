@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-user-visible-result-one-request-materialization-execution
+currentPhase: ap-01-qwen-user-visible-result-local-db-persistence-approval
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-user-visible-result-one-request-materialization-execution
+  id: ap-01-qwen-user-visible-result-local-db-persistence-approval
   status: closed
-  result: pass_one_request_route_integrated_qwen_materialized_redacted_in_memory
-  sourceStory: userApprovedQwenUserVisibleResultOneRequestMaterializationExecution
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
-  branch: codex/ap-01-qwen-user-visible-result-one-request-materialization-execution
+  result: pass_docs_state_local_db_persistence_approval_no_call_no_db_write
+  sourceStory: userRequestedQwenUserVisibleResultLocalDbPersistenceApproval
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+  branch: codex/ap-01-qwen-user-visible-result-local-db-persistence-approval
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -2499,15 +2499,67 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenUserVisibleResultLocalDbPersistenceApproval:
+    taskId: ap-01-qwen-user-visible-result-local-db-persistence-approval
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    decision: pass_docs_state_local_db_persistence_approval_no_call_no_db_write
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+    boundarySummary:
+      validation: pass_docs_state_approval_no_env_read_no_provider_call_no_db_write
+      packageMaterialization: AP01_qwen_user_visible_result_local_db_persistence_approval
+      matrixStatus: release_blocked
+      approvedNextTask: ap-01-qwen-user-visible-result-local-db-persistence-execution
+      provider: openai_compatible
+      providerName: alibaba-qwen
+      model: qwen3.7-max
+      providerCallExecutedThisTask: false
+      envLocalReadThisTask: false
+      databaseUrlReadThisTask: false
+      databaseWriteThisTask: false
+      nextExecutionProviderCall: blocked
+      nextExecutionDatabaseUrlRead: approved_database_url_alias_local_only
+      nextExecutionDatabaseWrite: approved_redacted_draft_result_local_only
+      nextExecutionTargetTable: personal_ai_generation_result
+      nextExecutionPrerequisiteTaskTable: ai_generation_task
+      nextExecutionRawSql: blocked
+      nextExecutionDestructiveDbOperation: blocked
+      nextRecommendedTask: ap-01-qwen-user-visible-result-local-db-persistence-execution
+      ap01LocalOnlyRemainingStepsAfterThisTask: 2
+      ap01ReleaseGradeAdditionalGates:
+        - cost_calibration_gate
+        - staging_prod_provider_deploy_approval
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawErrorText: blocked
+      rawModelOutput: blocked
+      providerPayload: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      envSecretOutput: blocked
+      databaseUrlOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen user-visible result one-request materialization execution passed with exactly one route-integrated Qwen
-    request and redacted in-memory materialization. The next recommended task is
-    `ap-01-qwen-user-visible-result-local-db-persistence-approval`, scoped to approving whether the redacted result may
-    be persisted through the real local `personal_ai_generation_result` path without an additional provider call. Raw
-    prompt/response/model output/provider payload/error/key/token/database URL remain barred from evidence and
-    persistence. Additional provider calls, retry, streaming, Cost Calibration Gate, staging/prod/cloud/deploy, payment,
-    external-service, PR, push, force-push, dependency, and schema/migration remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
+    AP-01 Qwen user-visible result local DB persistence approval is materialized. The next recommended task is
+    `ap-01-qwen-user-visible-result-local-db-persistence-execution`, scoped to no additional provider calls and local-only
+    `DATABASE_URL` use for writing an already redacted draft result through the real `personal_ai_generation_result`
+    path. Raw prompt/response/model output/provider payload/error/key/token/full database URL remain barred from evidence
+    and persistence. Additional provider calls, retry, streaming, Cost Calibration Gate, staging/prod/cloud/deploy,
+    payment, external-service, PR, push, force-push, dependency, schema/migration, source/test/script/e2e changes, and
+    destructive DB work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
