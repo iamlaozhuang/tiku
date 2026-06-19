@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-05-standard-org-self-service-scope-decision-detailing
+currentPhase: ap-10-current-checkpoint-audit-target-detailing
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-05-standard-org-self-service-scope-decision-detailing
+  id: ap-10-current-checkpoint-audit-target-detailing
   status: closed
-  result: pass_l0_product_privacy_scope_decision_options_no_scope_change_no_schema_no_api_ui
-  sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP05
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
-  branch: codex/ap-05-standard-org-self-service-scope-decision-detailing
+  result: pass_l0_current_checkpoint_audit_target_package_no_source_test_e2e_repair
+  sourceStory: userRequestedBlockedUseCaseAccelerationSerialAP10
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  branch: codex/ap-10-current-checkpoint-audit-target-detailing
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: ap_05_standard_org_self_service_scope_decision_detailing_closed
+  status: ap_10_current_checkpoint_audit_target_detailing_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: ap-05-standard-org-self-service-scope-decision-detailing
+  currentTaskId: ap-10-current-checkpoint-audit-target-detailing
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -3270,18 +3270,59 @@ localExperienceClosure:
       browserPlaywrightRuntime: blocked
       formalAdoption: blocked
       costCalibrationGate: blocked
+  currentAp10CurrentCheckpointAuditTargetDetailing:
+    taskId: ap-10-current-checkpoint-audit-target-detailing
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-10
+    useCaseIds:
+      - UC-GATE-CURRENT-CHECKPOINT
+    decision: pass_l0_current_checkpoint_audit_target_package_no_source_test_e2e_repair
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+    boundarySummary:
+      validation: pass_docs_state_audit_target_detailing
+      packageMaterialization: AP10_current_checkpoint_audit_target_detailing
+      matrixStatus: release_blocked
+      repairExecuted: false
+      sourceTestE2eChanged: false
+      exactFutureL1ApprovalRequired: true
+      nextRecommendedTask: ap-11-source-governance-change-control-detailing
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      productSourceChanged: false
+      testSourceChanged: false
+      e2eSpecChanged: false
+      scriptChanged: false
+      schemaMigrationChanged: false
+      sourceRepair: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      envSecretOutput: blocked
+      databaseUrlRead: blocked
+      databaseUrlOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      providerModelCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      rawSensitiveEvidence: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-05 L0 standard organization self-service scope decision detailing is current and keeps
-    UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL release-blocked without adopting a scope change. The fastest safe next
-    task is `ap-10-current-checkpoint-audit-target-detailing` as an L0 audit target package. L0 docs/state governance can
-    be batched; L1/L2 local-only work requires exact allowed files, commands, redaction evidence, and stop conditions;
-    L3 provider/cost/staging/prod/deploy/payment/OCR/export/schema/dependency/source/test/high-risk work remains blocked
+    AP-10 L0 current checkpoint audit target detailing is current and keeps UC-GATE-CURRENT-CHECKPOINT release-blocked
+    without source/test/e2e repair. The fastest safe next task is `ap-11-source-governance-change-control-detailing` as
+    an L0 source governance change-control package. L0 docs/state governance can be batched; L1/L2 local-only work
+    requires exact allowed files, commands, redaction evidence, rollback, and stop conditions; L3
+    provider/cost/staging/prod/deploy/payment/OCR/export/schema/dependency/source/test/high-risk work remains blocked
     until fresh approval. Raw prompt/response/model output/provider payload/error/key/token/full database URL remain
     barred from evidence and persistence. Additional provider calls, retry, streaming, Cost Calibration Gate,
     staging/prod/cloud/deploy, payment, external-service, PR, force-push, dependency, schema/migration,
     source/test/script/e2e changes, Browser/Playwright runtime unless separately approved, destructive DB work, DB reads,
     DB writes, raw SQL, and formal adoption remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md

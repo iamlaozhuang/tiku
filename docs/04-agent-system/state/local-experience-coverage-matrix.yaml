@@ -243,6 +243,26 @@ lastAp05StandardOrgSelfServiceScopeDecisionDetailing:
     - privacy_data_access
     - staging_prod_cloud_deploy
     - raw_sensitive_evidence
+lastAp10CurrentCheckpointAuditTargetDetailing:
+  taskId: ap-10-current-checkpoint-audit-target-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-GATE-CURRENT-CHECKPOINT
+  decision: pass_l0_current_checkpoint_audit_target_package_keep_repair_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  matrixStatus: release_blocked
+  repairExecuted: false
+  nextRecommendedTask: ap-11-source-governance-change-control-detailing
+  blockedGates:
+    - source_repair
+    - test_change
+    - e2e_spec_change
+    - browser_playwright_runtime
+    - database_read_write
+    - env_secret
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -1011,10 +1031,10 @@ matrix:
     uiSurface: audit_only
     unitEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
     status: release_blocked
-    blockedGate: audit_reference_only
-    nextTask: ap-10-current-checkpoint-audit-repair-approval-package
+    blockedGate: audit_reference_only_source_test_e2e_repair_requires_l1_fresh_approval
+    nextTask: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
   - useCaseId: UC-AUDIT-SOURCE-GOVERNANCE
     edition: audit_only
     actor: platform_governance
