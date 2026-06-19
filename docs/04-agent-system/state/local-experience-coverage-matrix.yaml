@@ -516,10 +516,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-exact-model-id-and-key-permission-handoff.md
     status: release_blocked
-    blockedGate: qwen_post_console_retry_http_403_exact_model_or_key_permission_cost_calibration_staging_prod_provider_configuration
-    nextTask: ap-01-qwen-exact-model-id-and-key-permission-handoff
+    blockedGate: qwen3_7_max_one_request_smoke_fresh_approval_cost_calibration_staging_prod_provider_configuration
+    nextTask: ap-01-qwen3-7-max-one-request-smoke-approval
   - useCaseId: UC-STD-KN-RECOMMENDATION
     edition: standard
     actor: content_admin_system
