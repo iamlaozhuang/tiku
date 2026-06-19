@@ -283,6 +283,42 @@ lastAp11SourceGovernanceChangeControlDetailing:
     - source_test_e2e_change
     - database_read_write
     - env_secret
+lastAp02Ap11FreshApprovalDecisionPack:
+  taskId: ap-02-ap-11-fresh-approval-decision-pack
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-ADV-OPS-AUTH-QUOTA
+    - UC-GATE-PROVIDER-STAGING-EXECUTION
+    - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    - UC-FUTURE-ONLINE-PAYMENT
+    - UC-FUTURE-OCR-AUTO-IMPORT
+    - UC-FUTURE-ORG-DATA-EXPORT
+    - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    - UC-GATE-CURRENT-CHECKPOINT
+    - UC-AUDIT-SOURCE-GOVERNANCE
+  decision: pass_l0_fresh_approval_decision_pack_keep_all_high_risk_execution_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-02-ap-11-fresh-approval-decision-pack.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ap-11-fresh-approval-decision-pack.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
+  productScopeChanged: false
+  highRiskExecuted: false
+  blockedGates:
+    - product_scope_change
+    - source_test_e2e_change
+    - schema_migration
+    - dependency_package_lockfile_change
+    - env_secret
+    - database_read_write
+    - provider_model_call
+    - cost_calibration_gate
+    - staging_prod_cloud_deploy
+    - payment_ocr_export_external_service
+    - source_governance_rewrite
+    - formal_adoption
+    - sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
