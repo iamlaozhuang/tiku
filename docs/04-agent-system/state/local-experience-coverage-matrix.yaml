@@ -143,6 +143,26 @@ lastAp06OnlinePaymentProviderBoundaryDetailing:
     - database_read_write
     - schema_migration
     - raw_sensitive_evidence
+lastAp07OcrAutoImportProviderBoundaryDetailing:
+  taskId: ap-07-ocr-auto-import-provider-boundary-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-OCR-AUTO-IMPORT
+  decision: pass_l0_docs_state_ocr_boundary_detailing_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-08-org-data-export-boundary-detailing
+  blockedGates:
+    - ocr_parser_execution
+    - provider_model_call
+    - env_secret
+    - object_storage_write
+    - schema_migration
+    - dependency_package_lockfile_change
+    - database_read_write
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -855,10 +875,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
-    nextTask: ap-07-ocr-auto-import-approval-package
+    nextTask: ap-07-ocr-auto-import-execution-fresh-approval-required
   - useCaseId: UC-FUTURE-ORG-DATA-EXPORT
     edition: future_scope
     actor: organization_admin
