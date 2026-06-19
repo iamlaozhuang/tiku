@@ -221,6 +221,50 @@ describe("run-personal-ai-provider-smoke", () => {
     expectForbiddenEvidenceKeysAbsent(envelope);
   });
 
+  it("records sanitized provider status and error code without raw error text", async () => {
+    const config = buildCliConfig([...baseArgv, "--execute"]);
+    const readSecret = vi.fn(() => "fixture-provider-key");
+    const callProvider = vi.fn(async () => {
+      throw {
+        statusCode: 403,
+        data: {
+          code: "Model.AccessDenied",
+          message: "raw provider message must not be recorded",
+        },
+        responseBody: "raw provider body must not be recorded",
+      };
+    });
+
+    const envelope = await runProviderSmokeSandbox(config, {
+      env: { TIKU_PROVIDER_SMOKE_APPROVED: "1" },
+      readSecret,
+      callProvider,
+      now: vi.fn().mockReturnValueOnce(100).mockReturnValueOnce(145),
+    });
+
+    expect(envelope.code).toBe(502);
+    expect(envelope.data).toMatchObject({
+      providerCallExecuted: true,
+      resultStatus: "fail",
+      requestCount: 1,
+      durationMs: 45,
+      failureCategory: "provider_error",
+      providerErrorSummary: {
+        httpStatus: 403,
+        providerErrorCode: "Model.AccessDenied",
+      },
+      redactionStatus: "passed",
+    });
+
+    const serialized = JSON.stringify(envelope);
+    expect(serialized).not.toContain("fixture-provider-key");
+    expect(serialized).not.toContain(
+      "raw provider message must not be recorded",
+    );
+    expect(serialized).not.toContain("raw provider body must not be recorded");
+    expectForbiddenEvidenceKeysAbsent(envelope);
+  });
+
   it("passes explicit Alibaba base URL into the provider factory", async () => {
     const languageModel = Symbol("language-model");
     const languageModelFactory = vi.fn(() => languageModel);

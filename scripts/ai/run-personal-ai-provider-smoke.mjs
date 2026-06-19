@@ -175,6 +175,7 @@ export async function runProviderSmokeSandbox(config, dependencies = {}) {
           providerCallExecuted: true,
           resultStatus: "fail",
           failureCategory: resolveFailureCategory(providerError),
+          providerErrorSummary: summarizeProviderError(providerError),
           durationMs,
           usageSummary: null,
           redactionStatus: "passed",
@@ -326,6 +327,94 @@ function resolveFailureCategory(providerError) {
   }
 
   return "provider_error";
+}
+
+function summarizeProviderError(providerError) {
+  return {
+    httpStatus: resolveProviderHttpStatus(providerError),
+    providerErrorCode: resolveProviderErrorCode(providerError),
+  };
+}
+
+function resolveProviderHttpStatus(providerError) {
+  const statusCandidates = [
+    getObjectPath(providerError, ["status"]),
+    getObjectPath(providerError, ["statusCode"]),
+    getObjectPath(providerError, ["response", "status"]),
+    getObjectPath(providerError, ["response", "statusCode"]),
+    getObjectPath(providerError, ["cause", "status"]),
+    getObjectPath(providerError, ["cause", "statusCode"]),
+  ];
+
+  for (const statusCandidate of statusCandidates) {
+    const normalizedStatus = normalizeHttpStatus(statusCandidate);
+
+    if (normalizedStatus !== null) {
+      return normalizedStatus;
+    }
+  }
+
+  return null;
+}
+
+function resolveProviderErrorCode(providerError) {
+  const codeCandidates = [
+    getObjectPath(providerError, ["code"]),
+    getObjectPath(providerError, ["data", "code"]),
+    getObjectPath(providerError, ["error", "code"]),
+    getObjectPath(providerError, ["response", "data", "code"]),
+    getObjectPath(providerError, ["response", "body", "code"]),
+    getObjectPath(providerError, ["cause", "code"]),
+  ];
+
+  for (const codeCandidate of codeCandidates) {
+    const normalizedCode = normalizeProviderErrorCode(codeCandidate);
+
+    if (normalizedCode !== null) {
+      return normalizedCode;
+    }
+  }
+
+  return null;
+}
+
+function normalizeHttpStatus(value) {
+  const numericValue =
+    typeof value === "string" ? Number.parseInt(value, 10) : value;
+
+  return Number.isInteger(numericValue) &&
+    numericValue >= 100 &&
+    numericValue <= 599
+    ? numericValue
+    : null;
+}
+
+function normalizeProviderErrorCode(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedCode = value.trim();
+
+  return normalizedCode.length > 0 &&
+    normalizedCode.length <= 80 &&
+    /^[A-Za-z0-9._:-]+$/.test(normalizedCode)
+    ? normalizedCode
+    : null;
+}
+
+function getObjectPath(value, pathSegments) {
+  return pathSegments.reduce((currentValue, pathSegment) => {
+    if (
+      currentValue &&
+      typeof currentValue === "object" &&
+      pathSegment in currentValue
+    ) {
+      return currentValue[pathSegment];
+    }
+
+    return undefined;
+  }, value);
 }
 
 function resolveNow(dependencies) {

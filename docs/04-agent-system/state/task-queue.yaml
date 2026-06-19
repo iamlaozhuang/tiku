@@ -1,5 +1,137 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-redacted-provider-error-code-diagnostics
+    title: AP-01 Qwen redacted provider error code diagnostics
+    phase: ap-01-qwen-redacted-provider-error-code-diagnostics
+    sourceStory: userRequestedQwenRedactedProviderErrorCodeDiagnostics
+    dependencies:
+      - ap-01-qwen-openai-compatible-one-request-isolation-smoke
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a new task `ap-01-qwen-redacted-provider-error-code-diagnostics` to change only the smoke runner
+      error classification so it can record sanitized HTTP status and provider error code without recording raw error
+      text. Scope is limited to `scripts/ai/run-personal-ai-provider-smoke.mjs`,
+      `tests/unit/run-personal-ai-provider-smoke.test.ts`, docs/state/evidence/audit/task-plan updates, local dry-run,
+      unit/lint/typecheck validation, and local commit. This task must not read `.env.local`, must not execute any
+      provider/model call, must not retry Qwen, and must keep Cost Calibration Gate, staging/prod/cloud/deploy,
+      payment/external-service, dependency, schema/migration, product source outside the smoke runner, e2e changes, PR,
+      push, force-push, destructive DB, raw provider error, raw prompt, raw payload, raw response, key, token,
+      Authorization header, and raw sensitive evidence blocked. A future one-request diagnostic run requires separate
+      fresh approval.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: closed
+    result: redacted_provider_error_code_diagnostics_ready_provider_call_blocked
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-redacted-provider-error-code-diagnostics
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    nextApprovalRequired: qwen_one_request_redacted_error_code_diagnostic_run_requires_fresh_approval
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      smokeRunnerSourceChange: approved_error_classification_only
+      smokeRunnerUnitTestChange: approved_tdd_red_green
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      providerRetry: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      envFileWriteByCodex: blocked
+      costCalibrationGate: blocked
+      productSourceChange: scoped_smoke_runner_only
+      testChange: scoped_smoke_runner_unit_test_only
+      e2eSpecChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    implementationBoundary:
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      testFile: tests/unit/run-personal-ai-provider-smoke.test.ts
+      allowedBehaviorChange: sanitized_provider_http_status_and_error_code_summary
+      rawErrorText: blocked
+      providerCallDuringTask: blocked
+      futureDiagnosticRun: requires_fresh_approval
+    blockedCapabilities:
+      - envLocalRead
+      - envSecretOutput
+      - envFileWriteByCodex
+      - providerCall
+      - providerRetry
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - productSourceChangeOutsideSmokeRunner
+      - e2eRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - pr
+      - push
+      - forcePush
+      - costCalibrationGate
+    allowedFiles:
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-openai-compatible-one-request-isolation-smoke.md
+      - package.json
+      - node_modules/@ai-sdk/alibaba/**
+      - node_modules/@ai-sdk/openai-compatible/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name alibaba-qwen --base-url https://dashscope.aliyuncs.com/compatible-mode/v1 --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - npx.cmd prettier --write --ignore-unknown scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+      - npx.cmd prettier --check --ignore-unknown scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-redacted-provider-error-code-diagnostics
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-redacted-provider-error-code-diagnostics
   - id: ap-01-qwen-openai-compatible-one-request-isolation-smoke
     title: AP-01 Qwen OpenAI-compatible one-request isolation smoke
     phase: ap-01-qwen-openai-compatible-one-request-isolation-smoke
