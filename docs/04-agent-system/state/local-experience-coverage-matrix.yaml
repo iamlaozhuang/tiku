@@ -104,6 +104,26 @@ lastAp02OpsAuthQuotaCostCalibrationApprovalDetailing:
     - staging_prod_cloud_deploy
     - source_test_e2e_script_change
     - raw_sensitive_evidence
+lastAp03ProviderStagingExecutionApprovalDetailing:
+  taskId: ap-03-provider-staging-execution-approval-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-GATE-PROVIDER-STAGING-EXECUTION
+  decision: pass_l0_docs_state_approval_detailing_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-06-online-payment-provider-boundary-detailing
+  blockedGates:
+    - provider_model_call
+    - env_secret
+    - staging_prod_cloud_deploy
+    - provider_configuration_change
+    - database_read_write
+    - schema_migration
+    - dependency_package_lockfile_change
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -858,10 +878,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
-    nextTask: ap-03-provider-staging-execution-approval-package
+    nextTask: ap-03-provider-staging-execution-fresh-approval-required
   - useCaseId: UC-GATE-CURRENT-CHECKPOINT
     edition: audit_only
     actor: platform_governance
