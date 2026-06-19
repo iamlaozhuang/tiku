@@ -1,5 +1,209 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-in-app-ai-one-request-execution
+    title: AP-01 Qwen in-app AI one-request execution
+    phase: ap-01-qwen-in-app-ai-one-request-execution
+    sourceStory: userRequestedQwenInAppAiOneRequestExecution
+    dependencies:
+      - ap-01-qwen-in-app-ai-one-request-execution-approval
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested execution of the approved AP-01 one real local Qwen request. Scope is limited to one provider
+      request using `openai_compatible` / `alibaba-qwen` / `qwen3.7-max` with base URL
+      `https://dashscope.aliyuncs.com/compatible-mode/v1`, maxRequests=1, maxRetries=0, timeoutMs=30000, max spend
+      0.10 USD, and redacted evidence only. This task may read `.env.local` only to load the `ALIBABA_API_KEY` alias into
+      the local process for the one provider request. It must not output, modify, copy, stage, or commit `.env*` content;
+      must not retry; must not run additional provider requests; must not change source, tests, scripts, packages,
+      lockfiles, schema, migrations, e2e specs, provider/model/base URL configuration, or runtime behavior; and must keep
+      streaming, Cost Calibration Gate, staging/prod/cloud/deploy, payment/external-service, PR, push, force-push,
+      destructive DB, and raw sensitive evidence blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: local_provider_execution
+    moduleRunVersion: 2
+    status: closed
+    result: pass_one_request_qwen_provider_runner_route_integration_pending
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-in-app-ai-one-request-execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    capabilities:
+      localProviderExecution: approved_one_request_only
+      envLocalRead: approved_alibaba_api_key_alias_only
+      envSecretOutput: blocked
+      envFileWriteByCodex: blocked
+      providerCall: approved_one_request_only
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      modelChangeExecution: blocked
+      costCalibrationGate: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    executionBoundary:
+      currentInAppEntry:
+        uiRoute: /ai-generation
+        submitRoute: POST /api/v1/personal-ai-generation-requests
+        requestMode: local_browser_experience
+        routeRealProviderExecution: not_implemented
+      executionEntry: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider:
+        provider: openai_compatible
+        providerName: alibaba-qwen
+        model: qwen3.7-max
+        baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+        baseUrlHost: dashscope.aliyuncs.com
+        envKeyAlias: ALIBABA_API_KEY
+      limits:
+        maxRequests: 1
+        maxRetries: 0
+        timeoutMs: 30000
+        maxOutputTokensApprovalCeiling: 32
+        runnerMaxOutputTokens: 8
+        maxSpendUsd: 0.10
+        stopIfTotalTokensGreaterThan: 2000
+        stopIfReasoningTokensGreaterThan: 1800
+        streaming: blocked
+        formalCostCalibrationGate: blocked
+      evidenceBoundary:
+        allowed:
+          - command_name
+          - pass_fail
+          - request_count
+          - provider_model_base_url_host
+          - sanitized_http_status
+          - sanitized_provider_error_code
+          - aggregate_token_counts
+          - duration_ms
+          - redaction_pass_fail
+        blocked:
+          - raw_prompt
+          - raw_response
+          - raw_model_output
+          - raw_provider_error_text
+          - provider_payload
+          - request_body
+          - authorization_header
+          - api_key
+          - token
+          - secret
+          - env_file_content
+          - database_url
+          - raw_db_rows
+          - raw_question
+          - raw_answer
+          - raw_standard_answer
+          - raw_analysis
+          - raw_material
+          - screenshots
+          - traces
+          - html_reports
+      stopConditions:
+        - stop_after_first_provider_request_regardless_of_pass_or_fail
+        - do_not_retry_provider_failures
+        - stop_if_raw_sensitive_evidence_would_be_required
+      result:
+        providerCallExecuted: true
+        requestCount: 1
+        resultStatus: pass
+        failureCategory: null
+        durationMs: 14583
+        usageSummary:
+          inputTokens: 24
+          outputTokens: 692
+          totalTokens: 716
+          reasoningTokens: 686
+          cachedInputTokens: 0
+        redactionStatus: passed
+        routeIntegratedProviderExecution: pending_separate_approval
+        costCalibrationGate: blocked
+    blockedCapabilities:
+      - envSecretOutput
+      - envFileWriteByCodex
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeBeyondQwen37Max
+      - costCalibrationGate
+      - productSourceChange
+      - testChange
+      - e2eRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - pr
+      - push
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.ts
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - node --version
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "<redacted one-request ALIBABA_API_KEY loader and node scripts/ai/run-personal-ai-provider-smoke.mjs execution>"
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-in-app-ai-one-request-execution
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-in-app-ai-one-request-execution
   - id: ap-01-qwen-in-app-ai-one-request-execution-approval
     title: AP-01 Qwen in-app AI one-request execution approval
     phase: ap-01-qwen-in-app-ai-one-request-execution-approval
