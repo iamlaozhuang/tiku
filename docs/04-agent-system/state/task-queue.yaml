@@ -18696,3 +18696,339 @@ tasks:
     commitSha: null
     retryCount: 0
     lastFailurePath: null
+  - id: blocked-gates-approval-package-materialization
+    title: Blocked gates approval package materialization
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP00ToAP11
+    dependencies:
+      - final-audit-gate-governance-packet
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-18 user prompt to fresh approve AP-00 through AP-11 for docs/state approval-package
+      materialization only. This authorizes creating the bounded approval/task packet, task plan/evidence/audit,
+      task-queue/project-state/matrix sync, local validation, local commit, fast-forward merge to master, push
+      origin/master, and merged short-branch cleanup when gates pass. It does not authorize provider/model calls,
+      env/secret read/write/output, staging/prod/cloud/deploy, payment/external-service, Cost Calibration Gate,
+      schema/migration, package/lockfile/dependency, product source, tests/e2e changes, PR, force-push, destructive DB,
+      or sensitive evidence exposure.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    targetClosureItem: AP-00 through AP-11 approval package seed
+    behaviorBoundary: approval-package::docs_state_materialization_only
+    approvalPackageIds:
+      - AP-00
+      - AP-01
+      - AP-02
+      - AP-03
+      - AP-04
+      - AP-05
+      - AP-06
+      - AP-07
+      - AP-08
+      - AP-09
+      - AP-10
+      - AP-11
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_bounded_packet_serial
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: approval_packages_materialized_execution_blocked
+    claimedAt: "2026-06-18T19:21:12-07:00"
+    validatedAt: "2026-06-18T19:21:12-07:00"
+    closedAt: "2026-06-18T19:21:12-07:00"
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      approvalPackageMaterialization: allowed
+      readRequirements: allowed
+      readEvidence: allowed
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+      - docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId blocked-gates-approval-package-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId blocked-gates-approval-package-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId blocked-gates-approval-package-materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    branch: codex/blocked-gates-approval-packages
+    commitSha: null
+    retryCount: 0
+    lastFailurePath: null
+  - id: ap-01-ai-scoring-provider-execution-approval-package
+    title: AP-01 AI scoring provider execution approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP01
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: exact_provider_model_route_allowed_files_request_cost_redaction_and_rollback
+    blockedCapabilities:
+      - providerCall
+      - envSecretAccess
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+  - id: ap-02-ops-auth-quota-cost-calibration-approval-package
+    title: AP-02 ops auth quota cost calibration approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP02
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: quota_unit_ledger_cost_source_measurement_scope_and_redacted_evidence
+    blockedCapabilities:
+      - providerCall
+      - paymentExternalService
+      - costCalibrationGate
+      - envSecretAccess
+  - id: ap-03-provider-staging-execution-approval-package
+    title: AP-03 provider staging execution approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP03
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-GATE-PROVIDER-STAGING-EXECUTION
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: staging_resource_provider_ceiling_command_list_rollback_owner_acceptance
+    blockedCapabilities:
+      - providerCall
+      - envSecretAccess
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+  - id: ap-04-standard-ai-generation-scope-change-approval-package
+    title: AP-04 standard AI generation scope change approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP04
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: product_scope_change_provider_env_quota_cost_formal_adoption
+    blockedCapabilities:
+      - productSourceChange
+      - providerCall
+      - envSecretAccess
+      - costCalibrationGate
+  - id: ap-05-standard-org-self-service-scope-change-approval-package
+    title: AP-05 standard org self-service scope change approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP05
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: product_scope_change_privacy_schema_api_ui_deploy_data_boundary
+    blockedCapabilities:
+      - productSourceChange
+      - schemaMigration
+      - stagingProdDeploy
+      - envSecretAccess
+  - id: ap-06-online-payment-approval-package
+    title: AP-06 online payment approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP06
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-ONLINE-PAYMENT
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: payment_provider_refund_invoice_settlement_reconciliation_env_deploy
+    blockedCapabilities:
+      - paymentExternalService
+      - envSecretAccess
+      - stagingProdDeploy
+      - dependencyIntroduction
+  - id: ap-07-ocr-auto-import-approval-package
+    title: AP-07 OCR auto import approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP07
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-OCR-AUTO-IMPORT
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: ocr_parser_provider_storage_schema_dependency_import_rollback
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - externalService
+  - id: ap-08-org-data-export-approval-package
+    title: AP-08 organization data export approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP08
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-ORG-DATA-EXPORT
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: export_format_file_generation_download_privacy_permission_audit_deploy
+    blockedCapabilities:
+      - productSourceChange
+      - externalService
+      - stagingProdDeploy
+      - sensitiveEvidence
+  - id: ap-09-runtime-capability-list-approval-package
+    title: AP-09 runtime capability list approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP09
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: capability_model_api_ui_data_model_allowed_files_validation_rollback
+    blockedCapabilities:
+      - productSourceChange
+      - schemaMigration
+      - testChange
+  - id: ap-10-current-checkpoint-audit-repair-approval-package
+    title: AP-10 current checkpoint audit repair approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP10
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-GATE-CURRENT-CHECKPOINT
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: exact_audit_target_allowed_source_test_e2e_files_validation_stop_conditions
+    blockedCapabilities:
+      - productSourceChange
+      - testChange
+      - e2eSpecChange
+      - envSecretAccess
+  - id: ap-11-source-governance-change-approval-package
+    title: AP-11 source governance change approval package
+    phase: blocked-gates-approval-package-materialization
+    sourceStory: userApprovalPackageSeed.AP11
+    dependencies:
+      - blocked-gates-approval-package-materialization
+    useCaseIds:
+      - UC-AUDIT-SOURCE-GOVERNANCE
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked_pending_specific_execution_approval
+    result: approval_package_seeded_execution_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-18-blocked-gates-approval-package-materialization.md
+    nextApprovalRequired: source_ids_catalog_matrix_rows_requirement_change_rules_blocked_gates
+    blockedCapabilities:
+      - productSourceChange
+      - sourceGovernanceRewrite
+      - sensitiveEvidence

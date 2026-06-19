@@ -27,8 +27,8 @@ sourceReferences:
   technicalLandingMatrix: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
   governanceSop: docs/04-agent-system/sop/local-experience-closure-governance.md
 currentFactRefresh:
-  taskId: final-audit-gate-governance-packet
-  refreshedAt: "2026-06-18T13:14:56-07:00"
+  taskId: blocked-gates-approval-package-materialization
+  refreshedAt: "2026-06-18T19:21:12-07:00"
   requirementUseCaseCatalogCount: 32
   coverageMatrixUseCaseCount: 32
   missingUseCaseIds: []
@@ -516,10 +516,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: provider_call_env_secret_cost_calibration_staging_prod
-    nextTask: provider_gate_approval_package_required
+    nextTask: ap-01-ai-scoring-provider-execution-approval-package
   - useCaseId: UC-STD-KN-RECOMMENDATION
     edition: standard
     actor: content_admin_system
@@ -684,10 +684,10 @@ matrix:
     uiSurface: existing_admin_ops_surfaces
     unitEvidence: src/server/services/ops-governance-authorization-quota-summary-service.test.ts
     e2eEvidence: not_found
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: cost_calibration_provider_measurement_payment_external_service_blocked
-    nextTask: ops_auth_quota_cost_calibration_approval_package_required
+    nextTask: ap-02-ops-auth-quota-cost-calibration-approval-package
   - useCaseId: UC-ADV-RETENTION-LOG-GOVERNANCE
     edition: advanced
     actor: ops_admin_audit_reviewer
@@ -726,10 +726,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
-    nextTask: none_future_non_goal
+    nextTask: ap-04-standard-ai-generation-scope-change-approval-package
   - useCaseId: UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
     edition: future_scope
     actor: organization_admin
@@ -740,10 +740,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: future_non_goal_for_standard
-    nextTask: none_future_non_goal
+    nextTask: ap-05-standard-org-self-service-scope-change-approval-package
   - useCaseId: UC-FUTURE-ONLINE-PAYMENT
     edition: future_scope
     actor: payer_ops_admin
@@ -754,10 +754,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: payment_external_service_env_secret_deploy_blocked
-    nextTask: none_future_non_goal
+    nextTask: ap-06-online-payment-approval-package
   - useCaseId: UC-FUTURE-OCR-AUTO-IMPORT
     edition: future_scope
     actor: content_admin_ops_admin
@@ -768,10 +768,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
-    nextTask: none_future_non_goal
+    nextTask: ap-07-ocr-auto-import-approval-package
   - useCaseId: UC-FUTURE-ORG-DATA-EXPORT
     edition: future_scope
     actor: organization_admin
@@ -782,10 +782,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: export_file_generation_external_service_privacy_deploy_blocked
-    nextTask: none_future_non_goal
+    nextTask: ap-08-org-data-export-approval-package
   - useCaseId: UC-FUTURE-RUNTIME-CAPABILITY-LIST
     edition: audit_only
     actor: platform_governance
@@ -796,10 +796,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: audit_artifact_only
-    nextTask: none_audit_only
+    nextTask: ap-09-runtime-capability-list-approval-package
   - useCaseId: UC-GATE-PROVIDER-STAGING-EXECUTION
     edition: blocked_gate
     actor: platform_governance
@@ -810,10 +810,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
-    nextTask: provider_staging_approval_package_required
+    nextTask: ap-03-provider-staging-execution-approval-package
   - useCaseId: UC-GATE-CURRENT-CHECKPOINT
     edition: audit_only
     actor: platform_governance
@@ -824,10 +824,10 @@ matrix:
     uiSurface: audit_only
     unitEvidence: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: audit_reference_only
-    nextTask: none_audit_only
+    nextTask: ap-10-current-checkpoint-audit-repair-approval-package
   - useCaseId: UC-AUDIT-SOURCE-GOVERNANCE
     edition: audit_only
     actor: platform_governance
@@ -838,7 +838,7 @@ matrix:
     uiSurface: not_required
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     status: release_blocked
     blockedGate: audit_artifact_only
-    nextTask: none_audit_only_current_refresh_closed
+    nextTask: ap-11-source-governance-change-approval-package
