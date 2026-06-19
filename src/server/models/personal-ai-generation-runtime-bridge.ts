@@ -1,6 +1,8 @@
 export const personalAiGenerationRuntimeBridgeStatusValues = [
   "provider_call_blocked",
   "controlled_runner_ready",
+  "provider_call_succeeded",
+  "provider_call_failed",
 ] as const;
 
 export type PersonalAiGenerationRuntimeBridgeStatus =
@@ -17,6 +19,7 @@ export type PersonalAiGenerationRuntimeBridgeMode =
 export const personalAiGenerationRuntimeBridgeRunnerModeValues = [
   "provider_call_blocked_runner",
   "deterministic_fake_runner",
+  "route_integrated_provider_runner",
 ] as const;
 
 export type PersonalAiGenerationRuntimeBridgeRunnerMode =

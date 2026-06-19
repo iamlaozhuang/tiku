@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-qwen-route-integrated-provider-execution-implementation-approval
+currentPhase: ap-01-qwen-route-integrated-provider-execution-implementation
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-qwen-route-integrated-provider-execution-implementation-approval
+  id: ap-01-qwen-route-integrated-provider-execution-implementation
   status: closed
-  result: pass_docs_state_route_integrated_provider_execution_implementation_approval_no_call
-  sourceStory: userRequestedQwenRouteIntegratedProviderExecutionImplementationApproval
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
-  branch: codex/ap-01-qwen-route-integrated-provider-execution-implementation-approval
+  result: pass_route_integrated_provider_execution_service_wired_no_real_call
+  sourceStory: userRequestedContinueAfterQwenRouteIntegratedProviderExecutionImplementationApproval
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+  branch: codex/ap-01-qwen-route-integrated-provider-execution-implementation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -2136,16 +2136,58 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01QwenRouteIntegratedProviderExecutionImplementation:
+    taskId: ap-01-qwen-route-integrated-provider-execution-implementation
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: pass_route_integrated_provider_execution_service_wired_no_real_call
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+    boundarySummary:
+      validation: pass_focused_unit_lint_typecheck_no_real_provider_call
+      implementation: route_service_server_side_provider_execution_dependency_wired
+      targetRouteService: src/server/services/personal-ai-generation-request-route.ts
+      targetSubmitRoute: POST /api/v1/personal-ai-generation-requests
+      targetMode: local_browser_experience
+      matrixStatus: release_blocked
+      provider: openai_compatible
+      providerName: alibaba-qwen
+      model: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      envKeyAlias: ALIBABA_API_KEY
+      defaultProviderCallBlocked: true
+      clientBodyCannotEnableProviderCall: true
+      serverSideExplicitLocalExecutionControlRequired: true
+      implementationRealProviderCallExecuted: false
+      implementationEnvLocalRead: false
+      routeIntegratedFakeExecutorUnitOnly: true
+      routeIntegratedRealRequestRequiresFreshApproval: true
+      appRouteChanged: false
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawErrorText: blocked
+      rawModelOutput: blocked
+      providerPayload: blocked
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen route-integrated provider execution implementation approval is materialized. The next recommended task is
-    `ap-01-qwen-route-integrated-provider-execution-implementation`, scoped to wiring a server-side controlled provider
-    execution path into `POST /api/v1/personal-ai-generation-requests` for `local_browser_experience` while default
-    provider calls remain blocked, client body cannot enable provider execution, no `.env.local` is read, and no provider
-    call is executed during implementation. After implementation, the first real route-integrated provider request still
-    requires a fresh approval. Keep provider retry, streaming, additional provider calls, Cost Calibration Gate,
+    AP-01 Qwen route-integrated provider execution implementation is complete at the route service boundary. The next
+    recommended task is `ap-01-qwen-route-integrated-provider-one-request-execution-approval`, scoped to approving one
+    real local route-integrated Qwen request using the server-side controlled execution path. Until that fresh approval,
+    real provider calls, `.env.local` reads, retry, streaming, additional provider calls, Cost Calibration Gate,
     staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence, dependency, and
-    schema/migration blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
+    schema/migration remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md

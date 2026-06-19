@@ -8,6 +8,24 @@ import type {
   PersonalAiGenerationRuntimeBridgeRunnerMode,
   PersonalAiGenerationRuntimeBridgeStatus,
 } from "../models/personal-ai-generation-runtime-bridge";
+export type PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto = {
+  requestCount: 0 | 1;
+  resultStatus: "pass" | "fail" | "blocked";
+  failureCategory:
+    | "provider_call_blocked"
+    | "missing_provider_credential"
+    | "provider_error"
+    | "timeout"
+    | "redaction_violation"
+    | null;
+  durationMs: number;
+  usageSummary: Record<string, number> | null;
+  providerErrorSummary: {
+    httpStatus: number | null;
+    providerErrorCode: string | null;
+  } | null;
+  redactionStatus: "redacted";
+};
 
 export type PersonalAiGenerationRuntimeBridgeDto = {
   bridgeStatus: PersonalAiGenerationRuntimeBridgeStatus;
@@ -15,10 +33,10 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
   runnerMode: PersonalAiGenerationRuntimeBridgeRunnerMode;
   localSwitchRequired: true;
   explicitLocalSwitchPresent: boolean;
-  realProviderExecutionApproved: false;
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  realProviderExecutionApproved: boolean;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   providerRetryAttempted: false;
   providerStreamingEnabled: false;
   costCalibrationExecuted: false;
@@ -37,5 +55,6 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
     providerResponsePayload: RedactedJsonObject | null;
     providerErrorPayload: RedactedJsonObject | null;
   };
+  providerExecutionSummary: PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto;
   blockedReasons: PersonalAiGenerationRuntimeBridgeBlockedReason[];
 };

@@ -1,23 +1,23 @@
 import type { PersonalAiGenerationRuntimeBridgeDto } from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 import { createAiCallLogRedactedSnapshots } from "../models/ai-rag";
+import {
+  createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  executePersonalAiGenerationRouteIntegratedProvider,
+  qwenRouteIntegratedProviderMetadata,
+  type PersonalAiGenerationRouteIntegratedProviderExecutionControl,
+  type PersonalAiGenerationRouteIntegratedProviderExecutionOutcome,
+} from "./personal-ai-generation-route-integrated-provider-execution-service";
 
 export type PersonalAiGenerationRuntimeBridgeControl = {
   bridgeMode: "controlled_runner";
   explicitLocalSwitchPresent: true;
+  providerExecution?: PersonalAiGenerationRouteIntegratedProviderExecutionControl;
 };
 
 export type PersonalAiGenerationRuntimeBridgeOptions = {
   runtimeBridgeControl?: PersonalAiGenerationRuntimeBridgeControl;
 };
-
-const qwenRuntimeBridgeProviderMetadata = {
-  modelProvider: "openai_compatible",
-  providerName: "alibaba-qwen",
-  modelName: "qwen3.7-max",
-  baseUrlHost: "dashscope.aliyuncs.com",
-  envKeyAlias: "ALIBABA_API_KEY",
-} as const;
 
 function createRuntimeBridgeRedactionProbe(
   requestFlow: PersonalAiGenerationRequestFlowDto,
@@ -49,13 +49,27 @@ function createRuntimeBridgeRedactionProbe(
   };
 }
 
-export function buildPersonalAiGenerationRuntimeBridgeReadModel(
+function mapRuntimeBridgeOutcomeToStatus(
+  executionOutcome: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome,
+): PersonalAiGenerationRuntimeBridgeDto["bridgeStatus"] {
+  if (!executionOutcome.providerCallExecuted) {
+    return "controlled_runner_ready";
+  }
+
+  return executionOutcome.executionSummary.resultStatus === "pass"
+    ? "provider_call_succeeded"
+    : "provider_call_failed";
+}
+
+function buildPersonalAiGenerationRuntimeBridgeDto(
   requestFlow: PersonalAiGenerationRequestFlowDto,
   options: PersonalAiGenerationRuntimeBridgeOptions = {},
 ): PersonalAiGenerationRuntimeBridgeDto {
   const isControlledRunnerEnabled =
     options.runtimeBridgeControl?.bridgeMode === "controlled_runner" &&
     options.runtimeBridgeControl.explicitLocalSwitchPresent;
+  const executionOutcome =
+    createDefaultBlockedRouteIntegratedProviderExecutionOutcome();
 
   return {
     bridgeStatus: isControlledRunnerEnabled
@@ -69,16 +83,18 @@ export function buildPersonalAiGenerationRuntimeBridgeReadModel(
       : "provider_call_blocked_runner",
     localSwitchRequired: true,
     explicitLocalSwitchPresent: isControlledRunnerEnabled,
-    realProviderExecutionApproved: false,
-    providerCallExecuted: false,
-    envSecretAccessed: false,
-    providerConfigurationRead: false,
+    realProviderExecutionApproved:
+      executionOutcome.realProviderExecutionApproved,
+    providerCallExecuted: executionOutcome.providerCallExecuted,
+    envSecretAccessed: executionOutcome.envSecretAccessed,
+    providerConfigurationRead: executionOutcome.providerConfigurationRead,
     providerRetryAttempted: false,
     providerStreamingEnabled: false,
     costCalibrationExecuted: false,
     redactionStatus: "redacted",
-    providerMetadata: qwenRuntimeBridgeProviderMetadata,
+    providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
+    providerExecutionSummary: executionOutcome.executionSummary,
     blockedReasons: isControlledRunnerEnabled
       ? ["real_provider_execution_requires_fresh_approval"]
       : [
@@ -87,5 +103,59 @@ export function buildPersonalAiGenerationRuntimeBridgeReadModel(
           "env_secret_access_blocked",
           "real_provider_execution_requires_fresh_approval",
         ],
+  };
+}
+
+export function buildPersonalAiGenerationRuntimeBridgeReadModel(
+  requestFlow: PersonalAiGenerationRequestFlowDto,
+  options: PersonalAiGenerationRuntimeBridgeOptions = {},
+): PersonalAiGenerationRuntimeBridgeDto {
+  return buildPersonalAiGenerationRuntimeBridgeDto(requestFlow, options);
+}
+
+export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
+  requestFlow: PersonalAiGenerationRequestFlowDto,
+  options: PersonalAiGenerationRuntimeBridgeOptions = {},
+): Promise<PersonalAiGenerationRuntimeBridgeDto> {
+  const isControlledRunnerEnabled =
+    options.runtimeBridgeControl?.bridgeMode === "controlled_runner" &&
+    options.runtimeBridgeControl.explicitLocalSwitchPresent;
+  const providerExecutionControl =
+    options.runtimeBridgeControl?.providerExecution;
+
+  if (!isControlledRunnerEnabled || providerExecutionControl === undefined) {
+    return buildPersonalAiGenerationRuntimeBridgeReadModel(
+      requestFlow,
+      options,
+    );
+  }
+
+  const executionOutcome =
+    await executePersonalAiGenerationRouteIntegratedProvider(
+      requestFlow,
+      providerExecutionControl,
+    );
+
+  return {
+    bridgeStatus: mapRuntimeBridgeOutcomeToStatus(executionOutcome),
+    bridgeMode: "controlled_runner",
+    runnerMode: "route_integrated_provider_runner",
+    localSwitchRequired: true,
+    explicitLocalSwitchPresent: true,
+    realProviderExecutionApproved:
+      executionOutcome.realProviderExecutionApproved,
+    providerCallExecuted: executionOutcome.providerCallExecuted,
+    envSecretAccessed: executionOutcome.envSecretAccessed,
+    providerConfigurationRead: executionOutcome.providerConfigurationRead,
+    providerRetryAttempted: false,
+    providerStreamingEnabled: false,
+    costCalibrationExecuted: false,
+    redactionStatus: "redacted",
+    providerMetadata: qwenRouteIntegratedProviderMetadata,
+    redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
+    providerExecutionSummary: executionOutcome.executionSummary,
+    blockedReasons: executionOutcome.providerCallExecuted
+      ? []
+      : ["real_provider_execution_requires_fresh_approval"],
   };
 }

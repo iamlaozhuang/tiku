@@ -12,6 +12,7 @@ import {
 } from "../models/personal-ai-generation-local-browser-experience";
 import {
   buildPersonalAiGenerationRuntimeBridgeReadModel,
+  buildPersonalAiGenerationRuntimeBridgeReadModelForRoute,
   type PersonalAiGenerationRuntimeBridgeOptions,
 } from "./personal-ai-generation-runtime-bridge-service";
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
@@ -68,6 +69,26 @@ function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
   };
 }
 
+async function mapPersonalAiGenerationRequestFlowToRouteLocalBrowserExperience(
+  requestFlow: PersonalAiGenerationRequestFlowDto,
+  options: PersonalAiGenerationRuntimeBridgeOptions,
+): Promise<PersonalAiGenerationLocalBrowserExperienceDto> {
+  const localBrowserExperience =
+    mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
+      requestFlow,
+      options,
+    );
+
+  return {
+    ...localBrowserExperience,
+    runtimeBridge:
+      await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
+        requestFlow,
+        options,
+      ),
+  };
+}
+
 export function buildPersonalAiGenerationLocalBrowserExperienceReadModel(
   input: unknown,
   options: PersonalAiGenerationRuntimeBridgeOptions = {},
@@ -80,6 +101,24 @@ export function buildPersonalAiGenerationLocalBrowserExperienceReadModel(
 
   return createSuccessResponse(
     mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
+      requestFlow.data,
+      options,
+    ),
+  );
+}
+
+export async function buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute(
+  input: unknown,
+  options: PersonalAiGenerationRuntimeBridgeOptions = {},
+): Promise<ApiResponse<PersonalAiGenerationLocalBrowserExperienceDto | null>> {
+  const requestFlow = buildPersonalAiGenerationRequestFlowReadModel(input);
+
+  if (requestFlow.code !== 0 || requestFlow.data === null) {
+    return createErrorResponse(requestFlow.code, requestFlow.message);
+  }
+
+  return createSuccessResponse(
+    await mapPersonalAiGenerationRequestFlowToRouteLocalBrowserExperience(
       requestFlow.data,
       options,
     ),

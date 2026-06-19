@@ -13,7 +13,7 @@ import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
-import { buildPersonalAiGenerationLocalBrowserExperienceReadModel } from "./personal-ai-generation-local-browser-experience-service";
+import { buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute } from "./personal-ai-generation-local-browser-experience-service";
 import type { PersonalAiGenerationRuntimeBridgeControl } from "./personal-ai-generation-runtime-bridge-service";
 import type { SessionService } from "./session-service";
 
@@ -396,7 +396,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             }
 
             return createJsonResponse(
-              buildPersonalAiGenerationLocalBrowserExperienceReadModel(
+              await buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute(
                 localBrowserRequestInput,
                 { runtimeBridgeControl },
               ),

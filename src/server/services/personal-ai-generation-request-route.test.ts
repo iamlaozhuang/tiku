@@ -573,6 +573,110 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it("executes the route-integrated provider only from server-side route dependencies", async () => {
+    const providerExecutorCalls: unknown[] = [];
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 8,
+            timeoutMs: 30000,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async (executionInput) => {
+              providerExecutorCalls.push(executionInput);
+
+              return {
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 37,
+                usageSummary: {
+                  inputTokens: 12,
+                  outputTokens: 3,
+                  totalTokens: 15,
+                },
+                providerErrorSummary: null,
+              };
+            },
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(providerExecutorCalls).toHaveLength(1);
+    expect(providerExecutorCalls[0]).toMatchObject({
+      providerMetadata: {
+        modelProvider: "openai_compatible",
+        providerName: "alibaba-qwen",
+        modelName: "qwen3.7-max",
+        baseUrlHost: "dashscope.aliyuncs.com",
+        envKeyAlias: "ALIBABA_API_KEY",
+      },
+      limits: {
+        maxRequests: 1,
+        maxRetries: 0,
+        maxOutputTokens: 8,
+        timeoutMs: 30000,
+      },
+      requestContext: {
+        taskPublicId: "ai_generation_task_public_route_123",
+        aiFuncType: "explanation",
+        questionPublicId: "question_public_123",
+        answerRecordPublicId: "answer_record_public_123",
+      },
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        runtimeBridge: {
+          bridgeStatus: "provider_call_succeeded",
+          bridgeMode: "controlled_runner",
+          runnerMode: "route_integrated_provider_runner",
+          explicitLocalSwitchPresent: true,
+          realProviderExecutionApproved: true,
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          providerRetryAttempted: false,
+          providerStreamingEnabled: false,
+          costCalibrationExecuted: false,
+          providerExecutionSummary: {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            durationMs: 37,
+            usageSummary: {
+              inputTokens: 12,
+              outputTokens: 3,
+              totalTokens: 15,
+            },
+            providerErrorSummary: null,
+            redactionStatus: "redacted",
+          },
+          blockedReasons: [],
+        },
+      },
+    });
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("generated content");
+  });
+
   it("persists local browser POST metadata with session-normalized ownership public ids", async () => {
     const staleBodyPublicId = "body_stale_owner_public_999";
     const requestedAt = new Date("2026-06-12T18:00:00.000Z");
