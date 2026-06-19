@@ -1,5 +1,190 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-qwen-user-visible-result-one-request-materialization-approval
+    title: AP-01 Qwen user-visible result one-request materialization approval
+    phase: ap-01-qwen-user-visible-result-one-request-materialization-approval
+    sourceStory: userRequestedQwenUserVisibleResultOneRequestMaterializationApproval
+    dependencies:
+      - ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a fresh docs-only approval task for exactly one real route-integrated Qwen request whose redacted
+      result may enter the previously validated user-visible result materialization path. This approval task must not
+      read `.env.local`, must not execute provider/model calls, must not modify source, tests, scripts, e2e specs,
+      schema, migrations, package files, lockfiles, provider configuration, staging/prod/cloud/deploy resources, or
+      `.env*`, and must keep Cost Calibration Gate, additional provider calls, retry, streaming, staging/prod/deploy,
+      PR, push, and force-push blocked.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    taskKind: docs_state_approval
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_one_request_materialization_approval_no_call
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-qwen-user-visible-result-one-request-materialization-approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    nextRecommendedTask: ap-01-qwen-user-visible-result-one-request-materialization-execution
+    capabilities:
+      docsStateOnlyApproval: allowed
+      envLocalReadThisTask: blocked
+      providerCallThisTask: blocked
+      nextExecutionEnvLocalRead: approved_alibaba_api_key_alias_only
+      nextExecutionProviderCall: approved_one_request_only
+      nextExecutionResultMaterialization: approved_redacted_snapshot_digest_masked_preview_only
+      nextExecutionPersonalAiGenerationResultWrite: approved_redacted_snapshot_digest_masked_preview_only
+      nextExecutionTransientInMemoryRedaction: approved_no_evidence_no_persistence_raw_output
+      providerRetry: blocked
+      providerStreaming: blocked
+      additionalProviderExecution: blocked
+      providerConfigurationChange: blocked
+      modelChangeExecution: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      formalAdoption: blocked
+    executionApprovalBoundary:
+      approvedNextTask: ap-01-qwen-user-visible-result-one-request-materialization-execution
+      targetRouteService: src/server/services/personal-ai-generation-request-route.ts
+      targetRuntimeBridgeService: src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      targetMaterializationService: src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      targetSubmitRoute: POST /api/v1/personal-ai-generation-requests
+      targetMode: local_browser_experience
+      targetResultTable: personal_ai_generation_result
+      provider:
+        modelProvider: openai_compatible
+        providerName: alibaba-qwen
+        modelName: qwen3.7-max
+        baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+        baseUrlHost: dashscope.aliyuncs.com
+        envKeyAlias: ALIBABA_API_KEY
+      limits:
+        maxRequests: 1
+        maxRetries: 0
+        maxOutputTokens: 8
+        timeoutMs: 30000
+        maxSpendUsd: 0.10
+        streaming: blocked
+        formalCostCalibrationGate: blocked
+      allowedMaterializedFields:
+        - contentPreviewMasked
+        - contentDigest
+        - contentVisibility
+        - redactionStatus
+        - evidenceStatus
+        - citationCount
+      allowedPersistentColumns:
+        - content_redacted_snapshot
+        - content_digest
+        - content_preview_masked
+        - citation_redacted_snapshot
+        - evidence_status
+        - citation_count
+        - ai_call_log_public_id
+        - is_formal_adoption_blocked
+      requiredRuntimeControls:
+        exactlyOneProviderRequest: true
+        stopAfterFirstRequestRegardlessOfResult: true
+        doNotRetryProviderFailure: true
+        existingRouteIntegratedControlOnly: true
+        existingMaterializationPathOnly: true
+        serverSideExplicitLocalExecutionControlRequired: true
+        clientBodyCannotEnableProviderCallOrMaterialization: true
+        transientInMemoryRawOutputAllowedOnlyForRedaction: true
+        rawOutputEvidencePersistenceOrRouteDisplay: blocked
+        formalAdoptionBlocked: true
+      stopConditions:
+        - missing_alibaba_api_key
+        - provider_error_or_timeout_after_one_request
+        - redaction_violation_before_materialization
+        - existing_path_cannot_materialize_without_source_change
+        - persistence_failure
+        - token_or_cost_limit_exceeded
+        - schema_dependency_or_config_change_needed
+      nextTaskIfBlocked: ap-01-qwen-user-visible-result-materialization-gap-diagnosis
+    blockedCapabilities:
+      - envSecretOutput
+      - envFileWriteByCodex
+      - providerRetry
+      - providerStreaming
+      - additionalProviderExecution
+      - providerConfigurationChange
+      - modelChangeExecution
+      - costCalibrationGate
+      - productSourceChange
+      - testChange
+      - e2eRuntime
+      - stagingProdDeploy
+      - paymentExternalService
+      - dependencyIntroduction
+      - schemaMigration
+      - destructiveDatabaseOperation
+      - rawSensitiveEvidence
+      - formalAdoption
+      - pr
+      - push
+      - forcePush
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-qwen-user-visible-result-one-request-materialization-approval
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-qwen-user-visible-result-one-request-materialization-approval
   - id: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
     title: AP-01 Qwen route-integrated user-visible result materialization implementation
     phase: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
