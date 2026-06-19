@@ -163,6 +163,25 @@ lastAp07OcrAutoImportProviderBoundaryDetailing:
     - dependency_package_lockfile_change
     - database_read_write
     - raw_sensitive_evidence
+lastAp08OrgDataExportBoundaryDetailing:
+  taskId: ap-08-org-data-export-boundary-detailing
+  evaluatedAt: "2026-06-19T00:00:00-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-ORG-DATA-EXPORT
+  decision: pass_l0_docs_state_export_boundary_detailing_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-boundary-detailing.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-08-org-data-export-boundary-detailing.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-09-runtime-capability-list-inventory-detailing
+  blockedGates:
+    - export_file_generation_execution
+    - privacy_data_access
+    - database_read_write
+    - object_storage_write
+    - external_service
+    - staging_prod_cloud_deploy
+    - raw_sensitive_evidence
 lastClosureReadinessAudit:
   taskId: future-scope-non-goal-governance-packet
   auditedAt: "2026-06-18T13:00:53-07:00"
@@ -889,10 +908,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-boundary-detailing.md
     status: release_blocked
     blockedGate: export_file_generation_external_service_privacy_deploy_blocked
-    nextTask: ap-08-org-data-export-approval-package
+    nextTask: ap-08-org-data-export-execution-fresh-approval-required
   - useCaseId: UC-FUTURE-RUNTIME-CAPABILITY-LIST
     edition: audit_only
     actor: platform_governance
