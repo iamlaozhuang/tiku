@@ -516,10 +516,10 @@ matrix:
     uiSurface: src/app/(admin)/ops/ai-audit-logs/page.tsx; student AI entry surfaces
     unitEvidence: tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts; tests/unit/phase-12-model-config-server-runtime.test.ts
     e2eEvidence: e2e/local-business-flow.spec.ts
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen3-7-max-one-request-smoke-approval.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
     status: release_blocked
-    blockedGate: qwen3_7_max_provider_smoke_pass_cost_calibration_in_app_ai_experience_staging_prod_provider_configuration
-    nextTask: ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+    blockedGate: in_app_ai_runtime_bridge_cost_calibration_provider_call_staging_prod_blocked
+    nextTask: ap-01-qwen-in-app-ai-runtime-bridge-approval
   - useCaseId: UC-STD-KN-RECOMMENDATION
     edition: standard
     actor: content_admin_system
