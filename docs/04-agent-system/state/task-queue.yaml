@@ -1,5 +1,137 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    title: AP-02 ops auth quota cost calibration release gate fresh approval required
+    phase: ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    sourceStory: userRequestedAp02ReleaseGateFreshApprovalRequired
+    dependencies:
+      - ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested a docs-only AP-02 release gate fresh approval package after L1 local summary execution. Scope is
+      limited to docs/state/governance and minimal L3 release gate approval text. This task must not execute
+      provider/model calls, Cost Calibration Gate, payment/external-service, DB read/write, `.env*`, staging/prod/cloud,
+      deploy, schema/migration, dependency/package/lockfile changes, e2e/browser runtime, PR, force push, destructive DB,
+      or sensitive evidence collection.
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-02-L3-RELEASE-GATE-FRESH-APPROVAL
+    useCaseIds:
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: docs_state_l3_release_gate_fresh_approval_required_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    status: closed
+    result: pass_l0_ap02_l3_release_gate_fresh_approval_required_no_execution
+    claimedAt: "2026-06-19T16:01:21-07:00"
+    validatedAt: "2026-06-19T16:01:21-07:00"
+    closedAt: "2026-06-19T16:01:21-07:00"
+    branch: codex/ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    nextRecommendedTask: manual_fresh_approval_required_before_any_ap02_l3_release_gate_execution
+    freshApprovalTextMaterialized: true
+    l3ReleaseGateApprovalText:
+      decisionRequired: owner_must_choose_before_execution
+      minimalText: >-
+        Fresh approve AP-02 L3 release gate execution decision only. I choose one allowed path: keep AP-02 release
+        blocked, or authorize a separate exact-scope L3 execution package. No provider/model call, Cost Calibration
+        Gate, payment/external-service, DB read/write, `.env*`, staging/prod/cloud/deploy, schema/migration,
+        dependency/package/lockfile, PR, force push, destructive DB, or sensitive evidence execution is approved unless
+        the follow-up approval explicitly names exact allowed files, exact commands, redaction, rollback, and stop
+        conditions.
+      executionStillBlockedUntilExactScope: true
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      freshApprovalTextMaterialization: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      providerModelCall: blocked
+      costCalibrationGate: blocked
+      paymentExternalService: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      pr: blocked
+      forcePush: blocked
+      destructiveDatabase: blocked
+      rawSensitiveEvidence: blocked
+    blockedCapabilities:
+      - providerModelCall
+      - costCalibrationGate
+      - paymentExternalService
+      - envLocalRead
+      - envSecretOutput
+      - databaseRead
+      - databaseWrite
+      - stagingProdDeploy
+      - schemaMigration
+      - dependencyIntroduction
+      - e2eRuntime
+      - browserPlaywrightRuntime
+      - pr
+      - forcePush
+      - destructiveDatabase
+      - rawSensitiveEvidence
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - deploy/cloud/payment/provider config files
+      - any file not explicitly listed in allowedFiles
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+
   - id: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
     title: AP-02 ops auth quota cost calibration L1 local summary execution
     phase: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
