@@ -14,6 +14,7 @@ export const forbiddenEvidenceKeys = [
 
 const supportedProviders = ["alibaba", "openai_compatible"];
 const executionApprovalEnvKey = "TIKU_PROVIDER_SMOKE_APPROVED";
+const providerSmokeMaxOutputTokens = 8;
 const internalProviderSmokeInstruction =
   "Answer with a single short confirmation word for a local provider smoke check.";
 
@@ -59,6 +60,7 @@ export function buildCliConfig(argv) {
     envKey,
     mode: executeRequested ? "execute" : "dry_run",
     maxRequests,
+    maxOutputTokens: providerSmokeMaxOutputTokens,
     timeoutMs,
     baseUrl: parsedArgs.get("base-url") ?? null,
     providerName: parsedArgs.get("provider-name") ?? "openai_compatible",
@@ -71,6 +73,7 @@ export async function runProviderSmokeSandbox(config, dependencies = {}) {
     provider: config.provider,
     model: config.model,
     maxRequests: config.maxRequests,
+    maxOutputTokens: config.maxOutputTokens,
     timeoutMs: config.timeoutMs,
   };
 
@@ -191,6 +194,7 @@ export async function executeProviderSmokeRequest(config) {
   return generateText({
     model: providerModel,
     prompt: internalProviderSmokeInstruction,
+    maxOutputTokens: config.maxOutputTokens,
     maxRetries: 0,
     abortSignal,
   });

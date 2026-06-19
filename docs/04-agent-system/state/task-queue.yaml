@@ -1,5 +1,120 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-01-provider-smoke-harness-token-cap-hardening
+    title: AP-01 provider smoke harness token cap hardening
+    phase: ap-01-provider-smoke-harness-token-cap-hardening
+    sourceStory: userDirectedAp01ProviderSmokeTokenCapHardening
+    dependencies:
+      - ap-01-provider-smoke-execution-approval-detailing
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User accepted the recommended next step after AP-01 provider smoke approval detailing. Scope is limited to adding
+      an explicit output token cap to the local provider smoke harness before any real provider spend, updating the
+      focused unit test, recording redacted evidence, and making a local commit. Real provider/model calls, provider
+      configuration, `.env*` read/write/output, secret/env value disclosure, Cost Calibration Gate,
+      staging/prod/cloud/deploy, payment/external-service, dependency, schema/migration, unrelated product source, e2e,
+      PR, push, force-push, destructive DB, and raw sensitive evidence remain blocked until fresh task-specific approval.
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: closed
+    result: provider_smoke_harness_token_cap_hardened_execution_blocked
+    claimedAt: "2026-06-19T00:00:00-07:00"
+    validatedAt: "2026-06-19T00:00:00-07:00"
+    closedAt: "2026-06-19T00:00:00-07:00"
+    branch: codex/ap-01-provider-smoke-token-cap-hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+    nextApprovalRequired: exact_provider_smoke_execute_command_request_spend_rollback_redaction_approval
+    capabilities:
+      sourceChange: approved_scoped_smoke_runner_hardening
+      testSourceChange: approved_scoped_smoke_runner_unit_test
+      docsStateOnlyQueueMaintenance: allowed
+      dryRunProviderSmokeCommandShape: allowed
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      providerConfiguration: blocked
+      e2eSpecChange: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+    providerSmokeHarnessHardening:
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      outputTokenCap: fixed_small_smoke_cap
+      requestCount: 1
+      retryLimit: 0
+      providerExecution: blocked
+      evidenceMode: redacted_envelope_only
+      costCalibrationGate: blocked
+    blockedCapabilities:
+      - providerCall
+      - providerConfiguration
+      - envSecretAccess
+      - stagingProdDeploy
+      - paymentExternalService
+      - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+      - node_modules/ai/dist/index.d.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name deepseek --base-url https://api.deepseek.com --model deepseek-v4-flash --env-key DEEPSEEK_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-provider-smoke-harness-token-cap-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-provider-smoke-harness-token-cap-hardening
   - id: ap-01-provider-smoke-execution-approval-detailing
     title: AP-01 provider smoke execution approval detailing
     phase: ap-01-provider-smoke-execution-approval-detailing

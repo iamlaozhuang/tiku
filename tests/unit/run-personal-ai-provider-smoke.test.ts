@@ -28,6 +28,7 @@ describe("run-personal-ai-provider-smoke", () => {
       model: "qwen-plus",
       envKey: "ALIBABA_API_KEY",
       maxRequests: 1,
+      maxOutputTokens: 8,
       mode: "dry_run",
       timeoutMs: 30000,
     });
@@ -140,6 +141,11 @@ describe("run-personal-ai-provider-smoke", () => {
     });
     expect(readSecret).toHaveBeenCalledWith("ALIBABA_API_KEY");
     expect(callProvider).toHaveBeenCalledTimes(1);
+    expect(callProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxOutputTokens: 8,
+      }),
+    );
 
     const serialized = JSON.stringify(envelope);
     expect(serialized).not.toContain("secret-provider-key");
