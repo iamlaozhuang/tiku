@@ -4,8 +4,8 @@
 
 APPROVE PACKAGE, KEEP EXECUTION BLOCKED.
 
-AP-01 now has a minimum approval package for `UC-STD-AI-SCORING-EXPLANATION`. The package does not authorize provider or
-model execution.
+AP-01 now has a closed minimum approval package for `UC-STD-AI-SCORING-EXPLANATION`. The package does not authorize
+provider or model execution.
 
 ## Scope Review
 
@@ -16,7 +16,8 @@ model execution.
 
 ## State Review
 
-- Task queue status remains `blocked`.
+- Task queue status is `closed` for the docs/state approval package.
+- Provider/model execution remains blocked by `result`, handoff, and the matrix `release_blocked` row.
 - Matrix status remains `release_blocked`.
 - No unsupported matrix status is written.
 - No `experience_closed` claim is made.

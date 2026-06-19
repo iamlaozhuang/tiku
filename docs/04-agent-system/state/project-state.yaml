@@ -501,8 +501,8 @@ repository:
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
   id: ap-01-ai-scoring-provider-execution-approval-package
-  status: blocked
-  result: blocked_waiting_fresh_approval_minimum_package_ready
+  status: closed
+  result: minimum_approval_package_ready_execution_blocked
   sourceStory: userApprovalPackageSeed.AP01
   planPath: docs/05-execution-logs/task-plans/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
@@ -1143,7 +1143,7 @@ localExperienceClosure:
     targetExperienceChain: blocked-gates-approval-package-materialization
     approvalPackageId: AP-01
     useCaseId: UC-STD-AI-SCORING-EXPLANATION
-    decision: blocked_waiting_fresh_approval_minimum_package_ready
+    decision: minimum_approval_package_ready_execution_blocked
     evidence: docs/05-execution-logs/evidence/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
     auditReview: docs/05-execution-logs/audits-reviews/2026-06-18-ap-01-ai-scoring-provider-execution-approval-package.md
     boundarySummary:

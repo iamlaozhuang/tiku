@@ -18,12 +18,13 @@ executionDecision: blocked_waiting_fresh_approval
 
 - RED: AP-01 was seeded as `status: blocked` with only a generic
   `nextApprovalRequired: exact_provider_model_route_allowed_files_request_cost_redaction_and_rollback`.
-- GREEN: This evidence materializes the minimum approval package for AP-01, links the AP-01 queue and matrix row to this
-  fresh evidence, and keeps provider/model execution blocked pending a task-specific fresh approval.
+- GREEN: This evidence materializes and closes the minimum approval package for AP-01, links the AP-01 queue and matrix
+  row to this fresh evidence, and keeps provider/model execution blocked pending a task-specific fresh approval.
 
 ## Facts Read
 
-- Task queue: AP-01 remains `status: blocked`.
+- Task queue: AP-01 approval package is `status: closed`; provider/model execution remains blocked by `result` and
+  handoff decision.
 - Matrix: `UC-STD-AI-SCORING-EXPLANATION` remains `status: release_blocked`.
 - Matrix blocked gate: `provider_call_env_secret_cost_calibration_staging_prod`.
 - Existing AP-00 through AP-11 materialization evidence:
@@ -51,9 +52,9 @@ It includes:
 
 ## Current Decision
 
-AP-01 is not executable in this run. The task remains blocked because it still requires a human-supplied exact provider
-key alias, model name, request ceiling, spend ceiling, timeout, retry limit, allowed files, allowed commands, rollback
-boundary, and redaction evidence boundary.
+AP-01 provider execution is not executable in this run. The docs/state approval package is closed, but the execution
+remains blocked because it still requires a human-supplied exact provider key alias, model name, request ceiling, spend
+ceiling, timeout, retry limit, allowed files, allowed commands, rollback boundary, and redaction evidence boundary.
 
 ## Gates
 
