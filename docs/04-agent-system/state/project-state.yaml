@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-01-provider-smoke-execution-qwen-approval
+currentPhase: ap-01-provider-smoke-execution-qwen-env-local-ready
 updatedAt: "2026-06-19T00:00:00-07:00"
 architecture:
   status: complete
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-01-provider-smoke-execution-qwen-approval
-  status: closed
-  result: qwen_provider_smoke_approval_ready_execution_blocked
-  sourceStory: userRequestedQwenSecondProviderApprovalAndEnvLocalGuidance
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
-  branch: codex/ap-01-provider-smoke-execution-qwen-approval
+  id: ap-01-provider-smoke-execution-qwen-env-local-ready
+  status: blocked
+  result: blocked_qwen_provider_error_redacted
+  sourceStory: userConfirmedAlibabaApiKeyWrittenToEnvLocal
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+  branch: codex/ap-01-provider-smoke-execution-qwen-env-local-ready
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1354,15 +1354,51 @@ localExperienceClosure:
       schemaMigration: blocked
       dependencyIntroduction: blocked
       costCalibrationGate: blocked
+  currentAp01ProviderSmokeExecutionQwenEnvLocalReady:
+    taskId: ap-01-provider-smoke-execution-qwen-env-local-ready
+    evaluatedAt: "2026-06-19T00:00:00-07:00"
+    targetExperienceChain: blocked-gates-approval-package-materialization
+    approvalPackageId: AP-01
+    useCaseId: UC-STD-AI-SCORING-EXPLANATION
+    decision: blocked_qwen_provider_error_redacted
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+    boundarySummary:
+      validation: blocked_qwen_one_request_provider_error_redacted
+      packageMaterialization: AP01_qwen_env_local_provider_smoke_execution
+      execution: one_qwen_provider_smoke_failed_provider_error
+      matrixStatus: release_blocked
+      entrypoint: scripts/ai/run-personal-ai-provider-smoke.mjs
+      provider: alibaba
+      model: qwen-plus
+      envKeyAlias: ALIBABA_API_KEY
+      envSource: .env.local_present_redacted
+      maxRequests: 1
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      retryLimit: 0
+      maxSpendUsd: 0.05
+      requestCount: 1
+      providerCallExecuted: true
+      resultStatus: fail
+      failureCategory: provider_error
+      usageSummary: null
+      redactionStatus: passed
+      providerConfiguration: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-01 Qwen second-provider smoke approval and key handoff are ready under task
-    ap-01-provider-smoke-execution-qwen-approval. The user should manually add ALIBABA_API_KEY to local-only
-    `.env.local` and reply without sharing the value. After that, the next task candidate is
-    ap-01-provider-smoke-execution-qwen-env-local-ready, limited to reading only ALIBABA_API_KEY and running exactly one
-    redacted `alibaba/qwen-plus` smoke request. Keep provider configuration, staging/prod/cloud/deploy, payment,
-    external-service, PR, push, force-push, raw sensitive evidence, and Cost Calibration Gate blocked until a later task
-    explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    AP-01 Qwen env-local provider smoke consumed exactly one redacted `alibaba/qwen-plus` request and is blocked by
+    sanitized `provider_error` under task ap-01-provider-smoke-execution-qwen-env-local-ready. Recommended next work is
+    ap-01-qwen-provider-smoke-failure-diagnosis: inspect key/model/provider entitlement and local runner configuration
+    without another provider call unless fresh approval is given. Keep additional provider execution, provider
+    configuration, staging/prod/cloud/deploy, payment, external-service, PR, push, force-push, raw sensitive evidence,
+    and Cost Calibration Gate blocked until a later task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
