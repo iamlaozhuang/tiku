@@ -35,6 +35,12 @@ are not executable from this task.
 | AP-10 | Seeded; current checkpoint source audit/repair execution remains blocked.                                     |
 | AP-11 | Seeded; source/catalog governance changes remain blocked beyond this materialization.                         |
 
+## Task Queue Status Review
+
+AP-01 through AP-11 are intentionally recorded as `status: blocked`, which is a supported task-queue status. Their
+specific execution-blocked reason is preserved in `result`, `blockedCapabilities`, and `nextApprovalRequired`; no AP
+execution package is pending or executable from this packet.
+
 ## Validation Review
 
 | Command                                       | Result                                 |

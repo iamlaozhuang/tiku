@@ -18811,7 +18811,7 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18833,7 +18833,7 @@ tasks:
       - UC-ADV-OPS-AUTH-QUOTA
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18854,7 +18854,7 @@ tasks:
       - UC-GATE-PROVIDER-STAGING-EXECUTION
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18876,7 +18876,7 @@ tasks:
       - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18897,7 +18897,7 @@ tasks:
       - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18918,7 +18918,7 @@ tasks:
       - UC-FUTURE-ONLINE-PAYMENT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18939,7 +18939,7 @@ tasks:
       - UC-FUTURE-OCR-AUTO-IMPORT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18960,7 +18960,7 @@ tasks:
       - UC-FUTURE-ORG-DATA-EXPORT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -18981,7 +18981,7 @@ tasks:
       - UC-FUTURE-RUNTIME-CAPABILITY-LIST
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -19001,7 +19001,7 @@ tasks:
       - UC-GATE-CURRENT-CHECKPOINT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md
@@ -19022,7 +19022,7 @@ tasks:
       - UC-AUDIT-SOURCE-GOVERNANCE
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: blocked_pending_specific_execution_approval
+    status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-18-blocked-gates-approval-package-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-blocked-gates-approval-package-materialization.md

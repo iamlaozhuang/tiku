@@ -33,20 +33,20 @@ package/lockfile/dependency, product source, tests/e2e, PR, force-push, or destr
 
 ## Materialized Packages
 
-| AP    | Task id                                                         | Target use case                                | Execution status after this seed              |
-| ----- | --------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------- |
-| AP-00 | `blocked-gates-approval-package-materialization`                | all remaining blocked gates                    | `closed` after docs/state validation          |
-| AP-01 | `ap-01-ai-scoring-provider-execution-approval-package`          | `UC-STD-AI-SCORING-EXPLANATION`                | `blocked_pending_specific_execution_approval` |
-| AP-02 | `ap-02-ops-auth-quota-cost-calibration-approval-package`        | `UC-ADV-OPS-AUTH-QUOTA`                        | `blocked_pending_specific_execution_approval` |
-| AP-03 | `ap-03-provider-staging-execution-approval-package`             | `UC-GATE-PROVIDER-STAGING-EXECUTION`           | `blocked_pending_specific_execution_approval` |
-| AP-04 | `ap-04-standard-ai-generation-scope-change-approval-package`    | `UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL`    | `blocked_pending_specific_execution_approval` |
-| AP-05 | `ap-05-standard-org-self-service-scope-change-approval-package` | `UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL` | `blocked_pending_specific_execution_approval` |
-| AP-06 | `ap-06-online-payment-approval-package`                         | `UC-FUTURE-ONLINE-PAYMENT`                     | `blocked_pending_specific_execution_approval` |
-| AP-07 | `ap-07-ocr-auto-import-approval-package`                        | `UC-FUTURE-OCR-AUTO-IMPORT`                    | `blocked_pending_specific_execution_approval` |
-| AP-08 | `ap-08-org-data-export-approval-package`                        | `UC-FUTURE-ORG-DATA-EXPORT`                    | `blocked_pending_specific_execution_approval` |
-| AP-09 | `ap-09-runtime-capability-list-approval-package`                | `UC-FUTURE-RUNTIME-CAPABILITY-LIST`            | `blocked_pending_specific_execution_approval` |
-| AP-10 | `ap-10-current-checkpoint-audit-repair-approval-package`        | `UC-GATE-CURRENT-CHECKPOINT`                   | `blocked_pending_specific_execution_approval` |
-| AP-11 | `ap-11-source-governance-change-approval-package`               | `UC-AUDIT-SOURCE-GOVERNANCE`                   | `blocked_pending_specific_execution_approval` |
+| AP    | Task id                                                         | Target use case                                | Execution status after this seed     |
+| ----- | --------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------ |
+| AP-00 | `blocked-gates-approval-package-materialization`                | all remaining blocked gates                    | `closed` after docs/state validation |
+| AP-01 | `ap-01-ai-scoring-provider-execution-approval-package`          | `UC-STD-AI-SCORING-EXPLANATION`                | `blocked`                            |
+| AP-02 | `ap-02-ops-auth-quota-cost-calibration-approval-package`        | `UC-ADV-OPS-AUTH-QUOTA`                        | `blocked`                            |
+| AP-03 | `ap-03-provider-staging-execution-approval-package`             | `UC-GATE-PROVIDER-STAGING-EXECUTION`           | `blocked`                            |
+| AP-04 | `ap-04-standard-ai-generation-scope-change-approval-package`    | `UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL`    | `blocked`                            |
+| AP-05 | `ap-05-standard-org-self-service-scope-change-approval-package` | `UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL` | `blocked`                            |
+| AP-06 | `ap-06-online-payment-approval-package`                         | `UC-FUTURE-ONLINE-PAYMENT`                     | `blocked`                            |
+| AP-07 | `ap-07-ocr-auto-import-approval-package`                        | `UC-FUTURE-OCR-AUTO-IMPORT`                    | `blocked`                            |
+| AP-08 | `ap-08-org-data-export-approval-package`                        | `UC-FUTURE-ORG-DATA-EXPORT`                    | `blocked`                            |
+| AP-09 | `ap-09-runtime-capability-list-approval-package`                | `UC-FUTURE-RUNTIME-CAPABILITY-LIST`            | `blocked`                            |
+| AP-10 | `ap-10-current-checkpoint-audit-repair-approval-package`        | `UC-GATE-CURRENT-CHECKPOINT`                   | `blocked`                            |
+| AP-11 | `ap-11-source-governance-change-approval-package`               | `UC-AUDIT-SOURCE-GOVERNANCE`                   | `blocked`                            |
 
 ## AP-01 Provider Scoring Execution Boundary
 

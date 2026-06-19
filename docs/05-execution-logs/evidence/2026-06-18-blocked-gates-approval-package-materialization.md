@@ -59,6 +59,13 @@ Cost Calibration Gate remains blocked.
 - No row is marked `experience_closed`.
 - No unsupported matrix status is written.
 
+## Task Queue Status Sync
+
+- AP-01 through AP-11 use the mechanism-supported task status `blocked`.
+- The more specific execution boundary is recorded in each task's `result`, `blockedCapabilities`, and
+  `nextApprovalRequired` fields.
+- No AP execution task is pending or executable from this materialization packet.
+
 ## Validation
 
 | Command                                       | Result                                 |
