@@ -2839,8 +2839,11 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
     evidencePath: docs/05-execution-logs/evidence/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-212-ai-task-and-provider-lifecycle-claim.md
-    status: in_progress
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-212-closeout-and-six-stage-route.md
+    status: closed
+    result: pass_provider_agnostic_ai_task_lifecycle_contract_validated_no_provider_execution
+    validatedAt: "2026-06-20T03:25:27-07:00"
+    closedAt: "2026-06-20T03:25:27-07:00"
     retryCount: 0
   - id: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
     title: Module Run v2 ai-task-and-provider implementation seed
