@@ -1,10 +1,10 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: mechanism-tuning-authorization-slimming-implementation
-  updatedAt: "2026-06-17T03:16:46-07:00"
+  updatedByTask: active-queue-slimming-2026-06-20-batch-03
+  updatedAt: "2026-06-20T01:24:45-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -8312,3 +8312,503 @@ entries:
     commitSha: null
     completedAt: "2026-06-19T22:27:50-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-second-window
+  - id: active-queue-slimming-2026-06-20-first-window
+    phase: active-queue-slimming-2026-06-20-first-window
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-first-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-first-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:46:26-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-04-standard-ai-generation-scope-change-user-choice-required
+    phase: ap-04-standard-ai-generation-scope-change-user-choice-required
+    status: closed
+    taskKind: docs_state_product_scope_user_choice_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T22:17:06-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-09-runtime-capability-implementation-exact-scope-required
+    phase: ap-09-runtime-capability-implementation-exact-scope-required
+    status: closed
+    taskKind: docs_state_l1_l2_runtime_capability_exact_scope_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T22:01:05-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-08-org-data-export-execution-fresh-approval-required
+    phase: ap-08-org-data-export-execution-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l3_export_file_generation_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T21:49:47-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-07-ocr-auto-import-execution-fresh-approval-required
+    phase: ap-07-ocr-auto-import-execution-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l3_ocr_parser_import_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T21:39:40-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-06-online-payment-execution-fresh-approval-required
+    phase: ap-06-online-payment-execution-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l3_online_payment_external_service_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-execution-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-06-online-payment-execution-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T21:26:52-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-03-provider-staging-execution-fresh-approval-required
+    phase: ap-03-provider-staging-execution-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l3_provider_staging_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T17:23:28-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    phase: ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l3_release_gate_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T16:01:21-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
+    phase: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
+    status: closed
+    taskKind: local_l1_summary_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T12:20:41-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required
+    phase: ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l1_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    phase: ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    status: closed
+    taskKind: docs_state_l1_l2_exact_scope_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
+    phase: ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
+    status: closed
+    taskKind: docs_state_fresh_approval_required_seed
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ap-11-fresh-approval-decision-pack
+    phase: ap-02-ap-11-fresh-approval-decision-pack
+    status: closed
+    taskKind: docs_state_fresh_approval_decision_pack
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ap-11-fresh-approval-decision-pack.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ap-11-fresh-approval-decision-pack.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-11-source-governance-change-control-detailing
+    phase: ap-11-source-governance-change-control-detailing
+    status: closed
+    taskKind: docs_state_governance_change_control
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-10-current-checkpoint-audit-target-detailing
+    phase: ap-10-current-checkpoint-audit-target-detailing
+    status: closed
+    taskKind: docs_state_audit_target_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-05-standard-org-self-service-scope-decision-detailing
+    phase: ap-05-standard-org-self-service-scope-decision-detailing
+    status: closed
+    taskKind: docs_state_product_scope_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-04-standard-ai-generation-scope-decision-detailing
+    phase: ap-04-standard-ai-generation-scope-decision-detailing
+    status: closed
+    taskKind: docs_state_product_scope_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-decision-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-09-runtime-capability-list-inventory-detailing
+    phase: ap-09-runtime-capability-list-inventory-detailing
+    status: closed
+    taskKind: docs_state_inventory_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-08-org-data-export-boundary-detailing
+    phase: ap-08-org-data-export-boundary-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-boundary-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-08-org-data-export-boundary-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-07-ocr-auto-import-provider-boundary-detailing
+    phase: ap-07-ocr-auto-import-provider-boundary-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-06-online-payment-provider-boundary-detailing
+    phase: ap-06-online-payment-provider-boundary-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-03-provider-staging-execution-approval-detailing
+    phase: ap-03-provider-staging-execution-approval-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    phase: ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-02-ops-auth-quota-cost-calibration-approval-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: blocked-use-case-acceleration-governance-packet
+    phase: blocked-use-case-acceleration-governance-packet
+    status: closed
+    taskKind: docs_state_acceleration_packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-local-experience-merge-push-cleanup
+    phase: ap-01-qwen-local-experience-merge-push-cleanup
+    status: closed
+    taskKind: local_merge_push_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-local-experience-merge-push-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-local-experience-merge-push-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-local-experience-closeout-audit
+    phase: ap-01-qwen-local-experience-closeout-audit
+    status: closed
+    taskKind: docs_state_closeout_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-local-experience-closeout-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-local-experience-closeout-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-local-readback-closeout-execution
+    phase: ap-01-qwen-user-visible-result-local-readback-closeout-execution
+    status: closed
+    taskKind: local_readback_closeout_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    phase: ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-readback-closeout-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-local-db-persistence-execution
+    phase: ap-01-qwen-user-visible-result-local-db-persistence-execution
+    status: closed
+    taskKind: local_database_persistence_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-local-db-persistence-approval
+    phase: ap-01-qwen-user-visible-result-local-db-persistence-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-local-db-persistence-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-one-request-materialization-execution
+    phase: ap-01-qwen-user-visible-result-one-request-materialization-execution
+    status: closed
+    taskKind: local_provider_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-user-visible-result-one-request-materialization-approval
+    phase: ap-01-qwen-user-visible-result-one-request-materialization-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-user-visible-result-one-request-materialization-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    phase: ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+    phase: ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-user-visible-result-materialization-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-provider-one-request-execution
+    phase: ap-01-qwen-route-integrated-provider-one-request-execution
+    status: closed
+    taskKind: local_provider_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-provider-one-request-execution-approval
+    phase: ap-01-qwen-route-integrated-provider-one-request-execution-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-one-request-execution-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-provider-execution-implementation
+    phase: ap-01-qwen-route-integrated-provider-execution-implementation
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-route-integrated-provider-execution-implementation-approval
+    phase: ap-01-qwen-route-integrated-provider-execution-implementation-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-route-integrated-provider-execution-implementation-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-in-app-ai-one-request-execution
+    phase: ap-01-qwen-in-app-ai-one-request-execution
+    status: closed
+    taskKind: local_provider_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-in-app-ai-one-request-execution-approval
+    phase: ap-01-qwen-in-app-ai-one-request-execution-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-one-request-execution-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-in-app-ai-runtime-bridge-implementation
+    phase: ap-01-qwen-in-app-ai-runtime-bridge-implementation
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-in-app-ai-runtime-bridge-approval
+    phase: ap-01-qwen-in-app-ai-runtime-bridge-approval
+    status: closed
+    taskKind: docs_state_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-in-app-ai-runtime-bridge-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+    phase: ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+    status: closed
+    taskKind: docs_state_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen3-7-max-one-request-smoke-approval
+    phase: ap-01-qwen3-7-max-one-request-smoke-approval
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen3-7-max-one-request-smoke-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen3-7-max-one-request-smoke-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-exact-model-id-and-key-permission-handoff
+    phase: ap-01-qwen-exact-model-id-and-key-permission-handoff
+    status: closed
+    taskKind: docs_state_handoff
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-exact-model-id-and-key-permission-handoff.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-exact-model-id-and-key-permission-handoff.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-console-permission-remediation-handoff
+    phase: ap-01-qwen-console-permission-remediation-handoff
+    status: closed
+    taskKind: docs_state_handoff
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-console-permission-remediation-handoff.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-redacted-provider-error-code-diagnostics
+    phase: ap-01-qwen-redacted-provider-error-code-diagnostics
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
+    phase: ap-01-qwen-provider-smoke-base-url-failure-diagnosis
+    status: closed
+    taskKind: docs_state_provider_failure_diagnosis
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-base-url-failure-diagnosis.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-provider-smoke-runner-base-url-config
+    phase: ap-01-qwen-provider-smoke-runner-base-url-config
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-runner-base-url-config.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03
+  - id: ap-01-qwen-provider-config-approval-package
+    phase: ap-01-qwen-provider-config-approval-package
+    status: closed
+    taskKind: docs_state_provider_config_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-config-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-config-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-03

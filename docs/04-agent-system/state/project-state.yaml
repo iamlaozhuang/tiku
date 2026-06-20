@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-2026-06-20-second-window
-updatedAt: "2026-06-20T01:02:05-07:00"
+currentPhase: active-queue-slimming-2026-06-20-batch-03
+updatedAt: "2026-06-20T01:24:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: dcd6f3bcd92007645da18cd4e987751d15b8f74f
-  lastKnownOriginMasterSha: dcd6f3bcd92007645da18cd4e987751d15b8f74f
+  lastKnownMasterSha: 24117be439f9c14a280510ba173c34f87e37600c
+  lastKnownOriginMasterSha: 24117be439f9c14a280510ba173c34f87e37600c
 currentTask:
-  id: active-queue-slimming-2026-06-20-second-window
+  id: active-queue-slimming-2026-06-20-batch-03
   status: closed
-  result: pass_docs_state_active_queue_slimming_second_window_no_execution
-  sourceStory: userApprovedNextArchiveBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-second-window.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-second-window.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-second-window.md
-  branch: codex/active-queue-slimming-second-window
+  result: pass_docs_state_active_queue_slimming_batch_03_no_execution
+  sourceStory: userApprovedActiveQueueSlimmingBatch
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-03.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-03.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-03.md
+  branch: codex/active-queue-slimming-batch-03
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4042,6 +4042,76 @@ lastActiveQueueSlimmingSecondWindow:
     - ap-05-standard-org-self-service-scope-change-user-choice-required
   activeQueueBeforeArchiveCandidates: 217
   archivedTaskCount: 5
+  boundary: >-
+    This docs/state queue slimming task moved closed historical task blocks to the monthly archive and updated the
+    history index only. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3 execution,
+    provider/model calls, DB work, env/secret access, schema/migration, dependency changes, deploy, payment, OCR,
+    export, external-service actions, PR, force push, destructive DB, or Cost Calibration Gate execution.
+lastActiveQueueSlimmingBatch03:
+  taskId: active-queue-slimming-2026-06-20-batch-03
+  archivedAt: "2026-06-20T01:24:45-07:00"
+  branch: codex/active-queue-slimming-batch-03
+  decision: pass_docs_state_active_queue_slimming_batch_03_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-20-first-window
+    - ap-04-standard-ai-generation-scope-change-user-choice-required
+    - ap-09-runtime-capability-implementation-exact-scope-required
+    - ap-08-org-data-export-execution-fresh-approval-required
+    - ap-07-ocr-auto-import-execution-fresh-approval-required
+    - ap-06-online-payment-execution-fresh-approval-required
+    - ap-03-provider-staging-execution-fresh-approval-required
+    - ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required
+    - ap-02-ops-auth-quota-cost-calibration-l1-local-summary-execution
+    - ap-02-ops-auth-quota-cost-calibration-l1-local-summary-fresh-approval-required
+    - ap-02-ops-auth-quota-cost-calibration-l1-l2-exact-scope-package
+    - ap-02-ops-auth-quota-cost-calibration-fresh-approval-required
+    - ap-02-ap-11-fresh-approval-decision-pack
+    - ap-11-source-governance-change-control-detailing
+    - ap-10-current-checkpoint-audit-target-detailing
+    - ap-05-standard-org-self-service-scope-decision-detailing
+    - ap-04-standard-ai-generation-scope-decision-detailing
+    - ap-09-runtime-capability-list-inventory-detailing
+    - ap-08-org-data-export-boundary-detailing
+    - ap-07-ocr-auto-import-provider-boundary-detailing
+    - ap-06-online-payment-provider-boundary-detailing
+    - ap-03-provider-staging-execution-approval-detailing
+    - ap-02-ops-auth-quota-cost-calibration-approval-detailing
+    - blocked-use-case-acceleration-governance-packet
+    - ap-01-qwen-local-experience-merge-push-cleanup
+    - ap-01-qwen-local-experience-closeout-audit
+    - ap-01-qwen-user-visible-result-local-readback-closeout-execution
+    - ap-01-qwen-user-visible-result-local-readback-closeout-approval
+    - ap-01-qwen-user-visible-result-local-db-persistence-execution
+    - ap-01-qwen-user-visible-result-local-db-persistence-approval
+    - ap-01-qwen-user-visible-result-one-request-materialization-execution
+    - ap-01-qwen-user-visible-result-one-request-materialization-approval
+    - ap-01-qwen-route-integrated-user-visible-result-materialization-implementation
+    - ap-01-qwen-route-integrated-user-visible-result-materialization-approval
+    - ap-01-qwen-route-integrated-provider-one-request-execution
+    - ap-01-qwen-route-integrated-provider-one-request-execution-approval
+    - ap-01-qwen-route-integrated-provider-execution-implementation
+    - ap-01-qwen-route-integrated-provider-execution-implementation-approval
+    - ap-01-qwen-in-app-ai-one-request-execution
+    - ap-01-qwen-in-app-ai-one-request-execution-approval
+    - ap-01-qwen-in-app-ai-runtime-bridge-implementation
+    - ap-01-qwen-in-app-ai-runtime-bridge-approval
+    - ap-01-qwen-cost-calibration-and-in-app-ai-experience-approval-detailing
+    - ap-01-qwen3-7-max-one-request-smoke-approval
+    - ap-01-qwen-exact-model-id-and-key-permission-handoff
+    - ap-01-qwen-console-permission-remediation-handoff
+    - ap-01-qwen-redacted-provider-error-code-diagnostics
+    - ap-01-qwen-provider-smoke-base-url-failure-diagnosis
+    - ap-01-qwen-provider-smoke-runner-base-url-config
+    - ap-01-qwen-provider-config-approval-package
+  activeQueueBeforeArchiveCandidates: 213
+  archivedTaskCount: 50
+  dependentActiveBlockedTasks:
+    - ap-01-qwen-one-request-post-console-remediation-retry-approval
+    - ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+    - ap-01-qwen-openai-compatible-one-request-isolation-smoke
+    - ap-01-qwen-provider-smoke-execution-base-url-ready
   boundary: >-
     This docs/state queue slimming task moved closed historical task blocks to the monthly archive and updated the
     history index only. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3 execution,
