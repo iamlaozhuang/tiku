@@ -3,8 +3,7 @@
 ## Decision
 
 APPROVE validation after the targeted personal AI Playwright spec and focused local checks passed. Final closeout still
-requires the validation commit hash, module closeout readiness, pre-push readiness, fast-forward merge, push, and branch
-cleanup.
+requires module closeout readiness, pre-push readiness, fast-forward merge, push, and branch cleanup.
 
 ## Scope Review
 
@@ -20,4 +19,10 @@ cleanup.
   are `null`.
 - Raw provider payload content remains forbidden, and the spec now asserts the provider request/response/error payload
   references are `null`.
-- Validation and closeout hashes are pending.
+- Validation commit: `32cac297c40fed589db780ca5d78af51e8e4e7a4`.
+
+## Final Closeout Review
+
+APPROVE closeout after module closeout readiness and pre-push readiness passed. The repair changed only the existing
+personal AI Playwright spec plus task docs/state; no `src/**`, schema, migration, dependency, env, provider, local DB,
+headed/debug browser, deploy, PR, force-push, or Cost Calibration Gate action was performed.

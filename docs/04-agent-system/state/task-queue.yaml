@@ -4910,11 +4910,13 @@ tasks:
     taskKind: local_validation_repair
     moduleRunVersion: 2
     localFullFlowGate: approved_localhost_only
-    status: in_progress
+    status: closed
     result: pass_personal_ai_local_ui_auth_session_contract_validation
     claimedAt: "2026-06-20T09:01:42-07:00"
     validatedAt: "2026-06-20T09:08:00-07:00"
+    closedAt: "2026-06-20T09:15:00-07:00"
     branch: codex/personal-ai-local-ui-auth-session-repair
+    commitSha: 32cac297c40fed589db780ca5d78af51e8e4e7a4
     allowedFiles:
       - e2e/personal-ai-generation-local-request.spec.ts
       - docs/04-agent-system/state/project-state.yaml
@@ -4983,13 +4985,13 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     validationCommandLifecycle:
-      - phase: pre_validation
+      - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_validation
+      - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_validation
+      - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_validation
+      - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId module-run-v2-personal-ai-local-ui-auth-session-contract-repair -Capability localFullFlowGate -Intent use_capability
       - phase: post_edit
         command: npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/protected-route-guard-ui.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
