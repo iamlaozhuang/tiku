@@ -1999,6 +1999,185 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
     planPath: docs/05-execution-logs/task-plans/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
     retryCount: 1
+  - id: module-run-v2-cross-role-local-flow-planning
+    title: Cross-role local flow and e2e readiness bridge approval reconciliation
+    phase: module-run-v2-cross-role-local-flow-planning
+    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
+    dependencies:
+      - module-run-v2-personal-ai-local-transport-contract-planning
+      - module-run-v2-personal-ai-local-ui-browser-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-20 user prompt "批准继续" after the local mechanism recommended
+      `module-run-v2-cross-role-local-flow-planning`. This approval is materialized as task-level
+      `localExperienceAcceptanceBridgeApproved` for L6 `local_role_flow_and_e2e_readiness` planning reconciliation only.
+      It allows creating the bounded task packet, task plan/evidence/audit, state sync, read-only inspection of existing
+      role-flow and e2e inventory, focused unit validation of existing auth/redaction/role-boundary contracts,
+      Playwright spec listing only, lint/typecheck/scoped formatting/diff/hardening/readiness gates, local validation
+      and closeout commits, fast-forward merge to master, push to origin/master, and merged short-branch cleanup. It
+      does not authorize product source edits, test/e2e spec edits, Playwright flow execution, headed/debug browser,
+      new e2e specs, destructive local DB writes, schema/drizzle/migration, package/lockfile/dependency, provider/model
+      calls, env/secret read/write/output, staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost
+      Calibration Gate work.
+    localExperienceAcceptanceBridgeApproved: >-
+      Approved for the personal-learning-ai-experience L6 `local_role_flow_and_e2e_readiness` planning reconciliation
+      only. Existing role-flow and e2e files are read-only for this packet; any actual Playwright flow execution or spec
+      repair remains blocked unless separately approved by a task-level local e2e validation or repair packet.
+    targetClosureItem: personal-learning-ai cross-role local flow and e2e readiness planning
+    behaviorBoundary: personal-learning-ai::local_role_flow_and_e2e_readiness_planning_reconciliation
+    useCases:
+      - Reconcile the current bridge proposal with historical local e2e smoke planning and existing role-flow inventory.
+      - Verify existing auth/session, admin log redaction, and personal AI UI redaction contracts through focused unit validation.
+      - Inventory existing Playwright role-flow, denial, student, and personal AI specs without executing browser flows.
+      - Close the bridge sequence only after L6 planning is represented in current queue state.
+    acceptanceScenarios:
+      - Bridge proposal diagnostics recognize this L6 task while active and stop asking for unrelated work.
+      - Focused auth/redaction/role-boundary unit validation passes without provider/model calls or runtime source edits.
+      - E2E inventory confirms existing role-flow and personal AI specs are discoverable without running them.
+      - Closeout evidence records the remaining executable work as separate validation or repair packets.
+    nonGoals:
+      - product source edits, test/e2e edits, Playwright flow execution, headed/debug browser, new e2e specs, destructive DB writes, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
+    validationProfile: docs_state_lite
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_acceptance_bridge
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: in_progress
+    result: pass_l6_role_flow_e2e_readiness_reconciliation
+    claimedAt: "2026-06-20T10:16:32-07:00"
+    validatedAt: "2026-06-20T10:20:40-07:00"
+    branch: codex/cross-role-local-flow-planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+      - docs/05-execution-logs/evidence/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+      - docs/05-execution-logs/audits-reviews/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/local-business-flow.spec.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product runtime source edits
+      - test/e2e spec edits
+      - Playwright flow execution
+      - headed/debug browser
+      - new e2e specs
+      - destructive local DB writes
+      - schema/drizzle/migration changes
+      - database migration execution
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - evidence_redaction
+      - local_experience_acceptance_bridge_reconciliation
+      - read_only_role_flow_e2e_readiness
+      - known_blocked_validation_boundary
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: rg --files e2e
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/evidence/2026-06-20-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - npm.cmd run test:e2e -- --list
+      - rg --files e2e
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/evidence/2026-06-20-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
+    retryCount: 1
   - id: blocked-gates-approval-package-materialization
     title: Blocked gates approval package materialization
     phase: blocked-gates-approval-package-materialization
