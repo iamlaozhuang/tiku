@@ -30,13 +30,16 @@ const forbiddenVisibleMarkers = [
   "raw prompt",
   "raw answer",
   "raw model response",
-  "providerRequestPayload",
-  "providerResponsePayload",
   "Bearer ",
   "apiKey",
   "databaseUrl",
   "secretValue",
   localStudentAccessValue,
+] as const;
+const providerPayloadReferenceFields = [
+  "providerRequestPayload",
+  "providerResponsePayload",
+  "providerErrorPayload",
 ] as const;
 
 async function expectForbiddenMarkersHidden(page: Page, values: string[]) {
@@ -104,6 +107,39 @@ function readRequiredNestedString(value: unknown, path: string[]): string {
   }
 
   return currentValue;
+}
+
+function readRequiredNestedRecord(
+  value: unknown,
+  path: string[],
+): Record<string, unknown> {
+  let currentValue = value;
+
+  for (const pathSegment of path) {
+    if (!isRecord(currentValue)) {
+      throw new Error("Missing required object in local e2e fixture response.");
+    }
+
+    currentValue = currentValue[pathSegment];
+  }
+
+  if (!isRecord(currentValue)) {
+    throw new Error("Missing required object in local e2e fixture response.");
+  }
+
+  return currentValue;
+}
+
+function expectProviderPayloadReferencesRedacted(value: unknown) {
+  const redactionProbe = readRequiredNestedRecord(value, [
+    "data",
+    "runtimeBridge",
+    "redactionProbe",
+  ]);
+
+  for (const providerPayloadReferenceField of providerPayloadReferenceFields) {
+    expect(redactionProbe[providerPayloadReferenceField]).toBeNull();
+  }
 }
 
 async function installLocalStudentBrowserSession(page: Page): Promise<string> {
@@ -335,6 +371,7 @@ test.describe("personal AI generation local request", () => {
     expectCamelCaseJsonKeys(requestPayload);
     expectNoInternalIdKeys(requestPayload);
     expectNoSensitivePayload(requestPayload, [localAuthHeaderValue]);
+    expectProviderPayloadReferencesRedacted(requestPayload);
     expect(requestPayload).toMatchObject({
       code: 0,
       data: {
