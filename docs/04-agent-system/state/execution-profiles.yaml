@@ -9,7 +9,7 @@ defaults:
   queueSelectionMode: legacy_explicit
 l123AccelerationPolicy:
   defaultMode: proposal_only
-  maxTasksPerPacket: 1
+  maxTasksPerPacket: 10
   modes:
     proposal_only:
       meaning: Classify and report L123 acceleration opportunities without writing state or executing tasks.
@@ -364,7 +364,7 @@ workPacket:
     - repository_runtime_local
     - low_risk_experience_batch
   maxTasksPerPacket:
-    docs_state_lite: 6
+    docs_state_lite: 10
     local_experience_audit: 2
     local_low_risk_experience_batch: 5
     local_unit_tdd: 4

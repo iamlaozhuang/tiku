@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: queue-matrix-drift-readonly-audit
-updatedAt: "2026-06-20T00:29:49-07:00"
+currentPhase: l123-docs-state-packet-limit-governance-sync
+updatedAt: "2026-06-20T00:36:10-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,14 +503,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: queue-matrix-drift-readonly-audit
+  id: l123-docs-state-packet-limit-governance-sync
   status: closed
-  result: pass_docs_state_queue_matrix_drift_audit_no_seed_no_execution
-  sourceStory: userRequestedQueueMatrixDriftAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-queue-matrix-drift-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-queue-matrix-drift-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-queue-matrix-drift-readonly-audit.md
-  branch: codex/queue-matrix-drift-audit
+  result: pass_docs_state_l123_packet_limit_10_governance_sync_no_execution
+  sourceStory: userRequestedL123PacketLimitGovernanceSync
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  branch: codex/l123-packet-limit-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -3988,3 +3988,22 @@ lastQueueMatrixDriftAudit:
     diagnostic. Existing blocked tasks remain blocked and no seed, close, product execution, or repair action is
     authorized by this audit.
   nextRecommendedTask: l123-docs-state-packet-limit-governance-sync
+lastL123PacketLimitGovernanceSync:
+  taskId: l123-docs-state-packet-limit-governance-sync
+  syncedAt: "2026-06-20T00:36:10-07:00"
+  branch: codex/l123-packet-limit-governance
+  decision: pass_docs_state_l123_packet_limit_10_governance_sync_no_execution
+  evidence: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  executionProfileCatalogPath: docs/04-agent-system/state/execution-profiles.yaml
+  previousLimits:
+    l123AccelerationPolicyMaxTasksPerPacket: 1
+    docsStateLiteWorkPacketMaxTasksPerPacket: 6
+  newLimits:
+    l123AccelerationPolicyMaxTasksPerPacket: 10
+    docsStateLiteWorkPacketMaxTasksPerPacket: 10
+  boundary: >-
+    This docs/state governance sync changes packet-count limits only. It does not approve exact_scope_local_auto_execute,
+    source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access, schema/migration,
+    dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push, destructive DB, or Cost
+    Calibration Gate execution.

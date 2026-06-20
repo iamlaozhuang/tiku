@@ -1,5 +1,110 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: l123-docs-state-packet-limit-governance-sync
+    title: L123 Docs State Packet Limit Governance Sync
+    phase: l123-docs-state-packet-limit-governance-sync
+    sourceStory: userRequestedL123PacketLimitGovernanceSync
+    dependencies:
+      - queue-matrix-drift-readonly-audit
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested this task only after the queue/matrix drift audit closed cleanly. Scope is limited to docs/state
+      governance for changing the L123 docs-state approval package packet limit to 10. This task does not authorize
+      exact_scope_local_auto_execute, source/test/e2e repair, L3 execution, product implementation, DB, provider/model,
+      env/secret, schema/migration, dependency/package/lockfile, deploy, payment, OCR, export, external-service, Cost
+      Calibration Gate, PR, force push, destructive DB, or sensitive evidence work.
+    taskKind: docs_state_governance
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    status: closed
+    result: pass_docs_state_l123_packet_limit_10_governance_sync_no_execution
+    claimedAt: "2026-06-20T00:36:10-07:00"
+    validatedAt: "2026-06-20T00:36:10-07:00"
+    closedAt: "2026-06-20T00:36:10-07:00"
+    branch: codex/l123-packet-limit-governance
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    previousLimits:
+      l123AccelerationPolicyMaxTasksPerPacket: 1
+      docsStateLiteWorkPacketMaxTasksPerPacket: 6
+    newLimits:
+      l123AccelerationPolicyMaxTasksPerPacket: 10
+      docsStateLiteWorkPacketMaxTasksPerPacket: 10
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      governanceStateChange: approved
+      sourceTestE2eScriptChange: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      providerModelCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentOcrExportExternalService: blocked
+      costCalibrationGate: blocked
+      exactScopeLocalAutoExecute: blocked
+      l3Execution: blocked
+      pr: blocked
+      forcePush: blocked
+      destructiveDatabase: blocked
+      rawSensitiveEvidence: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+      - docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - scripts/agent-system/Get-TikuNextAction.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - deploy/cloud/payment/provider config files
+      - any file not explicitly listed in allowedFiles
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        message: "docs(l123): set packet limit to 10"
+        approval: current_user_prompt_2026_06_20_queue_drift_then_packet_limit
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
   - id: queue-matrix-drift-readonly-audit
     title: Queue Matrix Drift Readonly Audit
     phase: queue-matrix-drift-readonly-audit
