@@ -593,6 +593,81 @@ currentTask:
     Assert-Contains -Output $seedOutput -Pattern '^recommendedHumanDecision: approve_auto_seed_or_keep_paused_or_create_manual_task$'
     Assert-Contains -Output $seedOutput -Pattern '^recommendedAction: request_auto_seed_approval:authorization-and-access$'
 
+    $seedHistoryMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-seed-history.yaml"
+    $seedHistoryIndexPath = Join-Path -Path $stateRoot -ChildPath "task-history-index-seed-history.yaml"
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+mode:
+  firstEligibleImplementationBatchNumber: 101
+sourcePlanningModules:
+  - module: authorization-context
+    sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
+    v2ExecutionModule: authorization-and-access
+    currentProgress:
+      completedBatches:
+        - batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+        - batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+  - module: ai-task-domain
+    sourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
+    v2ExecutionModule: ai-task-and-provider
+executionModules:
+  - module: authorization-and-access
+    sourceModules:
+      - authorization-context
+    localFullLoopMinimum: L4
+    targetLocalClosure:
+      - authorization read-model and display contracts
+      - personal_auth and org_auth local summaries
+  - module: ai-task-and-provider
+    sourceModules:
+      - ai-task-domain
+    dependsOnExecutionModules:
+      - authorization-and-access
+    localFullLoopMinimum: L2
+    targetLocalClosure:
+      - provider-agnostic AI task lifecycle contracts
+implementationAutoSeedGate:
+  enabled: true
+localExperienceClosureGate:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $seedHistoryMatrixPath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+entries:
+  - id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    status: done
+    evidencePath: docs/05-execution-logs/evidence/archived-a.md
+  - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    status: closed
+    evidencePath: docs/05-execution-logs/evidence/archived-a.md
+"@ | Set-Content -LiteralPath $seedHistoryIndexPath -Encoding UTF8
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $seedHistoryOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $seedProjectStatePath `
+                -QueuePath $seedQueuePath `
+                -MatrixPath $seedHistoryMatrixPath `
+                -TaskHistoryIndexPath $seedHistoryIndexPath `
+                -LocalExperienceMatrixPath $missingLocalExperienceMatrixPath `
+                -ExecutionProfileCatalogPath $executionProfileCatalogPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $seedHistoryOutput -Pattern '^nextActionDecision: seed_proposal_available$'
+    Assert-Contains -Output $seedHistoryOutput -Pattern '^seedModule: ai-task-and-provider$'
+    Assert-NotContains -Output $seedHistoryOutput -Pattern '^seedModule: authorization-and-access$'
+
     $bridgeQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-bridge.yaml"
     $bridgeMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-bridge.yaml"
     $bridgeProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-bridge.yaml"

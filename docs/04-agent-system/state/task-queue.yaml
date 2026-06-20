@@ -2650,3 +2650,54 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
+  - id: mechanism-authorization-seed-dedup-history-index
+    title: Module Run v2 seed proposal history-index de-dup repair
+    phase: mechanism-authorization-seed-dedup-history-index
+    sourceStory: user-approved-next-step
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      批准建议
+    taskKind: mechanism_repair
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    allowedFiles:
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/**
+      - src/app/**
+    riskTypes:
+      - mechanism_repair
+      - docs_state
+      - local_validation
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -TaskId active-queue-slimming-2026-06-20-batch-08 -MaxBatchCount 8
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-authorization-seed-dedup-history-index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-authorization-seed-dedup-history-index.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-authorization-seed-dedup-history-index.md
+    status: closed
+    startedAt: "2026-06-20T02:26:08-07:00"
+    completedAt: "2026-06-20T02:30:51-07:00"

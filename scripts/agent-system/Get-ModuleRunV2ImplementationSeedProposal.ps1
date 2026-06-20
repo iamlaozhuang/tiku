@@ -16,7 +16,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml"
 )
 
 $ErrorActionPreference = "Stop"
@@ -263,6 +267,103 @@ function Get-SourcePlanningTaskMap {
     return $map
 }
 
+function Add-CompletedBatchId {
+    param(
+        [Parameter(Mandatory = $true)][hashtable]$Map,
+        [Parameter(Mandatory = $true)][string]$ExecutionModule,
+        [Parameter(Mandatory = $true)][string]$BatchId
+    )
+
+    if (-not $Map.ContainsKey($ExecutionModule)) {
+        $Map[$ExecutionModule] = New-Object System.Collections.Generic.List[string]
+    }
+
+    if (-not $Map[$ExecutionModule].Contains($BatchId)) {
+        $Map[$ExecutionModule].Add($BatchId)
+    }
+}
+
+function Get-CompletedBatchIdsByExecutionModule {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $map = @{}
+    $insideSourceModules = $false
+    $currentExecutionModule = ""
+    $currentCompletedBatches = New-Object System.Collections.Generic.List[string]
+    $currentList = ""
+
+    foreach ($line in $Lines) {
+        if ($line -match "^sourcePlanningModules:\s*$") {
+            $insideSourceModules = $true
+            continue
+        }
+
+        if (-not $insideSourceModules) {
+            continue
+        }
+
+        if ($line -match "^\S" -and $line -notmatch "^sourcePlanningModules:\s*$") {
+            break
+        }
+
+        if ($line -match "^\s{2}- module:\s*(.+?)\s*$") {
+            if (-not [string]::IsNullOrWhiteSpace($currentExecutionModule)) {
+                foreach ($batchId in $currentCompletedBatches) {
+                    Add-CompletedBatchId -Map $map -ExecutionModule $currentExecutionModule -BatchId $batchId
+                }
+            }
+
+            $currentExecutionModule = ""
+            $currentCompletedBatches = New-Object System.Collections.Generic.List[string]
+            $currentList = ""
+            continue
+        }
+
+        if ($line -match "^\s{4}v2ExecutionModule:\s*(.+?)\s*$") {
+            $currentExecutionModule = Remove-ValueQuotes -Value $Matches[1]
+            $currentList = ""
+            continue
+        }
+
+        if ($line -match "^\s{6}completedBatches:\s*$") {
+            $currentList = "completedBatches"
+            continue
+        }
+
+        if ($line -match "^\s{4}\S[^:]*:\s*" -and $line -notmatch "^\s{4}currentProgress:\s*$") {
+            $currentList = ""
+            continue
+        }
+
+        if ($currentList -eq "completedBatches" -and $line -match "^\s{8}-\s+(.+?)\s*$") {
+            $currentCompletedBatches.Add((Remove-ValueQuotes -Value $Matches[1]))
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($currentExecutionModule)) {
+        foreach ($batchId in $currentCompletedBatches) {
+            Add-CompletedBatchId -Map $map -ExecutionModule $currentExecutionModule -BatchId $batchId
+        }
+    }
+
+    return $map
+}
+
+function Get-CompletedBatchIds {
+    param([Parameter(Mandatory = $true)][hashtable]$CompletedBatchIdsByModule)
+
+    $batchIds = New-Object System.Collections.Generic.List[string]
+    foreach ($key in $CompletedBatchIdsByModule.Keys) {
+        foreach ($batchId in $CompletedBatchIdsByModule[$key]) {
+            if (-not $batchIds.Contains($batchId)) {
+                $batchIds.Add($batchId)
+            }
+        }
+    }
+
+    return $batchIds.ToArray()
+}
+
 function Test-ModuleClosureMarker {
     param(
         [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
@@ -294,8 +395,19 @@ function Test-TargetClosureCompleted {
     param(
         [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
         [Parameter(Mandatory = $true)][string]$ModuleId,
-        [Parameter(Mandatory = $true)][string]$TargetClosure
+        [Parameter(Mandatory = $true)][string]$TargetClosure,
+        [Parameter(Mandatory = $false)][hashtable]$CompletedBatchIdsByModule = @{}
     )
+
+    if ($CompletedBatchIdsByModule.ContainsKey($ModuleId)) {
+        $targetClosureSlug = ConvertTo-TaskSlug -Text $TargetClosure
+        $completedBatchPattern = "^batch-\d+-$([regex]::Escape($ModuleId))-$([regex]::Escape($targetClosureSlug))$"
+        foreach ($completedBatchId in $CompletedBatchIdsByModule[$ModuleId]) {
+            if ($completedBatchId -match $completedBatchPattern) {
+                return $true
+            }
+        }
+    }
 
     foreach ($block in $TaskBlocks) {
         $status = Get-TaskScalarValue -Block $block.Lines -Key "status"
@@ -317,7 +429,8 @@ function Test-TargetClosureCompleted {
 function Test-ModuleTargetClosureCompleted {
     param(
         [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
-        [Parameter(Mandatory = $true)]$ExecutionModule
+        [Parameter(Mandatory = $true)]$ExecutionModule,
+        [Parameter(Mandatory = $false)][hashtable]$CompletedBatchIdsByModule = @{}
     )
 
     $targetClosureItems = @($ExecutionModule.TargetClosure)
@@ -326,7 +439,7 @@ function Test-ModuleTargetClosureCompleted {
     }
 
     foreach ($targetClosure in $targetClosureItems) {
-        if (-not (Test-TargetClosureCompleted -TaskBlocks $TaskBlocks -ModuleId $ExecutionModule.Module -TargetClosure $targetClosure)) {
+        if (-not (Test-TargetClosureCompleted -TaskBlocks $TaskBlocks -ModuleId $ExecutionModule.Module -TargetClosure $targetClosure -CompletedBatchIdsByModule $CompletedBatchIdsByModule)) {
             return $false
         }
     }
@@ -337,11 +450,12 @@ function Test-ModuleTargetClosureCompleted {
 function Test-ModuleCompleted {
     param(
         [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
-        [Parameter(Mandatory = $true)]$ExecutionModule
+        [Parameter(Mandatory = $true)]$ExecutionModule,
+        [Parameter(Mandatory = $false)][hashtable]$CompletedBatchIdsByModule = @{}
     )
 
     return (Test-ModuleClosureMarker -TaskBlocks $TaskBlocks -ModuleId $ExecutionModule.Module) -or
-        (Test-ModuleTargetClosureCompleted -TaskBlocks $TaskBlocks -ExecutionModule $ExecutionModule)
+        (Test-ModuleTargetClosureCompleted -TaskBlocks $TaskBlocks -ExecutionModule $ExecutionModule -CompletedBatchIdsByModule $CompletedBatchIdsByModule)
 }
 
 function Get-FirstEligibleBatchNumber {
@@ -357,12 +471,21 @@ function Get-FirstEligibleBatchNumber {
 function Get-NextCandidateBatchNumber {
     param(
         [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
-        [Parameter(Mandatory = $true)][int]$MinimumBatchNumber
+        [Parameter(Mandatory = $true)][int]$MinimumBatchNumber,
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][string[]]$ExistingBatchIds = @()
     )
 
     $highestBatchNumber = $MinimumBatchNumber - 1
     foreach ($block in $TaskBlocks) {
         if ($block.Id -match "^batch-(\d+)-") {
+            $batchNumber = [int]$Matches[1]
+            if ($batchNumber -gt $highestBatchNumber) {
+                $highestBatchNumber = $batchNumber
+            }
+        }
+    }
+    foreach ($batchId in $ExistingBatchIds) {
+        if ($batchId -match "^batch-(\d+)-") {
             $batchNumber = [int]$Matches[1]
             if ($batchNumber -gt $highestBatchNumber) {
                 $highestBatchNumber = $batchNumber
@@ -403,6 +526,10 @@ try {
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
     $matrixLines = @(Get-Content -LiteralPath $MatrixPath)
+    $taskHistoryLines = @()
+    if (Test-Path -LiteralPath $TaskHistoryIndexPath) {
+        $taskHistoryLines = @(Get-Content -LiteralPath $TaskHistoryIndexPath)
+    }
     $matrixContent = $matrixLines -join "`n"
 
     if ($matrixContent -notmatch "implementationAutoSeedGate\s*:" -or $matrixContent -notmatch "Cost Calibration Gate remains blocked") {
@@ -415,6 +542,8 @@ try {
     }
 
     $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+    $taskHistoryBlocks = @(Get-TaskBlocks -Lines $taskHistoryLines)
+    $completionTaskBlocks = @($taskBlocks + $taskHistoryBlocks)
     $currentTaskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)
     $currentTaskStatus = Get-TaskScalarValue -Block $currentTaskBlock -Key "status"
     $pendingTaskIds = @()
@@ -440,6 +569,8 @@ try {
 
     $executionModules = @(Get-ExecutionModules -Lines $matrixLines)
     $sourcePlanningTaskMap = Get-SourcePlanningTaskMap -Lines $matrixLines
+    $completedBatchIdsByModule = Get-CompletedBatchIdsByExecutionModule -Lines $matrixLines
+    $completedBatchIds = @(Get-CompletedBatchIds -CompletedBatchIdsByModule $completedBatchIdsByModule)
     if ($executionModules.Count -eq 0) {
         Write-Output "HARD_BLOCK_NO_EXECUTION_MODULES"
         Write-SeedProposalResult -Decision "stop_for_hard_block" -Reason "matrix has no execution modules" -ExitCode 1
@@ -447,7 +578,7 @@ try {
 
     $selectedModule = $null
     foreach ($executionModule in $executionModules) {
-        if (Test-ModuleCompleted -TaskBlocks $taskBlocks -ExecutionModule $executionModule) {
+        if (Test-ModuleCompleted -TaskBlocks $completionTaskBlocks -ExecutionModule $executionModule -CompletedBatchIdsByModule $completedBatchIdsByModule) {
             Write-Output "seedModuleAlreadyComplete: $($executionModule.Module)"
             continue
         }
@@ -457,9 +588,9 @@ try {
             $dependencyModule = @($executionModules | Where-Object { $_.Module -eq $dependency } | Select-Object -First 1)
             $dependencyComplete = $false
             if ($dependencyModule.Count -gt 0) {
-                $dependencyComplete = Test-ModuleCompleted -TaskBlocks $taskBlocks -ExecutionModule $dependencyModule[0]
+                $dependencyComplete = Test-ModuleCompleted -TaskBlocks $completionTaskBlocks -ExecutionModule $dependencyModule[0] -CompletedBatchIdsByModule $completedBatchIdsByModule
             } else {
-                $dependencyComplete = Test-ModuleClosureMarker -TaskBlocks $taskBlocks -ModuleId $dependency
+                $dependencyComplete = Test-ModuleClosureMarker -TaskBlocks $completionTaskBlocks -ModuleId $dependency
             }
 
             if (-not $dependencyComplete) {
@@ -480,7 +611,7 @@ try {
     }
 
     $targetClosureItems = @($selectedModule.TargetClosure | Where-Object {
-            -not (Test-TargetClosureCompleted -TaskBlocks $taskBlocks -ModuleId $selectedModule.Module -TargetClosure $_)
+            -not (Test-TargetClosureCompleted -TaskBlocks $completionTaskBlocks -ModuleId $selectedModule.Module -TargetClosure $_ -CompletedBatchIdsByModule $completedBatchIdsByModule)
         })
     if ($targetClosureItems.Count -eq 0) {
         Write-Output "HARD_BLOCK_SELECTED_MODULE_HAS_NO_TARGET_CLOSURE $($selectedModule.Module)"
@@ -495,7 +626,7 @@ try {
         $sourcePlanningTask = $TaskId
     }
 
-    $batchNumber = Get-NextCandidateBatchNumber -TaskBlocks $taskBlocks -MinimumBatchNumber (Get-FirstEligibleBatchNumber -MatrixContent $matrixContent)
+    $batchNumber = Get-NextCandidateBatchNumber -TaskBlocks $completionTaskBlocks -MinimumBatchNumber (Get-FirstEligibleBatchNumber -MatrixContent $matrixContent) -ExistingBatchIds $completedBatchIds
     $candidateCount = [Math]::Min($MaxBatchCount, $targetClosureItems.Count)
 
     Write-Section -Title "Seed Candidate"

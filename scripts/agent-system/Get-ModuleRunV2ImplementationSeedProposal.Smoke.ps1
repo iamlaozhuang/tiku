@@ -13,12 +13,26 @@ function Assert-Contains {
 }
 
 function Write-FixtureFiles {
-    param([Parameter(Mandatory = $true)][string]$Root)
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $false)][switch]$ArchivedAuthorizationCompleted
+    )
 
     New-Item -ItemType Directory -Path $Root -Force | Out-Null
     $projectStatePath = Join-Path -Path $Root -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $Root -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $Root -ChildPath "matrix.yaml"
+    $taskHistoryIndexPath = Join-Path -Path $Root -ChildPath "task-history-index.yaml"
+    $authorizationProgress = if ($ArchivedAuthorizationCompleted) {
+        @"
+    currentProgress:
+      completedBatches:
+        - batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+        - batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+"@
+    } else {
+        ""
+    }
 
     @"
 schemaVersion: 1
@@ -44,6 +58,7 @@ sourcePlanningModules:
   - module: authorization-context
     sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
     v2ExecutionModule: authorization-and-access
+$authorizationProgress
   - module: ai-task-domain
     sourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
     v2ExecutionModule: ai-task-and-provider
@@ -74,10 +89,33 @@ terminologyAnchors:
 Cost Calibration Gate remains blocked
 "@ | Set-Content -LiteralPath $matrixPath -Encoding UTF8
 
+    if ($ArchivedAuthorizationCompleted) {
+        @"
+schemaVersion: 1
+entries:
+  - id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+  - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+"@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
+    } else {
+        @"
+schemaVersion: 1
+entries: []
+"@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
+    }
+
     return [pscustomobject]@{
         ProjectStatePath = $projectStatePath
         QueuePath        = $queuePath
         MatrixPath       = $matrixPath
+        TaskHistoryIndexPath = $taskHistoryIndexPath
     }
 }
 
@@ -93,7 +131,8 @@ try {
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
-            -MatrixPath $fixture.MatrixPath
+            -MatrixPath $fixture.MatrixPath `
+            -TaskHistoryIndexPath $fixture.TaskHistoryIndexPath
     )
     Assert-Contains -Output $proposalOutput -Pattern "seedProposalDecision: proposal_available"
     Assert-Contains -Output $proposalOutput -Pattern "seedModule: authorization-and-access"
@@ -121,11 +160,25 @@ try {
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
-            -MatrixPath $fixture.MatrixPath
+            -MatrixPath $fixture.MatrixPath `
+            -TaskHistoryIndexPath $fixture.TaskHistoryIndexPath
     )
     Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedModuleAlreadyComplete: authorization-and-access"
     Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedModule: ai-task-and-provider"
     Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedCandidateTask: batch-103-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract"
+
+    $historyFixtureRoot = Join-Path -Path $fixtureRoot -ChildPath "history-completed"
+    $historyFixture = Write-FixtureFiles -Root $historyFixtureRoot -ArchivedAuthorizationCompleted
+    $historyCompletedOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $historyFixture.ProjectStatePath `
+            -QueuePath $historyFixture.QueuePath `
+            -MatrixPath $historyFixture.MatrixPath `
+            -TaskHistoryIndexPath $historyFixture.TaskHistoryIndexPath
+    )
+    Assert-Contains -Output $historyCompletedOutput -Pattern "seedModuleAlreadyComplete: authorization-and-access"
+    Assert-Contains -Output $historyCompletedOutput -Pattern "seedModule: ai-task-and-provider"
+    Assert-Contains -Output $historyCompletedOutput -Pattern "seedCandidateTask: batch-103-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract"
 
     Add-Content -LiteralPath $fixture.QueuePath -Value @"
   - id: pending-task
@@ -137,7 +190,8 @@ try {
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
-            -MatrixPath $fixture.MatrixPath
+            -MatrixPath $fixture.MatrixPath `
+            -TaskHistoryIndexPath $fixture.TaskHistoryIndexPath
     )
     Assert-Contains -Output $executableOutput -Pattern "seedProposalDecision: executable_task_exists"
 } finally {
