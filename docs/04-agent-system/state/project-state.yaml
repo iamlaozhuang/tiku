@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T05:47:44-07:00"
+updatedAt: "2026-06-20T05:59:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2722365e89e69b513d0241956b36c991901fc16c
-  lastKnownOriginMasterSha: 2722365e89e69b513d0241956b36c991901fc16c
+  lastKnownMasterSha: a8ed5163ca9f01bee57c6cf6254deeb29d796e52
+  lastKnownOriginMasterSha: a8ed5163ca9f01bee57c6cf6254deeb29d796e52
 currentTask:
-  id: queue-health-carryover-archive-2026-06-20
-  status: closed
-  result: pass_queue_health_carryover_archive
-  sourceStory: userRequestedContinuousProgressAfterStage2Closeout
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-queue-health-carryover-archive.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-queue-health-carryover-archive.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-queue-health-carryover-archive.md
-  branch: codex/queue-health-carryover-archive
-  commitSha: 5315382417922831c609e4011c1382c3706c4e65
+  id: batch-216-personal-learning-ai-personal-generation-request-flow
+  status: in_progress
+  result: pending
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-216-personal-generation-request-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-216-personal-learning-ai-personal-generation-request-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-216-personal-learning-ai-personal-generation-request-flow.md
+  branch: codex/batch-216-personal-generation-request-flow
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
