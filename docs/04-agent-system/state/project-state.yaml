@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T05:59:52-07:00"
+updatedAt: "2026-06-20T06:02:39-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: a8ed5163ca9f01bee57c6cf6254deeb29d796e52
 currentTask:
   id: batch-216-personal-learning-ai-personal-generation-request-flow
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass_personal_generation_request_flow_contract
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-216-personal-generation-request-flow.md
   evidencePath: docs/05-execution-logs/evidence/batch-216-personal-learning-ai-personal-generation-request-flow.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-216-personal-learning-ai-personal-generation-request-flow.md
   branch: codex/batch-216-personal-generation-request-flow
-  commitSha: null
+  commitSha: 8b5a701ae0b7a65addd060bc5fdb5f3f9fb6015e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4597,3 +4597,18 @@ lastPersonalLearningAiAutoSeed:
     approved only when each task's readiness gates pass. Env/provider/schema/deploy/payment/PR/force-push/dependency,
     real provider/model calls, provider configuration, raw prompts, raw generated AI content in evidence, and Cost
     Calibration Gate remain blocked.
+
+lastStage4Batch216PersonalGenerationRequestFlow:
+  taskId: batch-216-personal-learning-ai-personal-generation-request-flow
+  validatedAt: "2026-06-20T06:02:39-07:00"
+  closedAt: "2026-06-20T06:02:39-07:00"
+  branch: codex/batch-216-personal-generation-request-flow
+  commitSha: 8b5a701ae0b7a65addd060bc5fdb5f3f9fb6015e
+  decision: pass_personal_generation_request_flow_contract
+  focusedUnit: src/server/services/personal-ai-generation-request-flow-service.test.ts
+  sourceChanged: false
+  nextCandidateTaskId: batch-217-personal-learning-ai-paper-and-mock-exam-context-selection
+  boundary: >-
+    Batch 216 validated existing local personal AI generation request flow contracts with a scoped unit test. No
+    source/test change, provider/env/schema/deploy/payment/PR/force-push, raw prompt or raw generated AI content
+    evidence, or Cost Calibration Gate work was performed.
