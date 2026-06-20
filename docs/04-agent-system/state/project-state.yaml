@@ -504,13 +504,14 @@ repository:
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
   id: batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-  status: in_progress
+  status: closed
+  result: pass_ops_governance_log_retention_redaction_contract
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: pending-task-plan
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-230-ops-governance-log-retention-redaction-contracts.md
   evidencePath: docs/05-execution-logs/evidence/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
   branch: codex/batch-230-ops-governance-log-retention
-  commitSha: pending-local-commit
+  commitSha: b29bab35fe8918521d9df9649a3b047ff9bb624a
   prUrl: null
   retryCount: 0
   lastFailurePath: null

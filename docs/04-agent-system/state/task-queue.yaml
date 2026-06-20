@@ -4750,7 +4750,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     evidencePath: docs/05-execution-logs/evidence/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
     title: Module Run v2 ops-governance-and-retention implementation seed

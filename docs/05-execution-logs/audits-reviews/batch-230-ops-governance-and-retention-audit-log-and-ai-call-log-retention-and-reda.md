@@ -32,4 +32,7 @@ focused unit coverage passed. Final closeout still requires validation commit ha
 
 ## Final Closeout Review
 
-Pending validation commit, task-scoped hardening, and module closeout readiness.
+APPROVE batch-230 local closeout after validation commit
+`b29bab35fe8918521d9df9649a3b047ff9bb624a` and module closeout readiness passed. No source/test change was required.
+The next ops-governance-and-retention seeded task is
+`batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c`.
