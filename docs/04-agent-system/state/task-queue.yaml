@@ -3610,7 +3610,11 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-222-organization-training-context.md
     evidencePath: docs/05-execution-logs/evidence/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-    status: in_progress
+    validatedAt: "2026-06-20T07:16:11-07:00"
+    closedAt: "2026-06-20T07:16:11-07:00"
+    commitSha: facca4f32f4144e7da451b7c8bf347b096011879
+    result: pass_organization_training_context_usage_contract
+    status: closed
     retryCount: 0
   - id: batch-223-organization-training-audit-log-redacted-reference
     title: Module Run v2 organization-training implementation seed

@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: 3817c69c23425041c0cd723bd59ac36206aae6ae
 currentTask:
   id: batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass_organization_training_context_usage_contract
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-222-organization-training-context.md
   evidencePath: docs/05-execution-logs/evidence/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
   branch: codex/batch-222-organization-training-context
-  commitSha: null
+  commitSha: facca4f32f4144e7da451b7c8bf347b096011879
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4687,5 +4687,21 @@ lastStage4Batch221OrganizationTrainingEmployeeFlow:
   boundary: >-
     Batch 221 validated existing local organization-training employee answer lifecycle, route, validator, and employee
     entry contracts with scoped unit tests. No source/test change, browser/e2e/local DB write,
+    provider/env/schema/deploy/payment/PR/force-push, dependency change, raw employee answer text, full paper content,
+    raw prompt or raw generated AI content evidence, or Cost Calibration Gate work was performed.
+
+lastStage4Batch222OrganizationTrainingContext:
+  taskId: batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex
+  validatedAt: "2026-06-20T07:16:11-07:00"
+  closedAt: "2026-06-20T07:16:11-07:00"
+  branch: codex/batch-222-organization-training-context
+  commitSha: facca4f32f4144e7da451b7c8bf347b096011879
+  decision: pass_organization_training_context_usage_contract
+  focusedUnit: src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts
+  sourceChanged: false
+  nextCandidateTaskId: batch-223-organization-training-audit-log-redacted-reference
+  boundary: >-
+    Batch 222 validated existing local organization-training paper and mock_exam context usage, route, validator, and
+    metadata-only redaction contracts with scoped unit tests. No source/test change, browser/e2e/local DB write,
     provider/env/schema/deploy/payment/PR/force-push, dependency change, raw employee answer text, full paper content,
     raw prompt or raw generated AI content evidence, or Cost Calibration Gate work was performed.
