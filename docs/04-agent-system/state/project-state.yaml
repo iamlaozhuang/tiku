@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3817c69c23425041c0cd723bd59ac36206aae6ae
-  lastKnownOriginMasterSha: 3817c69c23425041c0cd723bd59ac36206aae6ae
+  lastKnownMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
+  lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
-  id: batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex
-  status: closed
-  result: pass_organization_training_context_usage_contract
+  id: batch-223-organization-training-audit-log-redacted-reference
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-222-organization-training-context.md
-  evidencePath: docs/05-execution-logs/evidence/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-  branch: codex/batch-222-organization-training-context
-  commitSha: facca4f32f4144e7da451b7c8bf347b096011879
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-223-organization-training-audit-log.md
+  evidencePath: docs/05-execution-logs/evidence/batch-223-organization-training-audit-log-redacted-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-223-organization-training-audit-log-redacted-reference.md
+  branch: codex/batch-223-organization-training-audit-log
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
