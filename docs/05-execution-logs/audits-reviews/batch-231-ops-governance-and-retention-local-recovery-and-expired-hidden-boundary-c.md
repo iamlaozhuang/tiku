@@ -33,4 +33,6 @@ coverage passed. Final closeout still requires validation commit hash and module
 
 ## Final Closeout Review
 
-Pending validation commit, task-scoped hardening, and module closeout readiness.
+APPROVE batch-231 local closeout after validation commit
+`925a1edc602172d653bd13d58eb2fc11014383df` and module closeout readiness passed. No source/test change was required.
+This closes the seeded ops-governance-and-retention batch-228 through batch-231 range.

@@ -504,13 +504,14 @@ repository:
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
   id: batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-  status: in_progress
+  status: closed
+  result: pass_ops_governance_local_recovery_expired_hidden_boundary_contract
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: pending-task-plan
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-231-ops-governance-local-recovery-expired-hidden-boundary.md
   evidencePath: docs/05-execution-logs/evidence/batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
   branch: codex/batch-231-ops-governance-recovery-boundary
-  commitSha: pending-local-commit
+  commitSha: 925a1edc602172d653bd13d58eb2fc11014383df
   prUrl: null
   retryCount: 0
   lastFailurePath: null
