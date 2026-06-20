@@ -8212,3 +8212,53 @@ entries:
     commitSha: null
     completedAt: "2026-06-16T16:27:53-07:00"
     archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: queue-matrix-drift-readonly-audit
+    phase: queue-matrix-drift-readonly-audit
+    status: closed
+    taskKind: docs_state_readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-queue-matrix-drift-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-queue-matrix-drift-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:29:49-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-first-window
+  - id: manual_fresh_approval_required_before_any_ap08_org_data_export_execution
+    phase: manual_fresh_approval_required_before_any_ap08_org_data_export_execution
+    status: closed
+    taskKind: l123_acceleration_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap08-org-data-export-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap08-org-data-export-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:19:40-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-first-window
+  - id: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+    phase: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+    status: closed
+    taskKind: l123_acceleration_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:12:02-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-first-window
+  - id: manual_fresh_approval_required_before_any_ap06_online_payment_execution
+    phase: manual_fresh_approval_required_before_any_ap06_online_payment_execution
+    status: closed
+    taskKind: l123_acceleration_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:00:37-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-first-window
+  - id: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+    phase: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+    status: closed
+    taskKind: l123_acceleration_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T23:53:38-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-first-window

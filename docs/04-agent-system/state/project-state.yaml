@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: l123-docs-state-packet-limit-governance-sync
-updatedAt: "2026-06-20T00:36:10-07:00"
+currentPhase: active-queue-slimming-2026-06-20-first-window
+updatedAt: "2026-06-20T00:46:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
-  lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
+  lastKnownMasterSha: 481dc213856d27941670ea42ddf9a7a267c925cc
+  lastKnownOriginMasterSha: 481dc213856d27941670ea42ddf9a7a267c925cc
 currentTask:
-  id: l123-docs-state-packet-limit-governance-sync
+  id: active-queue-slimming-2026-06-20-first-window
   status: closed
-  result: pass_docs_state_l123_packet_limit_10_governance_sync_no_execution
-  sourceStory: userRequestedL123PacketLimitGovernanceSync
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
-  branch: codex/l123-packet-limit-governance
+  result: pass_docs_state_active_queue_slimming_first_window_no_execution
+  sourceStory: userRequestedIdleNoPendingTaskSafeDocsStateAdvancement
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-first-window.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-first-window.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-first-window.md
+  branch: codex/active-queue-slimming-first-window
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4007,3 +4007,23 @@ lastL123PacketLimitGovernanceSync:
     source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access, schema/migration,
     dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push, destructive DB, or Cost
     Calibration Gate execution.
+lastActiveQueueSlimmingFirstWindow:
+  taskId: active-queue-slimming-2026-06-20-first-window
+  archivedAt: "2026-06-20T00:46:26-07:00"
+  branch: codex/active-queue-slimming-first-window
+  decision: pass_docs_state_active_queue_slimming_first_window_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - queue-matrix-drift-readonly-audit
+    - manual_fresh_approval_required_before_any_ap08_org_data_export_execution
+    - manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+    - manual_fresh_approval_required_before_any_ap06_online_payment_execution
+    - manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+  activeQueueBeforeArchiveCandidates: 221
+  archivedTaskCount: 5
+  boundary: >-
+    This docs/state queue slimming task moved closed historical task blocks to the monthly archive and updated the
+    history index only. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3 execution,
+    provider/model calls, DB work, env/secret access, schema/migration, dependency changes, deploy, payment, OCR,
+    export, external-service actions, PR, force push, destructive DB, or Cost Calibration Gate execution.
