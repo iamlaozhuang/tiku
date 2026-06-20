@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
-updatedAt: "2026-06-20T04:46:05-07:00"
+currentPhase: batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+updatedAt: "2026-06-20T04:48:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 119d0f5ab6c483a17867166b523eb218e4c2cd88
-  lastKnownOriginMasterSha: 119d0f5ab6c483a17867166b523eb218e4c2cd88
+  lastKnownMasterSha: 2722365e89e69b513d0241956b36c991901fc16c
+  lastKnownOriginMasterSha: 2722365e89e69b513d0241956b36c991901fc16c
 currentTask:
-  id: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
-  status: closed
-  result: pass_local_task_request_policy_result_reference_contract
+  id: batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+  status: in_progress
+  result: pending_validation
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-213-ai-task-request-policy.md
-  evidencePath: docs/05-execution-logs/evidence/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  branch: codex/batch-213-ai-task-request-policy
-  commitSha: 4b9daba15deabf4ae6136d247e03b948e2942e4c
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-214-ai-log-evidence-reference.md
+  evidencePath: docs/05-execution-logs/evidence/batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  branch: codex/batch-214-ai-log-evidence-reference
+  commitSha: pending_batch_214_validation_commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
