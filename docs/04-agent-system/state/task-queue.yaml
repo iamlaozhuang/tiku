@@ -6209,11 +6209,13 @@ tasks:
     moduleRunVersion: 2
     localFullFlowGate: approved_localhost_only
     localE2EValidation: approved_local_only_existing_spec
-    status: in_progress
+    status: closed
     result: pass_personal_ai_local_ui_browser_auth_session_revalidation
     claimedAt: "2026-06-20T10:43:04-07:00"
     validatedAt: "2026-06-20T10:47:35-07:00"
+    closedAt: "2026-06-20T10:50:31-07:00"
     branch: codex/personal-ai-auth-session-repair
+    commitSha: 24c187f37ddb9e60a6c973020bc155ef9859b8e0
     allowedFiles:
       - src/app/(auth)/login/page.tsx
       - src/features/student/studentRuntimeApi.ts
