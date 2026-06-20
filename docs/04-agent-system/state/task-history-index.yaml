@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-20-batch-06
-  updatedAt: "2026-06-20T02:25:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-20-batch-07
+  updatedAt: "2026-06-20T02:48:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10315,3 +10315,124 @@ entries:
     commitSha: null
     completedAt: "2026-06-18T07:49:20-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-batch-06
+
+  - id: active-queue-slimming-2026-06-20-batch-05
+    phase: active-queue-slimming-2026-06-20-batch-05
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-05.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-05.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:14:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-account-session-local-experience-audit
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch-account-session.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch-account-session.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-personal-auth-redeem-local-experience-audit
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch-personal-auth-redeem.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch-personal-auth-redeem.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-practice-local-experience-audit
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch-practice.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch-practice.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-mock-exam-local-experience-audit
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch-mock-exam.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch-mock-exam.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-report-mistake-book-local-experience-audit
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch-report-mistake-book.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch-report-mistake-book.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-core-student-local-full-flow-validation
+    phase: standard-core-student-local-full-flow-validation
+    status: closed
+    taskKind: local_full_flow_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T08:18:43-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: mechanism-throughput-readiness-tuning
+    phase: mechanism-throughput-readiness-tuning
+    status: closed
+    taskKind: mechanism_tuning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-throughput-readiness-tuning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-throughput-readiness-tuning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: mechanism-guarded-goal-packet-v1
+    phase: mechanism-guarded-goal-packet-v1
+    status: closed
+    taskKind: mechanism_tuning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-guarded-goal-packet-v1.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-guarded-goal-packet-v1.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: mechanism-docs-queue-slimming-and-self-repair
+    phase: mechanism-docs-queue-slimming-and-self-repair
+    status: closed
+    taskKind: mechanism_tuning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-mechanism-docs-queue-slimming-and-self-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-admin-ops-logs-local-experience-batch
+    phase: standard-admin-ops-logs-local-experience-batch
+    status: closed
+    taskKind: local_experience_batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T08:02:20-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: standard-admin-ops-logs-local-experience-audit
+    phase: standard-admin-ops-logs-local-experience-batch
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-experience-batch-child.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-07

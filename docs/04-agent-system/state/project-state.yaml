@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-2026-06-20-batch-06
-updatedAt: "2026-06-20T02:25:00-07:00"
+currentPhase: active-queue-slimming-2026-06-20-batch-07
+updatedAt: "2026-06-20T02:48:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 504785aa3a467974eb592316b330bf655dc120c7
-  lastKnownOriginMasterSha: 504785aa3a467974eb592316b330bf655dc120c7
+  lastKnownMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
+  lastKnownOriginMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
 currentTask:
-  id: active-queue-slimming-2026-06-20-batch-06
+  id: active-queue-slimming-2026-06-20-batch-07
   status: closed
-  result: pass_docs_state_active_queue_slimming_batch_06_no_execution
+  result: pass_docs_state_active_queue_slimming_batch_07_no_execution
   sourceStory: userApprovedActiveQueueSlimmingBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-06.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
-  branch: codex/active-queue-slimming-batch-06
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-07.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
+  branch: codex/active-queue-slimming-batch-07
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4360,3 +4360,38 @@ lastActiveQueueSlimmingBatch06:
     source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access, schema/migration,
     dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push, destructive DB, or
     Cost Calibration Gate execution.
+
+lastActiveQueueSlimmingBatch07:
+  taskId: active-queue-slimming-2026-06-20-batch-07
+  archivedAt: "2026-06-20T02:48:00-07:00"
+  branch: codex/active-queue-slimming-batch-07
+  decision: pass_docs_state_active_queue_slimming_batch_07_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-20-batch-05
+    - standard-core-account-session-local-experience-audit
+    - standard-core-personal-auth-redeem-local-experience-audit
+    - standard-core-practice-local-experience-audit
+    - standard-core-mock-exam-local-experience-audit
+    - standard-core-report-mistake-book-local-experience-audit
+    - standard-core-student-local-full-flow-validation
+    - mechanism-throughput-readiness-tuning
+    - mechanism-guarded-goal-packet-v1
+    - mechanism-docs-queue-slimming-and-self-repair
+    - standard-admin-ops-logs-local-experience-batch
+    - standard-admin-ops-logs-local-experience-audit
+  activeQueueBeforeArchiveCandidates: 17
+  archivedTaskCount: 12
+  intentionallyRetainedCandidates:
+    - standard-admin-ops-logs-local-full-flow-validation
+  dependentActiveBlockedTasks:
+    - none
+  expectedArchiveCandidateCountAfter: 6
+  boundary: >-
+    This docs/state queue slimming task moved eligible terminal historical task blocks to the monthly archive and
+    updated the history index only. It intentionally retained standard-admin-ops-logs-local-full-flow-validation because
+    its original evidence path is missing and not registered as debt or closure evidence. It did not execute AP
+    high-risk tasks, L1/L2 source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access,
+    schema/migration, dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push,
+    destructive DB, or Cost Calibration Gate execution.
