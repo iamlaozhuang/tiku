@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T07:55:53-07:00"
+updatedAt: "2026-06-20T07:58:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,15 +503,15 @@ repository:
   lastKnownMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
-  id: batch-226-organization-analytics-export-readiness-contracts-without-object-st
-  status: closed
-  result: pass_organization_analytics_export_readiness_contract
+  id: batch-227-organization-analytics-audit-log-redacted-reference
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-226-organization-analytics-export-readiness.md
-  evidencePath: docs/05-execution-logs/evidence/batch-226-organization-analytics-export-readiness-contracts-without-object-st.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-226-organization-analytics-export-readiness-contracts-without-object-st.md
-  branch: codex/batch-226-organization-analytics-export-readiness
-  commitSha: fa136f498fdf39451aaa18a85782772e340e2697
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-227-organization-analytics-audit-log.md
+  evidencePath: docs/05-execution-logs/evidence/batch-227-organization-analytics-audit-log-redacted-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-227-organization-analytics-audit-log-redacted-reference.md
+  branch: codex/batch-227-organization-analytics-audit-log
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
