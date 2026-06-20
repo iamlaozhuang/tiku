@@ -1717,11 +1717,13 @@ tasks:
         parkWorktree: false
     taskKind: docs_only
     moduleRunVersion: 2
-    status: in_progress
+    status: closed
     result: pass_l4_transport_bridge_approval_reconciliation
     claimedAt: "2026-06-20T09:51:07-07:00"
     validatedAt: "2026-06-20T09:54:00-07:00"
+    closedAt: "2026-06-20T09:58:00-07:00"
     branch: codex/personal-ai-local-transport-bridge-approval
+    commitSha: 523ed26b395d4d72ce37bea331ac45a3122de731
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
