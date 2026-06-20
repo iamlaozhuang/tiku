@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-08-org-data-export-execution-fresh-approval-required
-updatedAt: "2026-06-19T21:49:47-07:00"
+currentPhase: ap-09-runtime-capability-implementation-exact-scope-required
+updatedAt: "2026-06-19T22:01:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-08-org-data-export-execution-fresh-approval-required
+  id: ap-09-runtime-capability-implementation-exact-scope-required
   status: closed
-  result: pass_l0_ap08_org_data_export_fresh_approval_required_no_export_no_file_generation_no_db
-  sourceStory: userRequestedAp08OrgDataExportFreshApprovalRequired
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
-  branch: codex/ap-08-org-data-export-execution-fresh-approval-required
+  result: pass_l0_ap09_runtime_capability_exact_scope_required_no_runtime_source_schema_dependency_test_e2e
+  sourceStory: userRequestedAp09RuntimeCapabilityImplementationExactScopeRequired
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+  branch: codex/ap-09-runtime-capability-implementation-exact-scope-required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: ap_08_org_data_export_execution_fresh_approval_required_closed
+  status: ap_09_runtime_capability_implementation_exact_scope_required_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: ap-08-org-data-export-execution-fresh-approval-required
+  currentTaskId: ap-09-runtime-capability-implementation-exact-scope-required
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -3324,6 +3324,57 @@ localExperienceClosure:
       rawSensitiveEvidence: blocked
       formalAdoption: blocked
       costCalibrationGate: blocked
+  currentAp09RuntimeCapabilityImplementationExactScopeRequired:
+    taskId: ap-09-runtime-capability-implementation-exact-scope-required
+    evaluatedAt: "2026-06-19T22:01:05-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-09-RUNTIME-CAPABILITY-EXACT-SCOPE
+    useCaseIds:
+      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    decision: pass_l0_ap09_runtime_capability_exact_scope_required_no_runtime_source_schema_dependency_test_e2e
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    boundarySummary:
+      validation: pass_docs_state_ap09_runtime_capability_exact_scope_required
+      packageMaterialization: AP09_runtime_capability_implementation_exact_scope_required
+      matrixStatus: release_blocked
+      nextRecommendedTask: none_until_ap09_runtime_capability_fresh_approval
+      exactScopeTextMaterialized: true
+      productScopeChanged: false
+      sourceChanged: false
+      testChanged: false
+      e2eExecuted: false
+      runtimeCapabilityExecutedThisTask: false
+      apiUiDataModelChangedThisTask: false
+      scriptChangedThisTask: false
+      schemaMigrationChanged: false
+      dependencyChanged: false
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      providerModelCallThisTask: false
+      paymentExternalServiceExecutedThisTask: false
+      ocrParserExecutedThisTask: false
+      exportFileGenerationExecutedThisTask: false
+      stagingProdCloudDeployThisTask: false
+      costCalibrationGate: blocked
+      l1L2RuntimeCapabilityImplementationRequiresExactScope: true
+      l3RuntimeExecutionRequiresFreshApproval: true
+      runtimeCapabilityExecution: blocked
+      productSourceChange: blocked
+      sourceTestE2eScriptChange: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      providerModelCall: blocked
+      paymentOcrExportExternalService: blocked
+      generatedRuntimeInventory: blocked
+      rawDatabaseRow: blocked
+      providerPayload: blocked
+      rawPrompt: blocked
+      rawResponse: blocked
+      rawSensitiveEvidence: blocked
   currentAp04StandardAiGenerationScopeDecisionDetailing:
     taskId: ap-04-standard-ai-generation-scope-decision-detailing
     evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -3713,14 +3764,14 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-08 organization data export execution fresh-approval-required package is current and contains only minimal L3
-    approval text. UC-FUTURE-ORG-DATA-EXPORT remains release-blocked. No export/file generation, DB read/write, privacy
-    data access, object storage write, external-service execution, `.env*`, schema/migration, dependency/package
-    /lockfile, staging/prod/cloud/deploy, Cost Calibration Gate, source/test/e2e/script repair, PR, force-push,
-    destructive DB, generated file, export payload, download URL, raw database row, organization-private content, or
-    sensitive evidence execution is approved or performed. The owner must give a separate fresh approval with exact
-    allowed files, commands, export scope, file boundary, privacy/audit boundary, redaction, rollback, and stop
-    conditions before any AP-08 L3 organization data export execution can proceed. Next docs/state exact-scope package
-    candidate is `ap-09-runtime-capability-implementation-exact-scope-required`; it must not execute runtime capability
-    changes without separate approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-08-org-data-export-execution-fresh-approval-required.md
+    AP-09 runtime capability implementation exact-scope-required package is current and contains only docs/state
+    exact-scope stop text. UC-FUTURE-RUNTIME-CAPABILITY-LIST remains release-blocked. No runtime capability execution,
+    source modification, API/UI/data model change, test/e2e/script repair, schema/migration, dependency/package/lockfile
+    change, DB read/write, provider/model call, payment/OCR/export/external-service execution, generated file,
+    `.env*`, staging/prod/cloud/deploy, Cost Calibration Gate, PR, force-push, destructive DB, raw database row,
+    provider payload, raw prompt, raw response, or sensitive evidence execution is approved or performed. The owner must
+    give a separate fresh approval with exact allowedFiles, blockedFiles, commands, capability ids, user-visible
+    surfaces, data/privacy/runtime boundary, validation evidence, rollback owner, redaction rules, and stop conditions
+    before any AP-09 runtime capability implementation can proceed. Product-scope choices for AP-04/AP-05 also remain
+    user-choice blocked and must not be inferred from this AP-09 package.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md

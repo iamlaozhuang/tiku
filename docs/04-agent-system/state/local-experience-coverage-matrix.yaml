@@ -322,6 +322,38 @@ lastAp09RuntimeCapabilityListInventoryDetailing:
     - test_e2e_script_change
     - runtime_validation
     - raw_sensitive_evidence
+lastAp09RuntimeCapabilityImplementationExactScopeRequired:
+  taskId: ap-09-runtime-capability-implementation-exact-scope-required
+  evaluatedAt: "2026-06-19T22:01:05-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+  decision: pass_l0_ap09_runtime_capability_exact_scope_required_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: none_until_ap09_runtime_capability_fresh_approval
+  exactScopeTextMaterialized: true
+  productScopeChanged: false
+  sourceChanged: false
+  testChanged: false
+  highRiskExecuted: false
+  blockedGates:
+    - runtime_capability_execution
+    - product_source_change
+    - api_ui_data_model_change
+    - schema_migration
+    - dependency_package_lockfile_change
+    - test_e2e_script_change
+    - database_read_write
+    - provider_model_call
+    - payment_ocr_export_external_service
+    - export_file_generation_execution
+    - staging_prod_cloud_deploy
+    - cost_calibration_gate
+    - pr_force_push
+    - destructive_database
+    - raw_sensitive_evidence
 lastAp04StandardAiGenerationScopeDecisionDetailing:
   taskId: ap-04-standard-ai-generation-scope-decision-detailing
   evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -1316,10 +1348,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
     status: release_blocked
-    blockedGate: audit_artifact_only
-    nextTask: ap-09-runtime-capability-implementation-exact-scope-required
+    blockedGate: runtime_capability_exact_scope_required_source_schema_dependency_test_e2e_blocked
+    nextTask: none_until_ap09_runtime_capability_fresh_approval
   - useCaseId: UC-GATE-PROVIDER-STAGING-EXECUTION
     edition: blocked_gate
     actor: platform_governance

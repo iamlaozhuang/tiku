@@ -1,5 +1,153 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: ap-09-runtime-capability-implementation-exact-scope-required
+    title: AP-09 runtime capability implementation exact scope required
+    phase: ap-09-runtime-capability-implementation-exact-scope-required
+    sourceStory: userRequestedAp09RuntimeCapabilityImplementationExactScopeRequired
+    dependencies:
+      - ap-09-runtime-capability-list-inventory-detailing
+      - ap-08-org-data-export-execution-fresh-approval-required
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested AP-09 runtime capability implementation exact-scope package only because the local project status
+      scripts report a seed-required candidate. Scope is limited to docs/state/governance and exact-scope decision text.
+      This task must not execute runtime capability work, modify product source, change tests/e2e/scripts/schema/
+      migrations/dependencies/package files/lockfiles, read or write DB, read or write `.env*`, call providers, execute
+      payment/OCR/export/external services, generate files, connect to staging/prod/cloud, deploy, run Cost Calibration
+      Gate, create a PR, force push, perform destructive DB operations, or collect sensitive evidence.
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-09-RUNTIME-CAPABILITY-EXACT-SCOPE
+    useCaseIds:
+      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    taskKind: docs_state_l1_l2_runtime_capability_exact_scope_required_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    status: closed
+    result: pass_l0_ap09_runtime_capability_exact_scope_required_no_runtime_source_schema_dependency_test_e2e
+    claimedAt: "2026-06-19T22:01:05-07:00"
+    validatedAt: "2026-06-19T22:01:05-07:00"
+    closedAt: "2026-06-19T22:01:05-07:00"
+    branch: codex/ap-09-runtime-capability-implementation-exact-scope-required
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    nextRecommendedTask: none_until_ap09_runtime_capability_fresh_approval
+    exactScopeTextMaterialized: true
+    runtimeCapabilityExactScopeText:
+      implementationStillBlockedUntilFreshApproval: true
+      minimalText: >-
+        Fresh approve AP-09 runtime capability implementation exact-scope decision only. I choose one allowed path: keep
+        runtime capability implementation blocked, or authorize a separate exact-scope AP-09 runtime capability
+        implementation package. No runtime capability execution, source modification, test/e2e/script repair, schema/
+        migration, dependency/package/lockfile change, DB read/write, provider/model call, payment/OCR/export/external-
+        service execution, `.env*` access, staging/prod/cloud/deploy, Cost Calibration Gate, PR, force push, destructive
+        DB, generated runtime inventory, capability payload, raw database row, provider payload, raw prompt, raw
+        response, or sensitive evidence collection is approved unless the follow-up approval explicitly names exact
+        allowedFiles, blockedFiles, commands, capability ids, user-visible surfaces, data/privacy/runtime boundary,
+        validation evidence, rollback owner, redaction rules, and stop conditions.
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved
+      exactScopeTextMaterialization: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      runtimeCapabilityExecution: blocked
+      productSourceChange: blocked
+      apiUiDataModelChange: blocked
+      sourceTestE2eScriptChange: blocked
+      scriptChange: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      providerModelCall: blocked
+      paymentExternalServiceExecution: blocked
+      ocrParserExecution: blocked
+      exportFileGenerationExecution: blocked
+      generatedFile: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      stagingProdDeploy: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+      destructiveDatabase: blocked
+      rawSensitiveEvidence: blocked
+    blockedCapabilities:
+      - runtimeCapabilityExecution
+      - productSourceChange
+      - apiUiDataModelChange
+      - sourceTestE2eScriptChange
+      - scriptChange
+      - schemaMigration
+      - dependencyIntroduction
+      - databaseRead
+      - databaseWrite
+      - providerModelCall
+      - paymentExternalServiceExecution
+      - ocrParserExecution
+      - exportFileGenerationExecution
+      - generatedFile
+      - envLocalRead
+      - envSecretOutput
+      - stagingProdDeploy
+      - costCalibrationGate
+      - pr
+      - forcePush
+      - destructiveDatabase
+      - rawSensitiveEvidence
+    allowedFiles:
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-list-inventory-detailing.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - deploy/cloud/payment/provider config files
+      - any file not explicitly listed in allowedFiles
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md docs/05-execution-logs/evidence/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-09-runtime-capability-implementation-exact-scope-required.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-09-runtime-capability-implementation-exact-scope-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-09-runtime-capability-implementation-exact-scope-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-09-runtime-capability-implementation-exact-scope-required
+
   - id: ap-08-org-data-export-execution-fresh-approval-required
     title: AP-08 organization data export execution fresh approval required
     phase: ap-08-org-data-export-execution-fresh-approval-required
