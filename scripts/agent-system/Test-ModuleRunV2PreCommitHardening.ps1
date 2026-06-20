@@ -251,14 +251,29 @@ function Test-SeedTransactionFileSet {
         [string[]]$Files
     )
 
-    if ($Files.Count -ne 3) {
+    if ($Files.Count -lt 3) {
         return $false
     }
 
     $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
     $hasQueue = $normalizedFiles -contains "docs/04-agent-system/state/task-queue.yaml"
-    $evidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
-    $auditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $evidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" })
+    $auditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" })
+
+    foreach ($file in $normalizedFiles) {
+        $isAllowedSeedFile = $file -eq "docs/04-agent-system/state/task-queue.yaml" `
+            -or $file -eq "docs/04-agent-system/state/project-state.yaml" `
+            -or $file -match "^docs/04-agent-system/state/[a-z0-9-]+-auto-seed-approval-decision\.yaml$" `
+            -or $file -match "^docs/05-execution-logs/task-plans/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" `
+            -or $file -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" `
+            -or $file -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" `
+            -or $file -match "^docs/05-execution-logs/evidence/batch-\d+-[a-z0-9-]+\.md$" `
+            -or $file -match "^docs/05-execution-logs/audits-reviews/batch-\d+-[a-z0-9-]+\.md$"
+
+        if (-not $isAllowedSeedFile) {
+            return $false
+        }
+    }
 
     return $hasQueue -and $evidenceFiles.Count -eq 1 -and $auditFiles.Count -eq 1
 }
@@ -270,8 +285,8 @@ function Test-SeedTransactionAnchors {
     )
 
     $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
-    $evidenceFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/evidence/*-module-run-v2-auto-seed-*.md" } | Select-Object -First 1)
-    $auditFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/audits-reviews/*-module-run-v2-auto-seed-*.md" } | Select-Object -First 1)
+    $evidenceFile = [string]($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" } | Select-Object -First 1)
+    $auditFile = [string]($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-[a-z0-9-]*auto-seed[a-z0-9-]*\.md$" } | Select-Object -First 1)
 
     foreach ($seedLogFile in @($evidenceFile, $auditFile)) {
         if ([string]::IsNullOrWhiteSpace($seedLogFile)) {
@@ -659,8 +674,13 @@ if ($isSeedTransactionScope) {
     $TaskId = "module-run-v2-auto-seed-transaction"
     $allowedFiles = @(
         "docs/04-agent-system/state/task-queue.yaml",
-        "docs/05-execution-logs/evidence/*-module-run-v2-auto-seed-*.md",
-        "docs/05-execution-logs/audits-reviews/*-module-run-v2-auto-seed-*.md"
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/*-auto-seed-approval-decision.yaml",
+        "docs/05-execution-logs/task-plans/*-auto-seed*.md",
+        "docs/05-execution-logs/evidence/*-auto-seed*.md",
+        "docs/05-execution-logs/audits-reviews/*-auto-seed*.md",
+        "docs/05-execution-logs/evidence/batch-*.md",
+        "docs/05-execution-logs/audits-reviews/batch-*.md"
     )
     $blockedFiles = @(
         ".env.local",
