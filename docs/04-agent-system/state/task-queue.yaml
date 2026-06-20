@@ -5060,11 +5060,13 @@ tasks:
     taskKind: local_validation_repair
     moduleRunVersion: 2
     localFullFlowGate: approved_localhost_only
-    status: in_progress
+    status: closed
     result: pass_existing_organization_training_route_runtime_contract
     claimedAt: "2026-06-20T09:11:51-07:00"
     validatedAt: "2026-06-20T09:18:00-07:00"
+    closedAt: "2026-06-20T09:23:00-07:00"
     branch: codex/organization-training-route-runtime-repair
+    commitSha: d0e5f566aab3aead8c5160453bece9152a853683
     allowedFiles:
       - src/app/(admin)/content/organization-training/page.tsx
       - src/app/(admin)/organization-training/page.tsx
