@@ -2871,10 +2871,14 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-217-personal-learning-ai-paper-and-mock-exam-context-selection
     branch: codex/batch-217-paper-mock-exam-context
     claimedAt: "2026-06-20T06:08:26-07:00"
+    validatedAt: "2026-06-20T06:11:03-07:00"
+    closedAt: "2026-06-20T06:11:03-07:00"
+    commitSha: d2edc6408a6224f2e4c003590d29daf1d11e05c2
+    result: pass_paper_mock_exam_context_selection_contract
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-217-paper-mock-exam-context.md
     evidencePath: docs/05-execution-logs/evidence/batch-217-personal-learning-ai-paper-and-mock-exam-context-selection.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-217-personal-learning-ai-paper-and-mock-exam-context-selection.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and
     title: Module Run v2 personal-learning-ai implementation seed
