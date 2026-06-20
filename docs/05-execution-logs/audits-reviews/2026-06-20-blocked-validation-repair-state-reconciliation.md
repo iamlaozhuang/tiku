@@ -2,10 +2,11 @@
 
 ## Decision
 
-APPROVE validation for the docs/state reconciliation packet; final closeout remains pending until validation and closeout
-commits complete. The approval is scoped to docs/state reconciliation for already-closed organization-training repair
-packets only. It does not authorize product source, test/e2e, schema/migration, dependency, env/secret, provider/model,
-database, deploy, payment, PR, force-push, headed/debug browser, destructive DB, or Cost Calibration Gate work.
+APPROVE validation for the docs/state reconciliation packet; final closeout remains pending until closeout readiness and
+closeout commit complete. The approval is scoped to docs/state reconciliation for already-closed organization-training
+repair packets only. It does not authorize product source, test/e2e, schema/migration, dependency, env/secret,
+provider/model, database, deploy, payment, PR, force-push, headed/debug browser, destructive DB, or Cost Calibration Gate
+work.
 
 ## Scope Review
 
@@ -20,6 +21,14 @@ database, deploy, payment, PR, force-push, headed/debug browser, destructive DB,
 - No database URLs, secrets, tokens, Authorization headers, raw DB rows, raw prompts, raw generated AI content, provider
   payloads, plaintext `redeem_code`, full `paper`, full `material`, raw answer text, or sensitive browser/session values
   may be recorded.
-- Validation commit: pending.
+- Validation commit: `d09081c7c2d23949c2f0610b3c6fec26d73f0f0c`.
 - Diagnostics after reconciliation report only one known blocked validation entry:
   `module-run-v2-personal-ai-local-ui-browser-flow-validation`.
+
+## Final Closeout Review
+
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
+- Next action after closeout: `idle_no_pending_task`.
+- Known blocked validation after reconciliation: `module-run-v2-personal-ai-local-ui-browser-flow-validation`.
+- Closeout commit: pending.
