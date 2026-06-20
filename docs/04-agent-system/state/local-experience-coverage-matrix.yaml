@@ -124,6 +124,36 @@ lastAp03ProviderStagingExecutionApprovalDetailing:
     - schema_migration
     - dependency_package_lockfile_change
     - raw_sensitive_evidence
+lastAp03ProviderStagingExecutionFreshApprovalRequired:
+  taskId: ap-03-provider-staging-execution-fresh-approval-required
+  evaluatedAt: "2026-06-19T17:23:28-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-GATE-PROVIDER-STAGING-EXECUTION
+  decision: pass_l0_ap03_provider_staging_fresh_approval_required_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-06-online-payment-execution-fresh-approval-required
+  freshApprovalTextMaterialized: true
+  productScopeChanged: false
+  sourceChanged: false
+  testChanged: false
+  highRiskExecuted: false
+  blockedGates:
+    - provider_model_call
+    - provider_configuration_change
+    - env_secret
+    - staging_prod_cloud_deploy
+    - database_read_write
+    - cost_calibration_gate
+    - payment_external_service
+    - schema_migration
+    - dependency_package_lockfile_change
+    - source_test_e2e_script_change
+    - pr_force_push
+    - destructive_database
+    - raw_sensitive_evidence
 lastAp06OnlinePaymentProviderBoundaryDetailing:
   taskId: ap-06-online-payment-provider-boundary-detailing
   evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -1209,10 +1239,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-approval-detailing.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
-    nextTask: ap-03-provider-staging-execution-fresh-approval-required
+    nextTask: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
   - useCaseId: UC-GATE-CURRENT-CHECKPOINT
     edition: audit_only
     actor: platform_governance
