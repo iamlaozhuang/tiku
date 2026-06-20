@@ -4,9 +4,9 @@ archive:
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   archivedAt: '2026-06-11T20:00:52-07:00'
-  updatedByTask: stage-1-queue-health-archive-followup-2026-06-20
-  updatedAt: '2026-06-20T05:04:25-07:00'
-  taskCount: 802
+  updatedByTask: queue-health-carryover-archive-2026-06-20
+  updatedAt: '2026-06-20T05:36:21-07:00'
+  taskCount: 805
 tasks:
 - id: phase-21-write-concurrency-closeout-reconciliation
   title: Phase 21 Write Concurrency Closeout Reconciliation
@@ -71874,3 +71874,310 @@ tasks:
   commitSha: null
   retryCount: 0
   lastFailurePath: null
+- id: stage-2-blocked-task-triage-2026-06-20
+  title: Stage 2 Blocked Task Triage 2026 06 20
+  phase: stage-2-blocked-triage
+  sourceStory: userRequestedStage2BlockedTriageAfterStage1Merge
+  dependencies:
+    - stage-1-queue-health-archive-followup-2026-06-20
+    - personal-learning-ai-auto-seed-approval-request-2026-06-20
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User requested continuing from master into stage 2 blocked item triage after stage 1 branch merge/push/cleanup.
+    Scope is limited to docs/state-only classification of active non-terminal blocked queue items and a separate
+    non-queue seed proposal note. This task does not approve or execute personal-learning-ai auto-seed, does not
+    change existing blocked item semantics, and does not authorize source, tests, e2e, scripts,
+    package/lockfile/dependency changes, env/secret access, DB, provider/model calls or configuration,
+    schema/migration, staging/prod/cloud deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR,
+    force-push, destructive DB, high-risk gate execution, or pending implementation task claim.
+  taskKind: docs_state_blocked_triage
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: manual_stage_2_blocked_triage
+  status: closed
+  result: pass_stage_2_blocked_task_triage
+  claimedAt: "2026-06-20T05:26:24-07:00"
+  validatedAt: "2026-06-20T05:31:22-07:00"
+  closedAt: "2026-06-20T05:31:22-07:00"
+  branch: codex/stage-2-blocked-triage
+  commitSha: 75ac173c7333ae625a82e80edc3c2f53cf6ff75c
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-triage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-triage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-triage.md
+  triageRegisterPath: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
+  capabilities:
+    docsStateBlockedTriage: approved
+    queueDiagnosticReadOnly: approved
+    blockedTaskSemanticChange: blocked
+    autoSeedTransactionExecution: blocked
+    seededImplementationTaskAppend: blocked
+    pendingImplementationTaskClaim: blocked
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    providerConfiguration: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+    - docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
+    - docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-triage.md
+    - docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-triage.md
+    - docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-triage.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - scripts/**
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-triage.md docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-triage.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-triage.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-triage.md docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-triage.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-triage.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approval
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approval
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approval
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval
+- id: personal-learning-ai-auto-seed-approval-request-2026-06-20
+  title: Personal Learning AI Auto Seed Approval Request 2026 06 20
+  phase: personal-learning-ai-auto-seed-approval-request
+  sourceStory: userRequestedContinuousProgressAfterQueueHealthClean
+  dependencies:
+    - stage-1-queue-health-archive-followup-2026-06-20
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User clarified that local commit, fast-forward merge to master, push origin/master, and merged short-branch
+    cleanup are approved and requested continuous progress until the work goal is reached. Scope is limited to
+    docs/state-only preparation of a pending human decision package for the current personal-learning-ai auto-seed
+    proposal. This task does not approve or execute the personal-learning-ai auto-seed transaction, does not append
+    seeded implementation tasks, and does not authorize source, tests, e2e, scripts, package/lockfile/dependency
+    changes, env/secret access, DB, provider/model calls or configuration, schema/migration, staging/prod/cloud
+    deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR, force-push, destructive DB, high-risk
+    gate execution, pending implementation task claim, or blocked task semantic changes.
+  taskKind: docs_state_approval_request
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: manual_task_from_seed_proposal
+  status: closed
+  result: pass_personal_learning_ai_auto_seed_approval_request_package
+  claimedAt: "2026-06-20T05:12:00-07:00"
+  validatedAt: "2026-06-20T05:22:00-07:00"
+  closedAt: "2026-06-20T05:22:00-07:00"
+  branch: codex/personal-learning-ai-auto-seed-approval-request
+  commitSha: 8427cfd812fe47ab697b15498fac0932ae62224f
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+  decisionPath: docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml
+  capabilities:
+    docsStateApprovalRequest: approved
+    seedProposalReadOnlyDiagnostic: approved
+    autoSeedTransactionExecution: blocked
+    seededImplementationTaskAppend: blocked
+    pendingImplementationTaskClaim: blocked
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    providerConfiguration: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+    - docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml
+    - docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    - docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    - docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - scripts/**
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-learning-ai-auto-seed-approval-request-2026-06-20
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId personal-learning-ai-auto-seed-approval-request-2026-06-20
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approval
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approval
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approval
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval
+- id: stage-1-queue-health-archive-followup-2026-06-20
+  title: Stage 1 Queue Health Archive Followup 2026 06 20
+  phase: stage-1-queue-health-baseline
+  sourceStory: userRequestedContinuousProgressAfterBatch215Closeout
+  dependencies:
+    - batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User clarified that local commit, fast-forward merge to master, push origin/master, and merged short-branch
+    cleanup are approved and requested continuous progress until the work goal is reached. Scope is limited to
+    docs/state-only queue health archival of exact diagnostic archive candidates, project-state/task-queue/archive
+    index sync, evidence/audit/plan records, local validation, local commit, fast-forward merge, push, and merged
+    short-branch cleanup. This approval does not authorize new module auto-seed approval, source, tests, e2e,
+    scripts, package/lockfile/dependency changes, env/secret access, DB, provider/model calls or configuration,
+    schema/migration, staging/prod/cloud deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR,
+    force-push, destructive DB, high-risk gate execution, pending task claim, or blocked task semantic changes.
+  taskKind: docs_state_queue_archive
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: queue_slimming_diagnostic_candidates
+  status: closed
+  result: pass_queue_health_archive_followup
+  claimedAt: "2026-06-20T05:04:25-07:00"
+  validatedAt: "2026-06-20T05:08:32-07:00"
+  closedAt: "2026-06-20T05:08:32-07:00"
+  branch: codex/stage-1-queue-health-archive-followup
+  commitSha: a016c63f01b3cc53a03dd114999862cd4e2c88e9
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archiveCandidateSource: Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+  targetArchiveTaskIds:
+    - stage-3-decision-packages-2026-06-20
+    - provider-rag-quota-governance-packet
+    - future-scope-non-goal-governance-packet
+    - final-audit-gate-governance-packet
+  capabilities:
+    docsStateQueueArchive: approved
+    exactCandidateArchive: approved
+    blockedTaskSemanticChange: blocked
+    pendingTaskClaim: blocked
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    providerConfiguration: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md
+    - docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md
+    - docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - scripts/**
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approval
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approval
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approval
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval
