@@ -2727,10 +2727,14 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
     branch: codex/batch-214-ai-log-evidence-reference
     claimedAt: "2026-06-20T04:48:52-07:00"
+    validatedAt: "2026-06-20T04:53:25-07:00"
+    closedAt: "2026-06-20T04:53:25-07:00"
+    commitSha: 314aa4a4f9279cb9be47518e66081b00eb1bdbce
+    result: pass_redacted_audit_ai_call_log_evidence_reference_contract
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-214-ai-log-evidence-reference.md
     evidencePath: docs/05-execution-logs/evidence/batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     title: Module Run v2 ai-task-and-provider implementation seed

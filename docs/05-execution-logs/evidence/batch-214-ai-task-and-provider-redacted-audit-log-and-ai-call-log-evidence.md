@@ -17,7 +17,7 @@ result: pass
 - GREEN: existing `ai-generation-task-log-evidence-reference-service` scoped unit coverage validates redacted result
   references, available/missing `audit_log` and `ai_call_log` reference states, failed task evidence handling, and
   rejection of inputs without any log public reference; no source/test change was required.
-- Commit: `pending_batch_214_validation_commit`
+- Commit: `314aa4a4f9279cb9be47518e66081b00eb1bdbce`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: current thread can continue through batch-214 closeout; no rollover required.
 - nextModuleRunCandidate: batch-215 local_provider_sandbox proposal and evidence rules, unless project status recommends
@@ -59,3 +59,11 @@ Gate execution was performed.
 Only task ids, state paths, command names, pass/fail results, and local contract summaries are recorded. No secrets,
 `.env*` values, database URLs, raw DB rows, provider payloads, raw prompts, raw responses, OCR files, export payloads,
 payment data, or sensitive evidence are included.
+
+## Final Closeout State
+
+- Validation commit: `314aa4a4f9279cb9be47518e66081b00eb1bdbce`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Closeout readiness rerun: pass.
+- Merge/push/cleanup: approved by current user fresh approval after local closeout.
