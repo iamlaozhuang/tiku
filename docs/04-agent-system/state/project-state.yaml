@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: manual_fresh_approval_required_before_any_ap06_online_payment_execution
-updatedAt: "2026-06-20T00:00:37-07:00"
+currentPhase: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+updatedAt: "2026-06-20T00:12:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,14 +503,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: manual_fresh_approval_required_before_any_ap06_online_payment_execution
+  id: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
   status: closed
   result: pass_l0_l123_l3_minimal_fresh_approval_package_no_high_risk_execution
   sourceStory: l123AccelerationApprovalPackage
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
-  branch: codex/ap06-payment-l3-approval-package
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+  branch: codex/ap07-ocr-l3-approval-package
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -3961,12 +3961,12 @@ handoff:
     export/external-service, and Cost Calibration Gate remain blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
 l123AccelerationLastPackage:
-  taskId: manual_fresh_approval_required_before_any_ap06_online_payment_execution
-  appliedAt: "2026-06-20T00:00:37-07:00"
+  taskId: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+  appliedAt: "2026-06-20T00:12:02-07:00"
   decision: l3_approval_only
   riskTier: L3
   executionMode: l123_l3_approval_only
-  evidence: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
-  auditReview: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
+  evidence: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
   highRiskExecution: false
   costCalibrationGate: blocked

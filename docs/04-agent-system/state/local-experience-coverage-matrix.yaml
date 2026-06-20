@@ -1427,7 +1427,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
-    nextTask: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+    nextTask: none_until_manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution_fresh_approval
   - useCaseId: UC-FUTURE-ORG-DATA-EXPORT
     edition: future_scope
     actor: organization_admin
@@ -1552,6 +1552,28 @@ lastManualFreshApprovalRequiredBeforeAnyAp06OnlinePaymentExecution:
   executionMode: l123_l3_approval_only
   evidence: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
   auditReview: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap06-online-payment-execution.md
+  matrixStatus: release_blocked
+  highRiskExecution: false
+  nextRecommendedTask: none_until_l123_fresh_approval
+  blockedGates:
+    - source_test_e2e_script_change
+    - database_read_write
+    - env_secret
+    - provider_model_call
+    - schema_migration
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_ocr_export_external_service
+    - cost_calibration_gate
+    - raw_sensitive_evidence
+lastManualFreshApprovalRequiredBeforeAnyAp07OcrAutoImportExecution:
+  taskId: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
+  evaluatedAt: "2026-06-20T00:12:02-07:00"
+  decision: l3_approval_only
+  riskTier: L3
+  executionMode: l123_l3_approval_only
+  evidence: docs/05-execution-logs/evidence/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-20-manual-fresh-approval-required-before-any-ap07-ocr-auto-import-execution.md
   matrixStatus: release_blocked
   highRiskExecution: false
   nextRecommendedTask: none_until_l123_fresh_approval
