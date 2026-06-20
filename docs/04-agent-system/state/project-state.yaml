@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T06:16:56-07:00"
+updatedAt: "2026-06-20T06:23:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e5c3c43424b923a3bdaec1a2e517fd6bb45e5fa3
-  lastKnownOriginMasterSha: e5c3c43424b923a3bdaec1a2e517fd6bb45e5fa3
+  lastKnownMasterSha: c0a023020ae3d04d0a05076c1022ec1a0045ca8a
+  lastKnownOriginMasterSha: c0a023020ae3d04d0a05076c1022ec1a0045ca8a
 currentTask:
-  id: batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and
-  status: closed
-  result: pass_local_browser_experience_contract
+  id: batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-218-local-browser-experience.md
-  evidencePath: docs/05-execution-logs/evidence/batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  branch: codex/batch-218-local-ui-browser-experience
-  commitSha: dba26e41f6e4f18e863c16dab3d53ec01278a6e1
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-219-redacted-ai-call-log-reference.md
+  evidencePath: docs/05-execution-logs/evidence/batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  branch: codex/batch-219-redacted-ai-call-log-reference
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
