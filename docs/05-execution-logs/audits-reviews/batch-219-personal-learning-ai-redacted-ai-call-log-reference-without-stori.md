@@ -25,9 +25,10 @@
 
 ## Decision
 
-APPROVE batch-219 redacted ai_call_log reference contract validation after focused unit, lint, typecheck, and diff passed.
-Final closeout still requires pre-commit hardening, validation commit hash, and module closeout readiness rerun.
+APPROVE batch-219 redacted ai_call_log reference contract validation after focused unit, lint, typecheck, diff,
+pre-commit hardening, validation commit hash, and module closeout readiness passed.
 
 ## Final Closeout Review
 
-Pending validation commit and module closeout readiness rerun.
+APPROVE closeout for validation commit `8ea4b079182cfdf2ab7c73db91c14d745c729314`; queue and project-state are marked
+closed, evidence is redacted, and high-risk gates remain blocked.
