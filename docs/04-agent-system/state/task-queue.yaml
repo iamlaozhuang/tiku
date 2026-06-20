@@ -1513,6 +1513,155 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     retryCount: 1
+  - id: local-full-flow-human-acceptance-packet
+    title: Local full-flow human acceptance packet
+    phase: local-full-flow-human-acceptance
+    sourceStory: userApproval.localFullFlowHumanAcceptance
+    dependencies:
+      - module-run-v2-personal-ai-local-ui-auth-session-contract-repair
+      - organization-training-route-runtime-contract-repair
+      - organization-training-admin-visible-scope-no-migration-repair
+      - organization-training-admin-visible-scope-local-fixture-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Approved by the current 2026-06-20 user prompt to create or claim a local full-flow human acceptance packet using
+      local localhost only, existing allowlisted Playwright/e2e smoke specs, existing local validation commands,
+      redacted evidence, validation commit, closeout commit, fast-forward merge to master, push origin/master, and
+      merged short-branch cleanup. Scope is limited to command execution and redacted role/use-case/result metadata for
+      standard plus advanced key local experience paths. This approval does not allow new e2e specs, headed/debug
+      browser mode, destructive local DB writes, schema/drizzle/migration, dependency/package/lockfile changes,
+      provider/model calls, env/secret reads or writes, deploy/staging/prod/cloud/payment/export/OCR/external-service
+      work, PR, force-push, or Cost Calibration Gate execution.
+    targetExperienceChain: local-full-flow-human-acceptance
+    useCaseIds:
+      - UC-STD-STUDENT-PRACTICE-MOCK-LOCAL
+      - UC-ADV-PERSONAL-AI-LOCAL
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+      - UC-ADV-ORG-PORTAL-ADMIN
+      - UC-ADV-ORG-ANALYTICS-SUMMARY
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: user_directed_acceptance
+    taskKind: local_full_flow_acceptance
+    moduleRunVersion: 2
+    localFullFlowGate: approved_localhost_only
+    localE2EValidation: approved_local_only_existing_specs
+    destructiveLocalDockerDatabase: blocked_without_task_approval
+    status: in_progress
+    result: pass_local_full_flow_human_acceptance
+    claimedAt: "2026-06-20T09:39:49-07:00"
+    validatedAt: "2026-06-20T09:42:40-07:00"
+    branch: codex/local-full-flow-human-acceptance
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md
+      - docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-auth-session-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+      - e2e/local-business-flow.spec.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - e2e/organization-training-local-full-flow.spec.ts
+      - e2e/organization-portal-local-flow.spec.ts
+      - e2e/organization-analytics-local-flow.spec.ts
+      - playwright.config.ts
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - new e2e spec creation or e2e source modification
+      - headed/debug browser mode
+      - destructive local DB writes
+      - schema/drizzle/migration changes
+      - database migration execution
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - export/file generation/OCR/payment/external-service
+      - staging/prod/cloud/deploy
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId local-full-flow-human-acceptance-packet -Capability localFullFlowGate -Intent use_capability
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts --list
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-flow-human-acceptance-packet
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId local-full-flow-human-acceptance-packet -Capability localFullFlowGate -Intent use_capability
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts --list
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-flow-human-acceptance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md
+    retryCount: 0
   - id: blocked-gates-approval-package-materialization
     title: Blocked gates approval package materialization
     phase: blocked-gates-approval-package-materialization
