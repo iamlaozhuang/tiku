@@ -5186,3 +5186,148 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-route-runtime-contract-repair.md
     retryCount: 0
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
+  - id: organization-training-admin-visible-scope-no-migration-repair
+    title: Organization training admin visible scope no-migration repair
+    phase: blocked-validation-repair
+    sourceStory: repair.organization-training-draft-source-context-local-migration-execution-approval
+    dependencies:
+      - organization-training-draft-source-context-local-migration-execution-approval
+      - organization-training-route-runtime-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Approved by the current 2026-06-20 user prompt to create and execute an independent no-new-migration validation
+      repair packet for the organization-training admin visible scope blocker. Scope allows fixture/service/e2e
+      contract repair only when needed, existing focused local unit validation, existing scoped localhost-only
+      Playwright validation, redacted evidence, validation commit, closeout commit, fast-forward merge to master, push
+      origin/master, and merged short-branch cleanup. This approval explicitly does not allow new schema/drizzle/migration
+      files, migration execution, destructive local DB writes, `.env*`, package/lockfile/dependency changes,
+      provider/model calls or configuration, staging/prod/cloud/deploy/payment/external-service, PR, force-push,
+      headed/debug browser mode, or Cost Calibration Gate execution.
+    targetExperienceChain: organization-training-experience
+    useCaseIds:
+      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: user_directed_repair
+    taskKind: local_validation_repair
+    moduleRunVersion: 2
+    localFullFlowGate: approved_localhost_only
+    schemaMigration: blocked_without_task_approval
+    destructiveLocalDockerDatabase: blocked_without_task_approval
+    status: in_progress
+    result: pass_existing_admin_visible_scope_no_migration_validation
+    claimedAt: "2026-06-20T09:19:57-07:00"
+    validatedAt: "2026-06-20T09:25:00-07:00"
+    branch: codex/organization-training-admin-visible-scope-no-migration-repair
+    allowedFiles:
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - e2e/organization-training-local-full-flow.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/features/admin/organization-training/**
+      - playwright.config.ts
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - schema/drizzle/migration changes
+      - database migration execution
+      - destructive local DB writes
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - headed/debug browser mode
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair -Capability localFullFlowGate -Intent use_capability
+      - phase: post_edit
+        command: npm.cmd run test:unit -- src/db/dev-seed.test.ts src/server/services/organization-training-service.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts src/server/services/organization-training-service.ts src/server/services/organization-training-service.test.ts e2e/organization-training-local-full-flow.spec.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair -Capability localFullFlowGate -Intent use_capability
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts src/server/services/organization-training-service.test.ts
+      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
+      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts src/server/services/organization-training-service.ts src/server/services/organization-training-service.test.ts e2e/organization-training-local-full-flow.spec.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-no-migration-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
