@@ -16,7 +16,7 @@ result: pass
 - RED: project status reported `archiveCandidateCount: 4` after batch-215 closeout.
 - GREEN: exact four candidates were removed from active `task-queue.yaml`, appended to the June archive, indexed in
   `task-history-index.yaml`, and queue slimming diagnostic reported `archiveCandidateCount: 0`.
-- Commit: `pending_stage_1_queue_health_archive_followup_commit`
+- Commit: `a016c63f01b3cc53a03dd114999862cd4e2c88e9`
 - localFullLoopGate: docs/state validation only.
 - threadRolloverGate: current thread can continue after archive followup; no rollover required.
 - nextModuleRunCandidate: personal-learning-ai auto-seed remains pending explicit module approval; queue archive followup
@@ -35,18 +35,18 @@ result: pass
 
 ## Validation Results
 
-| Command                                                                                                                                                                               | Result  | Notes                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                                                                            | pass    | Reported `archiveCandidateCount: 0`; current task still active pending closeout.                 |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`                                                           | pass    | Reported `queueSlimmingDecision: clean`, `activeQueueTaskCount: 29`, `archiveCandidateCount: 0`. |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`                                                               | pass    | Reported deterministic current-task closeout recommendation.                                     |
-| `npx.cmd prettier --write --ignore-unknown ...`                                                                                                                                       | pass    | Scoped formatting completed.                                                                     |
-| `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                                       | pass    | All matched files use Prettier code style.                                                       |
-| `git diff --check`                                                                                                                                                                    | pass    | No whitespace errors; Git emitted LF normalization warning for the archive file only.            |
-| `npm.cmd run lint`                                                                                                                                                                    | pass    | ESLint completed successfully.                                                                   |
-| `npm.cmd run typecheck`                                                                                                                                                               | pass    | `tsc --noEmit` completed successfully.                                                           |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20`      | pending | Scope and evidence hardening.                                                                    |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20` | pending | Closeout readiness.                                                                              |
+| Command                                                                                                                                                                               | Result | Notes                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                                                                            | pass   | Reported `archiveCandidateCount: 0` and next action `request_auto_seed_approval:personal-learning-ai`. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`                                                           | pass   | Reported `queueSlimmingDecision: clean`, `activeQueueTaskCount: 29`, `archiveCandidateCount: 0`.       |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`                                                               | pass   | Reported current task `closed` and next action `request_auto_seed_approval:personal-learning-ai`.      |
+| `npx.cmd prettier --write --ignore-unknown ...`                                                                                                                                       | pass   | Scoped formatting completed.                                                                           |
+| `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                                       | pass   | All matched files use Prettier code style.                                                             |
+| `git diff --check`                                                                                                                                                                    | pass   | No whitespace errors; Git emitted LF normalization warning for the archive file only.                  |
+| `npm.cmd run lint`                                                                                                                                                                    | pass   | ESLint completed successfully.                                                                         |
+| `npm.cmd run typecheck`                                                                                                                                                               | pass   | `tsc --noEmit` completed successfully.                                                                 |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20`      | pass   | Scope and evidence hardening passed.                                                                   |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20` | pass   | Module closeout readiness passed.                                                                      |
 
 ## Explicit Non-Execution Boundary
 
@@ -77,3 +77,11 @@ payment data, or sensitive evidence are included.
   - `provider-rag-quota-governance-packet`
   - `future-scope-non-goal-governance-packet`
   - `final-audit-gate-governance-packet`
+
+## Final Closeout State
+
+- Validation commit: `a016c63f01b3cc53a03dd114999862cd4e2c88e9`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Closeout readiness rerun: pass.
+- Merge/push/cleanup: approved by current user fresh approval after local closeout.

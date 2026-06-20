@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-1-queue-health-baseline
-updatedAt: "2026-06-20T05:04:25-07:00"
+updatedAt: "2026-06-20T05:08:32-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: 2722365e89e69b513d0241956b36c991901fc16c
 currentTask:
   id: stage-1-queue-health-archive-followup-2026-06-20
-  status: in_progress
-  result: pending_validation
+  status: closed
+  result: pass_queue_health_archive_followup
   sourceStory: userRequestedContinuousProgressAfterBatch215Closeout
   planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
   branch: codex/stage-1-queue-health-archive-followup
-  commitSha: pending_stage_1_queue_health_archive_followup_commit
+  commitSha: a016c63f01b3cc53a03dd114999862cd4e2c88e9
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4555,3 +4555,21 @@ lastStage4Batch215ProviderSandboxProposal:
     Batch 215 validated existing local provider sandbox proposal and redacted evidence rule contracts with a scoped unit
     test. No source/test change, provider/env/schema/deploy/payment/PR/force-push, or Cost Calibration Gate work was
     performed.
+
+lastStage1QueueHealthArchiveFollowup:
+  taskId: stage-1-queue-health-archive-followup-2026-06-20
+  validatedAt: "2026-06-20T05:08:32-07:00"
+  closedAt: "2026-06-20T05:08:32-07:00"
+  branch: codex/stage-1-queue-health-archive-followup
+  commitSha: a016c63f01b3cc53a03dd114999862cd4e2c88e9
+  decision: pass_queue_health_archive_followup
+  archiveCandidateCountAfter: 0
+  archivedTaskIds:
+    - stage-3-decision-packages-2026-06-20
+    - provider-rag-quota-governance-packet
+    - future-scope-non-goal-governance-packet
+    - final-audit-gate-governance-packet
+  boundary: >-
+    Stage 1 queue health archive followup archived exact diagnostic candidates and updated the history index. No source,
+    tests, e2e, scripts, provider/env/schema/deploy/payment/PR/force-push, new module auto-seed approval, or Cost
+    Calibration Gate work was performed.
