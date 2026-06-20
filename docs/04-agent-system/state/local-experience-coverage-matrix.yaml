@@ -222,6 +222,37 @@ lastAp07OcrAutoImportProviderBoundaryDetailing:
     - dependency_package_lockfile_change
     - database_read_write
     - raw_sensitive_evidence
+lastAp07OcrAutoImportExecutionFreshApprovalRequired:
+  taskId: ap-07-ocr-auto-import-execution-fresh-approval-required
+  evaluatedAt: "2026-06-19T21:39:40-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-OCR-AUTO-IMPORT
+  decision: pass_l0_ap07_ocr_auto_import_fresh_approval_required_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-08-org-data-export-execution-fresh-approval-required
+  freshApprovalTextMaterialized: true
+  productScopeChanged: false
+  sourceChanged: false
+  testChanged: false
+  highRiskExecuted: false
+  blockedGates:
+    - ocr_parser_execution
+    - provider_model_call
+    - file_generation_import
+    - object_storage_write
+    - env_secret
+    - database_read_write
+    - schema_migration
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - cost_calibration_gate
+    - source_test_e2e_script_change
+    - pr_force_push
+    - destructive_database
+    - raw_sensitive_evidence
 lastAp08OrgDataExportBoundaryDetailing:
   taskId: ap-08-org-data-export-boundary-detailing
   evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -1226,10 +1257,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-provider-boundary-detailing.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-07-ocr-auto-import-execution-fresh-approval-required.md
     status: release_blocked
     blockedGate: ocr_parser_schema_storage_provider_external_service_blocked
-    nextTask: ap-07-ocr-auto-import-execution-fresh-approval-required
+    nextTask: manual_fresh_approval_required_before_any_ap07_ocr_auto_import_execution
   - useCaseId: UC-FUTURE-ORG-DATA-EXPORT
     edition: future_scope
     actor: organization_admin
