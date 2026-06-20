@@ -24,5 +24,10 @@
 
 ## Decision
 
-APPROVE batch-218 local browser experience contract validation after focused unit passed. Final closeout still requires
-lint, typecheck, diff, pre-commit hardening, validation commit hash, and module closeout readiness rerun.
+APPROVE batch-218 local browser experience contract validation after focused unit, lint, typecheck, diff, pre-commit
+hardening, validation commit hash, and module closeout readiness passed.
+
+## Final Closeout Review
+
+APPROVE closeout for validation commit `dba26e41f6e4f18e863c16dab3d53ec01278a6e1`; queue and project-state are marked
+closed, evidence is redacted, and high-risk gates remain blocked.
