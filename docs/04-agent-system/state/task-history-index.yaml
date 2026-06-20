@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-20-batch-08
-  updatedAt: "2026-06-20T03:05:00-07:00"
+  updatedByTask: stage-1-queue-health-baseline-2026-06-20
+  updatedAt: "2026-06-20T03:36:11-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10506,3 +10506,43 @@ entries:
     commitSha: null
     completedAt: "2026-06-20T02:48:00-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: active-queue-slimming-2026-06-20-batch-08
+    phase: active-queue-slimming-2026-06-20-batch-08
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T03:05:00-07:00"
+    archivedByTask: stage-1-queue-health-baseline-2026-06-20
+  - id: standard-core-student-experience-closure-readiness-audit
+    phase: standard-core-student-experience-closure-readiness-audit
+    status: closed
+    taskKind: readiness_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-experience-closure-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T11:17:51-07:00"
+    archivedByTask: stage-1-queue-health-baseline-2026-06-20
+  - id: admin-content-ops-local-experience-packet
+    phase: admin-content-ops-local-experience-packet
+    status: closed
+    taskKind: local_experience_packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-admin-content-ops-local-experience-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T12:06:27-07:00"
+    archivedByTask: stage-1-queue-health-baseline-2026-06-20
+  - id: personal-learning-ai-local-experience-packet
+    phase: personal-learning-ai-local-experience-packet
+    status: closed
+    taskKind: local_experience_packet
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-personal-learning-ai-local-experience-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T12:31:46-07:00"
+    archivedByTask: stage-1-queue-health-baseline-2026-06-20

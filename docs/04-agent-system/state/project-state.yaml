@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-updatedAt: "2026-06-20T03:25:27-07:00"
+currentPhase: stage-1-queue-health-baseline
+updatedAt: "2026-06-20T03:36:11-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,15 +503,15 @@ repository:
   lastKnownMasterSha: 1c726f548838d99bdf7ed4d955dc49d523f8a9fc
   lastKnownOriginMasterSha: 1c726f548838d99bdf7ed4d955dc49d523f8a9fc
 currentTask:
-  id: batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-  status: closed
-  result: pass_provider_agnostic_ai_task_lifecycle_contract_validated_no_provider_execution
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-212-closeout-and-six-stage-route.md
-  evidencePath: docs/05-execution-logs/evidence/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  branch: codex/batch-212-ai-task-provider-lifecycle
-  commitSha: 93105f1f31f4ccb3ffe94018923bd41949ecebf4
+  id: stage-1-queue-health-baseline-2026-06-20
+  status: in_progress
+  result: pending_validation
+  sourceStory: userRequestedSixStageRouteAfterBatch212Closeout
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-baseline.md
+  branch: codex/stage-1-queue-health-baseline
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4428,3 +4428,25 @@ lastActiveQueueSlimmingBatch08:
     proof and is not dependency evidence. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3
     execution, provider/model calls, DB work, env/secret access, schema/migration, dependency changes, deploy, payment,
     OCR, export, external-service actions, PR, force push, destructive DB, or Cost Calibration Gate execution.
+
+lastStage1QueueHealthBaseline:
+  taskId: stage-1-queue-health-baseline-2026-06-20
+  archivedAt: "2026-06-20T03:36:11-07:00"
+  branch: codex/stage-1-queue-health-baseline
+  decision: pending_validation
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-20-batch-08
+    - standard-core-student-experience-closure-readiness-audit
+    - admin-content-ops-local-experience-packet
+    - personal-learning-ai-local-experience-packet
+  activeQueueBeforeArchiveCandidates: 4
+  archivedTaskCount: 4
+  expectedArchiveCandidateCountAfter: 0
+  nextStage: stage-2-blocked-item-triage
+  boundary: >-
+    This stage 1 docs/state queue health baseline moved only terminal active-queue archive candidates into the monthly
+    archive and updated task-history-index.yaml. It did not change blocked task semantics, claim executable task
+    batch-213, execute high-risk gates, or perform source/test/e2e/script/env/provider/schema/deploy/payment/PR/force-push
+    or Cost Calibration Gate work.
