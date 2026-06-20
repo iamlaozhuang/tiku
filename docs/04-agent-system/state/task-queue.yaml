@@ -1368,65 +1368,61 @@ tasks:
       - organization-training-entry-route-path-contract-repair
     taskPlanPolicy: required_before_edit
     humanApprovalBoundary: >-
-      User requested creating and executing this task in the current 2026-06-18 prompt. Approval is limited to repairing
-      the local seed admin visible organization scope fixture or the scoped local e2e organization selection contract,
-      updating unit/e2e/coverage matrix evidence, running the idempotent local dev seed operation when needed, and
-      rerunning `npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts`. It must not output
-      database URLs, secrets, tokens, row data, or public ID lists, modify `.env*`, run `drizzle-kit push`, perform
-      destructive database operations, target staging/prod/cloud/deploy/payment/external-service, change
-      provider/model configuration, change package/lockfiles/dependencies, create PRs, force-push, or run Cost
-      Calibration Gate.
+      Approved by the current 2026-06-20 user prompt to claim and execute this independent validation repair packet for
+      the organization-training fixture/UI response mapping blocker, using a short branch from latest master, existing
+      focused local unit validation, existing scoped localhost-only Playwright validation, redacted evidence, validation
+      commit, closeout commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup. Scope
+      is limited to fixture/UI response mapping validation or the smallest allowed fixture/UI/e2e repair if current
+      validation still reproduces the blocker. This approval does not allow `.env*`, package/lockfile/dependency
+      changes, schema/drizzle/migration, migration execution, destructive local DB writes, provider/model calls or
+      configuration, staging/prod/cloud/deploy/payment/external-service, PR, force-push, headed/debug browser mode, or
+      Cost Calibration Gate execution.
     targetExperienceChain: organization-training-experience
     useCaseIds:
       - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
       - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-    executionProfile: local_seed_fixture_tdd_plus_scoped_local_full_flow
+    executionProfile: local_full_flow
     evidenceMode: full
-    validationPolicy: local_unit_plus_idempotent_local_seed_plus_scoped_local_full_flow
-    queueSelectionMode: user_directed_unblock
-    taskKind: local_fixture_contract_repair
+    validationPolicy: local_full_flow
+    queueSelectionMode: user_directed_repair
+    taskKind: local_validation_repair
     moduleRunVersion: 2
-    localDockerDatabase: approved_local_dev_only
+    localFullFlowGate: approved_localhost_only
     destructiveLocalDockerDatabase: blocked_without_task_approval
     localE2EValidation: approved_local_only_existing_specs
-    status: blocked_validation_failure
-    result: local_seed_admin_visible_scope_repaired_full_flow_blocked_by_source_context_ui_response_mapping
-    claimedAt: "2026-06-18T03:03:11-07:00"
-    closedAt: "2026-06-18T03:09:53-07:00"
-    branch: codex/organization-training-local-experience-chain
+    status: in_progress
+    result: pass_existing_fixture_ui_response_mapping_validation
+    claimedAt: "2026-06-20T09:29:07-07:00"
+    validatedAt: "2026-06-20T09:34:00-07:00"
+    closedAt: null
+    branch: codex/organization-training-fixture-ui-response-mapping-repair
     allowedFiles:
       - src/db/dev-seed.ts
       - src/db/dev-seed.test.ts
       - e2e/organization-training-local-full-flow.spec.ts
       - src/app/(admin)/content/organization-training/page.tsx
-      - src/app/(admin)/organization-training/page.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
       - tests/unit/organization-training-admin-entry-surface.test.ts
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+      - docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     readOnlyAllowedFiles:
       - AGENTS.md
-      - .env.local
       - docs/03-standards/code-taste-ten-commandments.md
       - docs/02-architecture/adr/**
       - docs/01-requirements/advanced-edition/modules/04-organization-training.md
       - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
       - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
       - src/server/repositories/organization-training-repository.ts
       - src/server/services/organization-training-route.ts
-      - scripts/db/Seed-DevDatabase.ps1
+      - src/server/contracts/organization-training-contract.ts
+      - playwright.config.ts
+      - package.json
     blockedFiles:
       - .env.local
       - .env.example
@@ -1439,7 +1435,6 @@ tasks:
       - drizzle/**
       - src/server/**
       - src/components/**
-      - src/features/**
       - src/hooks/**
       - scripts/**
       - playwright-report/**
@@ -1456,35 +1451,67 @@ tasks:
       - force push
       - Cost Calibration Gate
     closeoutPolicy:
-      localCommit: not_approved
+      localCommit:
+        approved: true
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: false
+        deleteShortBranch: true
+        parkWorktree: false
         fetchPruneAfterPush: true
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair -Capability localFullFlowGate -Intent use_capability
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts src/db/dev-seed.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-training-local-full-flow.spec.ts src/app/(admin)/content/organization-training/page.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx tests/unit/organization-training-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
     validationCommands:
-      - npm.cmd run test:unit -- src/db/dev-seed.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair -Capability localDockerDatabase -Intent use_capability
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair -Capability localFullFlowGate -Intent use_capability
+      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts src/db/dev-seed.test.ts
       - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
       - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
-      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/db/dev-seed.test.ts
-      - npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-training-local-full-flow.spec.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+      - npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-training-local-full-flow.spec.ts src/app/(admin)/content/organization-training/page.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx tests/unit/organization-training-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    retryCount: 0
+    retryCount: 1
   - id: blocked-gates-approval-package-materialization
     title: Blocked gates approval package materialization
     phase: blocked-gates-approval-package-materialization
