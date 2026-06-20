@@ -1119,12 +1119,17 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
-    status: blocked_validation_failure
+    status: closed
+    result: reconciled_by_personal_ai_local_ui_auth_session_contract_repair
     claimedAt: "2026-06-17T14:23:24-07:00"
     closedAt: "2026-06-17T14:28:51-07:00"
-    result: blocked_by_server_session_only_playwright_auth_mismatch
+    reconciledAt: "2026-06-20T10:47:35-07:00"
     branch: codex/personal-ai-local-ui-browser-flow-validation
-    commitSha: null
+    commitSha: 32cac297c40fed589db780ca5d78af51e8e4e7a4
+    repairTaskId: module-run-v2-personal-ai-local-ui-auth-session-contract-repair
+    repairCommitSha: 32cac297c40fed589db780ca5d78af51e8e4e7a4
+    revalidationTaskId: personal-ai-local-ui-browser-auth-session-repair
+    reconciliationTaskId: personal-ai-local-ui-browser-auth-session-repair
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
     blockedGates:
       - targeted Playwright spec expects browser local session token storage
@@ -6173,3 +6178,152 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
     planPath: docs/05-execution-logs/task-plans/2026-06-20-blocked-validation-repair-state-reconciliation.md
     retryCount: 0
+  - id: personal-ai-local-ui-browser-auth-session-repair
+    title: Personal AI local UI browser auth session repair
+    phase: blocked-validation-repair
+    sourceStory: repair.module-run-v2-personal-ai-local-ui-browser-flow-validation
+    dependencies:
+      - blocked-validation-repair-state-reconciliation-2026-06-20
+      - module-run-v2-personal-ai-local-ui-browser-flow-validation
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Approved by the current 2026-06-20 user prompt "批准继续执行 1 和 2" to serially run step 2 after state
+      reconciliation. Scope is limited to repairing or validating the personal AI localhost-only UI/browser auth/session
+      mismatch using latest master, an independent short branch, focused unit validation, the existing targeted
+      localhost-only Playwright spec, redacted evidence, validation commit, closeout commit, fast-forward merge to
+      master, push origin/master, and merged short-branch cleanup. If existing implementation and tests already pass, do
+      not modify product source or e2e. This approval does not allow `.env*`, package/lockfile/dependency changes,
+      schema/drizzle/migration, destructive local DB writes, provider/model calls or configuration,
+      staging/prod/cloud/deploy/payment/external-service, PR, force-push, headed/debug browser mode, new e2e specs, or
+      Cost Calibration Gate execution.
+    targetExperienceChain: personal-learning-ai-experience
+    targetClosureItem: personal AI localhost-only UI/browser auth/session validation repair
+    behaviorBoundary: personal-learning-ai::local_ui_browser_auth_session_repair
+    useCaseIds:
+      - UC-ADV-PERSONAL-AI-LOCAL-BROWSER
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: user_directed_repair
+    taskKind: local_validation_repair
+    moduleRunVersion: 2
+    localFullFlowGate: approved_localhost_only
+    localE2EValidation: approved_local_only_existing_spec
+    status: in_progress
+    result: pass_personal_ai_local_ui_browser_auth_session_revalidation
+    claimedAt: "2026-06-20T10:43:04-07:00"
+    validatedAt: "2026-06-20T10:47:35-07:00"
+    branch: codex/personal-ai-auth-session-repair
+    allowedFiles:
+      - src/app/(auth)/login/page.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-login-ui.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md
+      - package.json
+      - playwright.config.ts
+      - src/app/api/v1/sessions/route.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/contracts/user-auth/session-boundary.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - new e2e specs
+      - headed/debug browser mode
+      - schema/drizzle/migration changes
+      - database migration execution
+      - destructive local DB writes
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair -Capability localFullFlowGate -Intent use_capability
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/personal-ai-generation-local-browser-experience-service.test.ts e2e/personal-ai-generation-local-request.spec.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md docs/05-execution-logs/evidence/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair -Capability localFullFlowGate -Intent use_capability
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npx.cmd prettier --check --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/personal-ai-generation-local-browser-experience-service.test.ts e2e/personal-ai-generation-local-request.spec.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md docs/05-execution-logs/evidence/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId personal-ai-local-ui-browser-auth-session-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
