@@ -60,7 +60,7 @@ function Get-TaskBlocks {
     $taskItemIndent = -1
 
     foreach ($line in $Lines) {
-        if ($line -match "^tasks:\s*$") {
+        if ($line -match "^(tasks|entries):\s*$") {
             $insideTasks = $true
             continue
         }

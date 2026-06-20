@@ -165,7 +165,7 @@ tasks:
 
     @"
 schemaVersion: 1
-tasks:
+entries:
   - id: archived-a
     phase: archived-a
     status: done

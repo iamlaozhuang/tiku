@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: mechanism-authorization-seed-dedup-history-index
-updatedAt: "2026-06-20T02:30:51-07:00"
+currentPhase: mechanism-ai-task-provider-auto-seed-history-dependency
+updatedAt: "2026-06-20T02:46:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,7 +503,7 @@ repository:
   lastKnownMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
   lastKnownOriginMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
 currentTask:
-  id: mechanism-authorization-seed-dedup-history-index
+  id: mechanism-ai-task-provider-auto-seed-history-dependency
   status: closed
   result: pass_docs_state_active_queue_slimming_batch_08_no_execution
   sourceStory: userApprovedActiveQueueSlimmingBatch
