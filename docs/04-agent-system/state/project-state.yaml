@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-2-blocked-item-triage
-updatedAt: "2026-06-20T03:50:12-07:00"
+updatedAt: "2026-06-20T03:56:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: a094d09ebc55924c52ad4db78c47cd9f3dc4ee24
 currentTask:
   id: stage-2-blocked-item-triage-2026-06-20
-  status: in_progress
-  result: pending_validation
+  status: closed
+  result: pass_docs_state_blocked_item_triage_decision_surface
   sourceStory: userRequestedSixStageRouteAfterStage1Closeout
   planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-item-triage.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-item-triage.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-item-triage.md
   branch: codex/stage-2-blocked-item-triage
-  commitSha: null
+  commitSha: 747993d08990103ec0c1ebb8c931668392f20906
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4455,7 +4455,7 @@ lastStage2BlockedItemTriage:
   taskId: stage-2-blocked-item-triage-2026-06-20
   triagedAt: "2026-06-20T03:50:12-07:00"
   branch: codex/stage-2-blocked-item-triage
-  decision: pending_validation
+  decision: pass_docs_state_blocked_item_triage_decision_surface
   triagePath: docs/04-agent-system/state/blocked-item-triage-2026-06-20.yaml
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
