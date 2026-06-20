@@ -4484,7 +4484,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go
     evidencePath: docs/05-execution-logs/evidence/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-229-ops-governance-and-retention-redeem-code-redacted-reference
     title: Module Run v2 ops-governance-and-retention implementation seed
