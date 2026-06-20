@@ -22,11 +22,13 @@ tasks:
     evidenceMode: full
     validationPolicy: docs_state
     queueSelectionMode: explicit_user_requested_followup
-    status: in_progress
-    result: pending_validation
+    status: closed
+    result: pass_docs_state_decision_package_surface
     claimedAt: "2026-06-20T04:33:00-07:00"
+    validatedAt: "2026-06-20T04:38:51-07:00"
+    closedAt: "2026-06-20T04:38:51-07:00"
     branch: codex/stage-3-decision-packages
-    commitSha: pending_stage_3_first_commit
+    commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
     planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md

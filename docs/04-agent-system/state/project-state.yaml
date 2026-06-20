@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-3-low-risk-docs-state-decision-packages
-updatedAt: "2026-06-20T04:33:00-07:00"
+updatedAt: "2026-06-20T04:38:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,15 +504,15 @@ repository:
   lastKnownOriginMasterSha: 988c9cef1048b60b32febb7ef9456394e00969cf
 currentTask:
   id: stage-3-decision-packages-2026-06-20
-  status: in_progress
-  result: pending_validation
+  status: closed
+  result: pass_docs_state_decision_package_surface
   sourceStory: userRequestedSixStageRouteAfterStage2Closeout
   planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
   decisionPackagePath: docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
   branch: codex/stage-3-decision-packages
-  commitSha: pending_stage_3_first_commit
+  commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4485,8 +4485,11 @@ lastStage2BlockedItemTriage:
 lastStage3DecisionPackages:
   taskId: stage-3-decision-packages-2026-06-20
   preparedAt: "2026-06-20T04:33:00-07:00"
+  validatedAt: "2026-06-20T04:38:51-07:00"
+  closedAt: "2026-06-20T04:38:51-07:00"
+  commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
   branch: codex/stage-3-decision-packages
-  decision: pending_validation
+  decision: pass_docs_state_decision_package_surface
   decisionPackagePath: docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
