@@ -5216,11 +5216,13 @@ tasks:
     localFullFlowGate: approved_localhost_only
     schemaMigration: blocked_without_task_approval
     destructiveLocalDockerDatabase: blocked_without_task_approval
-    status: in_progress
+    status: closed
     result: pass_existing_admin_visible_scope_no_migration_validation
     claimedAt: "2026-06-20T09:19:57-07:00"
     validatedAt: "2026-06-20T09:25:00-07:00"
+    closedAt: "2026-06-20T09:30:00-07:00"
     branch: codex/organization-training-admin-visible-scope-no-migration-repair
+    commitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
     allowedFiles:
       - src/db/dev-seed.ts
       - src/db/dev-seed.test.ts
