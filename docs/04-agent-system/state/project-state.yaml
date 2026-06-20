@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T08:34:01-07:00"
+updatedAt: "2026-06-20T08:39:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,15 +503,14 @@ repository:
   lastKnownMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
-  id: batch-229-ops-governance-and-retention-redeem-code-redacted-reference
-  status: closed
-  result: pass_ops_governance_redeem_code_redacted_reference_contract
+  id: batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+  status: in_progress
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-229-ops-governance-redeem-code-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-229-ops-governance-and-retention-redeem-code-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-229-ops-governance-and-retention-redeem-code-redacted-reference.md
-  branch: codex/batch-229-ops-governance-redeem-code
-  commitSha: a7761af135db11e8b1613848396c0cf6c23c2879
+  planPath: pending-task-plan
+  evidencePath: docs/05-execution-logs/evidence/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  branch: codex/batch-230-ops-governance-log-retention
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
