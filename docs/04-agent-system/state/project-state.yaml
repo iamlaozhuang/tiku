@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c0a023020ae3d04d0a05076c1022ec1a0045ca8a
-  lastKnownOriginMasterSha: c0a023020ae3d04d0a05076c1022ec1a0045ca8a
+  lastKnownMasterSha: d5ed6cc62897aed5c11e63b5aa1fb87582968fdb
+  lastKnownOriginMasterSha: d5ed6cc62897aed5c11e63b5aa1fb87582968fdb
 currentTask:
-  id: batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori
-  status: closed
-  result: pass_redacted_ai_call_log_reference_contract
+  id: batch-220-organization-training-organization-admin-training-draft-publish-ta
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-219-redacted-ai-call-log-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
-  branch: codex/batch-219-redacted-ai-call-log-reference
-  commitSha: 8ea4b079182cfdf2ab7c73db91c14d745c729314
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-220-organization-training-admin-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
+  branch: codex/batch-220-organization-training-admin-flow
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
