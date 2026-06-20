@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-2026-06-20-batch-04
-updatedAt: "2026-06-20T02:05:00-07:00"
+currentPhase: active-queue-slimming-2026-06-20-batch-05
+updatedAt: "2026-06-20T02:14:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9283b170703296191437c76a58693cc47026f0fd
-  lastKnownOriginMasterSha: 9283b170703296191437c76a58693cc47026f0fd
+  lastKnownMasterSha: dadc09b54be25daabc7264aec9884b5c0a5b9e76
+  lastKnownOriginMasterSha: dadc09b54be25daabc7264aec9884b5c0a5b9e76
 currentTask:
-  id: active-queue-slimming-2026-06-20-batch-04
+  id: active-queue-slimming-2026-06-20-batch-05
   status: closed
-  result: pass_docs_state_active_queue_slimming_batch_04_no_execution
+  result: pass_docs_state_active_queue_slimming_batch_05_no_execution
   sourceStory: userApprovedActiveQueueSlimmingBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-04.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-04.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-04.md
-  branch: codex/active-queue-slimming-batch-04
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-05.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-05.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-05.md
+  branch: codex/active-queue-slimming-batch-05
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4197,6 +4197,83 @@ lastActiveQueueSlimmingBatch04:
     - ap-01-provider-smoke-execution-qwen-env-local-ready
     - ap-01-provider-smoke-execution
   expectedArchiveCandidateCountAfter: 115
+  boundary: >-
+    This docs/state queue slimming task moved terminal historical task blocks to the monthly archive and updated the
+    history index only. Registered legacy-unavailable evidence remains historical non-blocking debt, and closure
+    evidence recovery remains historical closeout metadata only. It did not execute AP high-risk tasks, L1/L2
+    source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access, schema/migration,
+    dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push, destructive DB, or
+    Cost Calibration Gate execution.
+
+lastActiveQueueSlimmingBatch05:
+  taskId: active-queue-slimming-2026-06-20-batch-05
+  archivedAt: "2026-06-20T02:14:00-07:00"
+  branch: codex/active-queue-slimming-batch-05
+  decision: pass_docs_state_active_queue_slimming_batch_05_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-20-batch-03
+    - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+    - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+    - advanced-organization-analytics-post-runtime-handoff-seeding
+    - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+    - advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck
+    - advanced-organization-analytics-employee-statistics-route-contract-tdd
+    - advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+    - advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+    - advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding
+    - advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd
+    - advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding
+    - advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd
+    - advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding
+    - advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-tdd
+    - advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding
+    - advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
+    - advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+    - advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+    - mechanism-tuning-authorization-slimming-implementation
+    - mechanism-profile-catalog-ready-set-foundation
+    - mechanism-runner-profile-workpacket-localfullflow-consumption
+    - mechanism-tuning-final-completion-audit
+    - batch-189-authorization-and-access-authorization-read-model-and-display-contrac
+    - batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    - batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    - batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    - batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    - batch-194-ai-task-and-provider-local-task-request-policy-and-result-referen
+    - batch-195-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    - batch-196-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    - batch-197-personal-learning-ai-personal-generation-request-flow
+    - batch-198-personal-learning-ai-paper-and-mock-exam-context-selection
+    - batch-199-personal-learning-ai-local-ui-browser-experience-for-request-and
+    - batch-200-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    - batch-201-organization-training-organization-admin-training-draft-publish-ta
+    - batch-202-organization-training-employee-answer-lifecycle-local-role-flow
+    - batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex
+    - batch-204-organization-training-audit-log-redacted-reference
+    - batch-205-organization-analytics-aggregate-only-organization-metrics
+    - batch-206-organization-analytics-privacy-preserving-employee-statistics
+    - batch-207-organization-analytics-export-readiness-contracts-without-object-st
+    - queue-drain-default-entry-rules
+    - batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    - batch-209-ops-governance-and-retention-redeem-code-redacted-reference
+    - batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    - batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    - mechanism-queue-matrix-drift-history-coverage
+    - mechanism-legacy-status-evidence-diagnostics
+    - mechanism-historical-evidence-provenance-diagnostics
+  activeQueueBeforeArchiveCandidates: 115
+  archivedTaskCount: 50
+  registeredLegacyUnavailableEvidence:
+    - none
+  closureEvidenceRecovered:
+    - none
+  legacyAuditUnavailable:
+    - none
+  dependentActiveBlockedTasks:
+    - none
+  expectedArchiveCandidateCountAfter: 66
   boundary: >-
     This docs/state queue slimming task moved terminal historical task blocks to the monthly archive and updated the
     history index only. Registered legacy-unavailable evidence remains historical non-blocking debt, and closure
