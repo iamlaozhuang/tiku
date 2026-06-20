@@ -1,51 +1,45 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 tasks:
-  - id: stage-3-decision-packages-2026-06-20
-    title: Stage 3 Low Risk Docs State Decision Packages 2026 06 20
-    phase: stage-3-low-risk-docs-state-decision-packages
-    sourceStory: userRequestedSixStageRouteAfterStage2Closeout
+  - id: stage-1-queue-health-archive-followup-2026-06-20
+    title: Stage 1 Queue Health Archive Followup 2026 06 20
+    phase: stage-1-queue-health-baseline
+    sourceStory: userRequestedContinuousProgressAfterBatch215Closeout
     dependencies:
-      - stage-2-blocked-item-triage-2026-06-20
+      - batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     taskPlanPolicy: required_before_edit
     humanApprovalBoundary: >-
-      User approved continued commit, fast-forward merge to master, push origin/master, and cleanup, then requested
-      continuing the six-stage route. Scope is limited to docs/state-only decision package clarification for AP-04,
-      AP-05, AP-09, AP-10, and AP-11, minimal entry-hygiene archival of the prior closed stage 2 task exposed after
-      merge, project-state/task-queue sync, evidence/audit/plan records, local validation, local commits, fast-forward
-      merge, push, and merged short-branch cleanup. This approval does not authorize source, tests, e2e, scripts,
-      package/lockfile/dependency changes, env/secret access, DB, provider/model, schema/migration, staging/prod/cloud
-      deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR, force-push, destructive DB, high-risk
-      gate execution, pending task claim, or blocked task semantic changes.
-    taskKind: docs_state_decision_package
+      User clarified that local commit, fast-forward merge to master, push origin/master, and merged short-branch
+      cleanup are approved and requested continuous progress until the work goal is reached. Scope is limited to
+      docs/state-only queue health archival of exact diagnostic archive candidates, project-state/task-queue/archive
+      index sync, evidence/audit/plan records, local validation, local commit, fast-forward merge, push, and merged
+      short-branch cleanup. This approval does not authorize new module auto-seed approval, source, tests, e2e,
+      scripts, package/lockfile/dependency changes, env/secret access, DB, provider/model calls or configuration,
+      schema/migration, staging/prod/cloud deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR,
+      force-push, destructive DB, high-risk gate execution, pending task claim, or blocked task semantic changes.
+    taskKind: docs_state_queue_archive
     moduleRunVersion: 2
     executionProfile: docs_state_lite
     evidenceMode: full
     validationPolicy: docs_state
-    queueSelectionMode: explicit_user_requested_followup
-    status: closed
-    result: pass_docs_state_decision_package_surface
-    claimedAt: "2026-06-20T04:33:00-07:00"
-    validatedAt: "2026-06-20T04:38:51-07:00"
-    closedAt: "2026-06-20T04:38:51-07:00"
-    branch: codex/stage-3-decision-packages
-    commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
-    decisionPackagePath: docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
+    queueSelectionMode: queue_slimming_diagnostic_candidates
+    status: in_progress
+    result: pending_validation
+    claimedAt: "2026-06-20T05:04:25-07:00"
+    branch: codex/stage-1-queue-health-archive-followup
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    archivedPriorTerminalTaskIds:
-      - stage-2-blocked-item-triage-2026-06-20
-    targetApprovalPackages:
-      - AP-04
-      - AP-05
-      - AP-09
-      - AP-10
-      - AP-11
+    archiveCandidateSource: Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    targetArchiveTaskIds:
+      - stage-3-decision-packages-2026-06-20
+      - provider-rag-quota-governance-packet
+      - future-scope-non-goal-governance-packet
+      - final-audit-gate-governance-packet
     capabilities:
-      docsStateDecisionPackage: approved
-      entryHygieneArchivePriorStage: approved
+      docsStateQueueArchive: approved
+      exactCandidateArchive: approved
       blockedTaskSemanticChange: blocked
       pendingTaskClaim: blocked
       sourceTestE2eScriptChange: blocked
@@ -54,6 +48,7 @@ tasks:
       envLocalRead: blocked
       envSecretOutput: blocked
       providerModelCall: blocked
+      providerConfiguration: blocked
       schemaMigration: blocked
       dependencyIntroduction: blocked
       stagingProdDeploy: blocked
@@ -66,12 +61,11 @@ tasks:
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
       - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
       - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
-      - docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+      - docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md
+      - docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
     blockedFiles:
       - .env*
       - package.json
@@ -85,14 +79,15 @@ tasks:
       - scripts/**
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-archive-followup.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-archive-followup.md
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-3-decision-packages-2026-06-20
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-3-decision-packages-2026-06-20
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-1-queue-health-archive-followup-2026-06-20
     closeoutPolicy:
       localCommit:
         approved: true
@@ -1486,349 +1481,6 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     retryCount: 0
-  - id: provider-rag-quota-governance-packet
-    title: Provider RAG quota governance packet
-    phase: provider-rag-quota-governance-packet
-    sourceStory: userBoundedLocalExperiencePacket.providerRagQuotaGovernance
-    dependencies:
-      - personal-learning-ai-local-experience-packet
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Approved by the current 2026-06-18 user prompt to execute the third bounded packet only after the previous packet
-      reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
-      `codex/provider-rag-quota-governance-packet`, seeding this work packet, creating task plan/evidence/audit,
-      updating project-state/task-queue/local-experience-coverage-matrix, directly related minimal source or focused unit
-      contract repair if validation fails, focused unit validation, `npm.cmd run test:e2e -- --list`, the three
-      explicitly allowed existing local e2e specs, scoped Prettier/diff/lint/typecheck, Module Run v2 readiness gates,
-      local commit, fast-forward merge to master, master gates, push origin/master, and merged short-branch cleanup. The
-      approval does not permit `.env*` or secret/env read/write/output, package/lockfile/dependency changes,
-      schema/drizzle/migration, new or edited e2e specs, real provider/model calls or provider configuration changes,
-      vector provider, real RAG provider, real quota/cost measurement, staging/prod/cloud/deploy,
-      payment/external-service, PR, force-push, destructive DB, Cost Calibration Gate, or sensitive/private evidence.
-    targetExperienceChain: provider-rag-quota-governance-packet
-    targetClosureItem: provider RAG quota governance local closure and blocked-gate resolution packet
-    behaviorBoundary: provider-rag-quota::local_mock_contracts_and_release_gate_blocks
-    useCaseIds:
-      - UC-STD-AI-SCORING-EXPLANATION
-      - UC-STD-KN-RECOMMENDATION
-      - UC-STD-RAG-KNOWLEDGE-BASE
-      - UC-ADV-OPS-AUTH-QUOTA
-      - UC-GATE-PROVIDER-STAGING-EXECUTION
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: user_bounded_packet_serial
-    taskKind: local_experience_packet
-    moduleRunVersion: 2
-    status: closed
-    result: completed_or_blocked_resolved
-    claimedAt: "2026-06-18T12:42:00-07:00"
-    validatedAt: "2026-06-18T12:45:59-07:00"
-    closedAt: "2026-06-18T12:45:59-07:00"
-    capabilities:
-      localFullFlowGate: approved_localhost_only
-      localE2EValidation: approved_local_only_existing_specs
-      e2eListOnly: allowed
-      focusedUnitValidation: allowed
-      minimalRepair: allowed_directly_related_source_and_focused_unit_tests_only
-      providerCall: blocked
-      providerConfiguration: blocked
-      vectorProvider: blocked
-      realRagProvider: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      quotaCostMeasurement: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md
-      - docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/04-agent-system/sop/local-experience-closure-governance.md
-      - docs/04-agent-system/sop/local-first-validation-governance.md
-      - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-      - e2e/local-business-flow.spec.ts
-      - e2e/admin-audit-navigation.spec.ts
-      - e2e/personal-ai-generation-local-request.spec.ts
-      - src/**
-      - tests/**
-    blockedFiles:
-      - .env*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts src/server/services/rag-retrieval-service.test.ts src/server/services/rag-chunking-service.test.ts src/server/services/ai-scoring-service.test.ts src/server/services/ai-explanation-hint-service.test.ts src/server/services/ops-governance-authorization-quota-summary-service.test.ts tests/unit/ai/provider-redaction-function-contract.test.ts tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/admin-audit-navigation.spec.ts e2e/personal-ai-generation-local-request.spec.ts
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId provider-rag-quota-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId provider-rag-quota-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId provider-rag-quota-governance-packet
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md
-    branch: codex/provider-rag-quota-governance-packet
-    commitSha: null
-    retryCount: 0
-    lastFailurePath: null
-  - id: future-scope-non-goal-governance-packet
-    title: Future scope non-goal governance packet
-    phase: future-scope-non-goal-governance-packet
-    sourceStory: userBoundedLocalExperiencePacket.futureScopeNonGoalGovernance
-    dependencies:
-      - provider-rag-quota-governance-packet
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Approved by the current 2026-06-18 user prompt to execute the fourth bounded packet only after the previous packet
-      reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
-      `codex/future-scope-non-goal-governance-packet`, seeding this docs/state governance work packet, creating task
-      plan/evidence/audit, updating project-state/task-queue/local-experience-coverage-matrix, running scoped
-      Prettier, git diff check, lint, typecheck, Module Run v2 readiness gates, local commit, fast-forward merge to
-      master, master gates, push origin/master, and merged short-branch cleanup. The approval does not permit product
-      source changes, tests or e2e spec changes, `.env*` or secret/env read/write/output, package/lockfile/dependency
-      changes, schema/drizzle/migration, real provider/model calls or provider configuration changes, OCR/parser,
-      payment, export, staging/prod/cloud/deploy, external-service, PR, force-push, destructive DB, Cost Calibration
-      Gate, or sensitive/private evidence.
-    targetExperienceChain: future-scope-non-goal-governance-packet
-    targetClosureItem: future scope non-goal governance resolution packet
-    behaviorBoundary: future-scope-non-goal::docs_state_governance_only
-    useCaseIds:
-      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
-      - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
-      - UC-FUTURE-ONLINE-PAYMENT
-      - UC-FUTURE-OCR-AUTO-IMPORT
-      - UC-FUTURE-ORG-DATA-EXPORT
-    executionProfile: local_experience_audit
-    evidenceMode: full
-    validationPolicy: docs_state
-    queueSelectionMode: user_bounded_packet_serial
-    taskKind: local_experience_packet
-    moduleRunVersion: 2
-    status: closed
-    result: completed_or_blocked_resolved
-    claimedAt: "2026-06-18T12:59:03-07:00"
-    validatedAt: "2026-06-18T13:00:53-07:00"
-    closedAt: "2026-06-18T13:00:53-07:00"
-    capabilities:
-      docsStateOnlyQueueMaintenance: allowed
-      readRequirements: allowed
-      readEvidence: allowed
-      localE2EValidation: blocked
-      localFullFlowGate: blocked
-      productSourceChange: blocked
-      testChange: blocked
-      e2eSpecChange: blocked
-      providerCall: blocked
-      providerConfiguration: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      paymentExternalService: blocked
-      ocrParserImplementation: blocked
-      exportFileGeneration: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
-      - docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/01-requirements/**
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/04-agent-system/sop/local-experience-closure-governance.md
-      - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-      - docs/05-execution-logs/task-plans/**
-    blockedFiles:
-      - .env*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    validationCommands:
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId future-scope-non-goal-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
-    branch: codex/future-scope-non-goal-governance-packet
-    commitSha: null
-    retryCount: 0
-    lastFailurePath: null
-  - id: final-audit-gate-governance-packet
-    title: Final audit gate governance packet
-    phase: final-audit-gate-governance-packet
-    sourceStory: userBoundedLocalExperiencePacket.finalAuditGateGovernance
-    dependencies:
-      - future-scope-non-goal-governance-packet
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Approved by the current 2026-06-18 user prompt to execute the fifth final bounded packet only after the previous
-      packet reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
-      `codex/final-audit-gate-governance-packet`, seeding this docs/state governance work packet, creating task
-      plan/evidence/audit, updating project-state/task-queue/local-experience-coverage-matrix, generating the global
-      32 use case status summary, running scoped Prettier, git diff check, lint, typecheck, Module Run v2 readiness
-      gates, local commit, fast-forward merge to master, master gates, push origin/master, and merged short-branch
-      cleanup. The approval does not permit product source changes, tests or e2e spec changes, `.env*` or secret/env
-      read/write/output, package/lockfile/dependency changes, schema/drizzle/migration, real provider/model calls or
-      provider configuration changes, staging/prod/cloud/deploy, payment, external-service, PR, force-push,
-      destructive DB, Cost Calibration Gate, or sensitive/private evidence.
-    targetExperienceChain: final-audit-gate-governance-packet
-    targetClosureItem: final audit gate governance resolution packet
-    behaviorBoundary: audit-gate-governance::docs_state_governance_only
-    useCaseIds:
-      - UC-FUTURE-RUNTIME-CAPABILITY-LIST
-      - UC-GATE-CURRENT-CHECKPOINT
-      - UC-AUDIT-SOURCE-GOVERNANCE
-    executionProfile: local_experience_audit
-    evidenceMode: full
-    validationPolicy: docs_state
-    queueSelectionMode: user_bounded_packet_serial
-    taskKind: local_experience_packet
-    moduleRunVersion: 2
-    status: closed
-    result: completed_or_blocked_resolved
-    claimedAt: "2026-06-18T13:14:56-07:00"
-    validatedAt: "2026-06-18T13:20:06-07:00"
-    closedAt: "2026-06-18T13:20:06-07:00"
-    capabilities:
-      docsStateOnlyQueueMaintenance: allowed
-      readRequirements: allowed
-      readEvidence: allowed
-      localE2EValidation: blocked
-      localFullFlowGate: blocked
-      productSourceChange: blocked
-      testChange: blocked
-      e2eSpecChange: blocked
-      providerCall: blocked
-      providerConfiguration: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      paymentExternalService: blocked
-      stagingProdDeploy: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md
-      - docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/01-requirements/**
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/04-agent-system/sop/local-experience-closure-governance.md
-      - docs/04-agent-system/sop/module-lifecycle-governance.md
-      - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-      - docs/05-execution-logs/task-plans/**
-    blockedFiles:
-      - .env*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    validationCommands:
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId final-audit-gate-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId final-audit-gate-governance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId final-audit-gate-governance-packet
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md
-    branch: codex/final-audit-gate-governance-packet
-    commitSha: null
-    retryCount: 0
-    lastFailurePath: null
   - id: blocked-gates-approval-package-materialization
     title: Blocked gates approval package materialization
     phase: blocked-gates-approval-package-materialization
@@ -2254,7 +1906,7 @@ tasks:
     dependencies: []
     taskPlanPolicy: required_before_edit
     humanApproval: >-
-      批准建议
+      鎵瑰噯寤鸿
     taskKind: mechanism_repair
     moduleRunVersion: 2
     executionProfile: docs_state_lite
@@ -2888,8 +2540,7 @@ tasks:
       - mechanism-authorization-seed-dedup-history-index
     taskPlanPolicy: required_before_edit
     humanApproval: >-
-      将该本地提交 fast-forward merge 到 master；之后再处理 ai-task-and-provider 的 auto seed approval。
-    taskKind: mechanism_repair
+      灏嗚鏈湴鎻愪氦 fast-forward merge 鍒?master锛涗箣鍚庡啀澶勭悊 ai-task-and-provider 鐨?auto seed approval銆?    taskKind: mechanism_repair
     moduleRunVersion: 2
     executionProfile: docs_state_lite
     evidenceMode: full

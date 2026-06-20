@@ -1,12 +1,12 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 archive:
   month: 2026-06
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   archivedAt: '2026-06-11T20:00:52-07:00'
-  updatedByTask: stage-3-decision-packages-2026-06-20
-  updatedAt: '2026-06-20T04:33:00-07:00'
-  taskCount: 798
+  updatedByTask: stage-1-queue-health-archive-followup-2026-06-20
+  updatedAt: '2026-06-20T05:04:25-07:00'
+  taskCount: 802
 tasks:
 - id: phase-21-write-concurrency-closeout-reconciliation
   title: Phase 21 Write Concurrency Closeout Reconciliation
@@ -20365,9 +20365,8 @@ tasks:
   targetClosureItem: API route/local contract bridge
   behaviorBoundary: personal-learning-ai::api route local contract bridge
   requirementRefs:
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
-    - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-涓昏棰?ai-鎻愮ず涓庨噸绛?    - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
   useCases:
     - local student client can post a redacted personal AI generation request through the REST boundary
     - route returns standard API envelopes and never exposes numeric ids or protected AI payloads
@@ -20500,9 +20499,8 @@ tasks:
   behaviorBoundary: personal-learning-ai::student local request entry UI
   requirementRefs:
     - docs/01-requirements/stories/epic-03-student-experience.md
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
-  useCases:
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-涓昏棰?ai-鎻愮ず涓庨噸绛?  useCases:
     - student can open a local personal AI learning entry from the student experience
     - entry sends only public ids and selected local context to the local route contract
     - UI shows loading, empty, error, and permission blocked states
@@ -20612,9 +20610,8 @@ tasks:
   targetClosureItem: redacted result/reference display integration
   behaviorBoundary: personal-learning-ai::redacted result reference display
   requirementRefs:
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
-    - docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-涓昏棰?ai-鎻愮ず涓庨噸绛?    - docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
   useCases:
     - student sees redacted result-reference metadata after a local request
     - student sees evidence status, citation count, and ai_call_log public reference without raw provider payload
@@ -20992,8 +20989,7 @@ tasks:
   targetClosureItem: student session/auth bridge for personal AI request route
   behaviorBoundary: personal-learning-ai::student session auth route bridge
   requirementRefs:
-    - docs/01-requirements/stories/epic-03-student-experience.md#us-03-02-理论卷练习
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+    - docs/01-requirements/stories/epic-03-student-experience.md#us-03-02-鐞嗚鍗风粌涔?    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
     - docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
     - docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
   useCases:
@@ -21110,7 +21106,7 @@ tasks:
   targetClosureItem: redacted request history read-model
   behaviorBoundary: personal-learning-ai::redacted request history read-model
   requirementRefs:
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
     - docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
   useCases:
     - student can receive a local redacted history summary for recent personal AI requests
@@ -21221,7 +21217,7 @@ tasks:
   targetClosureItem: redacted request history display
   behaviorBoundary: personal-learning-ai::redacted request history display
   requirementRefs:
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
     - docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
   useCases:
     - student sees a redacted recent request history section on `/ai-generation`
@@ -21327,7 +21323,7 @@ tasks:
   targetClosureItem: dedicated local e2e spec for AI generation request and redacted summary
   behaviorBoundary: personal-learning-ai::dedicated local e2e spec
   requirementRefs:
-    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+    - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-瀹㈣棰?ai-璁茶В
     - docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
   useCases:
     - local browser spec exercises `/ai-generation` request submission through existing local auth flow
@@ -34458,7 +34454,7 @@ tasks:
     boundaries against advanced MVP requirements: organization authorization, employee context, formal content
     isolation, employee answer privacy, ADR-002 layering expectations, and blocked provider/schema/DB gates.
   humanApproval: >-
-    User approved executing this readonly audit in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this readonly audit in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation, DB access, provider/model calls, schema/migration, package/lockfile/dependency changes, dev server,
@@ -34552,7 +34548,7 @@ tasks:
     publish confirmation validation, takedown reason validation, and copy-to-new-draft validation. It must not create
     repository, route, service, schema, DB, provider, UI, package, lockfile, or formal content write behavior.
   humanApproval: >-
-    User approved executing this TDD scaffold task in the current 2026-06-15 Codex thread by saying "批准执行".
+    User approved executing this TDD scaffold task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц".
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in the queued contract/model/validator/test files, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Route/service/
@@ -34641,7 +34637,7 @@ tasks:
     scaffold to confirm DTO naming, nullability, redaction, first-release question type validation, formal content
     isolation, ADR-002 readiness, and blocked gate preservation.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "批准执行". Approval
+    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval
     is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review, declared local
     validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
     prune. Implementation, route/service/repository/API runtime changes, DB access, schema/migration, provider/model
@@ -34727,7 +34723,7 @@ tasks:
     a pending narrow TDD implementation task. It must not modify product source, route, service, repository, mapper,
     schema, DB, provider, UI, package, lockfile, scripts, or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared local validation,
     local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune.
     Product implementation and all high-risk blocked gates remain blocked.
@@ -34810,7 +34806,7 @@ tasks:
     route, service, repository, mapper, schema, or UI work.
   humanApproval: >-
     User approved executing this narrow TDD alignment task in the current 2026-06-15 Codex thread by saying
-    "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
+    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in `src/server/models/organization-training.ts` and `src/server/validators/organization-training.test.ts`,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. Route/service/repository/mapper/API runtime/UI/schema/drizzle/scripts/package/lockfile/
@@ -34897,7 +34893,7 @@ tasks:
     readonly review of the organization training model, contract, validator, and scoped unit test to confirm answer
     status alignment, ADR-002 layering, and blocked gate preservation before downstream runtime work.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "批准执行". Approval
+    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval
     is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review, declared
     local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and
     fetch prune. Product source implementation, route/service/repository/mapper/API runtime/UI/schema/drizzle/scripts/
@@ -35076,7 +35072,7 @@ tasks:
     true repository, schema, DB access, route, UI, provider, quota/cost, or formal target write is required.
   humanApproval: >-
     User approved executing this narrow TDD implementation task in the current 2026-06-15 Codex thread by saying
-    "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
+    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in `src/server/services/organization-training-service.ts` and
     `src/server/services/organization-training-service.test.ts`, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Repository,
@@ -35179,7 +35175,7 @@ tasks:
     `pass_with_needs_recheck` outcome into a pending readonly recheck task. It must not modify product source, route,
     service, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -35819,7 +35815,7 @@ tasks:
     provider, UI, package, lockfile, scripts, e2e, or formal content write behavior.
   humanApproval: >-
     User approved executing this narrow RED-first TDD implementation task in the current 2026-06-15 Codex thread by
-    saying "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    saying "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     scoped TDD implementation in `src/server/services/organization-training-service.test.ts`,
     `src/server/services/organization-training-service.ts`, and
     `src/server/contracts/organization-training-contract.ts`, declared local validation, local commit,
@@ -35933,7 +35929,7 @@ tasks:
     not modify product source, route, service, repository, mapper, contract, model, validator, API runtime, UI, schema,
     DB, provider, package, lockfile, scripts, e2e, dev-server, or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval
     covers task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -36022,7 +36018,7 @@ tasks:
     `subject` as content/request scope, `EffectiveAuthorizationContextDto` remaining source-backed
     `profession/level` only, and blocked gate preservation.
   humanApproval: >-
-    User approved executing this readonly recheck task in the current 2026-06-15 Codex thread by saying "批准执行".
+    User approved executing this readonly recheck task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц".
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. Product implementation and all high-risk blocked gates remain blocked.
@@ -36113,7 +36109,7 @@ tasks:
     must not modify product source, route, service, repository, mapper, contract, model, validator, API runtime, UI,
     schema, DB, provider, package, lockfile, scripts, e2e, dev-server, or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -36209,7 +36205,7 @@ tasks:
     scripts, e2e, takedown, copy-to-new-draft, employee answer, analytics, quota/cost, or formal content write behavior.
   humanApproval: >-
     User approved executing this narrow RED-first TDD implementation task in the current 2026-06-15 Codex thread by
-    saying "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    saying "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     scoped TDD implementation in `src/server/services/organization-training-service.test.ts` and
     `src/server/services/organization-training-service.ts`, declared local validation, local commit, fast-forward merge
     to master, push origin/master, merged short-branch cleanup, and fetch prune. Route, repository, mapper, schema, DB,
@@ -36323,7 +36319,7 @@ tasks:
     ADR-002 layering, redacted metadata, formal target write blocked status, and downstream needs_recheck before
     repository/schema/route work.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "批准执行". Approval
+    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval
     is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review, declared
     local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and
     fetch prune. Product source implementation, route/service/repository/mapper/API runtime/UI/schema/drizzle/scripts/
@@ -36422,7 +36418,7 @@ tasks:
     product source, route, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, e2e, or formal
     content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行" after the
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц" after the
     next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable state
     updates, docs/state-only queue seeding, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked
@@ -36518,7 +36514,7 @@ tasks:
     provider, e2e, dependency, formal content write, and formal target write remain blocked.
   humanApproval: >-
     User approved executing this narrow TDD implementation task in the current 2026-06-15 Codex thread by saying
-    "批准执行" after the next-step recommendation. Approval is limited to task claim, task plan/evidence/audit
+    "鎵瑰噯鎵ц" after the next-step recommendation. Approval is limited to task claim, task plan/evidence/audit
     creation, scoped service/test implementation, declared local validation, local commit, fast-forward merge to
     master, push origin/master, merged short-branch cleanup, and fetch prune. High-risk blocked gates remain blocked.
   closeoutPolicy:
@@ -36626,7 +36622,7 @@ tasks:
     consistency, ADR-002 layering, redacted metadata, formal target write blocked status, and downstream persistence
     needs_recheck before repository/schema/route work.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "批准执行". Approval
+    User approved executing this readonly recheck in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval
     is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review, declared
     local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and
     fetch prune. Product source implementation, route/service/repository/mapper/API runtime/UI/schema/drizzle/scripts/
@@ -36725,7 +36721,7 @@ tasks:
     modify product source, route, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, e2e, formal
     content write, or formal target write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行" after the
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц" after the
     next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable state
     updates, docs/state-only queue seeding, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked gates
@@ -36823,7 +36819,7 @@ tasks:
     but must not modify product source, schema, migrations, routes, repositories, mappers, UI, DB, provider, package,
     lockfile, scripts, e2e, formal content write, or formal target write behavior.
   humanApproval: >-
-    User approved executing this docs-only planning task in the current 2026-06-15 Codex thread by saying "批准执行"
+    User approved executing this docs-only planning task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц"
     after the next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable
     state updates, docs/state-only planning and queue seeding, declared local validation, local commit, fast-forward
     merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all
@@ -36936,7 +36932,7 @@ tasks:
     implementation. It must not modify product source, schema, migrations, routes, repositories, mappers, UI, DB,
     provider, package, lockfile, scripts, e2e, formal content write, or formal target write behavior.
   humanApproval: >-
-    User approved executing this readonly inventory task in the current 2026-06-15 Codex thread by saying "批准执行"
+    User approved executing this readonly inventory task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц"
     after the next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable
     state updates, readonly local inventory, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked gates
@@ -37040,7 +37036,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц`, scoped to docs/state/log queue seeding,
     validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
     does not authorize schema/drizzle edits, DB access, migration generation/execution, provider/model work, dependency
     changes, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, formal content
@@ -37161,7 +37157,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to local schema/drizzle design,
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц`, scoped to local schema/drizzle design,
     migration file generation or hand-authoring without `.env*` reads, schema unit tests, validation, local commit,
     fast-forward merge to master, push origin/master, and short-branch cleanup. DB access, migration execution,
     drizzle-kit push, provider/model, dependency/package/lockfile, route/service/repository/mapper/UI, staging/prod/cloud,
@@ -37307,7 +37303,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц`, scoped to docs/state/log queue seeding,
     validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
     does not authorize repository, mapper, service, route, UI, schema, migration, DB access, provider/model work,
     dependency changes, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push,
@@ -37435,7 +37431,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行下一步建议的任务`, scoped to
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц涓嬩竴姝ュ缓璁殑浠诲姟`, scoped to
     repository/mapper TDD implementation, validation, local commit, fast-forward merge to master, push origin/master,
     and short-branch cleanup. This approval does not authorize route/service/API runtime/contract/model/validator/UI
     changes, schema/drizzle/scripts/package/lockfile/dependency changes, DB access, migration execution, provider/model
@@ -37591,7 +37587,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц`, scoped to docs/state/log queue seeding,
     validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
     does not authorize service/repository/mapper implementation, route/API/UI work, schema/drizzle/scripts/package/lockfile
     changes, DB access, migration execution, provider/model work, e2e/browser/dev-server, staging/prod/cloud/deploy/payment
@@ -37871,7 +37867,7 @@ tasks:
     product source, route, service, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, or formal
     content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -37967,7 +37963,7 @@ tasks:
     lineage persistence boundary, public DTO non-exposure, metadata-only semantics, formal target write blocking, and
     route/API/UI non-expansion. It must not implement product behavior or modify product source.
   humanApproval: >-
-    User approved executing this readonly recheck task in the current 2026-06-15 Codex thread by saying "批准执行".
+    User approved executing this readonly recheck task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц".
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, declared local
     validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
     prune. Product implementation and all high-risk blocked gates remain blocked.
@@ -38076,7 +38072,7 @@ tasks:
     not modify product source, route, service, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts,
     or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -38173,7 +38169,7 @@ tasks:
     DTO exposure, formal target write blocking, and route/API/UI non-expansion. It must not implement product behavior
     or modify product source.
   humanApproval: >-
-    User approved executing this readonly audit in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+    User approved executing this readonly audit in the current 2026-06-15 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, readonly source review, declared
     local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and
     fetch prune. Product source implementation, route/API runtime changes, service/repository/mapper changes,
@@ -38272,7 +38268,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
   humanApproval: >-
-    Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+    Fresh user approval recorded in the 2026-06-15 Codex thread by `鎵瑰噯鎵ц`, scoped to docs/state/log queue seeding,
     validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
     does not authorize route/API runtime implementation, service/repository/mapper implementation, UI work,
     schema/drizzle/scripts/package/lockfile changes, DB access, migration execution, provider/model work,
@@ -40328,14 +40324,14 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
   humanApprovalBoundary: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行". Scope is
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц". Scope is
     docs/state-only readonly verification of the trusted-lineage runtime wiring and, if needed, docs/state-only
     seeding of the next narrow runtime organization-admin actor context wiring task. Product source edits, test source
     edits, DB access, schema/drizzle, provider/model calls, dependency/package/lockfile changes, dev server,
     Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration
     Gate remain blocked.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行". Approval
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц". Approval
     is limited to task plan/evidence/audit creation, durable state updates, readonly review, pending next-task seed,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. High-risk gates remain blocked.
@@ -40548,7 +40544,7 @@ tasks:
     env/secrets, DB, provider/model, dev server, Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/
     external-service, PR, force push, or Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行".
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц".
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. Product source, test, script, schema/drizzle, package/lockfile/dependency, env/secret,
@@ -41380,7 +41376,7 @@ tasks:
   evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
   humanApprovalBoundary: >-
-    User approved execution in the current thread by saying "批准执行" after the agent recommended docs-only queue
+    User approved execution in the current thread by saying "鎵瑰噯鎵ц" after the agent recommended docs-only queue
     seeding for the next repository resolver task. Scope is docs/state/task-plan/evidence/audit only: seed a new
     pending red-first TDD implementation task that uses the landed `admin_organization` schema source for
     organization-admin visible organization scope. This task must not modify product source, tests, scripts,
@@ -41501,7 +41497,7 @@ tasks:
     hierarchy expansion cannot be implemented with existing schema facts and unit-testable repository code, stop and
     seed a docs-only boundary decision instead of guessing.
   humanApproval: >-
-    User approved execution in the current thread by saying "批准执行". Approval is limited to task claim,
+    User approved execution in the current thread by saying "鎵瑰噯鎵ц". Approval is limited to task claim,
     task plan/evidence/audit creation, durable state updates, scoped red-first unit tests and implementation in the
     allowed route/repository files, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. `.env*`, real DB execution, row/private data,
@@ -41620,7 +41616,7 @@ tasks:
     package/lockfiles, `.env*`, DB data, provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
     external-service, PR, force-push, or Cost Calibration Gate surfaces.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行".
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц".
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. Product source/test implementation, scripts, schema/drizzle, package/lockfile,
@@ -41731,7 +41727,7 @@ tasks:
     modify product source, tests, route, service, repository, mapper, contract, model, validator, API runtime, UI,
     schema, DB, provider, package, lockfile, scripts, e2e, dev-server, or formal content write behavior.
   humanApproval: >-
-    User approved executing this seeding task in the current 2026-06-16 Codex thread by saying "批准执行". Approval is
+    User approved executing this seeding task in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц". Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, existing auto-seed transaction
     execution, declared local validation, local commit, fast-forward merge to master, push origin/master, merged
     short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked gates remain blocked.
@@ -50640,7 +50636,7 @@ tasks:
   qwenHandoffBoundary:
     platform: alibaba_bailian_dashscope
     region: cn_beijing
-    regionLabel: 华北2（北京）
+    regionLabel: 鍗庡寳2锛堝寳浜級
     workspaceLabel: TIKUProject
     baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
     chatCompletionsEndpoint: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
@@ -50786,7 +50782,7 @@ tasks:
   consoleHandoffBoundary:
     screenshotConfirmed:
       region: cn-beijing
-      regionLabel: 华北2（北京）
+      regionLabel: 鍗庡寳2锛堝寳浜級
       workspaceLabel: TIKUProject
       visibleConsolePage: business_space_model_list
       visibleAuthorizedModels:
@@ -53075,7 +53071,7 @@ tasks:
     - batch-188-organization-analytics-audit-log-redacted-reference
   humanApproval: >-
     User approved executing the next recommended docs-only post-batch rollup/seeding task in the current 2026-06-16
-    Codex thread by saying "鎵瑰噯鎵ц". Approval is limited to task plan/evidence/audit creation, durable state updates,
+    Codex thread by saying "閹电懓鍣幍褑顢?. Approval is limited to task plan/evidence/audit creation, durable state updates,
     seeding one pending readonly audit, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked
     gates remain blocked.
@@ -53159,7 +53155,7 @@ tasks:
     separate schema/data-source boundary decision is required first. Current seeding does not approve source changes.
   humanApproval: >-
     User approved executing the next recommended docs-only readonly audit task in the current 2026-06-16 Codex thread
-    by saying "鎵瑰噯鎵ц". Approval is limited to task plan/evidence/audit creation, durable state updates, readonly
+    by saying "閹电懓鍣幍褑顢?. Approval is limited to task plan/evidence/audit creation, durable state updates, readonly
     review, seeding one pending narrow repository contract TDD task, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product source
     implementation for this audit task, DB access, schema/migration, provider/model calls, dependency changes,
@@ -53261,7 +53257,7 @@ tasks:
     - advanced-organization-analytics-repository-read-model-boundary-readonly-audit
   humanApproval: >-
     User approved executing this narrow repository contract TDD task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task plan/evidence/audit creation, durable state updates, scoped TDD
+    "閹电懓鍣幍褑顢?. Approval is limited to task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in `src/server/repositories/organization-analytics-repository.ts` and
     `src/server/repositories/organization-analytics-repository.test.ts`, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. DB access,
@@ -53369,7 +53365,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-repository-read-model-contract-tdd
   humanApproval: >-
-    User approved executing this readonly recheck task in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this readonly recheck task in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to docs/state task tracking, readonly review, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune under the task
     closeout policy. Product source/test changes, DB access, schema/migration, provider/model calls, dependency
@@ -53475,7 +53471,7 @@ tasks:
     come first.
   humanApproval: >-
     User approved executing this readonly boundary audit in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     readonly review of declared files using explicit file-scoped commands, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Implementation,
     product source/test source changes, direct DB access, row/private data exposure, schema/migration, Postgres
@@ -53578,7 +53574,7 @@ tasks:
     generation, object storage, external delivery, provider/model calls, or row/private data access is required.
   humanApproval: >-
     User approved executing this narrow service wiring TDD task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     scoped TDD changes in `src/server/services/organization-analytics-service.ts` and
     `src/server/services/organization-analytics-service.test.ts`, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Repository
@@ -53669,7 +53665,7 @@ tasks:
     - advanced-organization-analytics-repository-service-wiring-tdd
   humanApproval: >-
     User approved executing this docs/state-only queue refresh and readonly recheck seeding task in the current
-    2026-06-16 Codex thread by saying "鎵瑰噯鎵ц". Approval is limited to updating durable state and task queue,
+    2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢?. Approval is limited to updating durable state and task queue,
     creating task plan/evidence/audit logs, seeding a pending readonly recheck task, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
     source implementation, repository/mapper/validator/route/UI/runtime/schema/DB/data-source work, provider/model
@@ -53754,7 +53750,7 @@ tasks:
     boundaries, and preservation of blocked gates before any route, runtime, mapper, validator, schema, DB, UI, or
     data-source task is seeded.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, and branch-local closeout. Product source implementation,
     repository/mapper/validator/route/UI/runtime wiring changes, direct DB access, row/private data exposure,
@@ -53842,7 +53838,7 @@ tasks:
     - advanced-organization-analytics-repository-service-wiring-readonly-recheck
   humanApproval: >-
     User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending
+    "閹电懓鍣幍褑顢?. Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending
     readonly route/runtime boundary audit, declared local validation, local commit, fast-forward merge to master, push
     origin/master, and merged short-branch cleanup. Product source implementation, route/runtime/mapper/validator/UI
     changes, direct DB access, row/private data exposure, schema/migration, provider/model calls or configuration,
@@ -53931,7 +53927,7 @@ tasks:
     no current organization analytics route exists, and whether UI-facing surfaces can avoid technical identifier
     lists while preserving summary/aggregate/export-readiness redaction.
   humanApproval: >-
-    User approved executing this readonly audit in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this readonly audit in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, and branch-local closeout. Product source implementation,
     route/runtime/mapper/validator/UI changes, direct DB access, row/private data exposure, schema/migration,
@@ -54308,7 +54304,7 @@ tasks:
     - advanced-organization-analytics-mapper-validator-route-contract-tdd
   humanApproval: >-
     User approved executing the recommended next task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Scope is docs/state-only seeding of one pending dashboard summary route runtime wiring TDD task.
+    "閹电懓鍣幍褑顢?. Scope is docs/state-only seeding of one pending dashboard summary route runtime wiring TDD task.
     Product source implementation, route runtime code, service/repository business logic, DB, schema/migration,
     package/lockfile/dependency, UI, e2e/browser/dev-server, provider/model, object storage/export artifact,
     staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration Gate remain blocked.
@@ -54406,7 +54402,7 @@ tasks:
     delivery is required, stop and report instead of expanding scope.
   humanApproval: >-
     User approved executing this narrow TDD route runtime wiring task in the current 2026-06-16 Codex thread by
-    saying "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    saying "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     scoped TDD implementation in the allowed route adapter, route test, and App Router dashboard summary route file,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, and fetch prune. Real auth/session integration, repository factory wiring, direct DB access, service
@@ -54505,7 +54501,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
   humanApproval: >-
-    User approved executing this docs/state-only queue seeding task in the current Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this docs/state-only queue seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one readonly audit
     pending task, declared local validation, local commit, fast-forward merge to master, push origin/master, merged
     short-branch cleanup, and fetch prune. Source implementation, auth/session integration, service/repository
@@ -54589,7 +54585,7 @@ tasks:
     provider/model, dependency, UI, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR,
     force push, or Cost Calibration Gate work.
   humanApproval: >-
-    User approved executing this readonly audit task in the current Codex thread by saying "鎵瑰噯鎵ц". Approval is
+    User approved executing this readonly audit task in the current Codex thread by saying "閹电懓鍣幍褑顢?. Approval is
     limited to task claim, task plan/evidence/audit creation, durable state updates, readonly audit of the listed
     files, declared local validation, local commit, fast-forward merge to master, push origin/master, merged
     short-branch cleanup, and fetch prune. Source implementation, auth/session integration, repository factory wiring,
@@ -54690,7 +54686,7 @@ tasks:
     Gate is required, stop and report instead of expanding scope.
   humanApproval: >-
     User approved executing this narrow TDD route adapter contract task in the current Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
+    "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in `src/server/services/organization-analytics-route.ts` and
     `src/server/services/organization-analytics-route.test.ts`, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Real auth/session
@@ -54792,7 +54788,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
   humanApproval: >-
-    User approved executing the recommended next task in the current Codex thread by saying "鎵瑰噯鎵ц". Scope is
+    User approved executing the recommended next task in the current Codex thread by saying "閹电懓鍣幍褑顢?. Scope is
     docs/state-only runtime wiring decision and seeding of one pending dashboard summary runtime composition contract
     TDD task. Product source implementation, App Router real runtime wiring, repository factory wiring, DB access,
     service business logic changes, schema/migration, package/lockfile/dependency changes, provider/model calls,
@@ -54897,7 +54893,7 @@ tasks:
     change service business logic, change schemas/migrations, change dependencies, or run e2e/browser/dev-server.
   humanApproval: >-
     User approved executing this narrow TDD route runtime composition contract task in the current Codex thread by
-    saying "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+    saying "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
     scoped TDD implementation in `src/server/services/organization-analytics-route.ts` and
     `src/server/services/organization-analytics-route.test.ts`, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. App Router real
@@ -54998,7 +54994,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending repository
     factory boundary TDD task, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, and fetch prune. Product source implementation, real DB access,
@@ -55099,7 +55095,7 @@ tasks:
     or run e2e/browser/dev-server.
   humanApproval: >-
     User approved executing this narrow TDD repository factory boundary task in the current Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped
+    "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped
     TDD implementation in `src/server/repositories/organization-analytics-repository.ts` and
     `src/server/repositories/organization-analytics-repository.test.ts`, declared local validation, and local commit.
     Fast-forward merge to master, push origin/master, App Router runtime wiring, real DB access, service business
@@ -55195,7 +55191,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-postgres-repository-factory-boundary-tdd
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending readonly/docs
     decision task for real organization analytics Postgres gateway source inputs, declared local validation, local
     commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
@@ -55294,7 +55290,7 @@ tasks:
     providers/models, run e2e/browser/dev-server, touch staging/prod/cloud/deploy/payment/external-service surfaces,
     create/update PRs, force push, or execute Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this readonly/docs decision task in the current Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this readonly/docs decision task in the current Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly inspection
     of declared source/schema references, deciding the real Postgres gateway source input boundary, seeding one
     pending readonly/docs schema gap decision task, and declared local validation. Product source implementation,
@@ -55397,7 +55393,7 @@ tasks:
     staging/prod/cloud/deploy/payment/external-service surfaces, create/update PRs, force push, or execute Cost
     Calibration Gate.
   humanApproval: >-
-    User approved executing this readonly/docs gap decision task in the current Codex thread by saying "鎵瑰噯鎵ц".
+    User approved executing this readonly/docs gap decision task in the current Codex thread by saying "閹电懓鍣幍褑顢?.
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly inspection
     of declared source/schema references, deciding whether the current schema can support official organization
     training employee submissions, seeding one pending docs-only schema/migration planning task, and declared local
@@ -55597,8 +55593,8 @@ tasks:
     dev-server, staging/prod/cloud/deploy/payment/external-service work, PR, force push, or Cost Calibration Gate.
   humanApproval: >-
     User approved executing this schema migration task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц", and later approved the docs/state capability normalization and schema TDD continuation by saying
-    "鎵瑰噯鎵ц". Approval is limited to task claim, task plan/evidence/audit creation, schemaMigration capability gate
+    "閹电懓鍣幍褑顢?, and later approved the docs/state capability normalization and schema TDD continuation by saying
+    "閹电懓鍣幍褑顢?. Approval is limited to task claim, task plan/evidence/audit creation, schemaMigration capability gate
     normalization, scoped TDD schema/test implementation, generated Drizzle migration files without database
     execution, declared local validation, and stopping before local commit for fresh post-validation approval. Runtime
     route/service/repository/UI code, package/lockfile/dependencies, provider/model configuration, e2e/browser/
@@ -55695,7 +55691,7 @@ tasks:
     - advanced-organization-analytics-training-answer-source-schema-migration
   humanApproval: >-
     User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц" after the assistant recommended seeding a new pending repository/query task because the queue had no
+    "閹电懓鍣幍褑顢? after the assistant recommended seeding a new pending repository/query task because the queue had no
     pending entries. Approval is limited to baseline confirmation, task plan/evidence/audit creation, durable
     docs/state updates, one pending repository/query TDD task seed, declared local validation, local commit,
     fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product source
@@ -55792,7 +55788,7 @@ tasks:
   branch: codex/advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
   humanApproval: >-
     User approved executing this pending repository/query TDD task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц". Approval is limited to baseline confirmation, task plan/evidence/audit creation, scoped TDD
+    "閹电懓鍣幍褑顢?. Approval is limited to baseline confirmation, task plan/evidence/audit creation, scoped TDD
     implementation in the existing organization analytics repository/query boundary, and declared local validation.
     Local commit, fast-forward merge to master, push origin/master, PR, force push, route runtime wiring, service/UI
     changes, real database execution, schema/migration/drizzle changes, dependency changes, provider/model calls,
@@ -55800,7 +55796,7 @@ tasks:
     Calibration Gate remain blocked unless a later fresh approval explicitly allows them.
   closeoutApproval: >-
     After validation passed, the user explicitly approved the recommended closeout in the current 2026-06-16 Codex
-    thread by saying "鎵瑰噯鎵ц". Approval is limited to local commit of this task branch, fast-forward merge to
+    thread by saying "閹电懓鍣幍褑顢?. Approval is limited to local commit of this task branch, fast-forward merge to
     master, master-local validation gates, push to origin/master, deletion of the merged local short branch, fetch
     prune, and final repository hygiene checks. PR, force push, route runtime wiring, service/UI changes, DB
     execution, schema/migration/drizzle work, dependency changes, provider/model calls, e2e/browser/dev-server,
@@ -55920,7 +55916,7 @@ tasks:
     - advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
   humanApproval: >-
     User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц" after the assistant recommended seeding a new pending task because the queue had no pending entries.
+    "閹电懓鍣幍褑顢? after the assistant recommended seeding a new pending task because the queue had no pending entries.
     Approval is limited to baseline confirmation, task plan/evidence/audit creation, durable docs/state updates, one
     pending repository gateway composition TDD task seed, declared local validation, local commit, fast-forward merge
     to master, push origin/master, merged short-branch cleanup, and fetch prune. Product source implementation, route
@@ -56027,10 +56023,10 @@ tasks:
     changes, service changes, UI work, dependency changes, provider calls, or protected evidence would be required,
     stop and report instead of expanding scope.
   humanApproval: >-
-    User approved executing this scoped TDD implementation task in the current Codex thread by saying "鎵瑰噯鎵ц" after
+    User approved executing this scoped TDD implementation task in the current Codex thread by saying "閹电懓鍣幍褑顢? after
     fresh baseline confirmation. Approval is limited to task claim, task plan/evidence/audit creation, scoped
     repository and unit test changes in the declared allowedFiles, and local validation. After validation passed, the
-    user provided fresh closeout approval by saying "鎵瑰噯鎵ц"; that later approval allowed local commit, fast-forward
+    user provided fresh closeout approval by saying "閹电懓鍣幍褑顢?; that later approval allowed local commit, fast-forward
     merge to master, push to origin/master, merged short-branch cleanup, and fetch prune. PR and force push remained
     blocked.
   planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
@@ -56132,7 +56128,7 @@ tasks:
     - advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
   humanApproval: >-
     User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц" after the assistant recommended reconciling stale durable state and seeding the next repository-boundary
+    "閹电懓鍣幍褑顢? after the assistant recommended reconciling stale durable state and seeding the next repository-boundary
     task because the queue had no pending entries. Approval is limited to baseline confirmation, task plan/evidence/
     audit creation, durable docs/state updates, one pending repository source-reader TDD task seed, declared local
     validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
@@ -56257,7 +56253,7 @@ tasks:
     e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, row/private data exposure, publicId
     lists, and Cost Calibration Gate remain blocked.
   closeoutApproval: >-
-    User gave fresh approval in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庢帹鑽愪笅涓€姝ュ伐浣滃唴瀹?.
+    User gave fresh approval in the current 2026-06-16 Codex thread by saying "閹电懓鍣幓鎰唉閸氬牆鍙嗛幒銊┾偓浣歌嫙濞撳懐鎮婇敍宀€鍔ч崥搴㈠腹閼芥劒绗呮稉鈧銉ヤ紣娴ｆ粌鍞寸€?.
     Approval is limited to local commit, fast-forward merge to `master`, push `origin/master`, and short-branch cleanup.
     PR and force push remain blocked.
   planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
@@ -56529,7 +56525,7 @@ tasks:
     - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
     - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
   humanApproval: >-
-    User approved executing the recommended next work in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛?      鐒跺悗鍐嶆帹鑽愪笅涓€姝ュ伐浣滃唴瀹?. Approval is limited to this docs/state-only seeding task, task plan/evidence/audit creation,
+    User approved executing the recommended next work in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿?      閻掕泛鎮楅崘宥嗗腹閼芥劒绗呮稉鈧銉ヤ紣娴ｆ粌鍞寸€?. Approval is limited to this docs/state-only seeding task, task plan/evidence/audit creation,
     durable state updates, seeding one pending App Router dashboard summary Postgres runtime wiring TDD task, declared
     local validation, local commit, fast-forward merge to `master`, push `origin/master`, merged short-branch cleanup,
     and fetch prune. Product source implementation, real database execution, `.env*` access, schema/migration/drizzle,
@@ -56622,7 +56618,7 @@ tasks:
   closedAt: "2026-06-16T22:31:27-07:00"
   branch: codex/organization-analytics-postgres-runtime-wiring-tdd
   humanApproval: >-
-    User approved executing this task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛?      鐒跺悗鍐嶆帹鑽愪笅涓€姝ュ伐浣滃唴瀹?. Approval is limited to the declared
+    User approved executing this task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿?      閻掕泛鎮楅崘宥嗗腹閼芥劒绗呮稉鈧銉ヤ紣娴ｆ粌鍞寸€?. Approval is limited to the declared
     `advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd` scope, task plan/evidence/audit
     creation, scoped local TDD implementation, declared local validation, local commit, fast-forward merge to
     `master`, push to `origin/master`, merged short-branch cleanup, and fetch prune. `.env*` access, real database
@@ -56746,7 +56742,7 @@ tasks:
   dependencies:
     - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
   humanApproval: >-
-    User approved executing the recommended next work in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛?      鐒跺悗鍐嶆帹鑽愪笅涓€姝ュ伐浣滃唴瀹?. Approval is limited to docs/state-only handoff refresh, task plan/evidence/audit creation,
+    User approved executing the recommended next work in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿?      閻掕泛鎮楅崘宥嗗腹閼芥劒绗呮稉鈧銉ヤ紣娴ｆ粌鍞寸€?. Approval is limited to docs/state-only handoff refresh, task plan/evidence/audit creation,
     seeding one pending readonly recheck task, declared local validation, local commit, fast-forward merge to `master`,
     push `origin/master`, merged short-branch cleanup, and fetch prune. Product implementation, real database
     execution, `.env*` access, row/private data exposure, public identifier inventories, schema/migration/drizzle,
@@ -56842,7 +56838,7 @@ tasks:
     dependencies, provider/model configuration, route/runtime implementation, UI, e2e/browser/dev-server, staging/prod/
     cloud/deploy/payment/external-service, or any `.env*` file.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?.
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?.
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review of
     declared files, declared local validation, local commit, fast-forward merge to `master`, push to `origin/master`,
     merged short-branch cleanup, fetch prune, and next-work recommendation. Product implementation, real DB execution,
@@ -56945,7 +56941,7 @@ tasks:
     cloud/deploy/payment/external-service, or any `.env*` file.
   humanApproval: >-
     User approved executing this docs/state-only seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?. Approval is limited to task plan/evidence/audit creation,
+    "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?. Approval is limited to task plan/evidence/audit creation,
     durable state updates, pending queue seed, declared local validation, local commit, fast-forward merge to `master`,
     push to `origin/master`, merged short-branch cleanup, fetch prune, and next-work recommendation. Product
     implementation and all high-risk blocked gates remain blocked.
@@ -57038,7 +57034,7 @@ tasks:
     lockfile/dependencies, call providers/models, run e2e/browser/dev-server, touch staging/prod/cloud/deploy/payment/
     external-service, create/update PRs, force push, run quota/cost measurement, or execute Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this task in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this task in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, scoped TDD
     implementation in the declared route service and employee statistics App Router entrypoint, declared local
     validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, fetch
@@ -57155,7 +57151,7 @@ tasks:
     PR, force push, quota/cost, and Cost Calibration Gate remain blocked.
   humanApproval: >-
     User approved executing this docs/state-only seeding task in the current 2026-06-16 Codex thread by saying
-    "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€? Approval is limited to task plan/evidence/audit creation,
+    "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧? Approval is limited to task plan/evidence/audit creation,
     durable state and queue updates, declared local validation, local commit, fast-forward merge to master, push
     origin/master, merged short-branch cleanup, fetch prune, and next-work recommendation.
   seedDecision: >-
@@ -57261,7 +57257,7 @@ tasks:
     prod/cloud/deploy/payment/external-service, create/update PRs, force push, run quota/cost measurement, or execute
     Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
     declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
     cleanup, fetch prune, and next-work recommendation. Product source/test implementation, runtime Postgres wiring,
@@ -57376,7 +57372,7 @@ tasks:
     e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, quota/cost, or Cost
     Calibration Gate.
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared
     local validation, local commit, fast-forward merge to `master`, push to `origin/master`, merged short-branch
     cleanup, fetch prune, and next-work recommendation. Product implementation and all high-risk blocked gates remain
@@ -57613,7 +57609,7 @@ tasks:
     drizzle, package/lockfile, dependencies, provider/model configuration, UI, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force push, quota/cost, or Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared
     local validation, local commit, fast-forward merge to `master`, push to `origin/master`, merged short-branch
     cleanup, fetch prune, and next-work recommendation. Product implementation and all high-risk blocked gates remain
@@ -57721,7 +57717,7 @@ tasks:
     boundaries. If the existing source model is insufficient without schema/migration or raw row exposure, stop and
     report instead of expanding scope.
   humanApproval: >-
-    User approved executing this task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to this queued repository-level TDD task, task plan/evidence/audit creation, durable state
     updates, declared local validation, local commit, fast-forward merge to `master`, push to `origin/master`, merged
     short-branch cleanup, fetch prune, and next-work recommendation. Blocked gates remain blocked.
@@ -57831,7 +57827,7 @@ tasks:
     e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, quota/cost, or Cost
     Calibration Gate.
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared
     local validation, local commit, fast-forward merge to `master`, push to `origin/master`, merged short-branch
     cleanup, fetch prune, and next-work recommendation. Product implementation and all high-risk blocked gates remain
@@ -58067,7 +58063,7 @@ tasks:
     schema/migration, drizzle, package/lockfile, dependencies, provider/model configuration, UI, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force push, quota/cost, or Cost Calibration Gate.
   humanApproval: >-
-    User approved executing this docs/state-only seeding task in the current Codex thread by saying "鎵瑰噯鎵ц锛屽畬鎴愬悗鎵瑰噯鎻愪氦鍚堝叆鎺ㄩ€佸苟娓呯悊锛岀劧鍚庡啀鎺ㄨ崘涓嬩竴姝ュ伐浣滃唴瀹广€?
+    User approved executing this docs/state-only seeding task in the current Codex thread by saying "閹电懓鍣幍褑顢戦敍灞界暚閹存劕鎮楅幍鐟板櫙閹绘劒姘﹂崥鍫濆弳閹恒劑鈧礁鑻熷〒鍛倞閿涘瞼鍔ч崥搴″晙閹恒劏宕樻稉瀣╃濮濄儱浼愭担婊冨敶鐎瑰箍鈧?
     Approval is limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared
     local validation, local commit, fast-forward merge to `master`, push to `origin/master`, merged short-branch
     cleanup, fetch prune, and next-work recommendation. Product implementation and all high-risk blocked gates remain
@@ -65551,7 +65547,7 @@ tasks:
     - organization-training-admin-employee-entry-surface-planning
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "批准执行，按机制规范推进。" The approval executes the current
+    Approved by the current 2026-06-17 user prompt: "鎵瑰噯鎵ц锛屾寜鏈哄埗瑙勮寖鎺ㄨ繘銆? The approval executes the current
     handoff recommendation recorded in project-state for `organization-training-runtime-api-gap-boundary-audit`. The
     approval permits reading requirements, traceability, source, tests, e2e spec names, evidence, audit, and state;
     reading relevant schema source files only to decide whether future implementation needs a schema approval gate;
@@ -65762,7 +65758,7 @@ tasks:
     - organization-training-runtime-api-gap-boundary-audit
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "批准执行下一步建议的任务". The approval executes the current
+    Approved by the current 2026-06-17 user prompt: "鎵瑰噯鎵ц涓嬩竴姝ュ缓璁殑浠诲姟". The approval executes the current
     handoff recommendation recorded in project-state for `organization-training-version-takedown-runtime-route-contract-tdd`.
     The task is limited to low-risk local_unit_tdd source and docs/state work for the existing organization training
     version takedown lifecycle fields. It may read requirements, source, tests, e2e spec names, evidence, audit, and
@@ -65988,9 +65984,9 @@ tasks:
     - organization-training-version-takedown-runtime-route-contract-tdd
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "先做
-    organization-training-draft-source-context-schema-approval-package，因为 manual draft / source context /
-    copy-to-new-draft 仍是 schema gate。" The task is limited to a docs/state-only schema approval package and
+    Approved by the current 2026-06-17 user prompt: "鍏堝仛
+    organization-training-draft-source-context-schema-approval-package锛屽洜涓?manual draft / source context /
+    copy-to-new-draft 浠嶆槸 schema gate銆? The task is limited to a docs/state-only schema approval package and
     queue/state updates. It may read requirements, source, tests, e2e spec names, evidence, audit, and state; run
     Get-TikuProjectStatus, Get-TikuNextAction -VerboseHistory, `npm.cmd run test:e2e -- --list`, scoped Prettier,
     lint, typecheck, git diff, and readiness gates; and modify only the explicitly allowed docs/state, task plan,
@@ -66202,9 +66198,8 @@ tasks:
     - organization-training-draft-source-context-schema-approval-package
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "按机制规范，下一步执行：
-    organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization 然后紧接着执行：
-    organization-training-employee-answer-runtime-repository-contract-tdd". This task is docs/state-only and
+    Approved by the current 2026-06-17 user prompt: "鎸夋満鍒惰鑼冿紝涓嬩竴姝ユ墽琛岋細
+    organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization 鐒跺悗绱ф帴鐫€鎵ц锛?    organization-training-employee-answer-runtime-repository-contract-tdd". This task is docs/state-only and
     materializes the implementation task as a full pending queue entry before execution. Product source, tests, e2e,
     scripts, schema/drizzle/migration, package/lockfile/dependency, `.env*`, provider/model calls, dev server,
     Browser/Playwright runtime, full e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, Cost
@@ -66507,8 +66502,8 @@ tasks:
     - organization-training-employee-answer-runtime-repository-contract-tdd
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "按机制规范，先做队列对齐任务，把
-    organization-training-employee-answer-runtime-route-contract-tdd 物化成当前 ready-set 的下一项..." This task is
+    Approved by the current 2026-06-17 user prompt: "鎸夋満鍒惰鑼冿紝鍏堝仛闃熷垪瀵归綈浠诲姟锛屾妸
+    organization-training-employee-answer-runtime-route-contract-tdd 鐗╁寲鎴愬綋鍓?ready-set 鐨勪笅涓€椤?.." This task is
     docs/state-only and materializes the route contract implementation task as a full pending queue entry before the
     schema migration task is selected by default. Product source, tests, e2e, scripts, schema/drizzle/migration,
     package/lockfile/dependency, `.env*`, provider/model calls, dev server, Browser/Playwright runtime, full e2e,
@@ -66834,13 +66829,13 @@ tasks:
     dependencies, provider/model configuration, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
     external-service work, PR, force-push, or Cost Calibration Gate.
   humanApproval: >-
-    Approved by the current 2026-06-17 user prompt: "批准执行". The approval permits claiming this queued
+    Approved by the current 2026-06-17 user prompt: "鎵瑰噯鎵ц". The approval permits claiming this queued
     schema_isolated task and running its local schemaMigration capability gate. It does not approve database
     connection, migration execution, local commit, fast-forward merge, push, PR, force-push, staging/prod/cloud work,
     dependency changes, provider/model work, Browser/Playwright runtime, full e2e, or Cost Calibration Gate.
   closeoutApproval: >-
-    Approved by the current 2026-06-17 user prompt: "批准 closeout:
-    允许为该任务创建本地提交、合入 master、推送 origin/master、清理短分支". This approves local commit,
+    Approved by the current 2026-06-17 user prompt: "鎵瑰噯 closeout:
+    鍏佽涓鸿浠诲姟鍒涘缓鏈湴鎻愪氦銆佸悎鍏?master銆佹帹閫?origin/master銆佹竻鐞嗙煭鍒嗘敮". This approves local commit,
     fast-forward merge to master, push to origin/master, and cleanup of the merged short branch only. PR, force-push,
     database connection, migration execution, staging/prod/cloud/deploy/payment/external-service, provider/model,
     Browser/Playwright runtime, full e2e, dependency changes, and Cost Calibration Gate remain blocked.
@@ -66948,7 +66943,7 @@ tasks:
     - organization-training-employee-answer-runtime-route-contract-tdd
   taskPlanPolicy: required_before_edit
   humanApproval: >-
-    Approved by the current 2026-06-18 user prompt: "按机制规范，按你推荐的顺序执行 1-5，然后推荐下一步工作内容。" This approves
+    Approved by the current 2026-06-18 user prompt: "鎸夋満鍒惰鑼冿紝鎸変綘鎺ㄨ崘鐨勯『搴忔墽琛?1-5锛岀劧鍚庢帹鑽愪笅涓€姝ュ伐浣滃唴瀹广€? This approves
     materializing the recommended local organization-training experience chain and executing the resulting local
     tasks in order. It does not approve PR, force-push, dependency/package/lockfile changes, `.env*`, provider/model,
     staging/prod/cloud/deploy/payment/external-service, database migration execution, or Cost Calibration Gate.
@@ -71427,3 +71422,455 @@ tasks:
     fastForwardMergeToMaster: not_approved
     pushOriginMaster: not_approved
     deleteMergedShortBranch: not_approved
+
+- id: stage-3-decision-packages-2026-06-20
+  title: Stage 3 Low Risk Docs State Decision Packages 2026 06 20
+  phase: stage-3-low-risk-docs-state-decision-packages
+  sourceStory: userRequestedSixStageRouteAfterStage2Closeout
+  dependencies:
+    - stage-2-blocked-item-triage-2026-06-20
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User approved continued commit, fast-forward merge to master, push origin/master, and cleanup, then requested
+    continuing the six-stage route. Scope is limited to docs/state-only decision package clarification for AP-04,
+    AP-05, AP-09, AP-10, and AP-11, minimal entry-hygiene archival of the prior closed stage 2 task exposed after
+    merge, project-state/task-queue sync, evidence/audit/plan records, local validation, local commits, fast-forward
+    merge, push, and merged short-branch cleanup. This approval does not authorize source, tests, e2e, scripts,
+    package/lockfile/dependency changes, env/secret access, DB, provider/model, schema/migration, staging/prod/cloud
+    deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR, force-push, destructive DB, high-risk
+    gate execution, pending task claim, or blocked task semantic changes.
+  taskKind: docs_state_decision_package
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  status: closed
+  result: pass_docs_state_decision_package_surface
+  claimedAt: "2026-06-20T04:33:00-07:00"
+  validatedAt: "2026-06-20T04:38:51-07:00"
+  closedAt: "2026-06-20T04:38:51-07:00"
+  branch: codex/stage-3-decision-packages
+  commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+  decisionPackagePath: docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedPriorTerminalTaskIds:
+    - stage-2-blocked-item-triage-2026-06-20
+  targetApprovalPackages:
+    - AP-04
+    - AP-05
+    - AP-09
+    - AP-10
+    - AP-11
+  capabilities:
+    docsStateDecisionPackage: approved
+    entryHygieneArchivePriorStage: approved
+    blockedTaskSemanticChange: blocked
+    pendingTaskClaim: blocked
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
+    - docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
+    - docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - scripts/**
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-3-decision-packages-2026-06-20
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-3-decision-packages-2026-06-20
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approval
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approval
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approval
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval
+- id: provider-rag-quota-governance-packet
+  title: Provider RAG quota governance packet
+  phase: provider-rag-quota-governance-packet
+  sourceStory: userBoundedLocalExperiencePacket.providerRagQuotaGovernance
+  dependencies:
+    - personal-learning-ai-local-experience-packet
+  taskPlanPolicy: required_before_edit
+  humanApproval: >-
+    Approved by the current 2026-06-18 user prompt to execute the third bounded packet only after the previous packet
+    reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
+    `codex/provider-rag-quota-governance-packet`, seeding this work packet, creating task plan/evidence/audit,
+    updating project-state/task-queue/local-experience-coverage-matrix, directly related minimal source or focused unit
+    contract repair if validation fails, focused unit validation, `npm.cmd run test:e2e -- --list`, the three
+    explicitly allowed existing local e2e specs, scoped Prettier/diff/lint/typecheck, Module Run v2 readiness gates,
+    local commit, fast-forward merge to master, master gates, push origin/master, and merged short-branch cleanup. The
+    approval does not permit `.env*` or secret/env read/write/output, package/lockfile/dependency changes,
+    schema/drizzle/migration, new or edited e2e specs, real provider/model calls or provider configuration changes,
+    vector provider, real RAG provider, real quota/cost measurement, staging/prod/cloud/deploy,
+    payment/external-service, PR, force-push, destructive DB, Cost Calibration Gate, or sensitive/private evidence.
+  targetExperienceChain: provider-rag-quota-governance-packet
+  targetClosureItem: provider RAG quota governance local closure and blocked-gate resolution packet
+  behaviorBoundary: provider-rag-quota::local_mock_contracts_and_release_gate_blocks
+  useCaseIds:
+    - UC-STD-AI-SCORING-EXPLANATION
+    - UC-STD-KN-RECOMMENDATION
+    - UC-STD-RAG-KNOWLEDGE-BASE
+    - UC-ADV-OPS-AUTH-QUOTA
+    - UC-GATE-PROVIDER-STAGING-EXECUTION
+  executionProfile: local_full_flow
+  evidenceMode: full
+  validationPolicy: local_full_flow
+  queueSelectionMode: user_bounded_packet_serial
+  taskKind: local_experience_packet
+  moduleRunVersion: 2
+  status: closed
+  result: completed_or_blocked_resolved
+  claimedAt: "2026-06-18T12:42:00-07:00"
+  validatedAt: "2026-06-18T12:45:59-07:00"
+  closedAt: "2026-06-18T12:45:59-07:00"
+  capabilities:
+    localFullFlowGate: approved_localhost_only
+    localE2EValidation: approved_local_only_existing_specs
+    e2eListOnly: allowed
+    focusedUnitValidation: allowed
+    minimalRepair: allowed_directly_related_source_and_focused_unit_tests_only
+    providerCall: blocked
+    providerConfiguration: blocked
+    vectorProvider: blocked
+    realRagProvider: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    quotaCostMeasurement: blocked
+    costCalibrationGate: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md
+    - docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+    - docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/execution-profiles.yaml
+    - docs/04-agent-system/sop/local-experience-closure-governance.md
+    - docs/04-agent-system/sop/local-first-validation-governance.md
+    - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - e2e/local-business-flow.spec.ts
+    - e2e/admin-audit-navigation.spec.ts
+    - e2e/personal-ai-generation-local-request.spec.ts
+    - src/**
+    - tests/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - pnpm-lock.yaml
+    - package-lock.yaml
+    - package-lock.json
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts src/server/services/rag-retrieval-service.test.ts src/server/services/rag-chunking-service.test.ts src/server/services/ai-scoring-service.test.ts src/server/services/ai-explanation-hint-service.test.ts src/server/services/ops-governance-authorization-quota-summary-service.test.ts tests/unit/ai/provider-redaction-function-contract.test.ts tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts
+    - npm.cmd run test:e2e -- --list
+    - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/admin-audit-navigation.spec.ts e2e/personal-ai-generation-local-request.spec.ts
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId provider-rag-quota-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId provider-rag-quota-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId provider-rag-quota-governance-packet
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-provider-rag-quota-governance-packet.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-provider-rag-quota-governance-packet.md
+  branch: codex/provider-rag-quota-governance-packet
+  commitSha: null
+  retryCount: 0
+  lastFailurePath: null
+- id: future-scope-non-goal-governance-packet
+  title: Future scope non-goal governance packet
+  phase: future-scope-non-goal-governance-packet
+  sourceStory: userBoundedLocalExperiencePacket.futureScopeNonGoalGovernance
+  dependencies:
+    - provider-rag-quota-governance-packet
+  taskPlanPolicy: required_before_edit
+  humanApproval: >-
+    Approved by the current 2026-06-18 user prompt to execute the fourth bounded packet only after the previous packet
+    reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
+    `codex/future-scope-non-goal-governance-packet`, seeding this docs/state governance work packet, creating task
+    plan/evidence/audit, updating project-state/task-queue/local-experience-coverage-matrix, running scoped
+    Prettier, git diff check, lint, typecheck, Module Run v2 readiness gates, local commit, fast-forward merge to
+    master, master gates, push origin/master, and merged short-branch cleanup. The approval does not permit product
+    source changes, tests or e2e spec changes, `.env*` or secret/env read/write/output, package/lockfile/dependency
+    changes, schema/drizzle/migration, real provider/model calls or provider configuration changes, OCR/parser,
+    payment, export, staging/prod/cloud/deploy, external-service, PR, force-push, destructive DB, Cost Calibration
+    Gate, or sensitive/private evidence.
+  targetExperienceChain: future-scope-non-goal-governance-packet
+  targetClosureItem: future scope non-goal governance resolution packet
+  behaviorBoundary: future-scope-non-goal::docs_state_governance_only
+  useCaseIds:
+    - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    - UC-FUTURE-ONLINE-PAYMENT
+    - UC-FUTURE-OCR-AUTO-IMPORT
+    - UC-FUTURE-ORG-DATA-EXPORT
+  executionProfile: local_experience_audit
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: user_bounded_packet_serial
+  taskKind: local_experience_packet
+  moduleRunVersion: 2
+  status: closed
+  result: completed_or_blocked_resolved
+  claimedAt: "2026-06-18T12:59:03-07:00"
+  validatedAt: "2026-06-18T13:00:53-07:00"
+  closedAt: "2026-06-18T13:00:53-07:00"
+  capabilities:
+    docsStateOnlyQueueMaintenance: allowed
+    readRequirements: allowed
+    readEvidence: allowed
+    localE2EValidation: blocked
+    localFullFlowGate: blocked
+    productSourceChange: blocked
+    testChange: blocked
+    e2eSpecChange: blocked
+    providerCall: blocked
+    providerConfiguration: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    paymentExternalService: blocked
+    ocrParserImplementation: blocked
+    exportFileGeneration: blocked
+    costCalibrationGate: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
+    - docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+    - docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/state/execution-profiles.yaml
+    - docs/04-agent-system/sop/local-experience-closure-governance.md
+    - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/task-plans/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - pnpm-lock.yaml
+    - package-lock.yaml
+    - package-lock.json
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId future-scope-non-goal-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId future-scope-non-goal-governance-packet
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-future-scope-non-goal-governance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-future-scope-non-goal-governance-packet.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-future-scope-non-goal-governance-packet.md
+  branch: codex/future-scope-non-goal-governance-packet
+  commitSha: null
+  retryCount: 0
+  lastFailurePath: null
+- id: final-audit-gate-governance-packet
+  title: Final audit gate governance packet
+  phase: final-audit-gate-governance-packet
+  sourceStory: userBoundedLocalExperiencePacket.finalAuditGateGovernance
+  dependencies:
+    - future-scope-non-goal-governance-packet
+  taskPlanPolicy: required_before_edit
+  humanApproval: >-
+    Approved by the current 2026-06-18 user prompt to execute the fifth final bounded packet only after the previous
+    packet reached `ready_for_next_packet`. Scope is limited to creating/using the local short branch
+    `codex/final-audit-gate-governance-packet`, seeding this docs/state governance work packet, creating task
+    plan/evidence/audit, updating project-state/task-queue/local-experience-coverage-matrix, generating the global
+    32 use case status summary, running scoped Prettier, git diff check, lint, typecheck, Module Run v2 readiness
+    gates, local commit, fast-forward merge to master, master gates, push origin/master, and merged short-branch
+    cleanup. The approval does not permit product source changes, tests or e2e spec changes, `.env*` or secret/env
+    read/write/output, package/lockfile/dependency changes, schema/drizzle/migration, real provider/model calls or
+    provider configuration changes, staging/prod/cloud/deploy, payment, external-service, PR, force-push,
+    destructive DB, Cost Calibration Gate, or sensitive/private evidence.
+  targetExperienceChain: final-audit-gate-governance-packet
+  targetClosureItem: final audit gate governance resolution packet
+  behaviorBoundary: audit-gate-governance::docs_state_governance_only
+  useCaseIds:
+    - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+    - UC-GATE-CURRENT-CHECKPOINT
+    - UC-AUDIT-SOURCE-GOVERNANCE
+  executionProfile: local_experience_audit
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: user_bounded_packet_serial
+  taskKind: local_experience_packet
+  moduleRunVersion: 2
+  status: closed
+  result: completed_or_blocked_resolved
+  claimedAt: "2026-06-18T13:14:56-07:00"
+  validatedAt: "2026-06-18T13:20:06-07:00"
+  closedAt: "2026-06-18T13:20:06-07:00"
+  capabilities:
+    docsStateOnlyQueueMaintenance: allowed
+    readRequirements: allowed
+    readEvidence: allowed
+    localE2EValidation: blocked
+    localFullFlowGate: blocked
+    productSourceChange: blocked
+    testChange: blocked
+    e2eSpecChange: blocked
+    providerCall: blocked
+    providerConfiguration: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    paymentExternalService: blocked
+    stagingProdDeploy: blocked
+    costCalibrationGate: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md
+    - docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+    - docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/state/execution-profiles.yaml
+    - docs/04-agent-system/sop/local-experience-closure-governance.md
+    - docs/04-agent-system/sop/module-lifecycle-governance.md
+    - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/task-plans/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - pnpm-lock.yaml
+    - package-lock.yaml
+    - package-lock.json
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId final-audit-gate-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId final-audit-gate-governance-packet
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId final-audit-gate-governance-packet
+  evidencePath: docs/05-execution-logs/evidence/2026-06-18-final-audit-gate-governance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-final-audit-gate-governance-packet.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-18-final-audit-gate-governance-packet.md
+  branch: codex/final-audit-gate-governance-packet
+  commitSha: null
+  retryCount: 0
+  lastFailurePath: null
