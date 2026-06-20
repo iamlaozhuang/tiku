@@ -1,8 +1,8 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T08:01:27-07:00"
+updatedAt: "2026-06-20T08:27:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,15 +503,14 @@ repository:
   lastKnownMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
-  id: batch-227-organization-analytics-audit-log-redacted-reference
-  status: closed
-  result: pass_organization_analytics_audit_log_redacted_reference_contract
+  id: batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  status: in_progress
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-227-organization-analytics-audit-log.md
-  evidencePath: docs/05-execution-logs/evidence/batch-227-organization-analytics-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-227-organization-analytics-audit-log-redacted-reference.md
-  branch: codex/batch-227-organization-analytics-audit-log
-  commitSha: aeafeec32bc4f4b1539f5292e38e26e160570241
+  planPath: pending-task-plan
+  evidencePath: docs/05-execution-logs/evidence/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  branch: codex/batch-228-ops-governance-quota
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -1664,7 +1663,7 @@ localExperienceClosure:
       priorDiagnosticHttpStatus: 403
       priorDiagnosticProviderErrorCode: null
       consoleScreenshotRegion: cn_beijing
-      consoleScreenshotRegionLabel: 华北2（北京）
+      consoleScreenshotRegionLabel: 鍗庡寳2锛堝寳浜級
       consoleScreenshotWorkspace: TIKUProject
       consoleScreenshotVisibleAuthorizedModels:
         - Qwen3.7-Plus
@@ -1751,7 +1750,7 @@ localExperienceClosure:
       matrixStatus: release_blocked
       officialPlatform: alibaba_bailian_dashscope
       region: cn_beijing
-      regionLabel: 华北2（北京）
+      regionLabel: 鍗庡寳2锛堝寳浜級
       workspaceLabel: TIKUProject
       baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
       chatCompletionsEndpoint: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions

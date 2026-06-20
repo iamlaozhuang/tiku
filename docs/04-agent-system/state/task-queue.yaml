@@ -4472,7 +4472,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/ops-governance-authorization-quota-summary-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go
     validationCommands:
@@ -4480,10 +4480,11 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/ops-governance-authorization-quota-summary-service.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go
     evidencePath: docs/05-execution-logs/evidence/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-228-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: batch-229-ops-governance-and-retention-redeem-code-redacted-reference
     title: Module Run v2 ops-governance-and-retention implementation seed
