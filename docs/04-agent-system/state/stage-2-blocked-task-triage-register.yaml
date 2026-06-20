@@ -1,0 +1,271 @@
+schemaVersion: 1
+generatedByTask: stage-2-blocked-task-triage-2026-06-20
+generatedAt: "2026-06-20T05:26:24-07:00"
+scope:
+  sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
+  branch: codex/stage-2-blocked-triage
+  mode: docs_state_triage_only
+  taskStatusOwnership: docs/04-agent-system/state/task-queue.yaml
+  semanticChangeAllowed: false
+  notes:
+    - This register classifies next actions only.
+    - It does not approve, execute, abandon, unblock, or alter any blocked queue item.
+    - Existing task status, result, blocked gates, validation commands, allowed files, and evidence remain unchanged.
+summary:
+  activeQueueNonTerminalCountBeforeThisTask: 20
+  activeQueueNonTerminalCountIncludingThisTask: 21
+  triagedBlockedQueueItemCount: 20
+  activeBlockedCount: 16
+  activeBlockedValidationFailureCount: 4
+  activePendingCount: 0
+  primaryCategoryCounts:
+    fresh_approval_required: 6
+    exact_scope_required: 2
+    blocked_validation_failure: 4
+    high_risk_gated: 6
+    product_choice_required: 2
+  queueHealthCarryover:
+    archiveCandidateCount: 2
+    firstArchiveCandidates:
+      - personal-learning-ai-auto-seed-approval-request-2026-06-20
+      - stage-1-queue-health-archive-followup-2026-06-20
+    handling: record_as_stage_1_baseline_carryover_not_blocked_triage_semantics
+  nonQueueGuardedProposalCount: 1
+triageItems:
+  - id: ap-01-qwen-one-request-post-console-remediation-retry-approval
+    queueLine: 209
+    status: blocked
+    result: blocked_qwen_post_console_retry_http_403_provider_error_code_null_redacted
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - provider_model_gated
+    nextStepType: wait_or_approve
+    nextAction: wait for Qwen exact API/model/key permission remediation, then require fresh approval for at most one redacted retry; otherwise keep blocked or defer.
+    decisionOwner: human
+  - id: ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+    queueLine: 357
+    status: blocked
+    result: blocked_qwen_http_403_provider_error_code_null_redacted
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - provider_model_gated
+    nextStepType: wait_or_approve
+    nextAction: wait for Qwen console permission/workspace/model remediation, then require fresh approval for one redacted error-code diagnostic; otherwise keep blocked or defer.
+    decisionOwner: human
+  - id: ap-01-qwen-openai-compatible-one-request-isolation-smoke
+    queueLine: 504
+    status: blocked
+    result: blocked_qwen_openai_compatible_provider_error_redacted
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - provider_model_gated
+    nextStepType: approve_or_defer
+    nextAction: choose between Qwen console online debug and a fresh redacted diagnostic approval; do not run additional provider calls under the old result.
+    decisionOwner: human
+  - id: ap-01-qwen-provider-smoke-execution-base-url-ready
+    queueLine: 653
+    status: blocked
+    result: blocked_qwen_base_url_provider_error_redacted
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - provider_model_gated
+    nextStepType: approve_or_defer
+    nextAction: approve a scoped base-url failure diagnosis or one fresh redacted retry after remediation; otherwise keep blocked.
+    decisionOwner: human
+  - id: ap-01-provider-smoke-execution-qwen-env-local-ready
+    queueLine: 808
+    status: blocked
+    result: blocked_qwen_provider_error_redacted
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - provider_model_gated
+    nextStepType: approve_or_defer
+    nextAction: approve scoped Qwen provider error diagnosis or one fresh redacted retry; provider configuration and env output remain blocked.
+    decisionOwner: human
+  - id: ap-01-provider-smoke-execution
+    queueLine: 944
+    status: blocked
+    result: blocked_missing_deepseek_process_env_no_provider_call
+    primaryCategory: fresh_approval_required
+    secondaryCategories:
+      - high_risk_gated
+      - env_secret_gated
+      - provider_model_gated
+    nextStepType: wait_or_approve
+    nextAction: wait for DeepSeek process env key availability or require explicit env.local read approval; do not read env or run provider calls until approved.
+    decisionOwner: human
+  - id: module-run-v2-personal-ai-local-ui-browser-flow-validation
+    queueLine: 1070
+    status: blocked_validation_failure
+    result: blocked_by_server_session_only_playwright_auth_mismatch
+    primaryCategory: blocked_validation_failure
+    secondaryCategories:
+      - local_experience_repair
+    nextStepType: repair
+    nextAction: create a targeted auth/session local validation repair task with exact allowed files, reproduction command, and closeout policy; do not claim local experience closed until verified.
+    decisionOwner: agent_after_task_materialization
+  - id: organization-training-entry-route-path-contract-repair
+    queueLine: 1244
+    status: blocked_validation_failure
+    result: route_path_repaired_full_flow_blocked_by_manual_draft_runtime_500
+    primaryCategory: blocked_validation_failure
+    secondaryCategories:
+      - local_experience_repair
+    nextStepType: repair
+    nextAction: create an exact-scope repair task for the remaining local runtime 500 with explicit API/service/repository/UI files and validation commands.
+    decisionOwner: agent_after_task_materialization
+  - id: organization-training-draft-source-context-local-migration-execution-approval
+    queueLine: 1351
+    status: blocked_validation_failure
+    result: local_migration_applied_full_flow_blocked_by_admin_visible_scope_409080
+    primaryCategory: blocked_validation_failure
+    secondaryCategories:
+      - schema_migration_gated
+      - high_risk_gated
+    nextStepType: approve_or_defer
+    nextAction: require fresh schema/migration/local migration approval before any drizzle or DB work; otherwise keep blocked and defer validation closure.
+    decisionOwner: human
+  - id: organization-training-admin-visible-scope-local-fixture-contract-repair
+    queueLine: 1461
+    status: blocked_validation_failure
+    result: local_seed_admin_visible_scope_repaired_full_flow_blocked_by_source_context_ui_response_mapping
+    primaryCategory: blocked_validation_failure
+    secondaryCategories:
+      - local_experience_repair
+      - schema_migration_gated
+    nextStepType: repair_or_approve
+    nextAction: create an exact-scope source-context UI response mapping repair task; any schema/drizzle/migration path still requires fresh approval.
+    decisionOwner: human_for_schema_or_agent_for_non_schema_repair
+  - id: ap-02-ops-auth-quota-cost-calibration-approval-package
+    queueLine: 1776
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - cost_calibration_gated
+      - fresh_approval_required
+    nextStepType: approve_or_defer
+    nextAction: define quota unit ledger, cost source, measurement scope, redacted evidence rules, and explicit Cost Calibration Gate approval; otherwise keep blocked.
+    decisionOwner: human
+  - id: ap-03-provider-staging-execution-approval-package
+    queueLine: 1799
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - provider_model_gated
+      - staging_deploy_gated
+      - fresh_approval_required
+    nextStepType: approve_or_defer
+    nextAction: provide staging resource boundary, provider ceiling, exact command list, rollback owner, and acceptance owner; otherwise keep blocked.
+    decisionOwner: human
+  - id: ap-04-standard-ai-generation-scope-change-approval-package
+    queueLine: 1823
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: product_choice_required
+    secondaryCategories:
+      - exact_scope_required
+      - provider_model_gated
+      - cost_calibration_gated
+    nextStepType: approve_abandon_or_defer
+    nextAction: decide whether standard AI generation scope should be adopted; if yes, require a separate provider/env/quota/cost plan; if no, abandon or defer.
+    decisionOwner: human
+  - id: ap-05-standard-org-self-service-scope-change-approval-package
+    queueLine: 1846
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: product_choice_required
+    secondaryCategories:
+      - exact_scope_required
+      - schema_migration_gated
+      - privacy_gated
+      - deploy_gated
+    nextStepType: approve_abandon_or_defer
+    nextAction: decide whether standard org self-service belongs in scope; if yes, require separate privacy/schema/API/UI/deploy planning; if no, abandon or defer.
+    decisionOwner: human
+  - id: ap-06-online-payment-approval-package
+    queueLine: 1869
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - payment_gated
+      - env_secret_gated
+      - deploy_gated
+    nextStepType: approve_or_defer
+    nextAction: require a payment provider, refund, invoice, settlement, reconciliation, env, deployment, rollback, and evidence plan before any execution.
+    decisionOwner: human
+  - id: ap-07-ocr-auto-import-approval-package
+    queueLine: 1892
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - ocr_gated
+      - dependency_gated
+      - schema_migration_gated
+      - storage_gated
+    nextStepType: approve_or_defer
+    nextAction: require OCR parser/provider/storage/schema/dependency/import/rollback approval before any implementation or dependency work.
+    decisionOwner: human
+  - id: ap-08-org-data-export-approval-package
+    queueLine: 1915
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - export_gated
+      - privacy_gated
+      - deploy_gated
+    nextStepType: approve_or_defer
+    nextAction: require export format, file generation, download, privacy, permission, audit, deploy, rollback, and redaction plan before execution.
+    decisionOwner: human
+  - id: ap-09-runtime-capability-list-approval-package
+    queueLine: 1938
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: high_risk_gated
+    secondaryCategories:
+      - exact_scope_required
+      - schema_migration_gated
+      - deploy_gated
+    nextStepType: approve_or_defer
+    nextAction: define capability model, API/UI/data model changes, exact allowed files, validation, and rollback before creating an implementation task.
+    decisionOwner: human
+  - id: ap-10-current-checkpoint-audit-repair-approval-package
+    queueLine: 1960
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: exact_scope_required
+    secondaryCategories:
+      - audit_repair
+      - fresh_approval_required
+    nextStepType: define_scope_then_repair
+    nextAction: choose exact audit target, allowed source/test/e2e files, validation commands, and stop conditions before a repair task is created.
+    decisionOwner: human
+  - id: ap-11-source-governance-change-approval-package
+    queueLine: 1983
+    status: blocked
+    result: approval_package_seeded_execution_blocked
+    primaryCategory: exact_scope_required
+    secondaryCategories:
+      - governance_change
+      - fresh_approval_required
+    nextStepType: define_scope_then_repair
+    nextAction: define source IDs, catalog/matrix rows, requirement change rules, blocked gates, and allowed files before any governance change task is created.
+    decisionOwner: human
+nonQueueGuardedProposals:
+  - id: personal-learning-ai-auto-seed-proposal
+    queueStatus: not_a_queue_item
+    primaryCategory: fresh_approval_required
+    diagnosticSource: Get-ModuleRunV2ImplementationSeedProposal.ps1
+    seedModule: personal-learning-ai
+    requiredApproval: autoDriveLocalImplementationApproval for module personal-learning-ai
+    nextAction: require explicit human approval to apply the seed transaction for batch-216 through batch-219, or keep automation paused and continue manual docs/state governance.
+    decisionOwner: human

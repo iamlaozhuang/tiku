@@ -49,6 +49,9 @@ canonicalStateFiles:
   - id: personal-learning-ai-auto-seed-approval-decision
     path: docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml
     role: pending human decision package for the personal-learning-ai seed proposal; it records requested approval text and does not approve or apply a seed transaction while status remains pending_human_decision
+  - id: stage-2-blocked-task-triage-register
+    path: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
+    role: stage 2 triage summary for active non-terminal blocked queue items; records next-step classification only and does not replace task-queue as the owner of task status or blocked semantics
 factOwnership:
   - fact: task execution state, dependencies, allowed files, blocked files, validation commands, evidence path, audit review path
     sourcePath: docs/04-agent-system/state/task-queue.yaml
@@ -83,6 +86,13 @@ factOwnership:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Get-TikuProjectStatus.ps1
     rule: this package is a decision surface only; status pending_human_decision is not approval and must not trigger New-ModuleRunV2ImplementationSeed.ps1 or seeded implementation task creation.
+  - fact: stage 2 blocked task triage classification and next action summary
+    sourcePath: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    rule: triage classification is advisory governance metadata only; task status, allowed files, blocked files, blocked gates, validation commands, evidence paths, and closeout state remain owned by task-queue.yaml.
   - fact: execution profile defaults, evidence modes, validation policy bundles, queue selection modes, work packet limits, and local full-flow guardrails
     sourcePath: docs/04-agent-system/state/execution-profiles.yaml
     derivedSummaries:
