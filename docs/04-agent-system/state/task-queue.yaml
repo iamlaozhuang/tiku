@@ -1390,12 +1390,13 @@ tasks:
     localFullFlowGate: approved_localhost_only
     destructiveLocalDockerDatabase: blocked_without_task_approval
     localE2EValidation: approved_local_only_existing_specs
-    status: in_progress
+    status: closed
     result: pass_existing_fixture_ui_response_mapping_validation
     claimedAt: "2026-06-20T09:29:07-07:00"
     validatedAt: "2026-06-20T09:34:00-07:00"
-    closedAt: null
+    closedAt: "2026-06-20T09:40:00-07:00"
     branch: codex/organization-training-fixture-ui-response-mapping-repair
+    commitSha: 9164f9b069654c476307226d5dcb677ee48fcb55
     allowedFiles:
       - src/db/dev-seed.ts
       - src/db/dev-seed.test.ts
