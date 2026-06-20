@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-3-low-risk-docs-state-decision-packages
-updatedAt: "2026-06-20T04:38:51-07:00"
+currentPhase: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
+updatedAt: "2026-06-20T04:43:07-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,19 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 988c9cef1048b60b32febb7ef9456394e00969cf
-  lastKnownOriginMasterSha: 988c9cef1048b60b32febb7ef9456394e00969cf
+  lastKnownMasterSha: 119d0f5ab6c483a17867166b523eb218e4c2cd88
+  lastKnownOriginMasterSha: 119d0f5ab6c483a17867166b523eb218e4c2cd88
 currentTask:
-  id: stage-3-decision-packages-2026-06-20
-  status: closed
-  result: pass_docs_state_decision_package_surface
-  sourceStory: userRequestedSixStageRouteAfterStage2Closeout
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-3-decision-packages.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-3-decision-packages.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-3-decision-packages.md
-  decisionPackagePath: docs/04-agent-system/state/low-risk-decision-packages-2026-06-20.yaml
-  branch: codex/stage-3-decision-packages
-  commitSha: d3aa24c55811d6d8b33ab1a127f9cc6905080849
+  id: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
+  status: in_progress
+  result: pending_validation
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-213-ai-task-request-policy.md
+  evidencePath: docs/05-execution-logs/evidence/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  branch: codex/batch-213-ai-task-request-policy
+  commitSha: pending_batch_213_validation_commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
