@@ -4,9 +4,9 @@ archive:
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   archivedAt: '2026-06-11T20:00:52-07:00'
-  updatedByTask: active-queue-slimming-2026-06-20-first-window
-  updatedAt: '2026-06-20T00:46:26-07:00'
-  taskCount: 568
+  updatedByTask: active-queue-slimming-2026-06-20-second-window
+  updatedAt: '2026-06-20T01:02:05-07:00'
+  taskCount: 573
 tasks:
 - id: phase-21-write-concurrency-closeout-reconciliation
   title: Phase 21 Write Concurrency Closeout Reconciliation
@@ -24739,6 +24739,615 @@ tasks:
     - git diff --check
     - npm.cmd run lint
     - npm.cmd run typecheck
+- id: l123-docs-state-packet-limit-governance-sync
+  title: L123 Docs State Packet Limit Governance Sync
+  phase: l123-docs-state-packet-limit-governance-sync
+  sourceStory: userRequestedL123PacketLimitGovernanceSync
+  dependencies:
+    - queue-matrix-drift-readonly-audit
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User requested this task only after the queue/matrix drift audit closed cleanly. Scope is limited to docs/state
+    governance for changing the L123 docs-state approval package packet limit to 10. This task does not authorize
+    exact_scope_local_auto_execute, source/test/e2e repair, L3 execution, product implementation, DB, provider/model,
+    env/secret, schema/migration, dependency/package/lockfile, deploy, payment, OCR, export, external-service, Cost
+    Calibration Gate, PR, force push, destructive DB, or sensitive evidence work.
+  taskKind: docs_state_governance
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  status: closed
+  result: pass_docs_state_l123_packet_limit_10_governance_sync_no_execution
+  claimedAt: "2026-06-20T00:36:10-07:00"
+  validatedAt: "2026-06-20T00:36:10-07:00"
+  closedAt: "2026-06-20T00:36:10-07:00"
+  branch: codex/l123-packet-limit-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  previousLimits:
+    l123AccelerationPolicyMaxTasksPerPacket: 1
+    docsStateLiteWorkPacketMaxTasksPerPacket: 6
+  newLimits:
+    l123AccelerationPolicyMaxTasksPerPacket: 10
+    docsStateLiteWorkPacketMaxTasksPerPacket: 10
+  capabilities:
+    docsStateOnlyQueueMaintenance: approved
+    governanceStateChange: approved
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    exactScopeLocalAutoExecute: blocked
+    l3Execution: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/execution-profiles.yaml
+    - docs/05-execution-logs/task-plans/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    - docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    - docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+    - docs/04-agent-system/sop/task-lifecycle-governance.md
+    - scripts/agent-system/Get-TikuNextAction.ps1
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - yarn.lock
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - deploy/cloud/payment/provider config files
+    - any file not explicitly listed in allowedFiles
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      message: "docs(l123): set packet limit to 10"
+      approval: current_user_prompt_2026_06_20_queue_drift_then_packet_limit
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId l123-docs-state-packet-limit-governance-sync
+- id: ap-11-source-governance-change-control-fresh-approval-required
+  title: Ap 11 Source Governance Change Control Fresh Approval Required
+  phase: ap-11-source-governance-change-control-fresh-approval-required
+  sourceStory: l123AccelerationApprovalPackage
+  dependencies: []
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    L123 acceleration generated this docs/state approval-only package. It does not authorize source/test/e2e/script,
+    DB, env/secret, provider/model, schema/migration, dependency/package/lockfile, staging/prod/cloud/deploy,
+    payment/OCR/export/external-service, Cost Calibration Gate, PR, force push, destructive DB, or sensitive evidence
+    execution.
+  taskKind: l123_acceleration_approval_package
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  l123AccelerationDecision: approval_package_ready
+  riskTier: L0
+  l123ExecutionMode: l123_approval_package
+  status: closed
+  result: pass_l0_l123_approval_package_no_high_risk_execution
+  claimedAt: "2026-06-19T23:44:25-07:00"
+  validatedAt: "2026-06-19T23:44:25-07:00"
+  closedAt: "2026-06-19T23:44:25-07:00"
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  nextRecommendedTask: none_until_l123_fresh_approval
+  capabilities:
+    docsStateOnlyQueueMaintenance: approved
+    freshApprovalTextMaterialization: approved
+    sourceTestE2eScriptChange: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentOcrExportExternalService: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/05-execution-logs/task-plans/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+    - docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+    - docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - any file not explicitly listed in allowedFiles
+  validationCommands:
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+- id: mechanism-l123-acceleration-governance-and-readiness-classifier
+  title: L123 acceleration governance readiness classifier and proposal-only wiring
+  phase: mechanism-l123-acceleration-governance-and-readiness-classifier
+  sourceStory: userRequestedL123AccelerationMechanismImplementation
+  dependencies: []
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User requested implementation of the L1/L2/L3 acceleration mechanism. Scope allows mechanism scripts, docs/state,
+    queue, matrix, task plan, evidence, and audit only. The task must not read or modify `.env*`, execute provider/model
+    calls, DB read/write, schema/migration, dependency/package/lockfile changes, staging/prod/cloud/deploy, payment/OCR/
+    export/external-service, Cost Calibration Gate, PR, force push, destructive DB operations, product scope changes, or
+    product source behavior changes.
+  targetExperienceChain: l123-acceleration-mechanism
+  taskKind: mechanism_maintenance
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  status: closed
+  result: pass_mechanism_l123_acceleration_classifier_generator_and_proposal_only_wiring
+  claimedAt: "2026-06-19T23:27:00-07:00"
+  validatedAt: "2026-06-19T23:27:00-07:00"
+  closedAt: "2026-06-19T23:27:00-07:00"
+  branch: codex/mechanism-l123-acceleration-governance
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  nextRecommendedTask: ap-11-source-governance-change-control-fresh-approval-required
+  l123AccelerationMode: proposal_only
+  firstValidationCandidate: ap-11-source-governance-change-control-fresh-approval-required
+  firstValidationDecision: approval_package_ready
+  productScopeChanged: false
+  productSourceChanged: false
+  testChanged: false
+  e2eChanged: false
+  capabilities:
+    mechanismScriptChange: approved
+    projectResourceRead: approved_read_only_redacted
+    docsStateOnlyQueueMaintenance: approved
+    localCommit: approved
+    fastForwardMergeToMaster: approved
+    pushOriginMaster: approved
+    localBranchCleanup: approved
+    providerModelCall: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentExternalServiceExecution: blocked
+    ocrParserExecution: blocked
+    exportFileGeneration: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  blockedCapabilities:
+    - providerModelCall
+    - databaseRead
+    - databaseWrite
+    - envLocalRead
+    - envSecretOutput
+    - schemaMigration
+    - dependencyIntroduction
+    - stagingProdDeploy
+    - paymentExternalServiceExecution
+    - ocrParserExecution
+    - exportFileGeneration
+    - costCalibrationGate
+    - pr
+    - forcePush
+    - destructiveDatabase
+    - rawSensitiveEvidence
+  allowedFiles:
+    - docs/04-agent-system/state/execution-profiles.yaml
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - scripts/agent-system/Get-TikuNextAction.ps1
+    - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+    - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+    - scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.Smoke.ps1
+    - scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.ps1
+    - scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.Smoke.ps1
+    - scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.ps1
+    - docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    - docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    - docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/autodrive-control-schema.yaml
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - yarn.lock
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - deploy/cloud/payment/provider config files
+    - any file not explicitly listed in allowedFiles
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/execution-profiles.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2L123AccelerationReadiness.Smoke.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2L123ApprovalPackage.Smoke.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2L123AccelerationReadiness.ps1 -TaskId ap-11-source-governance-change-control-fresh-approval-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride ap-11-source-governance-change-control-fresh-approval-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-l123-acceleration-governance-and-readiness-classifier
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId mechanism-l123-acceleration-governance-and-readiness-classifier -Capability projectResourceRead -Intent declare_adapter
+- id: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  title: AP-10 current checkpoint audit repair L1 fresh approval required
+  phase: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  sourceStory: userRequestedAp10CurrentCheckpointAuditRepairL1FreshApprovalRequired
+  dependencies:
+    - ap-10-current-checkpoint-audit-target-detailing
+    - ap-05-standard-org-self-service-scope-change-user-choice-required
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User requested AP-10 current checkpoint audit repair L1 fresh approval required task. Scope is limited to
+    docs/state/governance and minimal L1 repair approval text. This task must not execute source/test/e2e/script
+    repair, browser/runtime validation, DB read/write, `.env*` access, provider/model call, schema/migration,
+    dependency/package/lockfile changes, staging/prod/cloud/deploy, payment/OCR/export/external-service execution,
+    Cost Calibration Gate, PR, force push, destructive DB operation, raw source artifact collection, raw row, raw
+    prompt, raw response, provider payload, or sensitive evidence collection.
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  approvalPackageId: AP-10-CURRENT-CHECKPOINT-AUDIT-REPAIR-L1-FRESH-APPROVAL
+  useCaseIds:
+    - UC-GATE-CURRENT-CHECKPOINT
+  taskKind: docs_state_l1_current_checkpoint_audit_repair_fresh_approval_required_package
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  status: closed
+  result: pass_l0_ap10_current_checkpoint_audit_repair_l1_fresh_approval_required_no_source_test_e2e_repair
+  claimedAt: "2026-06-19T22:40:59-07:00"
+  validatedAt: "2026-06-19T22:40:59-07:00"
+  closedAt: "2026-06-19T22:40:59-07:00"
+  branch: codex/ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  nextRecommendedTask: none_until_ap10_audit_repair_fresh_approval
+  freshApprovalTextMaterialized: true
+  repairExecuted: false
+  sourceChanged: false
+  testChanged: false
+  e2eChanged: false
+  scriptChanged: false
+  capabilities:
+    docsStateOnlyQueueMaintenance: approved
+    freshApprovalTextMaterialization: approved
+    localCommit: approved
+    fastForwardMergeToMaster: approved
+    pushOriginMaster: approved
+    localBranchCleanup: approved
+    sourceRepair: blocked
+    testChange: blocked
+    e2eSpecChange: blocked
+    scriptChange: blocked
+    browserPlaywrightRuntime: blocked
+    runtimeValidation: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    providerModelCall: blocked
+    paymentExternalServiceExecution: blocked
+    ocrParserExecution: blocked
+    exportFileGeneration: blocked
+    stagingProdDeploy: blocked
+    costCalibrationGate: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  blockedCapabilities:
+    - sourceRepair
+    - testChange
+    - e2eSpecChange
+    - scriptChange
+    - browserPlaywrightRuntime
+    - runtimeValidation
+    - schemaMigration
+    - dependencyIntroduction
+    - databaseRead
+    - databaseWrite
+    - envLocalRead
+    - envSecretOutput
+    - providerModelCall
+    - paymentExternalServiceExecution
+    - ocrParserExecution
+    - exportFileGeneration
+    - stagingProdDeploy
+    - costCalibrationGate
+    - pr
+    - forcePush
+    - destructiveDatabase
+    - rawSensitiveEvidence
+  allowedFiles:
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    - docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    - docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-target-detailing.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - deploy/cloud/payment/provider config files
+    - any file not explicitly listed in allowedFiles
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  minimalFreshApprovalText: >-
+    Fresh approve AP-10 current checkpoint audit repair L1 decision only. I choose one allowed path: keep current
+    checkpoint source/test/e2e repair blocked; or authorize a separate exact-scope AP-10 current checkpoint audit
+    repair package. No source/test/e2e/script repair, runtime/browser validation, DB read/write, .env* access,
+    schema/migration, dependency/package/lockfile, provider/model call, payment/OCR/export/external-service execution,
+    staging/prod/cloud/deploy, Cost Calibration Gate, PR, force push, destructive DB, raw source artifact beyond
+    allowed files, raw row, raw prompt, raw response, provider payload, or sensitive evidence collection is approved
+    unless the follow-up approval explicitly names exact allowed files, exact blocked files, exact commands, target
+    findings, repair boundary, validation evidence, rollback, redaction, and stop conditions.
+- id: ap-05-standard-org-self-service-scope-change-user-choice-required
+  title: AP-05 standard org self-service scope change user choice required
+  phase: ap-05-standard-org-self-service-scope-change-user-choice-required
+  sourceStory: userRequestedAp05StandardOrgSelfServiceScopeChangeUserChoiceRequired
+  dependencies:
+    - ap-05-standard-org-self-service-scope-decision-detailing
+    - ap-04-standard-ai-generation-scope-change-user-choice-required
+  taskPlanPolicy: required_before_edit
+  humanApprovalBoundary: >-
+    User requested AP-05 standard organization self-service scope-change user-choice-required task. Scope is limited to
+    docs/state/governance and product/privacy choice stop text. This task records that no product scope option is
+    chosen by the agent and that standard organization self-service remains a future non-goal until the owner
+    explicitly chooses an option. This task must not change product scope, modify source/tests/e2e/scripts/schema/
+    migrations/dependencies/package files/lockfiles, access organization/private data, read or write DB, read or write
+    `.env*`, execute payment/external services, connect to staging/prod/cloud, deploy, create a PR, force push,
+    perform destructive DB operations, or collect sensitive evidence.
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  approvalPackageId: AP-05-STANDARD-ORG-SELF-SERVICE-USER-CHOICE
+  useCaseIds:
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+  taskKind: docs_state_product_privacy_scope_user_choice_required_package
+  moduleRunVersion: 2
+  executionProfile: docs_state_lite
+  evidenceMode: full
+  validationPolicy: docs_state
+  queueSelectionMode: explicit_user_requested_followup
+  status: closed
+  result: pass_l0_ap05_product_privacy_scope_user_choice_required_no_scope_change_no_schema_no_api_ui
+  claimedAt: "2026-06-19T22:27:50-07:00"
+  validatedAt: "2026-06-19T22:27:50-07:00"
+  closedAt: "2026-06-19T22:27:50-07:00"
+  branch: codex/ap-05-standard-org-self-service-scope-change-user-choice-required
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  nextRecommendedTask: none_until_ap05_product_scope_choice
+  userChoiceRequired: true
+  productScopeChanged: false
+  productScopeChoice:
+    choiceStillRequired: true
+    currentScope: future_non_goal_for_standard
+    selectedOption: none
+    options:
+      - A_keep_standard_org_self_service_out_of_current_release
+      - B_add_limited_standard_org_self_service_later
+      - C_make_org_self_service_advanced_only
+      - D_defer_to_customer_specific_review
+    minimalChoiceText: >-
+      Choose AP-05 standard organization self-service scope. Option A keeps standard organization self-service out of
+      the current release. Option B authorizes a separate exact-scope package for limited standard organization
+      self-service. Option C authorizes a separate product-scope package for advanced-only organization self-service.
+      Option D defers the decision to customer-specific review. No product scope, source/test/e2e/script/API/UI,
+      schema/migration, dependency/package/lockfile, privacy data access, DB read/write, env/secret,
+      staging/prod/cloud/deploy, payment/external-service, formal adoption, PR, force push, destructive DB, raw
+      organization-private content, raw database row, payment data, private identifier, or sensitive evidence
+      collection is approved unless the follow-up approval explicitly names the chosen option, exact allowed files,
+      exact commands, product boundary, privacy/data boundary, release boundary, validation, rollback, redaction, and
+      stop conditions.
+  capabilities:
+    docsStateOnlyQueueMaintenance: approved
+    productChoiceTextMaterialization: approved
+    localCommit: approved
+    fastForwardMergeToMaster: approved
+    pushOriginMaster: approved
+    localBranchCleanup: approved
+    productScopeChange: blocked
+    productSourceChange: blocked
+    apiUiDataModelChange: blocked
+    sourceTestE2eScriptChange: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    privacyDataAccess: blocked
+    databaseRead: blocked
+    databaseWrite: blocked
+    envLocalRead: blocked
+    envSecretOutput: blocked
+    paymentExternalServiceExecution: blocked
+    stagingProdDeploy: blocked
+    formalAdoption: blocked
+    pr: blocked
+    forcePush: blocked
+    destructiveDatabase: blocked
+    rawSensitiveEvidence: blocked
+  blockedCapabilities:
+    - productScopeChange
+    - productSourceChange
+    - apiUiDataModelChange
+    - sourceTestE2eScriptChange
+    - schemaMigration
+    - dependencyIntroduction
+    - privacyDataAccess
+    - databaseRead
+    - databaseWrite
+    - envLocalRead
+    - envSecretOutput
+    - paymentExternalServiceExecution
+    - stagingProdDeploy
+    - formalAdoption
+    - pr
+    - forcePush
+    - destructiveDatabase
+    - rawSensitiveEvidence
+  allowedFiles:
+    - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    - docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    - docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - scripts/**
+    - deploy/cloud/payment/provider config files
+    - any file not explicitly listed in allowedFiles
+  closeoutPolicy:
+    localCommit:
+      approved: true
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: false
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    - git diff --check
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-05-standard-org-self-service-scope-change-user-choice-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-05-standard-org-self-service-scope-change-user-choice-required
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ap-05-standard-org-self-service-scope-change-user-choice-required
     - npm.cmd run test:unit
     - npm.cmd run build
   evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md

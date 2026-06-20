@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-2026-06-20-first-window
-updatedAt: "2026-06-20T00:46:26-07:00"
+currentPhase: active-queue-slimming-2026-06-20-second-window
+updatedAt: "2026-06-20T01:02:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 481dc213856d27941670ea42ddf9a7a267c925cc
-  lastKnownOriginMasterSha: 481dc213856d27941670ea42ddf9a7a267c925cc
+  lastKnownMasterSha: dcd6f3bcd92007645da18cd4e987751d15b8f74f
+  lastKnownOriginMasterSha: dcd6f3bcd92007645da18cd4e987751d15b8f74f
 currentTask:
-  id: active-queue-slimming-2026-06-20-first-window
+  id: active-queue-slimming-2026-06-20-second-window
   status: closed
-  result: pass_docs_state_active_queue_slimming_first_window_no_execution
-  sourceStory: userRequestedIdleNoPendingTaskSafeDocsStateAdvancement
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-first-window.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-first-window.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-first-window.md
-  branch: codex/active-queue-slimming-first-window
+  result: pass_docs_state_active_queue_slimming_second_window_no_execution
+  sourceStory: userApprovedNextArchiveBatch
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-second-window.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-second-window.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-second-window.md
+  branch: codex/active-queue-slimming-second-window
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4021,6 +4021,26 @@ lastActiveQueueSlimmingFirstWindow:
     - manual_fresh_approval_required_before_any_ap06_online_payment_execution
     - manual_fresh_approval_required_before_any_ap03_provider_staging_execution
   activeQueueBeforeArchiveCandidates: 221
+  archivedTaskCount: 5
+  boundary: >-
+    This docs/state queue slimming task moved closed historical task blocks to the monthly archive and updated the
+    history index only. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3 execution,
+    provider/model calls, DB work, env/secret access, schema/migration, dependency changes, deploy, payment, OCR,
+    export, external-service actions, PR, force push, destructive DB, or Cost Calibration Gate execution.
+lastActiveQueueSlimmingSecondWindow:
+  taskId: active-queue-slimming-2026-06-20-second-window
+  archivedAt: "2026-06-20T01:02:05-07:00"
+  branch: codex/active-queue-slimming-second-window
+  decision: pass_docs_state_active_queue_slimming_second_window_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - l123-docs-state-packet-limit-governance-sync
+    - ap-11-source-governance-change-control-fresh-approval-required
+    - mechanism-l123-acceleration-governance-and-readiness-classifier
+    - ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    - ap-05-standard-org-self-service-scope-change-user-choice-required
+  activeQueueBeforeArchiveCandidates: 217
   archivedTaskCount: 5
   boundary: >-
     This docs/state queue slimming task moved closed historical task blocks to the monthly archive and updated the

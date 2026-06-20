@@ -8262,3 +8262,53 @@ entries:
     commitSha: null
     completedAt: "2026-06-19T23:53:38-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-first-window
+  - id: l123-docs-state-packet-limit-governance-sync
+    phase: l123-docs-state-packet-limit-governance-sync
+    status: closed
+    taskKind: docs_state_governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-l123-docs-state-packet-limit-governance-sync.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T00:36:10-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-second-window
+  - id: ap-11-source-governance-change-control-fresh-approval-required
+    phase: ap-11-source-governance-change-control-fresh-approval-required
+    status: closed
+    taskKind: l123_acceleration_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T23:44:25-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-second-window
+  - id: mechanism-l123-acceleration-governance-and-readiness-classifier
+    phase: mechanism-l123-acceleration-governance-and-readiness-classifier
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T23:27:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-second-window
+  - id: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    phase: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    status: closed
+    taskKind: docs_state_l1_current_checkpoint_audit_repair_fresh_approval_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T22:40:59-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-second-window
+  - id: ap-05-standard-org-self-service-scope-change-user-choice-required
+    phase: ap-05-standard-org-self-service-scope-change-user-choice-required
+    status: closed
+    taskKind: docs_state_product_privacy_scope_user_choice_required_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T22:27:50-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-second-window
