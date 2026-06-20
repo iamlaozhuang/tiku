@@ -22,10 +22,13 @@ tasks:
     evidenceMode: full
     validationPolicy: docs_state
     queueSelectionMode: manual_task_from_seed_proposal
-    status: in_progress
-    result: pending_validation
+    status: closed
+    result: pass_personal_learning_ai_auto_seed_approval_request_package
     claimedAt: "2026-06-20T05:12:00-07:00"
+    validatedAt: "2026-06-20T05:22:00-07:00"
+    closedAt: "2026-06-20T05:22:00-07:00"
     branch: codex/personal-learning-ai-auto-seed-approval-request
+    commitSha: 8427cfd812fe47ab697b15498fac0932ae62224f
     planPath: docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
