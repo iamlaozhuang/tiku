@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
-updatedAt: "2026-06-20T04:43:07-07:00"
+updatedAt: "2026-06-20T04:46:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: 119d0f5ab6c483a17867166b523eb218e4c2cd88
 currentTask:
   id: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
-  status: in_progress
-  result: pending_validation
+  status: closed
+  result: pass_local_task_request_policy_result_reference_contract
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-213-ai-task-request-policy.md
   evidencePath: docs/05-execution-logs/evidence/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
   branch: codex/batch-213-ai-task-request-policy
-  commitSha: pending_batch_213_validation_commit
+  commitSha: 4b9daba15deabf4ae6136d247e03b948e2942e4c
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4510,3 +4510,18 @@ lastStage3DecisionPackages:
     archives the prior closed stage 2 task exposed after merge. It does not change blocked task semantics, claim pending
     implementation tasks, execute high-risk gates, or perform source/test/e2e/script/env/provider/schema/deploy/payment/
     PR/force-push or Cost Calibration Gate work.
+
+lastStage4Batch213AiTaskRequestPolicy:
+  taskId: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
+  validatedAt: "2026-06-20T04:46:05-07:00"
+  closedAt: "2026-06-20T04:46:05-07:00"
+  branch: codex/batch-213-ai-task-request-policy
+  commitSha: 4b9daba15deabf4ae6136d247e03b948e2942e4c
+  decision: pass_local_task_request_policy_result_reference_contract
+  focusedUnit: src/server/services/ai-generation-task-request-service.test.ts
+  sourceChanged: false
+  nextCandidateTaskId: batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+  boundary: >-
+    Batch 213 validated existing local AI generation task request policy and result reference contracts with a scoped
+    unit test. No source/test change, provider/env/schema/deploy/payment/PR/force-push, or Cost Calibration Gate work was
+    performed.

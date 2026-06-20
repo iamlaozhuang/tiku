@@ -2580,10 +2580,14 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
     branch: codex/batch-213-ai-task-request-policy
     claimedAt: "2026-06-20T04:43:07-07:00"
+    validatedAt: "2026-06-20T04:46:05-07:00"
+    closedAt: "2026-06-20T04:46:05-07:00"
+    commitSha: 4b9daba15deabf4ae6136d247e03b948e2942e4c
+    result: pass_local_task_request_policy_result_reference_contract
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-213-ai-task-request-policy.md
     evidencePath: docs/05-execution-logs/evidence/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
     title: Module Run v2 ai-task-and-provider implementation seed

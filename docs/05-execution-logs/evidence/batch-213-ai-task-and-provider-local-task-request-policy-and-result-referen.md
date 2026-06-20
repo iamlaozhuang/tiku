@@ -17,7 +17,7 @@ result: pass
 - GREEN: existing `ai-generation-task-request-service` scoped unit coverage validates create/reuse/reject request
   policy, redacted result references, organization authorization boundary, and no internal id or omitted fixture echo;
   no source/test change was required.
-- Commit: `pending_batch_213_validation_commit`
+- Commit: `4b9daba15deabf4ae6136d247e03b948e2942e4c`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: current thread can continue through batch-213 closeout; no rollover required.
 - nextModuleRunCandidate: batch-214 redacted audit_log and ai_call_log evidence references, unless project status
@@ -59,3 +59,11 @@ Gate execution was performed.
 Only task ids, state paths, command names, pass/fail results, and local contract summaries are recorded. No secrets,
 `.env*` values, database URLs, raw DB rows, provider payloads, raw prompts, raw responses, OCR files, export payloads,
 payment data, or sensitive evidence are included.
+
+## Final Closeout State
+
+- Validation commit: `4b9daba15deabf4ae6136d247e03b948e2942e4c`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Closeout readiness rerun: pass.
+- Merge/push/cleanup: approved by current user fresh approval after local closeout.
