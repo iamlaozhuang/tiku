@@ -1,5 +1,102 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: personal-learning-ai-auto-seed-approval-request-2026-06-20
+    title: Personal Learning AI Auto Seed Approval Request 2026 06 20
+    phase: personal-learning-ai-auto-seed-approval-request
+    sourceStory: userRequestedContinuousProgressAfterQueueHealthClean
+    dependencies:
+      - stage-1-queue-health-archive-followup-2026-06-20
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User clarified that local commit, fast-forward merge to master, push origin/master, and merged short-branch
+      cleanup are approved and requested continuous progress until the work goal is reached. Scope is limited to
+      docs/state-only preparation of a pending human decision package for the current personal-learning-ai auto-seed
+      proposal. This task does not approve or execute the personal-learning-ai auto-seed transaction, does not append
+      seeded implementation tasks, and does not authorize source, tests, e2e, scripts, package/lockfile/dependency
+      changes, env/secret access, DB, provider/model calls or configuration, schema/migration, staging/prod/cloud
+      deploy, payment, OCR, export, external-service, Cost Calibration Gate, PR, force-push, destructive DB, high-risk
+      gate execution, pending implementation task claim, or blocked task semantic changes.
+    taskKind: docs_state_approval_request
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: manual_task_from_seed_proposal
+    status: in_progress
+    result: pending_validation
+    claimedAt: "2026-06-20T05:12:00-07:00"
+    branch: codex/personal-learning-ai-auto-seed-approval-request
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    decisionPath: docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml
+    capabilities:
+      docsStateApprovalRequest: approved
+      seedProposalReadOnlyDiagnostic: approved
+      autoSeedTransactionExecution: blocked
+      seededImplementationTaskAppend: blocked
+      pendingImplementationTaskClaim: blocked
+      sourceTestE2eScriptChange: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      providerModelCall: blocked
+      providerConfiguration: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentOcrExportExternalService: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+      destructiveDatabase: blocked
+      rawSensitiveEvidence: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+      - docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/04-agent-system/state/personal-learning-ai-auto-seed-approval-decision.yaml docs/05-execution-logs/task-plans/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/evidence/2026-06-20-personal-learning-ai-auto-seed-approval-request.md docs/05-execution-logs/audits-reviews/2026-06-20-personal-learning-ai-auto-seed-approval-request.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-learning-ai-auto-seed-approval-request-2026-06-20
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId personal-learning-ai-auto-seed-approval-request-2026-06-20
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval
   - id: stage-1-queue-health-archive-followup-2026-06-20
     title: Stage 1 Queue Health Archive Followup 2026 06 20
     phase: stage-1-queue-health-baseline

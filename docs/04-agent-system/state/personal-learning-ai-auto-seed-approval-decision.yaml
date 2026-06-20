@@ -1,0 +1,80 @@
+schemaVersion: 1
+decisionId: personal-learning-ai-auto-seed-approval-decision
+createdAt: "2026-06-20T05:12:00-07:00"
+status: pending_human_decision
+defaultAction: keep_seed_transaction_blocked_until_explicit_module_approval
+sourceStory: user-requested-continuous-progress-after-queue-health-clean
+sourceDiagnostics:
+  seedProposalScriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+  nextActionScriptPath: scripts/agent-system/Get-TikuNextAction.ps1
+  projectStatusScriptPath: scripts/agent-system/Get-TikuProjectStatus.ps1
+  observedBranch: codex/personal-learning-ai-auto-seed-approval-request
+  observedHead: a0ec3670
+proposal:
+  seedProposalDecision: proposal_available
+  seedModule: personal-learning-ai
+  seedSourcePlanningTask: phase-71-advanced-personal-ai-generation-implementation-planning
+  seedLocalFullLoopMinimum: L5
+  seedRequiredApproval: autoDriveLocalImplementationApproval for module personal-learning-ai
+  seedCandidateTaskCount: 4
+candidateTasks:
+  - taskId: batch-216-personal-learning-ai-personal-generation-request-flow
+    targetClosure: personal generation request flow
+    validationProfile: L5-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-217-personal-learning-ai-paper-and-mock-exam-context-selection
+    targetClosure: paper and mock_exam context selection
+    validationProfile: L5-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and
+    targetClosure: local UI/browser experience for request and result reference where approved
+    validationProfile: L5-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-219-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    targetClosure: redacted ai_call_log reference without storing raw generated AI content
+    validationProfile: L5-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+requestedApprovalStatement: >-
+  Approve autoDriveLocalImplementationApproval for module personal-learning-ai to continue batch-216 through batch-219
+  under the local low-risk Module Run v2 L5 flow. Allow low-risk local seeded implementation task creation, local
+  validation, evidence/audit updates, local commit, fast-forward merge to master, push to origin/master, and cleanup of
+  merged short branches. Forbid env/provider/schema/deploy/payment/PR/force-push/dependency/Cost Calibration Gate, real
+  provider/model calls, provider configuration, raw prompts, and raw generated AI content in evidence.
+allowedIfApproved:
+  - seed_transaction_execution_for_personal_learning_ai_only
+  - queued_low_risk_local_implementation_task_creation
+  - local_validation
+  - evidence_and_audit_updates
+  - local_commit
+  - fast_forward_merge_to_master
+  - push_origin_master
+  - merged_short_branch_cleanup
+blockedActions:
+  - env_secret_change_or_read
+  - provider_call
+  - provider_configuration
+  - dependency_or_lockfile_change
+  - schema_or_migration_change
+  - staging_prod_cloud_deploy
+  - payment_or_external_service
+  - pr_or_force_push
+  - raw_prompt_or_raw_generated_content_evidence
+  - cost_calibration_gate
+humanDecisionOptions:
+  - id: approve_requested_statement
+    effect: allow the exact requestedApprovalStatement for personal-learning-ai only
+  - id: keep_pending
+    effect: keep seed transaction blocked and continue manual/docs-state work only
+  - id: create_manual_task
+    effect: create a manually reviewed task instead of relying on auto seed
+validationCommands:
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+terminologyAnchors:
+  - personal-learning-ai
+  - paper
+  - mock_exam
+  - ai_call_log
+  - autoDriveLocalImplementationApproval
+costCalibrationGate: blocked
