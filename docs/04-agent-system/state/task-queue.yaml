@@ -3316,7 +3316,11 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-220-organization-training-admin-flow.md
     evidencePath: docs/05-execution-logs/evidence/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
-    status: in_progress
+    validatedAt: "2026-06-20T07:01:09-07:00"
+    closedAt: "2026-06-20T07:01:09-07:00"
+    commitSha: 8b59536c3f09a57dbe6ff4b0350ce25e68be56f7
+    result: pass_organization_training_admin_flow_contract
+    status: closed
     retryCount: 0
   - id: batch-221-organization-training-employee-answer-lifecycle-local-role-flow
     title: Module Run v2 organization-training implementation seed

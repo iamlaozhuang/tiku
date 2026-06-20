@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: d5ed6cc62897aed5c11e63b5aa1fb87582968fdb
 currentTask:
   id: batch-220-organization-training-organization-admin-training-draft-publish-ta
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass_organization_training_admin_flow_contract
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-220-organization-training-admin-flow.md
   evidencePath: docs/05-execution-logs/evidence/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-220-organization-training-organization-admin-training-draft-publish-ta.md
   branch: codex/batch-220-organization-training-admin-flow
-  commitSha: null
+  commitSha: 8b59536c3f09a57dbe6ff4b0350ce25e68be56f7
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4657,3 +4657,19 @@ lastStage4Batch219RedactedAiCallLogReference:
     Batch 219 validated existing local personal AI generation redacted ai_call_log reference contracts with a scoped
     unit test. No source/test change, real provider/model call, provider/env/schema/deploy/payment/PR/force-push,
     dependency change, raw prompt or raw generated AI content evidence, or Cost Calibration Gate work was performed.
+
+lastStage4Batch220OrganizationTrainingAdminFlow:
+  taskId: batch-220-organization-training-organization-admin-training-draft-publish-ta
+  validatedAt: "2026-06-20T07:01:09-07:00"
+  closedAt: "2026-06-20T07:01:09-07:00"
+  branch: codex/batch-220-organization-training-admin-flow
+  commitSha: 8b59536c3f09a57dbe6ff4b0350ce25e68be56f7
+  decision: pass_organization_training_admin_flow_contract
+  focusedUnit: src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
+  sourceChanged: false
+  nextCandidateTaskId: batch-221-organization-training-employee-answer-lifecycle-local-role-flow
+  boundary: >-
+    Batch 220 validated existing local organization-training admin draft, publish, takedown, copy, route, validator,
+    and admin entry contracts with scoped unit tests. No source/test change, browser/e2e/local DB write,
+    provider/env/schema/deploy/payment/PR/force-push, dependency change, raw employee answer text, full paper content,
+    raw prompt or raw generated AI content evidence, or Cost Calibration Gate work was performed.
