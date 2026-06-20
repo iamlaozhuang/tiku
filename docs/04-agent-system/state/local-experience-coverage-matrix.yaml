@@ -173,6 +173,35 @@ lastAp06OnlinePaymentProviderBoundaryDetailing:
     - database_read_write
     - schema_migration
     - raw_sensitive_evidence
+lastAp06OnlinePaymentExecutionFreshApprovalRequired:
+  taskId: ap-06-online-payment-execution-fresh-approval-required
+  evaluatedAt: "2026-06-19T21:26:52-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-ONLINE-PAYMENT
+  decision: pass_l0_ap06_online_payment_fresh_approval_required_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-execution-fresh-approval-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-06-online-payment-execution-fresh-approval-required.md
+  matrixStatus: release_blocked
+  nextRecommendedTask: ap-07-ocr-auto-import-execution-fresh-approval-required
+  freshApprovalTextMaterialized: true
+  productScopeChanged: false
+  sourceChanged: false
+  testChanged: false
+  highRiskExecuted: false
+  blockedGates:
+    - payment_external_service
+    - payment_provider_configuration_change
+    - env_secret
+    - dependency_package_lockfile_change
+    - database_read_write
+    - schema_migration
+    - staging_prod_cloud_deploy
+    - cost_calibration_gate
+    - source_test_e2e_script_change
+    - pr_force_push
+    - destructive_database
+    - raw_sensitive_evidence
 lastAp07OcrAutoImportProviderBoundaryDetailing:
   taskId: ap-07-ocr-auto-import-provider-boundary-detailing
   evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -1183,10 +1212,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-provider-boundary-detailing.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-06-online-payment-execution-fresh-approval-required.md
     status: release_blocked
     blockedGate: payment_external_service_env_secret_deploy_blocked
-    nextTask: ap-06-online-payment-execution-fresh-approval-required
+    nextTask: manual_fresh_approval_required_before_any_ap06_online_payment_execution
   - useCaseId: UC-FUTURE-OCR-AUTO-IMPORT
     edition: future_scope
     actor: content_admin_ops_admin
