@@ -1,0 +1,237 @@
+schemaVersion: 1
+decisionPackageBatch:
+  id: stage-3-decision-packages-2026-06-20
+  generatedAt: "2026-06-20T04:33:00-07:00"
+  generatedByTask: stage-3-decision-packages-2026-06-20
+  sourceTriagePath: docs/04-agent-system/state/blocked-item-triage-2026-06-20.yaml
+  sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
+  scope:
+    packageIds:
+      - AP-04
+      - AP-05
+      - AP-09
+      - AP-10
+      - AP-11
+    status: decision_ready_blocked
+    boundary: >-
+      This batch clarifies low-risk docs/state decision surfaces only. It does not unblock execution, mutate the source
+      approval-package tasks, claim pending implementation work, or authorize source/test/e2e/script/env/provider/schema/
+      migration/deploy/payment/PR/force-push/Cost Calibration Gate work.
+  counts:
+    packageCount: 5
+    productChoiceRequired: 2
+    exactScopeRequired: 3
+    executionAuthorized: 0
+packages:
+  - packageId: AP-04
+    taskId: ap-04-standard-ai-generation-scope-change-approval-package
+    title: Standard AI generation scope change
+    currentStatus: blocked
+    triageCategory: product_choice_required
+    decisionState: decision_ready_blocked
+    nextStep: product_choice_then_fresh_approval
+    decisionNeeded:
+      - Choose whether standard edition should include AI generation at all.
+      - Choose the user roles, use cases, request surfaces, quotas, and formal adoption boundary.
+      - Choose whether provider, env, quota, and cost controls are in scope for a later high-risk task.
+    preparedFreshApprovalText: >-
+      Fresh approval is required before AP-04 execution. The approval must explicitly name the standard-edition AI
+      generation surfaces, roles, allowed files, provider/env/quota/cost boundaries, validation commands, redaction
+      rules, rollback or disablement path, and stop conditions. Without that approval, AP-04 remains blocked.
+    expectedAllowedFilesWhenApproved:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - source/test files explicitly named by the future approval only
+    blockedUntilFreshApproval:
+      - providerCall
+      - providerConfiguration
+      - envSecretAccess
+      - schemaMigration
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - costCalibrationGate
+      - paymentExternalService
+      - pr
+      - forcePush
+    validationExpectations:
+      - local lint/typecheck/unit commands must be named before implementation.
+      - provider execution, env reads, quota measurement, and cost calibration require separate task-specific approval.
+    rollbackOrStopConditions:
+      - Stop if the product decision says standard AI generation remains out of scope.
+      - Stop if allowed files include provider/env/schema/deploy/payment surfaces without fresh approval.
+      - Stop on validation failure and open a focused repair task instead of broadening scope.
+    recommendedDisposition: defer_until_product_choice_and_high_risk_approval
+  - packageId: AP-05
+    taskId: ap-05-standard-org-self-service-scope-change-approval-package
+    title: Standard organization self-service scope change
+    currentStatus: blocked
+    triageCategory: product_choice_required
+    decisionState: decision_ready_blocked
+    nextStep: product_choice_then_fresh_approval
+    decisionNeeded:
+      - Choose whether standard edition should include organization self-service.
+      - Define org tier, admin, employee, authorization, privacy, API, UI, schema, and data visibility boundaries.
+      - Decide whether deployment or migration work is needed and split it into independent high-risk tasks.
+    preparedFreshApprovalText: >-
+      Fresh approval is required before AP-05 execution. The approval must explicitly name the organization
+      self-service scope, privacy boundary, exact API/UI/schema surfaces, allowed files, validation commands, rollback
+      strategy, redaction requirements, and stop conditions. Without that approval, AP-05 remains blocked.
+    expectedAllowedFilesWhenApproved:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - exact source/test files explicitly named by the future approval only
+    blockedUntilFreshApproval:
+      - productSourceChange
+      - schemaMigration
+      - envSecretAccess
+      - stagingProdDeploy
+      - dataBoundaryChange
+      - dependencyIntroduction
+      - paymentExternalService
+      - pr
+      - forcePush
+    validationExpectations:
+      - Future work must name the exact auth, authorization, organization, employee, and admin surfaces.
+      - Any schema/migration or deploy step must be separated from local docs/state or UI/API implementation.
+    rollbackOrStopConditions:
+      - Stop if product does not choose standard organization self-service for the current roadmap.
+      - Stop if the approval merges privacy/schema/API/UI/deploy into one broad task.
+      - Stop on validation failure and split into a focused repair package.
+    recommendedDisposition: defer_until_product_choice_and_high_risk_approval
+  - packageId: AP-09
+    taskId: ap-09-runtime-capability-list-approval-package
+    title: Runtime capability list
+    currentStatus: blocked
+    triageCategory: exact_scope_required
+    decisionState: decision_ready_blocked
+    nextStep: exact_scope_then_fresh_approval
+    decisionNeeded:
+      - Name the capability model, API, UI, and data-model surfaces.
+      - Name exact allowed files, blocked files, validation commands, rollback, and stop conditions.
+      - Decide whether the first step is an audit-only inventory or an implementation task.
+    preparedFreshApprovalText: >-
+      Fresh approval is required before AP-09 execution. The approval must explicitly name whether the task is
+      audit-only or implementation, the capability model/API/UI/data-model scope, allowed files, blocked files,
+      validation commands, rollback plan, evidence redaction rules, and stop conditions.
+    expectedAllowedFilesWhenApproved:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - exact source/test files explicitly named by the future approval only
+    blockedUntilFreshApproval:
+      - productSourceChange
+      - schemaMigration
+      - testChange
+      - providerCall
+      - envSecretAccess
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - costCalibrationGate
+      - pr
+      - forcePush
+    validationExpectations:
+      - Audit-only scope may use docs/state validation only.
+      - Implementation scope must include focused lint/typecheck/unit and any required local contract tests.
+    rollbackOrStopConditions:
+      - Stop if exact files are not named.
+      - Stop if capability inventory expands into provider/env/schema/deploy work.
+      - Stop on any validation failure and record a follow-up repair task.
+    recommendedDisposition: prepare_fresh_exact_scope_approval
+  - packageId: AP-10
+    taskId: ap-10-current-checkpoint-audit-repair-approval-package
+    title: Current checkpoint audit repair
+    currentStatus: blocked
+    triageCategory: exact_scope_required
+    decisionState: decision_ready_blocked
+    nextStep: exact_scope_then_fresh_approval
+    decisionNeeded:
+      - Name the exact checkpoint, failing finding, and repair objective.
+      - Name allowed source, test, and e2e files, or explicitly declare audit-only scope.
+      - Name validation commands and stop conditions before execution.
+    preparedFreshApprovalText: >-
+      Fresh approval is required before AP-10 execution. The approval must name the current checkpoint target, the
+      precise audit finding or repair objective, exact allowed source/test/e2e files, blocked files, validation
+      commands, redaction rules, and stop conditions. Without exact files, AP-10 remains blocked.
+    expectedAllowedFilesWhenApproved:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - exact source/test/e2e files explicitly named by the future approval only
+    blockedUntilFreshApproval:
+      - productSourceChange
+      - testChange
+      - e2eSpecChange
+      - envSecretAccess
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - pr
+      - forcePush
+    validationExpectations:
+      - If e2e is needed, it must use an existing local approved spec and be explicitly named.
+      - If source changes are needed, focused unit/contract validation must be named before implementation.
+    rollbackOrStopConditions:
+      - Stop if the checkpoint target is not exact.
+      - Stop if e2e runtime is requested without local-only spec authorization.
+      - Stop on validation failure and record a smaller repair task.
+    recommendedDisposition: prepare_fresh_exact_scope_approval
+  - packageId: AP-11
+    taskId: ap-11-source-governance-change-approval-package
+    title: Source governance change
+    currentStatus: blocked
+    triageCategory: exact_scope_required
+    decisionState: decision_ready_blocked
+    nextStep: exact_scope_then_fresh_approval
+    decisionNeeded:
+      - Name source ids, catalog rows, matrix rows, and requirement change rules.
+      - Decide whether the work is docs/state governance only or source-governance implementation.
+      - Name blocked gates and evidence redaction expectations before execution.
+    preparedFreshApprovalText: >-
+      Fresh approval is required before AP-11 execution. The approval must explicitly name the affected source ids,
+      catalog/matrix rows, requirement change rules, allowed files, blocked files, validation commands, rollback or
+      reversal plan, sensitive-evidence redaction rules, and stop conditions.
+    expectedAllowedFilesWhenApproved:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - exact additional docs/source files explicitly named by the future approval only
+    blockedUntilFreshApproval:
+      - productSourceChange
+      - sourceGovernanceRewrite
+      - sensitiveEvidence
+      - schemaMigration
+      - providerCall
+      - envSecretAccess
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - pr
+      - forcePush
+    validationExpectations:
+      - Docs/state governance scope must include queue/status/matrix consistency checks.
+      - Any source-governance rewrite must be separated from high-risk provider/env/schema/deploy tasks.
+    rollbackOrStopConditions:
+      - Stop if source ids or catalog/matrix rows are not exact.
+      - Stop if sensitive evidence would be copied into docs/state.
+      - Stop on validation failure and create a smaller governance repair task.
+    recommendedDisposition: prepare_fresh_exact_scope_approval
+nextStageRecommendation:
+  id: stage-4-executable-low-risk-local-tasks
+  condition: >-
+    Proceed only after the stage 3 package surface is committed and merged. Stage 4 should claim only a pending
+    dependency-satisfied low-risk local implementation task with exact allowedFiles, blockedFiles, validation commands,
+    and closeout policy.
