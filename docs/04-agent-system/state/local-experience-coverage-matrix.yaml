@@ -431,6 +431,40 @@ lastAp05StandardOrgSelfServiceScopeDecisionDetailing:
     - privacy_data_access
     - staging_prod_cloud_deploy
     - raw_sensitive_evidence
+lastAp05StandardOrgSelfServiceScopeChangeUserChoiceRequired:
+  taskId: ap-05-standard-org-self-service-scope-change-user-choice-required
+  evaluatedAt: "2026-06-19T22:27:50-07:00"
+  targetExperienceChain: blocked-use-case-acceleration-governance-packet
+  useCaseIds:
+    - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+  decision: pass_l0_ap05_product_privacy_scope_user_choice_required_keep_release_blocked
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  matrixStatus: release_blocked
+  currentScope: future_non_goal_for_standard
+  selectedOption: none
+  userChoiceRequired: true
+  productScopeChanged: false
+  sourceChanged: false
+  testChanged: false
+  highRiskExecuted: false
+  nextRecommendedTask: none_until_ap05_product_scope_choice
+  blockedGates:
+    - product_scope_change
+    - product_source_change
+    - api_ui_data_model_change
+    - schema_migration
+    - privacy_data_access
+    - database_read_write
+    - dependency_package_lockfile_change
+    - test_e2e_script_change
+    - env_secret
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - formal_adoption
+    - pr_force_push
+    - destructive_database
+    - raw_sensitive_evidence
 lastAp10CurrentCheckpointAuditTargetDetailing:
   taskId: ap-10-current-checkpoint-audit-target-detailing
   evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -1327,10 +1361,10 @@ matrix:
     uiSurface: blocked_by_governance
     unitEvidence: not_required
     e2eEvidence: not_required
-    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-decision-detailing.md
+    freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
     status: release_blocked
-    blockedGate: future_non_goal_for_standard
-    nextTask: ap-05-standard-org-self-service-scope-change-user-choice-required
+    blockedGate: standard_org_self_service_product_scope_user_choice_required
+    nextTask: none_until_ap05_product_scope_choice
   - useCaseId: UC-FUTURE-ONLINE-PAYMENT
     edition: future_scope
     actor: payer_ops_admin

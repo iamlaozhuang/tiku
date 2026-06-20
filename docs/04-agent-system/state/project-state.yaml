@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-04-standard-ai-generation-scope-change-user-choice-required
-updatedAt: "2026-06-19T22:17:06-07:00"
+currentPhase: ap-05-standard-org-self-service-scope-change-user-choice-required
+updatedAt: "2026-06-19T22:27:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-04-standard-ai-generation-scope-change-user-choice-required
+  id: ap-05-standard-org-self-service-scope-change-user-choice-required
   status: closed
-  result: pass_l0_ap04_product_scope_user_choice_required_no_scope_change_no_source_no_provider
-  sourceStory: userRequestedAp04StandardAiGenerationScopeChangeUserChoiceRequired
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
-  branch: codex/ap-04-standard-ai-generation-scope-change-user-choice-required
+  result: pass_l0_ap05_product_privacy_scope_user_choice_required_no_scope_change_no_schema_no_api_ui
+  sourceStory: userRequestedAp05StandardOrgSelfServiceScopeChangeUserChoiceRequired
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+  branch: codex/ap-05-standard-org-self-service-scope-change-user-choice-required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: ap_04_standard_ai_generation_scope_change_user_choice_required_closed
+  status: ap_05_standard_org_self_service_scope_change_user_choice_required_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: ap-04-standard-ai-generation-scope-change-user-choice-required
+  currentTaskId: ap-05-standard-org-self-service-scope-change-user-choice-required
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -3511,6 +3511,58 @@ localExperienceClosure:
       browserPlaywrightRuntime: blocked
       formalAdoption: blocked
       costCalibrationGate: blocked
+  currentAp05StandardOrgSelfServiceScopeChangeUserChoiceRequired:
+    taskId: ap-05-standard-org-self-service-scope-change-user-choice-required
+    evaluatedAt: "2026-06-19T22:27:50-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-05-STANDARD-ORG-SELF-SERVICE-USER-CHOICE
+    useCaseIds:
+      - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
+    decision: pass_l0_ap05_product_privacy_scope_user_choice_required_no_scope_change_no_schema_no_api_ui
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    boundarySummary:
+      validation: pass_docs_state_ap05_product_privacy_scope_user_choice_required
+      packageMaterialization: AP05_standard_org_self_service_scope_user_choice_required
+      matrixStatus: release_blocked
+      currentScope: future_non_goal_for_standard
+      selectedOption: none
+      availableOptionsDocumented: true
+      userChoiceRequiredForScopeChange: true
+      nextRecommendedTask: none_until_ap05_product_scope_choice
+      productScopeChanged: false
+      productSourceChanged: false
+      testSourceChanged: false
+      e2eExecuted: false
+      privacyDataAccessedThisTask: false
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      schemaMigrationChanged: false
+      dependencyChanged: false
+      stagingProdCloudDeployThisTask: false
+      paymentExternalServiceExecutedThisTask: false
+      productScopeChange: blocked
+      productSourceChange: blocked
+      apiUiDataModelChange: blocked
+      privacyDataAccess: blocked
+      envSecretOutput: blocked
+      databaseUrlRead: blocked
+      databaseUrlOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      formalAdoption: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      rawOrganizationPrivateContent: blocked
+      rawDatabaseRow: blocked
+      paymentData: blocked
+      privateIdentifier: blocked
+      rawSensitiveEvidence: blocked
   currentAp10CurrentCheckpointAuditTargetDetailing:
     taskId: ap-10-current-checkpoint-audit-target-detailing
     evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -3816,14 +3868,15 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-04 standard AI generation scope-change user-choice-required package is current and contains only docs/state
-    product choice stop text. UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL remains release-blocked and the selected option
-    is `none`; standard edition AI generation remains `future_non_goal_for_standard`. No product scope change, source
-    modification, API/UI/data model change, test/e2e/script repair, schema/migration, dependency/package/lockfile
-    change, DB read/write, provider/model call, env/secret access, Cost Calibration Gate, payment/external-service
-    execution, staging/prod/cloud/deploy, formal adoption, PR, force-push, destructive DB, raw prompt, raw response, raw
-    model output, provider payload, or sensitive evidence execution is approved or performed. The owner must choose A
-    keep non-goal, B limited standard AI generation later, C advanced-only upsell, or D defer before any AP-04 scope
-    change can proceed; non-A options require a separate fresh approval with exact allowed files, commands,
-    product/provider/cost/env boundaries, validation, rollback, redaction, and stop conditions.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-04-standard-ai-generation-scope-change-user-choice-required.md
+    AP-05 standard organization self-service scope-change user-choice-required package is current and contains only
+    docs/state product/privacy choice stop text. UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL remains release-blocked
+    and the selected option is `none`; standard organization self-service remains `future_non_goal_for_standard`. No
+    product scope change, source modification, API/UI/data model change, test/e2e/script repair, schema/migration,
+    dependency/package/lockfile change, privacy data access, DB read/write, env/secret access, staging/prod/cloud/deploy,
+    payment/external-service execution, formal adoption, PR, force-push, destructive DB, raw organization-private
+    content, raw database row, payment data, private identifier, or sensitive evidence execution is approved or
+    performed. The owner must choose A keep out of current release, B limited standard organization self-service later, C
+    advanced-only, or D defer to customer-specific review before any AP-05 scope change can proceed; non-A options
+    require a separate fresh approval with exact allowed files, commands, product boundary, privacy/data boundary,
+    release boundary, validation, rollback, redaction, and stop conditions.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
