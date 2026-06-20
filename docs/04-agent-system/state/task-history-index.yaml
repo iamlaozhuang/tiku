@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-20-batch-05
-  updatedAt: "2026-06-20T02:14:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-20-batch-06
+  updatedAt: "2026-06-20T02:25:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -9814,3 +9814,504 @@ entries:
     commitSha: null
     completedAt: "2026-06-17T12:40:01-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-batch-05
+
+  - id: active-queue-slimming-2026-06-20-batch-04
+    phase: active-queue-slimming-2026-06-20-batch-04
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-04.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-04.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: mechanism-historical-evidence-debt-register
+    phase: mechanism-historical-evidence-debt-register
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-debt-register.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-historical-evidence-debt-register.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T12:55:22-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: next-seedable-module-source-coverage-audit
+    phase: next-seedable-module-source-coverage-audit
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-next-seedable-module-source-coverage-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T13:08:14-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: local-experience-acceptance-bridge-readiness
+    phase: local-experience-acceptance-bridge-readiness
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-acceptance-bridge-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-acceptance-bridge-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T13:22:40-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-personal-ai-local-transport-contract-planning
+    phase: module-run-v2-personal-ai-local-transport-contract-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T13:36:23-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    phase: module-run-v2-personal-ai-local-ui-browser-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T13:52:44-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-personal-ai-ui-redaction-unit-alignment
+    phase: module-run-v2-personal-ai-ui-redaction-unit-alignment
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T14:11:29-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: personal-ai-local-flow-blocked-evidence-closeout
+    phase: personal-ai-local-flow-blocked-evidence-closeout
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T14:36:21-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: personal-ai-local-playwright-auth-strategy-alignment
+    phase: personal-ai-local-playwright-auth-strategy-alignment
+    status: closed
+    taskKind: local_validation_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T15:01:53-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: local-experience-bridge-proposal-diagnostic
+    phase: local-experience-bridge-proposal-diagnostic
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T15:21:12-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-cross-role-local-flow-planning
+    phase: module-run-v2-cross-role-local-flow-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T15:37:31-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
+    phase: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
+    status: closed
+    taskKind: local_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T15:55:47-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-local-full-flow-lifecycle-phase-hardening
+    phase: module-run-v2-local-full-flow-lifecycle-phase-hardening
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T16:07:59-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-next-experience-chain-readiness-audit
+    phase: module-run-v2-next-experience-chain-readiness-audit
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T16:20:03-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-organization-training-local-role-flow-planning
+    phase: module-run-v2-organization-training-local-role-flow-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T16:30:46-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-organization-training-local-role-flow-smoke-validation
+    phase: module-run-v2-organization-training-local-role-flow-smoke-validation
+    status: closed
+    taskKind: local_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-local-role-flow-smoke-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T16:44:51-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-local-experience-governance-hardening
+    phase: module-run-v2-local-experience-governance-hardening
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-experience-governance-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-experience-governance-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T17:37:05-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-local-experience-authorization-package-hardening
+    phase: module-run-v2-local-experience-authorization-package-hardening
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-experience-authorization-package-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-experience-authorization-package-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T17:50:52-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: unified-standard-advanced-current-coverage-refresh
+    phase: unified-standard-advanced-current-coverage-refresh
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-unified-standard-advanced-current-coverage-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T18:13:50-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-admin-employee-entry-surface-planning
+    phase: organization-training-admin-employee-entry-surface-planning
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-admin-employee-entry-surface-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-admin-employee-entry-surface-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T18:50:04-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-organization-training-l6-closure-readiness-audit
+    phase: module-run-v2-organization-training-l6-closure-readiness-audit
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-l6-closure-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T18:34:05-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-runtime-api-gap-boundary-audit
+    phase: organization-training-runtime-api-gap-boundary-audit
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-runtime-api-gap-boundary-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T19:01:40-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-version-takedown-runtime-route-contract-tdd
+    phase: organization-training-version-takedown-runtime-route-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-version-takedown-runtime-route-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T20:32:53-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-draft-source-context-schema-approval-package
+    phase: organization-training-draft-source-context-schema-approval-package
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-draft-source-context-schema-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T21:19:37-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    phase: organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T22:07:07-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-employee-answer-runtime-repository-contract-tdd
+    phase: organization-training-employee-answer-runtime-repository-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-repository-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T22:26:47-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization
+    phase: organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T22:42:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-employee-answer-runtime-route-contract-tdd
+    phase: organization-training-employee-answer-runtime-route-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-employee-answer-runtime-route-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T23:18:31-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-draft-source-context-schema-migration
+    phase: organization-training-draft-source-context-schema-migration
+    status: closed
+    taskKind: local_schema_migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-organization-training-draft-source-context-schema-migration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-17T23:55:30-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-local-experience-chain-queue-materialization
+    phase: organization-training-local-experience-chain-queue-materialization
+    status: closed
+    taskKind: docs_state_queue_materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-local-experience-chain-queue-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T00:10:47-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-draft-source-context-runtime-contract-tdd
+    phase: organization-training-draft-source-context-runtime-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-runtime-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T00:46:38-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-admin-employee-entry-surface-local-ui
+    phase: organization-training-admin-employee-entry-surface-local-ui
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-entry-surface-local-ui.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T01:15:29-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-admin-employee-local-full-flow-validation
+    phase: organization-training-admin-employee-local-full-flow-validation
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T01:37:17-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-admin-source-context-ui-response-key-contract-repair
+    phase: organization-training-admin-source-context-ui-response-key-contract-repair
+    status: closed
+    taskKind: local_ui_contract_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-source-context-ui-response-key-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-source-context-ui-response-key-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T03:55:34-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-experience-closure-readiness-audit
+    phase: organization-training-experience-closure-readiness-audit
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-experience-closure-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T04:10:37-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-accumulated-chain-closeout-precommit-scope-recovery
+    phase: organization-training-accumulated-chain-closeout-precommit-scope-recovery
+    status: closed
+    taskKind: dirty_worktree_recovery
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-accumulated-chain-closeout-precommit-scope-recovery.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-accumulated-chain-closeout-precommit-scope-recovery.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T04:27:34-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-training-accumulated-chain-approved-closeout
+    phase: organization-training-accumulated-chain-approved-closeout
+    status: closed
+    taskKind: accumulated_chain_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-accumulated-chain-approved-closeout.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T04:41:40-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: local-experience-coverage-matrix-summary-count-repair
+    phase: local-experience-coverage-matrix-summary-count-repair
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T04:52:47-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-analytics-summary-local-flow-readiness-audit
+    phase: organization-analytics-summary-local-flow-readiness-audit
+    status: closed
+    taskKind: readiness_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-flow-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T05:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-analytics-summary-ui-entry-contract-tdd
+    phase: organization-analytics-summary-ui-entry-contract-tdd
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-ui-entry-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T06:05:15-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-portal-admin-local-entry-readiness-audit
+    phase: organization-portal-admin-local-entry-readiness-audit
+    status: closed
+    taskKind: readiness_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-entry-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T05:04:54-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-portal-admin-shell-entry-contract-tdd
+    phase: organization-portal-admin-shell-entry-contract-tdd
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-shell-entry-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T06:21:13-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-portal-admin-local-full-flow-validation
+    phase: organization-portal-admin-local-full-flow-validation
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-local-full-flow-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T06:35:18-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-portal-admin-experience-closure-readiness-audit
+    phase: organization-portal-admin-experience-closure-readiness-audit
+    status: closed
+    taskKind: readiness_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T06:49:41-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-analytics-summary-local-full-flow-validation
+    phase: organization-analytics-summary-local-full-flow-validation
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-local-full-flow-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T07:00:49-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    phase: organization-analytics-admin-visible-scope-local-fixture-contract-repair
+    status: closed
+    taskKind: local_fixture_contract_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-admin-visible-scope-local-fixture-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T07:21:24-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: organization-analytics-summary-experience-closure-readiness-audit
+    phase: organization-analytics-summary-experience-closure-readiness-audit
+    status: closed
+    taskKind: readiness_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T07:26:43-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
+    phase: local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-local-experience-coverage-matrix-summary-count-repair-after-analytics-closure.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-local-experience-coverage-matrix-summary-count-repair-after-analytics-closure.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T07:34:01-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: module-run-v2-low-risk-experience-batch-mechanism-tuning
+    phase: module-run-v2-low-risk-experience-batch-mechanism-tuning
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-module-run-v2-low-risk-experience-batch-mechanism-tuning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "null"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
+  - id: standard-core-student-local-experience-batch
+    phase: standard-core-student-local-experience-batch
+    status: closed
+    taskKind: local_experience_batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-experience-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-experience-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T07:49:20-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-06
