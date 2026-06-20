@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: mechanism-ai-task-provider-auto-seed-history-dependency
-updatedAt: "2026-06-20T02:46:17-07:00"
+currentPhase: batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+updatedAt: "2026-06-20T03:07:37-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
-  lastKnownOriginMasterSha: 8abd7c9a7736eb0a9b1dcb2639d9646463359d4c
+  lastKnownMasterSha: 1c726f548838d99bdf7ed4d955dc49d523f8a9fc
+  lastKnownOriginMasterSha: 1c726f548838d99bdf7ed4d955dc49d523f8a9fc
 currentTask:
-  id: mechanism-ai-task-provider-auto-seed-history-dependency
-  status: closed
-  result: pass_docs_state_active_queue_slimming_batch_08_no_execution
-  sourceStory: userApprovedActiveQueueSlimmingBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-08.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
-  branch: codex/active-queue-slimming-batch-08
-  commitSha: null
+  id: batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  status: in_progress
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-212-ai-task-and-provider-lifecycle-claim.md
+  evidencePath: docs/05-execution-logs/evidence/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  branch: codex/batch-212-ai-task-provider-lifecycle
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

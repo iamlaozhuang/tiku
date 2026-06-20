@@ -2785,6 +2785,13 @@ tasks:
       runStatus: active
       cleanupPolicy: none
       redactionRequired: true
+    redaction: no database URL, secret, env value, provider payload, raw prompt, raw model response, raw generated output, row-level data, auth token, or sensitive evidence in logs.
+    rollback: revert the batch-212 branch commit or restore the exact allowed docs/state files from master; no database, env, provider, schema, dependency, deploy, payment, PR, force-push, or Cost Calibration rollback action is authorized.
+    stopConditions:
+      - task scope requires env/provider/schema/deploy/payment/PR/force-push/Cost Calibration Gate access.
+      - validation requires reading .env* or calling any model provider/external service.
+      - planned changes would touch blocked files or files outside allowedFiles.
+      - existing user changes appear in batch-212 allowed files and cannot be separated safely.
     taskKind: implementation
     moduleRunVersion: 2
     allowedFiles:
@@ -2832,7 +2839,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
     evidencePath: docs/05-execution-logs/evidence/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-212-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-    status: pending
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-212-ai-task-and-provider-lifecycle-claim.md
+    status: in_progress
     retryCount: 0
   - id: batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
     title: Module Run v2 ai-task-and-provider implementation seed
