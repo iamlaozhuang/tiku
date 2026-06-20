@@ -1,169 +1,55 @@
 schemaVersion: 1
 tasks:
-  - id: active-queue-slimming-2026-06-20-batch-07
-    title: Active Queue Slimming 2026 06 20 Batch 07
-    phase: active-queue-slimming-2026-06-20-batch-07
+  - id: active-queue-slimming-2026-06-20-batch-08
+    title: Active Queue Slimming 2026 06 20 Batch 08
+    phase: active-queue-slimming-2026-06-20-batch-08
     sourceStory: userApprovedActiveQueueSlimmingBatch
     dependencies:
+      - active-queue-slimming-2026-06-20-batch-07
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested missing evidence triage/register for standard-admin-ops-logs-local-full-flow-validation
+      and fresh-approved continuation of docs/state-only active queue archival maintenance as batch 08. Scope is limited
+      to historical evidence debt registration, terminal task block archival, history index updates, project-state/task
+      queue sync, task plan/evidence/audit records, local commit, fast-forward merge, push origin/master, and merged
+      short-branch cleanup. This task does not authorize archived task business execution, source/test/e2e/script repair,
+      DB, env/secret, provider/model, schema/migration, dependency/package/lockfile, staging/prod/cloud/deploy, payment,
+      OCR, export, external-service, Cost Calibration Gate, PR, force push, destructive DB, sensitive evidence output, or
+      L1/L2/L3 execution.
+    taskKind: docs_state_queue_archive
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    status: closed
+    result: pass_docs_state_active_queue_slimming_batch_08_no_execution
+    claimedAt: "2026-06-20T03:05:00-07:00"
+    validatedAt: "2026-06-20T03:05:00-07:00"
+    closedAt: "2026-06-20T03:05:00-07:00"
+    branch: codex/active-queue-slimming-batch-08
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-08.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
+    archivedTaskIds:
       - active-queue-slimming-2026-06-20-batch-06
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User approved this session to continue docs/state-only active queue archival maintenance. Scope is limited to
-      serial archive batches of up to 50 terminal archive candidates, with a maximum of 5 batches. This batch is
-      intentionally capped before an unregistered missing evidence candidate.
-    taskKind: docs_state_queue_archive
-    moduleRunVersion: 2
-    executionProfile: docs_state_lite
-    evidenceMode: full
-    validationPolicy: docs_state
-    queueSelectionMode: explicit_user_requested_followup
-    status: closed
-    result: pass_docs_state_active_queue_slimming_batch_07_no_execution
-    claimedAt: "2026-06-20T02:48:00-07:00"
-    validatedAt: "2026-06-20T02:48:00-07:00"
-    closedAt: "2026-06-20T02:48:00-07:00"
-    branch: codex/active-queue-slimming-batch-07
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-07.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
-    archivedTaskIds:
-      - active-queue-slimming-2026-06-20-batch-05
-      - standard-core-account-session-local-experience-audit
-      - standard-core-personal-auth-redeem-local-experience-audit
-      - standard-core-practice-local-experience-audit
-      - standard-core-mock-exam-local-experience-audit
-      - standard-core-report-mistake-book-local-experience-audit
-      - standard-core-student-local-full-flow-validation
-      - mechanism-throughput-readiness-tuning
-      - mechanism-guarded-goal-packet-v1
-      - mechanism-docs-queue-slimming-and-self-repair
-      - standard-admin-ops-logs-local-experience-batch
-      - standard-admin-ops-logs-local-experience-audit
+      - active-queue-slimming-2026-06-20-batch-07
+      - standard-admin-ops-logs-local-full-flow-validation
+      - standard-core-student-local-full-flow-contract-repair
+      - standard-core-student-local-full-flow-validation-rerun
+      - standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+      - standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    registeredLegacyUnavailableEvidence:
+      - standard-admin-ops-logs-local-full-flow-validation
+    legacyAuditUnavailable:
+      - standard-admin-ops-logs-local-full-flow-validation
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    historicalEvidenceDebtPath: docs/04-agent-system/state/historical-evidence-debt.yaml
     capabilities:
       docsStateOnlyQueueMaintenance: approved
       queueArchiveAndIndex: approved
-      costCalibrationGate: blocked
-      rawSensitiveEvidence: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-07.md
-      - docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - drizzle/**
-      - scripts/**
-    validationCommands:
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-07.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-07.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-20-batch-07
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-07
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-07
-    closeoutPolicy:
-      localCommit: required
-      fastForwardMergeToMaster: approved_by_fresh_user_request
-      pushOriginMaster: approved_by_fresh_user_request
-      deleteMergedShortBranch: required
-  - id: active-queue-slimming-2026-06-20-batch-06
-    title: Active Queue Slimming 2026 06 20 Batch 06
-    phase: active-queue-slimming-2026-06-20-batch-06
-    sourceStory: userApprovedActiveQueueSlimmingBatch
-    dependencies:
-      - active-queue-slimming-2026-06-20-batch-05
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User approved this session to continue docs/state-only active queue archival maintenance. Scope is limited to
-      serial archive batches of up to 50 terminal archive candidates, with a maximum of 5 batches. This task does not
-      authorize archived task business execution, source/test/e2e/script repair, DB, env/secret, provider/model,
-      schema/migration, dependency/package/lockfile, staging/prod/cloud/deploy, payment, OCR, export, external-service,
-      Cost Calibration Gate, PR, force push, destructive DB, sensitive evidence output, exact_scope_local_auto_execute,
-      or L1/L2/L3 execution.
-    taskKind: docs_state_queue_archive
-    moduleRunVersion: 2
-    executionProfile: docs_state_lite
-    evidenceMode: full
-    validationPolicy: docs_state
-    queueSelectionMode: explicit_user_requested_followup
-    status: closed
-    result: pass_docs_state_active_queue_slimming_batch_06_no_execution
-    claimedAt: "2026-06-20T02:25:00-07:00"
-    validatedAt: "2026-06-20T02:25:00-07:00"
-    closedAt: "2026-06-20T02:25:00-07:00"
-    branch: codex/active-queue-slimming-batch-06
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-06.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
-    archivedTaskIds:
-      - active-queue-slimming-2026-06-20-batch-04
-      - mechanism-historical-evidence-debt-register
-      - next-seedable-module-source-coverage-audit
-      - local-experience-acceptance-bridge-readiness
-      - module-run-v2-personal-ai-local-transport-contract-planning
-      - module-run-v2-personal-ai-local-ui-browser-planning
-      - module-run-v2-personal-ai-ui-redaction-unit-alignment
-      - personal-ai-local-flow-blocked-evidence-closeout
-      - personal-ai-local-playwright-auth-strategy-alignment
-      - local-experience-bridge-proposal-diagnostic
-      - module-run-v2-cross-role-local-flow-planning
-      - module-run-v2-cross-role-local-auth-route-guard-smoke-validation
-      - module-run-v2-local-full-flow-lifecycle-phase-hardening
-      - module-run-v2-next-experience-chain-readiness-audit
-      - module-run-v2-organization-training-local-role-flow-planning
-      - module-run-v2-organization-training-local-role-flow-smoke-validation
-      - module-run-v2-local-experience-governance-hardening
-      - module-run-v2-local-experience-authorization-package-hardening
-      - unified-standard-advanced-current-coverage-refresh
-      - organization-training-admin-employee-entry-surface-planning
-      - module-run-v2-organization-training-l6-closure-readiness-audit
-      - organization-training-runtime-api-gap-boundary-audit
-      - organization-training-version-takedown-runtime-route-contract-tdd
-      - organization-training-draft-source-context-schema-approval-package
-      - organization-training-employee-answer-runtime-repository-contract-tdd-queue-materialization
-      - organization-training-employee-answer-runtime-repository-contract-tdd
-      - organization-training-employee-answer-runtime-route-contract-tdd-queue-materialization
-      - organization-training-employee-answer-runtime-route-contract-tdd
-      - organization-training-draft-source-context-schema-migration
-      - organization-training-local-experience-chain-queue-materialization
-      - organization-training-draft-source-context-runtime-contract-tdd
-      - organization-training-admin-employee-entry-surface-local-ui
-      - organization-training-admin-employee-local-full-flow-validation
-      - organization-training-admin-source-context-ui-response-key-contract-repair
-      - organization-training-experience-closure-readiness-audit
-      - organization-training-accumulated-chain-closeout-precommit-scope-recovery
-      - organization-training-accumulated-chain-approved-closeout
-      - local-experience-coverage-matrix-summary-count-repair
-      - organization-analytics-summary-local-flow-readiness-audit
-      - organization-analytics-summary-ui-entry-contract-tdd
-      - organization-portal-admin-local-entry-readiness-audit
-      - organization-portal-admin-shell-entry-contract-tdd
-      - organization-portal-admin-local-full-flow-validation
-      - organization-portal-admin-experience-closure-readiness-audit
-      - organization-analytics-summary-local-full-flow-validation
-      - organization-analytics-admin-visible-scope-local-fixture-contract-repair
-      - organization-analytics-summary-experience-closure-readiness-audit
-      - local-experience-coverage-matrix-summary-count-repair-after-analytics-closure
-      - module-run-v2-low-risk-experience-batch-mechanism-tuning
-      - standard-core-student-local-experience-batch
-    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    capabilities:
-      docsStateOnlyQueueMaintenance: approved
-      queueArchiveAndIndex: approved
+      historicalEvidenceDebtRegistration: approved
       sourceTestE2eScriptChange: blocked
       databaseRead: blocked
       databaseWrite: blocked
@@ -187,9 +73,10 @@ tasks:
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
       - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-06.md
-      - docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
+      - docs/04-agent-system/state/historical-evidence-debt.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-08.md
+      - docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
     blockedFiles:
       - .env*
       - package.json
@@ -202,14 +89,16 @@ tasks:
       - drizzle/**
       - scripts/**
     validationCommands:
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-06.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-06.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/04-agent-system/state/historical-evidence-debt.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-08.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/04-agent-system/state/historical-evidence-debt.yaml docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-08.md docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-08.md docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-08.md
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-20-batch-06
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-06
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-06
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-20-batch-08
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-08
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-20-batch-08
     closeoutPolicy:
       localCommit: required
       fastForwardMergeToMaster: approved_by_fresh_user_request
@@ -1593,539 +1482,6 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
     retryCount: 0
-  - id: standard-admin-ops-logs-local-full-flow-validation
-    title: Standard admin ops logs local full-flow validation
-    phase: standard-admin-ops-logs-local-full-flow-validation
-    sourceStory: localExperienceClosureGate.standardAdminOpsLogsRuntimeFullFlow
-    dependencies:
-      - standard-admin-ops-logs-local-experience-batch
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Seeded by `standard-admin-ops-logs-local-experience-batch` because low-risk batch evidence is not enough to mark
-      `UC-STD-ADMIN-OPS-LOGS` `experience_closed`. Execution requires a separate local full-flow task scope and
-      approval to run Browser/Playwright runtime against existing local e2e specs. Release, staging/prod,
-      provider/model, payment, external-service, dependency, schema/migration, `.env*`, destructive database
-      operations, PR, force-push, and Cost Calibration Gate remain blocked.
-    targetExperienceChain: standard-admin-ops-logs
-    useCaseIds:
-      - UC-STD-ADMIN-OPS-LOGS
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: recommended_next_requires_explicit_runtime_approval
-    taskKind: local_full_flow_validation
-    moduleRunVersion: 2
-    status: closed
-    result: pass
-    claimedAt: "2026-06-18T10:05:55-07:00"
-    closedAt: "2026-06-18T10:16:35-07:00"
-    blockedGates:
-      - requires_explicit_localhost_runtime_approval_before_execution
-      - release, staging/prod, cloud, deploy, payment, external-service
-      - provider/model calls or provider configuration
-      - schema/drizzle/migration changes
-      - package/lockfile/dependency changes
-      - "`.env*` changes or secret/env reads"
-      - destructive database operations
-      - PR creation or force-push
-      - Cost Calibration Gate
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-    readOnlyAllowedFiles:
-      - e2e/admin-audit-navigation.spec.ts
-      - e2e/local-business-flow.spec.ts
-      - src/**
-      - tests/**
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx"
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/admin-audit-navigation.spec.ts e2e/local-business-flow.spec.ts
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
-    retryCount: 0
-
-  - id: standard-core-student-local-full-flow-contract-repair
-    title: Standard core student local full-flow contract repair
-    phase: standard-core-student-local-full-flow-contract-repair
-    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
-    dependencies:
-      - standard-core-student-local-full-flow-validation
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User explicitly approved the serial standard student core chain on 2026-06-18: seed
-      `standard-core-student-local-full-flow-contract-repair`, execute the smallest product repair, rerun
-      `standard-core-student-local-full-flow-validation`, then enter closure readiness audit only if fresh runtime
-      evidence passes. This repair task may edit only the explicit student runtime/session contract files, focused unit
-      tests, docs/state/task plan/evidence/audit. It must not edit e2e specs, package/lockfiles/dependencies, `.env*`,
-      schema/drizzle/migrations, provider/model configuration, staging/prod/cloud/deploy/payment/external-service code,
-      destructive DB operations, PRs, force-push, or Cost Calibration Gate.
-    targetExperienceChain: standard-core-student
-    useCaseIds:
-      - UC-STD-ACCOUNT-SESSION
-      - UC-STD-PERSONAL-AUTH-REDEEM
-      - UC-STD-PRACTICE
-      - UC-STD-MOCK-EXAM
-      - UC-STD-REPORT-MISTAKE-BOOK
-    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
-    evidenceMode: full
-    validationPolicy: local_unit_plus_scoped_local_full_flow
-    queueSelectionMode: ready_set
-    taskKind: implementation
-    moduleRunVersion: 2
-    status: closed
-    result: pass
-    claimedAt: "2026-06-18T10:05:55-07:00"
-    closedAt: "2026-06-18T10:16:35-07:00"
-    capabilities:
-      localFullFlowGate: blocked_until_validation_task
-      localE2EValidation: blocked_until_validation_task
-      providerCall: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-      - src/app/(auth)/login/page.tsx
-      - src/db/dev-seed.ts
-      - src/db/dev-seed.test.ts
-      - src/features/student/studentRuntimeApi.ts
-      - src/features/student/practice/StudentPracticePage.tsx
-      - src/features/student/mock-exam/StudentMockExamReportPage.tsx
-      - src/features/student/mistake-book/StudentMistakeBookPage.tsx
-      - src/server/repositories/student-flow-runtime-repository.ts
-      - src/server/services/student-flow-runtime.ts
-      - tests/unit/student-practice-ui.test.ts
-      - tests/unit/student-mock-exam-report-ui.test.ts
-      - tests/unit/student-mistake-book-ui.test.ts
-      - tests/unit/student-login-ui.test.ts
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/operating-manual.md
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation.md
-      - src/**
-      - tests/unit/**
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/student-practice-mock-entry.spec.ts
-      - e2e/local-business-flow.spec.ts
-      - scripts/agent-system/*.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        message: "fix(student): repair local full-flow session contract"
-        approval: current_user_prompt_2026_06_18_serial_standard_student_core_chain
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        parkWorktree: true
-    validationCommands:
-      - npm.cmd run test:unit -- src/db/dev-seed.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-login-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
-      - npm.cmd run test:e2e -- --list
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-    retryCount: 0
-
-  - id: standard-core-student-local-full-flow-validation-rerun
-    title: standard core student local full flow validation rerun
-    phase: standard-core-student-local-full-flow-validation-rerun
-    sourceStory: localExperienceMechanismSeed.local_full_flow_validation
-    dependencies:
-      - standard-core-student-local-full-flow-contract-repair
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User explicitly approved the serial standard student core chain on 2026-06-18: rerun
-      `standard-core-student-local-full-flow-validation` after the contract repair, then enter closure readiness audit only
-      if fresh local runtime evidence passes. This rerun is localhost-only and limited to existing specs
-      `e2e/local-auth-route-guard.spec.ts`, `e2e/student-practice-mock-entry.spec.ts`, and
-      `e2e/local-business-flow.spec.ts`. Product source fixes, e2e spec edits, `.env*`, package/lockfile/dependency,
-      schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment/external-service, destructive database
-      operations, PR, force-push, and Cost Calibration Gate remain blocked.
-    targetExperienceChain: standard-core-student
-    useCaseIds:
-      - UC-STD-ACCOUNT-SESSION
-      - UC-STD-PERSONAL-AUTH-REDEEM
-      - UC-STD-PRACTICE
-      - UC-STD-MOCK-EXAM
-      - UC-STD-REPORT-MISTAKE-BOOK
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: ready_set
-    taskKind: local_full_flow_validation
-    moduleRunVersion: 2
-    status: closed
-    result: blocked_local_full_flow_validation_failure
-    claimedAt: "2026-06-18T10:24:05-07:00"
-    closedAt: "2026-06-18T10:28:30-07:00"
-    capabilities:
-      localFullFlowGate: approved_localhost_only
-      localE2EValidation: approved_local_only_existing_specs
-      e2eListOnly: allowed
-      focusedUnitValidation: allowed
-      providerCall: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/operating-manual.md
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/student-practice-mock-entry.spec.ts
-      - e2e/local-business-flow.spec.ts
-      - src/**
-      - tests/**
-      - scripts/agent-system/*.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        message: "chore(standard): rerun student local full flow"
-        approval: current_user_prompt_2026_06_18_serial_standard_student_core_chain
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        parkWorktree: true
-    validationCommands:
-      - npm.cmd run test:unit -- src/db/dev-seed.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-login-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-validation-rerun
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-validation-rerun
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-    retryCount: 0
-
-  - id: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-    title: standard core student local full flow report ai explanation contract repair
-    phase: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
-    dependencies:
-      - standard-core-student-local-full-flow-validation-rerun
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User explicitly approved the serial standard student core chain on 2026-06-18: seed
-      `standard-core-student-local-full-flow-report-ai-explanation-contract-repair`, execute the smallest product repair
-      for exam report creation payload and mistake-book AI explanation OK response, rerun
-      `standard-core-student-local-full-flow-validation`, then enter closure readiness audit only if fresh runtime
-      evidence passes. This repair task may edit only the explicit report, mistake-book AI explanation, focused unit test,
-      docs/state/task plan/evidence/audit files. It must not edit e2e specs, package/lockfiles/dependencies, `.env*`,
-      schema/drizzle/migrations, provider/model configuration, staging/prod/cloud/deploy/payment/external-service code,
-      destructive DB operations, PRs, force-push, or Cost Calibration Gate.
-    targetExperienceChain: standard-core-student
-    useCaseIds:
-      - UC-STD-ACCOUNT-SESSION
-      - UC-STD-PERSONAL-AUTH-REDEEM
-      - UC-STD-PRACTICE
-      - UC-STD-MOCK-EXAM
-      - UC-STD-REPORT-MISTAKE-BOOK
-    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
-    evidenceMode: full
-    validationPolicy: local_unit_plus_scoped_local_full_flow
-    queueSelectionMode: ready_set
-    taskKind: implementation
-    moduleRunVersion: 2
-    status: closed
-    result: blocked_local_full_flow_validation_failure
-    claimedAt: "2026-06-18T10:39:34-07:00"
-    closedAt: "2026-06-18T10:48:00-07:00"
-    capabilities:
-      localFullFlowGate: blocked_until_validation_task
-      localE2EValidation: blocked_until_validation_task
-      e2eListOnly: allowed
-      focusedUnitValidation: allowed
-      providerCall: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - src/server/contracts/exam-report-contract.ts
-      - src/server/contracts/mistake-book-contract.ts
-      - src/server/mappers/exam-report-mapper.ts
-      - src/server/mappers/mistake-book-mapper.ts
-      - src/server/services/exam-report-service.ts
-      - src/server/services/exam-report-service.test.ts
-      - src/server/services/exam-report-route.ts
-      - src/server/services/exam-report-route.test.ts
-      - src/server/services/mistake-book-service.ts
-      - src/server/services/mistake-book-service.test.ts
-      - src/server/services/mistake-book-route.ts
-      - src/server/services/mistake-book-route.test.ts
-      - src/server/services/student-experience/route-handlers.ts
-      - src/server/services/student-flow-runtime.ts
-      - src/server/services/student-mistake-book-runtime.ts
-      - src/server/repositories/student-flow-runtime-repository.ts
-      - src/server/repositories/exam-report-repository.ts
-      - src/server/repositories/mistake-book-repository.ts
-      - tests/unit/student-mock-exam-report-ui.test.ts
-      - tests/unit/student-mistake-book-ui.test.ts
-      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
-      - tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts
-      - tests/unit/phase-8-student-mistake-book-runtime.test.ts
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/operating-manual.md
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/student-practice-mock-entry.spec.ts
-      - e2e/local-business-flow.spec.ts
-      - src/app/api/v1/exam-reports/route.ts
-      - src/app/api/v1/mistake-books/[publicId]/ai-explanation/route.ts
-      - src/features/student/mock-exam/StudentMockExamReportPage.tsx
-      - src/features/student/mistake-book/StudentMistakeBookPage.tsx
-      - scripts/agent-system/*.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - playwright-report/**
-      - test-results/**
-      - scripts/**
-    closeoutPolicy:
-      localCommit:
-        approved: false
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        parkWorktree: true
-    validationCommands:
-      - npm.cmd run test:unit -- src/server/services/exam-report-service.test.ts src/server/services/exam-report-route.test.ts src/server/services/mistake-book-service.test.ts src/server/services/mistake-book-route.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts tests/unit/phase-8-student-mistake-book-runtime.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-    retryCount: 0
-
-  - id: standard-core-student-local-full-flow-content-admin-heading-contract-repair
-    title: standard core student local full flow content admin heading contract repair
-    phase: standard-core-student-local-full-flow-content-admin-heading-contract-repair
-    sourceStory: localExperienceMechanismSeed.local_full_flow_contract_repair
-    dependencies:
-      - standard-core-student-local-full-flow-report-ai-explanation-contract-repair
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User reaffirmed on 2026-06-18 that the serial standard student core repair should continue after the blocked
-      report/AI-explanation evidence. This task is the smallest follow-up repair for the content admin heading contract
-      that blocks `e2e/local-business-flow.spec.ts` after `/content/questions`. The dirty worktree is an intentional
-      carryover from the immediately preceding report/AI-explanation repair on the same student chain; those files remain
-      in allowedFiles only so the chain can continue without commit, merge, push, or branch cleanup. Product edits are
-      limited to the explicit admin content route/UI/guard surfaces and focused unit tests listed below. E2E specs,
-      `.env*`, package/lockfile/dependency, schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment/
-      external-service, destructive DB, PR, force-push, branch cleanup, merge, push, and Cost Calibration Gate remain
-      blocked.
-    targetExperienceChain: standard-core-student
-    useCaseIds:
-      - UC-STD-ACCOUNT-SESSION
-      - UC-STD-PERSONAL-AUTH-REDEEM
-      - UC-STD-PRACTICE
-      - UC-STD-MOCK-EXAM
-      - UC-STD-REPORT-MISTAKE-BOOK
-    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
-    evidenceMode: full
-    validationPolicy: local_unit_plus_scoped_local_full_flow
-    queueSelectionMode: ready_set
-    taskKind: implementation
-    moduleRunVersion: 2
-    status: closed
-    result: passed_local_full_flow_validation_no_experience_closed_claim
-    claimedAt: "2026-06-18T10:52:12-07:00"
-    closedAt: "2026-06-18T11:12:56-07:00"
-    capabilities:
-      localFullFlowGate: approved_localhost_only
-      localE2EValidation: approved_local_only_existing_specs
-      e2eListOnly: allowed
-      focusedUnitValidation: allowed
-      providerCall: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-      - docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - src/server/services/student-experience/route-handlers.ts
-      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
-      - src/app/(admin)/content/questions/page.tsx
-      - src/app/(admin)/content/materials/page.tsx
-      - src/app/(auth)/login/page.tsx
-      - src/features/admin/question-material-management/AdminQuestionMaterialManagement.ts
-      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
-      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
-      - src/features/admin/content-admin-runtime.tsx
-      - src/features/student/studentRuntimeApi.ts
-      - src/server/auth/session-cookie.ts
-      - src/server/services/admin-flow-runtime.ts
-      - src/server/services/admin-ai-audit-log-runtime.ts
-      - src/server/services/admin-organization-org-auth-runtime.ts
-      - src/server/services/admin-redeem-code-runtime.ts
-      - src/server/services/ai-call-log/route-handlers.ts
-      - src/server/services/audit-log/route-handlers.ts
-      - src/server/services/content-question-material-runtime.ts
-      - src/server/services/paper-composition-lifecycle-runtime.ts
-      - src/server/services/rag-resource-knowledge-runtime.ts
-      - tests/unit/admin-question-material-ui.test.ts
-      - tests/unit/protected-route-guard-ui.test.ts
-      - tests/unit/student-login-ui.test.ts
-      - tests/unit/phase-22-content-admin-cookie-session-repair.test.ts
-      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
-      - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
-      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
-      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/operating-manual.md
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/student-practice-mock-entry.spec.ts
-      - e2e/local-business-flow.spec.ts
-      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
-      - src/app/(admin)/content/papers/page.tsx
-      - src/app/(admin)/content/knowledge-nodes/page.tsx
-      - scripts/agent-system/*.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    closeoutPolicy:
-      localCommit:
-        approved: false
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        parkWorktree: true
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/protected-route-guard-ui.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/phase-22-content-admin-cookie-session-repair.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-business-flow.spec.ts
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-core-student-local-full-flow-content-admin-heading-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-core-student-local-full-flow-content-admin-heading-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
-    retryCount: 0
-
   - id: standard-core-student-experience-closure-readiness-audit
     title: standard core student experience closure readiness audit
     phase: standard-core-student-experience-closure-readiness-audit

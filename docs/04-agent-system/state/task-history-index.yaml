@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-20-batch-07
-  updatedAt: "2026-06-20T02:48:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-20-batch-08
+  updatedAt: "2026-06-20T03:05:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10436,3 +10436,73 @@ entries:
     commitSha: null
     completedAt: "2026-06-20T02:48:00-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-batch-07
+  - id: active-queue-slimming-2026-06-20-batch-06
+    phase: active-queue-slimming-2026-06-20-batch-06
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-06.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-06.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:25:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: standard-admin-ops-logs-local-full-flow-validation
+    phase: standard-admin-ops-logs-local-full-flow-validation
+    status: closed
+    taskKind: local_full_flow_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T10:16:35-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: standard-core-student-local-full-flow-contract-repair
+    phase: standard-core-student-local-full-flow-contract-repair
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T10:16:35-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: standard-core-student-local-full-flow-validation-rerun
+    phase: standard-core-student-local-full-flow-validation-rerun
+    status: closed
+    taskKind: local_full_flow_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-validation-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T10:28:30-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    phase: standard-core-student-local-full-flow-report-ai-explanation-contract-repair
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-report-ai-explanation-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T10:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    phase: standard-core-student-local-full-flow-content-admin-heading-contract-repair
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-core-student-local-full-flow-content-admin-heading-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-18T11:12:56-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08
+  - id: active-queue-slimming-2026-06-20-batch-07
+    phase: active-queue-slimming-2026-06-20-batch-07
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-07.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-07.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:48:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-08

@@ -41,6 +41,15 @@ entries:
     rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
     replacementEvidencePath: null
     notDependencyEvidence: true
+  - id: standard-admin-ops-logs-local-full-flow-validation
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    originalAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-standard-admin-ops-logs-local-full-flow-validation.md
+    statusAtRegistration: closed
+    decision: registered_legacy_unavailable
+    rationale: Later admin content ops local experience packet planning records this stale closed task's evidence and audit files are absent locally; batch 07 intentionally retained it until triage or registration. Registration preserves provenance without fabricating evidence or audit proof.
+    replacementEvidencePath: null
+    replacementAuditReviewPath: null
+    notDependencyEvidence: true
 forbiddenClaims:
   - This register does not fabricate missing historical evidence.
   - This register is not task evidence and must not satisfy dependency evidence gates by itself.
