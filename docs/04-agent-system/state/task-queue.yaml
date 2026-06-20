@@ -21,10 +21,13 @@ tasks:
     evidenceMode: full
     validationPolicy: docs_state
     queueSelectionMode: explicit_user_requested_followup
-    status: in_progress
-    result: pending_validation
+    status: closed
+    result: pass_docs_state_queue_health_baseline_archive_candidate_count_zero
     claimedAt: "2026-06-20T03:36:11-07:00"
+    validatedAt: "2026-06-20T03:42:17-07:00"
+    closedAt: "2026-06-20T03:42:17-07:00"
     branch: codex/stage-1-queue-health-baseline
+    commitSha: d57f8471aab237217b2dd98b1be91abfe86abcf4
     planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-baseline.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-baseline.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-baseline.md
