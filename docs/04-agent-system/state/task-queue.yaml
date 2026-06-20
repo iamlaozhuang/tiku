@@ -4052,7 +4052,11 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-225-organization-analytics-employee-statistics.md
     evidencePath: docs/05-execution-logs/evidence/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
-    status: in_progress
+    validatedAt: "2026-06-20T07:50:27-07:00"
+    closedAt: "2026-06-20T07:50:27-07:00"
+    commitSha: 66599fe466df11a1e11051d55f32c13c1e38306e
+    result: pass_organization_analytics_employee_statistics_contract
+    status: closed
     retryCount: 0
   - id: batch-226-organization-analytics-export-readiness-contracts-without-object-st
     title: Module Run v2 organization-analytics implementation seed

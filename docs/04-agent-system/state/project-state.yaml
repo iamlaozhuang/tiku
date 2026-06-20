@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T07:47:05-07:00"
+updatedAt: "2026-06-20T07:50:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
   id: batch-225-organization-analytics-privacy-preserving-employee-statistics
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass_organization_analytics_employee_statistics_contract
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-225-organization-analytics-employee-statistics.md
   evidencePath: docs/05-execution-logs/evidence/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
   branch: codex/batch-225-organization-analytics-employee-stats
-  commitSha: null
+  commitSha: 66599fe466df11a1e11051d55f32c13c1e38306e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4739,3 +4739,20 @@ lastStage4Batch224OrganizationAnalyticsMetrics:
     browser/e2e/local DB write, provider/env/schema/deploy/payment/PR/force-push, dependency change, raw employee answer
     text, full paper content, raw prompt or raw generated AI content evidence, or Cost Calibration Gate work was
     performed.
+
+lastStage4Batch225OrganizationAnalyticsEmployeeStatistics:
+  taskId: batch-225-organization-analytics-privacy-preserving-employee-statistics
+  validatedAt: "2026-06-20T07:50:27-07:00"
+  closedAt: "2026-06-20T07:50:27-07:00"
+  branch: codex/batch-225-organization-analytics-employee-stats
+  commitSha: 66599fe466df11a1e11051d55f32c13c1e38306e
+  decision: pass_organization_analytics_employee_statistics_contract
+  focusedUnit: src/server/models/organization-analytics.test.ts src/server/contracts/organization-analytics-contract.test.ts src/server/validators/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+  sourceChanged: false
+  nextCandidateTaskId: batch-226-organization-analytics-export-readiness-contracts-without-object-st
+  boundary: >-
+    Batch 225 validated existing local organization-analytics privacy-preserving employee statistics, answer snapshot
+    redaction, API contract mapping, route boundaries, validator normalization, and admin entry contracts with scoped
+    unit tests. No source/test change, browser/e2e/local DB write, provider/env/schema/deploy/payment/PR/force-push,
+    dependency change, raw employee answer text, full paper content, raw prompt or raw generated AI content evidence, or
+    Cost Calibration Gate work was performed.
