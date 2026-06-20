@@ -2,7 +2,8 @@
 
 ## Decision
 
-Pending implementation and closeout review.
+APPROVE validation evidence for provider-agnostic AI task lifecycle contract closeout, subject to recording the
+validation commit hash and passing the closeout readiness gate before the final closeout commit.
 
 ## Checks
 
@@ -20,3 +21,13 @@ Pending implementation and closeout review.
 - After correction, L123 readiness reported `exact_scope_ready` and serial executor `-Execute` reported `task_claimed`.
 - Claim validation passed for next-action diagnostics, auto-seed readiness, L123 readiness, `git diff --check`, lint, and typecheck.
 - The focused test anchor was not run because no focused test target exists; direct execution would run the full unit and e2e suite, which is outside this claim-only transaction.
+
+## 2026-06-20 Batch 212 Validation Review
+
+- The existing `src/server/models/ai-generation-task.test.ts` suite covers the provider-agnostic lifecycle contract:
+  status values, terminal statuses, transition effects, retryable/non-retryable failures, and provider boundary flags.
+- No source change is required for batch-212 because the contract already asserts `providerCallRequired: false`,
+  `providerConfigurationRequired: false`, `envSecretRequired: false`, and `providerPayloadRequired: false`.
+- Validation commands passed: lifecycle unit test, auto-seed readiness, lint, typecheck, and `git diff --check`.
+- The pre-final closeout readiness RED is acceptable and expected because the evidence needed a real validation commit
+  hash and final audit approval before the closeout gate can pass.
