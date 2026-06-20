@@ -17,7 +17,7 @@ result: pass
 - GREEN: existing `ai-generation-task-provider-sandbox-proposal-service` scoped unit coverage validates proposal-only
   runtime status, fresh approval gate, explicit local sandbox approval without provider execution, redacted evidence
   metadata, high-risk proposal blocking, and invalid input rejection; no source/test change was required.
-- Commit: `pending_batch_215_validation_commit`
+- Commit: `26649b66f02b037bbbe1c55b2b75a2fdef62af3b`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: current thread can continue through batch-215 closeout; no rollover required.
 - nextModuleRunCandidate: pending project status after closeout.
@@ -59,3 +59,11 @@ Gate execution was performed.
 Only task ids, state paths, command names, pass/fail results, and local contract summaries are recorded. No secrets,
 `.env*` values, database URLs, raw DB rows, provider payloads, raw prompts, raw responses, OCR files, export payloads,
 payment data, or sensitive evidence are included.
+
+## Final Closeout State
+
+- Validation commit: `26649b66f02b037bbbe1c55b2b75a2fdef62af3b`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Closeout readiness rerun: pass.
+- Merge/push/cleanup: approved by current user fresh approval after local closeout.

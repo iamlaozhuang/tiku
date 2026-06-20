@@ -2859,7 +2859,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/ai-generation-task-provider-sandbox-proposal-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     validationCommands:
@@ -2871,10 +2871,14 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     branch: codex/batch-215-provider-sandbox-proposal
     claimedAt: "2026-06-20T04:57:54-07:00"
+    validatedAt: "2026-06-20T05:00:54-07:00"
+    closedAt: "2026-06-20T05:00:54-07:00"
+    commitSha: 26649b66f02b037bbbe1c55b2b75a2fdef62af3b
+    result: pass_local_provider_sandbox_proposal_evidence_rules_contract
     planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-215-provider-sandbox-proposal.md
     evidencePath: docs/05-execution-logs/evidence/batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: mechanism-ai-task-provider-auto-seed-history-dependency
     title: AI task provider auto seed and history dependency repair
