@@ -1,8 +1,11 @@
 ﻿# Module Run v2 Seeded Task Audit Review: batch-218-personal-learning-ai-local-ui-browser-experience-for-request-and
 
-## Decision
+## Scope Review
 
-Pending implementation and closeout review.
+- Scope is limited to low-risk local browser request/result experience contracts for `personal-learning-ai`.
+- The focused unit target is `src/server/services/personal-ai-generation-local-browser-experience-service.test.ts`.
+- The task remains local-only and does not authorize browser/e2e runtime, provider/env/schema/deploy/dependency/payment/
+  PR/force-push/Cost Calibration Gate work.
 
 ## Checks
 
@@ -10,3 +13,16 @@ Pending implementation and closeout review.
 - Commit evidence must replace pending placeholder before closeout.
 - localFullLoopGate, threadRolloverGate, and nextModuleRunCandidate decisions are required.
 - Cost Calibration Gate remains blocked.
+
+## Validation Review
+
+- Pre-edit auto-seed readiness passed.
+- The advisory focused placeholder was replaced by a scoped unit command.
+- Existing focused unit coverage validates local browser states, provider-call blocking, controlled fake runner readiness,
+  blocked flow behavior, invalid input envelope, and redaction.
+- No source or test change was required.
+
+## Decision
+
+APPROVE batch-218 local browser experience contract validation after focused unit passed. Final closeout still requires
+lint, typecheck, diff, pre-commit hardening, validation commit hash, and module closeout readiness rerun.
