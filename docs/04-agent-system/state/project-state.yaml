@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f2f996fb4d344075232f454bd0460273ce802f63
-  lastKnownOriginMasterSha: f2f996fb4d344075232f454bd0460273ce802f63
+  lastKnownMasterSha: 3817c69c23425041c0cd723bd59ac36206aae6ae
+  lastKnownOriginMasterSha: 3817c69c23425041c0cd723bd59ac36206aae6ae
 currentTask:
-  id: batch-221-organization-training-employee-answer-lifecycle-local-role-flow
-  status: closed
-  result: pass_organization_training_employee_flow_contract
+  id: batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-221-organization-training-employee-flow.md
-  evidencePath: docs/05-execution-logs/evidence/batch-221-organization-training-employee-answer-lifecycle-local-role-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-221-organization-training-employee-answer-lifecycle-local-role-flow.md
-  branch: codex/batch-221-organization-training-employee-flow
-  commitSha: ecaa7f6c2ede0918ba25a67b3506ed6e907e8658
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-222-organization-training-context.md
+  evidencePath: docs/05-execution-logs/evidence/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-222-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  branch: codex/batch-222-organization-training-context
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
