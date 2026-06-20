@@ -504,14 +504,14 @@ repository:
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
   id: local-full-flow-human-acceptance-packet
-  status: in_progress
+  status: closed
   result: pass_local_full_flow_human_acceptance
   sourceStory: userApproval.localFullFlowHumanAcceptance
   planPath: docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
   branch: codex/local-full-flow-human-acceptance
-  commitSha: null
+  commitSha: 451514632287290490179c32538bac9870bddca3
   prUrl: null
   retryCount: 0
   lastFailurePath: null

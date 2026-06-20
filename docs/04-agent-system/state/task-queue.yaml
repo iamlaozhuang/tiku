@@ -1549,11 +1549,13 @@ tasks:
     localFullFlowGate: approved_localhost_only
     localE2EValidation: approved_local_only_existing_specs
     destructiveLocalDockerDatabase: blocked_without_task_approval
-    status: in_progress
+    status: closed
     result: pass_local_full_flow_human_acceptance
     claimedAt: "2026-06-20T09:39:49-07:00"
     validatedAt: "2026-06-20T09:42:40-07:00"
+    closedAt: "2026-06-20T09:46:00-07:00"
     branch: codex/local-full-flow-human-acceptance
+    commitSha: 451514632287290490179c32538bac9870bddca3
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
