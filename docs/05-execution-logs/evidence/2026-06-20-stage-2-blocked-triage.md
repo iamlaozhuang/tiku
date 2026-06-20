@@ -18,7 +18,7 @@ result: pass
   in-progress docs/state task and `archiveCandidateCount: 2`.
 - GREEN: triage register created for 20 active queue items with primary category and concrete next action for each item,
   plus a separate non-queue seed proposal note.
-- Commit: `pending_stage_2_blocked_task_triage_commit`
+- Commit: `75ac173c7333ae625a82e80edc3c2f53cf6ff75c`
 - localFullLoopGate: docs/state validation only.
 - threadRolloverGate: current thread can continue; no rollover required.
 - nextModuleRunCandidate: stage 2 follow-up should either resolve queue health carryover or request explicit
@@ -39,18 +39,25 @@ result: pass
 
 ## Validation Results
 
-| Command                                                                                                                                                                     | Result  | Notes                                                                                 |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------- |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`                                                     | pass    | Reported deterministic current-task closeout recommendation for stage 2.              |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                                                                  | pass    | Reported current task active and queue slimming carryover candidates.                 |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`                                                 | pass    | Read-only queue health reported two archive candidates after this task became active. |
-| `npx.cmd prettier --write --ignore-unknown ...`                                                                                                                             | pass    | Scoped formatting completed.                                                          |
-| `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                             | pass    | To be rerun before closeout commit.                                                   |
-| `git diff --check`                                                                                                                                                          | pass    | No whitespace errors.                                                                 |
-| `npm.cmd run lint`                                                                                                                                                          | pass    | ESLint completed successfully.                                                        |
-| `npm.cmd run typecheck`                                                                                                                                                     | pass    | `tsc --noEmit` completed successfully.                                                |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20`      | pass    | Scope and evidence hardening passed.                                                  |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20` | pending | Closeout readiness will be rerun after status and commit reference are recorded.      |
+| Command                                                                                                                                                                     | Result | Notes                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`                                                     | pass   | Reported deterministic current-task closeout recommendation for stage 2.              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                                                                  | pass   | Reported current task active and queue slimming carryover candidates.                 |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`                                                 | pass   | Read-only queue health reported two archive candidates after this task became active. |
+| `npx.cmd prettier --write --ignore-unknown ...`                                                                                                                             | pass   | Scoped formatting completed.                                                          |
+| `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                             | pass   | To be rerun before closeout commit.                                                   |
+| `git diff --check`                                                                                                                                                          | pass   | No whitespace errors.                                                                 |
+| `npm.cmd run lint`                                                                                                                                                          | pass   | ESLint completed successfully.                                                        |
+| `npm.cmd run typecheck`                                                                                                                                                     | pass   | `tsc --noEmit` completed successfully.                                                |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20`      | pass   | Scope and evidence hardening passed.                                                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stage-2-blocked-task-triage-2026-06-20` | pass   | Module closeout readiness passed after status and commit reference were recorded.     |
+
+## Final Closeout State
+
+- validationCommit: `75ac173c7333ae625a82e80edc3c2f53cf6ff75c`
+- taskStatus: `closed`
+- taskResult: `pass_stage_2_blocked_task_triage`
+- closeoutReadiness: `pass`
 
 ## Explicit Non-Execution Boundary
 

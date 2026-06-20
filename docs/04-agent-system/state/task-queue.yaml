@@ -22,10 +22,13 @@ tasks:
     evidenceMode: full
     validationPolicy: docs_state
     queueSelectionMode: manual_stage_2_blocked_triage
-    status: in_progress
-    result: pending_validation
+    status: closed
+    result: pass_stage_2_blocked_task_triage
     claimedAt: "2026-06-20T05:26:24-07:00"
+    validatedAt: "2026-06-20T05:31:22-07:00"
+    closedAt: "2026-06-20T05:31:22-07:00"
     branch: codex/stage-2-blocked-triage
+    commitSha: 75ac173c7333ae625a82e80edc3c2f53cf6ff75c
     planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-triage.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-triage.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-triage.md
