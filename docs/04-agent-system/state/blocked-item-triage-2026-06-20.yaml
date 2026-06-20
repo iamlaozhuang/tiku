@@ -1,0 +1,239 @@
+schemaVersion: 1
+triage:
+  id: stage-2-blocked-item-triage-2026-06-20
+  generatedAt: "2026-06-20T03:50:12-07:00"
+  generatedByTask: stage-2-blocked-item-triage-2026-06-20
+  sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
+  scope:
+    includedStatuses:
+      - blocked
+      - blocked_validation_failure
+    excludedStatuses:
+      - closed
+      - pending
+    excludedPendingTaskIds:
+      - batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
+      - batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+      - batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    entryHygieneArchivedTaskIds:
+      - stage-1-queue-health-baseline-2026-06-20
+    boundary: >-
+      This triage is a docs/state decision surface only. The only archive movement is the prior closed stage 1 task
+      exposed as the sole queue slimming candidate after merge. It does not change task semantics, unblock any task,
+      claim pending implementation work, or authorize env/provider/schema/deploy/payment/PR/force-push/Cost Calibration
+      Gate.
+  counts:
+    blockedClassItems: 20
+    blocked: 16
+    blockedValidationFailure: 4
+    freshApprovalRequired: 6
+    exactScopeRequired: 3
+    blockedValidationFailureCategory: 4
+    highRiskGated: 5
+    productChoiceRequired: 2
+  categories:
+    - id: fresh_approval_required
+      label: fresh approval required
+      itemCount: 6
+      items:
+        - taskId: ap-01-provider-smoke-execution
+          status: blocked
+          result: blocked_missing_deepseek_process_env_no_provider_call
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval for either a secret-safe local env read path or explicit confirmation that the required
+            DeepSeek process env key is available; otherwise wait external.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-01-provider-smoke-execution-qwen-env-local-ready
+          status: blocked
+          result: blocked_qwen_provider_error_redacted
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval for a redacted provider diagnosis or one bounded retry after the Qwen provider error.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-01-qwen-one-request-post-console-remediation-retry-approval
+          status: blocked
+          result: blocked_qwen_post_console_retry_http_403_provider_error_code_null_redacted
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval after exact Qwen API model/key permission remediation before any retry.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+          status: blocked
+          result: blocked_qwen_http_403_provider_error_code_null_redacted
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval for console permission/workspace remediation diagnostics before another one-request
+            provider action.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-01-qwen-openai-compatible-one-request-isolation-smoke
+          status: blocked
+          result: blocked_qwen_openai_compatible_provider_error_redacted
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval for online debug or redacted error-code diagnostics before any additional provider
+            execution.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-01-qwen-provider-smoke-execution-base-url-ready
+          status: blocked
+          result: blocked_qwen_base_url_provider_error_redacted
+          nextStep: approval
+          nextAction: >-
+            Obtain fresh approval for base-URL failure diagnosis or a bounded retry before any provider execution.
+          secondaryTags:
+            - high-risk gated
+    - id: exact_scope_required
+      label: exact_scope required
+      itemCount: 3
+      items:
+        - taskId: ap-09-runtime-capability-list-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: approval
+          nextAction: >-
+            Prepare exact capability model/API/UI/data-model scope, allowedFiles, validation commands, rollback, and
+            stop conditions before seeking fresh approval.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-10-current-checkpoint-audit-repair-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: approval
+          nextAction: >-
+            Prepare exact audit target, allowed source/test/e2e files, validation commands, and stop conditions before
+            seeking fresh approval.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-11-source-governance-change-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: approval
+          nextAction: >-
+            Prepare exact source ids, catalog/matrix rows, requirement change rules, and blocked gate boundaries before
+            seeking fresh approval.
+          secondaryTags:
+            - high-risk gated
+    - id: blocked_validation_failure
+      label: blocked_validation_failure
+      itemCount: 4
+      items:
+        - taskId: module-run-v2-personal-ai-local-ui-browser-flow-validation
+          status: blocked_validation_failure
+          result: blocked_by_server_session_only_playwright_auth_mismatch
+          nextStep: fix
+          nextAction: >-
+            Open a focused local validation repair task for the Playwright authentication/session mismatch with exact
+            allowedFiles and existing local validation commands.
+          secondaryTags:
+            - local validation repair
+        - taskId: organization-training-admin-visible-scope-local-fixture-contract-repair
+          status: blocked_validation_failure
+          result: local_seed_admin_visible_scope_repaired_full_flow_blocked_by_source_context_ui_response_mapping
+          nextStep: fix
+          nextAction: >-
+            Open a focused fixture/UI response mapping repair task for organization-training admin visible scope.
+          secondaryTags:
+            - local validation repair
+        - taskId: organization-training-draft-source-context-local-migration-execution-approval
+          status: blocked_validation_failure
+          result: local_migration_applied_full_flow_blocked_by_admin_visible_scope_409080
+          nextStep: fix
+          nextAction: >-
+            Decompose into a no-new-migration validation repair task for the admin visible scope blocker, with rollback
+            and evidence boundaries carried forward.
+          secondaryTags:
+            - local validation repair
+            - migration history sensitive
+        - taskId: organization-training-entry-route-path-contract-repair
+          status: blocked_validation_failure
+          result: route_path_repaired_full_flow_blocked_by_manual_draft_runtime_500
+          nextStep: fix
+          nextAction: >-
+            Open a focused route/runtime contract repair task for the manual draft runtime 500 blocker.
+          secondaryTags:
+            - local validation repair
+    - id: high_risk_gated
+      label: high-risk gated
+      itemCount: 5
+      items:
+        - taskId: ap-02-ops-auth-quota-cost-calibration-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: approval
+          nextAction: >-
+            Prepare quota unit ledger, cost source, measurement scope, and redacted evidence plan before fresh approval.
+          secondaryTags:
+            - Cost Calibration Gate remains blocked
+        - taskId: ap-03-provider-staging-execution-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: approval
+          nextAction: >-
+            Prepare staging resource, provider ceiling, command list, rollback owner, and acceptance boundary before
+            fresh approval.
+          secondaryTags:
+            - provider
+            - staging
+        - taskId: ap-06-online-payment-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: defer
+          nextAction: >-
+            Defer until payment provider, refund, invoice, settlement, reconciliation, env, and deploy decisions are
+            approved as a standalone high-risk package.
+          secondaryTags:
+            - payment
+        - taskId: ap-07-ocr-auto-import-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: defer
+          nextAction: >-
+            Defer until OCR parser/provider/storage/schema/dependency/import rollback decisions are approved as a
+            standalone high-risk package.
+          secondaryTags:
+            - OCR
+            - schema
+            - dependency
+        - taskId: ap-08-org-data-export-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: defer
+          nextAction: >-
+            Defer until export format, file generation, download, privacy, permission, audit, and deploy decisions are
+            approved as a standalone high-risk package.
+          secondaryTags:
+            - export
+            - privacy
+    - id: product_choice_required
+      label: product choice required
+      itemCount: 2
+      items:
+        - taskId: ap-04-standard-ai-generation-scope-change-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: defer
+          nextAction: >-
+            Defer execution until product chooses the standard AI generation scope change, provider/env/quota/cost
+            boundary, and formal adoption rules.
+          secondaryTags:
+            - high-risk gated
+        - taskId: ap-05-standard-org-self-service-scope-change-approval-package
+          status: blocked
+          result: approval_package_seeded_execution_blocked
+          nextStep: defer
+          nextAction: >-
+            Defer execution until product chooses the organization self-service scope, privacy, schema, API, UI, deploy,
+            and data boundary.
+          secondaryTags:
+            - high-risk gated
+  nextStageRecommendation:
+    id: stage-3-low-risk-docs-state-decision-packages
+    rationale: >-
+      Start with low-risk docs/state decision packages for AP-04, AP-05, AP-09, AP-10, and AP-11 before returning to
+      executable implementation work. Provider, staging, payment, OCR, export, schema, deploy, and Cost Calibration Gate
+      remain blocked until separate fresh approvals.

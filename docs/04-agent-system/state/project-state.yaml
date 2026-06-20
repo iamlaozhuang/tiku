@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-1-queue-health-baseline
-updatedAt: "2026-06-20T03:42:17-07:00"
+currentPhase: stage-2-blocked-item-triage
+updatedAt: "2026-06-20T03:50:12-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,18 +500,18 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c959985d160dcc039acf931fc05b9acbf84ecbf7
-  lastKnownOriginMasterSha: c959985d160dcc039acf931fc05b9acbf84ecbf7
+  lastKnownMasterSha: a094d09ebc55924c52ad4db78c47cd9f3dc4ee24
+  lastKnownOriginMasterSha: a094d09ebc55924c52ad4db78c47cd9f3dc4ee24
 currentTask:
-  id: stage-1-queue-health-baseline-2026-06-20
-  status: closed
-  result: pass_docs_state_queue_health_baseline_archive_candidate_count_zero
-  sourceStory: userRequestedSixStageRouteAfterBatch212Closeout
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-1-queue-health-baseline.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-1-queue-health-baseline.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-1-queue-health-baseline.md
-  branch: codex/stage-1-queue-health-baseline
-  commitSha: d57f8471aab237217b2dd98b1be91abfe86abcf4
+  id: stage-2-blocked-item-triage-2026-06-20
+  status: in_progress
+  result: pending_validation
+  sourceStory: userRequestedSixStageRouteAfterStage1Closeout
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-stage-2-blocked-item-triage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-stage-2-blocked-item-triage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-stage-2-blocked-item-triage.md
+  branch: codex/stage-2-blocked-item-triage
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4450,3 +4450,33 @@ lastStage1QueueHealthBaseline:
     archive and updated task-history-index.yaml. It did not change blocked task semantics, claim executable task
     batch-213, execute high-risk gates, or perform source/test/e2e/script/env/provider/schema/deploy/payment/PR/force-push
     or Cost Calibration Gate work.
+
+lastStage2BlockedItemTriage:
+  taskId: stage-2-blocked-item-triage-2026-06-20
+  triagedAt: "2026-06-20T03:50:12-07:00"
+  branch: codex/stage-2-blocked-item-triage
+  decision: pending_validation
+  triagePath: docs/04-agent-system/state/blocked-item-triage-2026-06-20.yaml
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedPriorTerminalTaskIds:
+    - stage-1-queue-health-baseline-2026-06-20
+  activeQueueBlockedClassItems: 20
+  blockedCount: 16
+  blockedValidationFailureCount: 4
+  categories:
+    freshApprovalRequired: 6
+    exactScopeRequired: 3
+    blockedValidationFailure: 4
+    highRiskGated: 5
+    productChoiceRequired: 2
+  excludedPendingTasks:
+    - batch-213-ai-task-and-provider-local-task-request-policy-and-result-referen
+    - batch-214-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    - batch-215-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  nextStage: stage-3-low-risk-docs-state-decision-packages
+  boundary: >-
+    This stage 2 docs/state triage classifies active queue blocked-class items and records the next step for each item.
+    It also archives the prior closed stage 1 task exposed as the only queue slimming candidate after merge. It does not
+    change blocked task semantics, claim pending implementation tasks, execute high-risk gates, or perform
+    source/test/e2e/script/env/provider/schema/deploy/payment/PR/force-push or Cost Calibration Gate work.
