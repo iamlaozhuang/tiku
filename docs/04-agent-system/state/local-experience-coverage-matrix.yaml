@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedByTask: module-run-v2-local-experience-governance-hardening
 generatedAt: "2026-06-17T17:24:01-07:00"
 moduleRunVersion: 2
@@ -1497,6 +1497,28 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-detailing.md
     status: release_blocked
     blockedGate: source_governance_rewrite_sensitive_evidence_requires_fresh_approval
-    nextTask: ap-11-source-governance-change-control-fresh-approval-required
+    nextTask: none_until_ap_11_source_governance_change_control_fresh_approval_required_fresh_approval
     l123AccelerationDecision: approval_package_ready
     l123AccelerationEvidence: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+lastAp11SourceGovernanceChangeControlFreshApprovalRequired:
+  taskId: ap-11-source-governance-change-control-fresh-approval-required
+  evaluatedAt: "2026-06-19T23:44:25-07:00"
+  decision: approval_package_ready
+  riskTier: L0
+  executionMode: l123_approval_package
+  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  matrixStatus: release_blocked
+  highRiskExecution: false
+  nextRecommendedTask: none_until_l123_fresh_approval
+  blockedGates:
+    - source_test_e2e_script_change
+    - database_read_write
+    - env_secret
+    - provider_model_call
+    - schema_migration
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_ocr_export_external_service
+    - cost_calibration_gate
+    - raw_sensitive_evidence
