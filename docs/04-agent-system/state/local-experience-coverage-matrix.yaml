@@ -1498,3 +1498,5 @@ matrix:
     status: release_blocked
     blockedGate: source_governance_rewrite_sensitive_evidence_requires_fresh_approval
     nextTask: ap-11-source-governance-change-control-fresh-approval-required
+    l123AccelerationDecision: approval_package_ready
+    l123AccelerationEvidence: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md

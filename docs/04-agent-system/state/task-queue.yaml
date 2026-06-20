@@ -1,5 +1,140 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: mechanism-l123-acceleration-governance-and-readiness-classifier
+    title: L123 acceleration governance readiness classifier and proposal-only wiring
+    phase: mechanism-l123-acceleration-governance-and-readiness-classifier
+    sourceStory: userRequestedL123AccelerationMechanismImplementation
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested implementation of the L1/L2/L3 acceleration mechanism. Scope allows mechanism scripts, docs/state,
+      queue, matrix, task plan, evidence, and audit only. The task must not read or modify `.env*`, execute provider/model
+      calls, DB read/write, schema/migration, dependency/package/lockfile changes, staging/prod/cloud/deploy, payment/OCR/
+      export/external-service, Cost Calibration Gate, PR, force push, destructive DB operations, product scope changes, or
+      product source behavior changes.
+    targetExperienceChain: l123-acceleration-mechanism
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: explicit_user_requested_followup
+    status: closed
+    result: pass_mechanism_l123_acceleration_classifier_generator_and_proposal_only_wiring
+    claimedAt: "2026-06-19T23:27:00-07:00"
+    validatedAt: "2026-06-19T23:27:00-07:00"
+    closedAt: "2026-06-19T23:27:00-07:00"
+    branch: codex/mechanism-l123-acceleration-governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    nextRecommendedTask: ap-11-source-governance-change-control-fresh-approval-required
+    l123AccelerationMode: proposal_only
+    firstValidationCandidate: ap-11-source-governance-change-control-fresh-approval-required
+    firstValidationDecision: approval_package_ready
+    productScopeChanged: false
+    productSourceChanged: false
+    testChanged: false
+    e2eChanged: false
+    capabilities:
+      mechanismScriptChange: approved
+      projectResourceRead: approved_read_only_redacted
+      docsStateOnlyQueueMaintenance: approved
+      localCommit: approved
+      fastForwardMergeToMaster: approved
+      pushOriginMaster: approved
+      localBranchCleanup: approved
+      providerModelCall: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      envLocalRead: blocked
+      envSecretOutput: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalServiceExecution: blocked
+      ocrParserExecution: blocked
+      exportFileGeneration: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+      destructiveDatabase: blocked
+      rawSensitiveEvidence: blocked
+    blockedCapabilities:
+      - providerModelCall
+      - databaseRead
+      - databaseWrite
+      - envLocalRead
+      - envSecretOutput
+      - schemaMigration
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - paymentExternalServiceExecution
+      - ocrParserExecution
+      - exportFileGeneration
+      - costCalibrationGate
+      - pr
+      - forcePush
+      - destructiveDatabase
+      - rawSensitiveEvidence
+    allowedFiles:
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+      - scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.Smoke.ps1
+      - scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.ps1
+      - scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.ps1
+      - docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+      - docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - deploy/cloud/payment/provider config files
+      - any file not explicitly listed in allowedFiles
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/execution-profiles.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2L123AccelerationReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2L123ApprovalPackage.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2L123AccelerationReadiness.ps1 -TaskId ap-11-source-governance-change-control-fresh-approval-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride ap-11-source-governance-change-control-fresh-approval-required
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-l123-acceleration-governance-and-readiness-classifier
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId mechanism-l123-acceleration-governance-and-readiness-classifier -Capability projectResourceRead -Intent declare_adapter
   - id: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
     title: AP-10 current checkpoint audit repair L1 fresh approval required
     phase: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required

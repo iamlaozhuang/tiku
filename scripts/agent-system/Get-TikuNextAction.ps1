@@ -339,6 +339,52 @@ function Invoke-LocalExperienceNextTaskDiagnostic {
     }
 }
 
+function Invoke-L123AccelerationDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$TaskId = ""
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2L123AccelerationReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("l123AccelerationDecision: unavailable", "reason: L123 acceleration readiness script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $l123Args = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $scriptPath,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
+    )
+    if (-not [string]::IsNullOrWhiteSpace($TaskId) -and $TaskId -ne "none") {
+        $l123Args += @("-TaskId", $TaskId)
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(& powershell.exe @l123Args 2>&1)
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Invoke-GuardedGoalPacketDiagnostic {
     param(
         [Parameter(Mandatory = $true)][string]$ProjectStatePath,
@@ -979,6 +1025,12 @@ $localExperienceSeedRequired = "false"
 $localExperienceReason = "none"
 $localExperienceCandidateReady = "false"
 $localExperienceCandidateBlockedReasons = "none"
+$l123AccelerationDecision = "not_checked"
+$l123RiskTier = "none"
+$l123ExecutionMode = "none"
+$l123MissingApprovalField = "none"
+$l123BlockedGate = "none"
+$l123NextRecommendedAction = "none"
 $bridgeProposalDecision = "not_checked"
 $bridgeExperienceChain = "none"
 $bridgeCandidateTask = "none"
@@ -1084,6 +1136,34 @@ if ($findings.Count -eq 0 -and $currentTaskTerminal) {
             $localExperienceCandidateBlockedReasons = Join-OrNone -Values @($candidateDependencyBlockedReasons)
             $recommendedHumanDecision = "resolve_local_experience_candidate_dependency_or_choose_bypass"
         }
+    }
+}
+
+if ($findings.Count -eq 0 -and $currentTaskTerminal -and $localExperienceCandidateTask -ne "none") {
+    $l123AccelerationResult = Invoke-L123AccelerationDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $LocalExperienceMatrixPath -TaskId $localExperienceCandidateTask
+    $l123AccelerationDecision = Get-OutputValue -Output $l123AccelerationResult.Output -Key "l123AccelerationDecision"
+    if ([string]::IsNullOrWhiteSpace($l123AccelerationDecision)) {
+        $l123AccelerationDecision = if ($l123AccelerationResult.ExitCode -eq 0) { "unknown" } else { "unavailable" }
+    }
+    $l123RiskTier = Get-OutputValue -Output $l123AccelerationResult.Output -Key "riskTier"
+    if ([string]::IsNullOrWhiteSpace($l123RiskTier)) {
+        $l123RiskTier = "none"
+    }
+    $l123ExecutionMode = Get-OutputValue -Output $l123AccelerationResult.Output -Key "executionMode"
+    if ([string]::IsNullOrWhiteSpace($l123ExecutionMode)) {
+        $l123ExecutionMode = "none"
+    }
+    $l123MissingApprovalField = Get-OutputValue -Output $l123AccelerationResult.Output -Key "missingApprovalField"
+    if ([string]::IsNullOrWhiteSpace($l123MissingApprovalField)) {
+        $l123MissingApprovalField = "none"
+    }
+    $l123BlockedGate = Get-OutputValue -Output $l123AccelerationResult.Output -Key "blockedGate"
+    if ([string]::IsNullOrWhiteSpace($l123BlockedGate)) {
+        $l123BlockedGate = "none"
+    }
+    $l123NextRecommendedAction = Get-OutputValue -Output $l123AccelerationResult.Output -Key "nextRecommendedAction"
+    if ([string]::IsNullOrWhiteSpace($l123NextRecommendedAction)) {
+        $l123NextRecommendedAction = "none"
     }
 }
 
@@ -1238,6 +1318,12 @@ Write-Output "localExperienceSeedRequired: $localExperienceSeedRequired"
 Write-Output "localExperienceReason: $localExperienceReason"
 Write-Output "localExperienceCandidateReady: $localExperienceCandidateReady"
 Write-Output "localExperienceCandidateBlockedReasons: $localExperienceCandidateBlockedReasons"
+Write-Output "l123AccelerationDecision: $l123AccelerationDecision"
+Write-Output "l123RiskTier: $l123RiskTier"
+Write-Output "l123ExecutionMode: $l123ExecutionMode"
+Write-Output "l123MissingApprovalField: $l123MissingApprovalField"
+Write-Output "l123BlockedGate: $l123BlockedGate"
+Write-Output "l123NextRecommendedAction: $l123NextRecommendedAction"
 Write-Output "activeQueueNonTerminalCount: $activeQueueNonTerminalCount"
 Write-Output "blockedWithRepairCandidate: $((($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') -and ($localExperienceNextTaskDecision -in @('seed_required', 'existing_task_available', 'existing_task_blocked_or_nonterminal'))).ToString().ToLowerInvariant())"
 Write-Output "coverageRowsWaitingRepair: $(if ($localExperienceCandidateKind -eq 'local_full_flow_contract_repair') { $localExperienceAffectedUseCaseCount } else { '0' })"

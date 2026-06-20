@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
-updatedAt: "2026-06-19T22:40:59-07:00"
+currentPhase: mechanism-l123-acceleration-governance-and-readiness-classifier
+updatedAt: "2026-06-19T23:27:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -72,6 +72,9 @@ automation:
     autoSeedProposalScriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
     autoSeedTransactionScriptPath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     autoSeedSelfReviewScriptPath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+    l123AccelerationMode: proposal_only
+    l123AccelerationReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.ps1
+    l123ApprovalPackageScriptPath: scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     standingUnattendedLocalCloseoutApproval:
@@ -500,14 +503,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  id: mechanism-l123-acceleration-governance-and-readiness-classifier
   status: closed
-  result: pass_l0_ap10_current_checkpoint_audit_repair_l1_fresh_approval_required_no_source_test_e2e_repair
-  sourceStory: userRequestedAp10CurrentCheckpointAuditRepairL1FreshApprovalRequired
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
-  branch: codex/ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+  result: pass_mechanism_l123_acceleration_classifier_generator_and_proposal_only_wiring
+  sourceStory: userRequestedL123AccelerationMechanismImplementation
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+  branch: codex/mechanism-l123-acceleration-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -3913,17 +3916,47 @@ localExperienceClosure:
       costCalibrationGate: blocked
       l3ReleaseGateExecutionRequiresFreshApproval: true
       rawSensitiveEvidence: blocked
+  currentMechanismL123AccelerationGovernanceAndReadinessClassifier:
+    taskId: mechanism-l123-acceleration-governance-and-readiness-classifier
+    evaluatedAt: "2026-06-19T23:27:00-07:00"
+    targetExperienceChain: l123-acceleration-mechanism
+    decision: pass_mechanism_l123_acceleration_classifier_generator_and_proposal_only_wiring
+    evidence: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
+    boundarySummary:
+      l123AccelerationMode: proposal_only
+      readinessScript: scripts/agent-system/Test-ModuleRunV2L123AccelerationReadiness.ps1
+      approvalPackageScript: scripts/agent-system/New-ModuleRunV2L123ApprovalPackage.ps1
+      nextActionDiagnostic: appended_l123AccelerationDecision_without_changing_queue_decision
+      autopilotApplyMode: docs_state_apply_only_not_enabled
+      serialExecutorGate: claim_and_run_validation_precheck
+      firstValidationCandidate: ap-11-source-governance-change-control-fresh-approval-required
+      firstValidationDecision: approval_package_ready
+      productScopeChanged: false
+      sourceProductChanged: false
+      testChanged: false
+      e2eExecuted: false
+      schemaMigrationChanged: false
+      dependencyChanged: false
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      providerModelCallThisTask: false
+      paymentOcrExportExternalServiceExecutedThisTask: false
+      stagingProdCloudDeployThisTask: false
+      costCalibrationGate: blocked
+      l3ExecutionAutoAllowed: false
+      rawSensitiveEvidence: blocked
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-10 current checkpoint audit repair L1 fresh approval required package is current and contains only docs/state
-    governance approval-stop text. UC-GATE-CURRENT-CHECKPOINT remains release-blocked. No source/test/e2e/script repair,
-    runtime/browser/Playwright validation, DB read/write, env/secret access, schema/migration, dependency/package/
-    lockfile change, provider/model call, payment/OCR/export/external-service execution, staging/prod/cloud/deploy, Cost
-    Calibration Gate, PR, force-push, destructive DB, raw source artifact, raw database row, raw prompt, raw response,
-    provider payload, or sensitive evidence execution is approved or performed. The owner must either keep AP-10 repair
-    blocked or authorize a separate exact-scope AP-10 current checkpoint audit repair package naming exact allowed files,
-    blocked files, commands, target findings, repair boundary, validation evidence, rollback, redaction, and stop
-    conditions.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    L123 acceleration mechanism v1 is installed in proposal_only mode. Get-TikuNextAction now reports
+    l123AccelerationDecision for the local-experience candidate, the autopilot runner can apply docs-state approval
+    packages only when l123AccelerationMode is explicitly set to docs_state_apply, and the serial executor stops
+    claim/run_validation unless L1/L2 exact-scope readiness passes. AP-11 is the first validation candidate and is
+    classified as approval_package_ready; next recommended task is to fresh-approve docs_state_apply for AP-11 package
+    materialization or run New-ModuleRunV2L123ApprovalPackage.ps1 for AP-11 under explicit approval. L3 execution,
+    provider/model call, DB read/write, env/secret, schema/migration, dependency/package/lockfile, deploy, payment/OCR/
+    export/external-service, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md

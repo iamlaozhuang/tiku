@@ -7,6 +7,80 @@ defaults:
   evidenceMode: full
   validationPolicy: legacy_explicit
   queueSelectionMode: legacy_explicit
+l123AccelerationPolicy:
+  defaultMode: proposal_only
+  maxTasksPerPacket: 1
+  modes:
+    proposal_only:
+      meaning: Classify and report L123 acceleration opportunities without writing state or executing tasks.
+    docs_state_apply:
+      meaning: Apply docs/state approval-only packages when readiness returns approval_package_ready or l3_approval_only.
+    exact_scope_local_auto_execute:
+      meaning: Reserved for future approval. Disabled in v1.
+      enabled: false
+  packages:
+    l123_approval_package:
+      executionProfile: docs_state_lite
+      validationPolicy: docs_state
+      allowedTaskKinds:
+        - docs_state_approval_package
+        - l123_acceleration_approval_package
+      allowedCapabilities:
+        - docsStateOnlyQueueMaintenance
+        - freshApprovalTextMaterialization
+      blockedCapabilities:
+        - sourceTestE2eScriptChange
+        - databaseRead
+        - databaseWrite
+        - envLocalRead
+        - envSecretOutput
+        - providerModelCall
+        - schemaMigration
+        - dependencyIntroduction
+        - stagingProdDeploy
+        - paymentOcrExportExternalService
+        - costCalibrationGate
+        - pr
+        - forcePush
+        - destructiveDatabase
+        - rawSensitiveEvidence
+    l123_exact_scope_local:
+      executionProfile: local_unit_tdd
+      validationPolicy: local_unit
+      requiredFields:
+        - allowedFiles
+        - blockedFiles
+        - commands
+        - redaction
+        - rollback
+        - stopConditions
+      autoExecuteEnabled: false
+      blockedWhenAllowedFilesMatch:
+        - .env*
+        - package.json
+        - package-lock.yaml
+        - package-lock.json
+        - pnpm-lock.yaml
+        - src/**
+        - tests/**
+        - e2e/**
+        - src/db/schema/**
+        - drizzle/**
+    l123_l3_approval_only:
+      executionProfile: docs_state_lite
+      validationPolicy: docs_state
+      highRiskCapabilities:
+        - providerModelCall
+        - databaseRead
+        - databaseWrite
+        - envLocalRead
+        - envSecretOutput
+        - schemaMigration
+        - dependencyIntroduction
+        - stagingProdDeploy
+        - paymentOcrExportExternalService
+        - costCalibrationGate
+      autoExecuteEnabled: false
 evidenceModes:
   full:
     requiredAnchors:

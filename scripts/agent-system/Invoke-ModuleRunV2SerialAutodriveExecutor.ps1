@@ -25,6 +25,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
+    [string]$LocalExperienceMatrixPath = "docs\04-agent-system\state\local-experience-coverage-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
 
     [Parameter(Mandatory = $false)]
@@ -379,6 +383,74 @@ function Invoke-AutodriveSchemaReadiness {
     )
 
     return Invoke-ExternalCommand -Arguments $schemaArgs
+}
+
+function Invoke-L123AccelerationReadiness {
+    param([Parameter(Mandatory = $true)][string]$TargetTaskId)
+
+    $l123ScriptPath = Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2L123AccelerationReadiness.ps1"
+    $l123Args = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $l123ScriptPath,
+        "-TaskId",
+        $TargetTaskId,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $LocalExperienceMatrixPath
+    )
+
+    return Invoke-ExternalCommand -Arguments $l123Args
+}
+
+function Assert-L123ExecutableGate {
+    param(
+        [Parameter(Mandatory = $true)][string]$TargetTaskId,
+        [Parameter(Mandatory = $true)][string]$RequestedAction
+    )
+
+    Write-Section -Title "L123 Acceleration Readiness For $TargetTaskId"
+    $l123Result = Invoke-L123AccelerationReadiness -TargetTaskId $TargetTaskId
+    $l123Result.Output | ForEach-Object { Write-Output $_ }
+    $l123Decision = Get-DecisionValue -Output $l123Result.Output -Key "l123AccelerationDecision"
+    $missingApprovalField = Get-DecisionValue -Output $l123Result.Output -Key "missingApprovalField"
+    $blockedGate = Get-DecisionValue -Output $l123Result.Output -Key "blockedGate"
+
+    if ($l123Result.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($l123Decision)) {
+        Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "L123 readiness diagnostic failed before $RequestedAction" -ExitCode 1 -TargetTaskId $TargetTaskId
+    }
+
+    switch ($l123Decision) {
+        "approval_package_required" {
+            Write-SerialExecutorResult -Decision "l123_approval_package_required" -Action "request_l123_exact_scope_approval" -Reason "L1/L2 exact scope is incomplete: $missingApprovalField" -ExitCode 0 -TargetTaskId $TargetTaskId
+        }
+        "approval_package_ready" {
+            Write-SerialExecutorResult -Decision "l123_approval_package_ready" -Action "generate_l123_approval_package" -Reason "target task is approval-package-only and is not executable by the serial executor" -ExitCode 0 -TargetTaskId $TargetTaskId
+        }
+        "l3_approval_only" {
+            Write-SerialExecutorResult -Decision "l123_l3_approval_only" -Action "generate_l3_fresh_approval_package" -Reason "L3 execution remains blocked: $blockedGate" -ExitCode 0 -TargetTaskId $TargetTaskId
+        }
+        "hard_block" {
+            Write-SerialExecutorResult -Decision "l123_hard_block" -Action "stop_for_hard_block" -Reason "L123 readiness hard block: $blockedGate" -ExitCode 1 -TargetTaskId $TargetTaskId
+        }
+        "exact_scope_ready" {
+            return
+        }
+        "no_l123_classification" {
+            return
+        }
+        "no_l123_candidate" {
+            return
+        }
+        default {
+            Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "unknown L123 readiness decision: $l123Decision" -ExitCode 1 -TargetTaskId $TargetTaskId
+        }
+    }
 }
 
 function Write-SerialExecutorResult {
@@ -875,6 +947,7 @@ try {
                 Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "target task is missing for claim_task" -ExitCode 1
             }
 
+            Assert-L123ExecutableGate -TargetTaskId $targetTask -RequestedAction "claim_task"
             Assert-SchemaReady -TargetTaskId $targetTask
             $queueContext = Get-QueueContext
             $taskBlock = @(Get-TargetTaskBlockOrStop -QueueContext $queueContext -TargetTaskId $targetTask)
@@ -899,6 +972,7 @@ try {
                 Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "target task is missing for run_validation" -ExitCode 1
             }
 
+            Assert-L123ExecutableGate -TargetTaskId $targetTask -RequestedAction "run_validation"
             Assert-SchemaReady -TargetTaskId $targetTask
             $queueContext = Get-QueueContext
             $taskBlock = @(Get-TargetTaskBlockOrStop -QueueContext $queueContext -TargetTaskId $targetTask)

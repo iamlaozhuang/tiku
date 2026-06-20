@@ -75,6 +75,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
+    [string]$LocalExperienceMatrixPath = "docs\04-agent-system\state\local-experience-coverage-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml",
 
     [Parameter(Mandatory = $false)]
@@ -536,6 +540,64 @@ function Invoke-SeedTransaction {
     return Invoke-ExternalCommand -Arguments $seedTransactionArgs
 }
 
+function Invoke-L123AccelerationReadiness {
+    $l123ReadinessArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2L123AccelerationReadiness.ps1"),
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $LocalExperienceMatrixPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $l123ReadinessArgs += @("-TaskId", $TaskId)
+    }
+
+    return Invoke-ExternalCommand -Arguments $l123ReadinessArgs
+}
+
+function Invoke-L123ApprovalPackage {
+    param([Parameter(Mandatory = $true)][string]$TargetTaskId)
+
+    $l123PackageArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "New-ModuleRunV2L123ApprovalPackage.ps1"),
+        "-TaskId",
+        $TargetTaskId,
+        "-Apply",
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $LocalExperienceMatrixPath
+    )
+
+    return Invoke-ExternalCommand -Arguments $l123PackageArgs
+}
+
+function Get-L123AccelerationMode {
+    if (-not (Test-Path -LiteralPath $ProjectStatePath)) {
+        return "proposal_only"
+    }
+
+    $mode = Get-YamlScalarValue -Path $ProjectStatePath -Key "l123AccelerationMode"
+    if ([string]::IsNullOrWhiteSpace($mode)) {
+        return "proposal_only"
+    }
+
+    return $mode
+}
+
 function Invoke-SeedSelfReview {
     param([Parameter(Mandatory = $true)][string]$ExpectedModule)
 
@@ -908,6 +970,43 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
     }
 
     if ($startupDecision -eq "no_executable_task") {
+        Write-Section -Title "Runner Step $stepIndex L123 Acceleration Readiness"
+        $l123ReadinessResult = Invoke-L123AccelerationReadiness
+        $l123ReadinessResult.Output | ForEach-Object { Write-Output $_ }
+        $l123Decision = Get-DecisionValue -Output $l123ReadinessResult.Output -Key "l123AccelerationDecision"
+        $l123TaskId = Get-FirstValue -Output $l123ReadinessResult.Output -Key "taskId"
+        if ([string]::IsNullOrWhiteSpace($l123TaskId) -or $l123TaskId -eq "none") {
+            $l123TaskId = $TaskId
+        }
+
+        if ($l123Decision -in @("approval_package_ready", "l3_approval_only")) {
+            $l123Mode = Get-L123AccelerationMode
+            Write-Output "l123AccelerationMode: $l123Mode"
+            if ($l123Mode -eq "docs_state_apply" -and -not $PlanOnly) {
+                if ([string]::IsNullOrWhiteSpace($l123TaskId) -or $l123TaskId -eq "none") {
+                    Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_l123_package_failure" -Reason "L123 approval package candidate task id is missing" -StepCount $stepIndex -ExitCode 1
+                }
+
+                Write-Section -Title "Runner Step $stepIndex L123 Approval Package"
+                $l123PackageResult = Invoke-L123ApprovalPackage -TargetTaskId $l123TaskId
+                $l123PackageResult.Output | ForEach-Object { Write-Output $_ }
+                $l123PackageDecision = Get-DecisionValue -Output $l123PackageResult.Output -Key "l123ApprovalPackageDecision"
+                if ($l123PackageDecision -in @("applied", "already_exists")) {
+                    Write-RunnerResult -Decision "l123_approval_package_applied" -NextAction "closeout_l123_approval_package_transaction" -Reason "L123 docs-state approval package transaction completed" -StepCount $stepIndex -ExitCode 0 -NextTask $l123TaskId -SeverityOverride "auto_recoverable" -RiskIfAutoContinued "none; docs-state approval package only and L3 execution remains blocked" -ResumePointer "taskId=$l123TaskId; projectState=$ProjectStatePath; queue=$QueuePath; matrix=$LocalExperienceMatrixPath"
+                }
+
+                Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_l123_package_failure" -Reason "L123 approval package transaction did not complete" -StepCount $stepIndex -ExitCode 1 -NextTask $l123TaskId
+            }
+
+            $l123NextCommand = if ([string]::IsNullOrWhiteSpace($l123TaskId) -or $l123TaskId -eq "none") {
+                ".\scripts\agent-system\New-ModuleRunV2L123ApprovalPackage.ps1"
+            } else {
+                ".\scripts\agent-system\New-ModuleRunV2L123ApprovalPackage.ps1 -TaskId $l123TaskId -Apply"
+            }
+            $l123NoWriteReason = if ($PlanOnly) { "PlanOnly prevents docs-state mutation" } else { "l123AccelerationMode is proposal_only" }
+            Write-RunnerResult -Decision "l123_approval_package_available" -NextAction "request_l123_docs_state_apply_or_run_generator" -Reason "no executable task exists and an L123 approval-only package is ready" -StepCount $stepIndex -ExitCode 0 -NextTask $l123TaskId -SeverityOverride "approval_required" -NextCommandOverride $l123NextCommand -RiskIfAutoContinued "none while proposal-only; apply writes only queue, project-state, local-experience matrix, task-plan, evidence, and audit" -NoWriteReason $l123NoWriteReason -ResumePointer "taskId=$l123TaskId; l123AccelerationMode=$l123Mode; projectState=$ProjectStatePath; queue=$QueuePath; matrix=$LocalExperienceMatrixPath"
+        }
+
         Write-Section -Title "Runner Step $stepIndex Seed Proposal"
         $seedProposalResult = Invoke-SeedProposal
         $seedProposalResult.Output | ForEach-Object { Write-Output $_ }
