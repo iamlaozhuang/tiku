@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-20T07:44:11-07:00"
+updatedAt: "2026-06-20T07:47:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,15 +503,15 @@ repository:
   lastKnownMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
   lastKnownOriginMasterSha: 8ec15acb90ed6090a5d1a3fe0f9e98d4c8f36d03
 currentTask:
-  id: batch-224-organization-analytics-aggregate-only-organization-metrics
-  status: closed
-  result: pass_organization_analytics_aggregate_metrics_contract
+  id: batch-225-organization-analytics-privacy-preserving-employee-statistics
+  status: in_progress
+  result: pending
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-224-organization-analytics-metrics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-224-organization-analytics-aggregate-only-organization-metrics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-224-organization-analytics-aggregate-only-organization-metrics.md
-  branch: codex/batch-224-organization-analytics-metrics
-  commitSha: 317f0c1eb0ce468339ec8143ccf4c844d7ab3673
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-batch-225-organization-analytics-employee-statistics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-225-organization-analytics-privacy-preserving-employee-statistics.md
+  branch: codex/batch-225-organization-analytics-employee-stats
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
