@@ -1165,11 +1165,16 @@ tasks:
     queueSelectionMode: user_directed_repair
     taskKind: implementation
     moduleRunVersion: 2
-    status: blocked_validation_failure
-    result: route_path_repaired_full_flow_blocked_by_manual_draft_runtime_500
+    status: closed
+    result: reconciled_by_organization_training_route_runtime_contract_repair
     claimedAt: "2026-06-18T01:58:25-07:00"
     closedAt: "2026-06-18T02:08:59-07:00"
+    reconciledAt: "2026-06-20T10:34:26-07:00"
     branch: codex/organization-training-local-experience-chain
+    commitSha: d0e5f566aab3aead8c5160453bece9152a853683
+    repairTaskId: organization-training-route-runtime-contract-repair
+    repairCommitSha: d0e5f566aab3aead8c5160453bece9152a853683
+    reconciliationTaskId: blocked-validation-repair-state-reconciliation-2026-06-20
     allowedFiles:
       - src/app/(admin)/content/organization-training/page.tsx
       - src/app/(admin)/organization-training/page.tsx
@@ -1277,11 +1282,16 @@ tasks:
     moduleRunVersion: 2
     schemaMigration: approved_migration_plan
     localDockerDatabase: approved_local_dev_only
-    status: blocked_validation_failure
-    result: local_migration_applied_full_flow_blocked_by_admin_visible_scope_409080
+    status: closed
+    result: reconciled_by_organization_training_admin_visible_scope_no_migration_repair
     claimedAt: "2026-06-18T02:34:05-07:00"
     closedAt: "2026-06-18T02:51:30-07:00"
+    reconciledAt: "2026-06-20T10:34:26-07:00"
     branch: codex/organization-training-local-experience-chain
+    commitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
+    repairTaskId: organization-training-admin-visible-scope-no-migration-repair
+    repairCommitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
+    reconciliationTaskId: blocked-validation-repair-state-reconciliation-2026-06-20
     allowedFiles:
       - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
@@ -6028,3 +6038,136 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
     retryCount: 0
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+  - id: blocked-validation-repair-state-reconciliation-2026-06-20
+    title: Blocked validation repair state reconciliation 2026 06 20
+    phase: blocked-validation-repair-state-reconciliation
+    sourceStory: userApprovedSerialRepairStateReconciliation
+    dependencies:
+      - organization-training-route-runtime-contract-repair
+      - organization-training-admin-visible-scope-no-migration-repair
+      - organization-training-admin-visible-scope-local-fixture-contract-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Approved by the current 2026-06-20 user prompt "批准继续执行 1 和 2" to serially run step 1
+      state reconciliation and then step 2 personal AI auth/session repair. This packet is step 1 only. It may reconcile
+      historical `blocked_validation_failure` queue entries that have already been repaired by independent closed/pass
+      repair packets, create task plan/evidence/audit records, run docs/state validation gates, create validation and
+      closeout commits, fast-forward merge to master, push origin/master, and delete the merged short branch. It does not
+      authorize product source, test, e2e, script, package/lockfile/dependency, env/secret, schema/drizzle/migration,
+      database, provider/model, staging/prod/cloud/deploy/payment/external-service, PR, force-push, headed/debug browser,
+      destructive DB, or Cost Calibration Gate work.
+    targetClosureItem: historical blocked validation repair state reconciliation
+    behaviorBoundary: docs-state::repair_status_reconciliation_only
+    reconciliationTargets:
+      - originalTaskId: organization-training-entry-route-path-contract-repair
+        repairTaskId: organization-training-route-runtime-contract-repair
+        repairCommitSha: d0e5f566aab3aead8c5160453bece9152a853683
+      - originalTaskId: organization-training-draft-source-context-local-migration-execution-approval
+        repairTaskId: organization-training-admin-visible-scope-no-migration-repair
+        repairCommitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
+    taskKind: docs_state_reconciliation
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_reconciliation
+    status: in_progress
+    result: pass_reconcile_closed_repair_packets
+    claimedAt: "2026-06-20T10:34:26-07:00"
+    validatedAt: "2026-06-20T10:36:43-07:00"
+    branch: codex/blocked-repair-state-reconciliation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-20-blocked-validation-repair-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source edits
+      - test/e2e edits or execution
+      - schema/drizzle/migration changes
+      - database migration execution
+      - destructive local DB writes
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - headed/debug browser mode
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-blocked-validation-repair-state-reconciliation.md docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-blocked-validation-repair-state-reconciliation.md docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId blocked-validation-repair-state-reconciliation-2026-06-20
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    retryCount: 0
