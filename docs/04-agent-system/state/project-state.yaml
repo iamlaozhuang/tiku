@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-11-source-governance-change-control-fresh-approval-required
-updatedAt: "2026-06-19T23:44:25-07:00"
+currentPhase: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+updatedAt: "2026-06-19T23:53:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,14 +503,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-11-source-governance-change-control-fresh-approval-required
+  id: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
   status: closed
-  result: pass_l0_l123_approval_package_no_high_risk_execution
+  result: pass_l0_l123_l3_minimal_fresh_approval_package_no_high_risk_execution
   sourceStory: l123AccelerationApprovalPackage
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
-  branch: codex/ap-11-l123-approval-package
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+  branch: codex/ap03-provider-staging-l3-approval-package
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -3961,12 +3961,12 @@ handoff:
     export/external-service, and Cost Calibration Gate remain blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-mechanism-l123-acceleration-governance-and-readiness-classifier.md
 l123AccelerationLastPackage:
-  taskId: ap-11-source-governance-change-control-fresh-approval-required
-  appliedAt: "2026-06-19T23:44:25-07:00"
-  decision: approval_package_ready
-  riskTier: L0
-  executionMode: l123_approval_package
-  evidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
-  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  taskId: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+  appliedAt: "2026-06-19T23:53:38-07:00"
+  decision: l3_approval_only
+  riskTier: L3
+  executionMode: l123_l3_approval_only
+  evidence: docs/05-execution-logs/evidence/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
   highRiskExecution: false
   costCalibrationGate: blocked

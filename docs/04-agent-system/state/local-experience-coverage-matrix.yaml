@@ -1469,7 +1469,7 @@ matrix:
     freshEvidence: docs/05-execution-logs/evidence/2026-06-19-ap-03-provider-staging-execution-fresh-approval-required.md
     status: release_blocked
     blockedGate: provider_env_secret_staging_prod_cloud_deploy_payment_cost_calibration
-    nextTask: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+    nextTask: none_until_manual_fresh_approval_required_before_any_ap03_provider_staging_execution_fresh_approval
   - useCaseId: UC-GATE-CURRENT-CHECKPOINT
     edition: audit_only
     actor: platform_governance
@@ -1508,6 +1508,28 @@ lastAp11SourceGovernanceChangeControlFreshApprovalRequired:
   executionMode: l123_approval_package
   evidence: docs/05-execution-logs/evidence/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
   auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-11-source-governance-change-control-fresh-approval-required.md
+  matrixStatus: release_blocked
+  highRiskExecution: false
+  nextRecommendedTask: none_until_l123_fresh_approval
+  blockedGates:
+    - source_test_e2e_script_change
+    - database_read_write
+    - env_secret
+    - provider_model_call
+    - schema_migration
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_ocr_export_external_service
+    - cost_calibration_gate
+    - raw_sensitive_evidence
+lastManualFreshApprovalRequiredBeforeAnyAp03ProviderStagingExecution:
+  taskId: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
+  evaluatedAt: "2026-06-19T23:53:38-07:00"
+  decision: l3_approval_only
+  riskTier: L3
+  executionMode: l123_l3_approval_only
+  evidence: docs/05-execution-logs/evidence/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-manual-fresh-approval-required-before-any-ap03-provider-staging-execution.md
   matrixStatus: release_blocked
   highRiskExecution: false
   nextRecommendedTask: none_until_l123_fresh_approval
