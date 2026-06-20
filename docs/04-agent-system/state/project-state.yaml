@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ap-05-standard-org-self-service-scope-change-user-choice-required
-updatedAt: "2026-06-19T22:27:50-07:00"
+currentPhase: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+updatedAt: "2026-06-19T22:40:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,14 +500,14 @@ repository:
   lastKnownMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
   lastKnownOriginMasterSha: 6676798b5fe4194e962c33db0da1e802c6913af1
 currentTask:
-  id: ap-05-standard-org-self-service-scope-change-user-choice-required
+  id: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
   status: closed
-  result: pass_l0_ap05_product_privacy_scope_user_choice_required_no_scope_change_no_schema_no_api_ui
-  sourceStory: userRequestedAp05StandardOrgSelfServiceScopeChangeUserChoiceRequired
-  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
-  branch: codex/ap-05-standard-org-self-service-scope-change-user-choice-required
+  result: pass_l0_ap10_current_checkpoint_audit_repair_l1_fresh_approval_required_no_source_test_e2e_repair
+  sourceStory: userRequestedAp10CurrentCheckpointAuditRepairL1FreshApprovalRequired
+  planPath: docs/05-execution-logs/task-plans/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+  branch: codex/ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -803,10 +803,10 @@ mechanismTuning:
     This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
     standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 localExperienceClosure:
-  status: ap_05_standard_org_self_service_scope_change_user_choice_required_closed
+  status: ap_10_current_checkpoint_audit_repair_l1_fresh_approval_required_closed
   governanceSopPath: docs/04-agent-system/sop/local-experience-closure-governance.md
   coverageMatrixPath: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-  currentTaskId: ap-05-standard-org-self-service-scope-change-user-choice-required
+  currentTaskId: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
   nextCoverageRefreshTaskId: unified-standard-advanced-current-coverage-refresh
   authorizationPackageTemplateStatus: hardened
   recommendationRule: >-
@@ -3604,6 +3604,55 @@ localExperienceClosure:
       dependencyIntroduction: blocked
       rawSensitiveEvidence: blocked
       costCalibrationGate: blocked
+  currentAp10CurrentCheckpointAuditRepairL1FreshApprovalRequired:
+    taskId: ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required
+    evaluatedAt: "2026-06-19T22:40:59-07:00"
+    targetExperienceChain: blocked-use-case-acceleration-governance-packet
+    approvalPackageId: AP-10-CURRENT-CHECKPOINT-AUDIT-REPAIR-L1-FRESH-APPROVAL
+    useCaseIds:
+      - UC-GATE-CURRENT-CHECKPOINT
+    decision: pass_l0_ap10_current_checkpoint_audit_repair_l1_fresh_approval_required_no_source_test_e2e_repair
+    evidence: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    auditReview: docs/05-execution-logs/audits-reviews/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
+    boundarySummary:
+      validation: pass_docs_state_ap10_audit_repair_l1_fresh_approval_required
+      packageMaterialization: AP10_current_checkpoint_audit_repair_l1_fresh_approval_required
+      matrixStatus: release_blocked
+      repairExecuted: false
+      sourceTestE2eChanged: false
+      freshApprovalTextMaterialized: true
+      nextRecommendedTask: none_until_ap10_audit_repair_fresh_approval
+      envLocalReadThisTask: false
+      databaseReadThisTask: false
+      databaseWriteThisTask: false
+      productSourceChanged: false
+      testSourceChanged: false
+      e2eSpecChanged: false
+      scriptChanged: false
+      schemaMigrationChanged: false
+      providerModelCallThisTask: false
+      paymentExternalServiceExecutedThisTask: false
+      ocrParserExecutedThisTask: false
+      exportFileGenerationExecutedThisTask: false
+      stagingProdCloudDeployThisTask: false
+      sourceRepair: blocked
+      e2eRuntime: blocked
+      browserPlaywrightRuntime: blocked
+      runtimeValidation: blocked
+      envSecretOutput: blocked
+      databaseUrlRead: blocked
+      databaseUrlOutput: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrParserExecution: blocked
+      exportFileGeneration: blocked
+      providerModelCall: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      rawSensitiveEvidence: blocked
+      costCalibrationGate: blocked
   currentAp11SourceGovernanceChangeControlDetailing:
     taskId: ap-11-source-governance-change-control-detailing
     evaluatedAt: "2026-06-19T00:00:00-07:00"
@@ -3868,15 +3917,13 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    AP-05 standard organization self-service scope-change user-choice-required package is current and contains only
-    docs/state product/privacy choice stop text. UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL remains release-blocked
-    and the selected option is `none`; standard organization self-service remains `future_non_goal_for_standard`. No
-    product scope change, source modification, API/UI/data model change, test/e2e/script repair, schema/migration,
-    dependency/package/lockfile change, privacy data access, DB read/write, env/secret access, staging/prod/cloud/deploy,
-    payment/external-service execution, formal adoption, PR, force-push, destructive DB, raw organization-private
-    content, raw database row, payment data, private identifier, or sensitive evidence execution is approved or
-    performed. The owner must choose A keep out of current release, B limited standard organization self-service later, C
-    advanced-only, or D defer to customer-specific review before any AP-05 scope change can proceed; non-A options
-    require a separate fresh approval with exact allowed files, commands, product boundary, privacy/data boundary,
-    release boundary, validation, rollback, redaction, and stop conditions.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-05-standard-org-self-service-scope-change-user-choice-required.md
+    AP-10 current checkpoint audit repair L1 fresh approval required package is current and contains only docs/state
+    governance approval-stop text. UC-GATE-CURRENT-CHECKPOINT remains release-blocked. No source/test/e2e/script repair,
+    runtime/browser/Playwright validation, DB read/write, env/secret access, schema/migration, dependency/package/
+    lockfile change, provider/model call, payment/OCR/export/external-service execution, staging/prod/cloud/deploy, Cost
+    Calibration Gate, PR, force-push, destructive DB, raw source artifact, raw database row, raw prompt, raw response,
+    provider payload, or sensitive evidence execution is approved or performed. The owner must either keep AP-10 repair
+    blocked or authorize a separate exact-scope AP-10 current checkpoint audit repair package naming exact allowed files,
+    blocked files, commands, target findings, repair boundary, validation evidence, rollback, redaction, and stop
+    conditions.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-19-ap-10-current-checkpoint-audit-repair-l1-fresh-approval-required.md
