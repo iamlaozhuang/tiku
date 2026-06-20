@@ -174,6 +174,40 @@ function Get-FirstMatrixCandidate {
     return ""
 }
 
+function Get-TaskScalarValue {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s{4}$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim().Trim('"').Trim("'")
+        }
+    }
+
+    return ""
+}
+
+function Get-L123ClassificationText {
+    param(
+        [Parameter(Mandatory = $true)][string]$ResolvedTaskId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock
+    )
+
+    $classificationValues = New-Object System.Collections.Generic.List[string]
+    $classificationValues.Add($ResolvedTaskId)
+
+    foreach ($key in @("title", "phase", "targetClosureItem", "behaviorBoundary")) {
+        $value = Get-TaskScalarValue -Block $TaskBlock -Key $key
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            $classificationValues.Add($value)
+        }
+    }
+
+    return ($classificationValues.ToArray()) -join "`n"
+}
+
 function Test-HasL3Keyword {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
 
@@ -240,7 +274,7 @@ try {
 
     $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $resolvedTaskId)
     $taskBlockText = $taskBlock -join "`n"
-    $classificationText = "$resolvedTaskId`n$taskBlockText"
+    $classificationText = Get-L123ClassificationText -ResolvedTaskId $resolvedTaskId -TaskBlock $taskBlock
     $affectedUseCaseIds = @(Get-AffectedUseCaseIds -MatrixContent $matrixContent -CandidateTaskId $resolvedTaskId)
     $hasL3Keyword = Test-HasL3Keyword -Text $classificationText
     $hasApprovalPackageShape = Test-HasApprovalPackageShape -Text $classificationText

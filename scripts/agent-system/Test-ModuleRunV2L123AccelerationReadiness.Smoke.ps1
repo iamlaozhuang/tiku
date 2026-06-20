@@ -113,6 +113,49 @@ tasks:
     )
     Assert-Contains -Output $broadAllowedFileOutput -Pattern "l123AccelerationDecision: hard_block" -Message "Broad source wildcard should hard block"
     Assert-Contains -Output $broadAllowedFileOutput -Pattern "broad_or_high_risk_allowed_file:src/\*\*" -Message "Broad source wildcard should be named"
+
+    Set-Content -LiteralPath $queuePath -Encoding UTF8 -Value @"
+schemaVersion: 1
+tasks:
+  - id: sample-local-unit-implementation
+    title: Sample local unit implementation
+    status: pending
+    taskKind: implementation
+    executionProfile: local_unit_tdd
+    validationPolicy: local_unit
+    targetClosureItem: local contract validation
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    capabilities:
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    allowedFiles:
+      - src/server/services/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - src/db/schema/**
+      - drizzle/**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+"@
+    Set-Content -LiteralPath $matrixPath -Encoding UTF8 -Value @"
+schemaVersion: 1
+coverage: []
+"@
+    $blockedTextLocalOutput = @(
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+            -TaskId "sample-local-unit-implementation" `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    )
+    Assert-Contains -Output $blockedTextLocalOutput -Pattern "l123AccelerationDecision: no_l123_classification" -Message "Blocked and non-goal high-risk text should not make local unit implementation L3"
+    Assert-Contains -Output $blockedTextLocalOutput -Pattern "nextRecommendedAction: continue_existing_mechanism:sample-local-unit-implementation" -Message "Local implementation should continue through existing mechanism"
 } finally {
     Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
 }
