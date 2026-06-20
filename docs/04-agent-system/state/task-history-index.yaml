@@ -1,10 +1,10 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-20-batch-03
-  updatedAt: "2026-06-20T01:24:45-07:00"
+  updatedByTask: active-queue-slimming-2026-06-20-batch-04
+  updatedAt: "2026-06-20T02:05:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -8812,3 +8812,504 @@ entries:
     commitSha: null
     completedAt: "2026-06-19T00:00:00-07:00"
     archivedByTask: active-queue-slimming-2026-06-20-batch-03
+
+  - id: active-queue-slimming-2026-06-20-second-window
+    phase: active-queue-slimming-2026-06-20-second-window
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-second-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-second-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T01:02:05-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: ap-01-provider-smoke-execution-qwen-approval
+    phase: ap-01-provider-smoke-execution-qwen-approval
+    status: closed
+    taskKind: docs_state_secret_handoff_preparation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: ap-01-provider-smoke-execution-deepseek-env-local-ready
+    phase: ap-01-provider-smoke-execution-deepseek-env-local-ready
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-deepseek-env-local-ready.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: ap-01-deepseek-env-local-prep
+    phase: ap-01-deepseek-env-local-prep
+    status: closed
+    taskKind: docs_state_secret_handoff_preparation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-deepseek-env-local-prep.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-deepseek-env-local-prep.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: ap-01-provider-smoke-harness-token-cap-hardening
+    phase: ap-01-provider-smoke-harness-token-cap-hardening
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-harness-token-cap-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: ap-01-provider-smoke-execution-approval-detailing
+    phase: ap-01-provider-smoke-execution-approval-detailing
+    status: closed
+    taskKind: high_risk_approval_detailing
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-approval-detailing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: local-machine-unit-failure-repair-before-full-phase-1
+    phase: local-machine-unit-failure-repair-before-full-phase-1
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-unit-failure-repair-before-full-phase-1.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: local-machine-fresh-db-phase-1-validation-rerun
+    phase: local-machine-fresh-db-phase-1-validation-rerun
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-fresh-db-phase-1-validation-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: local-machine-phase-0-1-validation
+    phase: local-machine-phase-0-1-validation
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-local-machine-phase-0-1-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-local-machine-phase-0-1-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19T00:00:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-1-api-contract-baseline
+    phase: phase-1-foundation
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-1-design-token-baseline
+    phase: phase-1-foundation
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-design-token-baseline.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-1-env-logging-baseline
+    phase: phase-1-foundation
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-env-logging-baseline.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-2-user-auth-planning
+    phase: phase-2-user-auth
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-planning.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-2-auth-schema-and-permission-model-approval
+    phase: phase-2-user-auth
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-and-permission-model-approval.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: phase-18-prerequisite-local-role-account-fixture-baseline
+    phase: phase-18-prerequisite-preparation
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-prerequisite-local-role-account-fixture-baseline.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: fix-student-login-local-session-token
+    phase: fix-student-login-local-session-token
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-local-session-token.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-local-session-token.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-20T02:05:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: batch-188-organization-analytics-audit-log-redacted-reference
+    phase: batch-188-organization-analytics-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-188-organization-analytics-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-188-organization-analytics-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T09:04:36-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    phase: advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T09:12:49-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    phase: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T09:28:51-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-read-model-contract-tdd
+    phase: advanced-organization-analytics-repository-read-model-contract-tdd
+    status: closed
+    taskKind: local_repository_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T09:38:37-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-read-model-contract-readonly-recheck
+    phase: advanced-organization-analytics-repository-read-model-contract-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-contract-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T09:49:38-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
+    phase: advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T10:31:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-service-wiring-tdd
+    phase: advanced-organization-analytics-repository-service-wiring-tdd
+    status: closed
+    taskKind: local_service_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T10:43:05-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-post-service-wiring-recheck-seeding
+    phase: advanced-organization-analytics-post-service-wiring-recheck-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T10:51:29-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    phase: advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T11:05:51-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    phase: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T11:19:15-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    phase: advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T11:31:38-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    phase: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T15:52:54-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+    phase: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+    status: closed
+    taskKind: mechanism_governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T16:14:31-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-mapper-validator-route-contract-tdd
+    phase: advanced-organization-analytics-mapper-validator-route-contract-tdd
+    status: closed
+    taskKind: local_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T16:44:26-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
+    phase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T16:53:28-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+    phase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+    status: closed
+    taskKind: local_route_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T17:09:30-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+    phase: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T17:20:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+    phase: advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T17:27:31-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    phase: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    status: closed
+    taskKind: local_route_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T17:39:16-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    phase: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:06:22-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    phase: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    status: closed
+    taskKind: local_route_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:26:41-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    phase: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:35:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    phase: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    status: closed
+    taskKind: local_repository_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:52:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    phase: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:24:08-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-source-input-decision
+    phase: advanced-organization-analytics-postgres-gateway-source-input-decision
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:42:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+    phase: advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T19:10:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-training-answer-source-schema-migration-planning
+    phase: advanced-organization-analytics-training-answer-source-schema-migration-planning
+    status: closed
+    taskKind: docs_schema_migration_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T18:47:42-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-training-answer-source-schema-migration
+    phase: advanced-organization-analytics-training-answer-source-schema-migration
+    status: closed
+    taskKind: local_schema_migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T19:39:52-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-gateway-query-task-seeding
+    phase: advanced-organization-analytics-gateway-query-task-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T19:56:13-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+    phase: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+    status: closed
+    taskKind: local_repository_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T20:43:58-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-post-query-gateway-composition-task-seeding
+    phase: advanced-organization-analytics-post-query-gateway-composition-task-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T20:57:00-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+    phase: advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+    status: closed
+    taskKind: local_repository_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T21:16:45-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-post-visible-scope-source-reader-seeding
+    phase: advanced-organization-analytics-post-visible-scope-source-reader-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T21:30:01-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04
+  - id: advanced-organization-analytics-postgres-gateway-source-readers-tdd
+    phase: advanced-organization-analytics-postgres-gateway-source-readers-tdd
+    status: closed
+    taskKind: local_repository_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T22:00:02-07:00"
+    archivedByTask: active-queue-slimming-2026-06-20-batch-04

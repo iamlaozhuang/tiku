@@ -1,8 +1,8 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-2026-06-20-batch-03
-updatedAt: "2026-06-20T01:24:45-07:00"
+currentPhase: active-queue-slimming-2026-06-20-batch-04
+updatedAt: "2026-06-20T02:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,17 +500,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 24117be439f9c14a280510ba173c34f87e37600c
-  lastKnownOriginMasterSha: 24117be439f9c14a280510ba173c34f87e37600c
+  lastKnownMasterSha: 9283b170703296191437c76a58693cc47026f0fd
+  lastKnownOriginMasterSha: 9283b170703296191437c76a58693cc47026f0fd
 currentTask:
-  id: active-queue-slimming-2026-06-20-batch-03
+  id: active-queue-slimming-2026-06-20-batch-04
   status: closed
-  result: pass_docs_state_active_queue_slimming_batch_03_no_execution
+  result: pass_docs_state_active_queue_slimming_batch_04_no_execution
   sourceStory: userApprovedActiveQueueSlimmingBatch
-  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-03.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-03.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-03.md
-  branch: codex/active-queue-slimming-batch-03
+  planPath: docs/05-execution-logs/task-plans/2026-06-20-active-queue-slimming-batch-04.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-20-active-queue-slimming-batch-04.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-active-queue-slimming-batch-04.md
+  branch: codex/active-queue-slimming-batch-04
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4117,3 +4117,90 @@ lastActiveQueueSlimmingBatch03:
     history index only. It did not execute AP high-risk tasks, L1/L2 source/test/e2e repair, L3 execution,
     provider/model calls, DB work, env/secret access, schema/migration, dependency changes, deploy, payment, OCR,
     export, external-service actions, PR, force push, destructive DB, or Cost Calibration Gate execution.
+
+lastActiveQueueSlimmingBatch04:
+  taskId: active-queue-slimming-2026-06-20-batch-04
+  archivedAt: "2026-06-20T02:05:00-07:00"
+  branch: codex/active-queue-slimming-batch-04
+  decision: pass_docs_state_active_queue_slimming_batch_04_no_execution
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-20-second-window
+    - ap-01-provider-smoke-execution-qwen-approval
+    - ap-01-provider-smoke-execution-deepseek-env-local-ready
+    - ap-01-deepseek-env-local-prep
+    - ap-01-provider-smoke-harness-token-cap-hardening
+    - ap-01-provider-smoke-execution-approval-detailing
+    - local-machine-unit-failure-repair-before-full-phase-1
+    - local-machine-fresh-db-phase-1-validation-rerun
+    - local-machine-phase-0-1-validation
+    - phase-1-api-contract-baseline
+    - phase-1-design-token-baseline
+    - phase-1-env-logging-baseline
+    - phase-2-user-auth-planning
+    - phase-2-auth-schema-and-permission-model-approval
+    - phase-18-prerequisite-local-role-account-fixture-baseline
+    - fix-student-login-local-session-token
+    - batch-188-organization-analytics-audit-log-redacted-reference
+    - advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    - advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    - advanced-organization-analytics-repository-read-model-contract-tdd
+    - advanced-organization-analytics-repository-read-model-contract-readonly-recheck
+    - advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
+    - advanced-organization-analytics-repository-service-wiring-tdd
+    - advanced-organization-analytics-post-service-wiring-recheck-seeding
+    - advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    - advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    - advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    - advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    - standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+    - advanced-organization-analytics-mapper-validator-route-contract-tdd
+    - advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
+    - advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+    - advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+    - advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+    - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    - advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    - advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    - advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    - advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    - advanced-organization-analytics-postgres-gateway-source-input-decision
+    - advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+    - advanced-organization-analytics-training-answer-source-schema-migration-planning
+    - advanced-organization-analytics-training-answer-source-schema-migration
+    - advanced-organization-analytics-gateway-query-task-seeding
+    - advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+    - advanced-organization-analytics-post-query-gateway-composition-task-seeding
+    - advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+    - advanced-organization-analytics-post-visible-scope-source-reader-seeding
+    - advanced-organization-analytics-postgres-gateway-source-readers-tdd
+  activeQueueBeforeArchiveCandidates: 164
+  archivedTaskCount: 50
+  registeredLegacyUnavailableEvidence:
+    - phase-1-api-contract-baseline
+    - phase-1-design-token-baseline
+    - phase-1-env-logging-baseline
+    - phase-2-user-auth-planning
+    - phase-2-auth-schema-and-permission-model-approval
+  closureEvidenceRecovered:
+    - phase-18-prerequisite-local-role-account-fixture-baseline
+  legacyAuditUnavailable:
+    - phase-1-api-contract-baseline
+    - phase-1-design-token-baseline
+    - phase-1-env-logging-baseline
+    - phase-2-user-auth-planning
+    - phase-2-auth-schema-and-permission-model-approval
+    - phase-18-prerequisite-local-role-account-fixture-baseline
+  dependentActiveBlockedTasks:
+    - ap-01-provider-smoke-execution-qwen-env-local-ready
+    - ap-01-provider-smoke-execution
+  expectedArchiveCandidateCountAfter: 115
+  boundary: >-
+    This docs/state queue slimming task moved terminal historical task blocks to the monthly archive and updated the
+    history index only. Registered legacy-unavailable evidence remains historical non-blocking debt, and closure
+    evidence recovery remains historical closeout metadata only. It did not execute AP high-risk tasks, L1/L2
+    source/test/e2e repair, L3 execution, provider/model calls, DB work, env/secret access, schema/migration,
+    dependency changes, deploy, payment, OCR, export, external-service actions, PR, force push, destructive DB, or
+    Cost Calibration Gate execution.
