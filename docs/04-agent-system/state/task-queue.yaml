@@ -3750,6 +3750,7 @@ tasks:
     validatedAt: "2026-06-21T07:59:41-07:00"
     closedAt: "2026-06-21T07:59:41-07:00"
     branch: codex/batch-241-organization-employee-answer-flow
+    commitSha: 150aa272
     retryCount: 0
   - id: batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
     title: Module Run v2 organization-training implementation seed

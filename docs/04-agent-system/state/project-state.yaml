@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
   branch: codex/batch-241-organization-employee-answer-flow
-  commitSha: null
+  commitSha: 150aa272
   prUrl: null
   retryCount: 0
   lastFailurePath: null
