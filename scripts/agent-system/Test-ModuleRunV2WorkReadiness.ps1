@@ -19,6 +19,8 @@ param(
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
 
     [Parameter(Mandatory = $false)]
+    [AllowEmptyCollection()]
+    [AllowEmptyString()]
     [string[]]$PlannedFiles = @()
 )
 
@@ -58,6 +60,8 @@ function Add-Finding {
 function Get-TaskBlock {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines,
 
         [Parameter(Mandatory = $true)]
@@ -90,6 +94,8 @@ function Get-TaskBlock {
 function Get-ScalarValue {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Block,
 
         [Parameter(Mandatory = $true)]
@@ -108,6 +114,8 @@ function Get-ScalarValue {
 function Get-ListValues {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Block,
 
         [Parameter(Mandatory = $true)]
@@ -139,6 +147,8 @@ function Get-ListValues {
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines
     )
 
@@ -164,6 +174,8 @@ function Get-CurrentTaskId {
 function Get-CurrentTaskScalar {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines,
 
         [Parameter(Mandatory = $true)]
@@ -224,6 +236,8 @@ function Get-MatchingPattern {
         [string]$Path,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Patterns
     )
 
@@ -243,6 +257,7 @@ function Write-List {
 
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Values
     )
 

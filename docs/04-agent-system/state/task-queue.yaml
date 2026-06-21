@@ -1,5 +1,81 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: module-run-v2-work-readiness-empty-line-parser-repair
+    title: Module Run v2 WorkReadiness empty line parser repair
+    phase: agent-system-governance-hardening
+    sourceStory: userApprovedWorkReadinessEmptyLineParserRepair
+    dependencies: []
+    executionProfile: local_low_risk_script_repair
+    evidenceMode: full
+    validationPolicy: local_script_smoke
+    queueSelectionMode: user_directed_requirement_decision
+    taskKind: script_repair
+    moduleRunVersion: 2
+    status: in_progress
+    result: pending
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T04:12:44-07:00"
+    branch: codex/work-readiness-empty-line-parser-repair
+    nextApprovalRequired: push_or_merge_requires_separate_user_approval
+    targetClosureItem: WorkReadiness parser accepts blank lines in YAML-backed file content and task blocks
+    behaviorBoundary: agent-system-script::work_readiness_empty_line_parser_repair
+    capabilities:
+      localScriptRepair: approved
+      localSmokeValidation: approved
+      productSourceChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - hook_governance
+      - local_script_repair
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-work-readiness-empty-line-parser-repair -PlannedFiles scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1,scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md,docs/05-execution-logs/evidence/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md,docs/05-execution-logs/audits-reviews/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-work-readiness-empty-line-parser-repair
+    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, raw DB rows, provider payloads, or raw user content
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_work_readiness_parser_repair
+      fastForwardMerge:
+        approved: false
+        approvalRequired: separate_user_approval
+      push:
+        approved: false
+        approvalRequired: separate_user_approval
+      cleanup:
+        deleteShortBranch: false
+        approvalRequired: separate_user_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
   - id: edition-aware-authorization-schema-migration-approval-package-materialization
     title: Edition-aware authorization schema migration approval package materialization
     phase: edition-aware-authorization-implementation-planning

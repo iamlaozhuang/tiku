@@ -59,8 +59,9 @@ try {
     $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
 
-    @"
+@"
 schemaVersion: 1
+
 currentTask:
   id: $taskId
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-completion.md
@@ -69,24 +70,30 @@ currentTask:
     @"
 schemaVersion: 1
 tasks:
+
   - id: $taskId
     status: in_progress
     taskKind: implementation
+
     allowedFiles:
       - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
       - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
       - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+
     blockedFiles:
       - .env.local
       - package.json
       - src/**
       - e2e/**
+
     riskTypes:
       - hook_governance
+
     validationCommands:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+
   - id: $doneTaskId
     status: done
     taskKind: implementation
@@ -137,9 +144,9 @@ tasks:
         & $scriptPath -Mode pre-work -ProjectStatePath $projectStatePath -QueuePath $queuePath
     }
 
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_INACTIVE_TASK" -Command {
-        & $scriptPath -Mode pre-work -TaskId $doneTaskId -ProjectStatePath $projectStatePath -QueuePath $queuePath
-    }
+    $doneTaskOutput = @(& $scriptPath -Mode pre-work -TaskId $doneTaskId -ProjectStatePath $projectStatePath -QueuePath $queuePath)
+    Assert-Contains -Output $doneTaskOutput -Pattern "workReadinessDecision: not_executable_closed_task"
+    Assert-Contains -Output $doneTaskOutput -Pattern "workReadinessAction: idle_no_executable_task"
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PLANNED_OUT_OF_SCOPE" -Command {
         & $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles "README.md"
