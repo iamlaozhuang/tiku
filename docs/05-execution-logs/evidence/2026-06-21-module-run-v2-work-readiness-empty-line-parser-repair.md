@@ -48,13 +48,13 @@ result: pass
 - GREEN: smoke and real `pre-edit` WorkReadiness command passed after adding empty-string tolerant array parameters.
 - Commit: `1dcf001f7bce548acbcc9ced7a8f7cdc631a3402`.
 - localFullLoopGate: not used; this is a local script repair only.
-- threadRolloverGate: after this local repair commit, stop unless the user separately approves merge/push or another task.
+- threadRolloverGate: current user prompt approved FF merge to `master`, push `origin/master`, and deletion of the merged short branch; stop after cleanup unless separately instructed.
 - nextModuleRunCandidate: none automatically selected; wait for user instruction.
-- blocked remainder: merge to `master`, push `origin/master`, PR, force-push, deploy, dependency/env/provider/payment/schema/migration/source/e2e work, DB migration apply, destructive DB, staging/prod DB, and Cost Calibration Gate remain blocked.
+- blocked remainder: PR, force-push, deploy, dependency/env/provider/payment/schema/migration/source/e2e work, DB migration apply, destructive DB, staging/prod DB, and Cost Calibration Gate remain blocked.
 
 ## Closeout Pending
 
 - Local validation commit: `1dcf001f7bce548acbcc9ced7a8f7cdc631a3402`.
-- Merge to `master`: not approved in this packet.
-- Push `origin/master`: not approved in this packet.
-- Short branch cleanup: pending user approval for merge/push flow.
+- Merge to `master`: approved by current user prompt; pending execution.
+- Push `origin/master`: approved by current user prompt; pending execution.
+- Short branch cleanup: approved by current user prompt; pending execution.

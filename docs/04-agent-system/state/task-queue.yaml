@@ -68,14 +68,16 @@ tasks:
         approved: true
         approvalSource: current_user_fresh_approval_2026_06_21_work_readiness_parser_repair
       fastForwardMerge:
-        approved: false
-        approvalRequired: separate_user_approval
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_21_work_readiness_parser_repair_merge_push_cleanup
       push:
-        approved: false
-        approvalRequired: separate_user_approval
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_21_work_readiness_parser_repair_merge_push_cleanup
       cleanup:
-        deleteShortBranch: false
-        approvalRequired: separate_user_approval
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_work_readiness_parser_repair_merge_push_cleanup
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
