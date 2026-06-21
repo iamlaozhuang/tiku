@@ -3184,9 +3184,15 @@ tasks:
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-237-personal-learning-ai-paper-and-mock-exam-context-selection
+    planPath: docs/05-execution-logs/task-plans/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md
     evidencePath: docs/05-execution-logs/evidence/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md
-    status: pending
+    status: closed
+    result: pass_existing_source_covers_personal_generation_context_selection
+    claimedAt: "2026-06-21T07:17:45-07:00"
+    validatedAt: "2026-06-21T07:18:59-07:00"
+    closedAt: "2026-06-21T07:18:59-07:00"
+    branch: codex/batch-237-personal-learning-ai-context-selection
     retryCount: 0
   - id: batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and
     title: Module Run v2 personal-learning-ai implementation seed
