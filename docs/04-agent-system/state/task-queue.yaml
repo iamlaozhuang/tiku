@@ -288,7 +288,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_org_auth_scope_product_decision_package
+    claimedAt: "2026-06-21T10:30:00-07:00"
+    validatedAt: "2026-06-21T10:35:00-07:00"
+    branch: codex/decide-org-auth-scope-product-model
     classification:
       - docs_decision
       - approval_blocked

@@ -1,0 +1,78 @@
+# Org Auth Scope Product Decision
+
+**Date:** 2026-06-21
+**Decision status:** decision package recorded; implementation blocked pending authorization-model approval, schema/API contract design, and security review.
+**Related use cases:** `UC-STD-ORG-AUTH-MANAGED`, `UC-ADV-AUTH-CONTEXT-UPGRADE`
+
+## Decision
+
+This task closes the discovered `org_auth` scope question as a product decision only. It does not change schema, API contracts, services, UI, data, migrations, or runtime authorization behavior.
+
+The product decision package is:
+
+1. `subject` is a real authorization dimension. Existing `org_auth` records and current runtime behavior are treated as covering both registered `subject` values, `theory` and `skill`, until a future schema/contract task explicitly introduces subject-scoped authorization.
+2. Product workflows may sell or display multi-`profession` and multi-`level` bundles, but authorization evaluation must use atomic scopes. One atomic scope is `organization` coverage plus one `profession`, one `level`, one `subject`, one `edition`, one time window, and one quota rule.
+3. A bundle that covers multiple `profession`, `level`, or `subject` values must decompose into multiple atomic authorization scopes. Do not store unreviewed arrays or comma-joined values in an `org_auth` row.
+4. `auth_scope_type` continues to describe organization coverage only: `current_and_descendants` or `specified_nodes`. It must not be overloaded to mean `profession`, `level`, or `subject` coverage.
+5. Enterprise backend access is shared by `organization` and `employee` context. Multiple `org_auth` records compose the same enterprise backend capability set; they do not create separate backend portals.
+6. Active overlapping scopes for the same effective `organization`, `profession`, `level`, `subject`, `edition`, and time window are prohibited unless a separately approved upgrade or extension rule defines conflict resolution.
+7. Account quota is evaluated per atomic authorization scope. Product pages may aggregate quota for display, but services must keep audit and consumption attributable to the atomic scope that grants access.
+
+## Current Runtime Baseline
+
+| area              | current fact                                                                                    | decision impact                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| schema            | `org_auth` stores one `profession` and one `level`; it does not store `subject`.                | Current data remains backward-compatible and should be interpreted as covering `theory` and `skill`. |
+| organization      | `org_auth_organization` stores covered organizations for `specified_nodes`.                     | Organization coverage remains separate from profession/level/subject coverage.                       |
+| API contract      | `OrgAuthDto` exposes `profession`, `level`, `authScopeType`, and `organizationPublicIds`.       | Future subject and bundle fields need a contract design before implementation.                       |
+| standard use case | Standard organization authorization is platform-managed; enterprise self-service is not in MVP. | Product decisions can be documented now, but runtime changes remain gated.                           |
+
+## Product Rules
+
+### Subject
+
+- Existing `org_auth` means access to both `subject` values: `theory` and `skill`.
+- Future subject-scoped authorization must use registered `subject` values only.
+- If a product flow needs "all subjects", implementation should create or evaluate multiple atomic subject scopes rather than adding an unregistered enum value.
+- Subject-scoped enablement requires contract, schema, service, UI, seed/migration, and security review tasks.
+
+### Multiple Profession And Level
+
+- Sales/admin UX may present a single package covering multiple `profession` or `level` values.
+- Backend authorization must remain atomic for eligibility, quota, expiry, cancellation, audit, and reporting.
+- A future implementation may choose either multiple `org_auth` rows or a reviewed child scope table, but that choice is out of scope for this task.
+- UI aggregation must not hide conflicts, expiry differences, quota differences, or cancellation state.
+
+### Shared Enterprise Backend
+
+- An `employee` enters one enterprise backend through their `organization` context.
+- Effective capabilities are computed from all active `org_auth` scopes covering that employee's organization and time window.
+- Enterprise backend navigation, analytics, and training views should display the effective scope set, not switch the user into separate portals per `org_auth`.
+- Admin operations must use public identifiers in URLs and logs; self-increment IDs remain internal.
+
+### Overlap And Conflict
+
+- The default rule is deny-overlap for active effective scopes with the same atomic authorization dimensions.
+- Upgrade, renewal, extension, cancellation, and downgrade behavior need separate product rules before code changes.
+- Any overlap exception must define precedence, quota transfer, audit wording, and rollback behavior.
+
+## Implementation Boundary
+
+This decision creates follow-up work; it does not approve runtime implementation.
+
+Required future task packages:
+
+1. Schema decision: whether to keep multiple atomic `org_auth` rows or introduce a reviewed scope child table.
+2. API contract decision: DTO fields, create/update inputs, list/detail aggregation, and backward compatibility.
+3. Service decision: effective authorization calculation, overlap detection, quota attribution, and cancellation semantics.
+4. UI decision: bundle creation/editing, detail page aggregation, enterprise backend scope display, and conflict warnings.
+5. Security review: URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules.
+6. Migration/seed plan: existing records interpreted as both `theory` and `skill` until an approved migration path exists.
+
+## Blocked Without Fresh Approval
+
+- Schema, migration, seed, or database changes.
+- Authorization runtime behavior changes.
+- Contract/service/UI implementation.
+- Browser/e2e/dev-server runtime verification.
+- `.env`, Provider, dependency, package, lockfile, deploy, PR, force-push, payment, external-service, or Cost Calibration Gate work.
