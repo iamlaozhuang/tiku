@@ -1,5 +1,99 @@
 schemaVersion: 1
 tasks:
+  - id: requirement-fulfillment-role-experience-review-audit-closeout
+    title: Requirement fulfillment and role experience static audit closeout
+    phase: requirement-fulfillment-role-experience-review
+    sourceStory: user-approved-2026-06-21-requirement-fulfillment-role-experience-review
+    dependencies:
+      - batch-243-organization-training-audit-log-redacted-reference
+    taskPlanPolicy: completed_before_edit
+    humanApprovalBoundary: >-
+      User explicitly approved a minimal governance and queue auto-seed commit to register the static requirement
+      fulfillment and role-experience audit task in task-queue.yaml and project-state.yaml, then commit the five audit
+      documents, fast-forward merge to master, push origin/master, clean the merged short branch, and open the next
+      short repair branch. No product source, tests, e2e, schema, migration, scripts, env, dependency, provider,
+      payment, deploy, PR, force-push, destructive DB, staging/prod/cloud database, or Cost Calibration Gate work is
+      approved.
+    targetClosureItem: five static requirement fulfillment and role-experience audit documents
+    behaviorBoundary: requirements_traceability::static_audit_closeout
+    executionProfile: docs_traceability_audit
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_traceability_audit_closeout
+    taskKind: docs_traceability_audit
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: ready_scope_registered_for_five_static_audit_documents
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T08:46:58-07:00"
+    validatedAt: "2026-06-21T08:46:58-07:00"
+    branch: codex/requirement-fulfillment-review
+    capabilities:
+      docsTraceabilityAudit: approved
+      productSourceChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/01-requirements/traceability/requirement-fulfillment-matrix.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/task-plans/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/05-execution-logs/evidence/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    plannedFiles:
+      - docs/01-requirements/traceability/requirement-fulfillment-matrix.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/task-plans/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/05-execution-logs/evidence/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source, tests, e2e, schema, migration, env, dependency, provider, payment, deploy, PR, force-push
+      - destructive local database operation, staging/prod/cloud database, provider/model calls, Cost Calibration Gate
+      - raw sensitive evidence, secrets, tokens, database URLs, Authorization headers, plaintext redeem_code
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - rg -n "TODO|TBD|占位|以后补" docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
+    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, private answer text, or full paper content
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_static_audit_closeout
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_21_static_audit_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_21_static_audit_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_static_audit_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    retryCount: 0
   - id: active-queue-slimming-2026-06-21-drain-to-recovery-window
     title: Active queue slimming 2026-06-21 drain to recovery window
     phase: agent-system-queue-health
