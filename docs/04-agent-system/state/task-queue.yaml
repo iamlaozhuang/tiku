@@ -761,12 +761,99 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-ui-context-packet.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-ui-context-packet.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-ui-context-packet.md
+  - id: edition-aware-authorization-e2e-spec-authoring-packet
+    title: Edition-aware authorization e2e spec authoring packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.e2eSpecAuthoring
+    dependencies:
+      - edition-aware-authorization-ui-context-packet
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: ready_set
+    taskKind: local_e2e_spec_authoring
+    moduleRunVersion: 2
+    status: in_progress
+    result: pending
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T03:26:06-07:00"
+    branch: codex/edition-auth-e2e-spec-authoring-packet
+    nextApprovalRequired: none_for_current_e2e_spec_authoring_scope
+    targetClosureItem: dedicated local edition-aware authorization e2e spec
+    behaviorBoundary: local-e2e-spec::edition_aware_authorization_contract_browser_flow_redacted
+    capabilities:
+      localE2ESpecAuthoring: approved_local_only_dedicated_spec
+      localE2EValidation: approved_local_only_dedicated_spec
+      localFullFlowGate: approved_localhost_only
+      devServer: approved_localhost_only
+      localDockerDatabase: blocked_without_task_fresh_approval
+      destructiveLocalDockerDatabase: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - e2e/edition-aware-authorization-local-flow.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/**
+      - src/app/**
+      - src/features/**
+      - src/components/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/edition-aware-authorization-local-flow.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet
+    redactionPolicy: e2e evidence records command, spec name, role/use-case summary, pass/fail, and redacted metadata only
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_e2e_spec_authoring_and_acceptance
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_e2e_spec_authoring_and_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-e2e-spec-authoring-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-e2e-spec-authoring-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-e2e-spec-authoring-packet.md
   - id: edition-aware-authorization-local-e2e-acceptance-packet
     title: Edition-aware authorization local e2e acceptance packet
     phase: edition-aware-authorization-implementation-planning
     sourceStory: editionAwareAuthorizationPacketSplit.e2e
     dependencies:
-      - edition-aware-authorization-ui-context-packet
+      - edition-aware-authorization-e2e-spec-authoring-packet
     useCaseIds:
       - UC-STD-PERSONAL-AUTH-REDEEM
       - UC-STD-ORG-AUTH-MANAGED
