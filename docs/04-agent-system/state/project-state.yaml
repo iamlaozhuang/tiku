@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
   lastKnownOriginMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
 currentTask:
-  id: record-org-auth-contract-security-merge-decision
+  id: record-enterprise-training-admin-first-decision
   status: ready_for_closeout
-  result: pass_org_auth_contract_security_merge_decision_record
-  claimedAt: "2026-06-21T15:49:45-07:00"
-  validatedAt: "2026-06-21T15:51:20-07:00"
+  result: pass_enterprise_training_admin_first_decision_record
+  claimedAt: "2026-06-21T15:54:24-07:00"
+  validatedAt: "2026-06-21T15:56:41-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-b-org-auth-contract-security-merge
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-org-auth-contract-security-merge-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-org-auth-contract-security-merge-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-contract-security-merge-decision.md
-  branch: codex/record-org-auth-contract-security-merge-decision
+  sourceStory: user-followup-approval-option-b-enterprise-training-admin-first
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-enterprise-training-admin-first-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-enterprise-training-admin-first-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-enterprise-training-admin-first-decision.md
+  branch: codex/record-enterprise-training-admin-first-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5038,6 +5038,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - security_review_required
+    - id: record-enterprise-training-admin-first-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - runtime_verification_later
   approvalDecisions:
     - decisionId: org-auth-scope-schema-path
       decidedAt: "2026-06-21T15:26:12-07:00"
@@ -5148,6 +5153,28 @@ discoveredIssueClosureBatch20260621:
         migration, seed, database connection, service/UI implementation, package or lockfile change, env/secret work,
         Provider calls, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost
         Calibration Gate work.
+    - decisionId: enterprise-training-admin-first-path
+      decidedAt: "2026-06-21T15:54:24-07:00"
+      source: user_selected_option_b
+      selectedOption: B
+      decision: allow_org_admin_training_content_management_local_candidate_first
+      appliesTo:
+        - close-organization-training-admin-management
+        - stabilize-org-auth-effective-scope-for-training
+        - close-employee-training-answer-flow
+        - close-organization-training-analytics-summary
+        - verify-enterprise-training-runtime-experience
+      implementationRule: >-
+        Future advanced enterprise training work may start with a separately approved low-risk local implementation
+        candidate for org_admin organization_training content management, covering draft, publish, take-down, copy, and
+        source-context administration while preserving existing org_auth blockers and formal-content separation. Employee
+        training answer flow, employee privacy, organization analytics, Provider-backed generation, and runtime proof
+        remain blocked until their own approvals and prerequisites are satisfied.
+      approvalBoundary: >-
+        This records sequencing approval only. It does not approve immediate source implementation in this task,
+        employee answer or analytics implementation, org_auth runtime behavior changes, schema, migration, seed, database
+        connection, package or lockfile change, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy,
+        PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
   currentSerialScopeStatus: all_seeded_tasks_reached_fixed_decision_or_blocked_closure
   boundary: >-

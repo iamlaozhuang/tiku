@@ -838,6 +838,67 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-contract-security-merge-decision.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-record-org-auth-contract-security-merge-decision.md
     retryCount: 0
+  - id: record-enterprise-training-admin-first-decision
+    title: Record enterprise training admin-first sequencing decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    sourceStory: user-followup-approval-option-b-enterprise-training-admin-first
+    dependencies:
+      - plan-advanced-enterprise-training-path
+      - record-org-auth-contract-security-merge-decision
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User selected option B for advanced enterprise and employee training path: allow a later separately scoped
+      org_admin organization_training content-management local implementation candidate first, while employee training,
+      organization analytics, Provider-backed training generation, and runtime proof remain blocked. This task may record
+      the decision in docs/state only. No immediate source implementation, no tests, no org_auth runtime behavior change,
+      no schema/migration/database work, no package/dependency change, no env/secret access, no Provider calls, no
+      browser/e2e/dev-server runtime, no deploy, PR, force-push, payment, external service, or Cost Calibration Gate is
+      allowed.
+    targetClosureItem: advanced enterprise training admin-first option B decision record
+    behaviorBoundary: advanced_enterprise_training::admin_first_decision_record
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_followup_approval_record
+    taskKind: product_implementation_sequence_decision_record
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_enterprise_training_admin_first_decision_record
+    claimedAt: "2026-06-21T15:54:24-07:00"
+    validatedAt: "2026-06-21T15:56:41-07:00"
+    branch: codex/record-enterprise-training-admin-first-decision
+    classification:
+      - docs_decision
+      - approval_blocked
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/advanced-edition/2026-06-21-enterprise-training-path-closure-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-21-record-enterprise-training-admin-first-decision.md
+      - docs/05-execution-logs/evidence/2026-06-21-record-enterprise-training-admin-first-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-record-enterprise-training-admin-first-decision.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\01-requirements\advanced-edition\2026-06-21-enterprise-training-path-closure-plan.md docs\05-execution-logs\task-plans\2026-06-21-record-enterprise-training-admin-first-decision.md docs\05-execution-logs\evidence\2026-06-21-record-enterprise-training-admin-first-decision.md docs\05-execution-logs\audits-reviews\2026-06-21-record-enterprise-training-admin-first-decision.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId record-enterprise-training-admin-first-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId record-enterprise-training-admin-first-decision -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-enterprise-training-admin-first-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-enterprise-training-admin-first-decision.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-record-enterprise-training-admin-first-decision.md
+    retryCount: 0
   - id: mistake-book-cookie-session-contract-repair
     title: Mistake book cookie session contract repair
     phase: student-experience-repair
