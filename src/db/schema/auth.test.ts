@@ -7,14 +7,19 @@ import {
   adminOrganization,
   authAccount,
   authSession,
+  authUpgrade,
+  authUpgradeSourceTypeValues,
+  authUpgradeStatusValues,
   authUser,
   authVerification,
+  authorizationEditionValues,
   employee,
   orgAuth,
   orgAuthOrganization,
   organization,
   personalAuth,
   redeemCode,
+  redeemCodeTypeValues,
   student,
   user,
 } from "./auth";
@@ -119,6 +124,57 @@ describe("auth schema baseline", () => {
     );
     expect(getIndexNames(orgAuthOrganization)).toContain(
       "udx_org_auth_organization_org_auth_id_organization_id",
+    );
+  });
+
+  it("defines edition-aware authorization source fields", () => {
+    expect(authorizationEditionValues).toEqual(["standard", "advanced"]);
+    expect(redeemCodeTypeValues).toEqual([
+      "personal_standard_activation",
+      "personal_advanced_activation",
+      "edition_upgrade",
+    ]);
+
+    expect(getColumnNames(redeemCode)).toContain("redeem_code_type");
+    expect(getColumnNames(personalAuth)).toContain("edition");
+    expect(getColumnNames(orgAuth)).toContain("edition");
+  });
+
+  it("defines auth_upgrade as the source table for standard to advanced upgrades", () => {
+    expect(getTableName(authUpgrade)).toBe("auth_upgrade");
+    expect(authUpgradeSourceTypeValues).toEqual(["redeem_code", "ops_manual"]);
+    expect(authUpgradeStatusValues).toEqual(["active", "expired", "revoked"]);
+
+    expect(getColumnNames(authUpgrade)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "personal_auth_id",
+        "org_auth_id",
+        "target_edition",
+        "source_type",
+        "redeem_code_id",
+        "ops_reference",
+        "ops_note",
+        "operator_admin_id",
+        "starts_at",
+        "expires_at",
+        "revoked_at",
+        "revoked_by_admin_id",
+        "status",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getIndexNames(authUpgrade)).toEqual(
+      expect.arrayContaining([
+        "udx_auth_upgrade_public_id",
+        "udx_auth_upgrade_redeem_code_id",
+        "idx_auth_upgrade_personal_auth_id",
+        "idx_auth_upgrade_org_auth_id",
+        "idx_auth_upgrade_status",
+        "idx_auth_upgrade_expires_at",
+      ]),
     );
   });
 

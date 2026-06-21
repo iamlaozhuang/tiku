@@ -70,6 +70,7 @@ describe("auth domain models", () => {
       name: "省级企业授权",
       purchaser_organization_id: 1,
       auth_scope_type: "current_and_descendants",
+      edition: "standard",
       profession: "monopoly",
       level: 3,
       account_quota: 100,

@@ -99,6 +99,13 @@
       "when": 1781764659079,
       "tag": "20260618063739_add_organization_training_draft_source_context",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1782035351533,
+      "tag": "20260621024911_add_edition_aware_authorization",
+      "breakpoints": true
     }
   ]
 }

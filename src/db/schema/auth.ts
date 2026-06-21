@@ -1,6 +1,7 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  check,
   index,
   integer,
   pgEnum,
@@ -42,6 +43,21 @@ export const authScopeTypeValues = [
   "current_and_descendants",
   "specified_nodes",
 ] as const;
+export const authorizationEditionValues = ["standard", "advanced"] as const;
+export const redeemCodeTypeValues = [
+  "personal_standard_activation",
+  "personal_advanced_activation",
+  "edition_upgrade",
+] as const;
+export const authUpgradeSourceTypeValues = [
+  "redeem_code",
+  "ops_manual",
+] as const;
+export const authUpgradeStatusValues = [
+  "active",
+  "expired",
+  "revoked",
+] as const;
 
 export const professionEnum = pgEnum("profession", professionValues);
 export const userTypeEnum = pgEnum("user_type", userTypeValues);
@@ -55,6 +71,22 @@ export const redeemCodeStatusEnum = pgEnum(
 );
 export const authStatusEnum = pgEnum("auth_status", authStatusValues);
 export const authScopeTypeEnum = pgEnum("auth_scope_type", authScopeTypeValues);
+export const authorizationEditionEnum = pgEnum(
+  "authorization_edition",
+  authorizationEditionValues,
+);
+export const redeemCodeTypeEnum = pgEnum(
+  "redeem_code_type",
+  redeemCodeTypeValues,
+);
+export const authUpgradeSourceTypeEnum = pgEnum(
+  "auth_upgrade_source_type",
+  authUpgradeSourceTypeValues,
+);
+export const authUpgradeStatusEnum = pgEnum(
+  "auth_upgrade_status",
+  authUpgradeStatusValues,
+);
 
 export const authUser = pgTable(
   "auth_user",
@@ -286,6 +318,9 @@ export const redeemCode = pgTable(
     public_id: text("public_id").notNull(),
     code_hash: text("code_hash").notNull(),
     code_display: text("code_display").notNull(),
+    redeem_code_type: redeemCodeTypeEnum("redeem_code_type")
+      .default("personal_standard_activation")
+      .notNull(),
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     duration_day: integer("duration_day").notNull(),
@@ -320,6 +355,7 @@ export const personalAuth = pgTable(
     redeem_code_id: bigint("redeem_code_id", { mode: "number" })
       .notNull()
       .references(() => redeemCode.id, { onDelete: "restrict" }),
+    edition: authorizationEditionEnum("edition").default("standard").notNull(),
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     starts_at: timestampColumn("starts_at"),
@@ -353,6 +389,7 @@ export const orgAuth = pgTable(
       .notNull()
       .references(() => organization.id, { onDelete: "restrict" }),
     auth_scope_type: authScopeTypeEnum("auth_scope_type").notNull(),
+    edition: authorizationEditionEnum("edition").default("standard").notNull(),
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
     account_quota: integer("account_quota").notNull(),
@@ -395,6 +432,56 @@ export const orgAuthOrganization = pgTable(
     index("idx_org_auth_organization_org_auth_id").on(table.org_auth_id),
     index("idx_org_auth_organization_organization_id").on(
       table.organization_id,
+    ),
+  ],
+);
+
+export const authUpgrade = pgTable(
+  "auth_upgrade",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    personal_auth_id: bigint("personal_auth_id", {
+      mode: "number",
+    }).references(() => personalAuth.id, { onDelete: "restrict" }),
+    org_auth_id: bigint("org_auth_id", { mode: "number" }).references(
+      () => orgAuth.id,
+      { onDelete: "restrict" },
+    ),
+    target_edition: authorizationEditionEnum("target_edition")
+      .default("advanced")
+      .notNull(),
+    source_type: authUpgradeSourceTypeEnum("source_type").notNull(),
+    redeem_code_id: bigint("redeem_code_id", { mode: "number" }).references(
+      () => redeemCode.id,
+      { onDelete: "restrict" },
+    ),
+    ops_reference: text("ops_reference"),
+    ops_note: text("ops_note"),
+    operator_admin_id: bigint("operator_admin_id", {
+      mode: "number",
+    }).references(() => admin.id, { onDelete: "restrict" }),
+    starts_at: timestampColumn("starts_at"),
+    expires_at: timestampColumn("expires_at"),
+    revoked_at: timestamp("revoked_at", { withTimezone: true }),
+    revoked_by_admin_id: bigint("revoked_by_admin_id", {
+      mode: "number",
+    }).references(() => admin.id, { onDelete: "restrict" }),
+    status: authUpgradeStatusEnum("status").default("active").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_auth_upgrade_public_id").on(table.public_id),
+    uniqueIndex("udx_auth_upgrade_redeem_code_id").on(table.redeem_code_id),
+    index("idx_auth_upgrade_personal_auth_id").on(table.personal_auth_id),
+    index("idx_auth_upgrade_org_auth_id").on(table.org_auth_id),
+    index("idx_auth_upgrade_source_type").on(table.source_type),
+    index("idx_auth_upgrade_status").on(table.status),
+    index("idx_auth_upgrade_expires_at").on(table.expires_at),
+    check(
+      "chk_auth_upgrade_exactly_one_source_auth",
+      sql`(("personal_auth_id" is not null and "org_auth_id" is null) or ("personal_auth_id" is null and "org_auth_id" is not null))`,
     ),
   ],
 );
@@ -444,6 +531,12 @@ export const adminRelations = relations(admin, ({ many, one }) => ({
     fields: [admin.auth_user_id],
     references: [authUser.id],
   }),
+  operatedAuthUpgrades: many(authUpgrade, {
+    relationName: "auth_upgrade_operator_admin",
+  }),
+  revokedAuthUpgrades: many(authUpgrade, {
+    relationName: "auth_upgrade_revoked_by_admin",
+  }),
 }));
 
 export const organizationRelations = relations(
@@ -487,6 +580,7 @@ export const employeeRelations = relations(employee, ({ one }) => ({
 }));
 
 export const redeemCodeRelations = relations(redeemCode, ({ many, one }) => ({
+  authUpgrades: many(authUpgrade),
   personalAuths: many(personalAuth),
   usedByUser: one(user, {
     fields: [redeemCode.used_by_user_id],
@@ -494,18 +588,23 @@ export const redeemCodeRelations = relations(redeemCode, ({ many, one }) => ({
   }),
 }));
 
-export const personalAuthRelations = relations(personalAuth, ({ one }) => ({
-  redeemCode: one(redeemCode, {
-    fields: [personalAuth.redeem_code_id],
-    references: [redeemCode.id],
+export const personalAuthRelations = relations(
+  personalAuth,
+  ({ many, one }) => ({
+    authUpgrades: many(authUpgrade),
+    redeemCode: one(redeemCode, {
+      fields: [personalAuth.redeem_code_id],
+      references: [redeemCode.id],
+    }),
+    user: one(user, {
+      fields: [personalAuth.user_id],
+      references: [user.id],
+    }),
   }),
-  user: one(user, {
-    fields: [personalAuth.user_id],
-    references: [user.id],
-  }),
-}));
+);
 
 export const orgAuthRelations = relations(orgAuth, ({ many, one }) => ({
+  authUpgrades: many(authUpgrade),
   organizations: many(orgAuthOrganization),
   purchaserOrganization: one(organization, {
     fields: [orgAuth.purchaser_organization_id],
@@ -526,3 +625,28 @@ export const orgAuthOrganizationRelations = relations(
     }),
   }),
 );
+
+export const authUpgradeRelations = relations(authUpgrade, ({ one }) => ({
+  orgAuth: one(orgAuth, {
+    fields: [authUpgrade.org_auth_id],
+    references: [orgAuth.id],
+  }),
+  operatorAdmin: one(admin, {
+    fields: [authUpgrade.operator_admin_id],
+    references: [admin.id],
+    relationName: "auth_upgrade_operator_admin",
+  }),
+  personalAuth: one(personalAuth, {
+    fields: [authUpgrade.personal_auth_id],
+    references: [personalAuth.id],
+  }),
+  redeemCode: one(redeemCode, {
+    fields: [authUpgrade.redeem_code_id],
+    references: [redeemCode.id],
+  }),
+  revokedByAdmin: one(admin, {
+    fields: [authUpgrade.revoked_by_admin_id],
+    references: [admin.id],
+    relationName: "auth_upgrade_revoked_by_admin",
+  }),
+}));
