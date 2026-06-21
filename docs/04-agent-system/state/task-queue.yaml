@@ -3889,6 +3889,7 @@ tasks:
     validatedAt: "2026-06-21T08:06:38-07:00"
     closedAt: "2026-06-21T08:06:38-07:00"
     branch: codex/batch-242-organization-context-usage
+    commitSha: 8b59a645
     retryCount: 0
   - id: batch-243-organization-training-audit-log-redacted-reference
     title: Module Run v2 organization-training implementation seed
