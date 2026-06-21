@@ -3473,3 +3473,532 @@ tasks:
     branch: codex/batch-239-personal-learning-ai-redacted-ai-call-log
     commitSha: b57e5acd
     retryCount: 0
+
+  - id: batch-240-organization-training-organization-admin-training-draft-publish-ta
+    title: Module Run v2 organization-training implementation seed
+    phase: batch-240-organization-training-organization-admin-training-draft-publish-ta
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-72-advanced-organization-training-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    seededByTask: phase-72-advanced-organization-training-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: organization admin training draft, publish, takedown, and copy flow
+    behaviorBoundary: organization-training::organization admin training draft, publish, takedown, and copy flow
+    requirementRefs:
+      - phase-72-advanced-organization-training-implementation-planning
+    useCases:
+      - organization-training local implementation validates organization admin training draft, publish, takedown, and copy flow
+    acceptanceScenarios:
+      - organization admin training draft, publish, takedown, and copy flow passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-240-organization-training-organization-admin-training-draft-publish-ta -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-240-organization-training-organization-admin-training-draft-publish-ta
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-240-organization-training-organization-admin-training-draft-publish-ta -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-240-organization-training-organization-admin-training-draft-publish-ta
+    evidencePath: docs/05-execution-logs/evidence/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
+    status: pending
+    retryCount: 0
+  - id: batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    title: Module Run v2 organization-training implementation seed
+    phase: batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-72-advanced-organization-training-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    seededByTask: phase-72-advanced-organization-training-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: employee answer lifecycle local role flow
+    behaviorBoundary: organization-training::employee answer lifecycle local role flow
+    requirementRefs:
+      - phase-72-advanced-organization-training-implementation-planning
+    useCases:
+      - organization-training local implementation validates employee answer lifecycle local role flow
+    acceptanceScenarios:
+      - employee answer lifecycle local role flow passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-241-organization-training-employee-answer-lifecycle-local-role-flow -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-241-organization-training-employee-answer-lifecycle-local-role-flow -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    evidencePath: docs/05-execution-logs/evidence/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
+    status: pending
+    retryCount: 0
+  - id: batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    title: Module Run v2 organization-training implementation seed
+    phase: batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-72-advanced-organization-training-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    seededByTask: phase-72-advanced-organization-training-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: paper and mock_exam context usage without exposing full paper content in evidence
+    behaviorBoundary: organization-training::paper and mock_exam context usage without exposing full paper content in evidence
+    requirementRefs:
+      - phase-72-advanced-organization-training-implementation-planning
+    useCases:
+      - organization-training local implementation validates paper and mock_exam context usage without exposing full paper content in evidence
+    acceptanceScenarios:
+      - paper and mock_exam context usage without exposing full paper content in evidence passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    evidencePath: docs/05-execution-logs/evidence/batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    status: pending
+    retryCount: 0
+  - id: batch-243-organization-training-audit-log-redacted-reference
+    title: Module Run v2 organization-training implementation seed
+    phase: batch-243-organization-training-audit-log-redacted-reference
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-72-advanced-organization-training-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-21 user prompt for module organization-training; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked: provider/env/dependency/schema/deploy/payment/PR/force-push/Cost Calibration Gate. No provider/model calls, no env/secret access, no dependency or schema changes, no deployment/payment/PR/force-push.
+    seededByTask: phase-72-advanced-organization-training-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: audit_log redacted reference
+    behaviorBoundary: organization-training::audit_log redacted reference
+    requirementRefs:
+      - phase-72-advanced-organization-training-implementation-planning
+    useCases:
+      - organization-training local implementation validates audit_log redacted reference
+    acceptanceScenarios:
+      - audit_log redacted reference passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-243-organization-training-audit-log-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-243-organization-training-audit-log-redacted-reference
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-243-organization-training-audit-log-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-21-module-run-v2-auto-seed-organization-training.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-243-organization-training-audit-log-redacted-reference
+    evidencePath: docs/05-execution-logs/evidence/batch-243-organization-training-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-243-organization-training-audit-log-redacted-reference.md
+    status: pending
+    retryCount: 0
