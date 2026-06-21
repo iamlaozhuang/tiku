@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-236-personal-learning-ai-personal-generation-request-flow.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-236-personal-learning-ai-personal-generation-request-flow.md
   branch: codex/batch-236-personal-learning-ai-request-flow
-  commitSha: null
+  commitSha: 65d95c08
   prUrl: null
   retryCount: 0
   lastFailurePath: null

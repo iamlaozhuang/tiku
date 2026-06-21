@@ -3054,6 +3054,7 @@ tasks:
     validatedAt: "2026-06-21T07:11:37-07:00"
     closedAt: "2026-06-21T07:11:37-07:00"
     branch: codex/batch-236-personal-learning-ai-request-flow
+    commitSha: 65d95c08
     retryCount: 0
   - id: batch-237-personal-learning-ai-paper-and-mock-exam-context-selection
     title: Module Run v2 personal-learning-ai implementation seed
