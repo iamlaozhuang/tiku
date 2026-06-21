@@ -17,10 +17,10 @@
 - Focused service and validator unit validation passed against existing source, so no source or test change was required.
 - Lint, typecheck, and diff check passed after closeout evidence/state edits.
 - Pre-commit hardening passed for the five task-owned docs/state/evidence/audit/plan files.
-- Module closeout readiness and pre-push readiness remain required before merge/push.
+- Module closeout readiness passed with required evidence anchors recorded.
+- Pre-push readiness passed before merge/push; master and origin/master were aligned at the checked baseline.
 
 ## Decision
 
-APPROVE batch-243 `audit_log` redacted reference validation once final local closeout gates pass. The task is eligible for
-fast-forward merge to `master`, push to `origin/master`, and merged short-branch cleanup under the recorded user approval
-and task-level closeout policy.
+APPROVE batch-243 `audit_log` redacted reference validation for fast-forward merge to `master`, push to `origin/master`,
+and merged short-branch cleanup under the recorded user approval and task-level closeout policy.
