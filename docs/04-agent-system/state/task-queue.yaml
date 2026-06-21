@@ -2914,4 +2914,5 @@ tasks:
     validatedAt: "2026-06-21T06:48:18-07:00"
     closedAt: "2026-06-21T06:48:18-07:00"
     branch: codex/batch-235-ai-task-provider-local-sandbox-rules
+    commitSha: e0c6333b
     retryCount: 0
