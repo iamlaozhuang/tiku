@@ -4,7 +4,7 @@
 
 - Task id: `active-queue-slimming-2026-06-21-post-edition-window`
 - Branch: `codex/active-queue-slimming-2026-06-21-post-edition-window`
-- Commit: pending
+- Commit: `1fcef3ee`
 - Scope: docs/state/archive-only active queue slimming for the current diagnostic's first five terminal candidates.
 
 ## Allowed files
@@ -28,6 +28,9 @@ Evidence records command/result summaries and task ids only. It does not include
 
 ## Candidate verification
 
+- Batch range: single docs/state/archive queue slimming task, `active-queue-slimming-2026-06-21-post-edition-window`.
+- RED: pre-move diagnostic showed terminal active queue candidates remained in active queue; `activeQueueTaskCount: 58`, `archiveCandidateCount: 33`, and the current diagnostic first five candidates were still active.
+- GREEN: post-move diagnostic showed the selected five terminal candidates archived; `activeQueueTaskCount: 54`, `activeQueueNonTerminalCount: 17`, `activeQueueTerminalCount: 37`, and `archiveCandidateCount: 29`.
 - Local parser verified all five selected active queue blocks were terminal before movement:
   - `active-queue-slimming-2026-06-21-edition-followup`: `closed`, commit `81f8c401`
   - `edition-aware-authorization-local-e2e-acceptance-packet`: `closed`, commit `38f789208f8205efb7d145b01da935b022e41564`
@@ -67,15 +70,22 @@ Evidence records command/result summaries and task ids only. It does not include
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-post-edition-window`
   - Result: pass.
   - Key output: `pre-commit hardening passed`, `filesToScan: 7`.
-- Closeout readiness and pre-push readiness: pending.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-post-edition-window`
+  - Result: pass.
+  - Key output: `module-closeout readiness passed`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-post-edition-window`
+  - Result: pending.
 
 ## Thread rollover gate
 
 - threadRolloverGate: not_required_current_turn
 - nextModuleRunCandidate: pending_diagnostic_after_closeout
+- localFullLoopGate: not applicable for this docs_state_archive_only task; local full flow and browser/e2e runtime remain blocked unless separately approved.
 
 ## Closeout
 
+- Cost Calibration Gate remains blocked.
+- Blocked remainder: provider/model call, env/secret access, schema/migration, dependency changes, payment, deploy, PR, force-push, destructive DB, staging/prod/cloud DB, product source changes, tests, and e2e remain blocked.
 - Product source changed: no.
 - Tests/e2e changed: no.
 - Schema/migration changed: no.

@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-post-edition-window.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-post-edition-window.md
   branch: codex/active-queue-slimming-2026-06-21-post-edition-window
-  commitSha: null
+  commitSha: 1fcef3ee
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4845,7 +4845,7 @@ lastActiveQueueSlimmingPostEditionWindow:
   taskId: active-queue-slimming-2026-06-21-post-edition-window
   archivedAt: "2026-06-21T06:05:00-07:00"
   branch: codex/active-queue-slimming-2026-06-21-post-edition-window
-  commitSha: null
+  commitSha: 1fcef3ee
   decision: pass_docs_state_active_queue_slimming_post_edition_window
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml

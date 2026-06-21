@@ -8,7 +8,7 @@
 
 ## Findings
 
-- No findings after candidate verification and movement.
+- No blocking findings after candidate verification and movement.
 - The selected five candidates were terminal before archive movement.
 - Movement was limited to complete task blocks, archive metadata, history index entries, and this task's docs/state records.
 
@@ -23,4 +23,4 @@
 
 ## Outcome
 
-Pass pending closeout readiness and pre-push readiness.
+APPROVE docs/state/archive closeout pending pre-push readiness rerun.

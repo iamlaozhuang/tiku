@@ -31,7 +31,7 @@ tasks:
     validatedAt: "2026-06-21T06:10:00-07:00"
     closedAt: "2026-06-21T06:10:00-07:00"
     branch: codex/active-queue-slimming-2026-06-21-post-edition-window
-    commitSha: null
+    commitSha: 1fcef3ee
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
     archiveCandidates:
