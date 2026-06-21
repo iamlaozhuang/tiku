@@ -1,7 +1,7 @@
 # Org Auth Scope Product Decision
 
 **Date:** 2026-06-21
-**Decision status:** decision package recorded; implementation blocked pending authorization-model approval, schema/API contract design, and security review.
+**Decision status:** decision package recorded; contract/security preflight package added; implementation blocked pending schema approval, authorization-model implementation approval, and runtime security review.
 **Related use cases:** `UC-STD-ORG-AUTH-MANAGED`, `UC-ADV-AUTH-CONTEXT-UPGRADE`
 
 ## Decision
@@ -64,7 +64,7 @@ This decision creates follow-up work; it does not approve runtime implementation
 
 Required future task packages:
 
-1. Contract/security preflight decision: DTO fields, create/update inputs, list/detail aggregation, bundle metadata, atomic scope rows, backward compatibility, URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules.
+1. Contract/security preflight decision: DTO fields, create/update inputs, list/detail aggregation, bundle metadata, atomic scope rows, backward compatibility, URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules. Recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-scope-contract-security-preflight.md`.
 2. Schema approval package: design the reviewed atomic scope child table path and request fresh schema/migration approval before any implementation.
 3. Service decision: effective authorization calculation, overlap detection, quota attribution, and cancellation semantics.
 4. UI decision: bundle creation/editing, detail page aggregation, enterprise backend scope display, and conflict warnings.

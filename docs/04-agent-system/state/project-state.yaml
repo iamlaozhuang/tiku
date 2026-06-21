@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
-  lastKnownOriginMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
+  lastKnownMasterSha: 8f2969e1a73f682a39306ba9b9f82b615659f626
+  lastKnownOriginMasterSha: 8f2969e1a73f682a39306ba9b9f82b615659f626
 currentTask:
-  id: record-enterprise-training-admin-first-decision
+  id: org-auth-scope-contract-and-security-preflight
   status: ready_for_closeout
-  result: pass_enterprise_training_admin_first_decision_record
-  claimedAt: "2026-06-21T15:54:24-07:00"
-  validatedAt: "2026-06-21T15:56:41-07:00"
+  result: pass_org_auth_scope_contract_security_preflight_package
+  claimedAt: "2026-06-21T16:04:42-07:00"
+  validatedAt: "2026-06-21T16:07:02-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-b-enterprise-training-admin-first
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-enterprise-training-admin-first-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-enterprise-training-admin-first-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-enterprise-training-admin-first-decision.md
-  branch: codex/record-enterprise-training-admin-first-decision
+  sourceStory: user-followup-approval-option-a-org-auth-contract-security-preflight
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-org-auth-scope-contract-and-security-preflight.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-scope-contract-and-security-preflight.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-scope-contract-and-security-preflight.md
+  branch: codex/org-auth-contract-security-preflight
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5043,6 +5043,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - runtime_verification_later
+    - id: org-auth-scope-contract-and-security-preflight
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
   approvalDecisions:
     - decisionId: org-auth-scope-schema-path
       decidedAt: "2026-06-21T15:26:12-07:00"
@@ -5175,8 +5180,29 @@ discoveredIssueClosureBatch20260621:
         employee answer or analytics implementation, org_auth runtime behavior changes, schema, migration, seed, database
         connection, package or lockfile change, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy,
         PR, force-push, payment, external service, or Cost Calibration Gate work.
+    - decisionId: org-auth-contract-security-preflight-package
+      decidedAt: "2026-06-21T16:04:42-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: create_docs_only_org_auth_contract_security_preflight_package
+      appliesTo:
+        - org-auth-scope-contract-and-security-preflight
+        - org-auth-schema-approval-package
+        - org-auth-effective-scope-service
+        - org-auth-admin-scope-builder-ui
+        - org-auth-compatibility-and-migration-guard
+        - org-auth-runtime-verification
+      implementationRule: >-
+        The first follow-up package for `org_auth` may document DTO/API behavior, compatibility rules, overlap semantics,
+        public identifier rules, redaction, audit_log wording, and cross-organization leakage checks. It must remain
+        docs-only and must not implement source, schema, service, UI, database, or runtime behavior.
+      approvalBoundary: >-
+        This approves a docs-only contract/security preflight package. It does not approve authorization runtime behavior
+        changes, source implementation, schema, migration, seed, database connection, service/UI implementation, package
+        or lockfile change, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy, PR, force-push,
+        payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
-  currentSerialScopeStatus: all_seeded_tasks_reached_fixed_decision_or_blocked_closure
+  currentSerialScopeStatus: org_auth_contract_security_preflight_recorded
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
