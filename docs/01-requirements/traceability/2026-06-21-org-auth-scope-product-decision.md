@@ -17,6 +17,7 @@ The product decision package is:
 5. Enterprise backend access is shared by `organization` and `employee` context. Multiple `org_auth` records compose the same enterprise backend capability set; they do not create separate backend portals.
 6. Active overlapping scopes for the same effective `organization`, `profession`, `level`, `subject`, `edition`, and time window are prohibited unless a separately approved upgrade or extension rule defines conflict resolution.
 7. Account quota is evaluated per atomic authorization scope. Product pages may aggregate quota for display, but services must keep audit and consumption attributable to the atomic scope that grants access.
+8. Follow-up approval on 2026-06-21 selected option A for the schema path: keep `org_auth` as the authorization bundle or purchase record and introduce a reviewed atomic scope child table for future scoped authorization rows. This is a planning decision only and does not approve schema, migration, seed, database, API, service, UI, or runtime implementation.
 
 ## Current Runtime Baseline
 
@@ -40,7 +41,7 @@ The product decision package is:
 
 - Sales/admin UX may present a single package covering multiple `profession` or `level` values.
 - Backend authorization must remain atomic for eligibility, quota, expiry, cancellation, audit, and reporting.
-- A future implementation may choose either multiple `org_auth` rows or a reviewed child scope table, but that choice is out of scope for this task.
+- Future implementation should use the approved direction of `org_auth` bundle or purchase records plus reviewed atomic scope child rows. Multiple `org_auth` rows remain a compatibility interpretation for existing data, not the target design for new multi-scope bundles.
 - UI aggregation must not hide conflicts, expiry differences, quota differences, or cancellation state.
 
 ### Shared Enterprise Backend
@@ -62,8 +63,8 @@ This decision creates follow-up work; it does not approve runtime implementation
 
 Required future task packages:
 
-1. Schema decision: whether to keep multiple atomic `org_auth` rows or introduce a reviewed scope child table.
-2. API contract decision: DTO fields, create/update inputs, list/detail aggregation, and backward compatibility.
+1. Schema approval package: design the reviewed atomic scope child table path and request fresh schema/migration approval before any implementation.
+2. API contract decision: DTO fields, create/update inputs, list/detail aggregation, bundle metadata, atomic scope rows, and backward compatibility.
 3. Service decision: effective authorization calculation, overlap detection, quota attribution, and cancellation semantics.
 4. UI decision: bundle creation/editing, detail page aggregation, enterprise backend scope display, and conflict warnings.
 5. Security review: URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules.

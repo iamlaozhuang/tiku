@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d477f9bd
-  lastKnownOriginMasterSha: d477f9bd
+  lastKnownMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
+  lastKnownOriginMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
 currentTask:
-  id: plan-advanced-enterprise-training-path
+  id: record-org-auth-scope-child-table-decision
   status: ready_for_closeout
-  result: pass_advanced_enterprise_training_blocked_closure_plan
-  claimedAt: "2026-06-21T11:10:00-07:00"
-  validatedAt: "2026-06-21T11:15:00-07:00"
+  result: pass_org_auth_scope_child_table_decision_record
+  claimedAt: "2026-06-21T15:26:12-07:00"
+  validatedAt: "2026-06-21T15:29:43-07:00"
   closedAt: null
-  sourceStory: role-matrix-advanced-employee-training-flow; user-order-8
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-plan-advanced-enterprise-training-path.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-advanced-enterprise-training-path.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-advanced-enterprise-training-path.md
-  branch: codex/plan-advanced-enterprise-training-path
+  sourceStory: user-followup-approval-option-a-org-auth-scope-schema-path
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-org-auth-scope-child-table-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-org-auth-scope-child-table-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-scope-child-table-decision.md
+  branch: codex/record-org-auth-scope-child-table-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5013,6 +5013,31 @@ discoveredIssueClosureBatch20260621:
         - approval_blocked
         - security_review_required
         - runtime_verification_later
+    - id: record-org-auth-scope-child-table-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
+  approvalDecisions:
+    - decisionId: org-auth-scope-schema-path
+      decidedAt: "2026-06-21T15:26:12-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: use_org_auth_bundle_header_with_atomic_scope_child_table
+      appliesTo:
+        - org-auth-scope-contract-design
+        - org-auth-schema-approval-package
+        - org-auth-effective-scope-service
+        - org-auth-admin-scope-builder-ui
+      implementationRule: >-
+        Future design should keep `org_auth` as the authorization bundle or purchase record and use a reviewed atomic
+        scope child table for `organization` coverage plus `profession`, `level`, `subject`, `edition`, quota, status,
+        and time-window rows.
+      approvalBoundary: >-
+        This records a planning decision only. It does not approve schema, migration, seed, database connection,
+        authorization runtime behavior, contract/service/UI implementation, package or lockfile change, env/secret
+        work, Provider calls, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or
+        Cost Calibration Gate work.
   nextCandidateTaskId: null
   currentSerialScopeStatus: all_seeded_tasks_reached_fixed_decision_or_blocked_closure
   boundary: >-

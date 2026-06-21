@@ -12,6 +12,7 @@
 - `OrgAuthDto` exposes `profession`, `level`, `authScopeType`, and `organizationPublicIds`.
 - Admin UI currently creates one `profession` and one `level`, while allowing multiple covered organizations.
 - Product decision now says `subject`, `profession`, and `level` must be evaluated as atomic authorization dimensions and that multiple commercial scopes must decompose into atomic scopes.
+- Follow-up approval on 2026-06-21 selected option A for schema-path planning: keep `org_auth` as the authorization bundle or purchase record and introduce reviewed atomic scope child rows for future scoped authorization dimensions. This approval does not permit schema, migration, seed, database, contract/service/UI, or runtime implementation.
 
 ## Split Strategy
 
@@ -21,7 +22,7 @@ Implementation must be split into reviewable packages in this order.
 | ----- | -------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | 1     | `org-auth-scope-contract-design`             | contract/design              | Define create/update/list/detail DTOs for atomic scopes, bundle display, compatibility, null behavior, and public IDs. | No runtime behavior or schema change.                            |
 | 2     | `org-auth-security-review-preflight`         | security review              | Review cross-organization leakage, overlap, quota, cancellation, audit_log, and employee boundary risks.               | No implementation until checklist is accepted.                   |
-| 3     | `org-auth-schema-approval-package`           | schema decision              | Compare schema choices and request fresh approval before any migration or seed work.                                   | No schema, migration, seed, or database connection in this task. |
+| 3     | `org-auth-schema-approval-package`           | schema decision              | Design the approved child-scope-table path and request fresh approval before any migration or seed work.               | No schema, migration, seed, or database connection in this task. |
 | 4     | `org-auth-effective-scope-service`           | service implementation       | Implement atomic effective-scope calculation, overlap detection, quota attribution, and cancellation semantics.        | Requires approved contract and schema path.                      |
 | 5     | `org-auth-admin-scope-builder-ui`            | UI implementation            | Implement admin bundle builder, subject/profession/level selection, conflict warnings, and detail aggregation.         | Requires approved contract/service behavior.                     |
 | 6     | `org-auth-compatibility-and-migration-guard` | migration/read compatibility | Preserve existing records as covering `theory` and `skill`, and prove backward-compatible read behavior.               | Requires schema approval and redacted migration evidence.        |
@@ -54,15 +55,14 @@ The contract package should define:
 
 ## Schema Approval Boundary
 
-Schema work is explicitly blocked in this task. The future schema package must compare at least these approaches:
+Schema work is explicitly blocked in this task. The approved planning direction is:
 
-| approach                        | description                                                                                                    | main risk                                                                       |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| add `subject` to `org_auth`     | Keep one atomic scope per `org_auth` row and create multiple rows for multi-subject/profession/level bundles.  | Bundle grouping and aggregate display need a reviewed grouping mechanism.       |
-| add child scope table           | Keep `org_auth` as purchase/bundle header and add reviewed atomic scope child rows.                            | Quota, cancellation, overlap, and migration semantics become more complex.      |
-| keep current schema temporarily | Do not support subject-scoped or multi-scope runtime changes yet; document current all-subject interpretation. | Does not close product capability, but avoids unsafe migration before approval. |
+- `org_auth` remains the authorization bundle or purchase record.
+- A future reviewed child table represents atomic authorization scope rows.
+- Each atomic row must carry one `profession`, one `level`, one `subject`, one `edition`, one quota rule, one status, and one time window, plus the reviewed link to the `org_auth` bundle and organization coverage model.
+- Existing `org_auth` records without child rows remain compatibility data and are interpreted as covering both registered `subject` values until an approved migration path exists.
 
-Fresh approval is required before choosing or implementing any schema path.
+The future `org-auth-schema-approval-package` must still request fresh approval before any schema, migration, seed, database connection, or data backfill work. It must define naming, constraints, overlap indexes or service-level guards, audit semantics, migration safety, rollback, and redacted evidence rules before implementation.
 
 ## Service Split
 
