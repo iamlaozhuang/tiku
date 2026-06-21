@@ -74,6 +74,8 @@ No database URLs, secrets, session credential values, Authorization headers, raw
 - Implementation commit hash: `b6deb30491415f3ac0cae882aa09da0da5078485`.
 - Module closeout readiness: pass.
 - Pre-push readiness: pass.
+- Queue status: closed.
+- Project state current task status: closed.
 - FF merge to `master`: not yet run.
 - Push `origin/master`: not yet run.
 - Merged branch cleanup: not yet run.

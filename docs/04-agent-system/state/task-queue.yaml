@@ -31,14 +31,15 @@ tasks:
     queueSelectionMode: user_directed_requirement_decision
     taskKind: local_validation_repair
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_edition_aware_authorization_db_backed_local_acceptance
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T12:00:00-07:00"
     validatedAt: "2026-06-21T04:56:34-07:00"
+    closedAt: "2026-06-21T04:58:29-07:00"
     branch: codex/edition-auth-db-backed-local-acceptance
     commitSha: b6deb30491415f3ac0cae882aa09da0da5078485
-    targetClosureItemStatus: passed_local_validation
+    targetClosureItemStatus: closed
     capabilities:
       localFullFlowGate: approved_localhost_only
       localDockerDatabase: approved_local_dev_only
