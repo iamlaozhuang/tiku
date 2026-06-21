@@ -27,24 +27,25 @@ result: pass
 
 ## Validation Results
 
-| Command                                                                                                                              | Result  | Notes                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------ |
-| `Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId active-queue-slimming-2026-06-21-edition-packets-window -PlannedFiles ...` | pass    | Planned files matched allowed files.                                                       |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`          | pass    | After archival: `activeQueueTaskCount: 58`, `archiveCandidateCount: 33`.                   |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                           | pass    | Reported current task active before closeout state update; blocked gates remained blocked. |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`              | pass    | Recommended finishing current task closeout before state update.                           |
-| `npx.cmd prettier --write --ignore-unknown ...`                                                                                      | pass    | Scoped docs/state/log formatting command completed.                                        |
-| `npx.cmd prettier --check --ignore-unknown ...`                                                                                      | pass    | All matched files use Prettier style.                                                      |
-| `npm.cmd run lint`                                                                                                                   | pass    | ESLint completed.                                                                          |
-| `npm.cmd run typecheck`                                                                                                              | pass    | `tsc --noEmit` completed.                                                                  |
-| `git diff --check`                                                                                                                   | pass    | Whitespace check passed.                                                                   |
-| `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                             | pass    | Scope and sensitive evidence scans passed.                                                 |
-| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                        | pass    | Final rerun passed after commit hash backfill.                                             |
-| `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                               | pending | To run after commit.                                                                       |
+| Command                                                                                                                              | Result | Notes                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------ |
+| `Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId active-queue-slimming-2026-06-21-edition-packets-window -PlannedFiles ...` | pass   | Planned files matched allowed files.                                                       |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`          | pass   | After archival: `activeQueueTaskCount: 58`, `archiveCandidateCount: 33`.                   |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                           | pass   | Reported current task active before closeout state update; blocked gates remained blocked. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`              | pass   | Recommended finishing current task closeout before state update.                           |
+| `npx.cmd prettier --write --ignore-unknown ...`                                                                                      | pass   | Scoped docs/state/log formatting command completed.                                        |
+| `npx.cmd prettier --check --ignore-unknown ...`                                                                                      | pass   | All matched files use Prettier style.                                                      |
+| `npm.cmd run lint`                                                                                                                   | pass   | ESLint completed.                                                                          |
+| `npm.cmd run typecheck`                                                                                                              | pass   | `tsc --noEmit` completed.                                                                  |
+| `git diff --check`                                                                                                                   | pass   | Whitespace check passed.                                                                   |
+| `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                             | pass   | Scope and sensitive evidence scans passed.                                                 |
+| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                        | pass   | Final rerun passed after commit hash backfill.                                             |
+| `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                               | pass   | Passed on clean task branch before final merge/push.                                       |
 
 ## Closeout Status
 
 - Commit: `2cc316b8` (`docs(agent): slim edition packet queue window`).
+- Closeout metadata commit: `d02f3a32` (`docs(agent): close edition packet queue slimming`).
 - FF merge to `master`: not yet run.
 - Push `origin/master`: not yet run.
 - Merged branch cleanup: not yet run.
