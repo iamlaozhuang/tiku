@@ -79,6 +79,31 @@ Policy:
 This decision does not approve implementation, formal content writes, schema, migration, Provider calls, prompt/provider
 payload exposure, database work, browser/e2e runtime, or publish-flow changes.
 
+## Logging And Evidence Redaction
+
+Follow-up approval on 2026-06-21 selected option A for logging and evidence: redacted references only.
+
+Policy:
+
+1. `audit_log`, `ai_call_log`, and execution evidence may store or display public request/result references, status,
+   model_provider or model_config references, token and cost summaries, latency, error code/category, reviewer public
+   reference, and redacted adoption action metadata.
+2. They must not store raw prompt text, Provider payloads, raw generated content, full private paper content, private
+   answer text, API keys, tokens, database URLs, internal numeric ids, or plaintext `redeem_code` values.
+3. `audit_log` should prove who requested, reviewed, rejected, or adopted an AI result, using public references and
+   redacted metadata only.
+4. `ai_call_log` should prove operational status and cost/capacity behavior without storing replayable prompt/provider
+   material or full model output.
+5. Evidence for future tasks should cite redacted public references and aggregate summaries only. It must not include
+   content that would allow reconstructing the prompt, Provider request/response, private answer text, or unpublished
+   paper content.
+6. Any exception for reversible debugging capture requires a separate product/security approval and a retention,
+   access-control, redaction, and deletion plan before implementation.
+
+This decision does not approve implementation, Provider calls, prompt/provider payload exposure, model output
+persistence, formal content writes, schema, migration, database work, browser/e2e runtime, or a debugging-capture
+exception.
+
 ## Recommended Future Architecture
 
 Future implementation should be split into these reviewable tasks. Every implementation task must preserve the option A boundary: generation produces reviewable drafts or suggestions only; formal adoption remains a separate human action.
@@ -89,7 +114,8 @@ Future implementation should be split into these reviewable tasks. Every impleme
    isolated review-surface decision above.
 4. Manual review and formal adoption package for `question` drafts, following the option A two-step adoption boundary.
 5. Manual review and formal adoption package for `paper` drafts, following the option A two-step adoption boundary.
-6. Audit/logging package covering `audit_log`, `ai_call_log`, reviewer identity, and public identifiers only.
+6. Audit/logging package covering `audit_log`, `ai_call_log`, reviewer identity, public identifiers, and redacted
+   references only.
 7. Runtime verification package after Provider and browser/e2e gates are separately approved.
 
 ## Non-Goals
