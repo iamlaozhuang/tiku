@@ -590,12 +590,14 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
-    status: claimed
-    result: in_progress_service_repository_packet
+    status: closed
+    result: pass_edition_aware_authorization_service_repository
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T03:07:01-07:00"
+    validatedAt: "2026-06-21T03:11:14-07:00"
+    closedAt: "2026-06-21T03:11:14-07:00"
     branch: codex/edition-auth-service-repository-packet
-    commitSha: null
+    commitSha: 37231fa01524b002b973efcfab0f2609a4a155f4
     nextApprovalRequired: none_for_current_service_repository_packet_scope
     targetClosureItem: effectiveEdition calculation, auth_upgrade evaluation, quota owner context, and audit-safe summaries
     behaviorBoundary: service-repository::effective_edition_authorization_boundary
