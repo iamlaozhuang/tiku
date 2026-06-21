@@ -14,10 +14,12 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { StudentRichText } from "@/components/StudentRichText/StudentRichText";
-import type {
-  ApiPagination,
-  ApiResponse,
-} from "@/server/contracts/api-response";
+import {
+  fetchStudentApi,
+  getStoredStudentSessionToken,
+  isStudentUnauthorizedResponse,
+} from "@/features/student/studentRuntimeApi";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type {
   AiExplanationDto,
   MistakeBookAiExplanationResultDto,
@@ -40,8 +42,6 @@ type MistakeBookFilterState = {
   source: MistakeBookSource | "all";
   status: Exclude<MistakeBookStatus, "removed"> | "all";
 };
-
-const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
 const professionLabels: Record<Profession, string> = {
   logistics: "物流",
@@ -89,38 +89,6 @@ const emptyPagination: ApiPagination = {
   sortBy: "latestWrongAt",
   sortOrder: "desc",
 };
-
-function getStoredSessionToken(): string | null {
-  const token = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY)?.trim();
-
-  return token === "" ? null : (token ?? null);
-}
-
-function createAuthHeaders(token: string) {
-  return {
-    authorization: `Bearer ${token}`,
-  };
-}
-
-async function fetchApi<TPayload>(
-  path: string,
-  token: string,
-  init?: RequestInit,
-): Promise<ApiResponse<TPayload | null>> {
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      ...createAuthHeaders(token),
-      ...(init?.headers ?? {}),
-    },
-  });
-
-  return (await response.json()) as ApiResponse<TPayload | null>;
-}
-
-function isUnauthorizedResponse(payload: ApiResponse<unknown>): boolean {
-  return payload.code === 401001;
-}
 
 function formatScopeLabel(mistakeBook: MistakeBookItemDto): string {
   return `${professionLabels[mistakeBook.profession]} ${mistakeBook.level}级`;
@@ -630,7 +598,9 @@ function StudentMistakeBookCard({
 export function StudentMistakeBookPage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [actionState, setActionState] = useState<ActionState>("idle");
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [studentSessionValue, setStudentSessionValue] = useState<string | null>(
+    null,
+  );
   const [mistakeBooks, setMistakeBooks] = useState<MistakeBookItemDto[]>([]);
   const [filters, setFilters] =
     useState<MistakeBookFilterState>(defaultFilters);
@@ -649,26 +619,19 @@ export function StudentMistakeBookPage() {
     let isActive = true;
 
     async function loadMistakeBooks() {
-      const token = getStoredSessionToken();
-
-      if (token === null) {
-        if (isActive) {
-          setLoadState("unauthorized");
-        }
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
-        const listPayload = await fetchApi<MistakeBookListResultDto>(
+        const listPayload = await fetchStudentApi<MistakeBookListResultDto>(
           createMistakeBookListPath(filters, currentPage),
-          token,
+          storedSessionValue,
         );
 
         if (!isActive) {
           return;
         }
 
-        if (isUnauthorizedResponse(listPayload)) {
+        if (isStudentUnauthorizedResponse(listPayload)) {
           setLoadState("unauthorized");
           return;
         }
@@ -678,7 +641,7 @@ export function StudentMistakeBookPage() {
           return;
         }
 
-        setSessionToken(token);
+        setStudentSessionValue(storedSessionValue);
         setMistakeBooks(listPayload.data.mistakeBooks);
         setPagination(listPayload.pagination ?? emptyPagination);
         setLoadState("ready");
@@ -706,24 +669,19 @@ export function StudentMistakeBookPage() {
     mistakeBook: MistakeBookItemDto,
     actionPath: "favorite" | "mark-mastered" | "remove" | "unfavorite",
   ) {
-    if (sessionToken === null) {
-      setLoadState("unauthorized");
-      return;
-    }
-
     setActionState("submitting");
     setFeedbackMessage(null);
 
     try {
-      const actionPayload = await fetchApi<MistakeBookResultDto>(
+      const actionPayload = await fetchStudentApi<MistakeBookResultDto>(
         `/api/v1/mistake-books/${mistakeBook.publicId}/${actionPath}`,
-        sessionToken,
+        studentSessionValue,
         {
           method: "POST",
         },
       );
 
-      if (isUnauthorizedResponse(actionPayload)) {
+      if (isStudentUnauthorizedResponse(actionPayload)) {
         setLoadState("unauthorized");
         return;
       }
@@ -760,25 +718,20 @@ export function StudentMistakeBookPage() {
   }
 
   async function handleAiExplanation(mistakeBook: MistakeBookItemDto) {
-    if (sessionToken === null) {
-      setLoadState("unauthorized");
-      return;
-    }
-
     setActionState("submitting");
     setFeedbackMessage(null);
 
     try {
       const explanationPayload =
-        await fetchApi<MistakeBookAiExplanationResultDto>(
+        await fetchStudentApi<MistakeBookAiExplanationResultDto>(
           `/api/v1/mistake-books/${mistakeBook.publicId}/ai-explanation`,
-          sessionToken,
+          studentSessionValue,
           {
             method: "POST",
           },
         );
 
-      if (isUnauthorizedResponse(explanationPayload)) {
+      if (isStudentUnauthorizedResponse(explanationPayload)) {
         setLoadState("unauthorized");
         return;
       }

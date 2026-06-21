@@ -73,18 +73,57 @@ afterEach(() => {
 });
 
 describe("StudentMistakeBookPage", () => {
-  it("renders unauthorized state without calling the protected mistake_book API when the session token is missing", () => {
-    const fetchMock = vi.fn();
+  it("renders unauthorized state when the mistake_book API rejects the cookie-backed session", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/mistake-books?page=1&pageSize=20");
+        expect(init).toEqual({ credentials: "same-origin" });
+
+        return createJsonResponse(
+          {
+            code: 401001,
+            message: "unauthorized",
+            data: null,
+          },
+          401,
+        );
+      },
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(StudentMistakeBookPage));
 
-    expect(screen.getByText("请先登录")).toBeInTheDocument();
+    expect(await screen.findByText("请先登录")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/mistake-books?page=1&pageSize=20",
+      { credentials: "same-origin" },
+    );
+  });
+
+  it("loads the mistake_book list through the cookie-backed student session when no local session value exists", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/mistake-books?page=1&pageSize=20");
+        expect(init).toEqual({ credentials: "same-origin" });
+
+        return createJsonResponse(mistakeBookPayload);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentMistakeBookPage));
+
+    expect(
+      await screen.findByTestId("mistake-book-item-mistake-book-public-001"),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/mistake-books?page=1&pageSize=20",
+      { credentials: "same-origin" },
+    );
   });
 
   it("loads the current student's mistake_book list through the session runtime without rendering secrets or internal ids", async () => {

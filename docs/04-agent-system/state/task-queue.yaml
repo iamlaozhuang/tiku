@@ -24,10 +24,10 @@ tasks:
     moduleRunVersion: 2
     seededImplementationTask: true
     status: ready_for_closeout
-    result: ready_scope_registered_for_mistake_book_cookie_session_repair
+    result: pass_mistake_book_cookie_session_contract_repair_local_validation
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T09:01:00-07:00"
-    validatedAt: "2026-06-21T09:01:00-07:00"
+    validatedAt: "2026-06-21T09:06:54-07:00"
     branch: codex/fix-mistake-book-session
     capabilities:
       productSourceChange: approved
