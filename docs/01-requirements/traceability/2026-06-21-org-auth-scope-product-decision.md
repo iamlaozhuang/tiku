@@ -18,6 +18,7 @@ The product decision package is:
 6. Active overlapping scopes for the same effective `organization`, `profession`, `level`, `subject`, `edition`, and time window are prohibited unless a separately approved upgrade or extension rule defines conflict resolution.
 7. Account quota is evaluated per atomic authorization scope. Product pages may aggregate quota for display, but services must keep audit and consumption attributable to the atomic scope that grants access.
 8. Follow-up approval on 2026-06-21 selected option A for the schema path: keep `org_auth` as the authorization bundle or purchase record and introduce a reviewed atomic scope child table for future scoped authorization rows. This is a planning decision only and does not approve schema, migration, seed, database, API, service, UI, or runtime implementation.
+9. Follow-up approval on 2026-06-21 selected option B for implementation sequencing: contract design and security review preflight should be merged into one first package, while schema approval, migration, seed, database, service, UI, and runtime work remain separately gated.
 
 ## Current Runtime Baseline
 
@@ -63,12 +64,11 @@ This decision creates follow-up work; it does not approve runtime implementation
 
 Required future task packages:
 
-1. Schema approval package: design the reviewed atomic scope child table path and request fresh schema/migration approval before any implementation.
-2. API contract decision: DTO fields, create/update inputs, list/detail aggregation, bundle metadata, atomic scope rows, and backward compatibility.
+1. Contract/security preflight decision: DTO fields, create/update inputs, list/detail aggregation, bundle metadata, atomic scope rows, backward compatibility, URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules.
+2. Schema approval package: design the reviewed atomic scope child table path and request fresh schema/migration approval before any implementation.
 3. Service decision: effective authorization calculation, overlap detection, quota attribution, and cancellation semantics.
 4. UI decision: bundle creation/editing, detail page aggregation, enterprise backend scope display, and conflict warnings.
-5. Security review: URL public IDs, audit_log wording, employee boundary checks, cross-organization leakage tests, and redacted evidence rules.
-6. Migration/seed plan: existing records interpreted as both `theory` and `skill` until an approved migration path exists.
+5. Migration/seed plan: existing records interpreted as both `theory` and `skill` until an approved migration path exists.
 
 ## Blocked Without Fresh Approval
 

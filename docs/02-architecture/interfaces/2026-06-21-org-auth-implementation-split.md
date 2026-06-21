@@ -13,24 +13,24 @@
 - Admin UI currently creates one `profession` and one `level`, while allowing multiple covered organizations.
 - Product decision now says `subject`, `profession`, and `level` must be evaluated as atomic authorization dimensions and that multiple commercial scopes must decompose into atomic scopes.
 - Follow-up approval on 2026-06-21 selected option A for schema-path planning: keep `org_auth` as the authorization bundle or purchase record and introduce reviewed atomic scope child rows for future scoped authorization dimensions. This approval does not permit schema, migration, seed, database, contract/service/UI, or runtime implementation.
+- Follow-up approval on 2026-06-21 selected option B for implementation sequencing: merge contract design and security review preflight into one first package, while schema/migration/database work remains separately gated.
 
 ## Split Strategy
 
 Implementation must be split into reviewable packages in this order.
 
-| order | package id                                   | type                         | purpose                                                                                                                | blocked work                                                     |
-| ----- | -------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 1     | `org-auth-scope-contract-design`             | contract/design              | Define create/update/list/detail DTOs for atomic scopes, bundle display, compatibility, null behavior, and public IDs. | No runtime behavior or schema change.                            |
-| 2     | `org-auth-security-review-preflight`         | security review              | Review cross-organization leakage, overlap, quota, cancellation, audit_log, and employee boundary risks.               | No implementation until checklist is accepted.                   |
-| 3     | `org-auth-schema-approval-package`           | schema decision              | Design the approved child-scope-table path and request fresh approval before any migration or seed work.               | No schema, migration, seed, or database connection in this task. |
-| 4     | `org-auth-effective-scope-service`           | service implementation       | Implement atomic effective-scope calculation, overlap detection, quota attribution, and cancellation semantics.        | Requires approved contract and schema path.                      |
-| 5     | `org-auth-admin-scope-builder-ui`            | UI implementation            | Implement admin bundle builder, subject/profession/level selection, conflict warnings, and detail aggregation.         | Requires approved contract/service behavior.                     |
-| 6     | `org-auth-compatibility-and-migration-guard` | migration/read compatibility | Preserve existing records as covering `theory` and `skill`, and prove backward-compatible read behavior.               | Requires schema approval and redacted migration evidence.        |
-| 7     | `org-auth-runtime-verification`              | runtime verification         | Validate ops_admin create/detail/cancel paths and employee effective authorization paths.                              | Requires browser/dev-server/e2e and data setup approval.         |
+| order | package id                                       | type                         | purpose                                                                                                                                                                                          | blocked work                                                                                            |
+| ----- | ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| 1     | `org-auth-scope-contract-and-security-preflight` | contract/security preflight  | Define create/update/list/detail DTOs, bundle display, compatibility, null behavior, public IDs, redaction, audit_log wording, overlap semantics, and cross-organization leakage risks together. | No runtime behavior, service/UI implementation, schema change, migration, seed, or database connection. |
+| 2     | `org-auth-schema-approval-package`               | schema decision              | Design the approved child-scope-table path and request fresh approval before any migration or seed work.                                                                                         | No schema, migration, seed, or database connection in this task.                                        |
+| 3     | `org-auth-effective-scope-service`               | service implementation       | Implement atomic effective-scope calculation, overlap detection, quota attribution, and cancellation semantics.                                                                                  | Requires approved contract/security preflight and schema path.                                          |
+| 4     | `org-auth-admin-scope-builder-ui`                | UI implementation            | Implement admin bundle builder, subject/profession/level selection, conflict warnings, and detail aggregation.                                                                                   | Requires approved contract/service behavior.                                                            |
+| 5     | `org-auth-compatibility-and-migration-guard`     | migration/read compatibility | Preserve existing records as covering `theory` and `skill`, and prove backward-compatible read behavior.                                                                                         | Requires schema approval and redacted migration evidence.                                               |
+| 6     | `org-auth-runtime-verification`                  | runtime verification         | Validate ops_admin create/detail/cancel paths and employee effective authorization paths.                                                                                                        | Requires browser/dev-server/e2e and data setup approval.                                                |
 
 ## Contract Design Boundary
 
-The contract package should define:
+The merged contract/security preflight package should define:
 
 1. Atomic scope DTO fields using camelCase JSON:
    - `profession`
@@ -52,6 +52,11 @@ The contract package should define:
 4. URL and reference rules:
    - external URLs use public identifiers only.
    - internal numeric IDs must not enter DTOs, URLs, audit evidence, or logs.
+5. Security preflight decisions:
+   - cross-organization leakage checks for direct and descendant coverage.
+   - overlap denial semantics for active atomic scopes.
+   - quota attribution, cancellation, expiry, renewal, and extension redaction rules.
+   - audit_log wording with public identifiers and redacted metadata only.
 
 ## Schema Approval Boundary
 

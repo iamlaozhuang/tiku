@@ -778,6 +778,66 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-admin-experience-gap-sequencing-decision.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-record-admin-experience-gap-sequencing-decision.md
     retryCount: 0
+  - id: record-org-auth-contract-security-merge-decision
+    title: Record org_auth contract and security preflight merge decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    sourceStory: user-followup-approval-option-b-org-auth-contract-security-merge
+    dependencies:
+      - plan-org-auth-implementation-split
+      - record-org-auth-scope-child-table-decision
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User selected option B for org_auth implementation split: merge contract design and security review preflight into
+      one first package, while schema/migration/database work remains separately gated. This task may record the
+      decision in docs/state only. No authorization runtime behavior change, no schema/migration/database work, no
+      service/UI implementation, no package/dependency change, no env/secret access, no Provider calls, no browser/e2e
+      /dev-server runtime, no deploy, PR, force-push, payment, external service, or Cost Calibration Gate is allowed.
+    targetClosureItem: org_auth contract and security preflight option B decision record
+    behaviorBoundary: org_auth::contract_security_preflight_merge_decision_record
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_followup_approval_record
+    taskKind: architecture_sequence_decision_record
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_org_auth_contract_security_merge_decision_record
+    claimedAt: "2026-06-21T15:49:45-07:00"
+    validatedAt: "2026-06-21T15:51:20-07:00"
+    branch: codex/record-org-auth-contract-security-merge-decision
+    classification:
+      - docs_decision
+      - approval_blocked
+      - security_review_required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/interfaces/2026-06-21-org-auth-implementation-split.md
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-21-record-org-auth-contract-security-merge-decision.md
+      - docs/05-execution-logs/evidence/2026-06-21-record-org-auth-contract-security-merge-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\02-architecture\interfaces\2026-06-21-org-auth-implementation-split.md docs\01-requirements\traceability\2026-06-21-org-auth-scope-product-decision.md docs\05-execution-logs\task-plans\2026-06-21-record-org-auth-contract-security-merge-decision.md docs\05-execution-logs\evidence\2026-06-21-record-org-auth-contract-security-merge-decision.md docs\05-execution-logs\audits-reviews\2026-06-21-record-org-auth-contract-security-merge-decision.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId record-org-auth-contract-security-merge-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId record-org-auth-contract-security-merge-decision -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    retryCount: 0
   - id: mistake-book-cookie-session-contract-repair
     title: Mistake book cookie session contract repair
     phase: student-experience-repair
