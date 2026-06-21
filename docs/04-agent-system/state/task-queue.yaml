@@ -177,7 +177,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: read_only_audit
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_adr_006_ai_sdk_baseline_freshness_recheck
+    claimedAt: "2026-06-21T10:05:00-07:00"
+    validatedAt: "2026-06-21T10:10:00-07:00"
+    branch: codex/recheck-adr-006-ai-sdk-baseline
     classification:
       - docs_decision
       - approval_blocked
