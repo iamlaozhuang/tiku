@@ -25,4 +25,4 @@
 
 ## Outcome
 
-APPROVE docs/state/archive closeout pending final formatting, hardening, closeout readiness, and pre-push readiness.
+APPROVE docs/state/archive closeout pending pre-push readiness rerun.

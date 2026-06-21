@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-drain-to-recovery-window.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-drain-to-recovery-window.md
   branch: codex/active-queue-slimming-2026-06-21-drain-to-recovery-window
-  commitSha: null
+  commitSha: efcb9d2b
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4891,7 +4891,7 @@ lastActiveQueueSlimmingDrainToRecoveryWindow:
   taskId: active-queue-slimming-2026-06-21-drain-to-recovery-window
   archivedAt: "2026-06-21T06:45:00-07:00"
   branch: codex/active-queue-slimming-2026-06-21-drain-to-recovery-window
-  commitSha: null
+  commitSha: efcb9d2b
   decision: pass_docs_state_active_queue_slimming_drain_to_recovery_window
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
