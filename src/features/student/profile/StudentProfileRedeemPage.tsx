@@ -28,6 +28,7 @@ import type {
   EffectiveAuthorizationDto,
   EffectiveAuthorizationListDto,
 } from "@/server/contracts/effective-authorization-contract";
+import type { EditionAwareAuthorizationContextDto } from "@/server/contracts/edition-aware-authorization-contract";
 import type { Profession } from "@/server/models/auth";
 import {
   clearStoredStudentSessionToken,
@@ -48,6 +49,23 @@ const professionLabels: Record<Profession, string> = {
 const authorizationTypeLabels = {
   org_auth: "企业授权",
   personal_auth: "个人授权",
+} satisfies Record<string, string>;
+
+const editionLabels = {
+  advanced: "高级版",
+  standard: "标准版",
+} satisfies Record<string, string>;
+
+const upgradeStatusLabels = {
+  active: "升级生效",
+  expired: "升级过期",
+  none: "无升级",
+  revoked: "升级撤销",
+} satisfies Record<string, string>;
+
+const quotaOwnerTypeLabels = {
+  organization: "企业",
+  personal: "个人",
 } satisfies Record<string, string>;
 
 function normalizeRedeemCodeInput(value: string): string {
@@ -79,6 +97,16 @@ function formatScopeLabel(input: {
   level: number;
 }): string {
   return `${professionLabels[input.profession]} ${input.level}级`;
+}
+
+function readEditionAwareAuthorizationContexts(
+  input: EffectiveAuthorizationListDto,
+): EditionAwareAuthorizationContextDto[] {
+  const authorizationContextPayload = input as {
+    authorizationContexts?: EditionAwareAuthorizationContextDto[];
+  };
+
+  return authorizationContextPayload.authorizationContexts ?? [];
 }
 
 function mapRedeemFailureMessage(
@@ -316,6 +344,72 @@ function EffectiveAuthorizationList({
   );
 }
 
+function EditionAwareAuthorizationContextList({
+  authorizationContexts,
+}: {
+  authorizationContexts: EditionAwareAuthorizationContextDto[];
+}) {
+  if (authorizationContexts.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-3">
+      <h2 className="font-heading text-text-primary text-lg font-semibold">
+        版本授权
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {authorizationContexts.map((authorizationContext) => (
+          <article
+            key={authorizationContext.authorizationPublicId}
+            className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1"
+            data-public-id={authorizationContext.authorizationPublicId}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h3 className="font-heading text-text-primary text-base font-semibold">
+                  {formatScopeLabel(authorizationContext)}
+                </h3>
+                <p className="text-text-secondary text-sm">
+                  {
+                    authorizationTypeLabels[
+                      authorizationContext.authorizationSource
+                    ]
+                  }
+                </p>
+              </div>
+              <span className="bg-secondary text-secondary-foreground rounded-lg px-2 py-1 text-xs font-medium">
+                {editionLabels[authorizationContext.effectiveEdition]}
+              </span>
+            </div>
+            <dl className="text-text-secondary mt-4 grid gap-2 text-sm">
+              <div className="bg-background rounded-lg px-3 py-2">
+                <dt>原始版本</dt>
+                <dd className="text-text-primary font-medium">
+                  {editionLabels[authorizationContext.edition]}
+                </dd>
+              </div>
+              <div className="bg-background rounded-lg px-3 py-2">
+                <dt>升级状态</dt>
+                <dd className="text-text-primary font-medium">
+                  {upgradeStatusLabels[authorizationContext.upgradeStatus]}
+                </dd>
+              </div>
+              <div className="bg-background rounded-lg px-3 py-2">
+                <dt>额度归属</dt>
+                <dd className="text-text-primary font-medium">
+                  额度归属：
+                  {quotaOwnerTypeLabels[authorizationContext.quotaOwnerType]}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ProfileNavLinks() {
   return (
     <nav className="grid grid-cols-2 gap-2" aria-label="学员个人中心导航">
@@ -419,6 +513,9 @@ export function StudentProfilePage() {
   const [effectiveAuthorizations, setEffectiveAuthorizations] = useState<
     EffectiveAuthorizationDto[]
   >([]);
+  const [authorizationContexts, setAuthorizationContexts] = useState<
+    EditionAwareAuthorizationContextDto[]
+  >([]);
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
 
   useEffect(() => {
@@ -463,6 +560,9 @@ export function StudentProfilePage() {
         setEffectiveAuthorizations(
           authorizationResponse.data.effectiveAuthorizations,
         );
+        setAuthorizationContexts(
+          readEditionAwareAuthorizationContexts(authorizationResponse.data),
+        );
         setPersonalAuths(personalAuthResponse.data.personalAuths);
         setLoadState("ready");
       } catch {
@@ -484,6 +584,7 @@ export function StudentProfilePage() {
     setAuthContext(null);
     setAuthorizations([]);
     setEffectiveAuthorizations([]);
+    setAuthorizationContexts([]);
     setPersonalAuths([]);
     setLoadState("unauthorized");
   }
@@ -537,6 +638,10 @@ export function StudentProfilePage() {
           effectiveAuthorizations={effectiveAuthorizations}
         />
       </section>
+
+      <EditionAwareAuthorizationContextList
+        authorizationContexts={authorizationContexts}
+      />
 
       {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
 

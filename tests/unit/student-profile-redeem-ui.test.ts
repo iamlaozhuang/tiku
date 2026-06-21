@@ -61,6 +61,24 @@ const authorizationPayload = {
         status: "active",
       },
     ],
+    authorizationContexts: [
+      {
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "personal-auth-public-001",
+        edition: "standard",
+        effectiveEdition: "advanced",
+        upgradeStatus: "active",
+        profession: "monopoly",
+        level: 3,
+        ownerType: "personal",
+        ownerPublicId: "user-dev-student",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "user-dev-student",
+        expiresAt: "2026-08-22T00:00:00.000Z",
+        displayStatus: "active",
+      },
+    ],
   },
 };
 
@@ -162,6 +180,9 @@ describe("StudentProfilePage", () => {
     expect(screen.getByText("13900000002")).toBeInTheDocument();
     expect(screen.getAllByText("专卖 3级").length).toBeGreaterThan(0);
     expect(screen.getAllByText("个人授权").length).toBeGreaterThan(0);
+    expect(screen.getByText("高级版")).toBeInTheDocument();
+    expect(screen.getByText("升级生效")).toBeInTheDocument();
+    expect(screen.getByText("额度归属：个人")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("code_hash");
     expect(screen.queryByText("1")).toBeNull();
     expect(fetchMock).toHaveBeenCalledWith(

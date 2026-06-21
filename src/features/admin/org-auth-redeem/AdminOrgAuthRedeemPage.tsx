@@ -42,6 +42,8 @@ import type {
 import type {
   AuthScopeType,
   AuthStatus,
+  AuthorizationEdition,
+  AuthUpgradeStatus,
   OrgTier,
   Profession,
   RedeemCodeStatus,
@@ -194,6 +196,18 @@ const redeemCodeStatusLabels = {
   used: "已使用",
 } satisfies Record<RedeemCodeStatus, string>;
 
+const editionLabels = {
+  advanced: "高级版",
+  standard: "标准版",
+} satisfies Record<AuthorizationEdition, string>;
+
+const upgradeStatusLabels = {
+  active: "升级生效",
+  expired: "升级过期",
+  none: "无升级",
+  revoked: "升级撤销",
+} satisfies Record<AuthUpgradeStatus | "none", string>;
+
 const userStatusLabels = {
   active: "正常",
   disabled: "已禁用",
@@ -314,6 +328,39 @@ function formatProfessionLevel(input: {
   level: number;
 }): string {
   return `${professionLabels[input.profession]} ${input.level}级`;
+}
+
+type EditionAwareOrgAuthView = {
+  edition?: AuthorizationEdition;
+  effectiveEdition?: AuthorizationEdition;
+  upgradeStatus?: AuthUpgradeStatus | "none";
+};
+
+function readEditionAwareOrgAuthView(
+  orgAuth: AdminOrgAuthData["orgAuths"][number],
+): EditionAwareOrgAuthView {
+  return orgAuth as AdminOrgAuthData["orgAuths"][number] &
+    EditionAwareOrgAuthView;
+}
+
+function getOrgAuthEditionLabel(
+  orgAuth: AdminOrgAuthData["orgAuths"][number],
+): string {
+  const editionAwareOrgAuth = readEditionAwareOrgAuthView(orgAuth);
+
+  return editionLabels[
+    editionAwareOrgAuth.effectiveEdition ??
+      editionAwareOrgAuth.edition ??
+      "standard"
+  ];
+}
+
+function getOrgAuthUpgradeStatusLabel(
+  orgAuth: AdminOrgAuthData["orgAuths"][number],
+): string {
+  return upgradeStatusLabels[
+    readEditionAwareOrgAuthView(orgAuth).upgradeStatus ?? "none"
+  ];
 }
 
 function createRedeemCodeListQuery(input: {
@@ -934,9 +981,14 @@ function OrgAuthList({
             <p className="text-text-secondary flex flex-wrap gap-1 text-xs">
               <span>{formatProfessionLevel(orgAuth)}</span>
               <span>/</span>
+              <span>{getOrgAuthEditionLabel(orgAuth)}</span>
+              <span>/</span>
               <span>
                 {orgAuth.usedQuota} / {orgAuth.accountQuota}
               </span>
+            </p>
+            <p className="text-text-muted text-xs">
+              {getOrgAuthUpgradeStatusLabel(orgAuth)}
             </p>
             <p className="text-text-muted text-xs">
               {authScopeTypeLabels[orgAuth.authScopeType]} /{" "}

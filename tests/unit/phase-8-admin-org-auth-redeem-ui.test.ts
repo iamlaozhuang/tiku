@@ -69,6 +69,9 @@ const orgAuthPayload = {
         level: 3,
         accountQuota: 100,
         usedQuota: 42,
+        edition: "advanced",
+        effectiveEdition: "advanced",
+        upgradeStatus: "none",
         startsAt: "2026-05-22T00:00:00.000Z",
         expiresAt: "2026-08-22T00:00:00.000Z",
         status: "active",
@@ -230,6 +233,7 @@ describe("AdminOrgAuthPage", () => {
     expect(within(organization).getByText("杭州烟草")).toBeInTheDocument();
     expect(within(orgAuth).getByText("专卖 3级")).toBeInTheDocument();
     expect(within(orgAuth).getByText("42 / 100")).toBeInTheDocument();
+    expect(within(orgAuth).getByText("高级版")).toBeInTheDocument();
     expect(employee).toHaveAttribute("data-public-id", "employee-public-001");
     expect(within(employee).getByText("张三")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");

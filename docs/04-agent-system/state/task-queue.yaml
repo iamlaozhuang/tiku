@@ -682,13 +682,17 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
-    status: blocked
-    result: packet_defined_execution_requires_fresh_approval
-    nextApprovalRequired: api_service_packets_closed_and_exact_ui_allowed_files_with_focused_unit_validation
+    status: claimed
+    result: in_progress_ui_context_packet
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T03:14:11-07:00"
+    branch: codex/edition-auth-ui-context-packet
+    commitSha: null
+    nextApprovalRequired: none_for_current_ui_context_packet_scope
     targetClosureItem: student and admin edition display, issue/upgrade controls, quota owner summaries, and safe audit metadata
     behaviorBoundary: ui-context::edition_aware_authorization_display_not_permission_boundary
     capabilities:
-      productSourceChange: blocked_without_task_fresh_approval
+      productSourceChange: approved_ui_context_only
       localE2EValidation: blocked
       schemaMigration: blocked
       providerCall: blocked
@@ -737,20 +741,21 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-ui-context-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-ui-context-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-ui-context-packet
     redactionPolicy: UI evidence records state names and pass/fail only; UI visibility is not treated as an authorization boundary
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalRequired: task_fresh_approval
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_edition_aware_authorization_packets
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
-        approvalRequired: task_fresh_approval
+        approvalSource: current_user_fresh_approval_2026_06_21_edition_aware_authorization_packets
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-ui-context-packet.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-ui-context-packet.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-ui-context-packet.md
