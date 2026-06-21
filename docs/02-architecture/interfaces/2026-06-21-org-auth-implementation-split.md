@@ -1,7 +1,8 @@
 # Org Auth Implementation Split
 
 **Date:** 2026-06-21
-**Status:** split plan recorded; contract/security preflight and schema approval packages recorded; implementation remains blocked without fresh approval.
+**Status:** split plan recorded; contract/security preflight, schema approval, and schema implementation planning
+packages recorded; implementation remains blocked without fresh approval.
 **Depends on:** `docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md`
 
 ## Current Baseline
@@ -16,6 +17,10 @@
 - Follow-up approval on 2026-06-21 selected option B for implementation sequencing: merge contract design and security review preflight into one first package, while schema/migration/database work remains separately gated.
 - Follow-up approval on 2026-06-21 selected option A for the next package: create the docs-only `org-auth-scope-contract-and-security-preflight` package. This approval does not permit source, schema, migration, seed, database, service/UI, or runtime implementation.
 - Follow-up approval on 2026-06-21 selected option A for the schema approval package: document the future `org_auth_scope` atomic child table and related coverage link table. This approval does not permit schema source edits, migration generation or execution, seed, database connection, service/UI, or runtime implementation.
+- Follow-up approval on 2026-06-21 selected option A for the schema implementation plan: split future schema source,
+  migration generation, migration validation, service adaptation, UI adaptation, compatibility, rollback, and runtime
+  verification into separate reviewable packets. This approval does not permit schema source edits, migration generation
+  or execution, seed, database connection, service/UI, or runtime implementation.
 
 ## Split Strategy
 
@@ -25,12 +30,16 @@ Implementation must be split into reviewable packages in this order.
 | ----- | ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | 1     | `org-auth-scope-contract-and-security-preflight` | contract/security preflight  | Define create/update/list/detail DTOs, bundle display, compatibility, null behavior, public IDs, redaction, audit_log wording, overlap semantics, and cross-organization leakage risks together. | No runtime behavior, service/UI implementation, schema change, migration, seed, or database connection. |
 | 2     | `org-auth-schema-approval-package`               | schema decision              | Design the approved child-scope-table path and request fresh approval before any migration or seed work.                                                                                         | No schema, migration, seed, or database connection in this task.                                        |
-| 3     | `org-auth-effective-scope-service`               | service implementation       | Implement atomic effective-scope calculation, overlap detection, quota attribution, and cancellation semantics.                                                                                  | Requires approved contract/security preflight and schema path.                                          |
-| 4     | `org-auth-admin-scope-builder-ui`                | UI implementation            | Implement admin bundle builder, subject/profession/level selection, conflict warnings, and detail aggregation.                                                                                   | Requires approved contract/service behavior.                                                            |
-| 5     | `org-auth-compatibility-and-migration-guard`     | migration/read compatibility | Preserve existing records as covering `theory` and `skill`, and prove backward-compatible read behavior.                                                                                         | Requires schema approval and redacted migration evidence.                                               |
-| 6     | `org-auth-runtime-verification`                  | runtime verification         | Validate ops_admin create/detail/cancel paths and employee effective authorization paths.                                                                                                        | Requires browser/dev-server/e2e and data setup approval.                                                |
+| 3     | `org-auth-schema-implementation-plan`            | implementation planning      | Split the actual schema and migration path into source, migration, validation, service, UI, compatibility, rollback, and runtime packets.                                                        | No schema source edit, migration generation, database connection, source implementation, or runtime.    |
+| 4     | `org-auth-schema-source-implementation`          | schema source implementation | Implement reviewed `org_auth_scope` and `org_auth_scope_organization` schema source after fresh approval.                                                                                        | No migration generation or database connection unless approved in that packet.                          |
+| 5     | `org-auth-migration-generation-review`           | migration generation review  | Generate and review the migration file after schema source approval.                                                                                                                             | No migration execution, seed, backfill, or database connection unless approved in that packet.          |
+| 6     | `org-auth-migration-static-validation`           | migration validation         | Validate generated SQL, rollback shape, and compatibility assumptions with redacted evidence.                                                                                                    | No production, staging, or local database execution unless approved in that packet.                     |
+| 7     | `org-auth-effective-scope-service`               | service implementation       | Implement atomic effective-scope calculation, overlap detection, quota attribution, and cancellation semantics.                                                                                  | Requires approved contract/security preflight and schema path.                                          |
+| 8     | `org-auth-admin-scope-builder-ui`                | UI implementation            | Implement admin bundle builder, subject/profession/level selection, conflict warnings, and detail aggregation.                                                                                   | Requires approved contract/service behavior.                                                            |
+| 9     | `org-auth-compatibility-and-migration-guard`     | migration/read compatibility | Preserve existing records as covering `theory` and `skill`, and prove backward-compatible read behavior.                                                                                         | Requires schema approval and redacted migration evidence.                                               |
+| 10    | `org-auth-runtime-verification`                  | runtime verification         | Validate ops_admin create/detail/cancel paths and employee effective authorization paths.                                                                                                        | Requires browser/dev-server/e2e and data setup approval.                                                |
 
-The first package is recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-scope-contract-security-preflight.md`. The second package is recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-schema-approval-package.md`.
+The first package is recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-scope-contract-security-preflight.md`. The second package is recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-schema-approval-package.md`. The third package is recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-schema-implementation-plan.md`.
 
 ## Contract Design Boundary
 

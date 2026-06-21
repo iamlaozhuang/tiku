@@ -1,7 +1,8 @@
 # Org Auth Schema Approval Package
 
 **Date:** 2026-06-21
-**Status:** docs-only schema approval package recorded; schema implementation remains blocked.
+**Status:** docs-only schema approval package recorded; schema implementation plan recorded separately; schema
+implementation remains blocked.
 **Depends on:** `docs/02-architecture/interfaces/2026-06-21-org-auth-scope-contract-security-preflight.md`
 
 ## Approval Boundary
@@ -30,6 +31,12 @@ The reviewed future schema direction is:
 4. Keep the existing `org_auth_organization` table as compatibility data until a later migration and read-compatibility package retires it.
 
 This is a design target only. No migration file or schema source edit is approved by this package.
+
+The follow-up implementation planning package is recorded in
+`docs/02-architecture/interfaces/2026-06-21-org-auth-schema-implementation-plan.md`. It splits future schema source,
+migration generation, static migration validation, service adaptation, UI adaptation, compatibility, rollback, and
+runtime verification into separate approval gates. It still does not approve actual schema source edits, migration
+generation, migration execution, database access, data backfill, or runtime behavior changes.
 
 ## `org_auth_scope` Design
 

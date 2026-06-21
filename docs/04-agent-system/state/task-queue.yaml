@@ -1024,6 +1024,68 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-approval-package.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-org-auth-schema-approval-package.md
     retryCount: 0
+  - id: org-auth-schema-implementation-plan
+    title: Create org_auth schema implementation plan package
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    sourceStory: user-followup-approval-option-a-org-auth-schema-implementation-plan
+    dependencies:
+      - org-auth-schema-approval-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User selected option A for the next org_auth schema and migration item: create a docs-only implementation plan.
+      This task may split future schema source edits, migration generation, migration static validation, service
+      adaptation, UI adaptation, compatibility, rollback, and runtime verification into separately reviewable packets.
+      No schema source edit, no migration generation or execution, no seed, no database connection, no data backfill, no
+      authorization runtime behavior change, no source implementation, no service/UI implementation, no package or
+      lockfile change, no env/secret access, no Provider calls, no browser/e2e/dev-server runtime, no deploy, PR,
+      force-push, payment, external service, or Cost Calibration Gate is allowed.
+    targetClosureItem: org_auth schema and migration implementation planning package
+    behaviorBoundary: org_auth::schema_implementation_plan
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_followup_approval
+    taskKind: schema_implementation_plan
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_org_auth_schema_implementation_plan
+    claimedAt: "2026-06-21T16:18:02-07:00"
+    validatedAt: "2026-06-21T16:20:15-07:00"
+    branch: codex/org-auth-schema-implementation-plan
+    classification:
+      - docs_decision
+      - approval_blocked
+      - security_review_required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/interfaces/2026-06-21-org-auth-implementation-split.md
+      - docs/02-architecture/interfaces/2026-06-21-org-auth-schema-approval-package.md
+      - docs/02-architecture/interfaces/2026-06-21-org-auth-schema-implementation-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-21-org-auth-schema-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-21-org-auth-schema-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-implementation-plan.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\02-architecture\interfaces\2026-06-21-org-auth-implementation-split.md docs\02-architecture\interfaces\2026-06-21-org-auth-schema-approval-package.md docs\02-architecture\interfaces\2026-06-21-org-auth-schema-implementation-plan.md docs\05-execution-logs\task-plans\2026-06-21-org-auth-schema-implementation-plan.md docs\05-execution-logs\evidence\2026-06-21-org-auth-schema-implementation-plan.md docs\05-execution-logs\audits-reviews\2026-06-21-org-auth-schema-implementation-plan.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-auth-schema-implementation-plan
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-auth-schema-implementation-plan -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-schema-implementation-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-implementation-plan.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-org-auth-schema-implementation-plan.md
+    retryCount: 0
   - id: mistake-book-cookie-session-contract-repair
     title: Mistake book cookie session contract repair
     phase: student-experience-repair
