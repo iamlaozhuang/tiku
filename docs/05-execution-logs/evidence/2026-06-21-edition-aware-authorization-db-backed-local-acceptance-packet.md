@@ -27,6 +27,8 @@ result: pass
 | `npm.cmd run typecheck`                                                                                                                                                                                                                               | pass   | `tsc --noEmit` passed.                                                                                                                                                |
 | `git diff --check`                                                                                                                                                                                                                                    | pass   | No whitespace errors.                                                                                                                                                 |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-db-backed-local-acceptance-packet`                                                         | pass   | Scope, sensitive evidence, and terminology scans passed after task allowlist metadata and touched-file scanner false positive were corrected.                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-db-backed-local-acceptance-packet`                                                    | pass   | Evidence/audit anchors, validation command anchors, RED/GREEN, commit evidence, localFullLoopGate, next candidate, and blocked remainder anchors passed.              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-db-backed-local-acceptance-packet`                                                           | pass   | Git readiness, evidence/audit paths, master/origin checkpoint policy, and closeout noise policy passed before task-end merge/push.                                    |
 
 ## Acceptance Coverage
 
@@ -57,6 +59,7 @@ result: pass
 
 - RED: focused unit tests first failed because org_auth validator dropped `edition`, effective authorization contexts omitted edition metadata, and active `auth_upgrade` rows were ignored.
 - GREEN: focused unit tests passed 19/19 and DB-backed Playwright passed 2/2 after runtime repository/service/API contract wiring.
+- Commit: `b6deb30491415f3ac0cae882aa09da0da5078485`.
 - localFullLoopGate: passed localhost-only capability gate; local DB use was limited to approved loopback migration apply, seed, and idempotent synthetic fixture writes.
 - threadRolloverGate: after this task closes, merges, pushes, and cleans its short branch, continue only to the next user-approved serial work item; do not enter AP-01/AP-11 or unrelated modules automatically.
 - nextModuleRunCandidate: after this task closes, the next approved serial item is queue/archive slimming unless the user redirects.
@@ -68,9 +71,9 @@ No database URLs, secrets, session credential values, Authorization headers, raw
 
 ## Closeout Status
 
-- Implementation commit hash: to be recorded after local commit.
-- Module closeout readiness: to be recorded after implementation commit hash is available.
-- Pre-push readiness: to be recorded after module closeout readiness.
+- Implementation commit hash: `b6deb30491415f3ac0cae882aa09da0da5078485`.
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
 - FF merge to `master`: not yet run.
 - Push `origin/master`: not yet run.
 - Merged branch cleanup: not yet run.
