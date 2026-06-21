@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-21-post-edition-window
-  updatedAt: "2026-06-21T06:05:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2
+  updatedAt: "2026-06-21T06:25:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10786,3 +10786,53 @@ entries:
     commitSha: 32cac297c40fed589db780ca5d78af51e8e4e7a4
     completedAt: "2026-06-17"
     archivedByTask: active-queue-slimming-2026-06-21-post-edition-window
+  - id: active-queue-slimming-2026-06-21-edition-packets-window
+    phase: agent-system-queue-health
+    status: closed
+    taskKind: docs_state_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 2cc316b8
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2
+  - id: organization-training-entry-route-path-contract-repair
+    phase: organization-training-entry-route-path-contract-repair
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-entry-route-path-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: d0e5f566aab3aead8c5160453bece9152a853683
+    completedAt: "2026-06-18"
+    archivedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2
+  - id: organization-training-draft-source-context-local-migration-execution-approval
+    phase: organization-training-draft-source-context-local-migration-execution-approval
+    status: closed
+    taskKind: local_migration_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
+    completedAt: "2026-06-18"
+    archivedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2
+  - id: organization-training-admin-visible-scope-local-fixture-contract-repair
+    phase: organization-training-admin-visible-scope-local-fixture-contract-repair
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 9164f9b069654c476307226d5dcb677ee48fcb55
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2
+  - id: local-full-flow-human-acceptance-packet
+    phase: local-full-flow-human-acceptance
+    status: closed
+    taskKind: local_full_flow_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 451514632287290490179c32538bac9870bddca3
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-diagnostic-window-2

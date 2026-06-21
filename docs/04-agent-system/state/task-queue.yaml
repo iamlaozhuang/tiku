@@ -1,5 +1,120 @@
 schemaVersion: 1
 tasks:
+  - id: active-queue-slimming-2026-06-21-diagnostic-window-2
+    title: Active queue slimming 2026-06-21 diagnostic window 2
+    phase: agent-system-queue-health
+    sourceStory: userApprovedActiveQueueSlimmingSeedMaterialization20260621
+    dependencies:
+      - active-queue-slimming-2026-06-21-post-edition-window
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested opening another same-kind docs/state/archive-only short branch to process the next batch of current
+      diagnostic archive candidates. This task is limited to materializing and executing a docs/state/archive-only
+      active queue slimming window for exactly the next five terminal archive candidates reported by the local queue
+      slimming diagnostic on this branch. Task end fast-forward merge to master, push origin/master, and merged short
+      branch cleanup remain approved by the user's standing task-end closeout authorization in this thread. It must not
+      change task semantics, execute blocked tasks, modify product source, tests, e2e, schema, migration, scripts, env,
+      dependency, provider, payment, deploy, PR, force push, destructive DB, staging/prod/cloud database, or Cost
+      Calibration Gate state.
+    targetClosureItem: archive current diagnostic next five terminal active queue candidates
+    behaviorBoundary: agent-system::active_queue_slimming_diagnostic_window_2
+    executionProfile: docs_state_archive_only
+    evidenceMode: full
+    validationPolicy: docs_state_diagnostics
+    queueSelectionMode: user_directed_diagnostic_next_five
+    taskKind: docs_state_archive
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_active_queue_slimming_diagnostic_window_2
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T06:20:00-07:00"
+    validatedAt: "2026-06-21T06:30:00-07:00"
+    closedAt: "2026-06-21T06:30:00-07:00"
+    branch: codex/active-queue-slimming-2026-06-21-diagnostic-window-2
+    commitSha: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    archiveCandidates:
+      - active-queue-slimming-2026-06-21-edition-packets-window
+      - organization-training-entry-route-path-contract-repair
+      - organization-training-draft-source-context-local-migration-execution-approval
+      - organization-training-admin-visible-scope-local-fixture-contract-repair
+      - local-full-flow-human-acceptance-packet
+    capabilities:
+      docsStateArchive: approved
+      productSourceChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+    plannedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source, tests, e2e, schema, migration, env, dependency, provider, payment, deploy, PR, force-push
+      - destructive local database operation, staging/prod/cloud database, provider/model calls, Cost Calibration Gate
+      - raw sensitive evidence, secrets, tokens, database URLs, Authorization headers, plaintext redeem_code
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-diagnostic-window-2
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-diagnostic-window-2
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-diagnostic-window-2
+    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, raw employee answer text, or full paper content
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_active_queue_slimming_seed_materialization
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md
   - id: active-queue-slimming-2026-06-21-post-edition-window
     title: Active queue slimming 2026-06-21 post edition window
     phase: agent-system-queue-health
@@ -115,120 +230,6 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-post-edition-window.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-post-edition-window.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-post-edition-window.md
-  - id: active-queue-slimming-2026-06-21-edition-packets-window
-    title: Active queue slimming 2026-06-21 edition packets window
-    phase: agent-system-queue-health
-    sourceStory: userApprovedActiveQueueSlimmingSeedMaterialization20260621
-    dependencies:
-      - active-queue-slimming-2026-06-21-edition-followup
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User approved continuing the next active queue slimming seed/materialization round. This task is limited to
-      materializing and executing a docs/state/archive-only active queue slimming window for the latest first five
-      terminal archive candidates reported by the local queue slimming diagnostic on this branch. Task end
-      fast-forward merge to master, push origin/master, and merged short branch cleanup remain approved by the user's
-      standing task-end closeout authorization in this thread. It must not change task semantics, execute blocked tasks,
-      modify product source, tests, e2e, schema, migration, scripts, env, dependency, provider, payment, deploy, PR,
-      force push, destructive DB, staging/prod/cloud database, or Cost Calibration Gate state.
-    targetClosureItem: archive latest first five terminal edition packet active queue candidates
-    behaviorBoundary: agent-system::active_queue_slimming_edition_packets_window
-    executionProfile: docs_state_archive_only
-    evidenceMode: full
-    validationPolicy: docs_state_diagnostics
-    queueSelectionMode: user_directed_requirement_decision
-    taskKind: docs_state_archive
-    moduleRunVersion: 2
-    status: closed
-    result: pass_docs_state_active_queue_slimming_edition_packets_window
-    freshApprovalStatus: current_user_fresh_approval_materialized
-    claimedAt: "2026-06-21T05:40:00-07:00"
-    validatedAt: "2026-06-21T05:50:00-07:00"
-    closedAt: "2026-06-21T05:50:00-07:00"
-    branch: codex/active-queue-slimming-2026-06-21-edition-packets-window
-    commitSha: 2cc316b8
-    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    archiveCandidates:
-      - edition-aware-authorization-schema-migration-approval-packet
-      - edition-aware-authorization-api-contract-packet
-      - edition-aware-authorization-service-repository-packet
-      - edition-aware-authorization-ui-context-packet
-      - edition-aware-authorization-e2e-spec-authoring-packet
-    capabilities:
-      docsStateArchive: approved
-      productSourceChange: blocked
-      schemaMigration: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      costCalibrationGate: blocked
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
-    plannedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - product source, tests, e2e, schema, migration, env, dependency, provider, payment, deploy, PR, force-push
-      - destructive local database operation, staging/prod/cloud database, provider/model calls, Cost Calibration Gate
-      - raw sensitive evidence, secrets, tokens, database URLs, Authorization headers, plaintext redeem_code
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-edition-packets-window.md docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-edition-packets-window.md docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window
-    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, raw employee answer text, or full paper content
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_fresh_approval_2026_06_21_active_queue_slimming_seed_materialization
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_fresh_approval_2026_06_21_task_end_merge_push_cleanup
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-packets-window.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-packets-window.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-edition-packets-window.md
   - id: ap-01-qwen-one-request-post-console-remediation-retry-approval
     title: AP-01 Qwen one-request post-console-remediation retry approval
     phase: ap-01-qwen-one-request-post-console-remediation-retry-approval
@@ -1090,538 +1091,6 @@ tasks:
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ap-01-provider-smoke-execution
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ap-01-provider-smoke-execution
-  - id: organization-training-entry-route-path-contract-repair
-    title: Organization training entry route path contract repair
-    phase: organization-training-entry-route-path-contract-repair
-    sourceStory: localExperienceClosureGate.organizationTrainingEntryRoutePathContractRepair
-    dependencies:
-      - organization-training-admin-employee-entry-surface-local-ui
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Approved by the current 2026-06-18 user prompt to repair the local organization-training entry route path
-      collision, move the admin entry to `/content/organization-training`, keep the employee entry at
-      `/organization-training`, update unit/e2e/coverage matrix, and rerun the scoped local full-flow validation. No
-      `.env*`, package/lockfile/dependency, schema/drizzle/migration, provider/model, staging/prod/cloud/deploy/payment,
-      external-service, PR, force-push, or Cost Calibration Gate work is approved.
-    targetExperienceChain: organization-training-experience
-    useCaseIds:
-      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
-      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-    executionProfile: local_unit_tdd_plus_scoped_local_full_flow
-    evidenceMode: full
-    validationPolicy: local_unit_plus_scoped_local_full_flow
-    queueSelectionMode: user_directed_repair
-    taskKind: implementation
-    moduleRunVersion: 2
-    status: closed
-    result: reconciled_by_organization_training_route_runtime_contract_repair
-    claimedAt: "2026-06-18T01:58:25-07:00"
-    closedAt: "2026-06-18T02:08:59-07:00"
-    reconciledAt: "2026-06-20T10:34:26-07:00"
-    branch: codex/organization-training-local-experience-chain
-    commitSha: d0e5f566aab3aead8c5160453bece9152a853683
-    repairTaskId: organization-training-route-runtime-contract-repair
-    repairCommitSha: d0e5f566aab3aead8c5160453bece9152a853683
-    reconciliationTaskId: blocked-validation-repair-state-reconciliation-2026-06-20
-    allowedFiles:
-      - src/app/(admin)/content/organization-training/page.tsx
-      - src/app/(admin)/organization-training/page.tsx
-      - tests/unit/organization-training-admin-entry-surface.test.ts
-      - e2e/organization-training-local-full-flow.spec.ts
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
-      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
-      - src/app/(student)/organization-training/page.tsx
-      - src/features/admin/organization-training/**
-      - src/features/student/organization-training/**
-      - tests/unit/organization-training-employee-entry-surface.test.ts
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/app/api/**
-      - src/server/**
-      - src/components/**
-      - src/features/**
-      - src/hooks/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - API route/service/repository behavior changes
-      - schema/drizzle/migration changes
-      - database migration execution
-      - provider/model calls or provider configuration
-      - dependency changes
-      - staging/prod/cloud/deploy/payment/external-service
-      - PR
-      - force push
-      - Cost Calibration Gate
-    closeoutPolicy:
-      localCommit: approved_by_current_user_prompt
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        fetchPruneAfterPush: true
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
-      - npx.cmd prettier --check --ignore-unknown 'src/app/(admin)/content/organization-training' tests/unit/organization-training-admin-entry-surface.test.ts e2e/organization-training-local-full-flow.spec.ts docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-entry-route-path-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-entry-route-path-contract-repair.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-entry-route-path-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-entry-route-path-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-entry-route-path-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-entry-route-path-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-entry-route-path-contract-repair.md
-    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
-    retryCount: 1
-  - id: organization-training-draft-source-context-local-migration-execution-approval
-    title: Organization training draft source context local migration execution approval
-    phase: organization-training-draft-source-context-local-migration-execution-approval
-    sourceStory: localExperienceClosureGate.organizationTrainingDraftSourceContextLocalMigrationExecutionApproval
-    dependencies:
-      - organization-training-draft-source-context-schema-migration
-      - organization-training-draft-source-context-runtime-contract-tdd
-      - organization-training-entry-route-path-contract-repair
-    taskPlanPolicy: required_before_execution
-    humanApprovalBoundary: >-
-      User selected option 1 in the current 2026-06-18 prompt. Approval is limited to validating that `.env.local`
-      resolves to a local/dev loopback database target, running `npx.cmd drizzle-kit migrate` against that current local
-      dev database, and rerunning `npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts`. It must
-      not output database URLs or secrets, modify `.env*`, run `drizzle-kit push`, target staging/prod/cloud/deploy/
-      payment/external-service, change provider/model configuration, change package/lockfiles/dependencies, create PRs,
-      force-push, or run Cost Calibration Gate.
-    targetExperienceChain: organization-training-experience
-    useCaseIds:
-      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
-      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-    executionProfile: local_migration_execution_plus_scoped_full_flow
-    evidenceMode: full
-    validationPolicy: local_migration_plus_scoped_full_flow
-    queueSelectionMode: user_directed_unblock
-    taskKind: local_migration_execution
-    moduleRunVersion: 2
-    schemaMigration: approved_migration_plan
-    localDockerDatabase: approved_local_dev_only
-    status: closed
-    result: reconciled_by_organization_training_admin_visible_scope_no_migration_repair
-    claimedAt: "2026-06-18T02:34:05-07:00"
-    closedAt: "2026-06-18T02:51:30-07:00"
-    reconciledAt: "2026-06-20T10:34:26-07:00"
-    branch: codex/organization-training-local-experience-chain
-    commitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
-    repairTaskId: organization-training-admin-visible-scope-no-migration-repair
-    repairCommitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
-    reconciliationTaskId: blocked-validation-repair-state-reconciliation-2026-06-20
-    allowedFiles:
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - .env.local
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
-      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
-      - docs/05-execution-logs/evidence/2026-06-17-organization-training-draft-source-context-schema-migration.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-entry-route-path-contract-repair.md
-      - drizzle/20260618063739_add_organization_training_draft_source_context.sql
-      - drizzle.config.ts
-      - e2e/organization-training-local-full-flow.spec.ts
-    blockedFiles:
-      - .env.example
-      - .env.*.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/app/**
-      - src/server/**
-      - src/components/**
-      - src/features/**
-      - src/hooks/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - drizzle-kit push
-      - staging/prod/cloud/deploy/payment/external-service
-      - provider/model calls or provider configuration
-      - dependency changes
-      - destructive database operations
-      - database URL or secret evidence output
-      - PR
-      - force push
-      - Cost Calibration Gate
-    closeoutPolicy:
-      localCommit: not_approved
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-      cleanup:
-        deleteShortBranch: false
-        fetchPruneAfterPush: true
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-draft-source-context-local-migration-execution-approval -Capability schemaMigration -Intent use_capability
-      - npx.cmd drizzle-kit migrate
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
-      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-admin-employee-local-full-flow-validation.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-draft-source-context-local-migration-execution-approval
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-draft-source-context-local-migration-execution-approval
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-draft-source-context-local-migration-execution-approval
-    evidencePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-    retryCount: 1
-  - id: organization-training-admin-visible-scope-local-fixture-contract-repair
-    title: Organization training admin visible scope local fixture contract repair
-    phase: organization-training-admin-visible-scope-local-fixture-contract-repair
-    sourceStory: localExperienceClosureGate.organizationTrainingAdminVisibleScopeLocalFixtureContractRepair
-    dependencies:
-      - organization-training-draft-source-context-local-migration-execution-approval
-      - organization-training-entry-route-path-contract-repair
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Approved by the current 2026-06-20 user prompt to claim and execute this independent validation repair packet for
-      the organization-training fixture/UI response mapping blocker, using a short branch from latest master, existing
-      focused local unit validation, existing scoped localhost-only Playwright validation, redacted evidence, validation
-      commit, closeout commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup. Scope
-      is limited to fixture/UI response mapping validation or the smallest allowed fixture/UI/e2e repair if current
-      validation still reproduces the blocker. This approval does not allow `.env*`, package/lockfile/dependency
-      changes, schema/drizzle/migration, migration execution, destructive local DB writes, provider/model calls or
-      configuration, staging/prod/cloud/deploy/payment/external-service, PR, force-push, headed/debug browser mode, or
-      Cost Calibration Gate execution.
-    targetExperienceChain: organization-training-experience
-    useCaseIds:
-      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
-      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: user_directed_repair
-    taskKind: local_validation_repair
-    moduleRunVersion: 2
-    localFullFlowGate: approved_localhost_only
-    destructiveLocalDockerDatabase: blocked_without_task_approval
-    localE2EValidation: approved_local_only_existing_specs
-    status: closed
-    result: pass_existing_fixture_ui_response_mapping_validation
-    claimedAt: "2026-06-20T09:29:07-07:00"
-    validatedAt: "2026-06-20T09:34:00-07:00"
-    closedAt: "2026-06-20T09:40:00-07:00"
-    branch: codex/organization-training-fixture-ui-response-mapping-repair
-    commitSha: 9164f9b069654c476307226d5dcb677ee48fcb55
-    allowedFiles:
-      - src/db/dev-seed.ts
-      - src/db/dev-seed.test.ts
-      - e2e/organization-training-local-full-flow.spec.ts
-      - src/app/(admin)/content/organization-training/page.tsx
-      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
-      - tests/unit/organization-training-admin-entry-surface.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
-      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-draft-source-context-local-migration-execution-approval.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
-      - src/server/repositories/organization-training-repository.ts
-      - src/server/services/organization-training-route.ts
-      - src/server/contracts/organization-training-contract.ts
-      - playwright.config.ts
-      - package.json
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-      - src/server/**
-      - src/components/**
-      - src/hooks/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - schema/drizzle/migration changes
-      - drizzle-kit push
-      - destructive database operations
-      - database URL, secret, token, row data, or public ID list evidence output
-      - provider/model calls or provider configuration
-      - dependency changes
-      - staging/prod/cloud/deploy/payment/external-service
-      - PR
-      - force push
-      - Cost Calibration Gate
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-        fetchPruneAfterPush: true
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair -Capability localFullFlowGate -Intent use_capability
-      - phase: post_edit
-        command: npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts src/db/dev-seed.test.ts
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-training-local-full-flow.spec.ts src/app/(admin)/content/organization-training/page.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx tests/unit/organization-training-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair -Capability localFullFlowGate -Intent use_capability
-      - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts src/db/dev-seed.test.ts
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts --list
-      - npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
-      - npx.cmd prettier --check --ignore-unknown src/db/dev-seed.ts src/db/dev-seed.test.ts e2e/organization-training-local-full-flow.spec.ts src/app/(admin)/content/organization-training/page.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx tests/unit/organization-training-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-admin-visible-scope-local-fixture-contract-repair
-    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    lastFailurePath: docs/05-execution-logs/evidence/2026-06-18-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-    retryCount: 1
-  - id: local-full-flow-human-acceptance-packet
-    title: Local full-flow human acceptance packet
-    phase: local-full-flow-human-acceptance
-    sourceStory: userApproval.localFullFlowHumanAcceptance
-    dependencies:
-      - module-run-v2-personal-ai-local-ui-auth-session-contract-repair
-      - organization-training-route-runtime-contract-repair
-      - organization-training-admin-visible-scope-no-migration-repair
-      - organization-training-admin-visible-scope-local-fixture-contract-repair
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Approved by the current 2026-06-20 user prompt to create or claim a local full-flow human acceptance packet using
-      local localhost only, existing allowlisted Playwright/e2e smoke specs, existing local validation commands,
-      redacted evidence, validation commit, closeout commit, fast-forward merge to master, push origin/master, and
-      merged short-branch cleanup. Scope is limited to command execution and redacted role/use-case/result metadata for
-      standard plus advanced key local experience paths. This approval does not allow new e2e specs, headed/debug
-      browser mode, destructive local DB writes, schema/drizzle/migration, dependency/package/lockfile changes,
-      provider/model calls, env/secret reads or writes, deploy/staging/prod/cloud/payment/export/OCR/external-service
-      work, PR, force-push, or Cost Calibration Gate execution.
-    targetExperienceChain: local-full-flow-human-acceptance
-    useCaseIds:
-      - UC-STD-STUDENT-PRACTICE-MOCK-LOCAL
-      - UC-ADV-PERSONAL-AI-LOCAL
-      - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
-      - UC-ADV-EMPLOYEE-TRAINING-ANSWER
-      - UC-ADV-ORG-PORTAL-ADMIN
-      - UC-ADV-ORG-ANALYTICS-SUMMARY
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: user_directed_acceptance
-    taskKind: local_full_flow_acceptance
-    moduleRunVersion: 2
-    localFullFlowGate: approved_localhost_only
-    localE2EValidation: approved_local_only_existing_specs
-    destructiveLocalDockerDatabase: blocked_without_task_approval
-    status: closed
-    result: pass_local_full_flow_human_acceptance
-    claimedAt: "2026-06-20T09:39:49-07:00"
-    validatedAt: "2026-06-20T09:42:40-07:00"
-    closedAt: "2026-06-20T09:46:00-07:00"
-    branch: codex/local-full-flow-human-acceptance
-    commitSha: 451514632287290490179c32538bac9870bddca3
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md
-      - docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-auth-session-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
-      - docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-local-fixture-contract-repair.md
-      - e2e/local-business-flow.spec.ts
-      - e2e/personal-ai-generation-local-request.spec.ts
-      - e2e/organization-training-local-full-flow.spec.ts
-      - e2e/organization-portal-local-flow.spec.ts
-      - e2e/organization-analytics-local-flow.spec.ts
-      - playwright.config.ts
-      - package.json
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - new e2e spec creation or e2e source modification
-      - headed/debug browser mode
-      - destructive local DB writes
-      - schema/drizzle/migration changes
-      - database migration execution
-      - provider/model calls or provider configuration
-      - env/secret reads or writes
-      - dependency changes
-      - export/file generation/OCR/payment/external-service
-      - staging/prod/cloud/deploy
-      - PR
-      - force push
-      - Cost Calibration Gate
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId local-full-flow-human-acceptance-packet -Capability localFullFlowGate -Intent use_capability
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts --list
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-flow-human-acceptance-packet
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId local-full-flow-human-acceptance-packet -Capability localFullFlowGate -Intent use_capability
-      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts --list
-      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts e2e/organization-portal-local-flow.spec.ts e2e/organization-analytics-local-flow.spec.ts
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-flow-human-acceptance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-flow-human-acceptance-packet
-    evidencePath: docs/05-execution-logs/evidence/2026-06-20-local-full-flow-human-acceptance-packet.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-local-full-flow-human-acceptance-packet.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-20-local-full-flow-human-acceptance-packet.md
-    retryCount: 0
   - id: module-run-v2-personal-ai-local-transport-contract-planning
     title: Personal AI local transport contract bridge approval reconciliation
     phase: module-run-v2-personal-ai-local-transport-contract-planning

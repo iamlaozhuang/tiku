@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: agent-system-queue-health
-updatedAt: "2026-06-21T06:10:00-07:00"
+updatedAt: "2026-06-21T06:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: c6d5d969
   lastKnownOriginMasterSha: c6d5d969
 currentTask:
-  id: active-queue-slimming-2026-06-21-post-edition-window
+  id: active-queue-slimming-2026-06-21-diagnostic-window-2
   status: closed
-  result: pass_docs_state_active_queue_slimming_post_edition_window
-  claimedAt: "2026-06-21T06:00:00-07:00"
-  validatedAt: "2026-06-21T06:10:00-07:00"
-  closedAt: "2026-06-21T06:10:00-07:00"
+  result: pass_docs_state_active_queue_slimming_diagnostic_window_2
+  claimedAt: "2026-06-21T06:20:00-07:00"
+  validatedAt: "2026-06-21T06:30:00-07:00"
+  closedAt: "2026-06-21T06:30:00-07:00"
   sourceStory: userApprovedActiveQueueSlimmingSeedMaterialization20260621
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-post-edition-window.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-post-edition-window.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-post-edition-window.md
-  branch: codex/active-queue-slimming-2026-06-21-post-edition-window
-  commitSha: 1fcef3ee
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
+  branch: codex/active-queue-slimming-2026-06-21-diagnostic-window-2
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4861,5 +4861,28 @@ lastActiveQueueSlimmingPostEditionWindow:
   boundary: >-
     This docs/state queue slimming task materialized and executed the post-edition active queue archive window for the
     current diagnostic first five terminal candidates. It did not execute or alter product source, tests, e2e, schema,
+    migration, scripts, env, dependency, provider, payment, deploy, PR, force-push, destructive DB,
+    staging/prod/cloud database, or Cost Calibration Gate state.
+
+lastActiveQueueSlimmingDiagnosticWindow2:
+  taskId: active-queue-slimming-2026-06-21-diagnostic-window-2
+  archivedAt: "2026-06-21T06:25:00-07:00"
+  branch: codex/active-queue-slimming-2026-06-21-diagnostic-window-2
+  commitSha: null
+  decision: pass_docs_state_active_queue_slimming_diagnostic_window_2
+  archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+  historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  archivedTaskIds:
+    - active-queue-slimming-2026-06-21-edition-packets-window
+    - organization-training-entry-route-path-contract-repair
+    - organization-training-draft-source-context-local-migration-execution-approval
+    - organization-training-admin-visible-scope-local-fixture-contract-repair
+    - local-full-flow-human-acceptance-packet
+  activeQueueTaskCountAfter: 50
+  archivedTaskCount: 5
+  archiveCandidateCountAfter: 25
+  boundary: >-
+    This docs/state queue slimming task materialized and executed the next active queue archive window for the current
+    diagnostic next five terminal candidates. It did not execute or alter product source, tests, e2e, schema,
     migration, scripts, env, dependency, provider, payment, deploy, PR, force-push, destructive DB,
     staging/prod/cloud database, or Cost Calibration Gate state.
