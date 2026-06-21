@@ -2775,6 +2775,7 @@ tasks:
     validatedAt: "2026-06-21T06:40:39-07:00"
     closedAt: "2026-06-21T06:40:39-07:00"
     branch: codex/batch-234-ai-task-provider-redacted-log-evidence
+    commitSha: dc3bde63
     retryCount: 0
   - id: batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     title: Module Run v2 ai-task-and-provider implementation seed

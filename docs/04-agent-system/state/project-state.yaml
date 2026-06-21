@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
   branch: codex/batch-234-ai-task-provider-redacted-log-evidence
-  commitSha: null
+  commitSha: dc3bde63
   prUrl: null
   retryCount: 0
   lastFailurePath: null

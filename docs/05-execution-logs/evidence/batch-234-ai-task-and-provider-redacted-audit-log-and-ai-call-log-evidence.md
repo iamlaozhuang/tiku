@@ -16,7 +16,7 @@ result: pass
 - Batch range: `batch-234`
 - RED: existing tests confirmed coverage before any source edit; no source gap found.
 - GREEN: `npm.cmd run test:unit -- src/server/services/ai-generation-task-log-evidence-reference-service.test.ts` passed with 1 file and 4 tests.
-- Commit: `39c94b5c` pre-task baseline; final task commit will be recorded after commit creation.
+- Commit: `dc3bde63` task closeout commit.
 - localFullLoopGate: L2 satisfied by local unit validation without provider/env/schema/dependency changes.
 - threadRolloverGate: continue_current_thread; this is the third implementation task after auto-seed and context remains inside the approved module boundary.
 - nextModuleRunCandidate: continue serially to `batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence` after 234 is merged and pushed.
@@ -35,6 +35,7 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence`: passed.
+- `git commit -m "docs(agent): close ai task provider redacted log evidence"`: created task closeout commit `dc3bde63`; pre-commit hardening, lint-staged, lint, typecheck, and post-commit advisory passed.
 
 ## Source Coverage
 
