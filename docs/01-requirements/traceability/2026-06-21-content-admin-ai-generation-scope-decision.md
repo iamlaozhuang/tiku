@@ -55,6 +55,30 @@ Policy:
 This decision does not approve schema, migration, source implementation, model output persistence, real Provider calls,
 prompt/provider payload exposure, formal content writes, database work, or runtime verification.
 
+## Review And Adoption Boundary
+
+Follow-up approval on 2026-06-21 selected option A for review/adoption: two-step adoption.
+
+Policy:
+
+1. Isolated AI results can only be adopted into editable formal drafts, not directly into published content.
+2. After adoption, `question` drafts, `material` drafts, and `paper` drafts must use the existing formal validation and
+   publish workflow.
+3. A reviewer may edit, split, reject, or adopt an isolated result. Rejection and adoption both require audit attribution
+   to the reviewer.
+4. AI question-generation results may create formal draft content only after reviewer adoption; they cannot create
+   published `question` records.
+5. AI paper-planning results may create or update formal draft `paper` content only after reviewer adoption; they cannot
+   publish a `paper` or make it available to `mock_exam` in the same action.
+6. The adoption action must not bypass duplicate detection, canonical `question_type` normalization, `paper` count
+   limits, material binding rules, or publish validation.
+7. Evidence for future adoption work must be redacted and must not include raw prompts, Provider payloads, raw generated
+   content, private answer text, full paper content, API keys, tokens, database URLs, internal numeric ids, or plaintext
+   `redeem_code` values.
+
+This decision does not approve implementation, formal content writes, schema, migration, Provider calls, prompt/provider
+payload exposure, database work, browser/e2e runtime, or publish-flow changes.
+
 ## Recommended Future Architecture
 
 Future implementation should be split into these reviewable tasks. Every implementation task must preserve the option A boundary: generation produces reviewable drafts or suggestions only; formal adoption remains a separate human action.
@@ -63,8 +87,8 @@ Future implementation should be split into these reviewable tasks. Every impleme
 2. Provider/env/cost approval package with redaction rules and stop conditions.
 3. Isolated generation result model or contract package, with no formal `question`/`paper` writes, following the option A
    isolated review-surface decision above.
-4. Manual review and formal adoption package for `question` drafts.
-5. Manual review and formal adoption package for `paper` drafts.
+4. Manual review and formal adoption package for `question` drafts, following the option A two-step adoption boundary.
+5. Manual review and formal adoption package for `paper` drafts, following the option A two-step adoption boundary.
 6. Audit/logging package covering `audit_log`, `ai_call_log`, reviewer identity, and public identifiers only.
 7. Runtime verification package after Provider and browser/e2e gates are separately approved.
 

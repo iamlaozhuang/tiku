@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7c5cf64397fbaf1f9f2de16498fbb53b61a45f1f
-  lastKnownOriginMasterSha: 7c5cf64397fbaf1f9f2de16498fbb53b61a45f1f
+  lastKnownMasterSha: 69655a0b594dc2abc5874402bb12371ee13d414e
+  lastKnownOriginMasterSha: 69655a0b594dc2abc5874402bb12371ee13d414e
 currentTask:
-  id: record-content-admin-ai-storage-model-decision
+  id: record-content-admin-ai-adoption-boundary-decision
   status: ready_for_closeout
-  result: pass_content_admin_ai_storage_model_decision_record
-  claimedAt: "2026-06-21T16:41:36-07:00"
-  validatedAt: "2026-06-21T16:43:17-07:00"
+  result: pass_content_admin_ai_adoption_boundary_decision_record
+  claimedAt: "2026-06-21T16:46:31-07:00"
+  validatedAt: "2026-06-21T16:48:09-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-content-admin-ai-storage-model
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-storage-model-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-storage-model-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-storage-model-decision.md
-  branch: codex/content-admin-ai-storage-model-decision
+  sourceStory: user-followup-approval-option-a-content-admin-ai-adoption-boundary
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-adoption-boundary-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-adoption-boundary-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-adoption-boundary-decision.md
+  branch: codex/content-admin-ai-adoption-boundary-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5028,6 +5028,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - security_review_required
+    - id: record-content-admin-ai-adoption-boundary-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
     - id: record-paper-count-alias-policy-decision
       classification:
         - docs_decision
@@ -5131,6 +5136,27 @@ discoveredIssueClosureBatch20260621:
         `paper`, `paper_section`, `question_group`, `question_option`, `standard_answer`, `analysis`, or `scoring_point`
         records, are not student-visible, cannot be published, and cannot be used by `mock_exam` until a separate human
         adoption workflow validates and copies accepted content into formal records with audit attribution.
+      approvalBoundary: >-
+        This records a product and architecture decision only. It does not approve real Provider calls, prompt or
+        provider payload exposure, raw generated AI content evidence, model output persistence, formal content writes,
+        source implementation, schema, migration, seed, database connection, package or lockfile change, env/secret
+        work, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration
+        Gate work.
+    - decisionId: content-admin-ai-adoption-boundary
+      decidedAt: "2026-06-21T16:46:31-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: require_two_step_human_adoption_to_formal_draft
+      appliesTo:
+        - content-admin-ai-generation-result-review-surface
+        - content-admin-ai-question-draft-adoption
+        - content-admin-ai-paper-draft-adoption
+        - content-admin-ai-audit-log-and-ai-call-log-redaction
+      implementationRule: >-
+        Future content_admin AI adoption must be two-step. A reviewer may adopt an isolated result only into an editable
+        formal draft first. The adopted draft must then use the existing formal validation and publish workflow before it
+        can become student-visible or usable by `mock_exam`. No AI result may become a published `question` or `paper`,
+        or move directly from isolated result to publish, in the same adoption action.
       approvalBoundary: >-
         This records a product and architecture decision only. It does not approve real Provider calls, prompt or
         provider payload exposure, raw generated AI content evidence, model output persistence, formal content writes,
@@ -5335,7 +5361,7 @@ discoveredIssueClosureBatch20260621:
         source implementation, service/UI implementation, package or lockfile change, env/secret work, Provider calls,
         browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
-  currentSerialScopeStatus: content_admin_ai_storage_model_decision_recorded
+  currentSerialScopeStatus: content_admin_ai_adoption_boundary_decision_recorded
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
