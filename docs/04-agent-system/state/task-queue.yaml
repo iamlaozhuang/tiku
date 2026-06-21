@@ -660,6 +660,65 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-human-review-decision.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-human-review-decision.md
     retryCount: 0
+  - id: record-paper-count-alias-policy-decision
+    title: Record paper count limit and question type alias policy decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    sourceStory: user-followup-approval-option-a-paper-count-alias-policy
+    dependencies:
+      - decide-paper-count-and-question-type-policy
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User selected option A for paper count and question type alias policy: confirm the 100-question limit and keep
+      legacy question_type aliases as compatibility inputs only, with delayed removal requiring separate approval. This
+      task may record the decision in docs/state only. No validator/service/UI implementation, no source or test
+      changes, no schema/migration/database work, no alias removal, no import exception above 100 questions, no
+      package/dependency change, no env/secret access, no Provider calls, no browser/e2e/dev-server runtime, no deploy,
+      PR, force-push, payment, external service, or Cost Calibration Gate is allowed.
+    targetClosureItem: paper question count and question type alias option A decision record
+    behaviorBoundary: paper::count_and_question_type_alias_policy_decision_record
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_followup_approval_record
+    taskKind: product_policy_decision_record
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_paper_count_alias_policy_decision_record
+    claimedAt: "2026-06-21T15:38:50-07:00"
+    validatedAt: "2026-06-21T15:40:03-07:00"
+    branch: codex/record-paper-count-alias-policy-decision
+    classification:
+      - docs_decision
+      - approval_blocked
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md
+      - docs/05-execution-logs/task-plans/2026-06-21-record-paper-count-alias-policy-decision.md
+      - docs/05-execution-logs/evidence/2026-06-21-record-paper-count-alias-policy-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-count-alias-policy-decision.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\01-requirements\traceability\2026-06-21-paper-question-count-and-type-policy.md docs\05-execution-logs\task-plans\2026-06-21-record-paper-count-alias-policy-decision.md docs\05-execution-logs\evidence\2026-06-21-record-paper-count-alias-policy-decision.md docs\05-execution-logs\audits-reviews\2026-06-21-record-paper-count-alias-policy-decision.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId record-paper-count-alias-policy-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId record-paper-count-alias-policy-decision -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-count-alias-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-count-alias-policy-decision.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-record-paper-count-alias-policy-decision.md
+    retryCount: 0
   - id: mistake-book-cookie-session-contract-repair
     title: Mistake book cookie session contract repair
     phase: student-experience-repair

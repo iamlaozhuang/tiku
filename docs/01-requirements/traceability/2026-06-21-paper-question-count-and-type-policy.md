@@ -6,7 +6,7 @@
 
 ## Decision
 
-This task closes the discovered `paper` question-count and legacy question-type-alias questions as a product policy. It does not change validators, services, schema, migrations, UI, tests, or runtime behavior.
+This task closes the discovered `paper` question-count and legacy question-type-alias questions as a product policy. Follow-up approval on 2026-06-21 selected option A, confirming this policy as the future implementation direction. It does not change validators, services, schema, migrations, UI, tests, or runtime behavior.
 
 The product policy is:
 
@@ -17,6 +17,7 @@ The product policy is:
 5. Formal `question` and `paper_question.question_snapshot` data must use only canonical `question_type` values.
 6. Legacy aliases are compatibility inputs only: `multiple_choice` maps to `multi_choice`, and `subjective` maps to `short_answer`.
 7. API responses, formal persisted content, new imports, authoring UI, and audit output must not emit legacy aliases after enforcement work is approved.
+8. The confirmed option A does not approve raising or lowering the 100-question limit, importing over-limit `paper` data, removing legacy alias compatibility, or implementing enforcement code without a separately approved follow-up task.
 
 ## Canonical Question Types
 

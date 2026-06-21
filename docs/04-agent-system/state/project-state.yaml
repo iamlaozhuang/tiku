@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
   lastKnownOriginMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
 currentTask:
-  id: record-content-admin-ai-human-review-decision
+  id: record-paper-count-alias-policy-decision
   status: ready_for_closeout
-  result: pass_content_admin_ai_human_review_gate_decision_record
-  claimedAt: "2026-06-21T15:34:10-07:00"
-  validatedAt: "2026-06-21T15:35:51-07:00"
+  result: pass_paper_count_alias_policy_decision_record
+  claimedAt: "2026-06-21T15:38:50-07:00"
+  validatedAt: "2026-06-21T15:40:03-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-content-admin-ai-human-review
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-human-review-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-human-review-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-human-review-decision.md
-  branch: codex/record-content-admin-ai-human-review-decision
+  sourceStory: user-followup-approval-option-a-paper-count-alias-policy
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-paper-count-alias-policy-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-count-alias-policy-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-count-alias-policy-decision.md
+  branch: codex/record-paper-count-alias-policy-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5023,6 +5023,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - security_review_required
+    - id: record-paper-count-alias-policy-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - runtime_verification_later
   approvalDecisions:
     - decisionId: org-auth-scope-schema-path
       decidedAt: "2026-06-21T15:26:12-07:00"
@@ -5064,6 +5069,27 @@ discoveredIssueClosureBatch20260621:
         source implementation, schema, migration, seed, database connection, package or lockfile change, env/secret
         work, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration
         Gate work.
+    - decisionId: paper-count-and-question-type-alias-policy
+      decidedAt: "2026-06-21T15:38:50-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: confirm_100_question_limit_and_legacy_alias_compatibility_policy
+      appliesTo:
+        - paper-validator-service-package
+        - paper-student-runtime-guard-package
+        - paper-admin-count-feedback-package
+        - question-type-alias-inventory-package
+        - question-type-alias-deprecation-package
+      implementationRule: >-
+        Future `paper` work must keep draft papers within 0 to 100 questions, published papers within 1 to 100
+        `paper_question` rows across all `paper_section` and `question_group` rows, and legacy `question_type` aliases
+        as compatibility inputs only. Formal persisted content, API responses, new imports, authoring UI, and audit
+        output must use canonical `question_type` values.
+      approvalBoundary: >-
+        This records a product policy decision only. It does not approve validator/service/UI implementation, source or
+        test changes, schema, migration, seed, database connection, alias removal, product exception imports above 100
+        questions, package or lockfile changes, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy,
+        PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
   currentSerialScopeStatus: all_seeded_tasks_reached_fixed_decision_or_blocked_closure
   boundary: >-
