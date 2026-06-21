@@ -6,7 +6,7 @@
 
 ## Decision
 
-For the current standard MVP and this discovered-issue closure batch, `content_admin` AI 出题 and AI 组卷 remain out of implementation scope.
+For the current standard MVP and this discovered-issue closure batch, `content_admin` AI 出题 and AI 组卷 remain out of implementation scope unless a later task receives explicit implementation approval. Follow-up product approval on 2026-06-21 selected option A as the future direction: AI may only create reviewable drafts or suggestions, and humans must confirm before any formal `question`, `paper`, publish, or `mock_exam` use.
 
 The product decision package is:
 
@@ -15,23 +15,25 @@ The product decision package is:
 3. If content_admin AI 出题 or AI 组卷 is approved later, generated output must first land in an isolated AI generation result or draft review surface, not directly in formal `question` or `paper` records.
 4. Formal adoption into `question` or `paper` requires a separate review action, audit trail, author attribution, validation, and security review.
 5. Real Provider calls, prompt/provider payloads, model output persistence, quota/cost policy, `.env` work, and production/staging execution remain blocked without fresh approval.
+6. AI 组卷 output may propose paper structure, candidate questions, or selection rationale only. It must not create a publishable `paper`, attach full paper content to evidence, or make the paper available to students until a `content_admin` reviewer explicitly accepts and validates it.
+7. AI 出题 output may propose question drafts only. It must not create formal `question`, `question_option`, `standard_answer`, `analysis`, `scoring_point`, `material`, or `question_group` records until a reviewer accepts the draft through a separately approved adoption workflow.
 
 ## Product Boundary
 
-| capability                            | current status | future entry condition                                                                                     |
-| ------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
-| content_admin AI 出题 button or route | blocked        | Product owner chooses a scope-change option and approves exact UI/API/source files.                        |
-| content_admin AI 组卷 button or route | blocked        | Product owner chooses a scope-change option and approves paper draft semantics.                            |
-| generated result storage              | blocked        | Requires data model or existing isolated result contract decision, redaction policy, and retention policy. |
-| formal `question` adoption            | blocked        | Requires manual review gate, audit_log entry, validation, duplicate detection, and source attribution.     |
-| formal `paper` adoption               | blocked        | Requires manual review gate, paper draft lifecycle rules, snapshot semantics, and publish validation.      |
-| real Provider execution               | blocked        | Requires Provider/env/cost approvals and redacted evidence rules.                                          |
+| capability                            | current status | future entry condition                                                                                          |
+| ------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| content_admin AI 出题 button or route | blocked        | Product owner approves exact UI/API/source files for draft/suggestion-only generation with manual adoption.     |
+| content_admin AI 组卷 button or route | blocked        | Product owner approves exact UI/API/source files for draft/suggestion-only paper planning with manual adoption. |
+| generated result storage              | blocked        | Requires data model or existing isolated result contract decision, redaction policy, and retention policy.      |
+| formal `question` adoption            | blocked        | Requires manual review gate, audit_log entry, validation, duplicate detection, and source attribution.          |
+| formal `paper` adoption               | blocked        | Requires manual review gate, paper draft lifecycle rules, snapshot semantics, and publish validation.           |
+| real Provider execution               | blocked        | Requires Provider/env/cost approvals and redacted evidence rules.                                               |
 
 ## Recommended Future Architecture
 
-Future implementation should be split into these reviewable tasks:
+Future implementation should be split into these reviewable tasks. Every implementation task must preserve the option A boundary: generation produces reviewable drafts or suggestions only; formal adoption remains a separate human action.
 
-1. Product UX/API contract package for `content_admin` AI generation request and review surfaces.
+1. Product UX/API contract package for `content_admin` AI generation request and review surfaces, including draft status and reviewer action semantics.
 2. Provider/env/cost approval package with redaction rules and stop conditions.
 3. Isolated generation result model or contract package, with no formal `question`/`paper` writes.
 4. Manual review and formal adoption package for `question` drafts.
