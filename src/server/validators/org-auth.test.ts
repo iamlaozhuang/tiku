@@ -24,10 +24,33 @@ describe("org auth validators", () => {
         authScopeType: "specified_nodes",
         profession: "monopoly",
         level: 3,
+        edition: "standard",
         accountQuota: 100,
         startsAt: new Date("2026-05-18T04:00:00.000Z"),
         expiresAt: new Date("2027-05-18T04:00:00.000Z"),
         organizationPublicIds: ["org_city_123", "org_district_456"],
+      },
+    });
+  });
+
+  it("normalizes advanced edition org auth input", () => {
+    expect(
+      normalizeCreateOrgAuthInput({
+        name: "advanced enterprise auth",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "current_and_descendants",
+        profession: "monopoly",
+        level: 3,
+        edition: "advanced",
+        accountQuota: 100,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+      }),
+    ).toMatchObject({
+      success: true,
+      value: {
+        edition: "advanced",
+        organizationPublicIds: [],
       },
     });
   });
@@ -40,6 +63,7 @@ describe("org auth validators", () => {
         authScopeType: "specified_nodes",
         profession: "monopoly",
         level: 3,
+        edition: "premium",
         accountQuota: 0,
         startsAt: "2027-05-18T04:00:00.000Z",
         expiresAt: "2026-05-18T04:00:00.000Z",

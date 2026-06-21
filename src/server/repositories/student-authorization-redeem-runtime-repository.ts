@@ -2,11 +2,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, or } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type {
+  EffectiveAuthUpgradeRow,
   EffectiveAuthorizationRepository,
   EffectiveOrgAuthRow,
   EffectivePersonalAuthRow,
@@ -34,6 +35,7 @@ export type StudentAuthorizationRedeemRuntimeRepositories = {
 
 const {
   employee,
+  authUpgrade,
   organization,
   orgAuth,
   orgAuthOrganization,
@@ -91,6 +93,7 @@ function createPostgresEffectiveAuthorizationRepository(
         .select({
           id: personalAuth.id,
           public_id: personalAuth.public_id,
+          edition: personalAuth.edition,
           profession: personalAuth.profession,
           level: personalAuth.level,
           starts_at: personalAuth.starts_at,
@@ -113,6 +116,7 @@ function createPostgresEffectiveAuthorizationRepository(
           organization_public_id: organization.public_id,
           organization_name: organization.name,
           organization_status: organization.status,
+          edition: orgAuth.edition,
           profession: orgAuth.profession,
           level: orgAuth.level,
           starts_at: orgAuth.starts_at,
@@ -140,6 +144,37 @@ function createPostgresEffectiveAuthorizationRepository(
         .orderBy(asc(orgAuth.expires_at));
 
       return rows satisfies EffectiveOrgAuthRow[];
+    },
+
+    async listAuthUpgradesByAuthorizationPublicIds(authorizationPublicIds) {
+      if (authorizationPublicIds.length === 0) {
+        return [];
+      }
+
+      const rows = await getDatabase()
+        .select({
+          personal_auth_public_id: personalAuth.public_id,
+          org_auth_public_id: orgAuth.public_id,
+          target_edition: authUpgrade.target_edition,
+          starts_at: authUpgrade.starts_at,
+          expires_at: authUpgrade.expires_at,
+          revoked_at: authUpgrade.revoked_at,
+          status: authUpgrade.status,
+        })
+        .from(authUpgrade)
+        .leftJoin(
+          personalAuth,
+          eq(personalAuth.id, authUpgrade.personal_auth_id),
+        )
+        .leftJoin(orgAuth, eq(orgAuth.id, authUpgrade.org_auth_id))
+        .where(
+          or(
+            inArray(personalAuth.public_id, authorizationPublicIds),
+            inArray(orgAuth.public_id, authorizationPublicIds),
+          ),
+        );
+
+      return rows satisfies EffectiveAuthUpgradeRow[];
     },
   };
 }

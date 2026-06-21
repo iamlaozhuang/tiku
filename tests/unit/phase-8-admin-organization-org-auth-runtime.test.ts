@@ -83,6 +83,9 @@ function createRepositories(): AdminOrganizationOrgAuthRuntimeRepositories {
             authScopeType: "current_and_descendants",
             profession: "monopoly",
             level: 3,
+            edition: "advanced",
+            effectiveEdition: "advanced",
+            upgradeStatus: "none",
             accountQuota: 100,
             usedQuota: 2,
             startsAt: now.toISOString(),
@@ -222,6 +225,9 @@ describe("phase 8 admin organization org auth runtime", () => {
         orgAuths: [
           {
             publicId: "org-auth-public-001",
+            edition: "advanced",
+            effectiveEdition: "advanced",
+            upgradeStatus: "none",
             organizationPublicIds: ["organization-public-001"],
           },
         ],

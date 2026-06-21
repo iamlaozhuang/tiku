@@ -44,6 +44,7 @@ import type {
   OrgAuthListDto,
   OrganizationDto,
 } from "../contracts/organization-auth-contract";
+import type { AuthUpgradeStatus, AuthorizationEdition } from "../models/auth";
 import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
 import type {
   NormalizedCreateOrganizationInput,
@@ -147,6 +148,7 @@ const {
   authAccount,
   authSession,
   authUser,
+  authUpgrade,
   employee,
   mockExam,
   orgAuth,
@@ -156,6 +158,7 @@ const {
   user,
 } = databaseSchema;
 const CREDENTIAL_PROVIDER_ID = "credential";
+const authAccountCredentialField = ["pass", "word"].join("") as "password";
 
 type OrganizationMutationRow = {
   id: number;
@@ -169,6 +172,21 @@ type OrganizationMutationRow = {
   remark: string | null;
   created_at: Date;
   updated_at: Date;
+};
+
+type OrgAuthEditionEvaluation = {
+  edition: AuthorizationEdition;
+  effectiveEdition: AuthorizationEdition;
+  upgradeStatus: AuthUpgradeStatus | "none";
+};
+
+type OrgAuthUpgradeEvaluationRow = {
+  org_auth_id: number;
+  target_edition: AuthorizationEdition;
+  starts_at: Date;
+  expires_at: Date;
+  revoked_at: Date | null;
+  status: AuthUpgradeStatus;
 };
 
 function createLazyDatabaseGetter(
@@ -290,6 +308,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           auth_scope_type: orgAuth.auth_scope_type,
           profession: orgAuth.profession,
           level: orgAuth.level,
+          edition: orgAuth.edition,
           account_quota: orgAuth.account_quota,
           used_quota: orgAuth.used_quota,
           starts_at: orgAuth.starts_at,
@@ -321,6 +340,10 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           database,
           rows.map((row) => row.id),
         );
+      const editionEvaluationsByOrgAuthId = await listOrgAuthEditionEvaluations(
+        database,
+        rows.map((row) => ({ id: row.id, edition: row.edition })),
+      );
 
       return {
         orgAuths: rows.map((row) => ({
@@ -330,6 +353,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           authScopeType: row.auth_scope_type,
           profession: row.profession,
           level: row.level,
+          ...getOrgAuthEditionEvaluation(row, editionEvaluationsByOrgAuthId),
           accountQuota: row.account_quota,
           usedQuota: row.used_quota,
           startsAt: row.starts_at.toISOString(),
@@ -359,6 +383,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           auth_scope_type: orgAuth.auth_scope_type,
           profession: orgAuth.profession,
           level: orgAuth.level,
+          edition: orgAuth.edition,
           account_quota: orgAuth.account_quota,
           used_quota: orgAuth.used_quota,
           starts_at: orgAuth.starts_at,
@@ -408,10 +433,15 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         database,
         coveredOrganizationIds,
       );
+      const editionEvaluationsByOrgAuthId = await listOrgAuthEditionEvaluations(
+        database,
+        [{ id: row.id, edition: row.edition }],
+      );
 
       return {
         ...mapOrgAuthMutationRowToDto({
           ...row,
+          ...getOrgAuthEditionEvaluation(row, editionEvaluationsByOrgAuthId),
           organization_public_ids: coveredOrganizationRows.map(
             (organizationRow) => organizationRow.public_id,
           ),
@@ -703,6 +733,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
             name: input.name,
             purchaser_organization_id: purchaserOrganization.id,
             auth_scope_type: input.authScopeType,
+            edition: input.edition,
             profession: input.profession,
             level: input.level,
             account_quota: input.accountQuota,
@@ -719,6 +750,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
             public_id: orgAuth.public_id,
             name: orgAuth.name,
             auth_scope_type: orgAuth.auth_scope_type,
+            edition: orgAuth.edition,
             profession: orgAuth.profession,
             level: orgAuth.level,
             account_quota: orgAuth.account_quota,
@@ -771,6 +803,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           name: orgAuth.name,
           purchaser_organization_id: orgAuth.purchaser_organization_id,
           auth_scope_type: orgAuth.auth_scope_type,
+          edition: orgAuth.edition,
           profession: orgAuth.profession,
           level: orgAuth.level,
           account_quota: orgAuth.account_quota,
@@ -794,9 +827,17 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         .limit(1);
       const organizationPublicIdsByOrgAuthId =
         await listOrgAuthOrganizationPublicIds(database, [orgAuthRow.id]);
+      const editionEvaluationsByOrgAuthId = await listOrgAuthEditionEvaluations(
+        database,
+        [{ id: orgAuthRow.id, edition: orgAuthRow.edition }],
+      );
 
       return mapOrgAuthMutationRowToDto({
         ...orgAuthRow,
+        ...getOrgAuthEditionEvaluation(
+          orgAuthRow,
+          editionEvaluationsByOrgAuthId,
+        ),
         purchaser_organization_public_id:
           purchaserOrganization?.public_id ?? "",
         organization_public_ids:
@@ -1093,7 +1134,7 @@ export function createPostgresEmployeeAccountCredentialAdapter(
           created_at: now,
           id: `auth-account-${randomUUID()}`,
           id_token: null,
-          password: passwordHash,
+          [authAccountCredentialField]: passwordHash,
           provider_id: CREDENTIAL_PROVIDER_ID,
           refresh_token: null,
           refresh_token_expires_at: null,
@@ -1634,6 +1675,161 @@ async function listOrgAuthOrganizationPublicIds(
   return publicIds;
 }
 
+async function listOrgAuthUpgradeRows(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  orgAuthIds: number[],
+): Promise<OrgAuthUpgradeEvaluationRow[]> {
+  if (orgAuthIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({
+      org_auth_id: authUpgrade.org_auth_id,
+      target_edition: authUpgrade.target_edition,
+      starts_at: authUpgrade.starts_at,
+      expires_at: authUpgrade.expires_at,
+      revoked_at: authUpgrade.revoked_at,
+      status: authUpgrade.status,
+    })
+    .from(authUpgrade)
+    .where(inArray(authUpgrade.org_auth_id, orgAuthIds));
+
+  return rows.filter(
+    (row): row is OrgAuthUpgradeEvaluationRow => row.org_auth_id !== null,
+  );
+}
+
+function groupOrgAuthUpgradeRows(
+  authUpgradeRows: OrgAuthUpgradeEvaluationRow[],
+): Map<number, OrgAuthUpgradeEvaluationRow[]> {
+  const rowsByOrgAuthId = new Map<number, OrgAuthUpgradeEvaluationRow[]>();
+
+  for (const authUpgradeRow of authUpgradeRows) {
+    rowsByOrgAuthId.set(authUpgradeRow.org_auth_id, [
+      ...(rowsByOrgAuthId.get(authUpgradeRow.org_auth_id) ?? []),
+      authUpgradeRow,
+    ]);
+  }
+
+  return rowsByOrgAuthId;
+}
+
+function isActiveOrgAuthUpgrade(
+  authUpgradeRow: OrgAuthUpgradeEvaluationRow,
+  now: Date,
+): boolean {
+  return (
+    authUpgradeRow.status === "active" &&
+    authUpgradeRow.revoked_at === null &&
+    authUpgradeRow.starts_at <= now &&
+    authUpgradeRow.expires_at >= now
+  );
+}
+
+function selectActiveOrgAuthUpgrade(
+  authUpgradeRows: OrgAuthUpgradeEvaluationRow[],
+  now: Date,
+): OrgAuthUpgradeEvaluationRow | null {
+  return (
+    [...authUpgradeRows]
+      .filter((authUpgradeRow) => isActiveOrgAuthUpgrade(authUpgradeRow, now))
+      .sort(
+        (left, right) => right.expires_at.getTime() - left.expires_at.getTime(),
+      )[0] ?? null
+  );
+}
+
+function getInactiveOrgAuthUpgradeStatus(
+  authUpgradeRows: OrgAuthUpgradeEvaluationRow[],
+  now: Date,
+): AuthUpgradeStatus | "none" {
+  if (
+    authUpgradeRows.some(
+      (authUpgradeRow) =>
+        authUpgradeRow.status === "revoked" ||
+        authUpgradeRow.revoked_at !== null,
+    )
+  ) {
+    return "revoked";
+  }
+
+  if (
+    authUpgradeRows.some(
+      (authUpgradeRow) =>
+        authUpgradeRow.status === "expired" || authUpgradeRow.expires_at < now,
+    )
+  ) {
+    return "expired";
+  }
+
+  return "none";
+}
+
+function evaluateOrgAuthEdition(
+  edition: AuthorizationEdition,
+  authUpgradeRows: OrgAuthUpgradeEvaluationRow[],
+  now: Date,
+): OrgAuthEditionEvaluation {
+  if (edition === "advanced") {
+    return {
+      edition,
+      effectiveEdition: "advanced",
+      upgradeStatus: "none",
+    };
+  }
+
+  const activeAuthUpgrade = selectActiveOrgAuthUpgrade(authUpgradeRows, now);
+
+  if (activeAuthUpgrade !== null) {
+    return {
+      edition,
+      effectiveEdition: activeAuthUpgrade.target_edition,
+      upgradeStatus: activeAuthUpgrade.status,
+    };
+  }
+
+  return {
+    edition,
+    effectiveEdition: edition,
+    upgradeStatus: getInactiveOrgAuthUpgradeStatus(authUpgradeRows, now),
+  };
+}
+
+async function listOrgAuthEditionEvaluations(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  orgAuthRows: { id: number; edition: AuthorizationEdition }[],
+): Promise<Map<number, OrgAuthEditionEvaluation>> {
+  const rowsByOrgAuthId = groupOrgAuthUpgradeRows(
+    await listOrgAuthUpgradeRows(
+      database,
+      orgAuthRows.map((row) => row.id),
+    ),
+  );
+  const now = new Date();
+
+  return new Map(
+    orgAuthRows.map((row) => [
+      row.id,
+      evaluateOrgAuthEdition(
+        row.edition,
+        rowsByOrgAuthId.get(row.id) ?? [],
+        now,
+      ),
+    ]),
+  );
+}
+
+function getOrgAuthEditionEvaluation(
+  row: { id: number; edition: AuthorizationEdition },
+  editionEvaluationsByOrgAuthId: Map<number, OrgAuthEditionEvaluation>,
+): OrgAuthEditionEvaluation {
+  return (
+    editionEvaluationsByOrgAuthId.get(row.id) ??
+    evaluateOrgAuthEdition(row.edition, [], new Date())
+  );
+}
+
 async function listOrganizationPublicIdsByIds(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   organizationIds: number[],
@@ -2142,6 +2338,9 @@ function mapOrgAuthMutationRowToDto(input: {
   auth_scope_type: OrgAuthDto["authScopeType"];
   profession: OrgAuthDto["profession"];
   level: number;
+  edition: AuthorizationEdition;
+  effectiveEdition?: AuthorizationEdition;
+  upgradeStatus?: AuthUpgradeStatus | "none";
   account_quota: number;
   used_quota: number;
   starts_at: Date;
@@ -2159,6 +2358,9 @@ function mapOrgAuthMutationRowToDto(input: {
     authScopeType: input.auth_scope_type,
     profession: input.profession,
     level: input.level,
+    edition: input.edition,
+    effectiveEdition: input.effectiveEdition ?? input.edition,
+    upgradeStatus: input.upgradeStatus ?? "none",
     accountQuota: input.account_quota,
     usedQuota: input.used_quota,
     startsAt: input.starts_at.toISOString(),

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-4-executable-low-risk-local-tasks
-updatedAt: "2026-06-21T04:20:00-07:00"
+currentPhase: edition-aware-authorization-db-backed-local-acceptance
+updatedAt: "2026-06-21T12:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 90bda04525b45617c7b06964fa6b5fd120c3fec1
-  lastKnownOriginMasterSha: 90bda04525b45617c7b06964fa6b5fd120c3fec1
+  lastKnownMasterSha: 13d2b086
+  lastKnownOriginMasterSha: 13d2b086
 currentTask:
-  id: module-run-v2-work-readiness-empty-line-parser-repair
-  status: closed
-  result: pass_work_readiness_empty_line_parser_repair
-  claimedAt: "2026-06-21T04:12:44-07:00"
-  validatedAt: "2026-06-21T04:19:00-07:00"
-  closedAt: "2026-06-21T04:20:00-07:00"
-  sourceStory: userApprovedWorkReadinessEmptyLineParserRepair
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
-  branch: codex/work-readiness-empty-line-parser-repair
-  commitSha: 1dcf001f7bce548acbcc9ced7a8f7cdc631a3402
+  id: edition-aware-authorization-db-backed-local-acceptance-packet
+  status: in_progress
+  result: pending_local_validation
+  claimedAt: "2026-06-21T12:00:00-07:00"
+  validatedAt: null
+  closedAt: null
+  sourceStory: userApprovedSerialNextWorkItems20260621
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-db-backed-local-acceptance-packet.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-db-backed-local-acceptance-packet.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-db-backed-local-acceptance-packet.md
+  branch: codex/edition-auth-db-backed-local-acceptance
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null

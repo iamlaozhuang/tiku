@@ -252,7 +252,10 @@ describe("phase 8 student authorization redeem runtime", () => {
               canViewOrganizationTrainingSummary: false,
             },
             contextDisplayStatus: "display_only",
+            displayStatus: "active",
+            edition: "standard",
             effectiveEdition: "standard",
+            expiresAt: "2027-05-01T04:00:00.000Z",
             level: 3,
             organizationPublicId: null,
             ownerPublicId: "user_public_student_123",
@@ -260,6 +263,7 @@ describe("phase 8 student authorization redeem runtime", () => {
             profession: "monopoly",
             quotaOwnerPublicId: "user_public_student_123",
             quotaOwnerType: "personal",
+            upgradeStatus: "none",
           },
           {
             authorizationPublicId: "org_auth_public_123",
@@ -274,7 +278,10 @@ describe("phase 8 student authorization redeem runtime", () => {
               canViewOrganizationTrainingSummary: false,
             },
             contextDisplayStatus: "display_only",
+            displayStatus: "active",
+            edition: "standard",
             effectiveEdition: "standard",
+            expiresAt: "2027-06-01T04:00:00.000Z",
             level: 3,
             organizationPublicId: "org_public_123",
             ownerPublicId: "org_public_123",
@@ -282,11 +289,91 @@ describe("phase 8 student authorization redeem runtime", () => {
             profession: "monopoly",
             quotaOwnerPublicId: "org_public_123",
             quotaOwnerType: "organization",
+            upgradeStatus: "none",
           },
         ],
       },
     });
     expect(JSON.stringify(responsePayload)).not.toContain('"id":');
+  });
+
+  it("derives advanced effective edition from active authorization upgrades", async () => {
+    const upgradedEffectiveAuthorizationRepository = {
+      async listPersonalAuthsByUserPublicId(userPublicId: string) {
+        expect(userPublicId).toBe("user_public_student_123");
+
+        return [createPersonalAuth()];
+      },
+      async listOrgAuthsByUserPublicId(userPublicId: string) {
+        expect(userPublicId).toBe("user_public_student_123");
+
+        return [];
+      },
+      async listAuthUpgradesByAuthorizationPublicIds(publicIds: string[]) {
+        expect(publicIds).toEqual(["personal_auth_public_123"]);
+
+        return [
+          {
+            personal_auth_public_id: "personal_auth_public_123",
+            org_auth_public_id: null,
+            target_edition: "advanced" as const,
+            starts_at: startsAt,
+            expires_at: expiresAt,
+            revoked_at: null,
+            status: "active" as const,
+          },
+        ];
+      },
+    };
+    const handlers = createStudentAuthorizationRedeemRuntimeRouteHandlers({
+      now: () => now,
+      sessionService: {
+        async getCurrentSession(input) {
+          return input.authorization === `${bearerScheme} ${sessionCredential}`
+            ? createStudentSession()
+            : {
+                code: 401001,
+                message: "User session is required.",
+                data: null,
+              };
+        },
+      },
+      effectiveAuthorizationRepository:
+        upgradedEffectiveAuthorizationRepository,
+      redeemCodeAuthorizationRepository: {
+        async findRedeemCodeByCode() {
+          throw new Error("redeem should not be called by authorization list");
+        },
+        async redeemCodeForUser() {
+          throw new Error("redeem should not be called by authorization list");
+        },
+        async listPersonalAuthsByUserPublicId() {
+          throw new Error("personal auth list should not be called here");
+        },
+      },
+    });
+
+    const response = await handlers.authorizations.GET(
+      new Request("http://localhost/api/v1/authorizations", {
+        headers: createRequestAuthHeaders(),
+      }),
+    );
+
+    await expect(readJson(response)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        authorizationContexts: [
+          {
+            authorizationPublicId: "personal_auth_public_123",
+            authorizationSource: "personal_auth",
+            edition: "standard",
+            effectiveEdition: "advanced",
+            upgradeStatus: "active",
+            blockedReason: "production_enablement_blocked",
+          },
+        ],
+      },
+    });
   });
 
   it("uses the session cookie for authorization routes without a request auth value", async () => {

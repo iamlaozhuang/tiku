@@ -1,8 +1,15 @@
-import type { AuthStatus, Profession } from "../models/auth";
+import type {
+  AuthStatus,
+  AuthUpgradeStatus,
+  AuthorizationEdition,
+  Profession,
+} from "../models/auth";
 
 export type AuthorizationType = "personal_auth" | "org_auth";
 
-export type EffectiveAuthorizationEdition = "standard" | "advanced";
+export type EffectiveAuthorizationEdition = AuthorizationEdition;
+
+export type EffectiveAuthorizationUpgradeStatus = AuthUpgradeStatus | "none";
 
 export type EffectiveAuthorizationOwnerType =
   | "personal"
@@ -48,7 +55,11 @@ export type EffectiveAuthorizationContextDto = {
   profession: Profession;
   level: number;
   contextDisplayStatus: EffectiveAuthorizationContextDisplayStatus;
+  edition?: EffectiveAuthorizationEdition;
   effectiveEdition: EffectiveAuthorizationEdition;
+  upgradeStatus?: EffectiveAuthorizationUpgradeStatus;
+  expiresAt?: string;
+  displayStatus?: AuthStatus;
   authorizationSource: AuthorizationType;
   authorizationPublicId: string;
   ownerType: EffectiveAuthorizationOwnerType;

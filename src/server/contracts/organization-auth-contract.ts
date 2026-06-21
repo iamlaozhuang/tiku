@@ -1,6 +1,8 @@
 import type {
   AuthScopeType,
   AuthStatus,
+  AuthUpgradeStatus,
+  AuthorizationEdition,
   OrgTier,
   Profession,
 } from "../models/auth";
@@ -38,6 +40,9 @@ export type OrgAuthDto = {
   authScopeType: AuthScopeType;
   profession: Profession;
   level: number;
+  edition?: AuthorizationEdition;
+  effectiveEdition?: AuthorizationEdition;
+  upgradeStatus?: AuthUpgradeStatus | "none";
   accountQuota: number;
   usedQuota: number;
   startsAt: string;

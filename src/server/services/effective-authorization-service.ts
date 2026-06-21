@@ -9,9 +9,11 @@ import type {
   EffectiveAuthorizationContextDto,
   EffectiveAuthorizationEdition,
   EffectiveAuthorizationListDto,
+  EffectiveAuthorizationUpgradeStatus,
 } from "../contracts/effective-authorization-contract";
 import { mapEffectiveAuthorizationListToApi } from "../mappers/effective-authorization-mapper";
 import type {
+  EffectiveAuthUpgradeRow,
   EffectiveAuthorizationRepository,
   EffectiveOrgAuthRow,
   EffectivePersonalAuthRow,
@@ -58,6 +60,12 @@ type EffectiveAuthorizationEditionRow = {
   effective_edition?: EffectiveAuthorizationEdition;
 };
 
+type EffectiveAuthorizationEditionEvaluation = {
+  edition: EffectiveAuthorizationEdition;
+  effectiveEdition: EffectiveAuthorizationEdition;
+  upgradeStatus: EffectiveAuthorizationUpgradeStatus;
+};
+
 function isActiveBetween(startsAt: Date, expiresAt: Date, now: Date): boolean {
   return startsAt <= now && expiresAt >= now;
 }
@@ -86,6 +94,139 @@ function getEffectiveEdition(
   return (
     (authorization as EffectiveAuthorizationEditionRow).effective_edition ??
     "standard"
+  );
+}
+
+function getSourceEdition(
+  authorization: EffectivePersonalAuthRow | EffectiveOrgAuthRow,
+): EffectiveAuthorizationEdition {
+  return authorization.edition ?? "standard";
+}
+
+function getUpgradeAuthorizationPublicId(
+  authUpgrade: EffectiveAuthUpgradeRow,
+): string | null {
+  return authUpgrade.personal_auth_public_id ?? authUpgrade.org_auth_public_id;
+}
+
+function isActiveAuthUpgrade(
+  authUpgrade: EffectiveAuthUpgradeRow,
+  now: Date,
+): boolean {
+  return (
+    authUpgrade.status === "active" &&
+    authUpgrade.revoked_at === null &&
+    isActiveBetween(authUpgrade.starts_at, authUpgrade.expires_at, now)
+  );
+}
+
+function selectActiveAuthUpgrade(
+  authUpgrades: EffectiveAuthUpgradeRow[],
+  now: Date,
+): EffectiveAuthUpgradeRow | null {
+  return (
+    [...authUpgrades]
+      .filter((authUpgrade) => isActiveAuthUpgrade(authUpgrade, now))
+      .sort(
+        (left, right) => right.expires_at.getTime() - left.expires_at.getTime(),
+      )[0] ?? null
+  );
+}
+
+function getInactiveAuthUpgradeStatus(
+  authUpgrades: EffectiveAuthUpgradeRow[],
+  now: Date,
+): EffectiveAuthorizationUpgradeStatus {
+  if (
+    authUpgrades.some(
+      (authUpgrade) =>
+        authUpgrade.status === "revoked" || authUpgrade.revoked_at !== null,
+    )
+  ) {
+    return "revoked";
+  }
+
+  if (
+    authUpgrades.some(
+      (authUpgrade) =>
+        authUpgrade.status === "expired" || authUpgrade.expires_at < now,
+    )
+  ) {
+    return "expired";
+  }
+
+  return "none";
+}
+
+function evaluateAuthorizationEdition(
+  authorization: EffectivePersonalAuthRow | EffectiveOrgAuthRow,
+  authUpgrades: EffectiveAuthUpgradeRow[],
+  now: Date,
+): EffectiveAuthorizationEditionEvaluation {
+  const edition = getSourceEdition(authorization);
+
+  if (edition === "advanced") {
+    return {
+      edition,
+      effectiveEdition: "advanced",
+      upgradeStatus: "none",
+    };
+  }
+
+  const activeAuthUpgrade = selectActiveAuthUpgrade(authUpgrades, now);
+
+  if (activeAuthUpgrade !== null) {
+    return {
+      edition,
+      effectiveEdition: activeAuthUpgrade.target_edition,
+      upgradeStatus: activeAuthUpgrade.status,
+    };
+  }
+
+  return {
+    edition,
+    effectiveEdition: getEffectiveEdition(authorization),
+    upgradeStatus: getInactiveAuthUpgradeStatus(authUpgrades, now),
+  };
+}
+
+function groupAuthUpgradesByAuthorizationPublicId(
+  authUpgrades: EffectiveAuthUpgradeRow[],
+): Map<string, EffectiveAuthUpgradeRow[]> {
+  const groupedAuthUpgrades = new Map<string, EffectiveAuthUpgradeRow[]>();
+
+  for (const authUpgrade of authUpgrades) {
+    const authorizationPublicId = getUpgradeAuthorizationPublicId(authUpgrade);
+
+    if (authorizationPublicId === null) {
+      continue;
+    }
+
+    groupedAuthUpgrades.set(authorizationPublicId, [
+      ...(groupedAuthUpgrades.get(authorizationPublicId) ?? []),
+      authUpgrade,
+    ]);
+  }
+
+  return groupedAuthUpgrades;
+}
+
+async function listAuthUpgradesByAuthorizationPublicId(
+  effectiveAuthorizationRepository: EffectiveAuthorizationRepository,
+  authorizationPublicIds: string[],
+): Promise<Map<string, EffectiveAuthUpgradeRow[]>> {
+  if (
+    authorizationPublicIds.length === 0 ||
+    effectiveAuthorizationRepository.listAuthUpgradesByAuthorizationPublicIds ===
+      undefined
+  ) {
+    return new Map();
+  }
+
+  return groupAuthUpgradesByAuthorizationPublicId(
+    await effectiveAuthorizationRepository.listAuthUpgradesByAuthorizationPublicIds(
+      authorizationPublicIds,
+    ),
   );
 }
 
@@ -134,15 +275,20 @@ function createOrgCapabilities(
 function mapPersonalAuthToAuthorizationContext(
   userPublicId: string,
   personalAuth: EffectivePersonalAuthRow,
+  editionEvaluation: EffectiveAuthorizationEditionEvaluation,
   isProductionEnablementConfigured: boolean,
 ): EffectiveAuthorizationContextDto {
-  const effectiveEdition = getEffectiveEdition(personalAuth);
+  const { edition, effectiveEdition, upgradeStatus } = editionEvaluation;
 
   return {
     profession: personalAuth.profession,
     level: personalAuth.level,
     contextDisplayStatus: "display_only",
+    edition,
     effectiveEdition,
+    upgradeStatus,
+    expiresAt: personalAuth.expires_at.toISOString(),
+    displayStatus: personalAuth.status,
     authorizationSource: "personal_auth",
     authorizationPublicId: personalAuth.public_id,
     ownerType: "personal",
@@ -163,15 +309,20 @@ function mapPersonalAuthToAuthorizationContext(
 
 function mapOrgAuthToAuthorizationContext(
   orgAuth: EffectiveOrgAuthRow,
+  editionEvaluation: EffectiveAuthorizationEditionEvaluation,
   isProductionEnablementConfigured: boolean,
 ): EffectiveAuthorizationContextDto {
-  const effectiveEdition = getEffectiveEdition(orgAuth);
+  const { edition, effectiveEdition, upgradeStatus } = editionEvaluation;
 
   return {
     profession: orgAuth.profession,
     level: orgAuth.level,
     contextDisplayStatus: "display_only",
+    edition,
     effectiveEdition,
+    upgradeStatus,
+    expiresAt: orgAuth.expires_at.toISOString(),
+    displayStatus: orgAuth.status,
     authorizationSource: "org_auth",
     authorizationPublicId: orgAuth.public_id,
     ownerType: "organization",
@@ -212,6 +363,16 @@ export function createEffectiveAuthorizationService(
       const effectiveOrgAuths = orgAuths.filter((orgAuth) =>
         isEffectiveOrgAuth(orgAuth, now),
       );
+      const authUpgradesByAuthorizationPublicId =
+        await listAuthUpgradesByAuthorizationPublicId(
+          effectiveAuthorizationRepository,
+          [
+            ...effectivePersonalAuths.map(
+              (personalAuth) => personalAuth.public_id,
+            ),
+            ...effectiveOrgAuths.map((orgAuth) => orgAuth.public_id),
+          ],
+        );
       const isProductionEnablementConfigured =
         capabilityConfig.isProductionEnablementConfigured;
 
@@ -225,12 +386,25 @@ export function createEffectiveAuthorizationService(
             mapPersonalAuthToAuthorizationContext(
               userContext.userPublicId,
               personalAuth,
+              evaluateAuthorizationEdition(
+                personalAuth,
+                authUpgradesByAuthorizationPublicId.get(
+                  personalAuth.public_id,
+                ) ?? [],
+                now,
+              ),
               isProductionEnablementConfigured,
             ),
           ),
           ...effectiveOrgAuths.map((orgAuth) =>
             mapOrgAuthToAuthorizationContext(
               orgAuth,
+              evaluateAuthorizationEdition(
+                orgAuth,
+                authUpgradesByAuthorizationPublicId.get(orgAuth.public_id) ??
+                  [],
+                now,
+              ),
               isProductionEnablementConfigured,
             ),
           ),

@@ -1,6 +1,8 @@
 import {
+  authorizationEditionValues,
   authScopeTypeValues,
   professionValues,
+  type AuthorizationEdition,
   type AuthScopeType,
   type Profession,
 } from "../models/auth";
@@ -11,6 +13,7 @@ export type NormalizedCreateOrgAuthInput = {
   authScopeType: AuthScopeType;
   profession: Profession;
   level: number;
+  edition: AuthorizationEdition;
   accountQuota: number;
   startsAt: Date;
   expiresAt: Date;
@@ -72,6 +75,19 @@ function isProfession(value: unknown): value is Profession {
   );
 }
 
+function normalizeAuthorizationEdition(
+  value: unknown,
+): AuthorizationEdition | null {
+  if (value === undefined) {
+    return "standard";
+  }
+
+  return typeof value === "string" &&
+    authorizationEditionValues.includes(value as AuthorizationEdition)
+    ? (value as AuthorizationEdition)
+    : null;
+}
+
 function normalizeOrganizationPublicIds(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -98,6 +114,7 @@ export function normalizeCreateOrgAuthInput(
     input.purchaserOrganizationPublicId,
   );
   const level = normalizePositiveInteger(input.level);
+  const edition = normalizeAuthorizationEdition(input.edition);
   const accountQuota = normalizePositiveInteger(input.accountQuota);
   const startsAt = normalizeDate(input.startsAt);
   const expiresAt = normalizeDate(input.expiresAt);
@@ -111,6 +128,7 @@ export function normalizeCreateOrgAuthInput(
     !isAuthScopeType(input.authScopeType) ||
     !isProfession(input.profession) ||
     level === null ||
+    edition === null ||
     accountQuota === null ||
     startsAt === null ||
     expiresAt === null ||
@@ -132,6 +150,7 @@ export function normalizeCreateOrgAuthInput(
       authScopeType: input.authScopeType,
       profession: input.profession,
       level,
+      edition,
       accountQuota,
       startsAt,
       expiresAt,
