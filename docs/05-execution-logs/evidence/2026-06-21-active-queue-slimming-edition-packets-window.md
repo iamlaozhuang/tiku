@@ -39,12 +39,12 @@ result: pass
 | `npm.cmd run typecheck`                                                                                                              | pass    | `tsc --noEmit` completed.                                                                  |
 | `git diff --check`                                                                                                                   | pass    | Whitespace check passed.                                                                   |
 | `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                             | pass    | Scope and sensitive evidence scans passed.                                                 |
-| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                        | pending | To run after closeout state update.                                                        |
+| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                        | pass    | Final rerun passed after commit hash backfill.                                             |
 | `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-packets-window`                               | pending | To run after commit.                                                                       |
 
 ## Closeout Status
 
-- Commit: to be recorded after local commit.
+- Commit: `2cc316b8` (`docs(agent): slim edition packet queue window`).
 - FF merge to `master`: not yet run.
 - Push `origin/master`: not yet run.
 - Merged branch cleanup: not yet run.
