@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This plan closes the discovered content/ops admin experience gaps by converting them into scoped follow-up packages. It does not change source code, routes, services, contracts, tests, schema, data, or runtime behavior.
+This plan closes the discovered content/ops admin experience gaps by converting them into scoped follow-up packages. Follow-up approval on 2026-06-21 selected option A: use the recommended split order for later low-risk local implementation packages, while keeping browser/dev-server/e2e runtime proof behind later approval. This plan does not change source code, routes, services, contracts, tests, schema, data, or runtime behavior.
 
 ## Closure Workstreams
 
@@ -79,6 +79,8 @@ Implementation boundaries:
 
 ## Recommended Execution Order
 
+The option A approval confirms this order as the default follow-up sequence. Each item still needs its own task plan, allowed-file scope, validation evidence, audit review, and independent commit before implementation starts.
+
 1. `close-question-material-binding-experience`
 2. `close-question-reference-and-material-lock-surface`
 3. `close-kn-recommendation-review-experience`
@@ -95,3 +97,4 @@ Implementation boundaries:
 - Browser/dev-server/e2e runtime proof remains blocked without fresh approval.
 - Schema, migration, seed, database, package, lockfile, dependency, Provider, `.env`, deploy, PR, force-push, payment, external-service, and Cost Calibration Gate work remain blocked.
 - Follow-up implementation tasks must each create their own task plan, evidence, audit review, commit, and verification record.
+- Security-sensitive follow-up items, especially `redeem_code`, `organization`, `employee`, and `kn_recommendation` work, must carry explicit redaction and security review evidence before closure.

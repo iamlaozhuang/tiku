@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
   lastKnownOriginMasterSha: 745b4d5b98ac8586fb1080d7cc9a23e7b878f7c3
 currentTask:
-  id: record-paper-count-alias-policy-decision
+  id: record-admin-experience-gap-sequencing-decision
   status: ready_for_closeout
-  result: pass_paper_count_alias_policy_decision_record
-  claimedAt: "2026-06-21T15:38:50-07:00"
-  validatedAt: "2026-06-21T15:40:03-07:00"
+  result: pass_admin_experience_gap_sequencing_decision_record
+  claimedAt: "2026-06-21T15:43:34-07:00"
+  validatedAt: "2026-06-21T15:44:52-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-paper-count-alias-policy
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-paper-count-alias-policy-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-count-alias-policy-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-count-alias-policy-decision.md
-  branch: codex/record-paper-count-alias-policy-decision
+  sourceStory: user-followup-approval-option-a-admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-admin-experience-gap-sequencing-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-admin-experience-gap-sequencing-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-admin-experience-gap-sequencing-decision.md
+  branch: codex/record-admin-experience-gap-sequencing-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5028,6 +5028,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - runtime_verification_later
+    - id: record-admin-experience-gap-sequencing-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - runtime_verification_later
   approvalDecisions:
     - decisionId: org-auth-scope-schema-path
       decidedAt: "2026-06-21T15:26:12-07:00"
@@ -5090,6 +5095,32 @@ discoveredIssueClosureBatch20260621:
         test changes, schema, migration, seed, database connection, alias removal, product exception imports above 100
         questions, package or lockfile changes, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy,
         PR, force-push, payment, external service, or Cost Calibration Gate work.
+    - decisionId: admin-experience-gap-sequencing
+      decidedAt: "2026-06-21T15:43:34-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: follow_split_order_low_risk_local_implementation_before_runtime_proof
+      appliesTo:
+        - close-question-material-binding-experience
+        - close-question-reference-and-material-lock-surface
+        - close-kn-recommendation-review-experience
+        - close-redeem-code-detail-contract
+        - close-redeem-code-detail-ui
+        - close-redeem-code-audit-redaction
+        - close-organization-detail-management
+        - close-employee-import-management
+        - close-employee-transfer-unbind-management
+        - close-organization-management-runtime-proof
+      implementationRule: >-
+        Future content_admin and ops_admin gap closure work should follow the recorded split order: question/material
+        binding first, redeem_code detail second, organization and employee management third, and browser/dev-server/e2e
+        runtime proof last. Each implementation package must be separately scoped, planned, validated, evidenced, and
+        committed.
+      approvalBoundary: >-
+        This records sequencing approval only. It does not approve immediate source implementation in this task, browser
+        or Playwright/e2e runtime, dev server, schema, migration, seed, database connection, package or lockfile change,
+        env/secret work, Provider calls, deploy, PR, force-push, payment, external service, or Cost Calibration Gate
+        work. Security-sensitive follow-up tasks must still carry security review evidence before closure.
   nextCandidateTaskId: null
   currentSerialScopeStatus: all_seeded_tasks_reached_fixed_decision_or_blocked_closure
   boundary: >-
