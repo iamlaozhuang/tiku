@@ -11,7 +11,7 @@ Govern advanced edition `authorization`, `redeem_code`, and quota state through 
 ## Acceptance Scenario
 
 1. Operations admin opens the authorization and quota governance surface.
-2. The system shows safe summaries for `authorization`, `redeem_code`, and quota.
+2. The system shows safe summaries for `authorization`, `redeem_code`, original `edition`, computed `effectiveEdition`, upgrade state, and quota.
 3. The admin performs an allowed governance action.
 4. The system records the action in `audit_log`.
 5. AI consumption summaries reference redacted `ai_call_log` data when relevant.
@@ -19,6 +19,7 @@ Govern advanced edition `authorization`, `redeem_code`, and quota state through 
 ## Data Boundary
 
 - Cleartext `redeem_code` must not be shown in ordinary operations views or evidence.
+- `auth_upgrade` is the governed source for standard-to-advanced upgrade state; source authorization is not overwritten by upgrade actions.
 - Production quota point defaults remain undecided until Cost Calibration Gate approval.
 - Payment, external-service integration, provider cost measurement, and env/secret work remain out of scope.
 

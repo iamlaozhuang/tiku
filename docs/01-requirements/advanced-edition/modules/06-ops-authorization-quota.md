@@ -13,12 +13,14 @@ Define platform operations governance for `authorization`, `redeem_code`, and qu
 ## Scope
 
 - Platform operations governs `authorization` upgrades, `redeem_code` state, quota packages, quota adjustments, and quota summaries.
+- Platform operations can issue personal or organization authorization as `standard | advanced` and can govern standard-to-advanced `auth_upgrade` state.
 - Governed operations must write `audit_log`.
 - AI consumption summaries may link to redacted `ai_call_log` data.
 
 ## Acceptance Boundaries
 
 - Operations can inspect safe quota and authorization summaries.
+- Operations summaries show original `edition`, computed `effectiveEdition`, upgrade status, and quota owner without exposing sensitive data.
 - Cleartext `redeem_code` is not shown in ordinary operations views or evidence.
 - Quota changes are auditable.
 - Production quota point defaults remain undecided until Cost Calibration Gate is approved.

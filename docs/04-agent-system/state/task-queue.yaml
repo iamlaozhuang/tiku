@@ -1,5 +1,143 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: edition-aware-authorization-docs-decision-package
+    title: Edition-aware authorization docs decision package
+    phase: requirements-architecture-decision
+    sourceStory: userConfirmedEditionAwareAuthorizationSixDecisions
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested implementing the documentation-only plan for edition-aware authorization after confirming six
+      product decisions: direct advanced issuance is allowed, original authorization edition belongs on the
+      authorization source, upgrades belong in auth_upgrade, personal redeem_code operations cover standard activation,
+      advanced activation, and edition_upgrade, organization authorization supports direct standard or advanced creation
+      plus standard-to-advanced upgrade, quota ownership follows personal or organization context, and legacy
+      unversioned authorization data is interpreted as standard. Scope is limited to docs-only requirements, ADR,
+      traceability, acceptance matrix, task plan, evidence, audit review, and task state updates. This approval does not
+      authorize src, tests, e2e, scripts, schema, drizzle, migration, env, provider, dependency, payment, deployment,
+      PR, force push, real provider/model calls, Cost Calibration Gate, or destructive database work.
+    targetExperienceChain: edition-aware-authorization
+    targetClosureItem: edition-aware authorization requirements and ADR decision package
+    behaviorBoundary: docs-state::edition_aware_authorization_decision_package
+    useCaseIds:
+      - UC-ADV-AUTH-CONTEXT-01
+      - UC-ADV-OPS-AUTH-QUOTA-01
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_requirement_decision
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: in_progress
+    claimedAt: "2026-06-21T00:25:39-07:00"
+    branch: codex/docs-edition-aware-authorization
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/01-authorization-context.md
+      - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+      - docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/01-requirements/traceability/unified-edition-delta-matrix.md
+      - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
+      - docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-docs.md
+      - docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-docs.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-docs.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/**
+      - docs/01-requirements/traceability/**
+      - docs/01-requirements/use-cases/**
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product runtime source edits
+      - UI/browser/e2e work or dev server validation
+      - schema/drizzle/migration changes
+      - database migration execution
+      - destructive local DB writes
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - requirements_traceability
+      - architecture_decision_record
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: git status --short --branch
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npm.cmd run format:check
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: rg -n "edition|effectiveEdition|auth_upgrade|redeem_code_type|quotaOwnerType" docs/01-requirements docs/02-architecture/adr docs/05-execution-logs
+      - phase: post_edit
+        command: targeted redacted-evidence sensitive-pattern scan over docs-only changes
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-docs-decision-package
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-docs-decision-package
+    validationCommands:
+      - git status --short --branch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npm.cmd run format:check
+      - git diff --check
+      - rg -n "edition|effectiveEdition|auth_upgrade|redeem_code_type|quotaOwnerType" docs/01-requirements docs/02-architecture/adr docs/05-execution-logs
+      - targeted redacted-evidence sensitive-pattern scan over docs-only changes
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-docs-decision-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-docs-decision-package
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_docs_only_plan_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        blockedReason: no_task_level_fresh_approval_for_remote_closeout
+      push:
+        approved: false
+        target: origin/master
+        blockedReason: no_task_level_fresh_approval_for_remote_closeout
+      cleanup:
+        deleteShortBranch: false
+        blockedReason: branch_kept_for_local_review_until_merge_push_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-docs.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-docs.md
+    retryCount: 0
   - id: queue-health-carryover-archive-2026-06-20
     title: Queue Health Carryover Archive 2026 06 20
     phase: stage-1-queue-health-baseline

@@ -69,6 +69,21 @@ considered later if a queued task grants exact `allowedFiles`, gates, evidence, 
 | `UC-GATE-PROVIDER-STAGING-EXECUTION`           | Provider and staging execution gate              | `CAP-GATE-PROVIDER-STAGING-EXECUTION`      | `GATE-B178-EV`, `GATE-B178-AUD`, `GATE-B180-EV`, `GATE-B180-AUD`, `ADV-SPEC-03`                    | `blocked_gate`              | `auditor`, `admin`              | Future approval package requirements are recorded without approving execution.                      | `blocked_gate_only`            | Real provider call, model request, quota use, env/secret, staging/prod/cloud/deploy, payment.       | `CFX-PROVIDER-001`                                 | `true`       | `false`                       | Blocked gate sources cannot authorize provider, staging, deploy, or Cost Calibration work.       |
 | `UC-GATE-CURRENT-CHECKPOINT`                   | Current checkpoint finding boundary              | `CAP-GATE-CURRENT-CHECKPOINT`              | `GATE-CHECK-EV`, `GATE-CHECK-AUD`, `PLAN-UNIFIED-01`, `PLAN-UNIFIED-02`                            | `blocked_gate`              | `auditor`, `developer`          | Current implementation findings remain audit context only until a later scoped task is approved.    | `audit_reference_only`         | Code audit, code fixes, implementation, e2e, env/secret, provider, deploy remain blocked.           | `CFX-CHECKPOINT-001`                               | `true`       | `false`                       | This row cannot rewrite requirements or trigger source changes in this task.                     |
 
+## Edition-Aware Authorization Supplement
+
+The following clarification applies to `UC-STD-PERSONAL-AUTH-REDEEM`, `UC-STD-ORG-AUTH-MANAGED`,
+`UC-ADV-AUTH-CONTEXT-UPGRADE`, and `UC-ADV-OPS-AUTH-QUOTA`.
+
+- Personal authorization must support standard activation, advanced activation, and standard-to-advanced
+  `edition_upgrade` through the shared `redeem_code` governance surface.
+- Organization authorization must support direct `standard | advanced` creation and standard-to-advanced manual
+  upgrade through `auth_upgrade.source_type = ops_manual`.
+- Service-layer authorization checks use computed `effectiveEdition`; frontend visibility and menu state are not
+  authorization boundaries.
+- Existing unversioned `personal_auth`, `org_auth`, and `redeem_code` data is interpreted as standard for compatibility.
+- Future implementation remains blocked by the declared auth model, schema, API, service, UI, quota, env/secret,
+  provider, deploy, payment, and Cost Calibration gates until scoped approval exists.
+
 ## Catalog Use Rules
 
 1. Later technical matrix or code audit tasks must cite `useCaseId`, `capabilityId`, and `sourceId` values.

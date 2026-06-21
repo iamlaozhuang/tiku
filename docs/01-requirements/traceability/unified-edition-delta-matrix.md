@@ -54,6 +54,18 @@ deployment, payment, schema, migration, e2e, PR, force-push, or Cost Calibration
 | `DELTA-PROVIDER-STAGING-GATE`    | `CAP-GATE-PROVIDER-STAGING-EXECUTION`, `CAP-STD-AI-SCORING-EXPLANATION`, `CAP-STD-RAG-KNOWLEDGE-BASE`, `CAP-ADV-AI-TASK-DOMAIN`, `CAP-ADV-OPS-AUTH-QUOTA`                                                     | `UC-GATE-PROVIDER-STAGING-EXECUTION`, `UC-STD-AI-SCORING-EXPLANATION`, `UC-STD-RAG-KNOWLEDGE-BASE`, `UC-ADV-AI-TASK-LIFECYCLE`, `UC-ADV-OPS-AUTH-QUOTA`                                                                   | `GATE-B178-EV`, `GATE-B178-AUD`, `GATE-B180-EV`, `GATE-B180-AUD`, `STD-REQ-04`, `STD-REQ-05`, `ADV-SPEC-03`, `ADV-MOD-02`, `ADV-STORY-04`                          | Standard AI/RAG requirements reference provider behavior but do not approve provider execution.                   | Advanced AI task and quota requirements also remain blocked until provider/staging approvals are explicit.     | `blocked_gate`       | Real provider calls, model requests, quota use, env/secret, staging/prod/cloud/deploy, payment, and Cost Calibration. | `CFX-PROVIDER-001`                                  | `true`       | `false`                       | Historical local smoke or approval-package evidence cannot be reused as execution approval.    |
 | `DELTA-CURRENT-CHECKPOINT-AUDIT` | `CAP-GATE-CURRENT-CHECKPOINT`, `CAP-AUDIT-SOURCE-GOVERNANCE`                                                                                                                                                  | `UC-GATE-CURRENT-CHECKPOINT`, `UC-AUDIT-SOURCE-GOVERNANCE`                                                                                                                                                                | `GATE-CHECK-EV`, `GATE-CHECK-AUD`, `PLAN-UNIFIED-01`, `PLAN-UNIFIED-02`                                                                                            | Standard MVP requirements are not rewritten by current implementation findings in this task.                      | Advanced requirements are also not rewritten by current implementation findings in this task.                  | `audit_only`         | Code audit, code fixes, implementation, e2e, env/secret, provider, deploy, and PR/force-push remain blocked.          | `CFX-CHECKPOINT-001`                                | `true`       | `false`                       | Current checkpoint findings can inform later audits only after scoped task approval.           |
 
+## Edition-Aware Authorization Supplement
+
+The edition-aware authorization decision refines `DELTA-AUTH-ACCOUNT-SESSION`, `DELTA-PERSONAL-AUTH`,
+`DELTA-ORG-AUTH-PORTAL`, and `DELTA-OPS-QUOTA`:
+
+- Standard remains the compatibility baseline for existing unversioned authorization records.
+- Advanced can be issued directly on new personal or organization authorization sources.
+- Standard-to-advanced upgrades are represented by `auth_upgrade`; the source authorization `edition` is not overwritten.
+- Personal `edition_upgrade` is a `redeem_code` kind, while organization upgrade is a platform operations action.
+- Quota owner follows the selected authorization context; exact production quota values remain blocked by Cost Calibration.
+- Payment, pricing, invoice, refund, external-service confirmation, provider execution, and deployment remain non-goals.
+
 ## Delta Use Rules
 
 1. Later technical matrix or code audit tasks must cite `deltaId` together with `useCaseId`, `capabilityId`, and

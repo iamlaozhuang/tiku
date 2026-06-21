@@ -13,6 +13,7 @@ Primary sources:
 - `docs/superpowers/specs/2026-06-05-advanced-edition-ai-generation-design.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md`
+- `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md`
 
@@ -41,6 +42,10 @@ Advanced edition MVP focuses on:
 
 ## Modules
 
+| Cross-cutting requirement          | File                                                                                         |
+| ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| Edition-aware authorization source | [edition-aware-authorization-requirements.md](./edition-aware-authorization-requirements.md) |
+
 | Module                             | File                                                                               |
 | ---------------------------------- | ---------------------------------------------------------------------------------- |
 | Authorization context              | [modules/01-authorization-context.md](./modules/01-authorization-context.md)       |
@@ -66,6 +71,7 @@ Advanced edition MVP focuses on:
 
 - AI generated learning content must not automatically write to formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
 - Organization training answer statistics must not be mixed into formal `exam_report` or formal `mistake_book`.
+- `effectiveEdition` is service-computed from source authorization, `edition`, upgrade state, expiry, revocation, and scope; UI visibility is not an authorization boundary.
 - `audit_log` and `ai_call_log` evidence must use redacted summaries.
 - Cost Calibration Gate remains blocked pending fresh explicit approval.
 - Provider, env/secret, staging/prod/cloud/deploy, payment, and external-service work remain out of scope.

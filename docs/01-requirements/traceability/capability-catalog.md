@@ -63,6 +63,19 @@ be considered later if a queued task grants exact `allowedFiles`, gates, evidenc
 | `CAP-GATE-PROVIDER-STAGING-EXECUTION`      | Provider and staging execution gate           | `GATE-B178-EV`, `GATE-B178-AUD`, `GATE-B180-EV`, `GATE-B180-AUD`, `ADV-SPEC-03`                    | `blocked_gate`              | `blocked_gate_only`            | Real provider call, model request, quota use, env/secret, staging/prod/cloud/deploy, payment.       | `CFX-PROVIDER-001`                                 | `true`       | `false`                       | Records future approval package requirements; it is not executable approval.                            |
 | `CAP-GATE-CURRENT-CHECKPOINT`              | Current checkpoint finding boundary           | `GATE-CHECK-EV`, `GATE-CHECK-AUD`, `PLAN-UNIFIED-01`, `PLAN-UNIFIED-02`                            | `blocked_gate`              | `audit_reference_only`         | Code audit, code fixes, implementation, e2e, env/secret, provider, deploy remain blocked.           | `CFX-CHECKPOINT-001`                               | `true`       | `false`                       | Current implementation findings can inform later audits only after explicit scoped task approval.       |
 
+## Edition-Aware Authorization Supplement
+
+`CAP-ADV-AUTH-CONTEXT` is the source capability for the edition-aware source-of-truth model. Later implementation must
+preserve these capability boundaries:
+
+- `CAP-STD-PERSONAL-AUTH` remains responsible for standard personal authorization, while advanced personal authorization
+  adds explicit `edition` and upgrade state rather than inventing a separate card system.
+- `CAP-STD-ORG-AUTH-OPS-MANAGED` remains platform-managed organization authorization, while advanced organization
+  authorization adds direct advanced issuance and auditable manual upgrade state.
+- `CAP-ADV-OPS-AUTH-QUOTA` consumes authorization contexts and quota ownership summaries; it does not own provider
+  execution, payment, production quota defaults, or Cost Calibration.
+- Service-layer capability checks must use `effectiveEdition` and must not rely on frontend-only controls.
+
 ## Catalog Use Rules
 
 1. Later use case catalog and edition delta tasks must cite `capabilityId` and `sourceIds`.
