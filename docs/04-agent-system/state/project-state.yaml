@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: agent-system-queue-health
-updatedAt: "2026-06-21T09:06:54-07:00"
+currentPhase: discovered-issue-closure-2026-06-21
+updatedAt: "2026-06-21T09:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: c802e6cc
   lastKnownOriginMasterSha: c802e6cc
 currentTask:
-  id: mistake-book-cookie-session-contract-repair
+  id: discovered-issue-closure-governance-seed
   status: ready_for_closeout
-  result: pass_mistake_book_cookie_session_contract_repair_local_validation
-  claimedAt: "2026-06-21T09:01:00-07:00"
-  validatedAt: "2026-06-21T09:06:54-07:00"
+  result: batch_scope_registered_for_serial_discovered_issue_closure
+  claimedAt: "2026-06-21T09:30:00-07:00"
+  validatedAt: "2026-06-21T09:35:00-07:00"
   closedAt: null
-  sourceStory: user-reported-2026-06-21-student-mistake-book-relogin-loop
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-fix-mistake-book-cookie-session.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-fix-mistake-book-cookie-session.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-fix-mistake-book-cookie-session.md
-  branch: codex/fix-mistake-book-session
+  sourceStory: user-directed-2026-06-21-discovered-issue-closure-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-discovered-issue-closure-governance-seed.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-discovered-issue-closure-governance-seed.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-discovered-issue-closure-governance-seed.md
+  branch: codex/discovered-issue-closure-seed
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -4932,3 +4932,89 @@ lastActiveQueueSlimmingDrainToRecoveryWindow:
     26 terminal task blocks to the June archive and registering them in the task history index. It did not execute or
     alter product source, tests, e2e, schema, migration, scripts, env, dependency, provider, payment, deploy, PR,
     force-push, destructive DB, staging/prod/cloud database, or Cost Calibration Gate state.
+
+discoveredIssueClosureBatch20260621:
+  batchId: discovered-issue-closure-2026-06-21
+  seededAt: "2026-06-21T09:30:00-07:00"
+  seedTaskId: discovered-issue-closure-governance-seed
+  branch: codex/discovered-issue-closure-seed
+  objective: >-
+    Serially close discovered audit and role-experience issues by reaching fixed, explicit product/architecture
+    decision package, or hard-gate blocked state with next steps recorded.
+  sourceCoverage:
+    - docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md Queue-Ready Suggestions
+    - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md nextTask and Current Experience Blockers
+    - current user 2026-06-21 explicit scope list
+  approvalBoundary:
+    allowed:
+      - docs_state_governance_seed
+      - short_lived_branch
+      - task_plan_evidence_audit_per_task
+      - low_risk_local_implementation
+      - docs_decision_packages
+      - focused_unit_lint_typecheck_prettier_module_gates
+      - local_commit
+      - fast_forward_merge_to_master
+      - push_origin_master
+      - merged_short_branch_cleanup
+    blockedWithoutFreshApproval:
+      - real_provider_call
+      - env_secret_access_or_change
+      - prompt_or_provider_payload_exposure
+      - database_connection_seed_migration_or_schema_change
+      - dependency_or_package_lockfile_change
+      - dev_server
+      - browser_or_playwright_e2e_runtime
+      - deploy
+      - pr
+      - force_push
+      - authorization_model_runtime_change
+      - payment_or_external_service
+      - cost_calibration_gate
+  alreadyFixed:
+    - itemId: fix-student-mistake-book-session
+      commitSha: 04f82c7e
+      remote: origin/master
+      note: cookie-backed student mistake_book session repair is already merged and pushed; this batch must not re-implement it.
+  serialTasks:
+    - id: clarify-student-subject-and-paper-count-copy
+      classification:
+        - local_implementation
+        - runtime_verification_later
+    - id: recheck-adr-006-ai-sdk-baseline
+      classification:
+        - docs_decision
+        - approval_blocked
+    - id: decide-content-admin-ai-generation-scope
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
+    - id: decide-org-auth-scope-product-model
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
+    - id: decide-paper-count-and-question-type-policy
+      classification:
+        - docs_decision
+        - runtime_verification_later
+    - id: plan-admin-experience-gap-closures
+      classification:
+        - local_implementation
+        - runtime_verification_later
+    - id: plan-org-auth-implementation-split
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
+    - id: plan-advanced-enterprise-training-path
+      classification:
+        - approval_blocked
+        - security_review_required
+        - runtime_verification_later
+  nextCandidateTaskId: clarify-student-subject-and-paper-count-copy
+  boundary: >-
+    This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
+    schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
+    force-push, payment, external service, authorization model runtime behavior, or Cost Calibration Gate state.

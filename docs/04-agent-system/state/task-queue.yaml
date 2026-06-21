@@ -1,5 +1,514 @@
 schemaVersion: 1
 tasks:
+  - id: discovered-issue-closure-governance-seed
+    title: Discovered issue closure governance seed
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: user-directed-2026-06-21-discovered-issue-closure-batch
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved a minimal governance seed to merge three issue sources, register this batch and the first legal
+      serial task scopes in task-queue.yaml and project-state.yaml, create task plan/evidence/audit artifacts, then
+      commit, fast-forward merge to master, push origin/master, and clean the merged short branch. This seed must not
+      modify product source, tests, package files, lockfiles, schema, migrations, scripts, env/secret files, Provider
+      configuration, database state, e2e/browser/dev-server surfaces, deploy, PR, force-push, payment, external
+      services, or Cost Calibration Gate state.
+    targetClosureItem: governance registration for discovered issue closure batch
+    behaviorBoundary: agent_system::discovered_issue_closure_governance_seed
+    executionProfile: docs_state_governance_seed
+    evidenceMode: full
+    validationPolicy: docs_state_validation
+    queueSelectionMode: user_directed_serial_batch_seed
+    taskKind: docs_state_governance_seed
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: batch_scope_registered_for_serial_discovered_issue_closure
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T09:30:00-07:00"
+    capabilities:
+      docsStateGovernance: approved
+      productSourceChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-discovered-issue-closure-governance-seed.md
+      - docs/05-execution-logs/evidence/2026-06-21-discovered-issue-closure-governance-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-discovered-issue-closure-governance-seed.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/glossary.yaml
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - package.json
+    plannedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-discovered-issue-closure-governance-seed.md
+      - docs/05-execution-logs/evidence/2026-06-21-discovered-issue-closure-governance-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-discovered-issue-closure-governance-seed.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_decision
+      - governance_seed
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-discovered-issue-closure-governance-seed.md docs\05-execution-logs\evidence\2026-06-21-discovered-issue-closure-governance-seed.md docs\05-execution-logs\audits-reviews\2026-06-21-discovered-issue-closure-governance-seed.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId discovered-issue-closure-governance-seed
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId discovered-issue-closure-governance-seed
+    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, private answer text, or full paper content
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_discovered_issue_batch
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_21_discovered_issue_batch
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_21_discovered_issue_batch
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_discovered_issue_batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-discovered-issue-closure-governance-seed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-discovered-issue-closure-governance-seed.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-discovered-issue-closure-governance-seed.md
+    retryCount: 0
+  - id: clarify-student-subject-and-paper-count-copy
+    title: Clarify student subject and paper count copy
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: AUDIT-0621-07; RX-02; RX-03; user-order-1
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk local UI copy and focused unit validation, with task plan/evidence/audit,
+      local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup. Browser runtime,
+      dev server, Playwright/e2e runtime, package/dependency changes, schema/migration/database work, Provider/env,
+      deploy, PR, force-push, payment, external service, and Cost Calibration Gate remain blocked.
+    targetClosureItem: student home clarifies theory/skill as subject groups and 20 as paper count page size
+    behaviorBoundary: student_home::subject_and_paper_count_copy
+    executionProfile: local_low_risk_scoped_repair
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_and_docs_gate
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - local_implementation
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/student/home/StudentHomePage.tsx
+      - tests/unit/student-home-ui.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+      - docs/05-execution-logs/evidence/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-home-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\features\student\home\StudentHomePage.tsx tests\unit\student-home-ui.test.ts docs\05-execution-logs\task-plans\2026-06-21-clarify-student-subject-and-paper-count-copy.md docs\05-execution-logs\evidence\2026-06-21-clarify-student-subject-and-paper-count-copy.md docs\05-execution-logs\audits-reviews\2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    retryCount: 0
+  - id: recheck-adr-006-ai-sdk-baseline
+    title: Recheck ADR-006 AI SDK dependency baseline
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: AUDIT-0621-06; super_admin-role-matrix; user-order-2
+    dependencies:
+      - clarify-student-subject-and-paper-count-copy
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only ADR/evidence reconciliation. package.json and lockfiles are read-only;
+      dependency install/remove/upgrade, Provider calls, env/secret changes, prompt/provider payload exposure, deploy,
+      PR, force-push, browser/e2e/runtime validation, database work, and Cost Calibration Gate remain blocked.
+    targetClosureItem: ADR-006 reflects installed AI SDK package reality without claiming Provider runtime readiness
+    behaviorBoundary: architecture::adr_006_ai_sdk_baseline
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: read_only_audit
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - docs_decision
+      - approval_blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/05-execution-logs/task-plans/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+      - docs/05-execution-logs/evidence/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    readOnlyAllowedFiles:
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\02-architecture\adr\adr-006-runtime-dependency-alignment.md docs\05-execution-logs\task-plans\2026-06-21-recheck-adr-006-ai-sdk-baseline.md docs\05-execution-logs\evidence\2026-06-21-recheck-adr-006-ai-sdk-baseline.md docs\05-execution-logs\audits-reviews\2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    retryCount: 0
+  - id: decide-content-admin-ai-generation-scope
+    title: Decide content_admin AI question and paper generation scope
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: AUDIT-0621-02; RX-05; user-order-3
+    dependencies:
+      - recheck-adr-006-ai-sdk-baseline
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only product/architecture decision package. Real AI Provider calls,
+      prompt/provider payload exposure, formal content adoption code, package/dependency changes, env/secret changes,
+      schema/migration/database work, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external
+      service, and Cost Calibration Gate remain blocked.
+    targetClosureItem: content_admin AI 出题 and AI 组卷 product scope decision
+    behaviorBoundary: content_admin::ai_generation_scope_decision
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: product_decision
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - docs_decision
+      - approval_blocked
+      - security_review_required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-21-decide-content-admin-ai-generation-scope.md
+      - docs/05-execution-logs/evidence/2026-06-21-decide-content-admin-ai-generation-scope.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-decide-content-admin-ai-generation-scope.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\2026-06-21-content-admin-ai-generation-scope-decision.md docs\05-execution-logs\task-plans\2026-06-21-decide-content-admin-ai-generation-scope.md docs\05-execution-logs\evidence\2026-06-21-decide-content-admin-ai-generation-scope.md docs\05-execution-logs\audits-reviews\2026-06-21-decide-content-admin-ai-generation-scope.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-content-admin-ai-generation-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-content-admin-ai-generation-scope.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-content-admin-ai-generation-scope.md
+    retryCount: 0
+  - id: decide-org-auth-scope-product-model
+    title: Decide org_auth subject multi-profession multi-level and shared backend model
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: AUDIT-0621-03; RX-04; user-order-4
+    dependencies:
+      - decide-content-admin-ai-generation-scope
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only product and architecture decision. Authorization model runtime changes,
+      contract/service/UI/schema implementation, schema/migration/database work, package/dependency changes,
+      env/secret access, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, and Cost
+      Calibration Gate remain blocked.
+    targetClosureItem: org_auth subject, multi-profession, multi-level, and shared enterprise backend decision
+    behaviorBoundary: org_auth::scope_product_model_decision
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: product_decision
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - docs_decision
+      - approval_blocked
+      - security_review_required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-21-decide-org-auth-scope-product-model.md
+      - docs/05-execution-logs/evidence/2026-06-21-decide-org-auth-scope-product-model.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-decide-org-auth-scope-product-model.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\2026-06-21-org-auth-scope-product-decision.md docs\05-execution-logs\task-plans\2026-06-21-decide-org-auth-scope-product-model.md docs\05-execution-logs\evidence\2026-06-21-decide-org-auth-scope-product-model.md docs\05-execution-logs\audits-reviews\2026-06-21-decide-org-auth-scope-product-model.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-org-auth-scope-product-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-org-auth-scope-product-model.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-org-auth-scope-product-model.md
+    retryCount: 0
+  - id: decide-paper-count-and-question-type-policy
+    title: Decide paper question count limit and question type alias policy
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: AUDIT-0621-04; AUDIT-0621-05; RX-06; user-order-5
+    dependencies:
+      - decide-org-auth-scope-product-model
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only product policy. Enforcement code, schema/migration/database work,
+      package/dependency changes, browser/e2e/dev-server runtime, env/secret access, Provider calls, deploy, PR,
+      force-push, payment, external service, and Cost Calibration Gate remain blocked unless a later task explicitly
+      approves them.
+    targetClosureItem: paper max question count, performance acceptance, and legacy question type alias policy
+    behaviorBoundary: paper::question_count_and_question_type_policy
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: product_decision
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - docs_decision
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md
+      - docs/05-execution-logs/task-plans/2026-06-21-decide-paper-count-and-question-type-policy.md
+      - docs/05-execution-logs/evidence/2026-06-21-decide-paper-count-and-question-type-policy.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-decide-paper-count-and-question-type-policy.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\2026-06-21-paper-question-count-and-type-policy.md docs\05-execution-logs\task-plans\2026-06-21-decide-paper-count-and-question-type-policy.md docs\05-execution-logs\evidence\2026-06-21-decide-paper-count-and-question-type-policy.md docs\05-execution-logs\audits-reviews\2026-06-21-decide-paper-count-and-question-type-policy.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-paper-count-and-question-type-policy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-paper-count-and-question-type-policy.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-paper-count-and-question-type-policy.md
+    retryCount: 0
+  - id: plan-admin-experience-gap-closures
+    title: Plan content and ops admin experience gap closures
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: role-matrix-question-admin-binding; role-matrix-redeem-code-detail-view; role-matrix-organization-management-complete; user-order-6
+    dependencies:
+      - decide-paper-count-and-question-type-policy
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only split planning for content/ops admin gap closures. Product source
+      implementation may be seeded later as separate low-risk tasks only after scope is explicit. Browser/e2e/dev
+      server runtime, package/dependency changes, schema/migration/database work, env/secret access, Provider calls,
+      deploy, PR, force-push, payment, external service, and Cost Calibration Gate remain blocked.
+    targetClosureItem: split question/material binding, redeem_code detail, and organization management closure tasks
+    behaviorBoundary: admin_experience::gap_closure_split_plan
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: implementation_split_plan
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - local_implementation
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-admin-experience-gap-closure-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-21-plan-admin-experience-gap-closures.md
+      - docs/05-execution-logs/evidence/2026-06-21-plan-admin-experience-gap-closures.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-plan-admin-experience-gap-closures.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\2026-06-21-admin-experience-gap-closure-plan.md docs\05-execution-logs\task-plans\2026-06-21-plan-admin-experience-gap-closures.md docs\05-execution-logs\evidence\2026-06-21-plan-admin-experience-gap-closures.md docs\05-execution-logs\audits-reviews\2026-06-21-plan-admin-experience-gap-closures.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-admin-experience-gap-closures.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-admin-experience-gap-closures.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-plan-admin-experience-gap-closures.md
+    retryCount: 0
+  - id: plan-org-auth-implementation-split
+    title: Plan org_auth implementation split and security review checklist
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: user-order-7; depends-on-decide-org-auth-scope-product-model
+    dependencies:
+      - plan-admin-experience-gap-closures
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only implementation split and security checklist. No authorization model
+      runtime change, no schema/migration/database work, no contract/service/UI implementation, no package/dependency
+      change, no env/secret access, no browser/e2e/dev-server runtime, no deploy, PR, force-push, payment, external
+      service, Provider call, or Cost Calibration Gate is allowed.
+    targetClosureItem: org_auth contract service UI schema split with security review gates
+    behaviorBoundary: org_auth::implementation_split_plan
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: implementation_split_plan
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - docs_decision
+      - approval_blocked
+      - security_review_required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/interfaces/2026-06-21-org-auth-implementation-split.md
+      - docs/05-execution-logs/task-plans/2026-06-21-plan-org-auth-implementation-split.md
+      - docs/05-execution-logs/evidence/2026-06-21-plan-org-auth-implementation-split.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-plan-org-auth-implementation-split.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\02-architecture\interfaces\2026-06-21-org-auth-implementation-split.md docs\05-execution-logs\task-plans\2026-06-21-plan-org-auth-implementation-split.md docs\05-execution-logs\evidence\2026-06-21-plan-org-auth-implementation-split.md docs\05-execution-logs\audits-reviews\2026-06-21-plan-org-auth-implementation-split.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-org-auth-implementation-split.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-org-auth-implementation-split.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-plan-org-auth-implementation-split.md
+    retryCount: 0
+  - id: plan-advanced-enterprise-training-path
+    title: Plan advanced enterprise and employee training path closure
+    phase: discovered-issue-closure-2026-06-21
+    sourceStory: role-matrix-advanced-employee-training-flow; user-order-8
+    dependencies:
+      - plan-org-auth-implementation-split
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits docs-only closure plan and blocked next-step registration. Implementation, e2e,
+      browser/dev-server runtime, authorization model changes, schema/migration/database work, package/dependency
+      changes, env/secret access, Provider calls, deploy, PR, force-push, payment, external service, and Cost
+      Calibration Gate remain blocked until org_auth scope and security boundaries stabilize.
+    targetClosureItem: advanced enterprise backend and employee training path closure plan
+    behaviorBoundary: advanced_enterprise_training::blocked_closure_plan
+    executionProfile: docs_decision
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_serial_discovered_issue_batch
+    taskKind: blocked_closure_plan
+    moduleRunVersion: 2
+    status: pending
+    classification:
+      - approval_blocked
+      - security_review_required
+      - runtime_verification_later
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/advanced-edition/2026-06-21-enterprise-training-path-closure-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-21-plan-advanced-enterprise-training-path.md
+      - docs/05-execution-logs/evidence/2026-06-21-plan-advanced-enterprise-training-path.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-plan-advanced-enterprise-training-path.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\advanced-edition\2026-06-21-enterprise-training-path-closure-plan.md docs\05-execution-logs\task-plans\2026-06-21-plan-advanced-enterprise-training-path.md docs\05-execution-logs\evidence\2026-06-21-plan-advanced-enterprise-training-path.md docs\05-execution-logs\audits-reviews\2026-06-21-plan-advanced-enterprise-training-path.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-advanced-enterprise-training-path.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-advanced-enterprise-training-path.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-plan-advanced-enterprise-training-path.md
+    retryCount: 0
   - id: mistake-book-cookie-session-contract-repair
     title: Mistake book cookie session contract repair
     phase: student-experience-repair
