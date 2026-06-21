@@ -28,9 +28,13 @@ tasks:
     queueSelectionMode: user_directed_requirement_decision
     taskKind: docs_only
     moduleRunVersion: 2
-    status: in_progress
+    status: closed
+    result: pass_edition_aware_authorization_docs_decision_package
     claimedAt: "2026-06-21T00:25:39-07:00"
+    validatedAt: "2026-06-21T00:35:00-07:00"
+    closedAt: "2026-06-21T00:35:00-07:00"
     branch: codex/docs-edition-aware-authorization
+    commitSha: 17e2731c9a9dfd8c4eff2b7e03a87eff58479770
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
