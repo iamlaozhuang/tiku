@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-diagnostic-window-2.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-diagnostic-window-2.md
   branch: codex/active-queue-slimming-2026-06-21-diagnostic-window-2
-  commitSha: null
+  commitSha: 6e5b1d01
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4868,7 +4868,7 @@ lastActiveQueueSlimmingDiagnosticWindow2:
   taskId: active-queue-slimming-2026-06-21-diagnostic-window-2
   archivedAt: "2026-06-21T06:25:00-07:00"
   branch: codex/active-queue-slimming-2026-06-21-diagnostic-window-2
-  commitSha: null
+  commitSha: 6e5b1d01
   decision: pass_docs_state_active_queue_slimming_diagnostic_window_2
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml

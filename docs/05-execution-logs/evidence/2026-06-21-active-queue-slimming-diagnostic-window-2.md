@@ -4,7 +4,7 @@
 
 - Task id: `active-queue-slimming-2026-06-21-diagnostic-window-2`
 - Branch: `codex/active-queue-slimming-2026-06-21-diagnostic-window-2`
-- Commit: pending
+- Commit: `6e5b1d01`
 - Scope: docs/state/archive-only active queue slimming for the current diagnostic's next five terminal candidates.
 
 ## Allowed files
@@ -71,7 +71,8 @@ Evidence records command/result summaries and task ids only. It does not include
   - Result: pass.
   - Key output: `pre-commit hardening passed`, `filesToScan: 7`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-diagnostic-window-2`
-  - Result: pending.
+  - Result: pass.
+  - Key output: `module-closeout readiness passed`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-diagnostic-window-2`
   - Result: pending.
 

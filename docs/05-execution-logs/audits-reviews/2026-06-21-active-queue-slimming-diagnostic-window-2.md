@@ -23,4 +23,4 @@
 
 ## Outcome
 
-APPROVE docs/state/archive closeout pending closeout readiness and pre-push readiness reruns.
+APPROVE docs/state/archive closeout pending pre-push readiness rerun.
