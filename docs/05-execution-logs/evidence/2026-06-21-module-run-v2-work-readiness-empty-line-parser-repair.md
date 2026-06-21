@@ -46,7 +46,7 @@ result: pass
 - Batch range: single WorkReadiness parser repair.
 - RED: real `pre-edit` WorkReadiness command failed on blank YAML lines because string-array parameters rejected empty string elements.
 - GREEN: smoke and real `pre-edit` WorkReadiness command passed after adding empty-string tolerant array parameters.
-- Commit: pending local validation commit.
+- Commit: `1dcf001f7bce548acbcc9ced7a8f7cdc631a3402`.
 - localFullLoopGate: not used; this is a local script repair only.
 - threadRolloverGate: after this local repair commit, stop unless the user separately approves merge/push or another task.
 - nextModuleRunCandidate: none automatically selected; wait for user instruction.
@@ -54,7 +54,7 @@ result: pass
 
 ## Closeout Pending
 
-- Local validation commit: pending.
+- Local validation commit: `1dcf001f7bce548acbcc9ced7a8f7cdc631a3402`.
 - Merge to `master`: not approved in this packet.
 - Push `origin/master`: not approved in this packet.
 - Short branch cleanup: pending user approval for merge/push flow.
