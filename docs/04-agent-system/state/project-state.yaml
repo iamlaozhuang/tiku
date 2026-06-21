@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-edition-followup.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-edition-followup.md
   branch: codex/active-queue-slimming-2026-06-21-edition-followup
-  commitSha: null
+  commitSha: 81f8c401
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4799,6 +4799,7 @@ lastActiveQueueSlimmingEditionFollowup:
   taskId: active-queue-slimming-2026-06-21-edition-followup
   archivedAt: "2026-06-21T05:28:00-07:00"
   branch: codex/active-queue-slimming-2026-06-21-edition-followup
+  commitSha: 81f8c401
   decision: pass_docs_state_active_queue_slimming_edition_followup
   archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
   historyIndexPath: docs/04-agent-system/state/task-history-index.yaml

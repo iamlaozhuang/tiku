@@ -39,7 +39,7 @@ result: pass
 | `npm.cmd run typecheck`                                                                                                        | pass    | `tsc --noEmit` completed.                                                                  |
 | `git diff --check`                                                                                                             | pass    | Whitespace check passed.                                                                   |
 | `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-2026-06-21-edition-followup`                             | pass    | Scope and sensitive evidence scans passed.                                                 |
-| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-followup`                        | pending | To run after closeout state update.                                                        |
+| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-followup`                        | pass    | Final rerun passed after evidence closeout text correction and commit hash backfill.       |
 | `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-edition-followup`                               | pending | To run after commit.                                                                       |
 
 ## Closeout Readiness Retry Note
@@ -49,7 +49,7 @@ result: pass
 
 ## Closeout Status
 
-- Commit: to be recorded after local commit.
+- Commit: `81f8c401` (`docs(agent): slim edition follow-up queue`).
 - FF merge to `master`: not yet run.
 - Push `origin/master`: not yet run.
 - Merged branch cleanup: not yet run.
