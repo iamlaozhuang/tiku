@@ -20,8 +20,8 @@ tasks:
     targetClosureItem: edition-aware authorization requirements and ADR decision package
     behaviorBoundary: docs-state::edition_aware_authorization_decision_package
     useCaseIds:
-      - UC-ADV-AUTH-CONTEXT-01
-      - UC-ADV-OPS-AUTH-QUOTA-01
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
     executionProfile: docs_state_lite
     evidenceMode: full
     validationPolicy: docs_state

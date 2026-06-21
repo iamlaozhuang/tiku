@@ -20,6 +20,9 @@ requirements and ADR coverage. No runtime implementation was performed.
 ## Evidence Review
 
 - Evidence records command outcomes, scope, file groups, and commit ids only.
+- Post-review correction scope is limited to docs traceability and acceptance matrix consistency: no product source, schema,
+  migration, dependency, env, provider, payment, deploy, PR, force-push, destructive DB, or Cost Calibration work was
+  added.
 - Redaction boundary is preserved: no credential values, auth header values, provider payloads, raw prompts, raw generated
   AI content, raw DB rows, plaintext `redeem_code`, full `paper`, full `material`, or raw employee answer text are
   recorded.

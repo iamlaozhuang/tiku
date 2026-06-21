@@ -54,6 +54,7 @@ result: pass
 - Initial validation commit attempt was blocked because `currentTask` still pointed to the previous closed repair task.
 - This packet added a task-level docs-only queue item and updated `currentTask` so pre-commit hardening could evaluate the correct allowedFiles.
 - A second hardening run blocked a sensitive-pattern literal in task metadata. The metadata was rewritten to a redacted scan description; hardening then passed.
+- Post-review repair fixed three documentation traceability issues: task queue use-case ids now match the use-case catalog, `ADV-EAA-*` source ids are linked from the affected use-case/capability/delta rows, and source authorization expiry/revocation/scope mismatch scenarios are explicit in the acceptance matrix.
 - No source, tests, e2e, schema, migration, dependency, env, provider, payment, deploy, PR, force-push, destructive DB, or Cost Calibration Gate action was performed.
 
 ## Required Anchors
