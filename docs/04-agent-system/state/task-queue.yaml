@@ -3471,4 +3471,5 @@ tasks:
     validatedAt: "2026-06-21T07:31:22-07:00"
     closedAt: "2026-06-21T07:31:22-07:00"
     branch: codex/batch-239-personal-learning-ai-redacted-ai-call-log
+    commitSha: b57e5acd
     retryCount: 0

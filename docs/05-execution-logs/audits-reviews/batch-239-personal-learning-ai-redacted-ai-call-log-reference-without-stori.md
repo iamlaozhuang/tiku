@@ -17,9 +17,11 @@
 - Lint and typecheck passed before closeout evidence was written.
 - `git diff --check` passed after closeout evidence/state edits.
 - Pre-commit hardening passed with only 239 docs/state files in scope.
+- Local closeout commit recorded as `b57e5acd`.
+- Module closeout readiness passed.
+- Pre-push readiness passed on the short branch.
 
 ## Decision
 
-APPROVE batch-239 redacted `ai_call_log` reference validation after focused unit, lint, typecheck, diff, and pre-commit
-hardening pass. Final closeout still requires the validation commit hash, module closeout readiness, and pre-push
-readiness reruns.
+APPROVE batch-239 redacted `ai_call_log` reference validation and local closeout. The task is ready for fast-forward
+merge to `master`, push to `origin/master`, and merged short-branch cleanup under the recorded user approval.
