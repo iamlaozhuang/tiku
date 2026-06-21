@@ -682,12 +682,14 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
-    status: claimed
-    result: in_progress_ui_context_packet
+    status: closed
+    result: pass_edition_aware_authorization_ui_context
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T03:14:11-07:00"
+    validatedAt: "2026-06-21T03:18:55-07:00"
+    closedAt: "2026-06-21T03:18:55-07:00"
     branch: codex/edition-auth-ui-context-packet
-    commitSha: null
+    commitSha: ea6526214655d2816dd9dc7a160ddbb6304dea9f
     nextApprovalRequired: none_for_current_ui_context_packet_scope
     targetClosureItem: student and admin edition display, issue/upgrade controls, quota owner summaries, and safe audit metadata
     behaviorBoundary: ui-context::edition_aware_authorization_display_not_permission_boundary

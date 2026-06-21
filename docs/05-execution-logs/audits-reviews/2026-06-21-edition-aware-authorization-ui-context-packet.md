@@ -1,5 +1,7 @@
 # Audit Review: edition-aware authorization UI context packet
 
+APPROVE_WITH_CLOSEOUT_PENDING
+
 ## Boundary Review
 
 - Packet scope: student/admin UI context, client service shaping, hooks/components, and focused UI/unit tests.
@@ -15,4 +17,6 @@
 
 - Focused UI/unit validation passed.
 - Lint, typecheck, and `git diff --check` passed.
-- Pre-commit hardening, module closeout readiness, and pre-push readiness pending.
+- Pre-commit hardening passed.
+- Module closeout readiness passed.
+- Approved to continue pre-push readiness, fast-forward merge to `master`, push `origin/master`, and merged short-branch cleanup if the remaining gates pass.
