@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
   branch: codex/batch-240-organization-admin-training-flow
-  commitSha: null
+  commitSha: 59c7f740
   prUrl: null
   retryCount: 0
   lastFailurePath: null

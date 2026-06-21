@@ -3611,6 +3611,7 @@ tasks:
     validatedAt: "2026-06-21T07:51:43-07:00"
     closedAt: "2026-06-21T07:51:43-07:00"
     branch: codex/batch-240-organization-admin-training-flow
+    commitSha: 59c7f740
     retryCount: 0
   - id: batch-241-organization-training-employee-answer-lifecycle-local-role-flow
     title: Module Run v2 organization-training implementation seed

@@ -17,10 +17,11 @@
 - WorkReadiness passed for pre-work and pre-edit after plan materialization.
 - Focused service and route unit validation passed against existing source, so no source or test change was required.
 - Lint, typecheck, diff check, and pre-commit hardening passed.
-- Module closeout readiness and pre-push readiness remain required before merge/push.
+- Local closeout commit was recorded as `59c7f740`.
+- Module closeout readiness passed.
+- Pre-push readiness passed on the short branch.
 
 ## Decision
 
-APPROVE batch-240 admin lifecycle validation once final local closeout gates pass. The task is eligible for fast-forward
-merge to `master`, push to `origin/master`, and merged short-branch cleanup under the recorded user approval and
-task-level closeout policy.
+APPROVE batch-240 admin lifecycle validation and local closeout. The task is ready for fast-forward merge to `master`,
+push to `origin/master`, and merged short-branch cleanup under the recorded user approval and task-level closeout policy.
