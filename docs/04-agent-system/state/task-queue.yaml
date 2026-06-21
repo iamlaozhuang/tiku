@@ -778,11 +778,14 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: local_e2e_spec_authoring
     moduleRunVersion: 2
-    status: in_progress
-    result: pending
+    status: closed
+    result: pass_edition_aware_authorization_e2e_spec_authoring
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T03:26:06-07:00"
+    validatedAt: "2026-06-21T03:32:51-07:00"
+    closedAt: "2026-06-21T03:35:00-07:00"
     branch: codex/edition-auth-e2e-spec-authoring-packet
+    commitSha: d924daa9b15e1dc1675aee8452ee62d9d982ce64
     nextApprovalRequired: none_for_current_e2e_spec_authoring_scope
     targetClosureItem: dedicated local edition-aware authorization e2e spec
     behaviorBoundary: local-e2e-spec::edition_aware_authorization_contract_browser_flow_redacted
@@ -865,15 +868,16 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: local_full_flow
     moduleRunVersion: 2
-    status: blocked
-    result: packet_defined_execution_requires_fresh_approval
-    nextApprovalRequired: all_prior_packets_closed_and_local_e2e_fresh_approval_with_exact_spec_and_fixture_boundary
+    status: pending
+    result: fresh_approval_ready_after_e2e_spec_authoring
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    nextApprovalRequired: none_for_current_local_e2e_acceptance_scope_after_spec_authoring
     targetClosureItem: local standard and advanced personal/organization authorization acceptance
     behaviorBoundary: local-e2e::edition_aware_authorization_acceptance_redacted
     capabilities:
-      localE2EValidation: blocked_without_task_fresh_approval
-      localFullFlowGate: blocked_without_task_fresh_approval
-      devServer: blocked_without_task_fresh_approval
+      localE2EValidation: approved_local_only_existing_dedicated_spec
+      localFullFlowGate: approved_localhost_only
+      devServer: approved_localhost_only
       localDockerDatabase: blocked_without_task_fresh_approval
       destructiveLocalDockerDatabase: blocked
       schemaMigration: blocked
@@ -914,20 +918,21 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
     redactionPolicy: e2e evidence records command, spec name, role/use-case summary, pass/fail, and redacted metadata only
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalRequired: task_fresh_approval
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_e2e_spec_authoring_and_acceptance
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
-        approvalRequired: task_fresh_approval
+        approvalSource: current_user_fresh_approval_2026_06_21_e2e_spec_authoring_and_acceptance
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md

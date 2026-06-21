@@ -23,7 +23,7 @@ result: pass
 | `npm.cmd run typecheck`                                                                                                                                                                                                                     | pass              | `tsc --noEmit` passed.                                                                                                                                             |
 | `git diff --check`                                                                                                                                                                                                                          | pass              | No whitespace errors.                                                                                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                       | pass              | Scope, sensitive evidence, and terminology scans passed for current authoring files.                                                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                  | pending           | Runs after local validation commit and closeout state update.                                                                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                  | pass              | Evidence/audit, validation, RED/GREEN, commit, localFullLoopGate, next candidate, and blocked remainder anchors passed.                                            |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                         | pending           | Runs after closeout readiness.                                                                                                                                     |
 
 ## Implementation Summary
@@ -53,7 +53,7 @@ result: pass
 - Batch range: single e2e spec authoring packet for edition-aware authorization.
 - RED: prior local e2e acceptance packet was blocked because no approved dedicated edition-aware authorization local flow spec existed.
 - GREEN: `npm.cmd run test:e2e -- e2e/edition-aware-authorization-local-flow.spec.ts` passed 3/3 after authoring.
-- Commit: pending local validation commit.
+- Commit: `d924daa9b15e1dc1675aee8452ee62d9d982ce64`.
 - localFullLoopGate: passed localhost-only capability gate; no DB migration apply or destructive DB was used.
 - threadRolloverGate: after this packet closes, merges, pushes, and cleans its short branch, continue to `edition-aware-authorization-local-e2e-acceptance-packet`.
 - nextModuleRunCandidate: `edition-aware-authorization-local-e2e-acceptance-packet`.
@@ -65,10 +65,10 @@ No database URLs, secrets, session credential values, raw DB rows, raw prompts, 
 
 ## Closeout Pending
 
-- Local validation commit: pending.
+- Local validation commit: `d924daa9b15e1dc1675aee8452ee62d9d982ce64`.
 - Closeout commit: pending.
-- Queue status: in progress until commit hash is available.
-- Project state current task status: in progress until commit hash is available.
+- Queue status: closed.
+- Project state current task status: closed.
 - FF merge to `master`: pending.
 - Push `origin/master`: pending.
 - Short branch cleanup: pending.
