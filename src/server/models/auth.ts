@@ -9,8 +9,12 @@ import {
   authSession,
   authStatusValues,
   authUser,
+  authUpgrade,
+  authUpgradeSourceTypeValues,
+  authUpgradeStatusValues,
   authVerification,
   employee,
+  authorizationEditionValues,
   orgAuth,
   orgAuthOrganization,
   orgTierValues,
@@ -19,6 +23,7 @@ import {
   professionValues,
   redeemCode,
   redeemCodeStatusValues,
+  redeemCodeTypeValues,
   student,
   user,
   userStatusValues,
@@ -27,11 +32,15 @@ import {
 
 export {
   adminRoleValues,
+  authorizationEditionValues,
   authScopeTypeValues,
+  authUpgradeSourceTypeValues,
+  authUpgradeStatusValues,
   authStatusValues,
   orgTierValues,
   professionValues,
   redeemCodeStatusValues,
+  redeemCodeTypeValues,
   userStatusValues,
   userTypeValues,
 };
@@ -44,6 +53,11 @@ export type OrgTier = (typeof orgTierValues)[number];
 export type AuthScopeType = (typeof authScopeTypeValues)[number];
 export type AuthStatus = (typeof authStatusValues)[number];
 export type RedeemCodeStatus = (typeof redeemCodeStatusValues)[number];
+export type AuthorizationEdition = (typeof authorizationEditionValues)[number];
+export type RedeemCodeType = (typeof redeemCodeTypeValues)[number];
+export type AuthUpgradeSourceType =
+  (typeof authUpgradeSourceTypeValues)[number];
+export type AuthUpgradeStatus = (typeof authUpgradeStatusValues)[number];
 
 export type AuthUserRow = InferSelectModel<typeof authUser>;
 export type NewAuthUserRow = InferInsertModel<typeof authUser>;
@@ -85,6 +99,9 @@ export type NewPersonalAuthRow = InferInsertModel<typeof personalAuth>;
 
 export type OrgAuthRow = InferSelectModel<typeof orgAuth>;
 export type NewOrgAuthRow = InferInsertModel<typeof orgAuth>;
+
+export type AuthUpgradeRow = InferSelectModel<typeof authUpgrade>;
+export type NewAuthUpgradeRow = InferInsertModel<typeof authUpgrade>;
 
 export type OrgAuthOrganizationRow = InferSelectModel<
   typeof orgAuthOrganization
