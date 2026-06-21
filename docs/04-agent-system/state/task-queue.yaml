@@ -1,5 +1,138 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: edition-aware-authorization-schema-migration-approval-package-materialization
+    title: Edition-aware authorization schema migration approval package materialization
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: userApprovedSchemaMigrationApprovalPackageMaterializationOnly
+    dependencies:
+      - edition-aware-authorization-packet-metadata-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved creating the task-level approval package for
+      edition-aware-authorization-schema-migration-approval-packet. Scope is limited to plan and gate materialization
+      only. This does not authorize editing src/db/schema, creating or editing drizzle migrations, running
+      drizzle-kit generate, running migrations, reading or writing database contents, API/service/UI/e2e/script work,
+      dependency changes, env/secret access, provider/model calls, payment, deploy, PR, force-push, destructive DB, or
+      Cost Calibration Gate execution.
+    targetExperienceChain: edition-aware-authorization
+    targetClosureItem: schema migration approval package only
+    behaviorBoundary: approval-package::edition_aware_authorization_schema_materialization_only
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_requirement_decision
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_schema_migration_approval_package_materialized_execution_blocked
+    claimedAt: "2026-06-21T02:29:40-07:00"
+    validatedAt: "2026-06-21T02:29:40-07:00"
+    closedAt: "2026-06-21T02:29:40-07:00"
+    branch: codex/edition-auth-schema-approval-package
+    commitSha: null
+    targetPacketId: edition-aware-authorization-schema-migration-approval-packet
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      approvalPackageMaterialization: allowed
+      readRequirements: allowed
+      readSource: allowed
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      schemaMigration: blocked
+      drizzleGenerate: blocked
+      databaseRead: blocked
+      databaseWrite: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+      - docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+      - docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+      - docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - src/db/schema/auth.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - schema/drizzle/migration changes or execution
+      - drizzle-kit generate
+      - database reads, writes, or destructive operations
+      - product runtime source edits
+      - API/service/repository/UI/test/e2e/script work
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - approval_package_materialization
+      - evidence_redaction
+      - high_risk_gate_preservation
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_schema_approval_package_materialization_only
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalRequired: fresh_approval
+      push:
+        approved: false
+        target: origin/master
+        approvalRequired: fresh_approval
+      cleanup:
+        deleteShortBranch: false
+        approvalRequired: after_merge_approval
+    validationCommands:
+      - git status --short --branch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - rg -n "approvalPackageStatus|schemaMigration|approved_migration_plan|execution remains blocked" docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-schema-migration-approval-package-materialization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-schema-migration-approval-package-materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+    retryCount: 0
   - id: edition-aware-authorization-packet-metadata-repair
     title: Edition-aware authorization packet metadata repair
     phase: edition-aware-authorization-implementation-planning
@@ -258,7 +391,7 @@ tasks:
     phase: edition-aware-authorization-implementation-planning
     sourceStory: editionAwareAuthorizationPacketSplit.schema
     dependencies:
-      - edition-aware-authorization-packet-metadata-repair
+      - edition-aware-authorization-schema-migration-approval-package-materialization
     useCaseIds:
       - UC-STD-PERSONAL-AUTH-REDEEM
       - UC-STD-ORG-AUTH-MANAGED
@@ -271,8 +404,9 @@ tasks:
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
     status: blocked
-    result: packet_defined_execution_requires_fresh_approval
-    nextApprovalRequired: exact_schema_migration_plan_local_capability_gate_rollback_and_redacted_evidence
+    result: approval_package_materialized_execution_blocked
+    approvalPackageStatus: materialized_execution_blocked
+    nextApprovalRequired: exact_schema_execution_fresh_approval_for_src_db_schema_and_drizzle_with_schemaMigration_approved_migration_plan_rollback_and_redacted_evidence
     targetClosureItem: source edition, redeem_code_type, auth_upgrade, compatibility migration plan
     behaviorBoundary: schema-migration::edition_aware_authorization_source_of_truth
     capabilities:
@@ -311,12 +445,17 @@ tasks:
       - test-results/**
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet -Capability schemaMigration -Intent use_capability
+      - npm.cmd run test:unit -- src/db/schema/auth.test.ts src/db/schema/system.test.ts
       - npx.cmd drizzle-kit generate
+      - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
     redactionPolicy: no database URL, row data, secret, token, cleartext redeem_code, provider payload, raw prompt, or raw generated AI content in evidence
+    approvalPackagePlanPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    approvalPackageEvidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    approvalPackageAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
     closeoutPolicy:
       localCommit:
         approved: false
