@@ -3193,6 +3193,7 @@ tasks:
     validatedAt: "2026-06-21T07:18:59-07:00"
     closedAt: "2026-06-21T07:18:59-07:00"
     branch: codex/batch-237-personal-learning-ai-context-selection
+    commitSha: cf11d8ff
     retryCount: 0
   - id: batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and
     title: Module Run v2 personal-learning-ai implementation seed
