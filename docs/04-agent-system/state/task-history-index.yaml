@@ -1,10 +1,10 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: queue-health-carryover-archive-2026-06-20
-  updatedAt: "2026-06-20T05:36:21-07:00"
+  updatedByTask: active-queue-slimming-2026-06-21-edition-followup
+  updatedAt: "2026-06-21T05:22:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10636,3 +10636,53 @@ entries:
     commitSha: a016c63f01b3cc53a03dd114999862cd4e2c88e9
     completedAt: "2026-06-20T05:08:32-07:00"
     archivedByTask: queue-health-carryover-archive-2026-06-20
+  - id: edition-aware-authorization-db-backed-local-acceptance-packet
+    phase: edition-aware-authorization-db-backed-local-acceptance
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-db-backed-local-acceptance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-db-backed-local-acceptance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b6deb30491415f3ac0cae882aa09da0da5078485
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-followup
+  - id: module-run-v2-work-readiness-empty-line-parser-repair
+    phase: agent-system-governance-hardening
+    status: closed
+    taskKind: script_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-module-run-v2-work-readiness-empty-line-parser-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 1dcf001f7bce548acbcc9ced7a8f7cdc631a3402
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-followup
+  - id: edition-aware-authorization-schema-migration-approval-package-materialization
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-package-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-followup
+  - id: edition-aware-authorization-packet-metadata-repair
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-followup
+  - id: edition-aware-authorization-implementation-packet-split
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-implementation-packets.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-implementation-packets.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-followup
