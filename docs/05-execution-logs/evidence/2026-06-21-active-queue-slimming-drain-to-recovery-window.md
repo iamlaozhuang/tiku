@@ -97,7 +97,8 @@ Evidence records command/result summaries and task ids only. It does not include
   - Result: pass.
   - Key output: `module-closeout readiness passed`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-slimming-2026-06-21-drain-to-recovery-window`
-  - Result: pending.
+  - Result: pass.
+  - Key output: `pre-push readiness passed`.
 
 ## Thread rollover gate
 
@@ -115,4 +116,7 @@ Evidence records command/result summaries and task ids only. It does not include
 - Scripts changed: no.
 - Env/dependency/provider/payment/deploy changed: no.
 - PR/force-push/destructive DB/Cost Calibration Gate used: no.
+- Body commit: `efcb9d2b`.
+- Closeout metadata commit: `a3c41413`.
+- Pre-push evidence commit: recorded by the final evidence-only commit for this task.
 - FF merge/push/branch cleanup: pending.
