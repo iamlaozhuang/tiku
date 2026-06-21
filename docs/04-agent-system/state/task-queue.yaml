@@ -3045,9 +3045,15 @@ tasks:
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-236-personal-learning-ai-personal-generation-request-flow
+    planPath: docs/05-execution-logs/task-plans/batch-236-personal-learning-ai-personal-generation-request-flow.md
     evidencePath: docs/05-execution-logs/evidence/batch-236-personal-learning-ai-personal-generation-request-flow.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-236-personal-learning-ai-personal-generation-request-flow.md
-    status: pending
+    status: closed
+    result: pass_existing_source_covers_personal_generation_request_flow
+    claimedAt: "2026-06-21T07:10:17-07:00"
+    validatedAt: "2026-06-21T07:11:37-07:00"
+    closedAt: "2026-06-21T07:11:37-07:00"
+    branch: codex/batch-236-personal-learning-ai-request-flow
     retryCount: 0
   - id: batch-237-personal-learning-ai-paper-and-mock-exam-context-selection
     title: Module Run v2 personal-learning-ai implementation seed

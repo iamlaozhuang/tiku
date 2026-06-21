@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: c6d5d969
   lastKnownOriginMasterSha: c6d5d969
 currentTask:
-  id: batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  id: batch-236-personal-learning-ai-personal-generation-request-flow
   status: closed
-  result: pass_existing_source_covers_local_provider_sandbox_proposal_rules
-  claimedAt: "2026-06-21T06:46:52-07:00"
-  validatedAt: "2026-06-21T06:48:18-07:00"
-  closedAt: "2026-06-21T06:48:18-07:00"
+  result: pass_existing_source_covers_personal_generation_request_flow
+  claimedAt: "2026-06-21T07:10:17-07:00"
+  validatedAt: "2026-06-21T07:11:37-07:00"
+  closedAt: "2026-06-21T07:11:37-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  branch: codex/batch-235-ai-task-provider-local-sandbox-rules
-  commitSha: e0c6333b
+  planPath: docs/05-execution-logs/task-plans/batch-236-personal-learning-ai-personal-generation-request-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-236-personal-learning-ai-personal-generation-request-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-236-personal-learning-ai-personal-generation-request-flow.md
+  branch: codex/batch-236-personal-learning-ai-request-flow
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
