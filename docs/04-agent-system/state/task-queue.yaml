@@ -403,10 +403,14 @@ tasks:
     queueSelectionMode: legacy_explicit
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
-    status: claimed
-    result: in_progress_schema_migration_execution_fresh_approval_materialized
+    status: closed
+    result: pass_edition_aware_authorization_schema_migration
     approvalPackageStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T02:46:55-07:00"
+    validatedAt: "2026-06-21T02:53:21-07:00"
+    closedAt: "2026-06-21T02:53:21-07:00"
+    branch: codex/edition-auth-schema-migration-packet
+    commitSha: 6e38250d7b69ab78e40676fbac773d6d68dfe291
     nextApprovalRequired: none_for_current_schema_packet_scope
     targetClosureItem: source edition, redeem_code_type, auth_upgrade, compatibility migration plan
     behaviorBoundary: schema-migration::edition_aware_authorization_source_of_truth
