@@ -43,6 +43,26 @@ No new `question_type` value is introduced by this policy.
 | exception import      | product gate  | Requires explicit exception, performance evidence, and audit record.                    |
 | student practice/mock | 1 to 100      | Runtime should reject starting a practice or mock_exam from an invalid published paper. |
 
+## Question Type Strategy
+
+Follow-up approval on 2026-06-21 selected option A for question type strategy: recommended distribution only, no hard
+ratio limit.
+
+Policy:
+
+1. Published `paper` validation must not require a fixed ratio across `question_type` values.
+2. The only hard product count rule remains 1 to 100 questions for published `paper` records.
+3. Draft save and publish may display question type distribution and risk warnings.
+4. Manual authoring, import review, and future AI paper-planning suggestions should use the same recommendation model so
+   content_admin sees consistent feedback.
+5. Recommendation warnings are advisory and must not block save or publish unless a later product decision introduces a
+   configured hard ratio policy.
+6. Any future hard ratio policy must define `paper_type`, `profession`, `level`, and `subject` applicability, exception
+   handling, copy behavior, import behavior, audit wording, and performance acceptance before implementation.
+
+This decision does not approve validator, service, UI, import, AI, Provider, schema, migration, database, or runtime
+work.
+
 ## Performance Acceptance Policy
 
 The future implementation must validate the 100-question policy before claiming runtime closure:
@@ -73,9 +93,11 @@ Compatibility boundaries:
 1. Validator/service package for `paper` draft, publish, copy, and question add/update flows.
 2. Student runtime guard package for `practice` and `mock_exam` start flows.
 3. Admin UI count-feedback package for `paper` composition.
-4. Alias inventory package for stored snapshots and API output scans.
-5. Alias deprecation package with migration or compatibility-removal plan.
-6. Runtime verification package for 100-question service and UI acceptance after browser/dev-server/database gates are approved.
+4. Advisory question type distribution feedback package for `paper` composition, import review, and future AI
+   paper-planning suggestions.
+5. Alias inventory package for stored snapshots and API output scans.
+6. Alias deprecation package with migration or compatibility-removal plan.
+7. Runtime verification package for 100-question service and UI acceptance after browser/dev-server/database gates are approved.
 
 ## Blocked Without Fresh Approval
 

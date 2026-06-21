@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8f2969e1a73f682a39306ba9b9f82b615659f626
-  lastKnownOriginMasterSha: 8f2969e1a73f682a39306ba9b9f82b615659f626
+  lastKnownMasterSha: a754c1b1bbd8ee2c5b892feb227aebf6b32edd6d
+  lastKnownOriginMasterSha: a754c1b1bbd8ee2c5b892feb227aebf6b32edd6d
 currentTask:
-  id: org-auth-schema-implementation-plan
+  id: record-paper-question-type-strategy-decision
   status: ready_for_closeout
-  result: pass_org_auth_schema_implementation_plan
-  claimedAt: "2026-06-21T16:18:02-07:00"
-  validatedAt: "2026-06-21T16:20:15-07:00"
+  result: pass_paper_question_type_strategy_decision_record
+  claimedAt: "2026-06-21T16:29:34-07:00"
+  validatedAt: "2026-06-21T16:31:36-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-org-auth-schema-implementation-plan
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-org-auth-schema-implementation-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-schema-implementation-plan.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-implementation-plan.md
-  branch: codex/org-auth-schema-implementation-plan
+  sourceStory: user-followup-approval-option-a-paper-question-type-strategy
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-paper-question-type-strategy-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-question-type-strategy-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-question-type-strategy-decision.md
+  branch: codex/paper-question-type-strategy-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5028,6 +5028,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - runtime_verification_later
+    - id: record-paper-question-type-strategy-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - runtime_verification_later
     - id: record-admin-experience-gap-sequencing-decision
       classification:
         - docs_decision
@@ -5115,6 +5120,26 @@ discoveredIssueClosureBatch20260621:
         `paper_question` rows across all `paper_section` and `question_group` rows, and legacy `question_type` aliases
         as compatibility inputs only. Formal persisted content, API responses, new imports, authoring UI, and audit
         output must use canonical `question_type` values.
+      approvalBoundary: >-
+        This records a product policy decision only. It does not approve validator/service/UI implementation, source or
+        test changes, schema, migration, seed, database connection, alias removal, product exception imports above 100
+        questions, package or lockfile changes, env/secret work, Provider calls, browser/e2e/dev-server runtime, deploy,
+        PR, force-push, payment, external service, or Cost Calibration Gate work.
+    - decisionId: paper-question-type-strategy
+      decidedAt: "2026-06-21T16:29:34-07:00"
+      source: user_selected_option_a
+      selectedOption: A
+      decision: use_recommended_question_type_distribution_without_hard_ratio_limit
+      appliesTo:
+        - paper-validator-service-package
+        - paper-admin-count-feedback-package
+        - content-admin-ai-paper-draft-adoption
+        - question-type-alias-inventory-package
+      implementationRule: >-
+        Future `paper` work should not enforce fixed question_type ratios at publish time. The hard publish validation
+        remains 1 to 100 questions using canonical `question_type` values. Admin, import, and future AI paper-planning
+        surfaces may show recommended question_type distribution and risk warnings, but ratio warnings must not block
+        draft save or publish unless a later product decision introduces a configured hard policy.
       approvalBoundary: >-
         This records a product policy decision only. It does not approve validator/service/UI implementation, source or
         test changes, schema, migration, seed, database connection, alias removal, product exception imports above 100
@@ -5256,7 +5281,7 @@ discoveredIssueClosureBatch20260621:
         source implementation, service/UI implementation, package or lockfile change, env/secret work, Provider calls,
         browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
-  currentSerialScopeStatus: org_auth_schema_implementation_plan_recorded
+  currentSerialScopeStatus: paper_question_type_strategy_decision_recorded
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
