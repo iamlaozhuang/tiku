@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: c802e6cc
   lastKnownOriginMasterSha: c802e6cc
 currentTask:
-  id: recheck-adr-006-ai-sdk-baseline
+  id: decide-content-admin-ai-generation-scope
   status: ready_for_closeout
-  result: pass_adr_006_ai_sdk_baseline_freshness_recheck
-  claimedAt: "2026-06-21T10:05:00-07:00"
-  validatedAt: "2026-06-21T10:10:00-07:00"
+  result: pass_content_admin_ai_generation_scope_decision_package
+  claimedAt: "2026-06-21T10:20:00-07:00"
+  validatedAt: "2026-06-21T10:25:00-07:00"
   closedAt: null
-  sourceStory: AUDIT-0621-06; super_admin-role-matrix; user-order-2
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
-  branch: codex/recheck-adr-006-ai-sdk-baseline
+  sourceStory: AUDIT-0621-02; RX-05; user-order-3
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-content-admin-ai-generation-scope.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-content-admin-ai-generation-scope.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-content-admin-ai-generation-scope.md
+  branch: codex/decide-content-admin-ai-generation-scope
   commitSha: null
   prUrl: null
   retryCount: 0

@@ -233,7 +233,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_content_admin_ai_generation_scope_decision_package
+    claimedAt: "2026-06-21T10:20:00-07:00"
+    validatedAt: "2026-06-21T10:25:00-07:00"
+    branch: codex/decide-content-admin-ai-generation-scope
     classification:
       - docs_decision
       - approval_blocked
