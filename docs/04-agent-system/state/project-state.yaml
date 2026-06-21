@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: c6d5d969
   lastKnownOriginMasterSha: c6d5d969
 currentTask:
-  id: batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+  id: batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
   status: closed
-  result: pass_existing_source_covers_redacted_log_evidence_references
-  claimedAt: "2026-06-21T06:40:05-07:00"
-  validatedAt: "2026-06-21T06:40:39-07:00"
-  closedAt: "2026-06-21T06:40:39-07:00"
+  result: pass_existing_source_covers_local_provider_sandbox_proposal_rules
+  claimedAt: "2026-06-21T06:46:52-07:00"
+  validatedAt: "2026-06-21T06:48:18-07:00"
+  closedAt: "2026-06-21T06:48:18-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  branch: codex/batch-234-ai-task-provider-redacted-log-evidence
-  commitSha: dc3bde63
+  planPath: docs/05-execution-logs/task-plans/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  branch: codex/batch-235-ai-task-provider-local-sandbox-rules
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
