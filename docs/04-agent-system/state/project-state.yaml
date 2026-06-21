@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 31979ddf
-  lastKnownOriginMasterSha: 31979ddf
+  lastKnownMasterSha: 8301cdda
+  lastKnownOriginMasterSha: 8301cdda
 currentTask:
-  id: decide-org-auth-scope-product-model
+  id: decide-paper-count-and-question-type-policy
   status: ready_for_closeout
-  result: pass_org_auth_scope_product_decision_package
-  claimedAt: "2026-06-21T10:30:00-07:00"
-  validatedAt: "2026-06-21T10:35:00-07:00"
+  result: pass_paper_count_and_question_type_policy_package
+  claimedAt: "2026-06-21T10:40:00-07:00"
+  validatedAt: "2026-06-21T10:45:00-07:00"
   closedAt: null
-  sourceStory: AUDIT-0621-03; RX-04; user-order-4
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-org-auth-scope-product-model.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-org-auth-scope-product-model.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-org-auth-scope-product-model.md
-  branch: codex/decide-org-auth-scope-product-model
+  sourceStory: AUDIT-0621-04; AUDIT-0621-05; RX-06; user-order-5
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-decide-paper-count-and-question-type-policy.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-paper-count-and-question-type-policy.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-paper-count-and-question-type-policy.md
+  branch: codex/decide-paper-count-question-type-policy
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5013,7 +5013,7 @@ discoveredIssueClosureBatch20260621:
         - approval_blocked
         - security_review_required
         - runtime_verification_later
-  nextCandidateTaskId: decide-paper-count-and-question-type-policy
+  nextCandidateTaskId: plan-admin-experience-gap-closures
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,

@@ -343,7 +343,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_paper_count_and_question_type_policy_package
+    claimedAt: "2026-06-21T10:40:00-07:00"
+    validatedAt: "2026-06-21T10:45:00-07:00"
+    branch: codex/decide-paper-count-question-type-policy
     classification:
       - docs_decision
       - runtime_verification_later
