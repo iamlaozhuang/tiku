@@ -24,7 +24,7 @@ result: pass
 | `git diff --check`                                                                                                                                                                                                                          | pass              | No whitespace errors.                                                                                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                       | pass              | Scope, sensitive evidence, and terminology scans passed for current authoring files.                                                                               |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                  | pass              | Evidence/audit, validation, RED/GREEN, commit, localFullLoopGate, next candidate, and blocked remainder anchors passed.                                            |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                         | pending           | Runs after closeout readiness.                                                                                                                                     |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-e2e-spec-authoring-packet`                                                         | pass              | Git readiness, evidence/audit paths, master/origin handoff checks, and closeout noise policy passed.                                                               |
 
 ## Implementation Summary
 
@@ -66,7 +66,7 @@ No database URLs, secrets, session credential values, raw DB rows, raw prompts, 
 ## Closeout Pending
 
 - Local validation commit: `d924daa9b15e1dc1675aee8452ee62d9d982ce64`.
-- Closeout commit: pending.
+- Closeout commit: `9724328962f6a2f532c3b7e566ca82847fba3903`.
 - Queue status: closed.
 - Project state current task status: closed.
 - FF merge to `master`: pending.
