@@ -1,12 +1,14 @@
-﻿# Module Run v2 Seeded Task Audit Review: batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+# Module Run v2 Audit Review: batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
 
 ## Decision
 
-Pending implementation and closeout review.
+APPROVE: provider-agnostic AI task lifecycle contract is locally covered by existing implementation and focused tests.
 
 ## Checks
 
-- RED/GREEN evidence must replace pending placeholders before closeout.
-- Commit evidence must replace pending placeholder before closeout.
-- localFullLoopGate, threadRolloverGate, and nextModuleRunCandidate decisions are required.
+- No blocking findings.
+- Existing implementation covers provider-agnostic lifecycle status, terminal states, failure categories, transition behavior, and provider boundary flags.
+- Focused unit validation passed with no product source edits.
+- Evidence remains redacted and contains no raw prompt, raw generated content, provider payload, database URL, Authorization header, secret, token, internal DB row, full paper content, raw employee answer text, or plaintext `redeem_code`.
+- Provider/env/dependency/schema/deploy/payment/PR/force-push work was not performed.
 - Cost Calibration Gate remains blocked.
