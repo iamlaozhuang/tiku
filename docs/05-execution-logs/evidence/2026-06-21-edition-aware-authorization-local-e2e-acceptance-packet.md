@@ -24,7 +24,7 @@ result: pass
 | `git diff --check`                                                                                                                                                                                                                            | pass              | No whitespace errors.                                                                                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                       | pass              | Scope, sensitive evidence, and terminology scans passed for current acceptance files.                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                  | pass              | Evidence/audit, validation, RED/GREEN, commit, localFullLoopGate, next candidate, and blocked remainder anchors passed.                                            |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                         | pending           | Runs after closeout readiness.                                                                                                                                     |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                         | pass              | Git readiness, evidence/audit paths, master/origin handoff checks, and closeout noise policy passed.                                                               |
 
 ## Acceptance Coverage
 
@@ -66,7 +66,7 @@ No database URLs, secrets, session credential values, raw DB rows, raw prompts, 
 ## Closeout Pending
 
 - Local validation commit: `38f789208f8205efb7d145b01da935b022e41564`.
-- Closeout commit: pending.
+- Closeout commit: `8ff45fdc96557a86826d7935cb7c2803436e920d`.
 - Queue status: closed.
 - Project state current task status: closed.
 - FF merge to `master`: pending.
