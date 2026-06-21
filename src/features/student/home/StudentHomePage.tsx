@@ -72,6 +72,7 @@ const subjectOrder: Subject[] = ["theory", "skill"];
 
 const selectedScopeSeparator = ":";
 const studentHomeSelectedScopeStorageKey = "tiku.studentHome.selectedScope";
+const studentPaperPageSize = 20;
 const authExpiryReminderWindowDays = 15;
 const millisecondsPerDay = 24 * 60 * 60 * 1000;
 const authExpiryReminderDismissalStorageKey =
@@ -390,7 +391,7 @@ function createStudentPaperListPath(scope: StudentHomeScopeSelection): string {
     profession: scope.profession,
     level: String(scope.level),
     page: "1",
-    pageSize: "20",
+    pageSize: String(studentPaperPageSize),
   });
 
   return `/api/v1/student-papers?${searchParams.toString()}`;
@@ -798,6 +799,13 @@ export function StudentHomePage({
           <p className="text-text-secondary text-sm leading-6">
             选择当前授权范围，按科目进入练习或模拟考试。
           </p>
+          <div className="text-text-secondary space-y-1 text-sm leading-6">
+            <p>理论/技能是科目分组，不是两套系统或答题模式。</p>
+            <p>
+              本页最多展示 {studentPaperPageSize}{" "}
+              套试卷；每张卡片内的“题”才是该试卷题量。
+            </p>
+          </div>
         </div>
         <nav
           className="grid grid-cols-2 gap-2 sm:grid-cols-4"
@@ -882,7 +890,7 @@ export function StudentHomePage({
                   {subjectLabels[group.subject]}
                 </h2>
                 <span className="text-text-secondary text-sm">
-                  {group.papers.length} 套
+                  {group.papers.length} 套试卷
                 </span>
               </div>
               {group.papers.length === 0 ? (

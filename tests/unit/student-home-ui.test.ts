@@ -69,6 +69,36 @@ describe("StudentHomePage", () => {
     expect(within(skillGroup).getByText("营销技能案例卷")).toBeInTheDocument();
   });
 
+  it("clarifies subject groups and paper count wording", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+      }),
+    );
+
+    expect(
+      screen.getByText("理论/技能是科目分组，不是两套系统或答题模式。"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "本页最多展示 20 套试卷；每张卡片内的“题”才是该试卷题量。",
+      ),
+    ).toBeInTheDocument();
+
+    const theoryGroup = screen.getByTestId("subject-group-theory");
+    const theoryPaperCard = screen.getByTestId(
+      "paper-card-paper-marketing-theory-002",
+    );
+
+    expect(within(theoryGroup).getByText("2 套试卷")).toBeInTheDocument();
+    expect(within(theoryPaperCard).getByText("42 题")).toBeInTheDocument();
+  });
+
   it("uses public identifiers in paper cards and action links", () => {
     render(
       createElement(StudentHomePage, {

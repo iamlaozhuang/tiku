@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: c802e6cc
   lastKnownOriginMasterSha: c802e6cc
 currentTask:
-  id: discovered-issue-closure-governance-seed
+  id: clarify-student-subject-and-paper-count-copy
   status: ready_for_closeout
-  result: batch_scope_registered_for_serial_discovered_issue_closure
-  claimedAt: "2026-06-21T09:30:00-07:00"
-  validatedAt: "2026-06-21T09:35:00-07:00"
+  result: pass_student_home_subject_and_paper_count_copy_local_validation
+  claimedAt: "2026-06-21T09:45:00-07:00"
+  validatedAt: "2026-06-21T09:55:00-07:00"
   closedAt: null
-  sourceStory: user-directed-2026-06-21-discovered-issue-closure-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-discovered-issue-closure-governance-seed.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-discovered-issue-closure-governance-seed.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-discovered-issue-closure-governance-seed.md
-  branch: codex/discovered-issue-closure-seed
+  sourceStory: AUDIT-0621-07; RX-02; RX-03; user-order-1
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+  branch: codex/clarify-student-home-copy
   commitSha: null
   prUrl: null
   retryCount: 0

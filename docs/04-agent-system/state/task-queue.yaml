@@ -120,7 +120,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_student_home_subject_and_paper_count_copy_local_validation
+    claimedAt: "2026-06-21T09:45:00-07:00"
+    validatedAt: "2026-06-21T09:55:00-07:00"
+    branch: codex/clarify-student-home-copy
     classification:
       - local_implementation
       - runtime_verification_later
