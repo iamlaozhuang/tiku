@@ -23,14 +23,17 @@ requirements and ADR coverage. No runtime implementation was performed.
 - Post-review correction scope is limited to docs traceability and acceptance matrix consistency: no product source, schema,
   migration, dependency, env, provider, payment, deploy, PR, force-push, destructive DB, or Cost Calibration work was
   added.
+- Second post-review status sync is limited to stale closeout status wording in evidence/audit and the `ADV-EAA-MAT`
+  source-index summary.
 - Redaction boundary is preserved: no credential values, auth header values, provider payloads, raw prompts, raw generated
   AI content, raw DB rows, plaintext `redeem_code`, full `paper`, full `material`, or raw employee answer text are
   recorded.
 - Validation commit: `17e2731c9a9dfd8c4eff2b7e03a87eff58479770`.
 - Closeout readiness: passed.
-- Closeout commit: pending creation.
+- Closeout commit: `cd739d6ab0e2af434f40ac7a9eefd6e5211de192`.
+- Post-review traceability repair commit: `e92e08be1db0585d98aa79e892989f2253144e4a`.
 
 ## Closeout Decision
 
-APPROVE closeout after local closeout readiness passes. Remote merge, push, PR, and branch cleanup remain blocked because
-this task-level approval covers local docs-only commits only.
+APPROVE closeout. Remote merge, push, PR, and branch cleanup remain blocked because this task-level approval covers local
+docs-only commits only.

@@ -8,6 +8,8 @@ result: pass
 - Branch: `codex/docs-edition-aware-authorization`
 - Scope: docs-only requirement, ADR, traceability, acceptance matrix, task plan, evidence, audit, and task state update.
 - Validation commit: `17e2731c9a9dfd8c4eff2b7e03a87eff58479770`.
+- Closeout commit: `cd739d6ab0e2af434f40ac7a9eefd6e5211de192`.
+- Post-review traceability repair commit: `e92e08be1db0585d98aa79e892989f2253144e4a`.
 - Source changes: none.
 - Test/e2e changes: none.
 - Schema/migration/dependency/env/provider/payment/deploy changes: none.
@@ -48,6 +50,7 @@ result: pass
 | Task-scoped sensitive evidence hardening                                                                                                                                               | pass   | `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-docs-decision-package` passed after task-level allowedFiles and redacted command metadata were corrected. |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-docs-decision-package` | pass   | Closeout readiness passed after the evidence anchor repair.                                                                                                                           |
 | Commit hook                                                                                                                                                                            | pass   | Validation commit ran hardening, lint-staged, `npm.cmd run lint`, and `npm.cmd run typecheck` successfully.                                                                           |
+| Post-review status sync search                                                                                                                                                         | pass   | Stale closeout-pending wording and stale `ADV-EAA-MAT` summary wording are absent after the second review repair.                                                                     |
 
 ## Gate Notes
 
@@ -55,6 +58,7 @@ result: pass
 - This packet added a task-level docs-only queue item and updated `currentTask` so pre-commit hardening could evaluate the correct allowedFiles.
 - A second hardening run blocked a sensitive-pattern literal in task metadata. The metadata was rewritten to a redacted scan description; hardening then passed.
 - Post-review repair fixed three documentation traceability issues: task queue use-case ids now match the use-case catalog, `ADV-EAA-*` source ids are linked from the affected use-case/capability/delta rows, and source authorization expiry/revocation/scope mismatch scenarios are explicit in the acceptance matrix.
+- Second post-review status sync removed stale closeout-pending wording from evidence/audit and expanded the `ADV-EAA-MAT` source-index summary to include source expiry/revocation, scope mismatch, quota block, and redacted audit.
 - No source, tests, e2e, schema, migration, dependency, env, provider, payment, deploy, PR, force-push, destructive DB, or Cost Calibration Gate action was performed.
 
 ## Required Anchors
@@ -84,7 +88,8 @@ credential values, auth header values, provider payloads, raw prompts, raw gener
 ## Closeout
 
 - Validation commit: `17e2731c9a9dfd8c4eff2b7e03a87eff58479770`.
-- Closeout commit: pending creation after closeout readiness passes.
+- Closeout commit: `cd739d6ab0e2af434f40ac7a9eefd6e5211de192`.
+- Post-review traceability repair commit: `e92e08be1db0585d98aa79e892989f2253144e4a`.
 - Queue status: closed by this closeout packet.
 - Project state current task status: closed by this closeout packet.
 - Merge/push/cleanup: not approved in this task-level package; branch remains local for review.
