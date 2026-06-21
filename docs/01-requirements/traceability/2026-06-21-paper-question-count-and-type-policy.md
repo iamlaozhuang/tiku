@@ -65,13 +65,24 @@ work.
 
 ## Performance Acceptance Policy
 
-The future implementation must validate the 100-question policy before claiming runtime closure:
+Follow-up approval on 2026-06-21 selected option B for performance acceptance: strong runtime acceptance is required
+before release closure for the 100-question policy.
+
+The future implementation must validate the 100-question policy before claiming full runtime acceptance:
 
 1. Service-level validation must prove create/update/publish rejects 101 questions and accepts 100 questions.
-2. Student `practice` and `mock_exam` start flows must be covered with a 100-question paper fixture.
-3. Mobile-first UI should render one active question at a time for student answering surfaces, with summary/list navigation designed for scanning rather than full long-form rendering.
-4. Admin paper composition should show count feedback before publish and avoid full-page layout shifts when a paper approaches 100 questions.
-5. Runtime proof that requires dev server, browser, Playwright/e2e, database seed, or full fresh-data verification remains deferred until separately approved.
+2. Strong runtime acceptance must use a reviewed data setup for a 100-question `paper`.
+3. Student `practice` and `mock_exam` start flows must be proven through browser/e2e runtime verification.
+4. Mobile-first UI must render one active question at a time for student answering surfaces, with summary/list navigation
+   designed for scanning rather than full long-form rendering.
+5. Admin paper composition must prove count feedback before publish and no incoherent layout shift near 100 questions
+   through browser/e2e runtime verification.
+6. Runtime evidence must be redacted and must not include database URLs, session tokens, internal numeric ids, private
+   answer text, full private paper content, Provider payloads, or secret values.
+
+Service and unit validation may close an intermediate local implementation package, but they cannot close release
+acceptance for the 100-question policy. Dev server, browser/e2e, database setup, seed, or full fresh-data verification
+remain blocked until separately approved.
 
 ## Legacy Alias Policy
 
@@ -97,10 +108,13 @@ Compatibility boundaries:
    paper-planning suggestions.
 5. Alias inventory package for stored snapshots and API output scans.
 6. Alias deprecation package with migration or compatibility-removal plan.
-7. Runtime verification package for 100-question service and UI acceptance after browser/dev-server/database gates are approved.
+7. Mandatory strong runtime verification package for 100-question student and admin acceptance after
+   browser/dev-server/database gates are approved.
 
 ## Blocked Without Fresh Approval
 
 - Source, test, e2e, schema, migration, seed, database, script, package, lockfile, dependency, `.env`, Provider, browser/dev-server runtime, deploy, PR, force-push, payment, external-service, or Cost Calibration Gate work.
 - Any exception allowing more than 100 questions in a published `paper`.
 - Any immediate removal of legacy alias compatibility.
+- Any release-acceptance claim for the 100-question policy before the mandatory strong runtime verification package
+  passes.
