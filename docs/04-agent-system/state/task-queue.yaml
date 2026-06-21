@@ -506,7 +506,11 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: blocked_closure_plan
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    result: pass_advanced_enterprise_training_blocked_closure_plan
+    claimedAt: "2026-06-21T11:10:00-07:00"
+    validatedAt: "2026-06-21T11:15:00-07:00"
+    branch: codex/plan-advanced-enterprise-training-path
     classification:
       - approval_blocked
       - security_review_required
