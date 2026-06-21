@@ -590,13 +590,17 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
-    status: blocked
-    result: packet_defined_execution_requires_fresh_approval
-    nextApprovalRequired: schema_and_api_packets_closed_with_exact_service_repository_allowed_files
+    status: claimed
+    result: in_progress_service_repository_packet
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T03:07:01-07:00"
+    branch: codex/edition-auth-service-repository-packet
+    commitSha: null
+    nextApprovalRequired: none_for_current_service_repository_packet_scope
     targetClosureItem: effectiveEdition calculation, auth_upgrade evaluation, quota owner context, and audit-safe summaries
     behaviorBoundary: service-repository::effective_edition_authorization_boundary
     capabilities:
-      productSourceChange: blocked_without_task_fresh_approval
+      productSourceChange: approved_service_repository_only
       localDockerDatabase: blocked_without_task_fresh_approval
       databaseWrite: blocked_without_task_fresh_approval
       schemaMigration: blocked
@@ -641,20 +645,21 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-service-repository-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-service-repository-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-service-repository-packet
     redactionPolicy: service evidence records contract outcomes and counts only; no row dumps, database URLs, auth headers, secrets, or cleartext redeem_code values
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalRequired: task_fresh_approval
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_edition_aware_authorization_packets
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
-        approvalRequired: task_fresh_approval
+        approvalSource: current_user_fresh_approval_2026_06_21_edition_aware_authorization_packets
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-service-repository-packet.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-service-repository-packet.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-service-repository-packet.md
