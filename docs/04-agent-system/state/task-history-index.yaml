@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-21-edition-followup
-  updatedAt: "2026-06-21T05:22:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-21-edition-packets-window
+  updatedAt: "2026-06-21T05:45:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -10686,3 +10686,53 @@ entries:
     commitSha: null
     completedAt: "2026-06-21"
     archivedByTask: active-queue-slimming-2026-06-21-edition-followup
+  - id: edition-aware-authorization-schema-migration-approval-packet
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 6e38250d7b69ab78e40676fbac773d6d68dfe291
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-packets-window
+  - id: edition-aware-authorization-api-contract-packet
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-api-contract-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-api-contract-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 3afe1aaf44e4a6ae9b5ee9f15020a361cbd13c53
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-packets-window
+  - id: edition-aware-authorization-service-repository-packet
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-service-repository-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-service-repository-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 37231fa01524b002b973efcfab0f2609a4a155f4
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-packets-window
+  - id: edition-aware-authorization-ui-context-packet
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-ui-context-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-ui-context-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: ea6526214655d2816dd9dc7a160ddbb6304dea9f
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-packets-window
+  - id: edition-aware-authorization-e2e-spec-authoring-packet
+    phase: edition-aware-authorization-implementation-planning
+    status: closed
+    taskKind: local_e2e_spec_authoring
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-e2e-spec-authoring-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-e2e-spec-authoring-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: d924daa9b15e1dc1675aee8452ee62d9d982ce64
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-edition-packets-window
