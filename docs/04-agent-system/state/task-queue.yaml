@@ -2497,6 +2497,7 @@ tasks:
     validatedAt: "2026-06-21T06:29:46-07:00"
     closedAt: "2026-06-21T06:29:46-07:00"
     branch: codex/batch-232-ai-task-provider-lifecycle-contract
+    commitSha: 7a05b187
     retryCount: 0
   - id: batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen
     title: Module Run v2 ai-task-and-provider implementation seed

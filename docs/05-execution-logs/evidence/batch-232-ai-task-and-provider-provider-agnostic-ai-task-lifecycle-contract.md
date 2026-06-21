@@ -16,7 +16,7 @@ result: pass
 - Batch range: `batch-232`
 - RED: existing tests confirmed coverage before any source edit; no source gap found.
 - GREEN: `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts src/server/validators/ai-task-domain.test.ts src/server/services/ai-task-domain-service.test.ts` passed with 3 files and 11 tests.
-- Commit: `6cf60bc2` pre-task seed baseline; final task commit will be recorded after commit creation.
+- Commit: `7a05b187` task closeout commit.
 - localFullLoopGate: L2 satisfied by local unit validation without provider/env/schema/dependency changes.
 - threadRolloverGate: continue_current_thread; this is the first implementation task after auto-seed and context remains within the approved module boundary.
 - nextModuleRunCandidate: continue serially to `batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen` after 232 is merged and pushed.
@@ -37,6 +37,7 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`: passed.
+- `git commit -m "docs(agent): close ai task provider lifecycle contract"`: created task closeout commit `7a05b187`; pre-commit hardening, lint-staged, lint, typecheck, and post-commit advisory passed.
 
 ## Source Coverage
 
