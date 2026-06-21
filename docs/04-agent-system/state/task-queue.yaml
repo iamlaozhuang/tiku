@@ -1,5 +1,121 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: edition-aware-authorization-packet-metadata-repair
+    title: Edition-aware authorization packet metadata repair
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: userApprovedEditionAwareAuthorizationPacketSplitMetadataRepair
+    dependencies:
+      - edition-aware-authorization-implementation-packet-split
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved continuing the edition-aware authorization implementation packet split under project mechanics. This
+      docs/state repair only adds missing queue metadata for the five future packets. It does not authorize executing
+      schema/migration, API, service, UI, e2e, provider/model call, dependency, env/secret, payment, deploy, PR,
+      force-push, destructive database, or Cost Calibration Gate work.
+    targetExperienceChain: edition-aware-authorization
+    targetClosureItem: schema/API/service/UI/e2e packet mechanism metadata
+    behaviorBoundary: docs-state::edition_aware_authorization_packet_metadata_only
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_requirement_decision
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_edition_aware_authorization_packet_metadata_repair
+    claimedAt: "2026-06-21T01:15:17-07:00"
+    validatedAt: "2026-06-21T01:15:17-07:00"
+    closedAt: "2026-06-21T01:15:17-07:00"
+    branch: codex/edition-auth-packet-metadata-repair
+    commitSha: null
+    repairedPacketIds:
+      - edition-aware-authorization-schema-migration-approval-packet
+      - edition-aware-authorization-api-contract-packet
+      - edition-aware-authorization-service-repository-packet
+      - edition-aware-authorization-ui-context-packet
+      - edition-aware-authorization-local-e2e-acceptance-packet
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      implementationPacketMaterialization: allowed
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+      - docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product runtime source edits
+      - schema/drizzle/migration changes or execution
+      - database reads, writes, or destructive operations
+      - UI/browser/e2e work or dev server validation
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - implementation_packet_metadata_repair
+      - evidence_redaction
+      - high_risk_gate_preservation
+    validationCommands:
+      - git status --short --branch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npm.cmd run format:check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - rg -n "executionProfile|validationPolicy|evidencePath|auditReviewPath|planPath|closeoutPolicy" docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-packet-metadata-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-packet-metadata-repair
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_packet_split_metadata_repair_instruction
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-packet-metadata-repair.md
+    retryCount: 0
   - id: edition-aware-authorization-implementation-packet-split
     title: Edition-aware authorization implementation packet split
     phase: edition-aware-authorization-implementation-planning
@@ -142,12 +258,16 @@ tasks:
     phase: edition-aware-authorization-implementation-planning
     sourceStory: editionAwareAuthorizationPacketSplit.schema
     dependencies:
-      - edition-aware-authorization-implementation-packet-split
+      - edition-aware-authorization-packet-metadata-repair
     useCaseIds:
       - UC-STD-PERSONAL-AUTH-REDEEM
       - UC-STD-ORG-AUTH-MANAGED
       - UC-ADV-AUTH-CONTEXT-UPGRADE
       - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: schema_isolated
+    evidenceMode: full
+    validationPolicy: high_risk_isolated
+    queueSelectionMode: legacy_explicit
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
     status: blocked
@@ -197,6 +317,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
     redactionPolicy: no database URL, row data, secret, token, cleartext redeem_code, provider payload, raw prompt, or raw generated AI content in evidence
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalRequired: task_fresh_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalRequired: task_fresh_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-schema-migration-approval-packet.md
   - id: edition-aware-authorization-api-contract-packet
     title: Edition-aware authorization API contract packet
     phase: edition-aware-authorization-implementation-planning
@@ -208,6 +344,10 @@ tasks:
       - UC-STD-ORG-AUTH-MANAGED
       - UC-ADV-AUTH-CONTEXT-UPGRADE
       - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
     status: blocked
@@ -263,6 +403,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-api-contract-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-api-contract-packet
     redactionPolicy: API evidence records status and contract shape only; no internal ids, database rows, auth headers, secrets, or cleartext redeem_code values
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalRequired: task_fresh_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalRequired: task_fresh_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-api-contract-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-api-contract-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-api-contract-packet.md
   - id: edition-aware-authorization-service-repository-packet
     title: Edition-aware authorization service and repository packet
     phase: edition-aware-authorization-implementation-planning
@@ -274,6 +430,10 @@ tasks:
       - UC-STD-ORG-AUTH-MANAGED
       - UC-ADV-AUTH-CONTEXT-UPGRADE
       - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: repository_runtime_tdd
+    evidenceMode: full
+    validationPolicy: runtime_unit
+    queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
     status: blocked
@@ -328,6 +488,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-service-repository-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-service-repository-packet
     redactionPolicy: service evidence records contract outcomes and counts only; no row dumps, database URLs, auth headers, secrets, or cleartext redeem_code values
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalRequired: task_fresh_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalRequired: task_fresh_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-service-repository-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-service-repository-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-service-repository-packet.md
   - id: edition-aware-authorization-ui-context-packet
     title: Edition-aware authorization UI context packet
     phase: edition-aware-authorization-implementation-planning
@@ -339,6 +515,10 @@ tasks:
       - UC-STD-ORG-AUTH-MANAGED
       - UC-ADV-AUTH-CONTEXT-UPGRADE
       - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
     status: blocked
@@ -397,6 +577,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-ui-context-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-ui-context-packet
     redactionPolicy: UI evidence records state names and pass/fail only; UI visibility is not treated as an authorization boundary
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalRequired: task_fresh_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalRequired: task_fresh_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-ui-context-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-ui-context-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-ui-context-packet.md
   - id: edition-aware-authorization-local-e2e-acceptance-packet
     title: Edition-aware authorization local e2e acceptance packet
     phase: edition-aware-authorization-implementation-planning
@@ -408,6 +604,10 @@ tasks:
       - UC-STD-ORG-AUTH-MANAGED
       - UC-ADV-AUTH-CONTEXT-UPGRADE
       - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: local_full_flow
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: ready_set
     taskKind: local_full_flow
     moduleRunVersion: 2
     status: blocked
@@ -460,6 +660,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
     redactionPolicy: e2e evidence records command, spec name, role/use-case summary, pass/fail, and redacted metadata only
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalRequired: task_fresh_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        approvalRequired: task_fresh_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-local-e2e-acceptance-packet.md
   - id: edition-aware-authorization-docs-decision-package
     title: Edition-aware authorization docs decision package
     phase: requirements-architecture-decision
