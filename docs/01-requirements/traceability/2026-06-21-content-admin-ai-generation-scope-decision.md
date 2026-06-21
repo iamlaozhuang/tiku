@@ -29,13 +29,40 @@ The product decision package is:
 | formal `paper` adoption               | blocked        | Requires manual review gate, paper draft lifecycle rules, snapshot semantics, and publish validation.           |
 | real Provider execution               | blocked        | Requires Provider/env/cost approvals and redacted evidence rules.                                               |
 
+## Generated Result Storage Model
+
+Follow-up approval on 2026-06-21 selected option A for generated-result storage: use an isolated AI generation result or
+draft review surface.
+
+Policy:
+
+1. AI generated question and paper-planning output must land in an isolated review surface before any formal content
+   adoption.
+2. Isolated results are not formal `question`, `material`, `paper`, `paper_section`, `question_group`,
+   `question_option`, `standard_answer`, `analysis`, or `scoring_point` records.
+3. Isolated results are not student-visible, cannot be published, cannot be selected by `mock_exam`, and cannot be used
+   as formal `paper` content.
+4. Formal adoption is a separate human action that validates, edits when needed, attributes the reviewer, writes
+   `audit_log`, and creates or updates formal records only after the reviewer accepts the result.
+5. Paper-planning output may propose structure, candidate question references, and selection rationale, but must not
+   create a publishable `paper` without the formal adoption workflow.
+6. Question-generation output may propose draft fields, options, standard answer, analysis, scoring points, materials,
+   or groups, but must not write them into formal records without the formal adoption workflow.
+7. Evidence must remain redacted and must not include raw prompts, Provider payloads, raw generated content, private
+   answer text, full paper content, API keys, tokens, database URLs, internal numeric ids, or plaintext `redeem_code`
+   values.
+
+This decision does not approve schema, migration, source implementation, model output persistence, real Provider calls,
+prompt/provider payload exposure, formal content writes, database work, or runtime verification.
+
 ## Recommended Future Architecture
 
 Future implementation should be split into these reviewable tasks. Every implementation task must preserve the option A boundary: generation produces reviewable drafts or suggestions only; formal adoption remains a separate human action.
 
 1. Product UX/API contract package for `content_admin` AI generation request and review surfaces, including draft status and reviewer action semantics.
 2. Provider/env/cost approval package with redaction rules and stop conditions.
-3. Isolated generation result model or contract package, with no formal `question`/`paper` writes.
+3. Isolated generation result model or contract package, with no formal `question`/`paper` writes, following the option A
+   isolated review-surface decision above.
 4. Manual review and formal adoption package for `question` drafts.
 5. Manual review and formal adoption package for `paper` drafts.
 6. Audit/logging package covering `audit_log`, `ai_call_log`, reviewer identity, and public identifiers only.
