@@ -495,12 +495,14 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: implementation
     moduleRunVersion: 2
-    status: claimed
-    result: in_progress_api_contract_packet
+    status: closed
+    result: pass_edition_aware_authorization_api_contract
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T02:59:30-07:00"
+    validatedAt: "2026-06-21T03:04:23-07:00"
+    closedAt: "2026-06-21T03:04:23-07:00"
     branch: codex/edition-auth-api-contract-packet
-    commitSha: null
+    commitSha: 3afe1aaf44e4a6ae9b5ee9f15020a361cbd13c53
     nextApprovalRequired: none_for_current_api_contract_packet_scope
     targetClosureItem: edition-aware authorization REST contracts, validators, mappers, and thin route handlers
     behaviorBoundary: api-contract::edition_aware_authorization_transport_boundary

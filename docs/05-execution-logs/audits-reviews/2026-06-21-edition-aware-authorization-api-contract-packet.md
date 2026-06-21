@@ -1,5 +1,7 @@
 # Audit Review: edition-aware authorization API contract packet
 
+APPROVE_WITH_CLOSEOUT_PENDING
+
 ## Boundary Review
 
 - Packet scope: API contract, validators, mappers, model type exports, and thin route handler only.
@@ -20,4 +22,6 @@
 
 - Focused API contract unit validation passed.
 - Lint, typecheck, and `git diff --check` passed.
-- Pre-commit hardening, module closeout readiness, and pre-push readiness pending.
+- Pre-commit hardening passed after repairing a banned-term test fixture.
+- Module closeout readiness passed.
+- Approved to continue module closeout readiness, pre-push readiness, fast-forward merge to `master`, push `origin/master`, and merged short-branch cleanup if the remaining gates pass.
