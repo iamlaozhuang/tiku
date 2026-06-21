@@ -1,5 +1,465 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: edition-aware-authorization-implementation-packet-split
+    title: Edition-aware authorization implementation packet split
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: userApprovedEditionAwareAuthorizationPacketSplitAfterDocsMerge
+    dependencies:
+      - edition-aware-authorization-docs-decision-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User approved fast-forward merge to master, push origin/master, cleanup of the completed docs branch, and then
+      splitting the edition-aware authorization implementation into schema/API/service/UI/e2e packets. This task is
+      limited to docs/state packet materialization only. It does not authorize executing schema/migration, API, service,
+      UI, e2e, provider/model call, dependency, env/secret, payment, deploy, PR, force-push, destructive database, or
+      Cost Calibration Gate work.
+    targetExperienceChain: edition-aware-authorization
+    targetClosureItem: schema/API/service/UI/e2e implementation packet split
+    behaviorBoundary: docs-state::edition_aware_authorization_packet_split_only
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_requirement_decision
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_edition_aware_authorization_implementation_packet_split
+    claimedAt: "2026-06-21T01:00:40-07:00"
+    validatedAt: "2026-06-21T01:00:40-07:00"
+    closedAt: "2026-06-21T01:00:40-07:00"
+    branch: codex/edition-auth-implementation-packets
+    commitSha: null
+    packetIds:
+      - edition-aware-authorization-schema-migration-approval-packet
+      - edition-aware-authorization-api-contract-packet
+      - edition-aware-authorization-service-repository-packet
+      - edition-aware-authorization-ui-context-packet
+      - edition-aware-authorization-local-e2e-acceptance-packet
+    capabilities:
+      docsStateOnlyQueueMaintenance: allowed
+      implementationPacketMaterialization: allowed
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-implementation-packets.md
+      - docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-implementation-packets.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-implementation-packets.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/**
+      - docs/01-requirements/traceability/**
+      - docs/01-requirements/use-cases/**
+      - src/server/**
+      - src/app/api/v1/**
+      - src/features/**
+      - src/app/**
+      - tests/unit/**
+      - e2e/**
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product runtime source edits
+      - schema/drizzle/migration changes or execution
+      - database reads, writes, or destructive operations
+      - UI/browser/e2e work or dev server validation
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - implementation_packet_split
+      - evidence_redaction
+      - high_risk_gate_preservation
+    validationCommands:
+      - git status --short --branch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - npm.cmd run format:check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - rg -n "edition-aware-authorization-(schema-migration-approval|api-contract|service-repository|ui-context|local-e2e-acceptance)-packet" docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-implementation-packet-split
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-implementation-packet-split
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_packet_split_instruction_and_standing_docs_state_fast_lane
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-edition-aware-authorization-implementation-packets.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-edition-aware-authorization-implementation-packets.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-edition-aware-authorization-implementation-packets.md
+    retryCount: 0
+  - id: edition-aware-authorization-schema-migration-approval-packet
+    title: Edition-aware authorization schema and migration approval packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.schema
+    dependencies:
+      - edition-aware-authorization-implementation-packet-split
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: high_risk_approval_package
+    moduleRunVersion: 2
+    status: blocked
+    result: packet_defined_execution_requires_fresh_approval
+    nextApprovalRequired: exact_schema_migration_plan_local_capability_gate_rollback_and_redacted_evidence
+    targetClosureItem: source edition, redeem_code_type, auth_upgrade, compatibility migration plan
+    behaviorBoundary: schema-migration::edition_aware_authorization_source_of_truth
+    capabilities:
+      schemaMigration: blocked_without_task_fresh_approval
+      localDockerDatabase: blocked_without_task_fresh_approval
+      destructiveLocalDockerDatabase: blocked
+      productSourceChange: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - src/db/schema/**
+      - drizzle/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/app/**
+      - src/features/**
+      - src/components/**
+      - src/server/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet -Capability schemaMigration -Intent use_capability
+      - npx.cmd drizzle-kit generate
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-schema-migration-approval-packet
+    redactionPolicy: no database URL, row data, secret, token, cleartext redeem_code, provider payload, raw prompt, or raw generated AI content in evidence
+  - id: edition-aware-authorization-api-contract-packet
+    title: Edition-aware authorization API contract packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.api
+    dependencies:
+      - edition-aware-authorization-schema-migration-approval-packet
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: blocked
+    result: packet_defined_execution_requires_fresh_approval
+    nextApprovalRequired: schema_packet_closed_and_exact_api_allowed_files_with_contract_unit_validation
+    targetClosureItem: edition-aware authorization REST contracts, validators, mappers, and thin route handlers
+    behaviorBoundary: api-contract::edition_aware_authorization_transport_boundary
+    capabilities:
+      productSourceChange: blocked_without_task_fresh_approval
+      schemaMigration: blocked
+      localE2EValidation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/personal-auths/**
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/redeem-codes/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/features/**
+      - src/components/**
+      - tests/e2e/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/validators/edition-aware-authorization.test.ts src/server/mappers/edition-aware-authorization-mapper.test.ts src/server/services/edition-aware-authorization-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-api-contract-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-api-contract-packet
+    redactionPolicy: API evidence records status and contract shape only; no internal ids, database rows, auth headers, secrets, or cleartext redeem_code values
+  - id: edition-aware-authorization-service-repository-packet
+    title: Edition-aware authorization service and repository packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.service
+    dependencies:
+      - edition-aware-authorization-api-contract-packet
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: blocked
+    result: packet_defined_execution_requires_fresh_approval
+    nextApprovalRequired: schema_and_api_packets_closed_with_exact_service_repository_allowed_files
+    targetClosureItem: effectiveEdition calculation, auth_upgrade evaluation, quota owner context, and audit-safe summaries
+    behaviorBoundary: service-repository::effective_edition_authorization_boundary
+    capabilities:
+      productSourceChange: blocked_without_task_fresh_approval
+      localDockerDatabase: blocked_without_task_fresh_approval
+      databaseWrite: blocked_without_task_fresh_approval
+      schemaMigration: blocked
+      localE2EValidation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/mappers/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/features/**
+      - src/components/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/edition-aware-authorization-service.test.ts src/server/repositories/edition-aware-authorization-repository.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-service-repository-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-service-repository-packet
+    redactionPolicy: service evidence records contract outcomes and counts only; no row dumps, database URLs, auth headers, secrets, or cleartext redeem_code values
+  - id: edition-aware-authorization-ui-context-packet
+    title: Edition-aware authorization UI context packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.ui
+    dependencies:
+      - edition-aware-authorization-service-repository-packet
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: blocked
+    result: packet_defined_execution_requires_fresh_approval
+    nextApprovalRequired: api_service_packets_closed_and_exact_ui_allowed_files_with_focused_unit_validation
+    targetClosureItem: student and admin edition display, issue/upgrade controls, quota owner summaries, and safe audit metadata
+    behaviorBoundary: ui-context::edition_aware_authorization_display_not_permission_boundary
+    capabilities:
+      productSourceChange: blocked_without_task_fresh_approval
+      localE2EValidation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - src/features/student/profile/**
+      - src/features/admin/org-auth-redeem/**
+      - src/features/admin/admin-ops-management/**
+      - src/features/student/studentRuntimeApi.ts
+      - src/app/(student)/profile/**
+      - src/app/(student)/redeem-code/**
+      - src/app/(admin)/ops/redeem-codes/**
+      - src/app/(admin)/ops/users/**
+      - src/app/(admin)/ops/organizations/**
+      - tests/unit/student-profile-redeem-ui.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/app/api/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-profile-redeem-ui.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-ui-context-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-ui-context-packet
+    redactionPolicy: UI evidence records state names and pass/fail only; UI visibility is not treated as an authorization boundary
+  - id: edition-aware-authorization-local-e2e-acceptance-packet
+    title: Edition-aware authorization local e2e acceptance packet
+    phase: edition-aware-authorization-implementation-planning
+    sourceStory: editionAwareAuthorizationPacketSplit.e2e
+    dependencies:
+      - edition-aware-authorization-ui-context-packet
+    useCaseIds:
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ORG-AUTH-MANAGED
+      - UC-ADV-AUTH-CONTEXT-UPGRADE
+      - UC-ADV-OPS-AUTH-QUOTA
+    taskKind: local_full_flow
+    moduleRunVersion: 2
+    status: blocked
+    result: packet_defined_execution_requires_fresh_approval
+    nextApprovalRequired: all_prior_packets_closed_and_local_e2e_fresh_approval_with_exact_spec_and_fixture_boundary
+    targetClosureItem: local standard and advanced personal/organization authorization acceptance
+    behaviorBoundary: local-e2e::edition_aware_authorization_acceptance_redacted
+    capabilities:
+      localE2EValidation: blocked_without_task_fresh_approval
+      localFullFlowGate: blocked_without_task_fresh_approval
+      devServer: blocked_without_task_fresh_approval
+      localDockerDatabase: blocked_without_task_fresh_approval
+      destructiveLocalDockerDatabase: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - e2e/edition-aware-authorization-local-flow.spec.ts
+      - tests/unit/playwright-config-baseline.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/**
+      - src/app/**
+      - src/features/**
+      - src/components/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/edition-aware-authorization-local-flow.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet
+    redactionPolicy: e2e evidence records command, spec name, role/use-case summary, pass/fail, and redacted metadata only
   - id: edition-aware-authorization-docs-decision-package
     title: Edition-aware authorization docs decision package
     phase: requirements-architecture-decision
