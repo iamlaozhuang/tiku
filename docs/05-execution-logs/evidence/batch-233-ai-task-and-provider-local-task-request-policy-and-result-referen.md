@@ -16,7 +16,7 @@ result: pass
 - Batch range: `batch-233`
 - RED: existing tests confirmed coverage before any source edit; no source gap found.
 - GREEN: focused request policy unit tests passed.
-- Commit: `048e6dfb` pre-task baseline; final task commit will be recorded after commit creation.
+- Commit: `a3c484e5` task closeout commit.
 - localFullLoopGate: L2 satisfied by local unit validation without provider/env/schema/dependency changes.
 - threadRolloverGate: continue_current_thread; this is the second implementation task after auto-seed and context remains inside the approved module boundary.
 - nextModuleRunCandidate: continue serially to `batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence` after 233 is merged and pushed.
@@ -36,6 +36,7 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen`: passed.
+- `git commit -m "docs(agent): close ai task provider request policy contract"`: created task closeout commit `a3c484e5`; pre-commit hardening, lint-staged, lint, typecheck, and post-commit advisory passed.
 
 ## Source Coverage
 
