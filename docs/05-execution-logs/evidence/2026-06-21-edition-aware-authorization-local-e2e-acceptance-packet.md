@@ -23,7 +23,7 @@ result: pass
 | `npm.cmd run typecheck`                                                                                                                                                                                                                       | pass              | `tsc --noEmit` passed.                                                                                                                                             |
 | `git diff --check`                                                                                                                                                                                                                            | pass              | No whitespace errors.                                                                                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                       | pass              | Scope, sensitive evidence, and terminology scans passed for current acceptance files.                                                                              |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                  | pending           | Runs after local validation commit and closeout state update.                                                                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                  | pass              | Evidence/audit, validation, RED/GREEN, commit, localFullLoopGate, next candidate, and blocked remainder anchors passed.                                            |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId edition-aware-authorization-local-e2e-acceptance-packet`                                                         | pending           | Runs after closeout readiness.                                                                                                                                     |
 
 ## Acceptance Coverage
@@ -53,7 +53,7 @@ result: pass
 - Batch range: single local e2e acceptance packet for edition-aware authorization.
 - RED: before the spec authoring packet, this acceptance packet was blocked because an allowlisted dedicated local e2e spec did not exist.
 - GREEN: `npm.cmd run test:e2e -- e2e/edition-aware-authorization-local-flow.spec.ts` passed 3/3 for this acceptance packet.
-- Commit: pending local validation commit.
+- Commit: `38f789208f8205efb7d145b01da935b022e41564`.
 - localFullLoopGate: passed localhost-only capability gate; no DB migration apply or destructive DB was used.
 - threadRolloverGate: after this packet closes, merges, pushes, and cleans its short branch, stop the edition-aware authorization packet sequence and do not enter other modules automatically.
 - nextModuleRunCandidate: none for this approved packet sequence; do not auto-enter AP-01/AP-11 or other unauthorized work.
@@ -65,10 +65,10 @@ No database URLs, secrets, session credential values, raw DB rows, raw prompts, 
 
 ## Closeout Pending
 
-- Local validation commit: pending.
+- Local validation commit: `38f789208f8205efb7d145b01da935b022e41564`.
 - Closeout commit: pending.
-- Queue status: in progress until commit hash is available.
-- Project state current task status: in progress until commit hash is available.
+- Queue status: closed.
+- Project state current task status: closed.
 - FF merge to `master`: pending.
 - Push `origin/master`: pending.
 - Short branch cleanup: pending.

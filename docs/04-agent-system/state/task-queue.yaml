@@ -868,11 +868,14 @@ tasks:
     queueSelectionMode: ready_set
     taskKind: local_full_flow
     moduleRunVersion: 2
-    status: in_progress
-    result: pending
+    status: closed
+    result: pass_edition_aware_authorization_local_e2e_acceptance
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T03:43:00-07:00"
+    validatedAt: "2026-06-21T03:51:00-07:00"
+    closedAt: "2026-06-21T03:52:00-07:00"
     branch: codex/edition-auth-local-e2e-acceptance-packet
+    commitSha: 38f789208f8205efb7d145b01da935b022e41564
     nextApprovalRequired: none_for_current_local_e2e_acceptance_scope_after_spec_authoring
     targetClosureItem: local standard and advanced personal/organization authorization acceptance
     behaviorBoundary: local-e2e::edition_aware_authorization_acceptance_redacted
