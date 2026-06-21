@@ -133,7 +133,7 @@ Audit and evidence must not contain session tokens, database URLs, internal nume
 
 ## Follow-Up Gates
 
-This preflight package unlocks only the next discussion item. The next `org_auth` item should be the `org-auth-schema-approval-package`, which must request fresh approval before any schema, migration, seed, database connection, or data backfill work.
+This preflight package unlocked the next discussion item. The user selected option A on 2026-06-21 to create the docs-only `org-auth-schema-approval-package`, recorded in `docs/02-architecture/interfaces/2026-06-21-org-auth-schema-approval-package.md`. That package still does not approve schema source edits, migration generation or execution, seed, database connection, or data backfill work.
 
 Remaining gates:
 
