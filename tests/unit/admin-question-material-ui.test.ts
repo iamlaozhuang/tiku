@@ -1455,6 +1455,15 @@ describe("AdminQuestionMaterialManagement", () => {
       "knowledge-recommendation-panel-question-marketing-001",
     );
     expect(panel).toHaveAttribute("data-stale", "false");
+    const reviewSummary = screen.getByTestId(
+      "knowledge-recommendation-review-summary-question-marketing-001",
+    );
+    expect(reviewSummary).toHaveTextContent(
+      "target question: question-marketing-001",
+    );
+    expect(reviewSummary).toHaveTextContent("accepted: 0");
+    expect(reviewSummary).toHaveTextContent("discarded: 0");
+    expect(reviewSummary).toHaveTextContent("pending: 2");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-row-knowledge-node-sampling-v2",
@@ -1501,6 +1510,23 @@ describe("AdminQuestionMaterialManagement", () => {
         "knowledge-recommendation-row-knowledge-node-segmentation",
       ),
     ).toHaveTextContent("discarded");
+    expect(reviewSummary).toHaveTextContent("accepted: 1");
+    expect(reviewSummary).toHaveTextContent("discarded: 1");
+    expect(reviewSummary).toHaveTextContent("pending: 0");
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-review-trace-question-marketing-001",
+      ),
+    ).toHaveTextContent(
+      "accepted knowledge-node-sampling-v2 -> question.update",
+    );
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-review-trace-question-marketing-001",
+      ),
+    ).toHaveTextContent(
+      "discarded knowledge-node-segmentation -> local_review_only",
+    );
 
     fireEvent.click(
       screen.getByRole("button", {

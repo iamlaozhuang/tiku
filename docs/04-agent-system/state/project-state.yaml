@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-21T18:43:15-07:00"
+updatedAt: "2026-06-21T18:55:07-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5e8f20fdebdc96160fb249b3fe1ba61572cabff7
-  lastKnownOriginMasterSha: 5e8f20fdebdc96160fb249b3fe1ba61572cabff7
+  lastKnownMasterSha: f5d17b6ef17d88a6fa39f10a948b8f508e1d5153
+  lastKnownOriginMasterSha: f5d17b6ef17d88a6fa39f10a948b8f508e1d5153
 currentTask:
-  id: close-question-reference-and-material-lock-surface
+  id: close-kn-recommendation-review-experience
   status: ready_for_closeout
-  result: pass_question_reference_material_lock_surface_local_validation
-  claimedAt: "2026-06-21T18:38:59-07:00"
-  validatedAt: "2026-06-21T18:46:34-07:00"
+  result: pass_kn_recommendation_review_experience_local_validation
+  claimedAt: "2026-06-21T18:51:45-07:00"
+  validatedAt: "2026-06-21T18:55:07-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-7; admin-experience-gap-sequencing
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
-  branch: codex/close-question-reference-and-material-lock-surface
+  sourceStory: current-user-low-risk-task-8; admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-kn-recommendation-review-experience.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-kn-recommendation-review-experience.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-kn-recommendation-review-experience.md
+  branch: codex/close-kn-recommendation-review-experience
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: close-question-reference-and-material-lock-surface
+  currentTaskId: close-kn-recommendation-review-experience
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for

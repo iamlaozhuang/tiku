@@ -163,6 +163,15 @@ type PendingContentAction =
 
 type KnowledgeRecommendationReviewState = {
   recommendation: QuestionKnowledgeRecommendationDto;
+  reviewActionByKnowledgeNodePublicId: Record<
+    string,
+    {
+      auditAction: "local_review_only" | "question.update";
+      knowledgeNodePublicId: string;
+      reviewStatus: RecommendationReviewStatus;
+      targetQuestionPublicId: string;
+    }
+  >;
   reviewStatusByKnowledgeNodePublicId: Record<
     string,
     RecommendationReviewStatus
@@ -914,6 +923,7 @@ export function AdminQuestionMaterialManagement({
       ...currentRecommendations,
       [question.publicId]: {
         recommendation: recommendationResult.recommendation,
+        reviewActionByKnowledgeNodePublicId: {},
         reviewStatusByKnowledgeNodePublicId: {},
       },
     }));
@@ -976,6 +986,18 @@ export function AdminQuestionMaterialManagement({
         ...currentRecommendations,
         [questionPublicId]: {
           ...currentRecommendation,
+          reviewActionByKnowledgeNodePublicId: {
+            ...currentRecommendation.reviewActionByKnowledgeNodePublicId,
+            [knowledgeNodePublicId]: {
+              auditAction:
+                reviewStatus === "accepted"
+                  ? "question.update"
+                  : "local_review_only",
+              knowledgeNodePublicId,
+              reviewStatus,
+              targetQuestionPublicId: questionPublicId,
+            },
+          },
           reviewStatusByKnowledgeNodePublicId: {
             ...currentRecommendation.reviewStatusByKnowledgeNodePublicId,
             [knowledgeNodePublicId]: reviewStatus,
@@ -2323,6 +2345,25 @@ function KnowledgeRecommendationReviewPanel({
   const isStale =
     reviewState.recommendation.reviewState.questionUpdatedAt !==
     question.updatedAt;
+  const reviewStatuses = reviewState.recommendation.recommendations.map(
+    (recommendation) =>
+      reviewState.reviewStatusByKnowledgeNodePublicId[
+        recommendation.knowledgeNodePublicId
+      ] ?? recommendation.confirmationStatus,
+  );
+  const acceptedCount = reviewStatuses.filter(
+    (reviewStatus) => reviewStatus === "accepted",
+  ).length;
+  const discardedCount = reviewStatuses.filter(
+    (reviewStatus) => reviewStatus === "discarded",
+  ).length;
+  const pendingCount =
+    reviewState.recommendation.recommendations.length -
+    acceptedCount -
+    discardedCount;
+  const reviewActions = Object.values(
+    reviewState.reviewActionByKnowledgeNodePublicId,
+  );
 
   return (
     <section
@@ -2345,6 +2386,35 @@ function KnowledgeRecommendationReviewPanel({
           {reviewState.recommendation.reviewState.bindingMode}
         </span>
       </div>
+      <div
+        className="text-text-secondary mt-3 grid gap-1 text-xs leading-5"
+        data-testid={`knowledge-recommendation-review-summary-${question.publicId}`}
+      >
+        <p>target question: {question.publicId}</p>
+        <p>
+          accepted: {acceptedCount} | discarded: {discardedCount} | pending:{" "}
+          {pendingCount}
+        </p>
+        <p>
+          recommendation snapshot:{" "}
+          {reviewState.recommendation.reviewState.questionUpdatedAt}
+        </p>
+      </div>
+      <ul
+        className="text-text-secondary mt-3 grid gap-1 text-xs leading-5"
+        data-testid={`knowledge-recommendation-review-trace-${question.publicId}`}
+      >
+        {reviewActions.length === 0 ? (
+          <li>no local review action yet</li>
+        ) : (
+          reviewActions.map((reviewAction) => (
+            <li key={reviewAction.knowledgeNodePublicId}>
+              {reviewAction.reviewStatus} {reviewAction.knowledgeNodePublicId}{" "}
+              -&gt; {reviewAction.auditAction}
+            </li>
+          ))
+        )}
+      </ul>
 
       {reviewState.recommendation.recommendations.length === 0 ? (
         <p className="text-text-secondary mt-3 text-sm">
