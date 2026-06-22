@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-272-organization-training-organization-admin-training-draft-publish-ta
-updatedAt: "2026-06-22T07:36:57-07:00"
+currentPhase: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+updatedAt: "2026-06-22T07:42:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-272-organization-training-organization-admin-training-draft-publish-ta
+  id: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
   status: closed
-  result: pass_organization_training_admin_flow_contract
-  claimedAt: "2026-06-22T07:36:57-07:00"
-  validatedAt: "2026-06-22T07:38:28-07:00"
-  closedAt: "2026-06-22T07:38:28-07:00"
+  result: pass_organization_training_employee_flow_contract
+  claimedAt: "2026-06-22T07:42:55-07:00"
+  validatedAt: "2026-06-22T07:44:21-07:00"
+  closedAt: "2026-06-22T07:44:21-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
-  evidencePath: docs/05-execution-logs/evidence/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
-  branch: codex/batch-272-organization-training-admin-flow
+  planPath: docs/05-execution-logs/task-plans/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
+  branch: codex/batch-273-organization-training-employee-flow
   commitSha: null
   prUrl: null
   retryCount: 0

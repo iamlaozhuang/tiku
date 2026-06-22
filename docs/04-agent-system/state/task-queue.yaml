@@ -5548,7 +5548,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-273-organization-training-employee-answer-lifecycle-local-role-flow
     validationCommands:
@@ -5556,10 +5556,17 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+    planPath: docs/05-execution-logs/task-plans/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
     evidencePath: docs/05-execution-logs/evidence/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
-    status: pending
+    status: closed
+    result: pass_organization_training_employee_flow_contract
+    claimedAt: "2026-06-22T07:42:55-07:00"
+    validatedAt: "2026-06-22T07:44:21-07:00"
+    closedAt: "2026-06-22T07:44:21-07:00"
+    branch: codex/batch-273-organization-training-employee-flow
     retryCount: 0
   - id: batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
     title: Module Run v2 organization-training implementation seed
