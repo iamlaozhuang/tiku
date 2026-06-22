@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-277-organization-analytics-privacy-preserving-employee-statistics
-updatedAt: "2026-06-22T08:16:56-07:00"
+currentPhase: batch-278-organization-analytics-export-readiness-contracts-without-object-st
+updatedAt: "2026-06-22T08:20:32-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f33216ef05de4e8ead061e5c51db86fe7fef8b02
-  lastKnownOriginMasterSha: f33216ef05de4e8ead061e5c51db86fe7fef8b02
+  lastKnownMasterSha: 22574da9043be66c041a7a243e6217cb015260b0
+  lastKnownOriginMasterSha: 22574da9043be66c041a7a243e6217cb015260b0
 currentTask:
-  id: batch-277-organization-analytics-privacy-preserving-employee-statistics
+  id: batch-278-organization-analytics-export-readiness-contracts-without-object-st
   status: closed
-  result: pass_organization_analytics_privacy_preserving_employee_statistics_historical_reconcile
-  claimedAt: "2026-06-22T08:16:00-07:00"
-  validatedAt: "2026-06-22T08:16:56-07:00"
-  closedAt: "2026-06-22T08:16:56-07:00"
+  result: pass_organization_analytics_export_readiness_contracts_historical_reconcile
+  claimedAt: "2026-06-22T08:20:00-07:00"
+  validatedAt: "2026-06-22T08:20:32-07:00"
+  closedAt: "2026-06-22T08:20:32-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
-  branch: codex/batch-277-organization-analytics-privacy-stats
+  planPath: docs/05-execution-logs/task-plans/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
+  evidencePath: docs/05-execution-logs/evidence/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
+  branch: codex/batch-278-organization-analytics-export-readiness
   commitSha: null
   prUrl: null
   retryCount: 0
