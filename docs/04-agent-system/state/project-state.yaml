@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ae7be0825e05d2a1f87c7c4dbefeedea6bfbe892
-  lastKnownOriginMasterSha: ec149b13463cd2477e76e4878fb50689bae6a525
+  lastKnownMasterSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
+  lastKnownOriginMasterSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
 currentTask:
-  id: batch-248-personal-learning-ai-personal-generation-request-flow
+  id: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection
   status: closed
-  result: pass_existing_request_flow_reconciled_and_revalidated
-  claimedAt: "2026-06-22T01:13:00-07:00"
-  validatedAt: "2026-06-22T01:14:00-07:00"
-  closedAt: "2026-06-22T01:14:00-07:00"
+  result: pass_existing_context_selection_reconciled_and_revalidated
+  claimedAt: "2026-06-22T01:21:53-07:00"
+  validatedAt: "2026-06-22T01:22:31-07:00"
+  closedAt: "2026-06-22T01:22:31-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-248-personal-learning-ai-personal-generation-request-flow.md
-  evidencePath: docs/05-execution-logs/evidence/batch-248-personal-learning-ai-personal-generation-request-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-248-personal-learning-ai-personal-generation-request-flow.md
-  branch: codex/batch-248-personal-learning-ai-request-flow
-  commitSha: ae7be0825e05d2a1f87c7c4dbefeedea6bfbe892
+  planPath: docs/05-execution-logs/task-plans/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  evidencePath: docs/05-execution-logs/evidence/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  branch: codex/batch-249-personal-learning-ai-context-selection
+  commitSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -5,7 +5,7 @@
 - Task id: `batch-249-personal-learning-ai-paper-and-mock-exam-context-selection`
 - Module: `personal-learning-ai`
 - Target closure: paper and mock_exam context selection.
-- Status: seeded; execute after batch 248 closeout.
+- Status: closed via historical implementation reconcile and current focused unit validation.
 
 ## Initial Boundary
 
@@ -20,3 +20,14 @@
 - `npm.cmd run typecheck`
 - `git diff --check`
 - Module Run v2 precommit, closeout, and prepush gates.
+
+## Reconcile Decision
+
+- Historical implementation anchors:
+  - `docs/05-execution-logs/evidence/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md`
+  - `docs/05-execution-logs/evidence/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md`
+- Current implementation surface remains the existing local contract:
+  - `src/server/services/personal-ai-generation-request-context-service.ts`
+  - `src/server/services/personal-ai-generation-request-context-service.test.ts`
+- No source change was required for batch-249 because the service already validates no-context, paper, `mock_exam`,
+  ambiguous context rejection, public-id-only references, and redacted context references.
