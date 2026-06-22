@@ -26,6 +26,8 @@ import type {
   EmployeeImportResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
+  RedeemCodeDetailDto,
+  RedeemCodeDetailResultDto,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
@@ -1281,7 +1283,7 @@ function RedeemCodeDetailPanel({
   redeemCode,
 }: {
   onClose: () => void;
-  redeemCode: AdminRedeemCodeData["redeemCodes"][number];
+  redeemCode: RedeemCodeDetailDto;
 }) {
   return (
     <section
@@ -1343,6 +1345,44 @@ function RedeemCodeDetailPanel({
           <dt className="text-text-muted text-xs">创建时间</dt>
           <dd className="text-text-primary mt-1 text-sm font-medium">
             {formatDate(redeemCode.createdAt)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">生成批次</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+            {redeemCode.generationGroupId}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">有效天数</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCode.durationDay}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">兑换时间</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCode.redeemedAt === null
+              ? "未兑换"
+              : formatDate(redeemCode.redeemedAt)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">更新时间</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {formatDate(redeemCode.updatedAt)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">脱敏状态</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCode.redactionStatus}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">脱敏原因</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+            {redeemCode.redactionReason}
           </dd>
         </div>
       </dl>
@@ -2909,18 +2949,41 @@ export function AdminRedeemCodePage() {
   const [selectedRedeemCodePublicId, setSelectedRedeemCodePublicId] = useState<
     string | null
   >(null);
+  const [selectedRedeemCodeDetail, setSelectedRedeemCodeDetail] =
+    useState<RedeemCodeDetailDto | null>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const hasUnavailablePlainTextCode = data.redeemCodes.some(
     (redeemCode) =>
       redeemCode.status === "unused" && !redeemCode.canViewPlainText,
   );
-  const selectedRedeemCode = useMemo(
-    () =>
-      data.redeemCodes.find(
-        (redeemCode) => redeemCode.publicId === selectedRedeemCodePublicId,
-      ) ?? null,
-    [data.redeemCodes, selectedRedeemCodePublicId],
-  );
+
+  async function handleViewRedeemCodeDetail(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setSelectedRedeemCodePublicId(publicId);
+    setSelectedRedeemCodeDetail(null);
+
+    const detailResponse = await fetchAdminApi<RedeemCodeDetailResultDto>(
+      `/api/v1/redeem-codes/${encodeURIComponent(publicId)}`,
+      sessionToken,
+    );
+
+    if (detailResponse.code !== 0 || detailResponse.data === null) {
+      setSelectedRedeemCodePublicId(null);
+      setToastMessage({
+        message: detailResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    setSelectedRedeemCodeDetail(detailResponse.data.redeemCode);
+  }
 
   async function handleConfirmRedeemCodeAction() {
     const sessionToken = getStoredSessionToken();
@@ -3077,16 +3140,34 @@ export function AdminRedeemCodePage() {
         />
       </section>
 
-      {selectedRedeemCode === null ? null : (
+      {selectedRedeemCodePublicId !== null &&
+      selectedRedeemCodeDetail === null ? (
+        <section
+          className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+          data-testid={`admin-redeem-code-detail-loading-${selectedRedeemCodePublicId}`}
+        >
+          <div className="text-text-secondary flex items-center gap-2 text-sm">
+            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            正在加载卡密详情
+          </div>
+        </section>
+      ) : null}
+
+      {selectedRedeemCodeDetail === null ? null : (
         <RedeemCodeDetailPanel
-          redeemCode={selectedRedeemCode}
-          onClose={() => setSelectedRedeemCodePublicId(null)}
+          redeemCode={selectedRedeemCodeDetail}
+          onClose={() => {
+            setSelectedRedeemCodePublicId(null);
+            setSelectedRedeemCodeDetail(null);
+          }}
         />
       )}
 
       <RedeemCodeList
         redeemCodes={data.redeemCodes}
-        onViewDetail={setSelectedRedeemCodePublicId}
+        onViewDetail={(publicId) => {
+          void handleViewRedeemCodeDetail(publicId);
+        }}
       />
 
       {confirmationState === null ? null : (

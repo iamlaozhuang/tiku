@@ -171,6 +171,33 @@ const redeemCodePayload = {
   },
 };
 
+const redeemCodeDetailPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    redeemCode: {
+      publicId: "redeem-code-public-001",
+      codeDisplay: "RC-2026-****",
+      canViewPlainText: false,
+      profession: "monopoly",
+      level: 3,
+      status: "unused",
+      redeemedUserPublicId: null,
+      redeemedAt: null,
+      durationDay: 365,
+      redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+      generationGroupId: "redeem-code-batch-public-001",
+      createdAt: "2026-05-22T00:00:00.000Z",
+      updatedAt: "2026-05-23T09:00:00.000Z",
+      redactionStatus: "redacted",
+      redactionReason: "plaintext_redeem_code_and_hash_hidden",
+      id: 402,
+      code_hash: "detail-do-not-render",
+      codePlainText: "RC-2026-DETAIL-PLAIN",
+    },
+  },
+};
+
 const generatedRedeemCodePayload = {
   code: 0,
   message: "ok",
@@ -230,6 +257,10 @@ function mockSystemOpsFetch() {
 
       if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
         return createJsonResponse(redeemCodePayload);
+      }
+
+      if (path === "/api/v1/redeem-codes/redeem-code-public-001") {
+        return createJsonResponse(redeemCodeDetailPayload);
       }
 
       if (
@@ -909,7 +940,7 @@ describe("admin user organization authorization ops baseline", () => {
 
   it("renders a redacted redeem_code detail view from the redeem code page", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockSystemOpsFetch();
+    const fetchMock = mockSystemOpsFetch();
 
     render(createElement(AdminRedeemCodePage));
 
@@ -934,10 +965,21 @@ describe("admin user organization authorization ops baseline", () => {
     expect(redeemCodeDetail).not.toHaveAttribute("data-id");
     expect(redeemCodeDetail).toHaveTextContent("RC-2026-****");
     expect(redeemCodeDetail).toHaveTextContent("redeem-code-public-001");
+    expect(redeemCodeDetail).toHaveTextContent("redeem-code-batch-public-001");
+    expect(redeemCodeDetail).toHaveTextContent("365");
+    expect(redeemCodeDetail).toHaveTextContent("redacted");
     expect(redeemCodeDetail).toHaveTextContent("未兑换");
     expect(redeemCodeDetail).toHaveTextContent("2026-06-24");
     expect(redeemCodeDetail).not.toHaveTextContent("LOCALTST");
     expect(redeemCodeDetail).not.toHaveTextContent("code_hash");
+    expect(redeemCodeDetail).not.toHaveTextContent("detail-do-not-render");
+    expect(redeemCodeDetail).not.toHaveTextContent("RC-2026-DETAIL-PLAIN");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/redeem-codes/redeem-code-public-001",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+      }),
+    );
 
     fireEvent.click(
       within(redeemCodeDetail).getByRole("button", { name: "关闭" }),
