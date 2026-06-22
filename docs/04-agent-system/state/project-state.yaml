@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-22T02:01:13-07:00"
+updatedAt: "2026-06-22T02:08:11-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 42add82cf2803819e4d7e292a9e11842d7404973
-  lastKnownOriginMasterSha: 42add82cf2803819e4d7e292a9e11842d7404973
+  lastKnownMasterSha: d54cb45016ef1f75816aab5461b29ec2e32dac45
+  lastKnownOriginMasterSha: d54cb45016ef1f75816aab5461b29ec2e32dac45
 currentTask:
-  id: closeout-reconcile-batch-248-251-checkpoint
+  id: batch-252-organization-training-organization-admin-training-draft-publish-ta
   status: closed
-  result: pass_docs_state_closeout_reconcile_batch_248_251_checkpoint
-  claimedAt: "2026-06-22T01:51:24-07:00"
-  validatedAt: "2026-06-22T01:51:24-07:00"
-  closedAt: "2026-06-22T01:51:24-07:00"
-  sourceStory: current-user-2026-06-22-closeout-reconcile-and-organization-training-seed
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
-  branch: codex/closeout-reconcile-batch-248-251
-  commitSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
+  result: pass_historical_reconcile_organization_admin_training_lifecycle
+  claimedAt: "2026-06-22T02:08:11-07:00"
+  validatedAt: "2026-06-22T02:08:11-07:00"
+  closedAt: "2026-06-22T02:08:11-07:00"
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/batch-252-organization-training-organization-admin-training-draft-publish-ta.md
+  evidencePath: docs/05-execution-logs/evidence/batch-252-organization-training-organization-admin-training-draft-publish-ta.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-252-organization-training-organization-admin-training-draft-publish-ta.md
+  branch: codex/batch-252-organization-training-admin-flow
+  commitSha: d54cb45016ef1f75816aab5461b29ec2e32dac45
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5645,8 +5645,8 @@ organizationTrainingGuardedImplementationBatch20260622:
     - batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex
     - batch-255-organization-training-audit-log-redacted-reference
   currentTaskId: batch-252-organization-training-organization-admin-training-draft-publish-ta
-  currentTaskStatus: pending
-  nextCandidateTaskId: batch-252-organization-training-organization-admin-training-draft-publish-ta
+  currentTaskStatus: closed
+  nextCandidateTaskId: batch-253-organization-training-employee-answer-lifecycle-local-role-flow
   approvalBoundary:
     allowed:
       - task_plan_evidence_audit_creation
