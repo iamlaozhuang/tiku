@@ -5129,19 +5129,26 @@ tasks:
         command: npm.cmd run typecheck
       - phase: post_edit
         command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-personal-learning-ai.md
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
     evidencePath: docs/05-execution-logs/evidence/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-    status: pending
+    planPath: docs/05-execution-logs/task-plans/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    status: closed
+    result: pass_personal_ai_generation_local_browser_experience_contract_validation
+    claimedAt: "2026-06-22T07:20:17-07:00"
+    validatedAt: "2026-06-22T07:21:43-07:00"
+    closedAt: "2026-06-22T07:21:43-07:00"
+    branch: codex/batch-270-personal-ai-local-browser-experience
     retryCount: 0
   - id: batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
     title: Module Run v2 personal-learning-ai implementation seed
