@@ -888,6 +888,7 @@ function OrganizationList({
   onDisableOrganization,
   onEditOrganization,
   onEnableOrganization,
+  onViewOrganizationDetail,
   organizations,
 }: {
   onDisableOrganization: (publicId: string) => void;
@@ -895,6 +896,7 @@ function OrganizationList({
     organization: AdminOrgAuthData["organizations"][number],
   ) => void;
   onEnableOrganization: (publicId: string) => void;
+  onViewOrganizationDetail: (publicId: string) => void;
   organizations: AdminOrgAuthData["organizations"];
 }) {
   return (
@@ -922,6 +924,15 @@ function OrganizationList({
             <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
               {organization.status === "active" ? "启用" : "停用"}
             </span>
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              data-testid={`organization-detail-${organization.publicId}`}
+              onClick={() => onViewOrganizationDetail(organization.publicId)}
+            >
+              <Eye className="size-3.5" aria-hidden="true" />
+              详情
+            </button>
             <button
               type="button"
               className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
@@ -956,6 +967,194 @@ function OrganizationList({
         </AdminDataRow>
       ))}
     </AdminPanel>
+  );
+}
+
+function OrganizationDetailPanel({
+  employees,
+  onClose,
+  onDisableOrganization,
+  onEditOrganization,
+  onEnableOrganization,
+  organization,
+  organizations,
+  orgAuths,
+}: {
+  employees: AdminOrgAuthData["employees"];
+  onClose: () => void;
+  onDisableOrganization: (publicId: string) => void;
+  onEditOrganization: (
+    organization: AdminOrgAuthData["organizations"][number],
+  ) => void;
+  onEnableOrganization: (publicId: string) => void;
+  organization: AdminOrgAuthData["organizations"][number];
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}) {
+  const parentOrganization = organizations.find(
+    (candidateOrganization) =>
+      candidateOrganization.publicId ===
+      organization.parentOrganizationPublicId,
+  );
+  const childOrganizations = organizations.filter(
+    (candidateOrganization) =>
+      candidateOrganization.parentOrganizationPublicId ===
+      organization.publicId,
+  );
+  const relatedOrgAuths = orgAuths.filter(
+    (orgAuth) =>
+      orgAuth.purchaserOrganizationPublicId === organization.publicId ||
+      orgAuth.organizationPublicIds.includes(organization.publicId),
+  );
+  const relatedEmployees = employees.filter(
+    (employee) => employee.organizationPublicId === organization.publicId,
+  );
+
+  return (
+    <section
+      aria-label="组织详情"
+      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
+      data-public-id={organization.publicId}
+      data-testid={`admin-organization-detail-${organization.publicId}`}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">组织详情</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            {organization.name}
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            基于当前后台列表数据聚合组织、授权和员工摘要；写操作继续通过既有二次确认提交。
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={() => onEditOrganization(organization)}
+          >
+            <Pencil className="size-3.5" aria-hidden="true" />
+            编辑组织
+          </button>
+          {organization.status === "active" ? (
+            <button
+              type="button"
+              className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onDisableOrganization(organization.publicId)}
+            >
+              <Ban className="size-3.5" aria-hidden="true" />
+              停用组织
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onEnableOrganization(organization.publicId)}
+            >
+              <CheckCircle2 className="size-3.5" aria-hidden="true" />
+              启用组织
+            </button>
+          )}
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onClose}
+          >
+            关闭
+          </button>
+        </div>
+      </div>
+
+      <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">企业层级</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {orgTierLabels[organization.orgTier]}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">组织状态</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {organization.status === "active" ? "启用" : "停用"}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">组织员工</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            员工 {organization.employeeCount}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">关联授权</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            关联授权 {relatedOrgAuths.length}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">父级组织</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+            {parentOrganization?.name ??
+              organization.parentOrganizationPublicId ??
+              "无"}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">下级组织</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {childOrganizations.length === 0
+              ? "无下级组织"
+              : childOrganizations.map((child) => child.name).join("、")}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">授权摘要</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {organization.authSummary ?? "暂无授权摘要"}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">员工记录</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {relatedEmployees.length === 0
+              ? "暂无员工记录"
+              : relatedEmployees.map((employee) => employee.name).join("、")}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-4 space-y-2">
+        <h3 className="text-text-primary text-sm font-semibold">
+          关联企业授权
+        </h3>
+        {relatedOrgAuths.length === 0 ? (
+          <p className="text-text-muted text-sm">暂无关联企业授权。</p>
+        ) : (
+          <div className="space-y-2">
+            {relatedOrgAuths.map((orgAuth) => (
+              <div
+                key={orgAuth.publicId}
+                className="border-border flex flex-col gap-1 rounded-md border p-3"
+              >
+                <p className="text-text-primary text-sm font-medium">
+                  {orgAuth.name}
+                </p>
+                <p className="text-text-secondary flex flex-wrap gap-1 text-xs">
+                  <span>{formatProfessionLevel(orgAuth)}</span>
+                  <span>/</span>
+                  <span>{getOrgAuthEditionLabel(orgAuth)}</span>
+                  <span>/</span>
+                  <span>{authStatusLabels[orgAuth.status]}</span>
+                  <span>/</span>
+                  <span>
+                    {orgAuth.usedQuota} / {orgAuth.accountQuota}
+                  </span>
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -2339,6 +2538,8 @@ export function AdminOrgAuthPage() {
   const [organizationFormState, setOrganizationFormState] =
     useState<OrganizationFormState>(defaultOrganizationFormState);
   const [employeeImportText, setEmployeeImportText] = useState("");
+  const [selectedOrganizationPublicId, setSelectedOrganizationPublicId] =
+    useState<string | null>(null);
   const [selectedOrgAuthPublicId, setSelectedOrgAuthPublicId] = useState<
     string | null
   >(null);
@@ -2353,6 +2554,16 @@ export function AdminOrgAuthPage() {
         0,
       ),
     [data.organizations],
+  );
+  const selectedOrganizationDetail = useMemo(
+    () =>
+      selectedOrganizationPublicId === null
+        ? null
+        : (data.organizations.find(
+            (organization) =>
+              organization.publicId === selectedOrganizationPublicId,
+          ) ?? null),
+    [data.organizations, selectedOrganizationPublicId],
   );
   async function handleViewOrgAuthDetail(publicId: string) {
     const sessionToken = getStoredSessionToken();
@@ -2853,6 +3064,7 @@ export function AdminOrgAuthPage() {
               publicId,
             })
           }
+          onViewOrganizationDetail={setSelectedOrganizationPublicId}
         />
         <OrgAuthList
           orgAuths={data.orgAuths}
@@ -2873,6 +3085,29 @@ export function AdminOrgAuthPage() {
           }
         />
       </section>
+
+      {selectedOrganizationDetail === null ? null : (
+        <OrganizationDetailPanel
+          employees={data.employees}
+          organization={selectedOrganizationDetail}
+          organizations={data.organizations}
+          orgAuths={data.orgAuths}
+          onClose={() => setSelectedOrganizationPublicId(null)}
+          onDisableOrganization={(publicId) =>
+            setOrganizationConfirmationState({
+              kind: "disableOrganization",
+              publicId,
+            })
+          }
+          onEditOrganization={handleEditOrganization}
+          onEnableOrganization={(publicId) =>
+            setOrganizationConfirmationState({
+              kind: "enableOrganization",
+              publicId,
+            })
+          }
+        />
+      )}
 
       {selectedOrgAuthPublicId !== null && selectedOrgAuthDetail === null ? (
         <section

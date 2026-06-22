@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ed7f49e7652fcc3af713a2e0a35ef4ff2a0ff1b4
-  lastKnownOriginMasterSha: ed7f49e7652fcc3af713a2e0a35ef4ff2a0ff1b4
+  lastKnownMasterSha: ac534c19903fa20704f8dc4ac57946e16d41379b
+  lastKnownOriginMasterSha: ac534c19903fa20704f8dc4ac57946e16d41379b
 currentTask:
-  id: close-redeem-code-audit-redaction
+  id: close-organization-detail-management
   status: ready_for_closeout
-  result: pass_redeem_code_audit_redaction_local_validation
-  claimedAt: "2026-06-21T19:20:34-07:00"
-  validatedAt: "2026-06-21T19:24:41-07:00"
+  result: pass_organization_detail_management_local_validation
+  claimedAt: "2026-06-21T19:29:20-07:00"
+  validatedAt: "2026-06-21T19:34:50-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-11; admin-experience-gap-sequencing
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
-  branch: codex/close-redeem-code-audit-redaction
+  sourceStory: current-user-low-risk-task-12; admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
+  branch: codex/close-organization-detail-management
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: close-redeem-code-audit-redaction
+  currentTaskId: close-organization-detail-management
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for

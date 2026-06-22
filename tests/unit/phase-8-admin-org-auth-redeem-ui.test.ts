@@ -1,5 +1,11 @@
 import { createElement } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -250,6 +256,30 @@ describe("AdminOrgAuthPage", () => {
         headers: { authorization: "Bearer unit-test-admin-token" },
       }),
     );
+  });
+
+  it("shows organization detail management from the existing organization data", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockAdminFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    const organization = await screen.findByTestId(
+      "admin-organization-organization-public-001",
+    );
+    fireEvent.click(within(organization).getByRole("button", { name: "详情" }));
+
+    const organizationDetail = screen.getByTestId(
+      "admin-organization-detail-organization-public-001",
+    );
+
+    expect(organizationDetail).toHaveTextContent("组织详情");
+    expect(organizationDetail).toHaveTextContent("员工 42");
+    expect(organizationDetail).toHaveTextContent("关联授权 1");
+    expect(organizationDetail).toHaveTextContent("杭州烟草企业授权");
+    expect(organizationDetail).not.toHaveTextContent("101");
+    expect(organizationDetail).not.toHaveTextContent("201");
+    expect(organizationDetail).not.toHaveTextContent("301");
   });
 
   it("renders empty and error states from standard response envelopes", async () => {

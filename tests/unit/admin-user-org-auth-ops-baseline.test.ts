@@ -862,6 +862,51 @@ describe("admin user organization authorization ops baseline", () => {
     );
   });
 
+  it("renders organization detail management without leaking internal identifiers", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    const organization = await screen.findByTestId(
+      "admin-organization-organization-public-001",
+    );
+    fireEvent.click(within(organization).getByRole("button", { name: "详情" }));
+
+    const organizationDetail = screen.getByTestId(
+      "admin-organization-detail-organization-public-001",
+    );
+
+    expect(organizationDetail).toHaveAttribute(
+      "data-public-id",
+      "organization-public-001",
+    );
+    expect(organizationDetail).not.toHaveAttribute("data-id");
+    expect(organizationDetail).toHaveTextContent("组织详情");
+    expect(organizationDetail).toHaveTextContent("杭州烟草");
+    expect(organizationDetail).toHaveTextContent("市级");
+    expect(organizationDetail).toHaveTextContent("员工 42");
+    expect(organizationDetail).toHaveTextContent("关联授权 1");
+    expect(organizationDetail).toHaveTextContent("杭州烟草企业授权");
+    expect(organizationDetail).not.toHaveTextContent("101");
+    expect(organizationDetail).not.toHaveTextContent("201");
+    expect(organizationDetail).not.toHaveTextContent("301");
+
+    fireEvent.click(
+      within(organizationDetail).getByRole("button", { name: "编辑组织" }),
+    );
+    expect(screen.getByTestId("organization-name-input")).toHaveValue(
+      "杭州烟草",
+    );
+
+    fireEvent.click(
+      within(organizationDetail).getByRole("button", { name: "关闭" }),
+    );
+    expect(
+      screen.queryByTestId("admin-organization-detail-organization-public-001"),
+    ).not.toBeInTheDocument();
+  });
+
   it("blocks organization tree mutations with invalid tier parent selection", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
