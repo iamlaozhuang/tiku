@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: organization-analytics-guarded-implementation-2026-06-22
-updatedAt: "2026-06-22T02:40:21-07:00"
+updatedAt: "2026-06-22T03:20:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
-  lastKnownOriginMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
+  lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
+  lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-259-organization-analytics-audit-log-redacted-reference
+  id: closeout-reconcile-batch-256-259-checkpoint
   status: closed
-  result: pass_historical_reconcile
-  claimedAt: "2026-06-22T03:07:58-07:00"
-  validatedAt: "2026-06-22T03:07:58-07:00"
-  closedAt: "2026-06-22T03:07:58-07:00"
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-259-organization-analytics-audit-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-259-organization-analytics-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-259-organization-analytics-audit-log-redacted-reference.md
-  branch: codex/batch-259-organization-analytics-audit-log
-  commitSha: 68182887a64698d2c792151daf6ebd48291f3c60
+  result: pass_docs_state_closeout_reconcile_batch_256_259_checkpoint
+  claimedAt: "2026-06-22T03:20:57-07:00"
+  validatedAt: "2026-06-22T03:20:57-07:00"
+  closedAt: "2026-06-22T03:20:57-07:00"
+  sourceStory: current-user-2026-06-22-closeout-reconcile-and-ops-governance-seed
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
+  branch: codex/closeout-reconcile-batch-256-259
+  commitSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5707,8 +5707,11 @@ organizationAnalyticsGuardedImplementationBatch20260622:
   seedClosedAt: "2026-06-22T02:47:00-07:00"
   seedStatus: closed
   closedAt: "2026-06-22T03:07:58-07:00"
+  finalHeadSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   closedTaskCount: 4
-  postCloseoutReconcileStatus: pending
+  postCloseoutReconcileTaskId: closeout-reconcile-batch-256-259-checkpoint
+  postCloseoutReconcileStatus: closed
+  postCloseoutReconcileValidatedAt: "2026-06-22T03:20:57-07:00"
   approvalBoundary:
     allowed:
       - task_plan_evidence_audit_creation
