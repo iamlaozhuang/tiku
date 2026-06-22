@@ -316,9 +316,11 @@ function mapPaperDraftToSummary(
     totalScore: paper.totalScore ?? existingPaper?.totalScore ?? "0.0",
     questionCount: paper.questionCount,
     questionTypeDistribution:
-      "questionTypeDistribution" in paper
+      "questionTypeDistribution" in paper && paper.questionTypeDistribution
         ? paper.questionTypeDistribution
-        : createQuestionTypeDistributionFromPaperDraft(paper),
+        : "paperSections" in paper && Array.isArray(paper.paperSections)
+          ? createQuestionTypeDistributionFromPaperDraft(paper)
+          : (existingPaper?.questionTypeDistribution ?? []),
     mockExamCount:
       "mockExamCount" in paper
         ? paper.mockExamCount
@@ -407,7 +409,7 @@ function createPaperQuestionCountFeedback(paper: AdminPaperOpsSummaryDto): {
 function createPaperQuestionTypeDistributionFeedback(
   paper: AdminPaperOpsSummaryDto,
 ): string {
-  const distribution = paper.questionTypeDistribution.filter(
+  const distribution = (paper.questionTypeDistribution ?? []).filter(
     (item) => item.count > 0,
   );
 
