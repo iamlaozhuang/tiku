@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
   lastKnownOriginMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
 currentTask:
-  id: batch-257-organization-analytics-privacy-preserving-employee-statistics
+  id: batch-258-organization-analytics-export-readiness-contracts-without-object-st
   status: closed
   result: pass_historical_reconcile
-  claimedAt: "2026-06-22T02:57:12-07:00"
-  validatedAt: "2026-06-22T02:57:12-07:00"
-  closedAt: "2026-06-22T02:57:12-07:00"
+  claimedAt: "2026-06-22T03:02:22-07:00"
+  validatedAt: "2026-06-22T03:02:22-07:00"
+  closedAt: "2026-06-22T03:02:22-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
-  branch: codex/batch-257-organization-analytics-employee-stats
-  commitSha: bc0b1b6d4a649caea1a77bd857b153a5e6c706c3
+  planPath: docs/05-execution-logs/task-plans/batch-258-organization-analytics-export-readiness-contracts-without-object-st.md
+  evidencePath: docs/05-execution-logs/evidence/batch-258-organization-analytics-export-readiness-contracts-without-object-st.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-258-organization-analytics-export-readiness-contracts-without-object-st.md
+  branch: codex/batch-258-organization-analytics-export-readiness
+  commitSha: 15e7861e4aab030c926718d5f562621e9305f55e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5701,9 +5701,9 @@ organizationAnalyticsGuardedImplementationBatch20260622:
     - batch-257-organization-analytics-privacy-preserving-employee-statistics
     - batch-258-organization-analytics-export-readiness-contracts-without-object-st
     - batch-259-organization-analytics-audit-log-redacted-reference
-  currentTaskId: batch-257-organization-analytics-privacy-preserving-employee-statistics
+  currentTaskId: batch-258-organization-analytics-export-readiness-contracts-without-object-st
   currentTaskStatus: closed
-  nextCandidateTaskId: batch-258-organization-analytics-export-readiness-contracts-without-object-st
+  nextCandidateTaskId: batch-259-organization-analytics-audit-log-redacted-reference
   seedClosedAt: "2026-06-22T02:47:00-07:00"
   seedStatus: closed
   approvalBoundary:
