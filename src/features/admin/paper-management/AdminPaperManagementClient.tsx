@@ -124,6 +124,9 @@ const paperTypeLabels: Record<PaperType, string> = {
   past_paper: "历年真题",
 };
 
+const PUBLISHED_PAPER_MIN_QUESTION_COUNT = 1;
+const PAPER_QUESTION_COUNT_LIMIT = 100;
+
 function usePaperData() {
   const [loadState, setLoadState] = useState<PaperLoadState>("loading");
   const [papers, setPapers] = useState<AdminPaperOpsSummaryDto[]>([]);
@@ -308,6 +311,45 @@ function createPaperLifecycleSummary(paper: AdminPaperOpsSummaryDto): string {
   }
 
   return "草稿可继续组卷；发布前需完成发布校验";
+}
+
+function createPaperQuestionCountFeedback(paper: AdminPaperOpsSummaryDto): {
+  feedback: string;
+  value: string;
+} {
+  const remainingQuestionCount = Math.max(
+    0,
+    PAPER_QUESTION_COUNT_LIMIT - paper.questionCount,
+  );
+  const value = `${paper.questionCount}/${PAPER_QUESTION_COUNT_LIMIT}`;
+
+  if (paper.questionCount < PUBLISHED_PAPER_MIN_QUESTION_COUNT) {
+    return {
+      value,
+      feedback: `发布风险：发布前至少需要 ${PUBLISHED_PAPER_MIN_QUESTION_COUNT} 题；还可加入 ${remainingQuestionCount} 题`,
+    };
+  }
+
+  if (paper.questionCount > PAPER_QUESTION_COUNT_LIMIT) {
+    return {
+      value,
+      feedback: `发布风险：已超过 ${PAPER_QUESTION_COUNT_LIMIT} 题上限 ${
+        paper.questionCount - PAPER_QUESTION_COUNT_LIMIT
+      } 题`,
+    };
+  }
+
+  if (paper.questionCount === PAPER_QUESTION_COUNT_LIMIT) {
+    return {
+      value,
+      feedback: `已达到 ${PAPER_QUESTION_COUNT_LIMIT} 题上限；发布前请复核性能风险`,
+    };
+  }
+
+  return {
+    value,
+    feedback: `题量有效；还可加入 ${remainingQuestionCount} 题`,
+  };
 }
 
 function createPaperInput(values: PaperFormValues) {
@@ -1506,6 +1548,7 @@ function PaperList({
         const isDraft = paper.paperStatus === "draft";
         const isPublished = paper.paperStatus === "published";
         const canCopy = paper.paperStatus !== "draft";
+        const questionCountFeedback = createPaperQuestionCountFeedback(paper);
 
         return (
           <article
@@ -1535,7 +1578,10 @@ function PaperList({
                 </h2>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <MetricBadge label="总分" value={paper.totalScore} />
-                  <MetricBadge label="题目" value={`${paper.questionCount}`} />
+                  <MetricBadge
+                    label="题量"
+                    value={questionCountFeedback.value}
+                  />
                   <MetricBadge
                     label="模拟记录"
                     value={`${paper.mockExamCount}`}
@@ -1601,10 +1647,14 @@ function PaperList({
               </Button>
             </div>
 
-            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-4">
+            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-5">
               <InfoBlock
                 label="原始文件"
                 value={paper.sourceFileName ?? "暂未绑定"}
+              />
+              <InfoBlock
+                label="题量发布风险"
+                value={questionCountFeedback.feedback}
               />
               <InfoBlock
                 label="发布校验"
