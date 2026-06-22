@@ -16,7 +16,7 @@ result: pass
 - Batch range: batch-247 only; `local_provider_sandbox` proposal and redacted evidence rule validation.
 - RED: batch-247 was pending with task-level closeout placeholders; existing focused provider sandbox proposal tests confirmed coverage before any source edit, so no source gap was found.
 - GREEN: `npm.cmd run test:unit -- src/server/services/ai-generation-task-provider-sandbox-proposal-service.test.ts` passed with 1 file and 5 tests.
-- Commit: to be recorded after the first local closeout commit.
+- Commit: `ae70a60a`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: continue_current_thread; this is the fourth and final task in the approved batch-244 through batch-247 packet.
 - nextModuleRunCandidate: none for this approved ai-task-and-provider packet after batch-247; stop after closeout and await the next explicit queue selection.
@@ -31,8 +31,17 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence`: passed.
-- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence`: to be run after the first local closeout commit is recorded.
-- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence -SkipRemoteAheadCheck`: to be run after module closeout readiness passes.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence`: passed.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence -SkipRemoteAheadCheck`: passed.
+
+## Final Closeout State
+
+- Validation commit: `ae70a60a`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
+- Merge/push/cleanup: approved by task-level closeoutPolicy and current batch authorization.
 
 ## Source Coverage
 

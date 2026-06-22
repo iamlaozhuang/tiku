@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
   branch: codex/batch-247-ai-task-sandbox-proposal
-  commitSha: null
+  commitSha: ae70a60a
   prUrl: null
   retryCount: 0
   lastFailurePath: null
