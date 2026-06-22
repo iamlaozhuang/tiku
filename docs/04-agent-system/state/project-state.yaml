@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-analytics-guarded-implementation-2026-06-22
-updatedAt: "2026-06-22T03:20:57-07:00"
+currentPhase: ops-governance-and-retention-guarded-implementation-2026-06-22
+updatedAt: "2026-06-22T03:28:39-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: closeout-reconcile-batch-256-259-checkpoint
+  id: module-run-v2-auto-seed-ops-governance-and-retention
   status: closed
-  result: pass_docs_state_closeout_reconcile_batch_256_259_checkpoint
-  claimedAt: "2026-06-22T03:20:57-07:00"
-  validatedAt: "2026-06-22T03:20:57-07:00"
-  closedAt: "2026-06-22T03:20:57-07:00"
-  sourceStory: current-user-2026-06-22-closeout-reconcile-and-ops-governance-seed
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
-  branch: codex/closeout-reconcile-batch-256-259
-  commitSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
+  result: pass
+  claimedAt: "2026-06-22T03:28:39-07:00"
+  validatedAt: "2026-06-22T03:28:39-07:00"
+  closedAt: "2026-06-22T03:28:39-07:00"
+  sourceStory: current-user-2026-06-22-batch-serial-ops-governance-retention-seed
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+  branch: codex/ops-governance-retention-guarded-seed
+  commitSha: 9ade20a885d6d54f1393a334b7e4f4f52fce55b6
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5745,3 +5745,58 @@ organizationAnalyticsGuardedImplementationBatch20260622:
     operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
     model changes, raw employee answer evidence, full paper content evidence, export object storage or external delivery,
     or Cost Calibration Gate work.
+
+opsGovernanceAndRetentionGuardedImplementationBatch20260622:
+  batchId: ops-governance-and-retention-guarded-implementation-2026-06-22
+  seededAt: "2026-06-22T03:28:39-07:00"
+  seedTaskId: module-run-v2-auto-seed-ops-governance-and-retention
+  branch: codex/ops-governance-retention-guarded-seed
+  seedSourcePlanningTask: phase-75-advanced-retention-log-governance-implementation-planning
+  seedEvidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+  seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+  autoDriveLocalImplementationApproval: recorded_current_user_2026_06_22
+  standingCloseoutApprovalRecorded: true
+  localFullLoopGate: L6
+  seededTaskIds:
+    - batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    - batch-261-ops-governance-and-retention-redeem-code-redacted-reference
+    - batch-262-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    - batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  currentTaskId: batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  currentTaskStatus: pending
+  nextCandidateTaskId: batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  seedClosedAt: "2026-06-22T03:28:39-07:00"
+  seedStatus: closed
+  approvalBoundary:
+    allowed:
+      - task_plan_evidence_audit_creation
+      - scoped_local_implementation_or_historical_reconcile
+      - focused_unit_validation
+      - lint_typecheck_diff_check
+      - module_run_v2_precommit_closeout_prepush
+      - local_commit
+      - fast_forward_merge_to_master
+      - push_origin_master
+      - merged_short_branch_cleanup
+    blockedWithoutFreshApproval:
+      - real_provider_call
+      - env_secret_access_or_change
+      - prompt_or_provider_payload_exposure
+      - schema_migration_seed_database_connection_or_data_change
+      - package_or_lockfile_change
+      - dev_server
+      - browser_or_playwright_e2e_runtime
+      - deploy
+      - pr
+      - force_push
+      - org_auth_runtime_behavior_change
+      - plaintext_redeem_code_exposure
+      - raw_employee_answer_or_full_paper_content_evidence
+      - payment_or_external_service
+      - cost_calibration_gate
+  boundary: >-
+    This guarded seed transaction registers batch-260 through batch-263 only. It does not execute product source
+    implementation, Provider calls, env/secret work, dependency/package/lockfile changes, schema/migration/seed/database
+    operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
+    model changes, plaintext redeem_code evidence, raw employee answer evidence, full paper content evidence, or Cost
+    Calibration Gate work.
