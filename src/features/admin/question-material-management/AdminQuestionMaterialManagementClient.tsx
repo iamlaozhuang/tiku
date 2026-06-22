@@ -526,6 +526,14 @@ function formatPublicIdList(publicIds: string[]): string {
   return publicIds.join("\n");
 }
 
+function formatBindingPublicId(value: string | null): string {
+  return value === null || value.trim().length === 0 ? "null" : value.trim();
+}
+
+function formatBindingPublicIdList(publicIds: string[]): string {
+  return publicIds.length === 0 ? "none" : publicIds.join(", ");
+}
+
 function parsePublicIdList(value: string): string[] {
   const publicIds = value
     .split(/[\s,，]+/u)
@@ -1353,6 +1361,14 @@ function QuestionWriteForm({
   const analysisLengthExceeded =
     formValues.analysisRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH;
   const isFormInvalid = stemLengthExceeded || analysisLengthExceeded;
+  const previewMaterialPublicId =
+    formValues.materialPublicId.trim().length === 0
+      ? null
+      : formValues.materialPublicId.trim();
+  const previewKnowledgeNodePublicIds = parsePublicIdList(
+    formValues.knowledgeNodePublicIdsText,
+  );
+  const previewTagPublicIds = parsePublicIdList(formValues.tagPublicIdsText);
 
   return (
     <form
@@ -1496,6 +1512,11 @@ function QuestionWriteForm({
             />
           </label>
         </div>
+        <QuestionBindingPreview
+          knowledgeNodePublicIds={previewKnowledgeNodePublicIds}
+          materialPublicId={previewMaterialPublicId}
+          tagPublicIds={previewTagPublicIds}
+        />
       </fieldset>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">
@@ -1722,6 +1743,34 @@ function QuestionWriteForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function QuestionBindingPreview({
+  knowledgeNodePublicIds,
+  materialPublicId,
+  tagPublicIds,
+}: {
+  knowledgeNodePublicIds: string[];
+  materialPublicId: string | null;
+  tagPublicIds: string[];
+}) {
+  return (
+    <div
+      className="border-border grid gap-1 border-t pt-3 text-xs leading-5"
+      data-testid="question-binding-preview"
+    >
+      <p className="text-text-secondary">
+        material: {formatBindingPublicId(materialPublicId)}
+      </p>
+      <p className="text-text-secondary">
+        knowledge_node: {knowledgeNodePublicIds.length}{" "}
+        {formatBindingPublicIdList(knowledgeNodePublicIds)}
+      </p>
+      <p className="text-text-secondary">
+        tag: {tagPublicIds.length} {formatBindingPublicIdList(tagPublicIds)}
+      </p>
+    </div>
   );
 }
 
@@ -2102,6 +2151,7 @@ function QuestionList({
                 <h2 className="text-text-primary text-base font-semibold">
                   {readQuestionSummary(question)}
                 </h2>
+                <QuestionBindingSummary question={question} />
                 <div className="flex flex-wrap gap-2">
                   {question.knowledgeNodePublicIds.map((publicId) => (
                     <span
@@ -2184,6 +2234,26 @@ function QuestionList({
           </article>
         );
       })}
+    </div>
+  );
+}
+
+function QuestionBindingSummary({ question }: { question: QuestionDto }) {
+  return (
+    <div
+      className="grid gap-1 text-xs leading-5"
+      data-testid={`question-binding-${question.publicId}`}
+    >
+      <p className="text-text-secondary">
+        material: {formatBindingPublicId(question.materialPublicId)}
+      </p>
+      <p className="text-text-secondary">
+        knowledge_node:{" "}
+        {formatBindingPublicIdList(question.knowledgeNodePublicIds)}
+      </p>
+      <p className="text-text-secondary">
+        tag: {formatBindingPublicIdList(question.tagPublicIds)}
+      </p>
     </div>
   );
 }

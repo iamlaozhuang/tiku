@@ -680,6 +680,33 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
   });
 
+  it("renders explicit question binding feedback for material, knowledge_node, and tag", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+
+    const boundQuestion = screen.getByTestId(
+      "question-binding-question-marketing-001",
+    );
+    expect(boundQuestion).toHaveTextContent("material: material-marketing-001");
+    expect(boundQuestion).toHaveTextContent(
+      "knowledge_node: knowledge-node-sampling",
+    );
+    expect(boundQuestion).toHaveTextContent("tag: tag-research");
+
+    const unboundQuestion = screen.getByTestId(
+      "question-binding-question-logistics-002",
+    );
+    expect(unboundQuestion).toHaveTextContent("material: null");
+    expect(unboundQuestion).toHaveTextContent(
+      "knowledge_node: knowledge-node-costing",
+    );
+    expect(unboundQuestion).toHaveTextContent("tag: none");
+  });
+
   it("starts question review from a knowledge_node durable binding handoff", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch();
@@ -1307,6 +1334,48 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByTestId("question-row-question-marketing-001"),
     ).toHaveTextContent("tag-compliance");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("previews parsed question bindings before saving the question form", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    fireEvent.click(screen.getByTestId("question-edit-question-marketing-001"));
+
+    const questionForm = within(
+      screen.getByTestId("content-edit-context-panel"),
+    );
+    const bindingPreview = screen.getByTestId("question-binding-preview");
+
+    expect(bindingPreview).toHaveTextContent(
+      "material: material-marketing-001",
+    );
+    expect(bindingPreview).toHaveTextContent(
+      "knowledge_node: 1 knowledge-node-sampling",
+    );
+    expect(bindingPreview).toHaveTextContent("tag: 1 tag-research");
+
+    fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+      target: { value: "" },
+    });
+    fireEvent.change(questionForm.getByLabelText("知识点 publicIds"), {
+      target: {
+        value:
+          "knowledge-node-sampling\nknowledge-node-retail knowledge-node-retail",
+      },
+    });
+    fireEvent.change(questionForm.getByLabelText("标签 publicIds"), {
+      target: { value: "" },
+    });
+
+    expect(bindingPreview).toHaveTextContent("material: null");
+    expect(bindingPreview).toHaveTextContent(
+      "knowledge_node: 2 knowledge-node-sampling, knowledge-node-retail",
+    );
+    expect(bindingPreview).toHaveTextContent("tag: 0 none");
   });
 
   it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
