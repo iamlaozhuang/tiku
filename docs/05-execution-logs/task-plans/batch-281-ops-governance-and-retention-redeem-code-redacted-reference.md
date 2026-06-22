@@ -28,10 +28,16 @@
 - Historical implementation reconcile:
   - Review existing redeem_code redaction contracts and focused tests before touching source.
   - Confirm outputs expose only redacted references and never plaintext redeem_code values.
-  - Do not change source if current implementation already satisfies the task.
+  - Existing implementation satisfies the task; no source or test edits were required.
 - Focused unit command:
-  - Replace the placeholder with an explicit scoped unit command before task closeout.
+  - `npm.cmd run test:unit -- src/server/services/ops-governance-redeem-code-redacted-reference-service.test.ts`
 - Run `npm.cmd run lint`.
 - Run `npm.cmd run typecheck`.
 - Run `git diff --check`.
 - Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Closeout Notes
+
+- Reconciled against historical evidence `batch-261-ops-governance-and-retention-redeem-code-redacted-reference`.
+- Existing service returns only redacted reference/status fields and excludes plaintext `redeem_code`, code hash, public id inventory, provider payload, raw prompt, raw answer, and row data.
+- No Provider/env/schema/database/dependency/browser/e2e/deploy/PR/force-push/destructive retention or Cost Calibration Gate work was performed.
