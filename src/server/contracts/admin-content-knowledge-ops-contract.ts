@@ -68,6 +68,11 @@ export type AdminQuestionOpsListDto = {
   questions: AdminQuestionOpsSummaryDto[];
 };
 
+export type AdminPaperQuestionTypeDistributionDto = {
+  questionType: QuestionType;
+  count: number;
+};
+
 export type AdminPaperOpsSummaryDto = {
   publicId: string;
   name: string;
@@ -79,6 +84,7 @@ export type AdminPaperOpsSummaryDto = {
   year: number | null;
   totalScore: string;
   questionCount: number;
+  questionTypeDistribution: AdminPaperQuestionTypeDistributionDto[];
   mockExamCount: number;
   sourceFileName: string | null;
   publishValidationSummary: string | null;

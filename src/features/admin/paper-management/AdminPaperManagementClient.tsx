@@ -15,7 +15,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { AdminPaperOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
+import type {
+  AdminPaperOpsSummaryDto,
+  AdminPaperQuestionTypeDistributionDto,
+} from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { PaperAssetDto } from "@/server/contracts/paper-asset-contract";
 import type {
@@ -122,6 +125,19 @@ const paperStatusLabels: Record<PaperStatus, string> = {
 const paperTypeLabels: Record<PaperType, string> = {
   mock_paper: "模拟卷",
   past_paper: "历年真题",
+};
+
+const questionTypeLabels: Record<
+  AdminPaperQuestionTypeDistributionDto["questionType"],
+  string
+> = {
+  case_analysis: "案例分析题",
+  calculation: "计算题",
+  fill_blank: "填空题",
+  multi_choice: "多选题",
+  short_answer: "简答题",
+  single_choice: "单选题",
+  true_false: "判断题",
 };
 
 const PUBLISHED_PAPER_MIN_QUESTION_COUNT = 1;
@@ -252,6 +268,38 @@ function upsertByPublicId<TItem extends { publicId: string }>(
   return [nextItem, ...items];
 }
 
+function createQuestionTypeDistributionFromPaperDraft(
+  paper: PaperDraftDto,
+): AdminPaperQuestionTypeDistributionDto[] {
+  const distribution = new Map<
+    AdminPaperQuestionTypeDistributionDto["questionType"],
+    number
+  >();
+
+  for (const paperSection of paper.paperSections) {
+    for (const paperQuestion of paperSection.paperQuestions) {
+      const questionType = paperQuestion.questionSnapshot.questionType;
+      distribution.set(questionType, (distribution.get(questionType) ?? 0) + 1);
+    }
+  }
+
+  return Object.keys(questionTypeLabels).flatMap((questionType) => {
+    const count = distribution.get(
+      questionType as AdminPaperQuestionTypeDistributionDto["questionType"],
+    );
+
+    return count === undefined
+      ? []
+      : [
+          {
+            questionType:
+              questionType as AdminPaperQuestionTypeDistributionDto["questionType"],
+            count,
+          },
+        ];
+  });
+}
+
 function mapPaperDraftToSummary(
   paper: PaperDraftDto | AdminPaperOpsSummaryDto,
   existingPaper?: AdminPaperOpsSummaryDto,
@@ -267,6 +315,10 @@ function mapPaperDraftToSummary(
     year: paper.year,
     totalScore: paper.totalScore ?? existingPaper?.totalScore ?? "0.0",
     questionCount: paper.questionCount,
+    questionTypeDistribution:
+      "questionTypeDistribution" in paper
+        ? paper.questionTypeDistribution
+        : createQuestionTypeDistributionFromPaperDraft(paper),
     mockExamCount:
       "mockExamCount" in paper
         ? paper.mockExamCount
@@ -350,6 +402,28 @@ function createPaperQuestionCountFeedback(paper: AdminPaperOpsSummaryDto): {
     value,
     feedback: `题量有效；还可加入 ${remainingQuestionCount} 题`,
   };
+}
+
+function createPaperQuestionTypeDistributionFeedback(
+  paper: AdminPaperOpsSummaryDto,
+): string {
+  const distribution = paper.questionTypeDistribution.filter(
+    (item) => item.count > 0,
+  );
+
+  if (distribution.length === 0) {
+    return "暂无题型分布数据；题型建议：发布前请在组卷详情复核题型覆盖，此建议不阻断发布。";
+  }
+
+  const summary = distribution
+    .map((item) => `${questionTypeLabels[item.questionType]} ${item.count} 题`)
+    .join(" / ");
+
+  if (distribution.length === 1) {
+    return `${summary}；题型建议：当前只有 1 类题型；可补充多选、判断、填空或简答，发布不受此建议阻断。`;
+  }
+
+  return `${summary}；题型建议：已覆盖 ${distribution.length} 类题型；发布仍以题量和分值校验为准。`;
 }
 
 function createPaperInput(values: PaperFormValues) {
@@ -1549,6 +1623,8 @@ function PaperList({
         const isPublished = paper.paperStatus === "published";
         const canCopy = paper.paperStatus !== "draft";
         const questionCountFeedback = createPaperQuestionCountFeedback(paper);
+        const questionTypeDistributionFeedback =
+          createPaperQuestionTypeDistributionFeedback(paper);
 
         return (
           <article
@@ -1647,7 +1723,7 @@ function PaperList({
               </Button>
             </div>
 
-            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-5">
+            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
               <InfoBlock
                 label="原始文件"
                 value={paper.sourceFileName ?? "暂未绑定"}
@@ -1655,6 +1731,10 @@ function PaperList({
               <InfoBlock
                 label="题量发布风险"
                 value={questionCountFeedback.feedback}
+              />
+              <InfoBlock
+                label="题型分布"
+                value={questionTypeDistributionFeedback}
               />
               <InfoBlock
                 label="发布校验"

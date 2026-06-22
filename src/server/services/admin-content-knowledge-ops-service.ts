@@ -102,6 +102,20 @@ const samplePapers: AdminPaperOpsListDto["papers"] = [
     year: 2026,
     totalScore: "100",
     questionCount: 50,
+    questionTypeDistribution: [
+      {
+        questionType: "single_choice",
+        count: 32,
+      },
+      {
+        questionType: "multi_choice",
+        count: 12,
+      },
+      {
+        questionType: "short_answer",
+        count: 6,
+      },
+    ],
     mockExamCount: 18,
     sourceFileName: "spring-marketing.pdf",
     publishValidationSummary: "发布校验已通过",

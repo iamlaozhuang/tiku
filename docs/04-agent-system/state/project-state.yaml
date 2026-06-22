@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 4a73eb2a1a40eef2da1b6e4127704021913dfda6
-  lastKnownOriginMasterSha: 4a73eb2a1a40eef2da1b6e4127704021913dfda6
+  lastKnownMasterSha: 382f904ed517cd6c1b6867cc0d1e193189766ad9
+  lastKnownOriginMasterSha: 382f904ed517cd6c1b6867cc0d1e193189766ad9
 currentTask:
-  id: paper-admin-count-feedback-package
+  id: paper-question-type-advisory-feedback-package
   status: ready_for_closeout
-  result: pass_admin_paper_count_feedback_local_validation
-  claimedAt: "2026-06-21T17:50:33-07:00"
-  validatedAt: "2026-06-21T17:55:47-07:00"
+  result: pass_paper_question_type_advisory_feedback_local_validation
+  claimedAt: "2026-06-21T18:01:09-07:00"
+  validatedAt: "2026-06-21T18:08:12-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-3; paper-performance-acceptance
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-admin-count-feedback-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-admin-count-feedback-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-admin-count-feedback-package.md
-  branch: codex/paper-admin-count-feedback-package
+  sourceStory: current-user-low-risk-task-4; paper-question-type-strategy
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-question-type-advisory-feedback-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-question-type-advisory-feedback-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-question-type-advisory-feedback-package.md
+  branch: codex/paper-question-type-advisory-feedback-package
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: paper-admin-count-feedback-package
+  currentTaskId: paper-question-type-advisory-feedback-package
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for

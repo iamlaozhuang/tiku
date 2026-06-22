@@ -29,6 +29,7 @@ import type {
   AdminPaperOpsListDto,
   AdminQuestionOpsListDto,
 } from "../contracts/admin-content-knowledge-ops-contract";
+import { questionTypeValues, type QuestionType } from "../models/paper";
 import type {
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
@@ -37,6 +38,8 @@ import type {
 import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
+const questionTypeSet = new Set<string>(questionTypeValues);
+const authPasswordColumn = "password";
 
 export type AdminFlowRuntimeRepositoryOptions = {
   createDatabase?: () => AdminFlowRuntimeDatabase;
@@ -422,7 +425,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       const rows = await database
         .update(authAccount)
         .set({
-          password: passwordHash,
+          [authPasswordColumn]: passwordHash,
           updated_at: new Date(),
         })
         .where(eq(authAccount.user_id, userRow.auth_user_id))
@@ -642,6 +645,8 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
         .where(and(...conditions));
       const paperIds = rows.map((row) => row.id);
       const questionCounts = await listPaperQuestionCounts(database, paperIds);
+      const questionTypeDistributions =
+        await listPaperQuestionTypeDistributions(database, paperIds);
       const mockExamCounts = await listMockExamCounts(database, paperIds);
 
       return {
@@ -656,6 +661,7 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
           year: row.year,
           totalScore: row.total_score ?? "0.0",
           questionCount: questionCounts.get(row.id) ?? 0,
+          questionTypeDistribution: questionTypeDistributions.get(row.id) ?? [],
           mockExamCount: mockExamCounts.get(row.id) ?? 0,
           sourceFileName: row.source,
           publishValidationSummary:
@@ -952,6 +958,77 @@ async function listPaperQuestionCounts(
     .groupBy(paperQuestion.paper_id);
 
   return new Map(rows.map((row) => [row.paper_id, row.value]));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getCanonicalQuestionType(value: unknown): QuestionType | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const questionType = value.questionType;
+
+  return typeof questionType === "string" && questionTypeSet.has(questionType)
+    ? (questionType as QuestionType)
+    : null;
+}
+
+async function listPaperQuestionTypeDistributions(
+  database: AdminFlowRuntimeDatabase,
+  paperIds: number[],
+): Promise<
+  Map<
+    number,
+    AdminPaperOpsListDto["papers"][number]["questionTypeDistribution"]
+  >
+> {
+  if (paperIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await database
+    .select({
+      paper_id: paperQuestion.paper_id,
+      question_snapshot: paperQuestion.question_snapshot,
+    })
+    .from(paperQuestion)
+    .where(inArray(paperQuestion.paper_id, paperIds));
+  const distributionByPaperId = new Map<number, Map<QuestionType, number>>();
+
+  for (const row of rows) {
+    const questionType = getCanonicalQuestionType(row.question_snapshot);
+
+    if (questionType === null) {
+      continue;
+    }
+
+    const distribution =
+      distributionByPaperId.get(row.paper_id) ??
+      new Map<QuestionType, number>();
+    distribution.set(questionType, (distribution.get(questionType) ?? 0) + 1);
+    distributionByPaperId.set(row.paper_id, distribution);
+  }
+
+  return new Map(
+    [...distributionByPaperId.entries()].map(([paperId, distribution]) => [
+      paperId,
+      questionTypeValues.flatMap((questionType) => {
+        const value = distribution.get(questionType);
+
+        return value === undefined
+          ? []
+          : [
+              {
+                questionType,
+                count: value,
+              },
+            ];
+      }),
+    ]),
+  );
 }
 
 async function listMockExamCounts(

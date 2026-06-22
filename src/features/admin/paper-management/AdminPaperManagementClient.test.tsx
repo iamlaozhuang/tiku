@@ -51,6 +51,7 @@ function createPaper(
     year: 2026,
     totalScore: "100.0",
     questionCount: 50,
+    questionTypeDistribution: [],
     mockExamCount: 0,
     sourceFileName: null,
     publishValidationSummary: null,
@@ -110,11 +111,31 @@ describe("AdminPaperManagement", () => {
         publicId: "paper-draft-capped",
         name: "Capped draft paper",
         questionCount: 100,
+        questionTypeDistribution: [
+          {
+            questionType: "single_choice",
+            count: 100,
+          },
+        ],
       }),
       createPaper({
         publicId: "paper-draft-over-limit",
         name: "Over limit draft paper",
         questionCount: 101,
+        questionTypeDistribution: [
+          {
+            questionType: "single_choice",
+            count: 60,
+          },
+          {
+            questionType: "multi_choice",
+            count: 25,
+          },
+          {
+            questionType: "short_answer",
+            count: 16,
+          },
+        ],
       }),
     ]);
 
@@ -135,6 +156,14 @@ describe("AdminPaperManagement", () => {
     expect(
       cappedRow.getByText("已达到 100 题上限；发布前请复核性能风险"),
     ).toBeInTheDocument();
+    expect(
+      cappedRow.getByText(
+        "单选题 100 题；题型建议：当前只有 1 类题型；可补充多选、判断、填空或简答，发布不受此建议阻断。",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      cappedRow.getByRole("button", { name: "发布 paper-draft-capped" }),
+    ).toBeEnabled();
 
     const overLimitRow = within(
       await screen.findByTestId("paper-row-paper-draft-over-limit"),
@@ -142,6 +171,11 @@ describe("AdminPaperManagement", () => {
     expect(overLimitRow.getByText("题量 101/100")).toBeInTheDocument();
     expect(
       overLimitRow.getByText("发布风险：已超过 100 题上限 1 题"),
+    ).toBeInTheDocument();
+    expect(
+      overLimitRow.getByText(
+        "单选题 60 题 / 多选题 25 题 / 简答题 16 题；题型建议：已覆盖 3 类题型；发布仍以题量和分值校验为准。",
+      ),
     ).toBeInTheDocument();
   });
 });

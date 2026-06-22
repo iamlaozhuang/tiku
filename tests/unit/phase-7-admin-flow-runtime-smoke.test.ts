@@ -118,6 +118,12 @@ function createRepositories(): AdminFlowRuntimeRepositories {
               year: 2026,
               totalScore: "5.0",
               questionCount: 1,
+              questionTypeDistribution: [
+                {
+                  questionType: "single_choice",
+                  count: 1,
+                },
+              ],
               mockExamCount: 0,
               sourceFileName: null,
               publishValidationSummary: "published seed paper",
