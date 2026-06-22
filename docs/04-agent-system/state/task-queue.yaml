@@ -6567,3 +6567,179 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
     retryCount: 0
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    title: Personal AI local UI browser bridge approval reconciliation
+    phase: module-run-v2-personal-ai-local-ui-browser-planning
+    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
+    dependencies:
+      - module-run-v2-personal-ai-local-transport-contract-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by the current 2026-06-22 user prompt "批准
+      module-run-v2-personal-ai-local-ui-browser-planning" after the local mechanism recommended this L5 bridge. This
+      approval is materialized as task-level `localExperienceAcceptanceBridgeApproved` for L5 `local_ui_browser_entry`
+      planning reconciliation only. It allows creating the bounded task packet, task plan/evidence/audit, state sync,
+      read-only inspection of existing student personal AI UI and existing local e2e spec inventory, focused unit
+      validation of existing UI/browser contracts, `npm.cmd run test:e2e -- --list` inventory only, lint/typecheck/scoped
+      formatting/diff/hardening/readiness gates, local commit, fast-forward merge to master, push to origin/master, and
+      merged short-branch cleanup. It does not authorize product source edits, e2e spec edits, Playwright auth/session
+      repair, headed/debug browser, new e2e specs, destructive local DB writes, schema/drizzle/migration,
+      package/lockfile/dependency, provider/model calls, env/secret read/write/output,
+      staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost Calibration Gate work.
+    localExperienceAcceptanceBridgeApproved: >-
+      Approved for the personal-learning-ai-experience L5 `local_ui_browser_entry` planning reconciliation only. The
+      current source and e2e surfaces are read-only for this packet; the known Playwright auth/session mismatch remains
+      a separate blocked validation repair task.
+    targetClosureItem: personal-learning-ai local UI/browser entry planning
+    behaviorBoundary: personal-learning-ai::local_ui_browser_entry_planning_reconciliation
+    useCases:
+      - Reconcile the current bridge proposal with historical L5 planning and existing student personal AI UI evidence.
+      - Verify existing student personal AI UI/browser contract coverage through focused local unit validation.
+      - Keep the existing Playwright auth/session mismatch out of scope and route it to the dedicated repair packet.
+      - Advance the bridge proposal to the L6 role-flow planning candidate only after L5 planning is represented in current queue state.
+    acceptanceScenarios:
+      - Bridge proposal diagnostics recognize this L5 task while active and stop asking for unrelated work.
+      - Focused student personal AI UI/browser unit validation passes without provider/model calls or runtime source edits.
+      - Evidence records the existing targeted e2e spec as inventory only and preserves the separate blocked repair boundary.
+      - Closeout evidence records L5 planning as satisfied and recommends the next L6 bridge candidate.
+    nonGoals:
+      - product source edits, route implementation, e2e repair, Playwright flow execution, headed/debug browser, new e2e specs, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
+    validationProfile: docs_state_lite
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_acceptance_bridge
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_l5_ui_browser_bridge_approval_reconciliation
+    claimedAt: "2026-06-22T04:16:15-07:00"
+    validatedAt: "2026-06-22T04:21:49-07:00"
+    closedAt: "2026-06-22T04:21:49-07:00"
+    branch: codex/personal-ai-local-ui-browser-bridge-20260622
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-batch-113-personal-learning-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/evidence/batch-113-personal-learning-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/audits-reviews/batch-113-personal-learning-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
+      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-transport-contract-planning.md
+      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - src/app/(student)/ai-generation/page.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product runtime source edits
+      - e2e spec edits or Playwright auth/session repair
+      - headed/debug browser
+      - new e2e specs
+      - destructive local DB writes
+      - schema/drizzle/migration changes
+      - database migration execution
+      - provider/model calls or provider configuration
+      - env/secret reads or writes
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    riskTypes:
+      - docs_state
+      - evidence_redaction
+      - local_experience_acceptance_bridge_reconciliation
+      - read_only_ui_browser_contract_validation
+      - known_blocked_validation_boundary
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    retryCount: 0
