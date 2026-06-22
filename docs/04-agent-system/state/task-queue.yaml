@@ -2828,588 +2828,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: close-organization-detail-management
-    title: Close organization detail management
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-low-risk-task-12; admin-experience-gap-sequencing
-    dependencies:
-      - close-redeem-code-audit-redaction
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Current user approval permits low-risk organization detail management contract/service/validator/UI and focused
-      unit tests. org_auth authorization model runtime code, schema/database changes, and runtime proof remain blocked.
-    targetClosureItem: organization detail management
-    behaviorBoundary: ops_admin::organization_detail_management
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: focused_unit_lint_typecheck_docs_gate
-    queueSelectionMode: user_directed_serial_low_risk_batch
-    taskKind: implementation_tdd
-    moduleRunVersion: 2
-    status: closed
-    claimedAt: "2026-06-21T19:29:20-07:00"
-    validatedAt: "2026-06-21T19:34:50-07:00"
-    closedAt: "2026-06-21T19:37:32-07:00"
-    result: pass_organization_detail_management_local_validation
-    branch: codex/close-organization-detail-management
-    commitSha: 24e353918c9911d1a643ca38ee270f9fc0d98c0f
-    plannedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
-    allowedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/app/api/**
-      - src/server/repositories/**
-      - src/db/schema/**
-      - drizzle/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      localSourceChange: approved
-      focusedUnitTest: approved
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId close-organization-detail-management
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId close-organization-detail-management -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
-    retryCount: 0
-  - id: close-employee-import-management
-    title: Close employee import management
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-low-risk-task-13; admin-experience-gap-sequencing
-    dependencies:
-      - close-organization-detail-management
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Current user approval permits low-risk employee import management contracts, validators, services, UI feedback,
-      and focused unit tests. It must not perform real file upload storage, database writes, schema/migration, dev-server,
-      browser/e2e, dependency, Provider/env, deploy, PR, force-push, payment, or external service work.
-    targetClosureItem: employee import management
-    behaviorBoundary: ops_admin::employee_import_management
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: focused_unit_lint_typecheck_docs_gate
-    queueSelectionMode: user_directed_serial_low_risk_batch
-    taskKind: implementation_tdd
-    moduleRunVersion: 2
-    status: closed
-    claimedAt: "2026-06-21T19:39:38-07:00"
-    validatedAt: "2026-06-21T19:44:55-07:00"
-    closedAt: "2026-06-21T19:45:56-07:00"
-    result: pass_employee_import_management_local_validation
-    branch: codex/close-employee-import-management
-    commitSha: 283055bd855d6ba22f72954cd45bb2f6675f9f8c
-    plannedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
-    allowedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/app/api/**
-      - src/server/repositories/**
-      - src/db/schema/**
-      - drizzle/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      localSourceChange: approved
-      focusedUnitTest: approved
-      schemaMigration: blocked
-      databaseConnection: blocked
-      realFileUploadStorage: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId close-employee-import-management
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId close-employee-import-management -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
-    retryCount: 0
-  - id: close-employee-transfer-unbind-management
-    title: Close employee transfer unbind management
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-low-risk-task-14; admin-experience-gap-sequencing
-    dependencies:
-      - close-employee-import-management
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Current user approval permits low-risk employee transfer and unbind management contract/service/validator/UI and
-      focused unit tests. It must not implement org_auth runtime model changes, schema/database writes, dev-server,
-      browser/e2e, dependency, Provider/env, deploy, PR, force-push, payment, external service, or Cost Calibration Gate.
-    targetClosureItem: employee transfer and unbind management
-    behaviorBoundary: ops_admin::employee_transfer_unbind_management
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: focused_unit_lint_typecheck_docs_gate
-    queueSelectionMode: user_directed_serial_low_risk_batch
-    taskKind: implementation_tdd
-    moduleRunVersion: 2
-    status: closed
-    claimedAt: "2026-06-21T19:48:15-07:00"
-    validatedAt: "2026-06-21T19:52:29-07:00"
-    closedAt: "2026-06-21T19:53:28-07:00"
-    result: pass_employee_unbind_management_with_transfer_approval_required_local_validation
-    blockedFollowUp:
-      - employee transfer runtime remains approval_required because it needs transfer route/service/repository/DB semantics beyond this low-risk UI task.
-    branch: codex/close-employee-transfer-unbind-management
-    commitSha: a04f737a8449eb54f787a376928f21a5e2f24062
-    plannedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-transfer-unbind-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
-    allowedFiles:
-      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
-      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-transfer-unbind-management.md
-      - docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/app/api/**
-      - src/server/repositories/**
-      - src/server/services/admin-organization-org-auth-runtime.ts
-      - src/db/schema/**
-      - drizzle/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      localSourceChange: approved
-      focusedUnitTest: approved
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      employeeTransferRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId close-employee-transfer-unbind-management
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId close-employee-transfer-unbind-management -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-employee-transfer-unbind-management.md
-    retryCount: 0
-  - id: low-risk-audit-closeout-state-normalization
-    title: Low risk audit closeout state normalization
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-2026-06-21-follow-up-order; low-risk-batch-closeout-metadata
-    dependencies:
-      - close-employee-transfer-unbind-management
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Current user approved following the recommended sequence. This P0 task is docs/state-only closeout metadata
-      normalization for the already pushed low-risk audit closeout batch. It does not approve product source, test,
-      package, lockfile, schema, migration, seed, database, script, env/secret, Provider, dev-server, browser/e2e,
-      deploy, PR, force-push, payment, external-service, org_auth runtime, employee transfer runtime, legacy alias
-      removal, or Cost Calibration Gate work.
-    targetClosureItem: normalize low-risk audit closeout batch state metadata after push
-    behaviorBoundary: agent_system::low_risk_audit_closeout_state_normalization
-    executionProfile: docs_state_governance_reconciliation
-    evidenceMode: full
-    validationPolicy: docs_state_validation_lint_typecheck
-    queueSelectionMode: user_directed_p0_state_closeout
-    taskKind: docs_state_governance_reconciliation
-    moduleRunVersion: 2
-    status: closed
-    result: pass_low_risk_audit_closeout_state_normalized
-    claimedAt: "2026-06-21T21:27:54-07:00"
-    validatedAt: "2026-06-21T21:27:54-07:00"
-    closedAt: "2026-06-21T21:27:54-07:00"
-    branch: codex/low-risk-closeout-state-normalization
-    commitSha: 7091321eae251831fe07a3da8c0f143d101bca30
-    blockedFollowUp:
-      - paper 100-question strong runtime acceptance remains approval_required because it needs reviewed data setup plus dev-server/browser/e2e runtime validation.
-      - close-organization-management-runtime-proof remains approval_required because it needs ops_admin browser/dev-server runtime evidence.
-      - employee transfer runtime remains approval_required because it needs route/service/repository/DB write semantics beyond the prior low-risk UI task.
-      - legacy question_type alias deprecation remains approval_required and time-gated by zero-alias validation runs and product owner approval.
-      - Provider, payment, OCR, export, staging/prod/deploy, dependency, schema/migration, env/secret, PR, force-push, and Cost Calibration Gate work remain blocked.
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-state-normalization.md
-      - docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-state-normalization.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-state-normalization.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      docsStateGovernance: approved
-      productSourceChange: blocked
-      testSourceChange: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      employeeTransferRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-low-risk-audit-closeout-state-normalization.md docs\05-execution-logs\evidence\2026-06-21-low-risk-audit-closeout-state-normalization.md docs\05-execution-logs\audits-reviews\2026-06-21-low-risk-audit-closeout-state-normalization.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId low-risk-audit-closeout-state-normalization
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId low-risk-audit-closeout-state-normalization -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-state-normalization.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-state-normalization.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-state-normalization.md
-    retryCount: 0
-  - id: low-risk-full-unit-regression-repair
-    title: Low risk full unit regression repair
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-2026-06-21-follow-up-order; low-risk-batch-closeout-full-unit-regression-repair
-    dependencies:
-      - low-risk-audit-closeout-state-normalization
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      Current user approved following the recommended sequence and authorized low-risk source/test repair for focused
-      unit regressions discovered before merging the P0 closeout state normalization branch. This task may change the
-      admin paper UI compatibility mapping, stale focused unit expectations, and docs/state/evidence/audit metadata.
-      It does not approve package, lockfile, schema, migration, seed, database, env/secret, Provider, dev-server,
-      browser/e2e, deploy, PR, force-push, payment, external-service, org_auth runtime, employee transfer runtime,
-      legacy alias removal, or Cost Calibration Gate work.
-    targetClosureItem: repair full unit regressions before low-risk closeout branch merge
-    behaviorBoundary: admin_paper_ui::legacy_fixture_distribution_fallback; effective_auth::current_context_contract_test
-    executionProfile: low_risk_local_source_test_repair
-    evidenceMode: full
-    validationPolicy: focused_unit_full_unit_lint_typecheck
-    queueSelectionMode: user_directed_p0_state_closeout_follow_up
-    taskKind: low_risk_source_test_repair
-    moduleRunVersion: 2
-    status: closed
-    result: pass_full_unit_regression_repaired
-    claimedAt: "2026-06-21T21:47:31-07:00"
-    validatedAt: "2026-06-21T21:47:31-07:00"
-    closedAt: "2026-06-21T21:47:31-07:00"
-    branch: codex/low-risk-closeout-state-normalization
-    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
-    blockedFollowUp:
-      - Runtime/browser/e2e proof remains approval_required because the user explicitly blocked dev server, external browser, Playwright, and e2e for this batch.
-      - Provider, payment, OCR, export, staging/prod/deploy, dependency, schema/migration, env/secret, PR, force-push, and Cost Calibration Gate work remain blocked.
-      - org_auth runtime code changes and employee transfer runtime changes remain blocked by the original safety boundary.
-    allowedFiles:
-      - src/features/admin/paper-management/AdminPaperManagementClient.tsx
-      - src/server/services/effective-authorization-service.test.ts
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-low-risk-full-unit-regression-repair.md
-      - docs/05-execution-logs/evidence/2026-06-21-low-risk-full-unit-regression-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-full-unit-regression-repair.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/db/schema/**
-      - drizzle/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - scripts/**
-    capabilities:
-      adminPaperUiFallbackRepair: approved
-      focusedUnitExpectationRepair: approved
-      docsStateGovernance: approved
-      packageLockChange: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      employeeTransferRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check src\features\admin\paper-management\AdminPaperManagementClient.tsx src\server\services\effective-authorization-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-low-risk-full-unit-regression-repair.md docs\05-execution-logs\evidence\2026-06-21-low-risk-full-unit-regression-repair.md docs\05-execution-logs\audits-reviews\2026-06-21-low-risk-full-unit-regression-repair.md
-      - npm.cmd run test:unit -- tests/unit/admin-paper-ui.test.ts src/server/services/effective-authorization-service.test.ts
-      - npm.cmd run test:unit
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId low-risk-full-unit-regression-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId low-risk-full-unit-regression-repair
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId low-risk-full-unit-regression-repair -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-full-unit-regression-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-full-unit-regression-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-low-risk-full-unit-regression-repair.md
-    retryCount: 0
-  - id: closeout-reconcile-commit-checkpoint
-    title: Closeout reconcile commit checkpoint
-    phase: low-risk-audit-closeout-implementation-2026-06-21
-    sourceStory: current-user-2026-06-21-next-step; closeout-reconcile-before-next-low-risk-candidate-scan
-    dependencies:
-      - low-risk-full-unit-regression-repair
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User explicitly requested running closeout reconcile before scanning audit docs and task queue for the next
-      no-approval low-risk candidate batch. This task is docs/state-only and may backfill pushed commit checkpoints,
-      create task plan/evidence/audit files, validate locally, commit, fast-forward merge to master, push
-      origin/master, and delete the short branch. It does not approve product source, tests, package, lockfile,
-      schema, migration, seed, database, script, env/secret, Provider, dev-server, browser/e2e, deploy, PR,
-      force-push, payment, external-service, org_auth runtime, employee transfer runtime, legacy alias removal, or
-      Cost Calibration Gate work.
-    targetClosureItem: reconcile pushed repair commit checkpoint before next low-risk candidate scan
-    behaviorBoundary: agent_system::post_closeout_checkpoint_reconcile
-    executionProfile: docs_state_governance_reconciliation
-    evidenceMode: full
-    validationPolicy: docs_state_validation_lint_typecheck
-    queueSelectionMode: user_directed_closeout_reconcile
-    taskKind: docs_state_governance_reconciliation
-    moduleRunVersion: 2
-    status: closed
-    result: pass_docs_state_closeout_reconcile_commit_checkpoint
-    claimedAt: "2026-06-21T22:49:03-07:00"
-    validatedAt: "2026-06-21T22:49:03-07:00"
-    closedAt: "2026-06-21T22:49:03-07:00"
-    branch: codex/closeout-reconcile-20260621
-    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
-    blockedFollowUp:
-      - Runtime/browser/e2e proof remains approval_required.
-      - Provider, payment, OCR, export, staging/prod/deploy, dependency, schema/migration, env/secret, PR, force-push, and Cost Calibration Gate work remain blocked.
-      - org_auth runtime code changes and employee transfer runtime changes remain blocked.
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-21-closeout-reconcile-commit-checkpoint.md
-      - docs/05-execution-logs/evidence/2026-06-21-closeout-reconcile-commit-checkpoint.md
-      - docs/05-execution-logs/audits-reviews/2026-06-21-closeout-reconcile-commit-checkpoint.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      docsStateGovernance: approved
-      productSourceChange: blocked
-      testSourceChange: blocked
-      packageLockChange: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      employeeTransferRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-closeout-reconcile-commit-checkpoint.md docs\05-execution-logs\evidence\2026-06-21-closeout-reconcile-commit-checkpoint.md docs\05-execution-logs\audits-reviews\2026-06-21-closeout-reconcile-commit-checkpoint.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId closeout-reconcile-commit-checkpoint
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId closeout-reconcile-commit-checkpoint
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId closeout-reconcile-commit-checkpoint
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId closeout-reconcile-commit-checkpoint -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-21-closeout-reconcile-commit-checkpoint.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-closeout-reconcile-commit-checkpoint.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-21-closeout-reconcile-commit-checkpoint.md
-    retryCount: 0
   - id: active-queue-slimming-2026-06-21-recovery-window
     title: Active queue slimming recovery window
     phase: agent-system-maintenance-2026-06-21
@@ -4228,5 +3646,99 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+    status: closed
+    retryCount: 0
+  - id: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    title: Active queue slimming ready-for-closeout recovery window
+    phase: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    sourceStory: current-user-2026-06-22-approved-closeout-reconcile-and-active-queue-slimming
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved executing closeout reconcile checkpoint and then continuing active queue slimming on 2026-06-22.
+      Scope is docs/state/archive-only movement of terminal historical active queue entries into the recovery window;
+      high-risk capability gates remain blocked.
+    targetClosureItem: active queue terminal history archive to recovery window after batch-244 through batch-247 closeout
+    behaviorBoundary: agent_system::active_queue_slimming_ready_for_closeout_recovery_window
+    requirementRefs:
+      - current-user-2026-06-22-approved-closeout-reconcile-and-active-queue-slimming
+    useCases:
+      - active queue retains only the terminal recovery window while archived terminal history remains indexed
+    acceptanceScenarios:
+      - terminal active queue task count returns to the configured recovery window without moving non-terminal tasks
+    nonGoals:
+      - product source, tests, package/lockfile, schema/migration, seed/database, script, env/secret, Provider, dev server, browser/e2e, deploy, PR, force-push, payment, external-service, authorization runtime, employee transfer runtime, or Cost Calibration Gate work
+    validationProfile: docs-state-archive-maintenance
+    executionProfile: docs_state_archive_maintenance
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_approved
+    localFullLoopGate: not_applicable_docs_state_only
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - docs_state_archive
+      - queue_slimming
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md docs/05-execution-logs/evidence/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md docs/05-execution-logs/audits-reviews/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md docs/05-execution-logs/evidence/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md docs/05-execution-logs/audits-reviews/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
     status: closed
     retryCount: 0

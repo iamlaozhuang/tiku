@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: stopped-automation-hygiene-cleanup-2026-06-21
-  updatedAt: "2026-06-21T23:26:48-07:00"
+  updatedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  updatedAt: "2026-06-22T01:00:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -11426,3 +11426,63 @@ entries:
     commitSha: ac534c19903fa20704f8dc4ac57946e16d41379b
     completedAt: "2026-06-21"
     archivedByTask: stopped-automation-hygiene-cleanup-2026-06-21
+  - id: close-organization-detail-management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 24e353918c9911d1a643ca38ee270f9fc0d98c0f
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: close-employee-import-management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 283055bd855d6ba22f72954cd45bb2f6675f9f8c
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: close-employee-transfer-unbind-management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: a04f737a8449eb54f787a376928f21a5e2f24062
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: low-risk-audit-closeout-state-normalization
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: docs_state_governance_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-state-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-state-normalization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 7091321eae251831fe07a3da8c0f143d101bca30
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: low-risk-full-unit-regression-repair
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: low_risk_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-full-unit-regression-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-full-unit-regression-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: closeout-reconcile-commit-checkpoint
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: docs_state_governance_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-closeout-reconcile-commit-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-closeout-reconcile-commit-checkpoint.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
