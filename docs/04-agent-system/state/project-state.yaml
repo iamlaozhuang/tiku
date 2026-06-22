@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
   lastKnownOriginMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
 currentTask:
-  id: batch-256-organization-analytics-aggregate-only-organization-metrics
+  id: batch-257-organization-analytics-privacy-preserving-employee-statistics
   status: closed
   result: pass_historical_reconcile
-  claimedAt: "2026-06-22T02:51:46-07:00"
-  validatedAt: "2026-06-22T02:51:46-07:00"
-  closedAt: "2026-06-22T02:51:46-07:00"
+  claimedAt: "2026-06-22T02:57:12-07:00"
+  validatedAt: "2026-06-22T02:57:12-07:00"
+  closedAt: "2026-06-22T02:57:12-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-256-organization-analytics-aggregate-only-organization-metrics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-256-organization-analytics-aggregate-only-organization-metrics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-256-organization-analytics-aggregate-only-organization-metrics.md
-  branch: codex/batch-256-organization-analytics-metrics
-  commitSha: 67e4437755e36593c067b575553dc918fafe9635
+  planPath: docs/05-execution-logs/task-plans/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
+  branch: codex/batch-257-organization-analytics-employee-stats
+  commitSha: bc0b1b6d4a649caea1a77bd857b153a5e6c706c3
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5701,9 +5701,9 @@ organizationAnalyticsGuardedImplementationBatch20260622:
     - batch-257-organization-analytics-privacy-preserving-employee-statistics
     - batch-258-organization-analytics-export-readiness-contracts-without-object-st
     - batch-259-organization-analytics-audit-log-redacted-reference
-  currentTaskId: batch-256-organization-analytics-aggregate-only-organization-metrics
+  currentTaskId: batch-257-organization-analytics-privacy-preserving-employee-statistics
   currentTaskStatus: closed
-  nextCandidateTaskId: batch-257-organization-analytics-privacy-preserving-employee-statistics
+  nextCandidateTaskId: batch-258-organization-analytics-export-readiness-contracts-without-object-st
   seedClosedAt: "2026-06-22T02:47:00-07:00"
   seedStatus: closed
   approvalBoundary:
