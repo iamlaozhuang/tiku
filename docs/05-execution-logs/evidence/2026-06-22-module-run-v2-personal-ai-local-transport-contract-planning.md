@@ -19,6 +19,11 @@ The current 2026-06-22 user prompt approves executing
 `module-run-v2-personal-ai-local-transport-contract-planning`, asking the mechanism for the next legal seed or
 executable task group, and approving legal seed execution.
 
+The current 2026-06-22 08:53 fresh user prompt approved `localExperienceAcceptanceBridgeApproved` for
+`module-run-v2-personal-ai-local-transport-contract-planning`. This run materializes only that L4 bridge approval and
+restores a closed active queue recovery marker because the terminal task was previously archived by queue slimming while
+the bridge proposal script still checks active queue terminal status first.
+
 This task consumes `localExperienceAcceptanceBridgeApproved` only for docs-state reconciliation and read-only focused
 route-service validation. It does not authorize runtime source edits, UI/browser/e2e work, dev server validation,
 schema/migration, dependency/package/lockfile changes, env/secret access, provider/model calls, staging/prod/cloud/
@@ -33,6 +38,7 @@ deploy/payment/external-service work, PR/force-push, or Cost Calibration Gate wo
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1`                                                                                                                                                                                                                                                                                                                                             | pass   | Existing in-progress bridge task detected; no implementation seed candidate before bridge closeout.                                                                    |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1`                                                                                                                                                                                                                                                                                                                                          | pass   | Bridge proposal recognized the current L4 candidate as `in_progress`; decision was `executable_task_exists`.                                                           |
 | `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                                                                                                                                                                                                                                                                                                | pass   | 1 focused test file passed; 20 tests passed.                                                                                                                           |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1`                                                                                                                                                                                                                                                                                                                                          | pass   | After restoring the closed L4 active recovery marker, bridge proposal advances past L4 to the next bridge candidate.                                                   |
 | `npm.cmd run lint`                                                                                                                                                                                                                                                                                                                                                                                                                                                         | pass   | ESLint completed successfully.                                                                                                                                         |
 | `npm.cmd run typecheck`                                                                                                                                                                                                                                                                                                                                                                                                                                                    | pass   | `tsc --noEmit` completed successfully.                                                                                                                                 |
 | `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md` | pass   | All matched files use Prettier code style.                                                                                                                             |
@@ -46,9 +52,9 @@ deploy/payment/external-service work, PR/force-push, or Cost Calibration Gate wo
 - Batch range: single L4 bridge approval reconciliation packet.
 - RED: current bridge proposal diagnostic asks for `module-run-v2-personal-ai-local-transport-contract-planning`
   approval because active queue no longer contains the terminal candidate.
-- GREEN: current queue contains the L4 candidate, focused route-service unit validation passes, and no runtime source
-  edits were required.
-- Commit: `726085fff6f09f4bea57417c8bdd226369c74361` is the branch base before this reconciliation; the immutable task
+- GREEN: current queue contains the L4 candidate as a closed recovery marker, focused route-service unit validation
+  passes, and no runtime source edits were required.
+- Commit: `f108d42be579c76e743cc82ad7fe885219c89667` is the branch base before this reconciliation; the immutable task
   commit is reported after commit creation.
 - localFullLoopGate: L4 local API or Server Action contract planning reconciliation.
 - threadRolloverGate: no rollover required for this narrow docs-state bridge; current thread can continue to seed
@@ -68,6 +74,6 @@ recorded.
 
 - Queue status: `closed`.
 - Project state current task status: `closed`.
-- Commit: `726085fff6f09f4bea57417c8bdd226369c74361` was the pre-task branch base; final task commit is recorded after
+- Commit: `f108d42be579c76e743cc82ad7fe885219c89667` was the pre-task branch base; final task commit is recorded after
   immutable commit creation.
 - Merge/push/cleanup: pending after local commit.

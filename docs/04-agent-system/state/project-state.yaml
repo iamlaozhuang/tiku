@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-updatedAt: "2026-06-22T08:46:10-07:00"
+currentPhase: module-run-v2-personal-ai-local-transport-contract-planning
+updatedAt: "2026-06-22T08:53:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: bc2fc77e4c372b40d564a521db08188dffa6a60b
-  lastKnownOriginMasterSha: bc2fc77e4c372b40d564a521db08188dffa6a60b
+  lastKnownMasterSha: f108d42be579c76e743cc82ad7fe885219c89667
+  lastKnownOriginMasterSha: f108d42be579c76e743cc82ad7fe885219c89667
 currentTask:
-  id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  id: module-run-v2-personal-ai-local-transport-contract-planning
   status: closed
-  result: pass_ops_governance_local_recovery_expired_hidden_boundary_contracts_historical_reconcile
-  claimedAt: "2026-06-22T08:46:00-07:00"
-  validatedAt: "2026-06-22T08:46:10-07:00"
-  closedAt: "2026-06-22T08:46:10-07:00"
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  branch: codex/batch-283-ops-governance-local-recovery-boundary
+  result: pass_l4_transport_bridge_approval_reconciliation_current_approval
+  claimedAt: "2026-06-22T08:53:52-07:00"
+  validatedAt: "2026-06-22T08:53:52-07:00"
+  closedAt: "2026-06-22T08:53:52-07:00"
+  sourceStory: localExperienceClosureGate.acceptanceBridgePlan
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
+  branch: codex/personal-ai-local-transport-bridge-approval-20260622
   commitSha: null
   prUrl: null
   retryCount: 0

@@ -6,6 +6,10 @@ APPROVE validation. The current approval is treated as `localExperienceAcceptanc
 planning/reconciliation task only. The current queue contains the bridge candidate, focused route-service unit validation
 passed, and no runtime source, e2e, schema, migration, dependency, provider, or env changes were made.
 
+The current 2026-06-22 08:53 approval is accepted only for this L4 bridge candidate. Restoring a closed active queue
+recovery marker is approved because the task was already archived as terminal, the bridge proposal script is
+active-queue-terminal aware, and this repair does not alter archive/history evidence.
+
 ## Scope Review
 
 - Allowed write surface is limited to state, task plan, evidence, and audit files.
@@ -22,7 +26,7 @@ passed, and no runtime source, e2e, schema, migration, dependency, provider, or 
 
 ## Final Closeout Review
 
-APPROVE closeout. Prettier check, `git diff --check`, pre-commit hardening, module closeout readiness, and pre-push
-readiness passed on the task branch. The bridge proposal advanced to
+APPROVE closeout. Prettier check, `git diff --check`, focused route-service unit validation, pre-commit hardening,
+module closeout readiness, and pre-push readiness passed on the task branch. The bridge proposal advanced to
 `module-run-v2-personal-ai-local-ui-browser-planning`, which remains blocked until separate fresh
 `localExperienceAcceptanceBridgeApproved` unless a later legal mechanism seed supersedes it.

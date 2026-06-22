@@ -8,6 +8,7 @@
 - Evidence mode: `lite`
 - Validation policy: `docs_state`
 - Approval: current 2026-06-22 user prompt approves executing this local experience bridge and approving a legal follow-up seed when the mechanism proposes one.
+- Latest approval: current 2026-06-22 user prompt approves `localExperienceAcceptanceBridgeApproved` for `module-run-v2-personal-ai-local-transport-contract-planning`.
 
 ## Scope
 
@@ -49,8 +50,9 @@ Blocked files and actions:
 1. Record the current approval as `localExperienceAcceptanceBridgeApproved` for the L4 candidate only.
 2. Reconcile active queue state with historical reality: L4 planning and implementation evidence already exists, but the active queue no longer contains the candidate because of queue slimming.
 3. Run focused local route-service unit validation without changing runtime code.
-4. Record redacted evidence and audit, then close this task so bridge proposal diagnostics can advance to the next mechanism recommendation.
-5. Run next-action and implementation seed proposal after closeout; if a legal seed candidate appears, execute it with the project seed script and keep all high-risk gates blocked.
+4. Restore a closed active queue recovery marker for the L4 bridge so the read-only bridge proposal can treat it as terminal without altering archive/history records.
+5. Record redacted evidence and audit, then close this task so bridge proposal diagnostics can advance to the next mechanism recommendation.
+6. Run next-action and implementation seed proposal after closeout; if a legal seed candidate appears, execute it with the project seed script and keep all high-risk gates blocked.
 
 ## Validation Commands
 
