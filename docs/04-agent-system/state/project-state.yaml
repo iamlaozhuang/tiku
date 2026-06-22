@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b3cc3ff852852a7003482433382565ad3b0ea587
-  lastKnownOriginMasterSha: b3cc3ff852852a7003482433382565ad3b0ea587
+  lastKnownMasterSha: 7f7426a7b147c038069590ef5ce2dda8351963c6
+  lastKnownOriginMasterSha: 7f7426a7b147c038069590ef5ce2dda8351963c6
 currentTask:
-  id: stopped-automation-hygiene-cleanup-2026-06-21
+  id: batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
   status: closed
-  result: pass_stopped_automation_hygiene_cleanup
-  claimedAt: "2026-06-21T23:26:48-07:00"
-  validatedAt: "2026-06-21T23:26:48-07:00"
-  closedAt: "2026-06-21T23:26:48-07:00"
-  sourceStory: current-user-2026-06-21-approved-stopped-automation-hygiene-cleanup
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-stopped-automation-hygiene-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-stopped-automation-hygiene-cleanup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-stopped-automation-hygiene-cleanup.md
-  branch: codex/stopped-automation-hygiene-cleanup-20260621
-  commitSha: b3cc3ff852852a7003482433382565ad3b0ea587
+  result: pass_ai_task_provider_lifecycle_contract
+  claimedAt: "2026-06-22T00:00:00-07:00"
+  validatedAt: "2026-06-22T00:09:08-07:00"
+  closedAt: "2026-06-22T00:09:08-07:00"
+  sourceStory: phase-70-advanced-ai-task-domain-implementation-planning
+  planPath: docs/05-execution-logs/task-plans/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  evidencePath: docs/05-execution-logs/evidence/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  branch: codex/batch-244-ai-task-lifecycle-contract
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
