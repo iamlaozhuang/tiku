@@ -29,10 +29,16 @@
 - Historical implementation reconcile:
   - Review existing recovery and expired-hidden boundary contracts and focused tests before touching source.
   - Confirm local recovery is represented as a safe boundary contract only and does not execute recovery, purge, deletion, or destructive data operations.
-  - Do not change source if current implementation already satisfies the task.
+  - Existing implementation satisfies the task; no source or test edits were required.
 - Focused unit command:
-  - Replace the placeholder with an explicit scoped unit command before task closeout.
+  - `npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts`
 - Run `npm.cmd run lint`.
 - Run `npm.cmd run typecheck`.
 - Run `git diff --check`.
 - Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Closeout Notes
+
+- Reconciled against historical evidence `batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c`.
+- Existing service emits only local recovery status, expired-hidden coverage status, hidden visibility status, redacted log reference status, and blocked capability status.
+- No actual recovery, purge, deletion, destructive operation, raw hidden/expired record exposure, Provider/env/schema/database/dependency/browser/e2e/deploy/PR/force-push, or Cost Calibration Gate work was performed.

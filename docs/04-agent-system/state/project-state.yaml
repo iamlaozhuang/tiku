@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-updatedAt: "2026-06-22T08:42:50-07:00"
+currentPhase: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+updatedAt: "2026-06-22T08:46:10-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 80ff830c6845ffb15d674623ca00570577b76bfd
-  lastKnownOriginMasterSha: 80ff830c6845ffb15d674623ca00570577b76bfd
+  lastKnownMasterSha: bc2fc77e4c372b40d564a521db08188dffa6a60b
+  lastKnownOriginMasterSha: bc2fc77e4c372b40d564a521db08188dffa6a60b
 currentTask:
-  id: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+  id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
   status: closed
-  result: pass_ops_governance_log_retention_redaction_contracts_historical_reconcile
-  claimedAt: "2026-06-22T08:42:00-07:00"
-  validatedAt: "2026-06-22T08:42:50-07:00"
-  closedAt: "2026-06-22T08:42:50-07:00"
+  result: pass_ops_governance_local_recovery_expired_hidden_boundary_contracts_historical_reconcile
+  claimedAt: "2026-06-22T08:46:00-07:00"
+  validatedAt: "2026-06-22T08:46:10-07:00"
+  closedAt: "2026-06-22T08:46:10-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-  evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-  branch: codex/batch-282-ops-governance-log-retention-redaction
+  planPath: docs/05-execution-logs/task-plans/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+  evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+  branch: codex/batch-283-ops-governance-local-recovery-boundary
   commitSha: null
   prUrl: null
   retryCount: 0

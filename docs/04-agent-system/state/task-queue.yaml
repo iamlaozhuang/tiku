@@ -6940,7 +6940,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
     validationCommands:
@@ -6948,9 +6948,15 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
     planPath: docs/05-execution-logs/task-plans/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
     evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    status: pending
+    status: closed
+    result: pass_ops_governance_local_recovery_expired_hidden_boundary_contracts_historical_reconcile
+    claimedAt: "2026-06-22T08:46:00-07:00"
+    validatedAt: "2026-06-22T08:46:10-07:00"
+    closedAt: "2026-06-22T08:46:10-07:00"
+    branch: codex/batch-283-ops-governance-local-recovery-boundary
     retryCount: 0
