@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
-updatedAt: "2026-06-22T07:42:55-07:00"
+currentPhase: batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+updatedAt: "2026-06-22T07:47:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+  id: batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
   status: closed
-  result: pass_organization_training_employee_flow_contract
-  claimedAt: "2026-06-22T07:42:55-07:00"
-  validatedAt: "2026-06-22T07:44:21-07:00"
-  closedAt: "2026-06-22T07:44:21-07:00"
+  result: pass_organization_training_context_usage_contract
+  claimedAt: "2026-06-22T07:47:21-07:00"
+  validatedAt: "2026-06-22T07:48:57-07:00"
+  closedAt: "2026-06-22T07:48:57-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
-  evidencePath: docs/05-execution-logs/evidence/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
-  branch: codex/batch-273-organization-training-employee-flow
+  planPath: docs/05-execution-logs/task-plans/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  evidencePath: docs/05-execution-logs/evidence/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  branch: codex/batch-274-organization-training-context
   commitSha: null
   prUrl: null
   retryCount: 0

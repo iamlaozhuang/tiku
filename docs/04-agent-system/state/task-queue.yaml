@@ -5687,7 +5687,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
     validationCommands:
@@ -5695,10 +5695,17 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+    planPath: docs/05-execution-logs/task-plans/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
     evidencePath: docs/05-execution-logs/evidence/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-    status: pending
+    status: closed
+    result: pass_organization_training_context_usage_contract
+    claimedAt: "2026-06-22T07:47:21-07:00"
+    validatedAt: "2026-06-22T07:48:57-07:00"
+    closedAt: "2026-06-22T07:48:57-07:00"
+    branch: codex/batch-274-organization-training-context
     retryCount: 0
   - id: batch-275-organization-training-audit-log-redacted-reference
     title: Module Run v2 organization-training implementation seed
