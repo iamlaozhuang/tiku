@@ -7,6 +7,9 @@ function createBaseInput() {
   const codeHash = ["CODE", "HASH"].join("-");
   const auditLogPayload = ["AUDIT", "PAYLOAD"].join("-");
   const aiCallLogPayload = ["AI", "CALL", "PAYLOAD"].join("-");
+  const sensitiveExternalMarker = ["EXTERNAL", "PRIVATE"].join("-");
+  const sensitiveInputMarker = ["INPUT", "PRIVATE"].join("-");
+  const sensitiveOutputMarker = ["OUTPUT", "PRIVATE"].join("-");
 
   return {
     id: 601,
@@ -21,6 +24,9 @@ function createBaseInput() {
     codeHash,
     auditLogPayload,
     aiCallLogPayload,
+    sensitiveExternalMarker,
+    sensitiveInputMarker,
+    sensitiveOutputMarker,
     privatePayloadMarker: "private-payload-marker",
   };
 }
@@ -50,6 +56,19 @@ describe("redeem_code reference service", () => {
           aiCallLogPublicId: "ai_call_log_public_123",
           redactionStatus: "redacted",
         },
+        auditRedaction: {
+          auditLogMetadataStatus: "redacted",
+          aiCallLogRequestStatus: "not_included",
+          aiCallLogResponseStatus: "not_included",
+          plaintextCodeStatus: "not_included",
+          codeHashStatus: "not_included",
+          providerPayloadStatus: "not_included",
+          rawPromptStatus: "not_included",
+          rawAnswerStatus: "not_included",
+          internalIdStatus: "not_included",
+          publicIdInventoryStatus: "not_included",
+          redactionBoundary: "audit_log_ai_call_log_redacted_metadata_only",
+        },
         redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
         referenceStatus: "redacted_reference",
       },
@@ -59,6 +78,9 @@ describe("redeem_code reference service", () => {
     expect(serializedResult).not.toContain(input.codeHash);
     expect(serializedResult).not.toContain(input.auditLogPayload);
     expect(serializedResult).not.toContain(input.aiCallLogPayload);
+    expect(serializedResult).not.toContain(input.sensitiveExternalMarker);
+    expect(serializedResult).not.toContain(input.sensitiveInputMarker);
+    expect(serializedResult).not.toContain(input.sensitiveOutputMarker);
     expect(serializedResult).not.toContain(input.privatePayloadMarker);
   });
 
@@ -91,6 +113,19 @@ describe("redeem_code reference service", () => {
           auditLogPublicId: null,
           aiCallLogPublicId: null,
           redactionStatus: "redacted",
+        },
+        auditRedaction: {
+          auditLogMetadataStatus: "redacted",
+          aiCallLogRequestStatus: "not_included",
+          aiCallLogResponseStatus: "not_included",
+          plaintextCodeStatus: "not_included",
+          codeHashStatus: "not_included",
+          providerPayloadStatus: "not_included",
+          rawPromptStatus: "not_included",
+          rawAnswerStatus: "not_included",
+          internalIdStatus: "not_included",
+          publicIdInventoryStatus: "not_included",
+          redactionBoundary: "audit_log_ai_call_log_redacted_metadata_only",
         },
         redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
         referenceStatus: "redacted_reference",

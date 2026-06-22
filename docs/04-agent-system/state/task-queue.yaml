@@ -6826,21 +6826,74 @@ tasks:
     queueSelectionMode: user_directed_serial_low_risk_batch
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    claimedAt: "2026-06-21T19:20:34-07:00"
+    validatedAt: "2026-06-21T19:24:41-07:00"
+    result: pass_redeem_code_audit_redaction_local_validation
+    branch: codex/close-redeem-code-audit-redaction
     plannedFiles:
-      - src/server/validators/**
-      - src/server/services/**
-      - src/server/contracts/**
-      - tests/unit/**
+      - src/server/contracts/redeem-code-reference-contract.ts
+      - src/server/services/redeem-code-reference-service.ts
+      - src/server/services/redeem-code-reference-service.test.ts
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md
       - docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
       - docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
-    blockedFiles: *low_risk_blocked_files
-    capabilities: *low_risk_capabilities
-    closeoutPolicy: *low_risk_closeout_policy
-    validationCommands: *low_risk_validation_commands
+    allowedFiles:
+      - src/server/contracts/redeem-code-reference-contract.ts
+      - src/server/services/redeem-code-reference-service.ts
+      - src/server/services/redeem-code-reference-service.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
+    blockedFiles:
+      - .env
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/redeem-code-reference-service.test.ts src/server/services/audit-ai-call-log-reference-service.test.ts src/server/services/ops-governance-redeem-code-redacted-reference-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId close-redeem-code-audit-redaction
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId close-redeem-code-audit-redaction -SkipRemoteAheadCheck
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md

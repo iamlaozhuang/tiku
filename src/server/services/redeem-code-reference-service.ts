@@ -9,6 +9,22 @@ import { normalizeRedeemCodeReferenceInput } from "../validators/redeem-code-ref
 
 const INVALID_REDEEM_CODE_REFERENCE_INPUT_CODE = 400010;
 
+function createRedeemCodeAuditRedaction(): RedeemCodeReferenceDto["auditRedaction"] {
+  return {
+    auditLogMetadataStatus: "redacted",
+    aiCallLogRequestStatus: "not_included",
+    aiCallLogResponseStatus: "not_included",
+    plaintextCodeStatus: "not_included",
+    codeHashStatus: "not_included",
+    providerPayloadStatus: "not_included",
+    rawPromptStatus: "not_included",
+    rawAnswerStatus: "not_included",
+    internalIdStatus: "not_included",
+    publicIdInventoryStatus: "not_included",
+    redactionBoundary: "audit_log_ai_call_log_redacted_metadata_only",
+  };
+}
+
 function mapRedeemCodeReferenceToDto(
   input: RedeemCodeReferenceInput,
 ): RedeemCodeReferenceDto {
@@ -28,6 +44,7 @@ function mapRedeemCodeReferenceToDto(
       aiCallLogPublicId: input.aiCallLogPublicId,
       redactionStatus: "redacted",
     },
+    auditRedaction: createRedeemCodeAuditRedaction(),
     redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
     referenceStatus: "redacted_reference",
   };
