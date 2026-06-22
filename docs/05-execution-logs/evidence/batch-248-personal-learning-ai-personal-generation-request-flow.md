@@ -16,7 +16,7 @@ result: pass
 - Batch range: batch-248 only; personal generation request flow duplicate-suppression closeout.
 - RED: batch-248 was newly seeded as pending even though batch-119 and batch-236 already recorded the request-flow implementation and duplicate-suppression evidence.
 - GREEN: existing request-flow implementation was revalidated with the current focused unit target; no source change was required.
-- Commit: pending until local closeout commit is created.
+- Commit: `25868c6b3e0864232f01e5ea54548f6cc2cefb55`
 - localFullLoopGate: L5 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: continue current thread through batch-248 closeout.
 - nextModuleRunCandidate: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.
@@ -37,6 +37,12 @@ result: pass
   - Key output: `Test Files 1 passed (1)`, `Tests 5 passed (5)`.
 - PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId batch-248-personal-learning-ai-personal-generation-request-flow -PlannedFiles ...`
   - Key output: planned docs/state/evidence/audit files matched allowedFiles; `work readiness passed`.
+- PASS: git commit hooks for `25868c6b3e0864232f01e5ea54548f6cc2cefb55`
+  - Key output: pre-commit hardening passed, lint-staged ran Prettier, `npm.cmd run lint` passed, `npm.cmd run typecheck` passed, and post-commit advisory confirmed the five changed files were task-scoped.
+- PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-248-personal-learning-ai-personal-generation-request-flow`
+  - First run exposed this missing command anchor in evidence; this entry records the closeout command before rerun.
+- PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-248-personal-learning-ai-personal-generation-request-flow -SkipRemoteAheadCheck`
+  - Key output: `OK_PRE_PUSH_STATE_SHA_ANCESTOR master`, `pre-push readiness passed`.
 
 ## Implementation Decision
 
