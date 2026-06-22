@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-21-drain-to-recovery-window
-  updatedAt: "2026-06-21T06:45:00-07:00"
+  updatedByTask: active-queue-slimming-2026-06-21-recovery-window
+  updatedAt: "2026-06-21T23:00:59-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -11096,3 +11096,323 @@ entries:
     commitSha: null
     completedAt: "2026-06-21"
     archivedByTask: active-queue-slimming-2026-06-21-drain-to-recovery-window
+  - id: active-queue-slimming-2026-06-21-drain-to-recovery-window
+    phase: agent-system-queue-health
+    status: closed
+    taskKind: docs_state_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-drain-to-recovery-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-drain-to-recovery-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: efcb9d2b
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-229-ops-governance-and-retention-redeem-code-redacted-reference
+    phase: batch-229-ops-governance-and-retention-redeem-code-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-229-ops-governance-and-retention-redeem-code-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-229-ops-governance-and-retention-redeem-code-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    phase: batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-230-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    phase: batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-231-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: module-run-v2-personal-ai-local-ui-auth-session-contract-repair
+    phase: blocked-validation-repair
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-auth-session-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-personal-ai-local-ui-auth-session-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 32cac297c40fed589db780ca5d78af51e8e4e7a4
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: organization-training-route-runtime-contract-repair
+    phase: blocked-validation-repair
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-route-runtime-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-route-runtime-contract-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: d0e5f566aab3aead8c5160453bece9152a853683
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: organization-training-admin-visible-scope-no-migration-repair
+    phase: blocked-validation-repair
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-organization-training-admin-visible-scope-no-migration-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 821ee36e524bc91d1ca763b89fa0422f441a8c1a
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: blocked-validation-repair-state-reconciliation-2026-06-20
+    phase: blocked-validation-repair-state-reconciliation
+    status: closed
+    taskKind: docs_state_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-blocked-validation-repair-state-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: d09081c7c2d23949c2f0610b3c6fec26d73f0f0c
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: personal-ai-local-ui-browser-auth-session-repair
+    phase: blocked-validation-repair
+    status: closed
+    taskKind: local_validation_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-20-personal-ai-local-ui-browser-auth-session-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 24c187f37ddb9e60a6c973020bc155ef9859b8e0
+    completedAt: "2026-06-20"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    phase: batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-232-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 7a05b187
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen
+    phase: batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-233-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: a3c484e5
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    phase: batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-234-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: dc3bde63
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    phase: batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-235-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: e0c6333b
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-236-personal-learning-ai-personal-generation-request-flow
+    phase: batch-236-personal-learning-ai-personal-generation-request-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-236-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-236-personal-learning-ai-personal-generation-request-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 65d95c08
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-237-personal-learning-ai-paper-and-mock-exam-context-selection
+    phase: batch-237-personal-learning-ai-paper-and-mock-exam-context-selection
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-237-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: cf11d8ff
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and
+    phase: batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-238-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: a3e83c92
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-239-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    phase: batch-239-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-239-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-239-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b57e5acd
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-240-organization-training-organization-admin-training-draft-publish-ta
+    phase: batch-240-organization-training-organization-admin-training-draft-publish-ta
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-240-organization-training-organization-admin-training-draft-publish-ta.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 59c7f740
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    phase: batch-241-organization-training-employee-answer-lifecycle-local-role-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-241-organization-training-employee-answer-lifecycle-local-role-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 150aa272
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    phase: batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-242-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 8b59a645
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: batch-243-organization-training-audit-log-redacted-reference
+    phase: batch-243-organization-training-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-243-organization-training-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-243-organization-training-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: e9f24ba2
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: low-risk-audit-closeout-implementation-seed
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: docs_state_governance_seed
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b424218f4e9e16ec81beaaaa0c35ce160557f198
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: paper-validator-service-package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-validator-service-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-validator-service-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: a690dcd6194ba447f40c86020dde459faa2445f4
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: paper-student-runtime-guard-package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-student-runtime-guard-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-student-runtime-guard-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 4a73eb2a1a40eef2da1b6e4127704021913dfda6
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: paper-admin-count-feedback-package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-admin-count-feedback-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-admin-count-feedback-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 382f904ed517cd6c1b6867cc0d1e193189766ad9
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: paper-question-type-advisory-feedback-package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-question-type-advisory-feedback-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-question-type-advisory-feedback-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b7d01ff06194a1e245a44e973aac40d8c6ea2993
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: paper-legacy-alias-inventory-package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-legacy-alias-inventory-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-legacy-alias-inventory-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: cbd6c7cf751af76f1473a7b9e539390cbe4c7279
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: close-question-material-binding-experience
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-material-binding-experience.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-material-binding-experience.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 5e8f20fdebdc96160fb249b3fe1ba61572cabff7
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: close-question-reference-and-material-lock-surface
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: f5d17b6ef17d88a6fa39f10a948b8f508e1d5153
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: close-kn-recommendation-review-experience
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-kn-recommendation-review-experience.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-kn-recommendation-review-experience.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 8142dc9be618543480ba56c0e546522c19111a0d
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: close-redeem-code-detail-contract
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 883bcd96832faac04446bf7e90230c532c1f9b50
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
+  - id: close-redeem-code-detail-ui
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-ui.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: ed7f49e7652fcc3af713a2e0a35ef4ff2a0ff1b4
+    completedAt: "2026-06-21"
+    archivedByTask: active-queue-slimming-2026-06-21-recovery-window
