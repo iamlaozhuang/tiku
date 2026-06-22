@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a4d7e1b6a46e4d92c745febfd94a2717f3f3b6a0
-  lastKnownOriginMasterSha: a4d7e1b6a46e4d92c745febfd94a2717f3f3b6a0
+  lastKnownMasterSha: ce707eb9e7ce534213c2814543aab364f1559847
+  lastKnownOriginMasterSha: ce707eb9e7ce534213c2814543aab364f1559847
 currentTask:
-  id: batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+  id: batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
   status: closed
-  result: pass_ai_task_provider_log_evidence_contract
-  claimedAt: "2026-06-22T00:19:00-07:00"
-  validatedAt: "2026-06-22T00:19:47-07:00"
-  closedAt: "2026-06-22T00:19:47-07:00"
+  result: pass_ai_task_provider_local_sandbox_proposal_rules
+  claimedAt: "2026-06-22T00:24:00-07:00"
+  validatedAt: "2026-06-22T00:24:33-07:00"
+  closedAt: "2026-06-22T00:24:33-07:00"
   sourceStory: phase-70-advanced-ai-task-domain-implementation-planning
-  planPath: docs/05-execution-logs/task-plans/batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  branch: codex/batch-246-ai-task-log-evidence
-  commitSha: 2dba66bc
+  planPath: docs/05-execution-logs/task-plans/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  branch: codex/batch-247-ai-task-sandbox-proposal
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
