@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: cross-role-local-flow-bridge-validation-2026-06-22
-updatedAt: "2026-06-22T04:48:59-07:00"
+updatedAt: "2026-06-22T05:58:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: preview-readiness-queue-hygiene-preview-readiness-refresh
+  id: preview-release-scope-decision-package
   status: closed
-  result: pass_preview_readiness_queue_hygiene_checkpoint_refreshed
-  claimedAt: "2026-06-22T05:42:44-07:00"
-  validatedAt: "2026-06-22T05:42:44-07:00"
-  closedAt: "2026-06-22T05:42:44-07:00"
-  sourceStory: user-request-2026-06-22-four-docs-state-queue-hygiene-tasks
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
-  branch: codex/queue-hygiene-preview-readiness-refresh
+  result: pass_preview_release_scope_fixed_docs_state_only
+  claimedAt: "2026-06-22T05:58:43-07:00"
+  validatedAt: "2026-06-22T05:58:43-07:00"
+  closedAt: "2026-06-22T05:58:43-07:00"
+  sourceStory: user-request-2026-06-22-preview-release-scope-decision-package
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-scope-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-scope-decision-package.md
+  branch: codex/preview-release-scope-decision-package
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -6046,3 +6046,110 @@ previewReadinessQueueHygieneCheckpoint20260622:
     Local docs/state queue hygiene is closed and the active queue is slim. This does not claim preview release
     readiness. Preview release preparation still requires explicit approval and scope decisions for release gate groups
     AP-01 through AP-11, and the next mechanism proposal is guarded seeding for ai-task-and-provider.
+
+previewReleaseScopeDecisionPackage20260622:
+  taskId: preview-release-scope-decision-package
+  phase: preview-release-scope-decision-2026-06-22
+  recordedAt: "2026-06-22T05:58:43-07:00"
+  branch: codex/preview-release-scope-decision-package
+  taskStatus: closed
+  result: pass_preview_release_scope_fixed_docs_state_only
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-scope-decision-package.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-scope-decision-package.md
+  decision:
+    firstPreviewLabel: staging_owner_acceptance_web_preview
+    previewReleaseReadyClaim: false
+    deploymentApproved: false
+    productionReadyClaim: false
+    decisionType: scope_boundary_only
+  includeScope:
+    productSurface:
+      - Web-only owner acceptance preview.
+      - Desktop-first admin workflows already locally closed.
+      - Student and personal learning flows already locally closed.
+      - Organization training and organization analytics flows already locally closed.
+      - Ops governance and redacted audit-log visibility already locally closed.
+    dataMode:
+      - synthetic_or_reviewed_non_sensitive_sample_data_only
+      - no_production_data_clone
+      - no_raw_employee_answer
+      - no_full_paper_content_in_evidence
+    aiMode:
+      - provider_disabled_by_default
+      - redacted_ai_task_and_ai_call_log_metadata_only
+      - no_raw_prompt_provider_payload_or_generated_content
+    authorizationMode:
+      - existing_local_auth_boundary_only
+      - no_org_auth_runtime_model_change
+      - no_personal_auth_or_org_auth_schema_migration_in_this_scope
+    validationMode:
+      - local_lint_typecheck_unit_build_evidence_before_release_planning
+      - existing_e2e_inventory_or_fresh_approved_staging_validation_later
+  excludeScope:
+    - real_provider_or_model_call_execution
+    - provider_key_env_secret_read_write_or_rotation
+    - cost_calibration_gate_execution
+    - online_payment_refund_invoice_settlement_or_external_purchase_confirmation
+    - ocr_auto_import_or_parser_provider_execution
+    - organization_data_export_file_generation_or_download_delivery
+    - schema_migration_drizzle_migration_or_database_mutation
+    - cloud_resource_creation_or_staging_deploy
+    - production_deploy_or_production_data_access
+    - dependency_package_lockfile_change
+    - pr_force_push_or_release_tag
+    - org_auth_runtime_authorization_model_change
+  deferredGateGroups:
+    AP-01:
+      scope: provider_smoke_execution
+      status: excluded_from_first_preview_without_fresh_provider_env_approval
+    AP-02:
+      scope: ops_auth_quota_cost_calibration
+      status: deferred_until_cost_calibration_gate_approval
+    AP-03:
+      scope: provider_staging_execution
+      status: deferred_until_staging_resource_provider_and_rollback_scope_approval
+    AP-04:
+      scope: standard_ai_generation_scope_change
+      status: deferred_until_product_scope_provider_env_quota_cost_decision
+    AP-05:
+      scope: standard_org_self_service_scope_change
+      status: deferred_until_product_privacy_schema_api_ui_deploy_decision
+    AP-06:
+      scope: online_payment
+      status: excluded_from_first_preview
+    AP-07:
+      scope: ocr_auto_import
+      status: excluded_from_first_preview
+    AP-08:
+      scope: org_data_export
+      status: excluded_from_first_preview
+    AP-09:
+      scope: runtime_capability_list
+      status: release_planning_prerequisite_before_deploy
+    AP-10:
+      scope: current_checkpoint_audit_repair
+      status: release_planning_prerequisite_before_deploy
+    AP-11:
+      scope: source_governance_change
+      status: release_planning_prerequisite_before_deploy
+  nextRecommendedTasks:
+    - preview-staging-resource-boundary-planning
+    - preview-release-validation-plan
+    - ready-for-closeout-closeout-policy-repair
+    - ai-task-and-provider-guarded-seed-only_if_local_implementation_continues_before_release
+  blockedWithoutFreshApproval:
+    - provider_model_call
+    - env_secret_access_or_env_file_change
+    - schema_migration_or_database_mutation
+    - cloud_resource_or_deploy
+    - payment_external_service
+    - dependency_package_lockfile_change
+    - browser_e2e_runtime_outside_named_validation_plan
+    - pr_force_push_release_tag
+    - production_or_staging_data_access
+  conclusion: >-
+    The first preview release scope is fixed as a Web-only owner acceptance candidate over already local-closed,
+    low-risk workflows with provider disabled by default and synthetic or reviewed non-sensitive sample data only. This
+    package does not authorize deployment or claim preview release readiness. Staging resource planning and validation
+    planning must happen before any preview environment publication.
