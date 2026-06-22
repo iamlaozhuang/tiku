@@ -5826,7 +5826,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-275-organization-training-audit-log-redacted-reference
     validationCommands:
@@ -5834,8 +5834,15 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-275-organization-training-audit-log-redacted-reference
+    planPath: docs/05-execution-logs/task-plans/batch-275-organization-training-audit-log-redacted-reference.md
     evidencePath: docs/05-execution-logs/evidence/batch-275-organization-training-audit-log-redacted-reference.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-275-organization-training-audit-log-redacted-reference.md
-    status: pending
+    status: closed
+    result: pass_organization_training_audit_log_redacted_reference_contract
+    claimedAt: "2026-06-22T07:52:10-07:00"
+    validatedAt: "2026-06-22T07:53:41-07:00"
+    closedAt: "2026-06-22T07:53:41-07:00"
+    branch: codex/batch-275-organization-training-audit-log
     retryCount: 0

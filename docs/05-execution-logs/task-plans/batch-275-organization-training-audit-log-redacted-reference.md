@@ -1,0 +1,50 @@
+# Module Run v2 Seeded Task Plan: batch-275
+
+## Task
+
+- Task id: `batch-275-organization-training-audit-log-redacted-reference`
+- Module: `organization-training`
+- Target closure: audit_log redacted reference.
+- Seed source: `phase-72-advanced-organization-training-implementation-planning`
+- localFullLoopGate: L6
+
+## Seeded Scope
+
+- Use the generated queue scope and existing historical implementation evidence first.
+- If implementation already exists, perform historical implementation reconcile and focused validation.
+- Allowed source surfaces are limited to `src/server/models/**`, `src/server/contracts/**`, `src/server/validators/**`, and `src/server/services/**`.
+- Governance updates are limited to `docs/04-agent-system/state/**` and `docs/05-execution-logs/**`.
+
+## Blocked Gates
+
+- No Provider/model calls.
+- No `.env*` read/write/output.
+- No package or lockfile changes.
+- No schema, migration, seed, database connection, or data mutation.
+- No dev server, browser, Playwright/e2e, deploy, PR, force push, payment, external service, org_auth runtime behavior change, raw employee answer exposure, full paper content exposure, or Cost Calibration Gate work.
+
+## Validation Plan
+
+- Historical implementation reconcile:
+  - Review existing batch-184, batch-223, batch-243, and batch-255 evidence before touching source.
+  - Confirm existing model, contract, service, and validator coverage already closes redacted audit_log references.
+  - Do not change source if current implementation already satisfies the task.
+- Focused unit command:
+  - `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts`
+- Run `npm.cmd run lint`.
+- Run `npm.cmd run typecheck`.
+- Run `git diff --check`.
+- Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Reconcile Decision
+
+- Decision: historical implementation reconcile only.
+- Existing implementation surfaces:
+  - `src/server/models/organization-training.ts`
+  - `src/server/contracts/organization-training-contract.ts`
+  - `src/server/services/organization-training-service.ts`
+  - `src/server/validators/organization-training.ts`
+- Existing validation surfaces:
+  - `src/server/services/organization-training-service.test.ts`
+  - `src/server/validators/organization-training.test.ts`
+- Source changes planned: none.
