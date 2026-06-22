@@ -3,6 +3,12 @@ taskId: preview-owner-acceptance-naming-packet-2026-06-22
 updatedAt: "2026-06-22T11:45:00-07:00"
 status: naming_packet_defined_pending_human_assignment
 sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+ownerAssignmentStagingBoundaryPacket:
+  path: docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
+  status: defined_pending_human_owner_assignment_no_staging_resource_action
+  updatedAt: "2026-06-22T12:30:00-07:00"
+  stagingBoundaryStatus: planning_only_no_resource_action
+  realPersonNamesRecorded: false
 scope:
   firstPreviewScope: web_only_owner_acceptance_preview
   providerDefault: disabled

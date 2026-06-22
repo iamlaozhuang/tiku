@@ -1,0 +1,132 @@
+schemaVersion: 1
+taskId: preview-owner-acceptance-owner-assignment-staging-boundary-packet-2026-06-22
+updatedAt: "2026-06-22T12:30:00-07:00"
+status: owner_assignment_staging_boundary_packet_defined_docs_state_only
+sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+sourceNamingPacketPath: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
+scope:
+  firstPreviewScope: web_only_owner_acceptance_preview
+  providerDefault: disabled
+  dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  stagingResourceActionApproved: false
+  accountActionApproved: false
+ownerAssignment:
+  status: pending_human_named_owner_assignment
+  realPersonNamesRecorded: false
+  reason: no_human_owner_names_were_provided_in_current_instruction
+  namedOwnerRefCurrentValue: null
+  policy:
+    namedOwnerRefType: non_sensitive_role_or_reviewed_public_business_identifier_only
+    contactDetailsAllowedHere: false
+    futureAssignmentRequires:
+      - explicit_human_named_owner_input
+      - redaction_boundary_for_any_personal_or_contact_detail
+      - confirmation_owner_accepts_role
+      - fresh_approval_before_staging_publication
+  requiredBeforeFreshStagingPublicationApproval:
+    ownerAcceptanceAccounts:
+      accountInventoryOwner: pending_named_owner
+      accountCreationOwner: pending_named_owner
+      accountDisableOwner: pending_named_owner
+      acceptanceReviewerOwner: pending_named_owner
+    sampleDataBoundary:
+      sampleDataOwner: pending_named_owner
+      sourceReviewOwner: pending_named_owner
+      redactionVerifier: pending_named_owner
+      resetOrSeedOwner: conditionally_pending_named_owner_if_seed_or_reset_is_requested
+    operationsAndSafety:
+      monitoringOwner: pending_named_owner
+      incidentOwner: pending_named_owner
+      rollbackOwner: pending_named_owner
+      stopOwner: pending_named_owner
+      evidenceRedactionOwner: pending_named_owner
+    stagingResourceBoundary:
+      stagingResourceOwner: pending_named_owner
+      stagingDomainTlsOwner: pending_named_owner
+      authCallbackOwner: pending_named_owner
+      migrationRollbackOwner: conditionally_pending_named_owner_if_staging_database_or_migration_is_requested
+      providerFeatureFlagOwner: conditionally_pending_named_owner_if_provider_enablement_is_requested
+stagingBoundary:
+  status: planning_only_no_resource_action
+  resourceActionTaken: false
+  createdOrChanged:
+    cloudResource: false
+    deployTarget: false
+    domainOrTls: false
+    authCallbackOrigin: false
+    envOrSecret: false
+    databaseOrSchemaOrMigrationOrSeed: false
+    objectStorage: false
+    providerConfiguration: false
+    account: false
+  requiredBeforeAnyStagingPublication:
+    resources:
+      - staging_resource_owner_named
+      - deployment_topology_defined_without_production_resource_reuse
+      - staging_domain_tls_owner_named_if_public_url_is_requested
+      - auth_callback_origin_owner_named_if_auth_flow_is_requested
+      - rollback_or_disable_owner_named
+    data:
+      - sample_data_owner_named
+      - source_review_owner_named
+      - redaction_verifier_named
+      - synthetic_or_reviewed_non_sensitive_sample_data_only
+      - no_production_database_clone_or_object_storage_reuse
+    operations:
+      - monitoring_owner_named
+      - incident_owner_named
+      - stop_owner_named
+      - evidence_redaction_owner_named
+      - owner_authorized_stop_conditions_recorded
+    validation:
+      - lint_typecheck_unit_build_or_task_specific_static_gate_evidence
+      - git_inventory_no_unapproved_source_schema_package_env_provider_deploy_drift
+      - redaction_check_no_secret_token_db_url_prompt_payload_raw_generated_content_raw_employee_answer_full_paper_or_plaintext_redeem_code
+      - AP_01_to_AP_11_release_gates_have_own_evidence_before_any_preview_ready_claim
+sampleDataBoundary:
+  allowed:
+    - synthetic_seed_data
+    - reviewed_non_sensitive_sample_metadata
+    - redacted_existing_evidence_metadata
+  conditionallyAllowedOnlyWithFreshApproval:
+    - imported_content_after_source_owner_review_and_redaction_plan
+    - staging_seed_or_reset_command_after_exact_target_backup_and_rollback_owner_are_named
+  forbidden:
+    - production_database_clone
+    - production_object_storage_reuse
+    - raw_prompt
+    - provider_payload
+    - raw_generated_content
+    - raw_employee_answer
+    - full_paper_content
+    - plaintext_redeem_code
+    - secret_token_authorization_header_or_database_url
+stopConditions:
+  - any_ap01_to_ap11_gate_claim_without_own_evidence_and_approval
+  - any_env_secret_provider_db_schema_deploy_browser_e2e_dependency_payment_or_external_service_action_without_fresh_approval
+  - any_sensitive_raw_content_or_identifier_exposure_in_evidence
+  - staging_resource_boundary_missing_named_owner
+  - preview_ready_release_ready_or_production_ready_claim_before_gate_evidence
+freshApprovalRequiredFor:
+  - account_creation_or_disable_action
+  - staging_resource_creation_or_change
+  - env_secret_read_write_or_rotation
+  - provider_model_call_or_provider_enablement
+  - schema_migration_seed_database_connection_or_data_change
+  - browser_e2e_runtime_or_dev_server
+  - deployment_cloud_resource_domain_tls_or_callback_origin_change
+  - payment_external_service_or_org_auth_runtime_change
+  - dependency_package_lockfile_change
+  - pr_force_push_release_tag
+  - cost_calibration_gate
+boundaryStatement: >-
+  This packet binds the existing preview owner acceptance checklist and naming packet to a staging boundary decision
+  surface. It records no real person names or contact details because none were provided, creates or disables no
+  accounts, creates or changes no staging resources, reads or writes no env/secret files, runs no Provider/model calls,
+  connects to no database, runs no schema/migration/seed/data mutation, starts no dev server, runs no browser/e2e,
+  deploys nothing, creates no PR, performs no force push, changes no dependencies, touches no payment/external service,
+  mutates no org_auth runtime behavior, declares no previewReleaseReady/productionReady status, and leaves the Cost
+  Calibration Gate blocked.

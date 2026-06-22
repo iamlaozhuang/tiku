@@ -1899,3 +1899,54 @@ lastLocalReleaseCandidateBuildUnitExecutionPacket20260622:
     - payment_external_service
     - cost_calibration_gate
   displacedTerminalArchivedTask: module-run-v2-completion-marker-reconcile-2026-06-22
+
+lastPreviewOwnerAcceptanceOwnerAssignmentStagingBoundaryPacket20260622:
+  taskId: preview-owner-acceptance-owner-assignment-staging-boundary-packet-2026-06-22
+  evaluatedAt: "2026-06-22T12:30:00-07:00"
+  decision: docs_state_owner_assignment_staging_boundary_packet_no_resource_action
+  packetPath: docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
+  checklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+  namingPacketPath: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
+  evidence: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-owner-assignment-staging-boundary-packet.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-owner-assignment-staging-boundary-packet.md
+  rowStatusChanges: 0
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  ownerAssignmentStatus: pending_human_named_owner_assignment
+  realPersonNamesRecorded: false
+  stagingBoundaryStatus: planning_only_no_resource_action
+  noRuntimeActions:
+    - account_creation_or_disable_action
+    - staging_resource_creation_or_change
+    - dev_server
+    - browser_e2e
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - deploy_cloud_staging_resource
+  requiredBeforeFreshStagingPublicationApproval:
+    - account_inventory_owner_named
+    - account_creation_owner_named
+    - account_disable_owner_named
+    - acceptance_reviewer_owner_named
+    - sample_data_owner_named
+    - source_review_owner_named
+    - redaction_verifier_named
+    - staging_resource_owner_named
+    - monitoring_owner_named
+    - incident_owner_named
+    - rollback_owner_named
+    - stop_owner_named
+    - evidence_redaction_owner_named
+  blockedGates:
+    - account_creation_or_disable_action
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+  displacedTerminalArchivedTask: module-run-v2-total-closeout-recheck-2026-06-22

@@ -8,6 +8,15 @@ namingPacket:
   updatedAt: "2026-06-22T11:45:00-07:00"
   realPersonNamesRecorded: false
   reason: no_human_owner_names_were_provided_in_current_instruction
+ownerAssignmentStagingBoundaryPacket:
+  path: docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
+  status: defined_pending_human_owner_assignment_no_staging_resource_action
+  updatedAt: "2026-06-22T12:30:00-07:00"
+  stagingBoundaryStatus: planning_only_no_resource_action
+  realPersonNamesRecorded: false
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
 scope:
   firstPreviewScope: web_only_owner_acceptance_preview
   providerDefault: disabled
@@ -128,6 +137,7 @@ monitoringRollbackStopOwners:
     - staging_resource_boundary_missing_named_owner
     - preview_ready_release_ready_or_production_ready_claim_before_gate_evidence
 freshApprovalRequiredFor:
+  - account_creation_or_disable_action
   - staging_resource_creation_or_change
   - env_secret_read_write_or_rotation
   - provider_model_call_or_provider_enablement
