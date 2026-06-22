@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: ready-for-closeout-closeout-policy-repair
-  updatedAt: "2026-06-22T06:22:08-07:00"
+  updatedByTask: queue-hygiene-archive-followup-2026-06-22
+  updatedAt: "2026-06-22T09:14:17-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -11806,3 +11806,233 @@ entries:
     commitSha: null
     completedAt: "2026-06-22"
     archivedByTask: ready-for-closeout-closeout-policy-repair
+  - id: preview-readiness-queue-hygiene-ready-for-closeout-review
+    phase: preview-readiness-queue-hygiene-2026-06-22
+    status: closed
+    taskKind: docs_state_queue_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: preview-readiness-queue-hygiene-blocked-gate-classification
+    phase: preview-readiness-queue-hygiene-2026-06-22
+    status: closed
+    taskKind: docs_state_queue_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-blocked-gate-classification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-blocked-gate-classification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: preview-readiness-queue-hygiene-preview-readiness-refresh
+    phase: preview-readiness-queue-hygiene-2026-06-22
+    status: closed
+    taskKind: docs_state_checkpoint
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: preview-release-scope-decision-package
+    phase: preview-release-scope-decision-2026-06-22
+    status: closed
+    taskKind: docs_state_release_scope_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-scope-decision-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: preview-staging-resource-boundary-planning
+    phase: preview-staging-resource-boundary-planning-2026-06-22
+    status: closed
+    taskKind: docs_state_release_boundary_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: preview-release-validation-plan
+    phase: preview-release-validation-plan-2026-06-22
+    status: closed
+    taskKind: docs_state_release_validation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-validation-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: ready-for-closeout-closeout-policy-repair
+    phase: ready-for-closeout-closeout-policy-repair-2026-06-22
+    status: closed
+    taskKind: docs_state_queue_metadata_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    phase: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
+    phase: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    phase: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    phase: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-268-personal-learning-ai-personal-generation-request-flow
+    phase: batch-268-personal-learning-ai-personal-generation-request-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-268-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-268-personal-learning-ai-personal-generation-request-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-269-personal-learning-ai-paper-and-mock-exam-context-selection
+    phase: batch-269-personal-learning-ai-paper-and-mock-exam-context-selection
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-269-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-269-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
+    phase: batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    phase: batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-272-organization-training-organization-admin-training-draft-publish-ta
+    phase: batch-272-organization-training-organization-admin-training-draft-publish-ta
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+    phase: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-273-organization-training-employee-answer-lifecycle-local-role-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+    phase: batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-275-organization-training-audit-log-redacted-reference
+    phase: batch-275-organization-training-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-275-organization-training-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-275-organization-training-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-276-organization-analytics-aggregate-only-organization-metrics
+    phase: batch-276-organization-analytics-aggregate-only-organization-metrics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-276-organization-analytics-aggregate-only-organization-metrics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-276-organization-analytics-aggregate-only-organization-metrics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-277-organization-analytics-privacy-preserving-employee-statistics
+    phase: batch-277-organization-analytics-privacy-preserving-employee-statistics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-278-organization-analytics-export-readiness-contracts-without-object-st
+    phase: batch-278-organization-analytics-export-readiness-contracts-without-object-st
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-279-organization-analytics-audit-log-redacted-reference
+    phase: batch-279-organization-analytics-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-279-organization-analytics-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-279-organization-analytics-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2026-06-22
