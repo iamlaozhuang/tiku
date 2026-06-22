@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  id: preview-readiness-queue-hygiene-archive-terminal-candidates
   status: closed
-  result: pass_historical_reconcile
-  claimedAt: "2026-06-22T03:52:19-07:00"
-  validatedAt: "2026-06-22T03:52:19-07:00"
-  closedAt: "2026-06-22T03:52:19-07:00"
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  evidencePath: docs/05-execution-logs/evidence/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  branch: codex/batch-263-ops-governance-recovery-boundary
-  commitSha: ec24ba68c49b5c2a2f41fb59046c245097be4e6e
+  result: pass_terminal_archive_candidates_moved
+  claimedAt: "2026-06-22T05:18:27-07:00"
+  validatedAt: "2026-06-22T05:18:27-07:00"
+  closedAt: "2026-06-22T05:25:11-07:00"
+  sourceStory: user-request-2026-06-22-four-docs-state-queue-hygiene-tasks
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
+  branch: codex/queue-hygiene-archive-terminal
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null

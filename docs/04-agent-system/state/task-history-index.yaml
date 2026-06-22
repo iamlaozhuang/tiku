@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
-  updatedAt: "2026-06-22T01:00:00-07:00"
+  updatedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  updatedAt: "2026-06-22T05:25:11-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -11486,3 +11486,253 @@ entries:
     commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
     completedAt: "2026-06-21"
     archivedByTask: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+  - id: active-queue-slimming-2026-06-21-recovery-window
+    phase: agent-system-maintenance-2026-06-21
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-recovery-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-recovery-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 598ef110522cf24257c598c314ad8b8ad4a36e6a
+    completedAt: "2026-06-21"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: stopped-automation-hygiene-cleanup-2026-06-21
+    phase: agent-system-maintenance-2026-06-21
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-stopped-automation-hygiene-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-stopped-automation-hygiene-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b3cc3ff852852a7003482433382565ad3b0ea587
+    completedAt: "2026-06-21"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    phase: batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen
+    phase: batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    phase: batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    phase: batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: closeout-reconcile-batch-244-247-checkpoint
+    phase: closeout-reconcile-batch-244-247-checkpoint
+    status: closed
+    taskKind: docs_state_governance_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    phase: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
+    status: closed
+    taskKind: mechanism_maintenance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-248-personal-learning-ai-personal-generation-request-flow
+    phase: batch-248-personal-learning-ai-personal-generation-request-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-248-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-248-personal-learning-ai-personal-generation-request-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection
+    phase: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and
+    phase: batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    phase: batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: closeout-reconcile-batch-248-251-checkpoint
+    phase: closeout-reconcile-batch-248-251-checkpoint
+    status: closed
+    taskKind: docs_state_governance_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: closeout-reconcile-batch-252-255-checkpoint
+    phase: module-run-v2-closeout-reconcile
+    status: closed
+    taskKind: docs_state_reconcile
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-252-255-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-252-255-checkpoint.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-252-organization-training-organization-admin-training-draft-publish-ta
+    phase: batch-252-organization-training-organization-admin-training-draft-publish-ta
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-252-organization-training-organization-admin-training-draft-publish-ta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-252-organization-training-organization-admin-training-draft-publish-ta.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-253-organization-training-employee-answer-lifecycle-local-role-flow
+    phase: batch-253-organization-training-employee-answer-lifecycle-local-role-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-253-organization-training-employee-answer-lifecycle-local-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-253-organization-training-employee-answer-lifecycle-local-role-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex
+    phase: batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-255-organization-training-audit-log-redacted-reference
+    phase: batch-255-organization-training-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-255-organization-training-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-255-organization-training-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: module-run-v2-auto-seed-organization-analytics
+    phase: module-run-v2-auto-seed-organization-analytics
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-organization-analytics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-organization-analytics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-256-organization-analytics-aggregate-only-organization-metrics
+    phase: batch-256-organization-analytics-aggregate-only-organization-metrics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-256-organization-analytics-aggregate-only-organization-metrics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-256-organization-analytics-aggregate-only-organization-metrics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-257-organization-analytics-privacy-preserving-employee-statistics
+    phase: batch-257-organization-analytics-privacy-preserving-employee-statistics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-257-organization-analytics-privacy-preserving-employee-statistics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-258-organization-analytics-export-readiness-contracts-without-object-st
+    phase: batch-258-organization-analytics-export-readiness-contracts-without-object-st
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-258-organization-analytics-export-readiness-contracts-without-object-st.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-258-organization-analytics-export-readiness-contracts-without-object-st.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: batch-259-organization-analytics-audit-log-redacted-reference
+    phase: batch-259-organization-analytics-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-259-organization-analytics-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-259-organization-analytics-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: closeout-reconcile-batch-256-259-checkpoint
+    phase: module-run-v2-closeout-reconcile
+    status: closed
+    taskKind: docs_state_reconcile
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-256-259-checkpoint.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+  - id: module-run-v2-auto-seed-ops-governance-and-retention
+    phase: module-run-v2-auto-seed-ops-governance-and-retention
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-readiness-queue-hygiene-archive-terminal-candidates
