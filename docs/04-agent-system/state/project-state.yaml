@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
   lastKnownOriginMasterSha: 578bcdac364eb2e24e4d830a5ca1ad4cfe8782f8
 currentTask:
-  id: module-run-v2-auto-seed-organization-analytics
+  id: batch-256-organization-analytics-aggregate-only-organization-metrics
   status: closed
-  result: pass
-  claimedAt: "2026-06-22T02:40:21-07:00"
-  validatedAt: "2026-06-22T02:47:00-07:00"
-  closedAt: "2026-06-22T02:47:00-07:00"
-  sourceStory: current-user-2026-06-22-batch-serial-organization-analytics-seed
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-auto-seed-organization-analytics.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-organization-analytics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-organization-analytics.md
-  branch: codex/organization-analytics-guarded-seed
-  commitSha: 1416689ae51bfc450fed33838252d2c35c582f57
+  result: pass_historical_reconcile
+  claimedAt: "2026-06-22T02:51:46-07:00"
+  validatedAt: "2026-06-22T02:51:46-07:00"
+  closedAt: "2026-06-22T02:51:46-07:00"
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/batch-256-organization-analytics-aggregate-only-organization-metrics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-256-organization-analytics-aggregate-only-organization-metrics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-256-organization-analytics-aggregate-only-organization-metrics.md
+  branch: codex/batch-256-organization-analytics-metrics
+  commitSha: 67e4437755e36593c067b575553dc918fafe9635
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -5702,8 +5702,8 @@ organizationAnalyticsGuardedImplementationBatch20260622:
     - batch-258-organization-analytics-export-readiness-contracts-without-object-st
     - batch-259-organization-analytics-audit-log-redacted-reference
   currentTaskId: batch-256-organization-analytics-aggregate-only-organization-metrics
-  currentTaskStatus: pending
-  nextCandidateTaskId: batch-256-organization-analytics-aggregate-only-organization-metrics
+  currentTaskStatus: closed
+  nextCandidateTaskId: batch-257-organization-analytics-privacy-preserving-employee-statistics
   seedClosedAt: "2026-06-22T02:47:00-07:00"
   seedStatus: closed
   approvalBoundary:

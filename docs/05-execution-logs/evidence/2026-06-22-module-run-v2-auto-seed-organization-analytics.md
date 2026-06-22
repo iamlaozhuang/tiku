@@ -30,6 +30,14 @@
 - `batch-258-organization-analytics-export-readiness-contracts-without-object-st`: export readiness contracts without object storage or external delivery
 - `batch-259-organization-analytics-audit-log-redacted-reference`: audit_log redacted reference
 
+## Readiness Anchors
+
+- implementationAutoSeedGate: satisfied by this guarded seed transaction.
+- localExperienceClosureGate: planned for seeded local implementation tasks.
+- seededImplementationTask: true for every candidate task listed above.
+- focused test plan: each seeded task must run scoped local unit validation or historical implementation reconcile validation before closeout.
+- localFullLoopGate: L5
+
 ## Candidate Readiness
 
 - `batch-256-organization-analytics-aggregate-only-organization-metrics`: PASS. `Test-ModuleRunV2ImplementationAutoSeedReadiness` passed before task claim.
