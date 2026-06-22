@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: discovered-issue-closure-2026-06-21
-updatedAt: "2026-06-21T09:35:00-07:00"
+currentPhase: low-risk-audit-closeout-implementation-2026-06-21
+updatedAt: "2026-06-21T18:20:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 382f904ed517cd6c1b6867cc0d1e193189766ad9
-  lastKnownOriginMasterSha: 382f904ed517cd6c1b6867cc0d1e193189766ad9
+  lastKnownMasterSha: b7d01ff06194a1e245a44e973aac40d8c6ea2993
+  lastKnownOriginMasterSha: b7d01ff06194a1e245a44e973aac40d8c6ea2993
 currentTask:
-  id: paper-question-type-advisory-feedback-package
+  id: paper-legacy-alias-inventory-package
   status: ready_for_closeout
-  result: pass_paper_question_type_advisory_feedback_local_validation
-  claimedAt: "2026-06-21T18:01:09-07:00"
-  validatedAt: "2026-06-21T18:08:12-07:00"
+  result: pass_paper_legacy_alias_inventory_local_validation
+  claimedAt: "2026-06-21T18:18:12-07:00"
+  validatedAt: "2026-06-21T18:20:47-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-4; paper-question-type-strategy
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-question-type-advisory-feedback-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-question-type-advisory-feedback-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-question-type-advisory-feedback-package.md
-  branch: codex/paper-question-type-advisory-feedback-package
+  sourceStory: current-user-low-risk-task-5; question-type-alias-inventory-package
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-legacy-alias-inventory-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-legacy-alias-inventory-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-legacy-alias-inventory-package.md
+  branch: codex/paper-legacy-alias-inventory-package
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: paper-question-type-advisory-feedback-package
+  currentTaskId: paper-legacy-alias-inventory-package
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for
