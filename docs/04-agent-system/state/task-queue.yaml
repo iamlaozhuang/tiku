@@ -3188,67 +3188,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: module-run-v2-completion-marker-reconcile-2026-06-22
-    title: Module Run v2 completion marker reconcile
-    phase: module-run-v2-completion-marker-reconcile-2026-06-22
-    sourceStory: user-request-2026-06-22-avoid-duplicate-personal-learning-ai-seed
-    taskKind: docs_state_queue_hygiene
-    moduleRunVersion: 2
-    targetClosureItem: completion marker reconcile for historical implementation batches
-    behaviorBoundary: module-run-v2::completion-marker-reconcile
-    humanApproval: >-
-      User directed after completing batch-284 through batch-287 to run Get-TikuNextAction.ps1 and seed proposal, and
-      if personal-learning-ai is recommended while historical coverage exists, perform a small completion reconcile /
-      queue hygiene follow-up instead of blindly seeding new duplicate tasks.
-    allowedFiles:
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - scripts/**
-      - drizzle/**
-      - e2e/**
-    validationCommandLifecycle:
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: post_edit
-        command: git diff --check
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22 -SkipRemoteAheadCheck
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - git diff --check
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22 -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md
-    status: closed
-    result: pass_completion_marker_reconcile_duplicate_seed_suppression
-    claimedAt: "2026-06-22T10:23:30-07:00"
-    validatedAt: "2026-06-22T10:23:30-07:00"
-    closedAt: "2026-06-22T10:23:30-07:00"
-    branch: codex/module-run-v2-completion-marker-reconcile-20260622
-    retryCount: 0
-
   - id: module-run-v2-total-closeout-recheck-2026-06-22
     title: Module Run v2 total closeout recheck
     phase: module-run-v2-total-closeout-recheck-2026-06-22
@@ -3975,4 +3914,128 @@ tasks:
     validatedAt: "2026-06-22T12:00:00-07:00"
     closedAt: "2026-06-22T12:00:00-07:00"
     branch: codex/local-release-candidate-evidence-packet-20260622
+    retryCount: 0
+
+  - id: local-release-candidate-build-unit-execution-packet-2026-06-22
+    title: Local release candidate build unit execution packet
+    phase: local-release-candidate-build-unit-execution-packet-2026-06-22
+    sourceStory: user-request-2026-06-22-fresh-approved-build-unit-execution-packet
+    taskKind: preview_release_planning
+    moduleRunVersion: 2
+    executionProfile: local_release_candidate_build_unit_execution
+    evidenceMode: full
+    validationPolicy: local_lint_typecheck_unit_build
+    queueSelectionMode: user_directed_fresh_approved_build_unit_execution_packet
+    targetClosureItem: Fresh-approved local unit and build execution evidence packet
+    behaviorBoundary: preview_owner_acceptance::local_release_candidate_build_unit_execution_no_e2e_no_provider_no_env_no_deploy
+    humanApproval: >-
+      User requested entering the fresh-approved build/unit execution packet. This approval allows local lint,
+      typecheck, unit, and build command execution with redacted evidence. It does not authorize default npm test
+      because that chains to e2e, browser/e2e/dev-server runtime, env/secret access or changes, Provider/model calls,
+      schema/migration/seed/database connection or data changes, deployment/cloud/staging resource work, source/test
+      implementation changes, package/lockfile changes, PR, force-push, payment, external service, org_auth runtime
+      change, production/staging data access, previewReleaseReady claim, or Cost Calibration Gate execution.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/local-release-candidate-build-unit-execution-packet.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    riskTypes:
+      - docs_state
+      - preview_release_planning
+      - release_candidate_unit_build_execution
+      - queue_archive_maintenance
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/local-release-candidate-build-unit-execution-packet.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-release-candidate-build-unit-execution-packet.md docs/05-execution-logs/evidence/2026-06-22-local-release-candidate-build-unit-execution-packet.md docs/05-execution-logs/audits-reviews/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: post_edit
+        command: git status --short --branch
+      - phase: post_edit
+        command: git diff --name-status
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/local-release-candidate-build-unit-execution-packet.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-release-candidate-build-unit-execution-packet.md docs/05-execution-logs/evidence/2026-06-22-local-release-candidate-build-unit-execution-packet.md docs/05-execution-logs/audits-reviews/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git status --short --branch
+      - git diff --name-status
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-release-candidate-build-unit-execution-packet-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+    status: closed
+    result: pass_local_release_candidate_build_unit_execution_packet
+    claimedAt: "2026-06-22T12:15:00-07:00"
+    validatedAt: "2026-06-22T12:15:00-07:00"
+    closedAt: "2026-06-22T12:15:00-07:00"
+    branch: codex/fresh-build-unit-execution-packet-20260622
     retryCount: 0

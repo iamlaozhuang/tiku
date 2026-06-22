@@ -12171,3 +12171,14 @@ entries:
     commitSha: null
     completedAt: "2026-06-22"
     archivedByTask: local-release-candidate-evidence-packet-2026-06-22
+
+  - id: module-run-v2-completion-marker-reconcile-2026-06-22
+    phase: module-run-v2-completion-marker-reconcile-2026-06-22
+    status: closed
+    taskKind: docs_state_queue_hygiene
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: local-release-candidate-build-unit-execution-packet-2026-06-22

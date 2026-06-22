@@ -1863,3 +1863,39 @@ lastLocalReleaseCandidateEvidencePacket20260622:
     - payment_external_service
     - cost_calibration_gate
   displacedTerminalArchivedTask: batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+
+lastLocalReleaseCandidateBuildUnitExecutionPacket20260622:
+  taskId: local-release-candidate-build-unit-execution-packet-2026-06-22
+  evaluatedAt: "2026-06-22T12:15:00-07:00"
+  decision: fresh_approved_local_release_candidate_unit_build_execution_packet
+  packetPath: docs/04-agent-system/state/local-release-candidate-build-unit-execution-packet.yaml
+  evidence: docs/05-execution-logs/evidence/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-local-release-candidate-build-unit-execution-packet.md
+  rowStatusChanges: 0
+  previewReleaseReadyClaim: false
+  executionGateResults:
+    lint: pass
+    typecheck: pass
+    unit: pass_297_files_1261_tests
+    build: pass_next_16_2_6_turbopack_65_static_pages
+    gitDiffCheck: pass_after_trailing_blank_line_fix
+    redactionChecklist: pass_command_summary_only_no_sensitive_runtime_material
+  buildBoundaryNote: next_build_reported_env_local_without_manual_env_file_read_edit_or_value_exposure
+  noRuntimeActions:
+    - default_npm_test
+    - dev_server
+    - browser_e2e
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - deploy_cloud_staging_resource
+  blockedGates:
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+  displacedTerminalArchivedTask: module-run-v2-completion-marker-reconcile-2026-06-22
