@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: ready-for-closeout-closeout-policy-repair-2026-06-22
-updatedAt: "2026-06-22T06:22:08-07:00"
+currentPhase: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+updatedAt: "2026-06-22T06:43:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: ready-for-closeout-closeout-policy-repair
+  id: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
   status: closed
-  result: pass_ready_for_closeout_closeout_policy_repair_docs_state_only
-  claimedAt: "2026-06-22T06:22:08-07:00"
-  validatedAt: "2026-06-22T06:22:08-07:00"
-  closedAt: "2026-06-22T06:22:08-07:00"
-  sourceStory: user-request-2026-06-22-preview-release-docs-state-serial-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-ready-for-closeout-closeout-policy-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-ready-for-closeout-closeout-policy-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-ready-for-closeout-closeout-policy-repair.md
-  branch: codex/ready-for-closeout-closeout-policy-repair
+  result: pass_provider_agnostic_ai_task_lifecycle_contract_local_validation
+  claimedAt: "2026-06-22T06:43:00-07:00"
+  validatedAt: "2026-06-22T06:44:00-07:00"
+  closedAt: "2026-06-22T06:48:07-07:00"
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  evidencePath: docs/05-execution-logs/evidence/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  branch: codex/batch-264-ai-task-lifecycle-contract
   commitSha: null
   prUrl: null
   retryCount: 0
