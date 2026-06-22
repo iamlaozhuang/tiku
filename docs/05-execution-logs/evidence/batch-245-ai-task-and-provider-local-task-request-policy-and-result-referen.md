@@ -16,7 +16,7 @@ result: pass
 - Batch range: batch-245 only; local task request policy and result reference validation.
 - RED: batch-245 was pending with task-level closeout placeholders; existing focused request policy tests confirmed coverage before any source edit, so no source gap was found.
 - GREEN: `npm.cmd run test:unit -- src/server/services/ai-generation-task-request-service.test.ts` passed with 1 file and 5 tests.
-- Commit: to be recorded after the first local closeout commit.
+- Commit: `d91192e9`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: continue_current_thread; this is the second task in the approved batch-244 through batch-247 packet.
 - nextModuleRunCandidate: continue serially to `batch-246-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence` after batch-245 is merged, pushed, and cleaned up.
@@ -31,8 +31,17 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen`: passed.
-- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen`: to be run after the first local closeout commit is recorded.
-- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen -SkipRemoteAheadCheck`: to be run after module closeout readiness passes.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen`: passed.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen -SkipRemoteAheadCheck`: passed.
+
+## Final Closeout State
+
+- Validation commit: `d91192e9`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
+- Merge/push/cleanup: approved by task-level closeoutPolicy and current batch authorization.
 
 ## Source Coverage
 

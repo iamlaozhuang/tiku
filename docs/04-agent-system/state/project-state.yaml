@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
   branch: codex/batch-245-ai-task-request-policy
-  commitSha: null
+  commitSha: d91192e9
   prUrl: null
   retryCount: 0
   lastFailurePath: null
