@@ -1,4 +1,4 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 lowRiskTaskTemplates:
   blockedFiles: &low_risk_blocked_files
     - .env*
@@ -3188,144 +3188,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-    title: Module Run v2 ai-task-and-provider implementation seed
-    phase: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-    sourceStory: module-run-v2-auto-seed-bridge
-    dependencies:
-      - phase-70-advanced-ai-task-domain-implementation-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ai-task-and-provider on 2026-06-22 for guarded seed only and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, prompt/provider payload/raw generated content exposure, dependency/package/lockfile changes, schema/migration/seed/database work, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external service, org_auth runtime changes, plaintext redeem_code exposure, raw employee answer exposure, full paper content exposure, token/db URL exposure, or Cost Calibration Gate execution.
-    autoDriveLocalImplementationApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ai-task-and-provider on 2026-06-22 for guarded seed only and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, prompt/provider payload/raw generated content exposure, dependency/package/lockfile changes, schema/migration/seed/database work, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external service, org_auth runtime changes, plaintext redeem_code exposure, raw employee answer exposure, full paper content exposure, token/db URL exposure, or Cost Calibration Gate execution.
-    seededByTask: phase-70-advanced-ai-task-domain-implementation-planning
-    seededImplementationTask: true
-    seededExecutionModule: ai-task-and-provider
-    targetClosureItem: provider-agnostic AI task lifecycle contracts
-    behaviorBoundary: ai-task-and-provider::provider-agnostic AI task lifecycle contracts
-    requirementRefs:
-      - phase-70-advanced-ai-task-domain-implementation-planning
-    useCases:
-      - ai-task-and-provider local implementation validates provider-agnostic AI task lifecycle contracts
-    acceptanceScenarios:
-      - provider-agnostic AI task lifecycle contracts passes L2-local-implementation without provider/env/schema/deploy/dependency changes
-    nonGoals:
-      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
-    validationProfile: L2-local-implementation
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: local_unit
-    queueSelectionMode: ready_set
-    localExperienceClosureGate: planned
-    localFullLoopGate: L2
-    blockedRemainder:
-      - none
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: true
-    autodrivePolicy:
-      mode: guarded_serial
-      allowedAgentActions:
-        - claim_task
-        - continue_task
-        - scaffold_task_plan
-        - run_validation
-        - write_evidence
-      blockedAgentActions:
-        - merge
-        - push
-        - pr
-        - deploy
-        - dependency_change
-        - schema_migration
-        - env_secret
-        - provider_call
-        - cost_calibration_gate
-      maxAutonomousSteps: 5
-      stopOn:
-        - hard_block
-        - blocked_gate
-        - validation_failure
-        - out_of_scope_change
-        - dirty_unknown_worktree
-        - active_owner_present
-    capabilities:
-      localDockerDatabase: task_approval_required
-      destructiveLocalDockerDatabase: blocked_without_task_approval
-      projectResourceRead: task_approval_required
-      providerKey: env_destination_confirmation_required
-      providerCall: blocked_without_task_approval
-      schemaMigration: blocked_without_task_approval
-      costCalibrationGate: blocked
-    registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
-      redactionRequired: true
-    taskKind: implementation
-    moduleRunVersion: 2
-    allowedFiles:
-      - src/server/models/**
-      - src/server/contracts/**
-      - src/server/validators/**
-      - src/server/services/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-    riskTypes:
-      - local_implementation
-      - local_validation
-      - evidence_redaction
-      - automation_policy
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-70-advanced-ai-task-domain-implementation-planning -CandidateTaskId batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-70-advanced-ai-task-domain-implementation-planning -CandidateTaskId batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-    evidencePath: docs/05-execution-logs/evidence/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-    planPath: docs/05-execution-logs/task-plans/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-    status: closed
-    result: pass_provider_agnostic_ai_task_lifecycle_contract_historical_reconcile
-    claimedAt: "2026-06-22T10:05:52-07:00"
-    validatedAt: "2026-06-22T10:05:52-07:00"
-    closedAt: "2026-06-22T10:05:52-07:00"
-    branch: codex/batch-284-ai-task-lifecycle-reconcile-20260622
-    retryCount: 0
   - id: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
     title: Module Run v2 ai-task-and-provider implementation seed
     phase: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
@@ -4085,4 +3947,110 @@ tasks:
     validatedAt: "2026-06-22T10:55:00-07:00"
     closedAt: "2026-06-22T10:55:00-07:00"
     branch: codex/local-experience-boundary-followup-20260622
+    retryCount: 0
+
+  - id: preview-owner-acceptance-validation-followup-2026-06-22
+    title: Preview owner acceptance validation follow-up
+    phase: preview-owner-acceptance-validation-followup-2026-06-22
+    sourceStory: user-request-2026-06-22-queue-hygiene-local-experience-preview-serial-order
+    taskKind: preview_release_planning
+    moduleRunVersion: 2
+    executionProfile: docs_state_release_planning
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_preview_owner_acceptance_followup
+    targetClosureItem: Preview owner acceptance validation plan follow-up
+    behaviorBoundary: preview_owner_acceptance::web_only_provider_off_synthetic_data_ap01_ap11_validation_plan
+    humanApproval: >-
+      User directed returning to the preview owner acceptance mainline after queue hygiene and Local Experience Closure
+      boundary audit. Scope is Web-only, Provider off, synthetic or reviewed non-sensitive sample data, AP-01 through
+      AP-11 release-gate validation planning, and no preview ready claim. This task stays docs/state-only and does not
+      authorize provider, env, schema, database, browser/e2e, dev-server, deploy, PR, force-push, dependency, payment,
+      external service, org_auth runtime, production/staging data, or Cost Calibration Gate work.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state
+      - preview_release_planning
+      - queue_archive_maintenance
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId preview-owner-acceptance-validation-followup-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md
+    status: closed
+    result: pass_preview_owner_acceptance_validation_followup
+    claimedAt: "2026-06-22T11:20:00-07:00"
+    validatedAt: "2026-06-22T11:20:00-07:00"
+    closedAt: "2026-06-22T11:20:00-07:00"
+    branch: codex/preview-owner-acceptance-validation-followup-20260622
     retryCount: 0

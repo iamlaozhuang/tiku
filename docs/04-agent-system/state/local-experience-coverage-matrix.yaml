@@ -1705,3 +1705,48 @@ lastLocalExperienceClosureBoundaryFollowup20260622:
     - staging_prod_cloud_deploy
     - payment_external_service
     - cost_calibration_gate
+
+lastPreviewOwnerAcceptanceValidationFollowup20260622:
+  taskId: preview-owner-acceptance-validation-followup-2026-06-22
+  evaluatedAt: "2026-06-22T11:20:00-07:00"
+  decision: docs_state_preview_validation_plan_followup_no_preview_ready_claim
+  evidence: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+  rowStatusChanges: 0
+  firstPreviewScope: web_only_owner_acceptance_preview
+  providerDefault: disabled
+  dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  previewReleaseReadyClaim: false
+  releaseGatesRemain:
+    - AP-01
+    - AP-02
+    - AP-03
+    - AP-04
+    - AP-05
+    - AP-06
+    - AP-07
+    - AP-08
+    - AP-09
+    - AP-10
+    - AP-11
+  existingPreviewPackets:
+    - preview-release-scope-decision-package
+    - preview-staging-resource-boundary-planning
+    - preview-release-validation-plan
+  validationPlanFollowup:
+    localCandidateChecks:
+      - lint
+      - typecheck
+      - focused_or_full_unit_evidence_before_publication
+      - build_evidence_before_publication
+      - git_inventory_and_redaction_checks
+    futureFreshApprovalRequired:
+      - provider_model_call
+      - env_secret
+      - schema_migration_seed_database
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - cost_calibration_gate
+  displacedTerminalArchivedTask: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract

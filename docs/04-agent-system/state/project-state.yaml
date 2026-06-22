@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-experience-closure-boundary-followup-2026-06-22
-updatedAt: "2026-06-22T10:55:00-07:00"
+currentPhase: preview-owner-acceptance-validation-followup-2026-06-22
+updatedAt: "2026-06-22T11:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: dce69db9e5d301f7548e5adf0929d4d4c29e919e
-  lastKnownOriginMasterSha: dce69db9e5d301f7548e5adf0929d4d4c29e919e
+  lastKnownMasterSha: 9119060beedd57d68591c10f38fbb9bf23e2fc27
+  lastKnownOriginMasterSha: 9119060beedd57d68591c10f38fbb9bf23e2fc27
 currentTask:
-  id: local-experience-closure-boundary-followup-2026-06-22
+  id: preview-owner-acceptance-validation-followup-2026-06-22
   status: closed
-  result: pass_local_experience_closure_boundary_followup
-  claimedAt: "2026-06-22T10:55:00-07:00"
-  validatedAt: "2026-06-22T10:55:00-07:00"
-  closedAt: "2026-06-22T10:55:00-07:00"
+  result: pass_preview_owner_acceptance_validation_followup
+  claimedAt: "2026-06-22T11:20:00-07:00"
+  validatedAt: "2026-06-22T11:20:00-07:00"
+  closedAt: "2026-06-22T11:20:00-07:00"
   sourceStory: user-request-2026-06-22-queue-hygiene-local-experience-preview-serial-order
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-boundary-followup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-boundary-followup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-boundary-followup.md
-  branch: codex/local-experience-boundary-followup-20260622
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+  branch: codex/preview-owner-acceptance-validation-followup-20260622
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -6851,3 +6851,80 @@ localExperienceClosureBoundaryFollowup20260622:
     tasks, change coverage row statuses, execute browser/e2e/dev-server validation, read or write env/secret files,
     connect to databases, run Provider/model calls, change schema/migrations/dependencies, deploy, create PRs, force
     push, mutate org_auth runtime behavior, expose sensitive evidence, or execute the Cost Calibration Gate.
+
+previewOwnerAcceptanceValidationFollowup20260622:
+  taskId: preview-owner-acceptance-validation-followup-2026-06-22
+  phase: preview-owner-acceptance-validation-followup-2026-06-22
+  recordedAt: "2026-06-22T11:20:00-07:00"
+  branch: codex/preview-owner-acceptance-validation-followup-20260622
+  taskStatus: closed
+  result: pass_preview_owner_acceptance_validation_followup
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md
+  queueHealthAfter:
+    queueSlimmingDecision: clean
+    archiveCandidateCount: 0
+    nextActionDecision: no_pending_task
+    seedProposalDecision: no_seed_candidate
+  existingPreviewPackets:
+    - preview-release-scope-decision-package
+    - preview-staging-resource-boundary-planning
+    - preview-release-validation-plan
+  firstPreviewScope: web_only_owner_acceptance_preview
+  providerDefault: disabled
+  dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  releaseGatesRemain:
+    - AP-01
+    - AP-02
+    - AP-03
+    - AP-04
+    - AP-05
+    - AP-06
+    - AP-07
+    - AP-08
+    - AP-09
+    - AP-10
+    - AP-11
+  validationPlanFollowup:
+    localCandidateChecks:
+      - lint
+      - typecheck
+      - focused_or_full_unit_evidence_before_publication
+      - build_evidence_before_publication
+      - git_inventory_no_unapproved_source_schema_package_env_provider_deploy_drift
+      - redaction_check_no_secret_token_db_url_prompt_payload_raw_generated_content_raw_employee_answer_full_paper_or_plaintext_redeem_code
+    ownerAcceptanceBoundary:
+      - web_only_preview_surface
+      - reviewed_non_production_owner_acceptance_accounts_before_publication
+      - synthetic_or_reviewed_non_sensitive_sample_data_only
+      - provider_disabled_by_default_until_fresh_provider_env_quota_cost_rollback_approval
+      - staging_resources_deploy_browser_e2e_runtime_require_future_fresh_approval
+    stopConditions:
+      - any_ap01_to_ap11_gate_claim_without_own_evidence_and_approval
+      - any_env_secret_provider_db_schema_deploy_browser_e2e_dependency_payment_or_external_service_action
+      - any_sensitive_raw_content_or_identifier_exposure_in_evidence
+      - any_preview_ready_release_ready_or_production_ready_claim_before_release_gate_evidence
+  displacedTerminalArchivedTask: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  blockedWithoutFreshApproval:
+    - provider_model_call
+    - env_secret_access_or_env_file_change
+    - schema_migration_seed_database_connection_or_data_change
+    - browser_e2e_runtime_or_dev_server
+    - cloud_resource_or_deploy
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - org_auth_runtime_change
+    - pr_force_push_release_tag
+    - production_or_staging_data_access
+    - cost_calibration_gate
+  boundary: >-
+    This follow-up keeps the preview owner acceptance mainline as a docs/state validation plan only. It restates the
+    Web-only, Provider-off, synthetic or reviewed non-sensitive data boundary, keeps AP-01 through AP-11 as release
+    gates, archives only the displaced terminal task from the active queue, and does not claim previewReleaseReady,
+    deploy, run browser/e2e/dev-server validation, read or write env/secret files, connect to databases, run
+    Provider/model calls, change schema/migrations/dependencies, create PRs, force push, mutate org_auth runtime
+    behavior, expose sensitive evidence, or execute the Cost Calibration Gate.
