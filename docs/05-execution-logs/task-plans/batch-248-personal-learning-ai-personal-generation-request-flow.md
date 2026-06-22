@@ -5,7 +5,7 @@
 - Task id: `batch-248-personal-learning-ai-personal-generation-request-flow`
 - Module: `personal-learning-ai`
 - Target closure: personal generation request flow.
-- Status: seeded; execute after guarded seed closeout.
+- Status: closed through historical implementation reconcile and current focused unit revalidation.
 
 ## Initial Boundary
 
@@ -20,3 +20,9 @@
 - `npm.cmd run typecheck`
 - `git diff --check`
 - Module Run v2 precommit, closeout, and prepush gates.
+
+## Reconcile Decision
+
+- Historical implementation evidence exists in `docs/05-execution-logs/evidence/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md`.
+- Later duplicate-suppression evidence exists in `docs/05-execution-logs/evidence/batch-236-personal-learning-ai-personal-generation-request-flow.md`.
+- Current batch-248 therefore does not repeat the same implementation; it revalidates the existing local request-flow service and closes the newly seeded task as already materialized.

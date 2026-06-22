@@ -3867,6 +3867,7 @@ tasks:
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-248-personal-learning-ai-personal-generation-request-flow
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-248-personal-learning-ai-personal-generation-request-flow -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-personal-learning-ai.md
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-flow-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -3874,7 +3875,11 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/batch-248-personal-learning-ai-personal-generation-request-flow.md
     evidencePath: docs/05-execution-logs/evidence/batch-248-personal-learning-ai-personal-generation-request-flow.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-248-personal-learning-ai-personal-generation-request-flow.md
-    status: pending
+    status: closed
+    result: pass_existing_request_flow_reconciled_and_revalidated
+    branch: codex/batch-248-personal-learning-ai-request-flow
+    validatedAt: "2026-06-22T01:14:00-07:00"
+    closedAt: "2026-06-22T01:14:00-07:00"
     retryCount: 0
   - id: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection
     title: Module Run v2 personal-learning-ai implementation seed
