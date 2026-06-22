@@ -1361,48 +1361,148 @@ function OrgAuthDetailPanel({
   );
 }
 
+function EmployeeTransferApprovalRequiredPanel({
+  employeeCount,
+  organizationCount,
+}: {
+  employeeCount: number;
+  organizationCount: number;
+}) {
+  return (
+    <section
+      className="bg-surface border-border rounded-md border border-dashed p-4 shadow-sm"
+      data-testid="employee-transfer-approval-required"
+    >
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+          <AlertCircle className="size-4" aria-hidden="true" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            approval_required
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            员工转移运行时待批准
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            当前低风险批次仅关闭解绑管理；跨组织 transfer
+            route、service、repository 和 DB 更新语义需要后续任务批准后再实现。
+          </p>
+          <p className="text-text-muted text-xs">
+            当前可管理员工 {employeeCount}，可选企业组织 {organizationCount}。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function EmployeeList({
   employees,
   onUnbindEmployee,
+  organizations,
 }: {
   employees: AdminOrgAuthData["employees"];
   onUnbindEmployee: (publicId: string) => void;
+  organizations: AdminOrgAuthData["organizations"];
 }) {
   return (
     <AdminPanel title="员工账号">
-      {employees.map((employee) => (
-        <AdminDataRow
-          key={employee.publicId}
-          publicId={employee.publicId}
-          testId={`admin-employee-${employee.publicId}`}
-        >
-          <div className="min-w-0 space-y-1">
-            <p className="text-text-primary text-sm font-medium">
-              {employee.name}
-            </p>
-            <p className="text-text-secondary text-xs">{employee.phone}</p>
-            <p className="text-text-muted text-xs">
-              用户 {employee.userPublicId} / 企业{" "}
-              {employee.organizationPublicId}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-              {userStatusLabels[employee.status]}
-            </span>
-            <button
-              type="button"
-              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              data-testid={`employee-unbind-${employee.publicId}`}
-              onClick={() => onUnbindEmployee(employee.publicId)}
-            >
-              <UserMinus className="size-3.5" aria-hidden="true" />
-              解绑
-            </button>
-          </div>
-        </AdminDataRow>
-      ))}
+      {employees.map((employee) => {
+        const employeeOrganization = organizations.find(
+          (organization) =>
+            organization.publicId === employee.organizationPublicId,
+        );
+
+        return (
+          <AdminDataRow
+            key={employee.publicId}
+            publicId={employee.publicId}
+            testId={`admin-employee-${employee.publicId}`}
+          >
+            <div className="min-w-0 space-y-1">
+              <p className="text-text-primary text-sm font-medium">
+                {employee.name}
+              </p>
+              <p className="text-text-secondary text-xs">{employee.phone}</p>
+              <p className="text-text-muted text-xs">
+                用户 {employee.userPublicId} / 企业{" "}
+                {employee.organizationPublicId}
+              </p>
+              <p className="text-text-muted text-xs">
+                解绑影响：从{" "}
+                {employeeOrganization?.name ?? employee.organizationPublicId}
+                移除，原组织员工数 -1。
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                {userStatusLabels[employee.status]}
+              </span>
+              <button
+                type="button"
+                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                data-testid={`employee-unbind-${employee.publicId}`}
+                onClick={() => onUnbindEmployee(employee.publicId)}
+              >
+                <UserMinus className="size-3.5" aria-hidden="true" />
+                解绑
+              </button>
+            </div>
+          </AdminDataRow>
+        );
+      })}
     </AdminPanel>
+  );
+}
+
+function EmployeeUnbindResultPanel({
+  organizations,
+  result,
+}: {
+  organizations: AdminOrgAuthData["organizations"];
+  result: EmployeeUnbindResultDto;
+}) {
+  const previousOrganization = organizations.find(
+    (organization) =>
+      organization.publicId === result.previousOrganizationPublicId,
+  );
+
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-public-id={result.employeePublicId}
+      data-testid="employee-unbind-result"
+    >
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">解绑结果</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            解绑成功
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            员工已从
+            {previousOrganization?.name ?? result.previousOrganizationPublicId}
+            移除，原组织员工数已减少。
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">状态</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              {result.status}
+            </p>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">影响组织</p>
+            <p className="text-text-primary mt-1 text-sm font-medium break-all">
+              {previousOrganization?.name ??
+                result.previousOrganizationPublicId}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -2684,6 +2784,8 @@ export function AdminOrgAuthPage() {
   const [employeeImportText, setEmployeeImportText] = useState("");
   const [lastEmployeeImportResult, setLastEmployeeImportResult] =
     useState<EmployeeImportResultDto | null>(null);
+  const [lastEmployeeUnbindResult, setLastEmployeeUnbindResult] =
+    useState<EmployeeUnbindResultDto | null>(null);
   const [selectedOrganizationPublicId, setSelectedOrganizationPublicId] =
     useState<string | null>(null);
   const [selectedOrgAuthPublicId, setSelectedOrgAuthPublicId] = useState<
@@ -3076,6 +3178,7 @@ export function AdminOrgAuthPage() {
     setEmployeeConfirmationState(null);
 
     if (unbindResponse.code !== 0 || unbindResponse.data === null) {
+      setLastEmployeeUnbindResult(null);
       setToastMessage({ message: unbindResponse.message, tone: "error" });
       return;
     }
@@ -3096,6 +3199,7 @@ export function AdminOrgAuthPage() {
           : organization,
       ),
     }));
+    setLastEmployeeUnbindResult(unboundEmployee);
     setToastMessage({ message: "员工已解绑。", tone: "success" });
   }
 
@@ -3191,6 +3295,11 @@ export function AdminOrgAuthPage() {
         <EmployeeImportResultPanel result={lastEmployeeImportResult} />
       )}
 
+      <EmployeeTransferApprovalRequiredPanel
+        employeeCount={data.employees.length}
+        organizationCount={data.organizations.length}
+      />
+
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile
           icon={<Building2 className="size-4" aria-hidden="true" />}
@@ -3238,14 +3347,23 @@ export function AdminOrgAuthPage() {
         />
         <EmployeeList
           employees={data.employees}
-          onUnbindEmployee={(publicId) =>
+          organizations={data.organizations}
+          onUnbindEmployee={(publicId) => {
+            setLastEmployeeUnbindResult(null);
             setEmployeeConfirmationState({
               kind: "unbindEmployee",
               publicId,
-            })
-          }
+            });
+          }}
         />
       </section>
+
+      {lastEmployeeUnbindResult === null ? null : (
+        <EmployeeUnbindResultPanel
+          organizations={data.organizations}
+          result={lastEmployeeUnbindResult}
+        />
+      )}
 
       {selectedOrganizationDetail === null ? null : (
         <OrganizationDetailPanel

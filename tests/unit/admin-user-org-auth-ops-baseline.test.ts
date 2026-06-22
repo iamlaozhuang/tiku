@@ -255,6 +255,19 @@ function mockSystemOpsFetch() {
         return createJsonResponse(employeePayload);
       }
 
+      if (path === "/api/v1/employees/employee-public-001/unbind") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            employeePublicId: "employee-public-001",
+            userPublicId: "user-employee-public-001",
+            previousOrganizationPublicId: "organization-public-001",
+            status: "unbound",
+          },
+        });
+      }
+
       if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
         return createJsonResponse(redeemCodePayload);
       }
@@ -1003,6 +1016,49 @@ describe("admin user organization authorization ops baseline", () => {
       content: employeeImportContent,
       sourceFormat: "csv",
     });
+  });
+
+  it("manages employee unbind feedback and marks transfer as approval required", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    const employee = await screen.findByTestId(
+      "admin-employee-employee-public-001",
+    );
+    const transferBoundary = screen.getByTestId(
+      "employee-transfer-approval-required",
+    );
+
+    expect(transferBoundary).toHaveTextContent("approval_required");
+    expect(transferBoundary).toHaveTextContent("transfer route");
+    expect(within(employee).getByText(/解绑影响/)).toHaveTextContent(
+      "原组织员工数 -1",
+    );
+
+    fireEvent.click(within(employee).getByRole("button", { name: "解绑" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认解绑员工？");
+    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("员工已解绑");
+    const unbindResult = screen.getByTestId("employee-unbind-result");
+
+    expect(unbindResult).toHaveTextContent("解绑成功");
+    expect(unbindResult).toHaveTextContent("杭州烟草");
+    expect(unbindResult).not.toHaveAttribute("data-id");
+    expect(
+      screen.queryByTestId("admin-employee-employee-public-001"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-organization-organization-public-001"),
+    ).toHaveTextContent("41 名员工");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/employees/employee-public-001/unbind",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
   });
 
   it("closes redeem_code generation and filtering on the redeem code page", async () => {
