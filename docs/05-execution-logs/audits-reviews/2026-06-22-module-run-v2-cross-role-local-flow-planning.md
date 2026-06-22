@@ -32,6 +32,6 @@ formatting, diff check, Module Run v2 closeout/prepush gates, commit, merge, pus
 - Local capability gate: pass.
 - Focused unit validation: pass.
 - Targeted localhost e2e validation: pass.
-- Module closeout readiness: pending.
-- Pre-push readiness: pending.
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
 - Closeout commit: pending.
