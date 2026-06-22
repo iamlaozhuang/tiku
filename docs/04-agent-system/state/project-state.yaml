@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-updatedAt: "2026-06-22T06:43:00-07:00"
+currentPhase: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
+updatedAt: "2026-06-22T06:49:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  id: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
   status: closed
-  result: pass_provider_agnostic_ai_task_lifecycle_contract_local_validation
-  claimedAt: "2026-06-22T06:43:00-07:00"
-  validatedAt: "2026-06-22T06:44:00-07:00"
-  closedAt: "2026-06-22T06:48:07-07:00"
+  result: pass_ai_task_request_policy_result_reference_local_validation
+  claimedAt: "2026-06-22T06:49:43-07:00"
+  validatedAt: "2026-06-22T06:51:01-07:00"
+  closedAt: "2026-06-22T06:51:01-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-264-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  branch: codex/batch-264-ai-task-lifecycle-contract
+  planPath: docs/05-execution-logs/task-plans/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  evidencePath: docs/05-execution-logs/evidence/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  branch: codex/batch-265-ai-task-request-policy
   commitSha: null
   prUrl: null
   retryCount: 0
