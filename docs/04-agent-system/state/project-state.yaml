@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
-updatedAt: "2026-06-22T06:53:09-07:00"
+currentPhase: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+updatedAt: "2026-06-22T06:59:58-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+  id: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
   status: closed
-  result: pass_ai_task_log_evidence_reference_local_validation
-  claimedAt: "2026-06-22T06:53:09-07:00"
-  validatedAt: "2026-06-22T06:54:24-07:00"
-  closedAt: "2026-06-22T06:54:24-07:00"
+  result: pass_ai_task_provider_sandbox_proposal_local_validation
+  claimedAt: "2026-06-22T06:57:45-07:00"
+  validatedAt: "2026-06-22T06:59:58-07:00"
+  closedAt: "2026-06-22T06:59:58-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
-  branch: codex/batch-266-ai-task-log-evidence
+  planPath: docs/05-execution-logs/task-plans/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+  branch: codex/batch-267-ai-task-sandbox-proposal
   commitSha: null
   prUrl: null
   retryCount: 0
