@@ -514,7 +514,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
   branch: codex/batch-249-personal-learning-ai-context-selection
-  commitSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
+  commitSha: 22d453907e05081523a4cc4e2f3b96cab314792e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
