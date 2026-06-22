@@ -4926,17 +4926,18 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-255-organization-training-audit-log-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-organization-training.md
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
       - phase: post_edit
         command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-255-organization-training-audit-log-redacted-reference
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-255-organization-training-audit-log-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-organization-training.md
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -4944,5 +4945,10 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/batch-255-organization-training-audit-log-redacted-reference.md
     evidencePath: docs/05-execution-logs/evidence/batch-255-organization-training-audit-log-redacted-reference.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-255-organization-training-audit-log-redacted-reference.md
-    status: pending
+    status: closed
+    result: pass_historical_reconcile_audit_log_redacted_reference
+    branch: codex/batch-255-organization-training-audit-redaction
+    claimedAt: "2026-06-22T02:24:08-07:00"
+    validatedAt: "2026-06-22T02:24:08-07:00"
+    closedAt: "2026-06-22T02:24:08-07:00"
     retryCount: 0

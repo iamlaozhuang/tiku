@@ -25,8 +25,26 @@
 
 ## Validation Plan
 
-- Replace the seeded placeholder with the focused unit command selected during implementation.
+- Historical implementation reconcile:
+  - Review existing batch-184, batch-223, and batch-243 evidence before touching source.
+  - Confirm existing model, contract, service, and validator coverage already closes redacted audit_log references.
+  - Do not change source if current implementation already satisfies the task.
+- Focused unit command:
+  - `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts`
 - Run `npm.cmd run lint`.
 - Run `npm.cmd run typecheck`.
 - Run `git diff --check`.
 - Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Reconcile Decision
+
+- Decision: historical implementation reconcile only.
+- Existing implementation surfaces:
+  - `src/server/models/organization-training.ts`
+  - `src/server/contracts/organization-training-contract.ts`
+  - `src/server/services/organization-training-service.ts`
+  - `src/server/validators/organization-training.ts`
+- Existing validation surfaces:
+  - `src/server/services/organization-training-service.test.ts`
+  - `src/server/validators/organization-training.test.ts`
+- Source changes planned: none.
