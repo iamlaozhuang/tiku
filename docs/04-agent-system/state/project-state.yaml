@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
-updatedAt: "2026-06-22T06:49:43-07:00"
+currentPhase: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+updatedAt: "2026-06-22T06:53:09-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen
+  id: batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
   status: closed
-  result: pass_ai_task_request_policy_result_reference_local_validation
-  claimedAt: "2026-06-22T06:49:43-07:00"
-  validatedAt: "2026-06-22T06:51:01-07:00"
-  closedAt: "2026-06-22T06:51:01-07:00"
+  result: pass_ai_task_log_evidence_reference_local_validation
+  claimedAt: "2026-06-22T06:53:09-07:00"
+  validatedAt: "2026-06-22T06:54:24-07:00"
+  closedAt: "2026-06-22T06:54:24-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  evidencePath: docs/05-execution-logs/evidence/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-265-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  branch: codex/batch-265-ai-task-request-policy
+  planPath: docs/05-execution-logs/task-plans/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-266-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  branch: codex/batch-266-ai-task-log-evidence
   commitSha: null
   prUrl: null
   retryCount: 0
