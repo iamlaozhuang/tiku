@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
-updatedAt: "2026-06-22T07:21:43-07:00"
+currentPhase: batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+updatedAt: "2026-06-22T07:25:08-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
+  id: batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
   status: closed
-  result: pass_personal_ai_generation_local_browser_experience_contract_validation
-  claimedAt: "2026-06-22T07:20:17-07:00"
-  validatedAt: "2026-06-22T07:21:43-07:00"
-  closedAt: "2026-06-22T07:21:43-07:00"
+  result: pass_personal_ai_generation_redacted_ai_call_log_reference_validation
+  claimedAt: "2026-06-22T07:23:49-07:00"
+  validatedAt: "2026-06-22T07:25:08-07:00"
+  closedAt: "2026-06-22T07:25:08-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  evidencePath: docs/05-execution-logs/evidence/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  branch: codex/batch-270-personal-ai-local-browser-experience
+  planPath: docs/05-execution-logs/task-plans/batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  evidencePath: docs/05-execution-logs/evidence/batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  branch: codex/batch-271-personal-ai-call-log-reference
   commitSha: null
   prUrl: null
   retryCount: 0
