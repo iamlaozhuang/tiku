@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-276-organization-analytics-aggregate-only-organization-metrics
-updatedAt: "2026-06-22T08:12:00-07:00"
+currentPhase: batch-277-organization-analytics-privacy-preserving-employee-statistics
+updatedAt: "2026-06-22T08:16:56-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e24f630d409b17472fe88b8d7c4ab23287db427a
-  lastKnownOriginMasterSha: e24f630d409b17472fe88b8d7c4ab23287db427a
+  lastKnownMasterSha: f33216ef05de4e8ead061e5c51db86fe7fef8b02
+  lastKnownOriginMasterSha: f33216ef05de4e8ead061e5c51db86fe7fef8b02
 currentTask:
-  id: batch-276-organization-analytics-aggregate-only-organization-metrics
+  id: batch-277-organization-analytics-privacy-preserving-employee-statistics
   status: closed
-  result: pass_organization_analytics_aggregate_metrics_historical_reconcile
-  claimedAt: "2026-06-22T08:11:00-07:00"
-  validatedAt: "2026-06-22T08:12:00-07:00"
-  closedAt: "2026-06-22T08:12:00-07:00"
+  result: pass_organization_analytics_privacy_preserving_employee_statistics_historical_reconcile
+  claimedAt: "2026-06-22T08:16:00-07:00"
+  validatedAt: "2026-06-22T08:16:56-07:00"
+  closedAt: "2026-06-22T08:16:56-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-276-organization-analytics-aggregate-only-organization-metrics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-276-organization-analytics-aggregate-only-organization-metrics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-276-organization-analytics-aggregate-only-organization-metrics.md
-  branch: codex/batch-276-organization-analytics-aggregate-metrics
+  planPath: docs/05-execution-logs/task-plans/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-277-organization-analytics-privacy-preserving-employee-statistics.md
+  branch: codex/batch-277-organization-analytics-privacy-stats
   commitSha: null
   prUrl: null
   retryCount: 0
