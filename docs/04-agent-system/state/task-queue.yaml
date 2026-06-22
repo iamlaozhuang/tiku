@@ -7336,7 +7336,7 @@ tasks:
     validatedAt: "2026-06-21T21:47:31-07:00"
     closedAt: "2026-06-21T21:47:31-07:00"
     branch: codex/low-risk-closeout-state-normalization
-    commitSha: pending_current_repair_commit
+    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
     blockedFollowUp:
       - Runtime/browser/e2e proof remains approval_required because the user explicitly blocked dev server, external browser, Playwright, and e2e for this batch.
       - Provider, payment, OCR, export, staging/prod/deploy, dependency, schema/migration, env/secret, PR, force-push, and Cost Calibration Gate work remain blocked.
@@ -7405,4 +7405,102 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-full-unit-regression-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-full-unit-regression-repair.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-low-risk-full-unit-regression-repair.md
+    retryCount: 0
+  - id: closeout-reconcile-commit-checkpoint
+    title: Closeout reconcile commit checkpoint
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-2026-06-21-next-step; closeout-reconcile-before-next-low-risk-candidate-scan
+    dependencies:
+      - low-risk-full-unit-regression-repair
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested running closeout reconcile before scanning audit docs and task queue for the next
+      no-approval low-risk candidate batch. This task is docs/state-only and may backfill pushed commit checkpoints,
+      create task plan/evidence/audit files, validate locally, commit, fast-forward merge to master, push
+      origin/master, and delete the short branch. It does not approve product source, tests, package, lockfile,
+      schema, migration, seed, database, script, env/secret, Provider, dev-server, browser/e2e, deploy, PR,
+      force-push, payment, external-service, org_auth runtime, employee transfer runtime, legacy alias removal, or
+      Cost Calibration Gate work.
+    targetClosureItem: reconcile pushed repair commit checkpoint before next low-risk candidate scan
+    behaviorBoundary: agent_system::post_closeout_checkpoint_reconcile
+    executionProfile: docs_state_governance_reconciliation
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_closeout_reconcile
+    taskKind: docs_state_governance_reconciliation
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_closeout_reconcile_commit_checkpoint
+    claimedAt: "2026-06-21T22:49:03-07:00"
+    validatedAt: "2026-06-21T22:49:03-07:00"
+    closedAt: "2026-06-21T22:49:03-07:00"
+    branch: codex/closeout-reconcile-20260621
+    commitSha: 67f04915902eb31089e15f114e7abd3493527e7f
+    blockedFollowUp:
+      - Runtime/browser/e2e proof remains approval_required.
+      - Provider, payment, OCR, export, staging/prod/deploy, dependency, schema/migration, env/secret, PR, force-push, and Cost Calibration Gate work remain blocked.
+      - org_auth runtime code changes and employee transfer runtime changes remain blocked.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-closeout-reconcile-commit-checkpoint.md
+      - docs/05-execution-logs/evidence/2026-06-21-closeout-reconcile-commit-checkpoint.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-closeout-reconcile-commit-checkpoint.md
+    blockedFiles:
+      - .env
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      docsStateGovernance: approved
+      productSourceChange: blocked
+      testSourceChange: blocked
+      packageLockChange: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      orgAuthRuntimeChange: blocked
+      employeeTransferRuntimeChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-closeout-reconcile-commit-checkpoint.md docs\05-execution-logs\evidence\2026-06-21-closeout-reconcile-commit-checkpoint.md docs\05-execution-logs\audits-reviews\2026-06-21-closeout-reconcile-commit-checkpoint.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId closeout-reconcile-commit-checkpoint
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId closeout-reconcile-commit-checkpoint
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId closeout-reconcile-commit-checkpoint
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId closeout-reconcile-commit-checkpoint -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-closeout-reconcile-commit-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-closeout-reconcile-commit-checkpoint.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-closeout-reconcile-commit-checkpoint.md
     retryCount: 0
