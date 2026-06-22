@@ -2828,168 +2828,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: module-run-v2-personal-ai-local-transport-contract-planning
-    title: Personal AI local transport contract bridge approval reconciliation
-    phase: module-run-v2-personal-ai-local-transport-contract-planning
-    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
-    dependencies:
-      - local-full-flow-human-acceptance-packet
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Approved by the current 2026-06-22 user prompt to execute
-      `module-run-v2-personal-ai-local-transport-contract-planning`, let the mechanism provide the next seed or
-      executable task group, and approve seed when legal. Scope is limited to materializing
-      `localExperienceAcceptanceBridgeApproved` for this L4 personal-learning-ai transport/API planning reconciliation
-      candidate, reconciling historical L4 implementation evidence, running read-only focused route-service validation,
-      writing redacted evidence/audit, creating a local validation commit, fast-forward merging to master, pushing
-      origin/master, and cleaning up the merged short branch. This approval does not authorize product runtime edits,
-      UI/browser/e2e work, dev server or Browser validation, schema/drizzle/migration, dependency/package/lockfile
-      changes, env/secret access, provider/model calls, staging/prod/cloud/deploy/payment/external-service work, PR,
-      force-push, or Cost Calibration Gate execution.
-    localExperienceAcceptanceBridgeApproved: >-
-      Approved for the personal-learning-ai-experience L4 local_api_or_server_action_contract planning reconciliation
-      only. Source files are read-only for this packet; any L5 UI/browser/e2e work requires a separate future approval
-      unless the mechanism produces a legal seed or executable scope that carries its own approval boundary.
-    targetClosureItem: personal-learning-ai local API or Server Action transport contract planning
-    behaviorBoundary: personal-learning-ai::local_api_or_server_action_contract_planning_reconciliation
-    useCases:
-      - Reconcile the current bridge proposal with historical L4 planning and route implementation evidence.
-      - Verify the current personal AI generation request route-service contract through focused local unit validation.
-      - Advance the mechanism to the next legal seed or executable recommendation after L4 is represented in current queue state.
-    acceptanceScenarios:
-      - Bridge proposal diagnostics recognize this task while active and stop asking for unrelated work.
-      - Focused route-service unit validation passes without provider/model calls or runtime source edits.
-      - Closeout evidence records L4 as satisfied and allows the mechanism to recommend the next seed or executable task.
-    nonGoals:
-      - product source edits, route implementation, UI/browser/e2e work, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
-    validationProfile: docs_state_lite
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: docs_state_lite
-    evidenceMode: lite
-    validationPolicy: docs_state
-    queueSelectionMode: user_directed_acceptance_bridge
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    taskKind: docs_only
-    moduleRunVersion: 2
-    status: closed
-    result: pass_l4_transport_bridge_approval_reconciliation
-    claimedAt: "2026-06-22T04:02:53-07:00"
-    validatedAt: "2026-06-22T04:06:02-07:00"
-    closedAt: "2026-06-22T04:06:02-07:00"
-    branch: codex/personal-ai-local-transport-bridge-20260622
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/evidence/batch-109-personal-learning-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
-      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-20-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - src/app/api/v1/personal-ai-generation-requests/route.ts
-      - src/server/services/personal-ai-generation-request-route.ts
-      - src/server/services/personal-ai-generation-request-route.test.ts
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-TikuNextAction.ps1
-      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - e2e/**
-      - tests/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - product runtime source edits
-      - UI/browser/e2e work or dev server validation
-      - schema/drizzle/migration changes
-      - database migration execution
-      - provider/model calls or provider configuration
-      - env/secret reads or writes
-      - dependency changes
-      - staging/prod/cloud/deploy/payment/external-service
-      - PR
-      - force push
-      - Cost Calibration Gate
-    riskTypes:
-      - docs_state
-      - evidence_redaction
-      - local_experience_acceptance_bridge_reconciliation
-      - read_only_runtime_contract_validation
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    retryCount: 0
   - id: module-run-v2-personal-ai-local-ui-browser-planning
     title: Personal AI local UI browser bridge approval reconciliation
     phase: module-run-v2-personal-ai-local-ui-browser-planning
@@ -3930,4 +3768,115 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md
+    retryCount: 0
+  - id: preview-release-validation-plan
+    title: Preview release validation plan
+    phase: preview-release-validation-plan-2026-06-22
+    sourceStory: user-request-2026-06-22-preview-release-docs-state-serial-batch
+    dependencies:
+      - preview-staging-resource-boundary-planning
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested a docs/state-only serial preview release preparation batch. This task may update
+      project-state.yaml, task-queue.yaml, the June task archive, task-history-index.yaml, and its own plan/evidence/audit
+      files. It must not modify product source, tests, package files, lockfiles, schema, migrations, scripts, env/secret
+      files, Provider configuration, database state, browser/e2e/dev-server surfaces, deployment, PR, force push, payment,
+      external services, org_auth runtime, employee answer runtime, raw answer content, full paper content, or Cost
+      Calibration Gate execution. User approved local commit, fast-forward merge to master, push origin/master, and
+      merged short-branch cleanup for this docs/state-only batch.
+    targetClosureItem: preview release validation matrix before preview publication
+    behaviorBoundary: release_governance::preview_release_validation_plan
+    executionProfile: docs_state_release_validation_planning
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_docs_state_preview_release_serial_batch
+    taskKind: docs_state_release_validation_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_preview_release_validation_plan_docs_state_only
+    claimedAt: "2026-06-22T06:17:34-07:00"
+    validatedAt: "2026-06-22T06:17:34-07:00"
+    closedAt: "2026-06-22T06:17:34-07:00"
+    branch: codex/preview-release-validation-plan
+    previewReleaseReadyClaim: false
+    browserE2ERuntimeExecuted: false
+    devServerExecuted: false
+    stagingValidationExecuted: false
+    displacedRecoveryWindowArchiveCount: 1
+    displacedRecoveryWindowArchivedTask: module-run-v2-personal-ai-local-transport-contract-planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-22-preview-release-validation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-validation-plan.md
+    blockedFiles:
+      - .env
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      docsStateGovernance: approved
+      previewValidationPlanning: approved
+      queueArchiveMaintenance: approved
+      projectStateCheckpoint: approved
+      productSourceChange: blocked
+      testSourceChange: blocked
+      packageLockChange: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingValidation: blocked_without_fresh_approval
+      orgAuthRuntimeChange: blocked
+      employeeAnswerRuntimeChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_22_docs_state_preview_release_serial_batch
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-release-validation-plan.md docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-validation-plan.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-release-validation-plan
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId preview-release-validation-plan
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 -TaskId preview-release-validation-plan
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId preview-release-validation-plan
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-validation-plan.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-validation-plan.md
     retryCount: 0
