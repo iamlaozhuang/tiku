@@ -2828,144 +2828,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    title: Module Run v2 ops-governance-and-retention implementation seed
-    phase: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    sourceStory: module-run-v2-auto-seed-bridge
-    dependencies:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      autoDriveLocalImplementationApproval: User approved batch-serial continuation for module ops-governance-and-retention on 2026-06-22, covering guarded seed and serial local closeout for low-risk local implementation or historical reconcile tasks only. standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile where already completed, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, prompt/provider payload/raw generated content exposure, dependency/package/lockfile changes, schema/migration/seed/database work, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external service, org_auth runtime changes, plaintext redeem_code exposure, raw employee answer exposure, full paper content exposure, or Cost Calibration Gate execution.
-    autoDriveLocalImplementationApproval: >-
-      autoDriveLocalImplementationApproval: User approved batch-serial continuation for module ops-governance-and-retention on 2026-06-22, covering guarded seed and serial local closeout for low-risk local implementation or historical reconcile tasks only. standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile where already completed, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, prompt/provider payload/raw generated content exposure, dependency/package/lockfile changes, schema/migration/seed/database work, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external service, org_auth runtime changes, plaintext redeem_code exposure, raw employee answer exposure, full paper content exposure, or Cost Calibration Gate execution.
-    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
-    seededImplementationTask: true
-    seededExecutionModule: ops-governance-and-retention
-    planPath: docs/05-execution-logs/task-plans/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    targetClosureItem: local recovery and expired-hidden boundary contracts
-    behaviorBoundary: ops-governance-and-retention::local recovery and expired-hidden boundary contracts
-    requirementRefs:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    useCases:
-      - ops-governance-and-retention local implementation validates local recovery and expired-hidden boundary contracts
-    acceptanceScenarios:
-      - local recovery and expired-hidden boundary contracts passes L6-local-implementation without provider/env/schema/deploy/dependency changes
-    nonGoals:
-      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
-    validationProfile: L6-local-implementation
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: local_unit
-    queueSelectionMode: ready_set
-    localExperienceClosureGate: planned
-    localFullLoopGate: L6
-    blockedRemainder:
-      - none
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: true
-    autodrivePolicy:
-      mode: guarded_serial
-      allowedAgentActions:
-        - claim_task
-        - continue_task
-        - scaffold_task_plan
-        - run_validation
-        - write_evidence
-      blockedAgentActions:
-        - merge
-        - push
-        - pr
-        - deploy
-        - dependency_change
-        - schema_migration
-        - env_secret
-        - provider_call
-        - cost_calibration_gate
-      maxAutonomousSteps: 5
-      stopOn:
-        - hard_block
-        - blocked_gate
-        - validation_failure
-        - out_of_scope_change
-        - dirty_unknown_worktree
-        - active_owner_present
-    capabilities:
-      localDockerDatabase: task_approval_required
-      destructiveLocalDockerDatabase: blocked_without_task_approval
-      projectResourceRead: task_approval_required
-      providerKey: env_destination_confirmation_required
-      providerCall: blocked_without_task_approval
-      schemaMigration: blocked_without_task_approval
-      costCalibrationGate: blocked
-    registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
-      redactionRequired: true
-    taskKind: implementation
-    moduleRunVersion: 2
-    allowedFiles:
-      - src/server/models/**
-      - src/server/contracts/**
-      - src/server/validators/**
-      - src/server/services/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-    riskTypes:
-      - local_implementation
-      - local_validation
-      - evidence_redaction
-      - automation_policy
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    evidencePath: docs/05-execution-logs/evidence/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    status: closed
-    claimedAt: "2026-06-22T03:52:19-07:00"
-    validatedAt: "2026-06-22T03:52:19-07:00"
-    closedAt: "2026-06-22T03:52:19-07:00"
-    result: pass_historical_reconcile
-    branch: codex/batch-263-ops-governance-recovery-boundary
-    retryCount: 0
   - id: module-run-v2-personal-ai-local-transport-contract-planning
     title: Personal AI local transport contract bridge approval reconciliation
     phase: module-run-v2-personal-ai-local-transport-contract-planning
@@ -3956,4 +3818,116 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-scope-decision-package.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-scope-decision-package.md
+    retryCount: 0
+  - id: preview-staging-resource-boundary-planning
+    title: Preview staging resource boundary planning
+    phase: preview-staging-resource-boundary-planning-2026-06-22
+    sourceStory: user-request-2026-06-22-preview-release-docs-state-serial-batch
+    dependencies:
+      - preview-release-scope-decision-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User explicitly requested a docs/state-only serial preview release preparation batch. This task may update
+      project-state.yaml, task-queue.yaml, the June task archive, task-history-index.yaml, and its own plan/evidence/audit
+      files. It must not modify product source, tests, package files, lockfiles, schema, migrations, scripts, env/secret
+      files, Provider configuration, database state, browser/e2e/dev-server surfaces, deployment, PR, force push, payment,
+      external services, org_auth runtime, employee answer runtime, raw answer content, full paper content, or Cost
+      Calibration Gate execution. User approved local commit, fast-forward merge to master, push origin/master, and
+      merged short-branch cleanup for this docs/state-only batch.
+    targetClosureItem: staging resource boundary definition before preview publication
+    behaviorBoundary: release_governance::preview_staging_resource_boundary_planning
+    executionProfile: docs_state_release_boundary_planning
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_docs_state_preview_release_serial_batch
+    taskKind: docs_state_release_boundary_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_preview_staging_resource_boundary_planning_docs_state_only
+    claimedAt: "2026-06-22T06:11:02-07:00"
+    validatedAt: "2026-06-22T06:11:02-07:00"
+    closedAt: "2026-06-22T06:11:02-07:00"
+    branch: codex/preview-staging-resource-boundary-planning
+    previewReleaseReadyClaim: false
+    deploymentApproved: false
+    productionReadyClaim: false
+    firstPreviewScope: web_only_owner_acceptance_preview
+    providerDefault: disabled_by_default
+    dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+    displacedRecoveryWindowArchiveCount: 1
+    displacedRecoveryWindowArchivedTask: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md
+      - docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+    blockedFiles:
+      - .env
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      docsStateGovernance: approved
+      previewResourceBoundaryPlanning: approved
+      queueArchiveMaintenance: approved
+      projectStateCheckpoint: approved
+      productSourceChange: blocked
+      testSourceChange: blocked
+      packageLockChange: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      orgAuthRuntimeChange: blocked
+      employeeAnswerRuntimeChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_22_docs_state_preview_release_serial_batch
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-staging-resource-boundary-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId preview-staging-resource-boundary-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 -TaskId preview-staging-resource-boundary-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId preview-staging-resource-boundary-planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md
     retryCount: 0

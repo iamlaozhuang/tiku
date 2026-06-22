@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: preview-release-scope-decision-package
-  updatedAt: "2026-06-22T06:00:08-07:00"
+  updatedByTask: preview-staging-resource-boundary-planning
+  updatedAt: "2026-06-22T06:11:02-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -11776,3 +11776,13 @@ entries:
     commitSha: null
     completedAt: "2026-06-22"
     archivedByTask: preview-release-scope-decision-package
+  - id: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    phase: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: preview-staging-resource-boundary-planning

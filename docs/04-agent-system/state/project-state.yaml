@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: cross-role-local-flow-bridge-validation-2026-06-22
-updatedAt: "2026-06-22T05:58:43-07:00"
+currentPhase: preview-staging-resource-boundary-planning-2026-06-22
+updatedAt: "2026-06-22T06:11:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: preview-release-scope-decision-package
+  id: preview-staging-resource-boundary-planning
   status: closed
-  result: pass_preview_release_scope_fixed_docs_state_only
-  claimedAt: "2026-06-22T05:58:43-07:00"
-  validatedAt: "2026-06-22T05:58:43-07:00"
-  closedAt: "2026-06-22T05:58:43-07:00"
-  sourceStory: user-request-2026-06-22-preview-release-scope-decision-package
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-scope-decision-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-scope-decision-package.md
-  branch: codex/preview-release-scope-decision-package
+  result: pass_preview_staging_resource_boundary_planning_docs_state_only
+  claimedAt: "2026-06-22T06:11:02-07:00"
+  validatedAt: "2026-06-22T06:11:02-07:00"
+  closedAt: "2026-06-22T06:11:02-07:00"
+  sourceStory: user-request-2026-06-22-preview-release-docs-state-serial-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+  branch: codex/preview-staging-resource-boundary-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -6153,3 +6153,69 @@ previewReleaseScopeDecisionPackage20260622:
     low-risk workflows with provider disabled by default and synthetic or reviewed non-sensitive sample data only. This
     package does not authorize deployment or claim preview release readiness. Staging resource planning and validation
     planning must happen before any preview environment publication.
+
+previewStagingResourceBoundaryPlanning20260622:
+  taskId: preview-staging-resource-boundary-planning
+  phase: preview-staging-resource-boundary-planning-2026-06-22
+  recordedAt: "2026-06-22T06:11:02-07:00"
+  branch: codex/preview-staging-resource-boundary-planning
+  taskStatus: closed
+  result: pass_preview_staging_resource_boundary_planning_docs_state_only
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-staging-resource-boundary-planning.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-preview-staging-resource-boundary-planning.md
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  firstPreviewScope: web_only_owner_acceptance_preview
+  dataBoundary:
+    - synthetic_or_reviewed_non_sensitive_sample_data_only
+    - no_production_database_clone
+    - no_raw_employee_answer_or_full_paper_content_evidence
+  stagingResourceBoundary:
+    database: isolated_staging_database_instance_or_namespace_required_before_deploy_no_connection_created
+    objectStorage: dedicated_bucket_or_strict_staging_prefix_required_no_bucket_or_object_created
+    authCallbackAndSecret: staging_only_base_url_callback_url_and_secret_required_no_secret_read_or_written
+    aiProvider: disabled_by_default_fresh_approval_required_before_provider_env_quota_or_cost_work
+    auditLogRetention: staging_retention_and_redaction_policy_required_before_publication
+    aiCallLogRetention: metadata_only_redacted_retention_required_no_raw_prompt_payload_or_generated_content
+    domainTls: staging_domain_tls_owner_callback_origin_and_dns_tls_proof_required_before_deploy
+    ownerAcceptanceAccounts: reviewed_non_production_owner_acceptance_accounts_only_no_account_created
+    seedReset: documented_synthetic_or_reviewed_non_sensitive_seed_reset_only_no_command_executed
+    monitoringRollbackOwner: future_publication_must_name_monitoring_incident_stop_and_rollback_owner
+  deferredGateGroups:
+    - AP-01
+    - AP-02
+    - AP-03
+    - AP-04
+    - AP-05
+    - AP-06
+    - AP-07
+    - AP-08
+    - AP-09
+    - AP-10
+    - AP-11
+  queueHealth:
+    activeQueueTaskCount: 51
+    activeQueueNonTerminalCount: 43
+    activeQueueTerminalCount: 8
+    terminalRecoveryWindow: 8
+    archiveCandidateCount: 0
+    displacedRecoveryWindowArchivedTask: batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  nextRecommendedTask: preview-release-validation-plan
+  blockedWithoutFreshApproval:
+    - provider_model_call
+    - env_secret_access_or_env_file_change
+    - schema_migration_seed_database_connection_or_data_change
+    - cloud_resource_or_deploy
+    - browser_e2e_runtime_or_dev_server
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - org_auth_runtime_change
+    - pr_force_push_release_tag
+    - production_or_staging_data_access
+    - cost_calibration_gate
+  conclusion: >-
+    Staging resource boundaries are defined for a Web-only owner acceptance preview, with Provider disabled by default
+    and synthetic or reviewed non-sensitive sample data only. This packet does not create resources, touch secrets,
+    connect to databases, run Provider calls, deploy, run browser/e2e validation, or claim previewReleaseReady.
