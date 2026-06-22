@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-21T23:26:48-07:00"
+updatedAt: "2026-06-22T00:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7389f2b6d4aa5b7c7a34244adf612fda3a886152
-  lastKnownOriginMasterSha: 7389f2b6d4aa5b7c7a34244adf612fda3a886152
+  lastKnownMasterSha: ec149b13463cd2477e76e4878fb50689bae6a525
+  lastKnownOriginMasterSha: ec149b13463cd2477e76e4878fb50689bae6a525
 currentTask:
-  id: active-queue-slimming-2026-06-22-ready-for-closeout-recovery-window
-  status: closed
-  result: pass_active_queue_slimming_ready_for_closeout_recovery_window
-  claimedAt: "2026-06-22T01:00:00-07:00"
-  validatedAt: "2026-06-22T01:00:00-07:00"
-  closedAt: "2026-06-22T01:00:00-07:00"
-  sourceStory: current-user-2026-06-22-approved-closeout-reconcile-and-active-queue-slimming
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-active-queue-slimming-ready-for-closeout-recovery-window.md
-  branch: codex/active-queue-slimming-20260622
-  commitSha: 7389f2b6d4aa5b7c7a34244adf612fda3a886152
+  id: batch-248-personal-learning-ai-personal-generation-request-flow
+  status: pending
+  result: pending_seeded_for_serial_local_closeout
+  claimedAt: null
+  validatedAt: null
+  closedAt: null
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/batch-248-personal-learning-ai-personal-generation-request-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-248-personal-learning-ai-personal-generation-request-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-248-personal-learning-ai-personal-generation-request-flow.md
+  branch: null
+  commitSha: ec149b13463cd2477e76e4878fb50689bae6a525
   prUrl: null
   retryCount: 0
   lastFailurePath: null
