@@ -534,6 +534,33 @@ function formatBindingPublicIdList(publicIds: string[]): string {
   return publicIds.length === 0 ? "none" : publicIds.join(", ");
 }
 
+function formatMaterialQuestionReferences(
+  references: MaterialDto["references"]["questions"],
+): string {
+  if (references.length === 0) {
+    return "none";
+  }
+
+  return references
+    .map(
+      (reference) =>
+        `${reference.questionPublicId} (${reference.questionType}, ${reference.status})`,
+    )
+    .join(", ");
+}
+
+function formatMaterialPaperReferences(
+  references: MaterialDto["references"]["papers"],
+): string {
+  if (references.length === 0) {
+    return "none";
+  }
+
+  return references
+    .map((reference) => `${reference.paperPublicId} (${reference.paperStatus})`)
+    .join(", ");
+}
+
 function parsePublicIdList(value: string): string[] {
   const publicIds = value
     .split(/[\s,，]+/u)
@@ -2152,6 +2179,7 @@ function QuestionList({
                   {readQuestionSummary(question)}
                 </h2>
                 <QuestionBindingSummary question={question} />
+                <QuestionLockSummary question={question} />
                 <div className="flex flex-wrap gap-2">
                   {question.knowledgeNodePublicIds.map((publicId) => (
                     <span
@@ -2253,6 +2281,23 @@ function QuestionBindingSummary({ question }: { question: QuestionDto }) {
       </p>
       <p className="text-text-secondary">
         tag: {formatBindingPublicIdList(question.tagPublicIds)}
+      </p>
+    </div>
+  );
+}
+
+function QuestionLockSummary({ question }: { question: QuestionDto }) {
+  return (
+    <div
+      className="grid gap-1 text-xs leading-5"
+      data-testid={`question-lock-${question.publicId}`}
+    >
+      <p className="text-text-secondary">
+        status:{" "}
+        {question.isLocked ? "locked by published paper reference" : "editable"}
+      </p>
+      <p className="text-text-secondary">
+        lockedAt: {question.lockedAt ?? "null"}
       </p>
     </div>
   );
@@ -2479,6 +2524,8 @@ function MaterialList({
                 复制
               </Button>
             </div>
+            <MaterialLockSummary material={material} />
+            <MaterialReferenceSummary material={material} />
             <ReferenceBlock
               label="材料锁定"
               value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
@@ -2502,6 +2549,45 @@ function MaterialList({
           </article>
         );
       })}
+    </div>
+  );
+}
+
+function MaterialLockSummary({ material }: { material: MaterialDto }) {
+  return (
+    <div
+      className="border-border mt-4 grid gap-1 border-t pt-4 text-xs leading-5"
+      data-testid={`material-lock-${material.publicId}`}
+    >
+      <p className="text-text-secondary">
+        status:{" "}
+        {material.isLocked ? "locked by published paper reference" : "editable"}
+      </p>
+      <p className="text-text-secondary">
+        lockedAt: {material.lockedAt ?? "null"}
+      </p>
+    </div>
+  );
+}
+
+function MaterialReferenceSummary({ material }: { material: MaterialDto }) {
+  return (
+    <div
+      className="border-border mt-4 grid gap-1 border-t pt-4 text-xs leading-5"
+      data-testid={`material-reference-summary-${material.publicId}`}
+    >
+      <p className="text-text-secondary">
+        question count: {material.references.questions.length}
+      </p>
+      <p className="text-text-secondary">
+        {formatMaterialQuestionReferences(material.references.questions)}
+      </p>
+      <p className="text-text-secondary">
+        paper count: {material.references.papers.length}
+      </p>
+      <p className="text-text-secondary">
+        {formatMaterialPaperReferences(material.references.papers)}
+      </p>
     </div>
   );
 }

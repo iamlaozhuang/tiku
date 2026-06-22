@@ -780,6 +780,30 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeEnabled();
   });
 
+  it("renders question lock state reason without exposing internal ids", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-logistics-002");
+
+    expect(
+      screen.getByTestId("question-lock-question-marketing-001"),
+    ).toHaveTextContent("status: editable");
+
+    const lockedQuestion = screen.getByTestId(
+      "question-lock-question-logistics-002",
+    );
+    expect(lockedQuestion).toHaveTextContent(
+      "status: locked by published paper reference",
+    );
+    expect(lockedQuestion).toHaveTextContent(
+      "lockedAt: 2026-05-18T08:00:00.000Z",
+    );
+    expect(lockedQuestion).not.toHaveTextContent('"id"');
+  });
+
   it("renders material management with runtime loading and an empty filtered state", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch();
@@ -841,6 +865,42 @@ describe("AdminQuestionMaterialManagement", () => {
         name: "复制材料 material-locked-002",
       }),
     ).toBeEnabled();
+  });
+
+  it("renders material reference counts, linked public references, and lock reason", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByTestId("material-row-material-marketing-001");
+
+    const materialReferences = screen.getByTestId(
+      "material-reference-summary-material-marketing-001",
+    );
+    expect(materialReferences).toHaveTextContent("question count: 1");
+    expect(materialReferences).toHaveTextContent(
+      "question-marketing-001 (single_choice, available)",
+    );
+    expect(materialReferences).toHaveTextContent("paper count: 1");
+    expect(materialReferences).toHaveTextContent(
+      "paper-material-ref-001 (published)",
+    );
+
+    const lockedMaterial = screen.getByTestId(
+      "material-lock-material-locked-002",
+    );
+    expect(lockedMaterial).toHaveTextContent(
+      "status: locked by published paper reference",
+    );
+    expect(lockedMaterial).toHaveTextContent(
+      "lockedAt: 2026-05-19T07:00:00.000Z",
+    );
+    expect(lockedMaterial).not.toHaveTextContent('"id"');
   });
 
   it("creates, edits, disables, and copies questions through the protected runtime", async () => {

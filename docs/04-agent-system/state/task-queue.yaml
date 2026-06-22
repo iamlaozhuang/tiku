@@ -6456,7 +6456,12 @@ tasks:
     queueSelectionMode: user_directed_serial_low_risk_batch
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: pending
+    status: ready_for_closeout
+    claimedAt: "2026-06-21T18:38:59-07:00"
+    validatedAt: "2026-06-21T18:46:34-07:00"
+    branch: codex/close-question-reference-and-material-lock-surface
+    result: question_reference_material_lock_surface_closed
+    freshApprovalStatus: current_user_batch_approval_materialized
     plannedFiles:
       - src/server/validators/**
       - src/server/services/**
@@ -6469,10 +6474,59 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
       - docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
       - docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
-    blockedFiles: *low_risk_blocked_files
-    capabilities: *low_risk_capabilities
-    closeoutPolicy: *low_risk_closeout_policy
-    validationCommands: *low_risk_validation_commands
+    allowedFiles:
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - tests/unit/admin-question-material-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\features\admin\question-material-management\AdminQuestionMaterialManagementClient.tsx tests\unit\admin-question-material-ui.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-close-question-reference-and-material-lock-surface.md docs\05-execution-logs\evidence\2026-06-21-close-question-reference-and-material-lock-surface.md docs\05-execution-logs\audits-reviews\2026-06-21-close-question-reference-and-material-lock-surface.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId close-question-reference-and-material-lock-surface
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId close-question-reference-and-material-lock-surface -SkipRemoteAheadCheck
     evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
     planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md

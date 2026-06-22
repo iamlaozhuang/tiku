@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-21T18:34:21-07:00"
+updatedAt: "2026-06-21T18:43:15-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cbd6c7cf751af76f1473a7b9e539390cbe4c7279
-  lastKnownOriginMasterSha: cbd6c7cf751af76f1473a7b9e539390cbe4c7279
+  lastKnownMasterSha: 5e8f20fdebdc96160fb249b3fe1ba61572cabff7
+  lastKnownOriginMasterSha: 5e8f20fdebdc96160fb249b3fe1ba61572cabff7
 currentTask:
-  id: close-question-material-binding-experience
+  id: close-question-reference-and-material-lock-surface
   status: ready_for_closeout
-  result: pass_question_material_binding_experience_local_validation
-  claimedAt: "2026-06-21T18:28:11-07:00"
-  validatedAt: "2026-06-21T18:34:21-07:00"
+  result: pass_question_reference_material_lock_surface_local_validation
+  claimedAt: "2026-06-21T18:38:59-07:00"
+  validatedAt: "2026-06-21T18:46:34-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-6; admin-experience-gap-sequencing
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-material-binding-experience.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-material-binding-experience.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-material-binding-experience.md
-  branch: codex/close-question-material-binding-experience
+  sourceStory: current-user-low-risk-task-7; admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
+  branch: codex/close-question-reference-and-material-lock-surface
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: close-question-material-binding-experience
+  currentTaskId: close-question-reference-and-material-lock-surface
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for
