@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-275-organization-training-audit-log-redacted-reference
-updatedAt: "2026-06-22T07:52:10-07:00"
+currentPhase: module-run-v2-auto-seed-organization-analytics
+updatedAt: "2026-06-22T08:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,8 +500,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
-  lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
+  lastKnownMasterSha: 7de340db73d2e49fffa95cd87af64c4211993719
+  lastKnownOriginMasterSha: 7de340db73d2e49fffa95cd87af64c4211993719
 currentTask:
   id: batch-275-organization-training-audit-log-redacted-reference
   status: closed

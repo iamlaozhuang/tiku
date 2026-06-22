@@ -3,8 +3,8 @@
 ## Scope
 
 - Task id: `module-run-v2-auto-seed-organization-analytics`
-- Branch: `codex/organization-analytics-guarded-seed`
-- Goal: seed the next guarded organization-analytics implementation batch after organization-training batch 252-255 closeout.
+- Branch: `codex/auto-seed-organization-analytics`
+- Goal: seed the next guarded organization-analytics implementation batch after organization-training batch 272-275 closeout.
 
 ## Read Before Edit
 
@@ -20,7 +20,7 @@
 ## Execution Plan
 
 1. Confirm repository readiness and current organization-analytics seed proposal.
-2. Use `New-ModuleRunV2ImplementationSeed.ps1 -Apply` to append guarded pending implementation tasks.
+2. Use `New-ModuleRunV2ImplementationSeed.ps1 -Apply` to append guarded pending implementation tasks for `batch-276` through `batch-279`.
 3. Register a docs/state queue-seeding task, evidence, audit review, and project-state batch checkpoint.
 4. Add task-plan paths for seeded implementation tasks so each task can be claimed independently.
 5. Run seed self-review, auto-seed readiness checks, diff check, lint, typecheck, GitCompletion, PreCommit, ModuleCloseout, and PrePush.
