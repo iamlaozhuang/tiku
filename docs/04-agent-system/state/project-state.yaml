@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-auto-seed-ops-governance-and-retention
-updatedAt: "2026-06-22T08:31:00-07:00"
+currentPhase: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+updatedAt: "2026-06-22T08:34:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d95f5e2237630d2b96b31b635616f442dd04eb36
-  lastKnownOriginMasterSha: d95f5e2237630d2b96b31b635616f442dd04eb36
+  lastKnownMasterSha: b2661818e37d2495eed359dfb1ae1904ec29ab56
+  lastKnownOriginMasterSha: b2661818e37d2495eed359dfb1ae1904ec29ab56
 currentTask:
-  id: batch-279-organization-analytics-audit-log-redacted-reference
+  id: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
   status: closed
-  result: pass_organization_analytics_audit_log_redacted_reference_historical_reconcile
-  claimedAt: "2026-06-22T08:24:00-07:00"
-  validatedAt: "2026-06-22T08:24:26-07:00"
-  closedAt: "2026-06-22T08:24:26-07:00"
+  result: pass_ops_governance_authorization_quota_summary_historical_reconcile
+  claimedAt: "2026-06-22T08:34:00-07:00"
+  validatedAt: "2026-06-22T08:34:30-07:00"
+  closedAt: "2026-06-22T08:34:30-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-279-organization-analytics-audit-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-279-organization-analytics-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-279-organization-analytics-audit-log-redacted-reference.md
-  branch: codex/batch-279-organization-analytics-audit-log
+  planPath: docs/05-execution-logs/task-plans/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  evidencePath: docs/05-execution-logs/evidence/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  branch: codex/batch-280-ops-governance-auth-quota-summary
   commitSha: null
   prUrl: null
   retryCount: 0

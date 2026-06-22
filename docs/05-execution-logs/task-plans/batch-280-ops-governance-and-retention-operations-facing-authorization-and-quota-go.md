@@ -29,9 +29,19 @@
   - Review existing ops-governance authorization/quota summary service and focused tests before touching source.
   - Confirm summaries remain operations-facing metadata and do not change quota enforcement, permissions, org_auth runtime behavior, or cost calibration.
   - Do not change source if current implementation already satisfies the task.
+- Reconcile decision:
+  - Existing implementation already satisfies operations-facing authorization and quota governance summaries.
+  - Close out as historical implementation reconcile with no source or test edits.
+  - Use focused unit coverage for the ops-governance authorization/quota summary service.
 - Focused unit command:
-  - Replace the placeholder with an explicit scoped unit command before task closeout.
+  - `npm.cmd run test:unit -- src/server/services/ops-governance-authorization-quota-summary-service.test.ts`
 - Run `npm.cmd run lint`.
 - Run `npm.cmd run typecheck`.
 - Run `git diff --check`.
 - Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Closeout Notes
+
+- Source decision: no runtime/source/test edit required.
+- Evidence boundary: record only command names, pass/fail status, and aggregate contract summaries.
+- Blocked gates preserved: quota enforcement/new permission/org_auth runtime/Provider/env/schema/db/dependency/dev-server/browser/e2e/deploy/PR/force-push/external-service/Cost Calibration Gate.
