@@ -1827,3 +1827,39 @@ lastPreviewOwnerAcceptanceNamingPacket20260622:
     - payment_external_service
     - cost_calibration_gate
   displacedTerminalArchivedTask: batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+
+lastLocalReleaseCandidateEvidencePacket20260622:
+  taskId: local-release-candidate-evidence-packet-2026-06-22
+  evaluatedAt: "2026-06-22T12:00:00-07:00"
+  decision: docs_state_local_release_candidate_static_evidence_packet_no_runtime_execution
+  packetPath: docs/04-agent-system/state/local-release-candidate-evidence-packet.yaml
+  evidence: docs/05-execution-logs/evidence/2026-06-22-local-release-candidate-evidence-packet.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-local-release-candidate-evidence-packet.md
+  rowStatusChanges: 0
+  previewReleaseReadyClaim: false
+  staticGateResults:
+    lint: pass
+    typecheck: pass
+    gitDiffCheck: pass_after_trailing_blank_line_fix
+    redactionChecklist: pass_command_summary_only_no_sensitive_runtime_material
+  unitAndBuildAvailability:
+    unitScript: available_not_executed_in_this_packet
+    buildScript: available_not_executed_in_this_packet
+    aggregateTestScript: available_blocked_for_this_packet_because_it_runs_e2e
+  noRuntimeActions:
+    - dev_server
+    - browser_e2e
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - deploy_cloud_staging_resource
+  blockedGates:
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+  displacedTerminalArchivedTask: batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence

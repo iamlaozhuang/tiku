@@ -1,0 +1,105 @@
+schemaVersion: 1
+taskId: local-release-candidate-evidence-packet-2026-06-22
+updatedAt: "2026-06-22T12:00:00-07:00"
+status: recorded_docs_state_only
+scope:
+  packetKind: local_release_candidate_static_evidence_packet
+  firstPreviewScope: web_only_owner_acceptance_preview
+  providerDefault: disabled
+  dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  runtimeExecutionApproved: false
+  devServerStarted: false
+  browserOrE2eRun: false
+  envSecretTouched: false
+  providerOrModelCallRun: false
+  deployOrCloudActionRun: false
+validationBoundary:
+  executed:
+    - npm_cmd_run_lint
+    - npm_cmd_run_typecheck
+    - git_inventory
+    - git_diff_check
+    - package_script_inventory_read_only
+    - module_run_v2_project_status
+    - module_run_v2_next_action
+    - module_run_v2_seed_proposal
+    - module_run_v2_queue_slimming
+    - module_run_v2_pre_commit_hardening
+    - module_run_v2_module_closeout_readiness
+    - module_run_v2_pre_push_readiness
+  notExecutedByBoundary:
+    - npm_cmd_run_dev
+    - npm_cmd_run_start
+    - npm_cmd_run_test
+    - npm_cmd_run_test_e2e
+    - npm_cmd_run_test_e2e_ui
+    - browser_or_playwright_runtime
+    - provider_or_model_call
+    - env_or_secret_read_write
+    - schema_migration_seed_database_connection_or_data_change
+    - deploy_cloud_resource_domain_tls_or_callback_change
+unitAndBuildAvailability:
+  source: package_json_scripts_read_only_inventory
+  unit:
+    script: test:unit
+    command: vitest run
+    availability: available_not_executed_in_this_packet
+    reason: local release-candidate packet records static gate evidence and avoids widening into broader runtime validation.
+  aggregateTest:
+    script: test
+    command: npm run test:unit && npm run test:e2e
+    availability: available_blocked_for_this_packet
+    reason: aggregate test triggers test:e2e, and browser/e2e remains outside this instruction.
+  build:
+    script: build
+    command: next build
+    availability: available_not_executed_in_this_packet
+    reason: build availability is recorded, while actual build evidence remains a later explicit static/build gate task if requested.
+gateResults:
+  lint:
+    command: npm.cmd run lint
+    result: pass
+  typecheck:
+    command: npm.cmd run typecheck
+    result: pass
+  packageScriptInventory:
+    result: pass
+  gitInventory:
+    result: pass_docs_state_evidence_files_only
+  redactionChecklist:
+    result: pass_command_summary_only_no_sensitive_runtime_material
+  moduleRunV2Checks:
+    result: pass
+queueHealthAfter:
+  nextActionDecision: no_pending_task
+  seedProposalDecision: no_seed_candidate
+  queueSlimmingDecision: clean
+  archiveCandidateCount: 0
+  displacedTerminalArchivedTask: batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+redactionChecklist:
+  evidenceMode: command_summary_and_static_gate_result_only
+  containsNo:
+    - provider_payload
+    - raw_prompt
+    - raw_generated_content
+    - raw_employee_answer
+    - full_paper_content
+    - plaintext_redeem_code
+    - authorization_header
+    - api_key_or_secret
+    - token_or_database_url
+    - production_or_staging_customer_data
+freshApprovalRequiredFor:
+  - dev_server_or_browser_or_e2e_runtime
+  - env_secret_read_write_or_rotation
+  - provider_model_call_or_provider_enablement
+  - schema_migration_seed_database_connection_or_data_change
+  - deployment_cloud_resource_domain_tls_or_callback_origin_change
+  - staging_resource_creation_or_change
+  - payment_external_service_or_org_auth_runtime_change
+  - dependency_package_lockfile_change
+  - pr_force_push_release_tag
+  - cost_calibration_gate
