@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ce707eb9e7ce534213c2814543aab364f1559847
-  lastKnownOriginMasterSha: ce707eb9e7ce534213c2814543aab364f1559847
+  lastKnownMasterSha: 48b2bfda2913285ff3fa2b7c94df420671316c6f
+  lastKnownOriginMasterSha: 48b2bfda2913285ff3fa2b7c94df420671316c6f
 currentTask:
-  id: batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  id: closeout-reconcile-batch-244-247-checkpoint
   status: closed
-  result: pass_ai_task_provider_local_sandbox_proposal_rules
-  claimedAt: "2026-06-22T00:24:00-07:00"
-  validatedAt: "2026-06-22T00:24:33-07:00"
-  closedAt: "2026-06-22T00:24:33-07:00"
-  sourceStory: phase-70-advanced-ai-task-domain-implementation-planning
-  planPath: docs/05-execution-logs/task-plans/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-247-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  branch: codex/batch-247-ai-task-sandbox-proposal
-  commitSha: ae70a60a
+  result: pass_docs_state_closeout_reconcile_batch_244_247_checkpoint
+  claimedAt: "2026-06-22T00:40:00-07:00"
+  validatedAt: "2026-06-22T00:40:00-07:00"
+  closedAt: "2026-06-22T00:40:00-07:00"
+  sourceStory: current-user-2026-06-22-approved-closeout-reconcile-and-active-queue-slimming
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-244-247-checkpoint.md
+  branch: codex/closeout-reconcile-20260622
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
