@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 29f9b31095a474f2a82f55a43e08c64ad4959609
-  lastKnownOriginMasterSha: 29f9b31095a474f2a82f55a43e08c64ad4959609
+  lastKnownMasterSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
+  lastKnownOriginMasterSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
 currentTask:
-  id: batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+  id: closeout-reconcile-batch-248-251-checkpoint
   status: closed
-  result: pass_existing_redacted_ai_call_log_reference_reconciled_and_revalidated
-  claimedAt: "2026-06-22T01:35:34-07:00"
-  validatedAt: "2026-06-22T01:36:14-07:00"
-  closedAt: "2026-06-22T01:36:14-07:00"
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
-  evidencePath: docs/05-execution-logs/evidence/batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-251-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
-  branch: codex/batch-251-personal-learning-ai-call-log-reference
-  commitSha: 24c622b42fc8207a49636e07b75a4019ac571d81
+  result: pass_docs_state_closeout_reconcile_batch_248_251_checkpoint
+  claimedAt: "2026-06-22T01:51:24-07:00"
+  validatedAt: "2026-06-22T01:51:24-07:00"
+  closedAt: "2026-06-22T01:51:24-07:00"
+  sourceStory: current-user-2026-06-22-closeout-reconcile-and-organization-training-seed
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-closeout-reconcile-batch-248-251-checkpoint.md
+  branch: codex/closeout-reconcile-batch-248-251
+  commitSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
   prUrl: null
   retryCount: 0
   lastFailurePath: null
