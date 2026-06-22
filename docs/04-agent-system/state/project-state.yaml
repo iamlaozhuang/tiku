@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: preview-owner-acceptance-validation-followup-2026-06-22
-updatedAt: "2026-06-22T11:20:00-07:00"
+currentPhase: preview-owner-acceptance-checklist-2026-06-22
+updatedAt: "2026-06-22T11:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9119060beedd57d68591c10f38fbb9bf23e2fc27
-  lastKnownOriginMasterSha: 9119060beedd57d68591c10f38fbb9bf23e2fc27
+  lastKnownMasterSha: edfbea3b6a662c813445aa24f7027a7ec056c268
+  lastKnownOriginMasterSha: edfbea3b6a662c813445aa24f7027a7ec056c268
 currentTask:
-  id: preview-owner-acceptance-validation-followup-2026-06-22
+  id: preview-owner-acceptance-checklist-2026-06-22
   status: closed
-  result: pass_preview_owner_acceptance_validation_followup
-  claimedAt: "2026-06-22T11:20:00-07:00"
-  validatedAt: "2026-06-22T11:20:00-07:00"
-  closedAt: "2026-06-22T11:20:00-07:00"
+  result: pass_preview_owner_acceptance_checklist_defined
+  claimedAt: "2026-06-22T11:30:00-07:00"
+  validatedAt: "2026-06-22T11:30:00-07:00"
+  closedAt: "2026-06-22T11:30:00-07:00"
   sourceStory: user-request-2026-06-22-queue-hygiene-local-experience-preview-serial-order
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-validation-followup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-validation-followup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-validation-followup.md
-  branch: codex/preview-owner-acceptance-validation-followup-20260622
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-checklist.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-checklist.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-checklist.md
+  branch: codex/preview-owner-acceptance-checklist-20260622
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -6928,3 +6928,76 @@ previewOwnerAcceptanceValidationFollowup20260622:
     deploy, run browser/e2e/dev-server validation, read or write env/secret files, connect to databases, run
     Provider/model calls, change schema/migrations/dependencies, create PRs, force push, mutate org_auth runtime
     behavior, expose sensitive evidence, or execute the Cost Calibration Gate.
+
+previewOwnerAcceptanceChecklist20260622:
+  taskId: preview-owner-acceptance-checklist-2026-06-22
+  phase: preview-owner-acceptance-checklist-2026-06-22
+  recordedAt: "2026-06-22T11:30:00-07:00"
+  branch: codex/preview-owner-acceptance-checklist-20260622
+  taskStatus: closed
+  result: pass_preview_owner_acceptance_checklist_defined
+  checklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-checklist.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-checklist.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-preview-owner-acceptance-checklist.md
+  queueHealthAfter:
+    queueSlimmingDecision: clean
+    archiveCandidateCount: 0
+    nextActionDecision: no_pending_task
+    seedProposalDecision: no_seed_candidate
+  checklistDefined:
+    ownerAcceptanceAccounts: required_before_any_staging_publication_not_created_here
+    sampleDataBoundary: required_before_any_staging_publication_no_seed_or_db_action_here
+    monitoringRollbackStopOwners: required_before_any_staging_publication_not_named_here
+  ownerAcceptanceBoundary:
+    accountInventoryOwner: must_be_named_before_fresh_staging_publication_approval
+    accountCreationOwner: must_be_named_before_fresh_staging_publication_approval
+    accountDisableOwner: must_be_named_before_fresh_staging_publication_approval
+    acceptanceReviewerOwner: must_be_named_before_fresh_staging_publication_approval
+  sampleDataBoundary:
+    sampleDataOwner: must_be_named_before_fresh_staging_publication_approval
+    sourceReviewOwner: must_be_named_before_fresh_staging_publication_approval
+    redactionVerifier: must_be_named_before_fresh_staging_publication_approval
+    resetOrSeedOwner: required_only_if_seed_or_reset_is_requested_with_fresh_approval
+    allowedDataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  operationalOwners:
+    monitoringOwner: must_be_named_before_fresh_staging_publication_approval
+    incidentOwner: must_be_named_before_fresh_staging_publication_approval
+    rollbackOwner: must_be_named_before_fresh_staging_publication_approval
+    stopOwner: must_be_named_before_fresh_staging_publication_approval
+    evidenceRedactionOwner: must_be_named_before_fresh_staging_publication_approval
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  releaseGatesRemain:
+    - AP-01
+    - AP-02
+    - AP-03
+    - AP-04
+    - AP-05
+    - AP-06
+    - AP-07
+    - AP-08
+    - AP-09
+    - AP-10
+    - AP-11
+  displacedTerminalArchivedTask: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+  blockedWithoutFreshApproval:
+    - provider_model_call
+    - env_secret_access_or_env_file_change
+    - schema_migration_seed_database_connection_or_data_change
+    - browser_e2e_runtime_or_dev_server
+    - cloud_resource_or_deploy
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - org_auth_runtime_change
+    - pr_force_push_release_tag
+    - production_or_staging_data_access
+    - cost_calibration_gate
+  boundary: >-
+    This checklist follow-up defines owner acceptance account responsibilities, sample data boundaries, and monitoring,
+    incident, rollback, stop, and evidence-redaction owner prerequisites for future fresh-approved staging publication.
+    It does not name or create accounts, seed or reset data, connect to staging or production, deploy, run browser/e2e
+    or dev-server validation, read or write env/secret files, run Provider/model calls, change schema/migrations/
+    dependencies, create PRs, force push, mutate org_auth runtime behavior, expose sensitive evidence, or execute the
+    Cost Calibration Gate.

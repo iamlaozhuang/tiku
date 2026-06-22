@@ -1750,3 +1750,40 @@ lastPreviewOwnerAcceptanceValidationFollowup20260622:
       - payment_external_service
       - cost_calibration_gate
   displacedTerminalArchivedTask: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+
+lastPreviewOwnerAcceptanceChecklist20260622:
+  taskId: preview-owner-acceptance-checklist-2026-06-22
+  evaluatedAt: "2026-06-22T11:30:00-07:00"
+  decision: docs_state_owner_acceptance_checklist_defined_no_runtime_execution
+  checklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+  evidence: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-checklist.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-checklist.md
+  rowStatusChanges: 0
+  previewReleaseReadyClaim: false
+  checklistDefined:
+    ownerAcceptanceAccounts: required_before_any_staging_publication_not_created_here
+    sampleDataBoundary: required_before_any_staging_publication_no_seed_or_db_action_here
+    monitoringRollbackStopOwners: required_before_any_staging_publication_not_named_here
+  requiredBeforeFreshStagingPublicationApproval:
+    - account_inventory_owner
+    - account_creation_owner
+    - account_disable_owner
+    - acceptance_reviewer_owner
+    - sample_data_owner
+    - source_review_owner
+    - redaction_verifier
+    - monitoring_owner
+    - incident_owner
+    - rollback_owner
+    - stop_owner
+    - evidence_redaction_owner
+  blockedGates:
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+  displacedTerminalArchivedTask: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen

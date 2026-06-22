@@ -1,0 +1,134 @@
+schemaVersion: 1
+taskId: preview-owner-acceptance-checklist-2026-06-22
+updatedAt: "2026-06-22T11:30:00-07:00"
+status: checklist_defined_docs_state_only
+scope:
+  firstPreviewScope: web_only_owner_acceptance_preview
+  providerDefault: disabled
+  dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+  previewReleaseReadyClaim: false
+  deploymentApproved: false
+  productionReadyClaim: false
+  releaseGatesRemain:
+    - AP-01
+    - AP-02
+    - AP-03
+    - AP-04
+    - AP-05
+    - AP-06
+    - AP-07
+    - AP-08
+    - AP-09
+    - AP-10
+    - AP-11
+ownerAcceptanceAccounts:
+  status: required_before_any_staging_publication_not_created_here
+  requiredDecisionBeforeFreshApproval:
+    accountInventoryOwner: must_be_named
+    accountCreationOwner: must_be_named
+    accountDisableOwner: must_be_named
+    acceptanceReviewerOwner: must_be_named
+  accountClasses:
+    - id: owner_admin_reviewer
+      purpose: review admin and owner acceptance flows
+      dataBoundary: non_production_reviewed_account_only
+      requiredBeforeUse:
+        - email_or_identifier_redaction_plan
+        - role_and_permission_scope
+        - reset_or_disable_plan
+        - evidence_redaction_rule
+    - id: organization_admin_reviewer
+      purpose: review organization admin workflows without production organization data
+      dataBoundary: synthetic_or_reviewed_non_sensitive_org_metadata_only
+      requiredBeforeUse:
+        - organization_fixture_owner
+        - org_auth_boundary_confirmation
+        - employee_identifier_redaction_plan
+        - account_disable_plan
+    - id: student_reviewer
+      purpose: review student practice and mock_exam flows
+      dataBoundary: synthetic_or_reviewed_non_sensitive_student_data_only
+      requiredBeforeUse:
+        - synthetic_answer_fixture_boundary
+        - no_raw_employee_answer_or_full_paper_content_evidence
+        - account_reset_plan
+    - id: ops_reviewer
+      purpose: review redacted audit_log and ai_call_log visibility only
+      dataBoundary: redacted_metadata_only
+      requiredBeforeUse:
+        - no_provider_payload_or_raw_generated_content
+        - audit_log_retention_boundary
+        - ai_call_log_redaction_boundary
+  forbidden:
+    - production_account_reuse
+    - production_user_or_employee_data
+    - shared_secret_or_token_in_evidence
+    - plaintext_redeem_code_in_evidence
+sampleDataBoundary:
+  status: required_before_any_staging_publication_no_seed_or_db_action_here
+  allowed:
+    - synthetic_seed_data
+    - reviewed_non_sensitive_sample_metadata
+    - redacted_existing_evidence_metadata
+  conditionallyAllowedOnlyWithFreshApproval:
+    - imported_content_after_source_owner_review_and_redaction_plan
+    - staging_seed_or_reset_command_after_exact_target_backup_and_rollback_owner_are_named
+  forbidden:
+    - production_database_clone
+    - production_object_storage_reuse
+    - raw_prompt
+    - provider_payload
+    - raw_generated_content
+    - raw_employee_answer
+    - full_paper_content
+    - plaintext_redeem_code
+    - secret_token_authorization_header_or_database_url
+  requiredBeforePublication:
+    sampleDataOwner: must_be_named
+    sourceReviewOwner: must_be_named
+    redactionVerifier: must_be_named
+    resetOrSeedOwner: must_be_named_if_seed_or_reset_is_requested
+    evidenceStorageBoundary: redacted_metadata_only
+monitoringRollbackStopOwners:
+  status: required_before_any_staging_publication_not_named_here
+  requiredDecisionBeforeFreshApproval:
+    monitoringOwner: must_be_named
+    incidentOwner: must_be_named
+    rollbackOwner: must_be_named
+    stopOwner: must_be_named
+    evidenceRedactionOwner: must_be_named
+  minimumSignalsBeforePublication:
+    - application_health_check
+    - auth_callback_health
+    - audit_log_redaction_check
+    - ai_call_log_redaction_check
+    - owner_acceptance_smoke_result
+    - git_inventory
+  rollbackBoundary:
+    requiredBeforeDeploy:
+      - deployment_source_sha
+      - rollback_target_sha_or_previous_deployment_identifier
+      - data_migration_presence_or_absence_statement
+      - owner_authorized_stop_condition
+    notApprovedHere:
+      - deployment
+      - rollback_execution
+      - cloud_resource_change
+      - env_secret_change
+  stopConditions:
+    - any_ap01_to_ap11_gate_claim_without_own_evidence_and_approval
+    - provider_env_schema_database_deploy_browser_e2e_dependency_or_payment_action_without_fresh_approval
+    - sensitive_raw_content_or_identifier_exposure
+    - staging_resource_boundary_missing_named_owner
+    - preview_ready_release_ready_or_production_ready_claim_before_gate_evidence
+freshApprovalRequiredFor:
+  - staging_resource_creation_or_change
+  - env_secret_read_write_or_rotation
+  - provider_model_call_or_provider_enablement
+  - schema_migration_seed_database_connection_or_data_change
+  - browser_e2e_runtime_or_dev_server
+  - deployment_cloud_resource_domain_tls_or_callback_origin_change
+  - payment_external_service_or_org_auth_runtime_change
+  - dependency_package_lockfile_change
+  - pr_force_push_release_tag
+  - cost_calibration_gate
