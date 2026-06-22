@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-22T00:50:00-07:00"
+updatedAt: "2026-06-22T02:01:13-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,8 +500,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
-  lastKnownOriginMasterSha: 8f6dbea07c4809c8a93e14d0b43f2f589d44247c
+  lastKnownMasterSha: 42add82cf2803819e4d7e292a9e11842d7404973
+  lastKnownOriginMasterSha: 42add82cf2803819e4d7e292a9e11842d7404973
 currentTask:
   id: closeout-reconcile-batch-248-251-checkpoint
   status: closed
@@ -5627,3 +5627,54 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     production changes, run local validation, write redacted evidence and audit review, commit independently, merge
     fast-forward to master, push origin/master, and clean its short branch before the next task starts. High-risk
     capabilities remain blocked unless the user grants fresh task-specific approval.
+
+organizationTrainingGuardedImplementationBatch20260622:
+  batchId: organization-training-guarded-implementation-2026-06-22
+  seededAt: "2026-06-22T02:01:13-07:00"
+  seedTaskId: module-run-v2-auto-seed-organization-training
+  branch: codex/organization-training-guarded-seed
+  seedSourcePlanningTask: phase-72-advanced-organization-training-implementation-planning
+  seedEvidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-organization-training.md
+  seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-organization-training.md
+  autoDriveLocalImplementationApproval: recorded_current_user_2026_06_22
+  standingCloseoutApprovalRecorded: true
+  localFullLoopGate: L6
+  seededTaskIds:
+    - batch-252-organization-training-organization-admin-training-draft-publish-ta
+    - batch-253-organization-training-employee-answer-lifecycle-local-role-flow
+    - batch-254-organization-training-paper-and-mock-exam-context-usage-without-ex
+    - batch-255-organization-training-audit-log-redacted-reference
+  currentTaskId: batch-252-organization-training-organization-admin-training-draft-publish-ta
+  currentTaskStatus: pending
+  nextCandidateTaskId: batch-252-organization-training-organization-admin-training-draft-publish-ta
+  approvalBoundary:
+    allowed:
+      - task_plan_evidence_audit_creation
+      - scoped_local_implementation_or_historical_reconcile
+      - focused_unit_validation
+      - lint_typecheck_diff_check
+      - module_run_v2_precommit_closeout_prepush
+      - local_commit
+      - fast_forward_merge_to_master
+      - push_origin_master
+      - merged_short_branch_cleanup
+    blockedWithoutFreshApproval:
+      - real_provider_call
+      - env_secret_access_or_change
+      - prompt_or_provider_payload_exposure
+      - schema_migration_seed_database_connection_or_data_change
+      - package_or_lockfile_change
+      - dev_server
+      - browser_or_playwright_e2e_runtime
+      - deploy
+      - pr
+      - force_push
+      - org_auth_runtime_behavior_change
+      - raw_employee_answer_or_full_paper_content_evidence
+      - payment_or_external_service
+      - cost_calibration_gate
+  boundary: >-
+    This guarded seed transaction registers batch-252 through batch-255 only. It does not execute product source
+    implementation, Provider calls, env/secret work, dependency/package/lockfile changes, schema/migration/seed/database
+    operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
+    model changes, raw employee answer evidence, full paper content evidence, or Cost Calibration Gate work.
