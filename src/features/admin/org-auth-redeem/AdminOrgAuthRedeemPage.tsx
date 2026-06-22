@@ -133,6 +133,13 @@ type EmployeeImportInput =
       sourceFormat: "csv" | "tsv";
     };
 
+type EmployeeImportPreview = {
+  formatLabel: string;
+  isReady: boolean;
+  message: string;
+  rowCount: number;
+};
+
 type EmployeeConfirmationState =
   | {
       kind: "importEmployees";
@@ -214,6 +221,18 @@ const userStatusLabels = {
   active: "正常",
   disabled: "已禁用",
 } satisfies Record<UserStatus, string>;
+
+const employeeImportRejectedReasonLabels = {
+  duplicate_phone: "手机号重复",
+  duplicate_user: "用户重复",
+  employee_create_failed: "员工创建失败",
+  invalid_row: "行格式无效",
+  organization_not_found: "企业组织不存在",
+  user_not_found: "用户不存在",
+} satisfies Record<
+  EmployeeImportResultDto["rejectedRows"][number]["reason"],
+  string
+>;
 
 const defaultOrgAuthFormState: OrgAuthFormState = {
   accountQuota: "100",
@@ -602,6 +621,64 @@ function buildEmployeeImportInput(value: string): {
       sourceFormat: lines.some((line) => line.includes("\t")) ? "tsv" : "csv",
     },
     message: null,
+  };
+}
+
+function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return {
+      formatLabel: "待输入",
+      isReady: false,
+      message: "请粘贴员工导入内容。",
+      rowCount: 0,
+    };
+  }
+
+  const lines = trimmedValue
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
+  const hasEmployeeAccountHeader =
+    firstLine.includes("phone") &&
+    firstLine.includes("name") &&
+    firstLine.includes("initialpassword") &&
+    firstLine.includes("organizationpublicid");
+  const legacyRows = lines.map((line) =>
+    line.split(",").map((item) => item.trim()),
+  );
+  const isLegacyPublicIdImport =
+    !hasEmployeeAccountHeader &&
+    legacyRows.every(
+      (row) => row.length === 2 && row.every((item) => item.length > 0),
+    );
+
+  if (isLegacyPublicIdImport) {
+    return {
+      formatLabel: "userPublicId 绑定导入",
+      isReady: lines.length > 0,
+      message: `将按 publicId 绑定格式解析 ${lines.length} 行员工。`,
+      rowCount: lines.length,
+    };
+  }
+
+  const sourceFormat = lines.some((line) => line.includes("\t"))
+    ? "TSV"
+    : "CSV";
+  const rowCount = hasEmployeeAccountHeader
+    ? Math.max(lines.length - 1, 0)
+    : lines.length;
+
+  return {
+    formatLabel: `员工账号 ${sourceFormat}`,
+    isReady: rowCount > 0,
+    message:
+      rowCount > 0
+        ? `将按员工账号 ${sourceFormat} 解析 ${rowCount} 行员工。`
+        : "请至少提供一行员工数据。",
+    rowCount,
   };
 }
 
@@ -1331,10 +1408,12 @@ function EmployeeList({
 
 function EmployeeImportActionPanel({
   importText,
+  importPreview,
   onImportTextChange,
   onSubmit,
 }: {
   importText: string;
+  importPreview: EmployeeImportPreview;
   onImportTextChange: (value: string) => void;
   onSubmit: () => void;
 }) {
@@ -1357,15 +1436,80 @@ function EmployeeImportActionPanel({
           value={importText}
           onChange={(event) => onImportTextChange(event.target.value)}
         />
+        <div
+          className="bg-background border-border rounded-md border p-3"
+          data-testid="employee-import-preview"
+        >
+          <p className="text-text-primary text-sm font-medium">导入预览</p>
+          <p className="text-text-secondary mt-1 text-sm">
+            {importPreview.message}
+          </p>
+          <p className="text-text-muted mt-1 text-xs">
+            格式 {importPreview.formatLabel} / 数据行 {importPreview.rowCount}
+          </p>
+        </div>
         <button
           type="button"
-          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="employee-import-submit"
+          disabled={!importPreview.isReady}
           onClick={onSubmit}
         >
           <Upload className="size-4" aria-hidden="true" />
           导入员工
         </button>
+      </div>
+    </section>
+  );
+}
+
+function EmployeeImportResultPanel({
+  result,
+}: {
+  result: EmployeeImportResultDto;
+}) {
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-testid="employee-import-result"
+    >
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">导入结果</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            员工导入反馈
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            仅展示聚合数量、行号和拒绝原因；原始导入内容与 publicId
+            不在结果反馈中回显。
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">成功</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              成功 {result.importedEmployees.length}
+            </p>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">拒绝</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              拒绝 {result.rejectedRows.length}
+            </p>
+          </div>
+        </div>
+        {result.rejectedRows.length === 0 ? (
+          <p className="text-text-muted text-sm">所有行均已通过导入。</p>
+        ) : (
+          <ul className="text-text-secondary space-y-1 text-sm">
+            {result.rejectedRows.map((rejectedRow) => (
+              <li key={`${rejectedRow.rowNumber}-${rejectedRow.reason}`}>
+                第 {rejectedRow.rowNumber} 行：
+                {employeeImportRejectedReasonLabels[rejectedRow.reason]}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
@@ -2538,6 +2682,8 @@ export function AdminOrgAuthPage() {
   const [organizationFormState, setOrganizationFormState] =
     useState<OrganizationFormState>(defaultOrganizationFormState);
   const [employeeImportText, setEmployeeImportText] = useState("");
+  const [lastEmployeeImportResult, setLastEmployeeImportResult] =
+    useState<EmployeeImportResultDto | null>(null);
   const [selectedOrganizationPublicId, setSelectedOrganizationPublicId] =
     useState<string | null>(null);
   const [selectedOrgAuthPublicId, setSelectedOrgAuthPublicId] = useState<
@@ -2554,6 +2700,10 @@ export function AdminOrgAuthPage() {
         0,
       ),
     [data.organizations],
+  );
+  const employeeImportPreview = useMemo(
+    () => buildEmployeeImportPreview(employeeImportText),
+    [employeeImportText],
   );
   const selectedOrganizationDetail = useMemo(
     () =>
@@ -2847,6 +2997,7 @@ export function AdminOrgAuthPage() {
     const importDraft = buildEmployeeImportInput(employeeImportText);
 
     if (importDraft.input === null) {
+      setLastEmployeeImportResult(null);
       setToastMessage({
         message: importDraft.message ?? "员工导入输入无效。",
         tone: "error",
@@ -2879,6 +3030,7 @@ export function AdminOrgAuthPage() {
       setEmployeeConfirmationState(null);
 
       if (importResponse.code !== 0 || importResponse.data === null) {
+        setLastEmployeeImportResult(null);
         setToastMessage({ message: importResponse.message, tone: "error" });
         return;
       }
@@ -2907,6 +3059,7 @@ export function AdminOrgAuthPage() {
             ).length,
         })),
       }));
+      setLastEmployeeImportResult(importResponse.data);
       setEmployeeImportText("");
       setToastMessage({
         message: `员工导入完成：成功 ${importedEmployees.length}，拒绝 ${rejectedRows.length}。`,
@@ -3026,9 +3179,17 @@ export function AdminOrgAuthPage() {
 
       <EmployeeImportActionPanel
         importText={employeeImportText}
-        onImportTextChange={setEmployeeImportText}
+        importPreview={employeeImportPreview}
+        onImportTextChange={(nextImportText) => {
+          setEmployeeImportText(nextImportText);
+          setLastEmployeeImportResult(null);
+        }}
         onSubmit={handleSubmitEmployeeImport}
       />
+
+      {lastEmployeeImportResult === null ? null : (
+        <EmployeeImportResultPanel result={lastEmployeeImportResult} />
+      )}
 
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile

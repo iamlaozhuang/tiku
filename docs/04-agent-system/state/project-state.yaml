@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ac534c19903fa20704f8dc4ac57946e16d41379b
-  lastKnownOriginMasterSha: ac534c19903fa20704f8dc4ac57946e16d41379b
+  lastKnownMasterSha: 24e353918c9911d1a643ca38ee270f9fc0d98c0f
+  lastKnownOriginMasterSha: 24e353918c9911d1a643ca38ee270f9fc0d98c0f
 currentTask:
-  id: close-organization-detail-management
+  id: close-employee-import-management
   status: ready_for_closeout
-  result: pass_organization_detail_management_local_validation
-  claimedAt: "2026-06-21T19:29:20-07:00"
-  validatedAt: "2026-06-21T19:34:50-07:00"
+  result: pass_employee_import_management_local_validation
+  claimedAt: "2026-06-21T19:39:38-07:00"
+  validatedAt: "2026-06-21T19:44:55-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-12; admin-experience-gap-sequencing
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
-  branch: codex/close-organization-detail-management
+  sourceStory: current-user-low-risk-task-13; admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
+  branch: codex/close-employee-import-management
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: close-organization-detail-management
+  currentTaskId: close-employee-import-management
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for

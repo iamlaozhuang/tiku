@@ -345,6 +345,33 @@ function mockSystemOpsFetchWithOrganizationTree() {
         });
       }
 
+      if (path === "/api/v1/employees/import") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            importedEmployees: [
+              {
+                publicId: "employee-imported-public-001",
+                userPublicId: "user-imported-public-001",
+                phone: "13900001111",
+                name: "Import One",
+                organizationPublicId: "org-district-001",
+                status: "active",
+              },
+            ],
+            rejectedRows: [
+              {
+                rowNumber: 3,
+                userPublicId: "user-rejected-public-001",
+                organizationPublicId: "org-missing-public-001",
+                reason: "duplicate_phone",
+              },
+            ],
+          },
+        });
+      }
+
       if (path === "/api/v1/org-auths") {
         const body = JSON.parse(String(init?.body));
 
@@ -934,6 +961,48 @@ describe("admin user organization authorization ops baseline", () => {
         ([url]) => String(url) === "/api/v1/organizations",
       ),
     ).toBe(false);
+  });
+
+  it("previews employee import content and renders redacted rejection feedback", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+    const employeeImportContent = [
+      "phone,name,initialPassword,organizationPublicId",
+      "13900001111,Import One,Passw0rd!,org-district-001",
+      "13900002222,Import Two,Passw0rd!,org-missing-public-001",
+    ].join("\n");
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("employee-import-textarea");
+
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: employeeImportContent },
+    });
+
+    const importPreview = screen.getByTestId("employee-import-preview");
+    expect(importPreview).toHaveTextContent("员工账号 CSV");
+    expect(importPreview).toHaveTextContent("2 行");
+
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认导入员工？");
+    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+
+    const importResult = await screen.findByTestId("employee-import-result");
+    expect(importResult).toHaveTextContent("成功 1");
+    expect(importResult).toHaveTextContent("拒绝 1");
+    expect(importResult).toHaveTextContent("第 3 行：手机号重复");
+    expect(importResult).not.toHaveTextContent("user-rejected-public-001");
+    expect(importResult).not.toHaveTextContent("org-missing-public-001");
+    expect(importResult).not.toHaveTextContent("13900002222");
+
+    const importCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/employees/import",
+    );
+    expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
+      content: employeeImportContent,
+      sourceFormat: "csv",
+    });
   });
 
   it("closes redeem_code generation and filtering on the redeem code page", async () => {
