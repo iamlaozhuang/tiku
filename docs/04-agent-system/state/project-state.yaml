@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
-updatedAt: "2026-06-22T06:59:58-07:00"
+currentPhase: batch-268-personal-learning-ai-personal-generation-request-flow
+updatedAt: "2026-06-22T07:14:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  id: batch-268-personal-learning-ai-personal-generation-request-flow
   status: closed
-  result: pass_ai_task_provider_sandbox_proposal_local_validation
-  claimedAt: "2026-06-22T06:57:45-07:00"
-  validatedAt: "2026-06-22T06:59:58-07:00"
-  closedAt: "2026-06-22T06:59:58-07:00"
+  result: pass_personal_ai_generation_request_flow_local_validation
+  claimedAt: "2026-06-22T07:13:22-07:00"
+  validatedAt: "2026-06-22T07:14:45-07:00"
+  closedAt: "2026-06-22T07:14:45-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-267-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  branch: codex/batch-267-ai-task-sandbox-proposal
+  planPath: docs/05-execution-logs/task-plans/batch-268-personal-learning-ai-personal-generation-request-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-268-personal-learning-ai-personal-generation-request-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-268-personal-learning-ai-personal-generation-request-flow.md
+  branch: codex/batch-268-personal-ai-request-flow
   commitSha: null
   prUrl: null
   retryCount: 0
