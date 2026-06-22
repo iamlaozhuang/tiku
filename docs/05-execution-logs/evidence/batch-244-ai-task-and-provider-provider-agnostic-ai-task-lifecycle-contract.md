@@ -16,7 +16,7 @@ result: pass
 - Batch range: batch-244 only; provider-agnostic lifecycle contract validation.
 - RED: batch-244 was pending with task-level closeout placeholders; existing focused lifecycle tests confirmed coverage before any source edit, so no source gap was found.
 - GREEN: `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts` passed with 1 file and 5 tests.
-- Commit: to be recorded after the first local closeout commit.
+- Commit: `078b3bc1`
 - localFullLoopGate: L2 local unit validation only; no provider/env/schema/deploy/dependency execution.
 - threadRolloverGate: continue_current_thread; this is the first task in the approved batch-244 through batch-247 packet.
 - nextModuleRunCandidate: continue serially to `batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen` after batch-244 is merged, pushed, and cleaned up.
@@ -31,8 +31,17 @@ result: pass
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
 - `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`: passed.
-- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`: to be run after the first local closeout commit is recorded.
-- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract -SkipRemoteAheadCheck`: to be run after module closeout readiness passes.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`: passed.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract -SkipRemoteAheadCheck`: passed.
+
+## Final Closeout State
+
+- Validation commit: `078b3bc1`.
+- Queue status: `closed`.
+- Project state current task status: `closed`.
+- Module closeout readiness: pass.
+- Pre-push readiness: pass.
+- Merge/push/cleanup: approved by task-level closeoutPolicy and current batch authorization.
 
 ## Source Coverage
 
