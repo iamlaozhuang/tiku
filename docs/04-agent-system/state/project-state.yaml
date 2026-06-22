@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: ops-governance-and-retention-guarded-implementation-2026-06-22
-updatedAt: "2026-06-22T03:28:39-07:00"
+updatedAt: "2026-06-22T03:36:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: module-run-v2-auto-seed-ops-governance-and-retention
+  id: batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
   status: closed
-  result: pass
-  claimedAt: "2026-06-22T03:28:39-07:00"
-  validatedAt: "2026-06-22T03:28:39-07:00"
-  closedAt: "2026-06-22T03:28:39-07:00"
-  sourceStory: current-user-2026-06-22-batch-serial-ops-governance-retention-seed
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-  branch: codex/ops-governance-retention-guarded-seed
+  result: pass_historical_reconcile
+  claimedAt: "2026-06-22T03:36:34-07:00"
+  validatedAt: "2026-06-22T03:36:34-07:00"
+  closedAt: "2026-06-22T03:36:34-07:00"
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  evidencePath: docs/05-execution-logs/evidence/batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  branch: codex/batch-260-ops-governance-quota-summary
   commitSha: 9ade20a885d6d54f1393a334b7e4f4f52fce55b6
   prUrl: null
   retryCount: 0
@@ -5763,10 +5763,11 @@ opsGovernanceAndRetentionGuardedImplementationBatch20260622:
     - batch-262-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     - batch-263-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
   currentTaskId: batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
-  currentTaskStatus: pending
-  nextCandidateTaskId: batch-260-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  currentTaskStatus: closed
+  nextCandidateTaskId: batch-261-ops-governance-and-retention-redeem-code-redacted-reference
   seedClosedAt: "2026-06-22T03:28:39-07:00"
   seedStatus: closed
+  closedTaskCount: 1
   approvalBoundary:
     allowed:
       - task_plan_evidence_audit_creation
