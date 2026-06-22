@@ -4919,5 +4919,11 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     evidencePath: docs/05-execution-logs/evidence/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-    status: pending
+    planPath: docs/05-execution-logs/task-plans/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    status: closed
+    result: pass_ai_task_provider_sandbox_proposal_historical_reconcile
+    claimedAt: "2026-06-22T10:17:50-07:00"
+    validatedAt: "2026-06-22T10:17:50-07:00"
+    closedAt: "2026-06-22T10:17:50-07:00"
+    branch: codex/batch-287-ai-task-sandbox-reconcile-20260622
     retryCount: 0
