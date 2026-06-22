@@ -6403,3 +6403,536 @@ tasks:
     closedAt: "2026-06-22T08:24:26-07:00"
     branch: codex/batch-279-organization-analytics-audit-log
     retryCount: 0
+
+  - id: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    title: Module Run v2 ops-governance-and-retention implementation seed
+    phase: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: ops-governance-and-retention
+    targetClosureItem: operations-facing authorization and quota governance summaries
+    behaviorBoundary: ops-governance-and-retention::operations-facing authorization and quota governance summaries
+    requirementRefs:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    useCases:
+      - ops-governance-and-retention local implementation validates operations-facing authorization and quota governance summaries
+    acceptanceScenarios:
+      - operations-facing authorization and quota governance summaries passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    planPath: docs/05-execution-logs/task-plans/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    evidencePath: docs/05-execution-logs/evidence/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    status: pending
+    retryCount: 0
+  - id: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    title: Module Run v2 ops-governance-and-retention implementation seed
+    phase: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: ops-governance-and-retention
+    targetClosureItem: redeem_code redacted reference
+    behaviorBoundary: ops-governance-and-retention::redeem_code redacted reference
+    requirementRefs:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    useCases:
+      - ops-governance-and-retention local implementation validates redeem_code redacted reference
+    acceptanceScenarios:
+      - redeem_code redacted reference passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    planPath: docs/05-execution-logs/task-plans/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
+    evidencePath: docs/05-execution-logs/evidence/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
+    status: pending
+    retryCount: 0
+  - id: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    title: Module Run v2 ops-governance-and-retention implementation seed
+    phase: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: ops-governance-and-retention
+    targetClosureItem: audit_log and ai_call_log retention and redaction contracts
+    behaviorBoundary: ops-governance-and-retention::audit_log and ai_call_log retention and redaction contracts
+    requirementRefs:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    useCases:
+      - ops-governance-and-retention local implementation validates audit_log and ai_call_log retention and redaction contracts
+    acceptanceScenarios:
+      - audit_log and ai_call_log retention and redaction contracts passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    planPath: docs/05-execution-logs/task-plans/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    status: pending
+    retryCount: 0
+  - id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    title: Module Run v2 ops-governance-and-retention implementation seed
+    phase: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
+    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: ops-governance-and-retention
+    targetClosureItem: local recovery and expired-hidden boundary contracts
+    behaviorBoundary: ops-governance-and-retention::local recovery and expired-hidden boundary contracts
+    requirementRefs:
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    useCases:
+      - ops-governance-and-retention local implementation validates local recovery and expired-hidden boundary contracts
+    acceptanceScenarios:
+      - local recovery and expired-hidden boundary contracts passes L6-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L6-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L6
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    planPath: docs/05-execution-logs/task-plans/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    status: pending
+    retryCount: 0
