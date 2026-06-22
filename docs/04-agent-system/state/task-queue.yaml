@@ -5409,7 +5409,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-272-organization-training-organization-admin-training-draft-publish-ta
     validationCommands:
@@ -5417,10 +5417,17 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/validators/organization-training.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-272-organization-training-organization-admin-training-draft-publish-ta
+    planPath: docs/05-execution-logs/task-plans/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
     evidencePath: docs/05-execution-logs/evidence/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-272-organization-training-organization-admin-training-draft-publish-ta.md
-    status: pending
+    status: closed
+    result: pass_organization_training_admin_flow_contract
+    claimedAt: "2026-06-22T07:36:57-07:00"
+    validatedAt: "2026-06-22T07:38:28-07:00"
+    closedAt: "2026-06-22T07:38:28-07:00"
+    branch: codex/batch-272-organization-training-admin-flow
     retryCount: 0
   - id: batch-273-organization-training-employee-answer-lifecycle-local-role-flow
     title: Module Run v2 organization-training implementation seed
