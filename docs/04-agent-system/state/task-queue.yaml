@@ -4189,3 +4189,531 @@ tasks:
     closedAt: "2026-06-22T12:45:00-07:00"
     branch: codex/acceptance-execution-plan-doc-20260622
     retryCount: 0
+
+  - id: acceptance-serial-batch-orchestration-2026-06-22
+    title: Standard and Advanced MVP acceptance serial batch orchestration
+    phase: acceptance-serial-batch-orchestration-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    executionProfile: docs_state_acceptance_serial_batch_seed
+    evidenceMode: full
+    validationPolicy: local_static_docs_gate
+    queueSelectionMode: user_directed_acceptance_serial_batch_seed
+    targetClosureItem: Standard and Advanced MVP acceptance serial batch seeded
+    behaviorBoundary: acceptance_execution::serial_batch_seed_only_no_acceptance_execution
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: parent
+    serialBatchChildren:
+      - acceptance-baseline-and-owner-gate-2026-06-22
+      - acceptance-l0-l2-static-gates-2026-06-22
+      - acceptance-use-case-matrix-run-2026-06-22
+      - acceptance-ap-gate-decision-2026-06-22
+      - acceptance-ai-lifecycle-run-2026-06-22
+      - acceptance-final-decision-review-2026-06-22
+    humanApproval: >-
+      User approved converting the proposed 1-6 acceptance progression into a serial batch. This approval covers
+      docs/state queue seeding and orchestration only: parent/child task creation, dependency ordering, static
+      validation, redacted evidence, audit review, local commit, fast-forward merge to master, push origin/master, and
+      merged short-branch cleanup when the docs/state fast-lane and Module Run v2 gates pass. It does not authorize
+      execution of the child acceptance tasks, source/test/script implementation changes, dependency or lockfile
+      changes, env/secret reads or writes, Provider/model calls, browser/e2e/dev-server runtime, schema/migration/seed
+      or database connections/data changes, staging/prod/cloud resource changes, deployment, payment/external-service
+      actions, PR creation, force-push, previewReleaseReady claims, productionReady claims, acceptance pass claims, or
+      Cost Calibration Gate execution.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    riskTypes:
+      - docs_state
+      - queue_seeding
+      - acceptance_orchestration
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-acceptance-serial-batch-orchestration.md docs/05-execution-logs/evidence/2026-06-22-acceptance-serial-batch-orchestration.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-serial-batch-orchestration.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-acceptance-serial-batch-orchestration.md docs/05-execution-logs/evidence/2026-06-22-acceptance-serial-batch-orchestration.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-serial-batch-orchestration.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId acceptance-serial-batch-orchestration-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-serial-batch-orchestration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-serial-batch-orchestration.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-serial-batch-orchestration.md
+    status: closed
+    result: pass_acceptance_serial_batch_seeded
+    claimedAt: "2026-06-22T13:00:00-07:00"
+    validatedAt: "2026-06-22T13:00:00-07:00"
+    closedAt: "2026-06-22T13:00:00-07:00"
+    branch: codex/acceptance-serial-batch-20260622
+    retryCount: 0
+
+  - id: acceptance-baseline-and-owner-gate-2026-06-22
+    title: Acceptance baseline and L6 owner gate
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-serial-batch-orchestration-2026-06-22
+    taskKind: acceptance_gate
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_1_baseline_owner_gate
+    evidenceMode: full
+    validationPolicy: docs_state_owner_gate_only
+    queueSelectionMode: serial_acceptance_batch_child_1
+    targetClosureItem: Frozen acceptance baseline and named L6 owner gate
+    behaviorBoundary: acceptance_execution::baseline_freeze_owner_gate_no_runtime_execution
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 1
+    requiredOutcome: >-
+      Freeze the acceptance baseline and record L6 owner assignment readiness before any execution gate can claim
+      formal acceptance. If required owner roles remain unnamed, this task must close as blocked or ready-for-owner
+      decision, not as acceptance passed.
+    stopConditions:
+      - missing_named_acceptance_owner
+      - missing_named_evidence_redaction_owner
+      - missing_named_stop_or_rollback_owner_for_runtime_gates
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+      - docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
+      - docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+      - docs/02-architecture/adr/**
+      - docs/03-standards/code-taste-ten-commandments.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-acceptance-baseline-and-owner-gate.md docs/05-execution-logs/evidence/2026-06-22-acceptance-baseline-and-owner-gate.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-baseline-and-owner-gate.md
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-baseline-and-owner-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-baseline-and-owner-gate.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-baseline-and-owner-gate.md
+    status: pending
+    result: not_started
+    retryCount: 0
+
+  - id: acceptance-l0-l2-static-gates-2026-06-22
+    title: Acceptance L0 through L2 static gates
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-baseline-and-owner-gate-2026-06-22
+    taskKind: acceptance_static_validation
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_2_l0_l2_static_gates
+    evidenceMode: full
+    validationPolicy: local_static_lint_typecheck_unit_build
+    queueSelectionMode: serial_acceptance_batch_child_2
+    targetClosureItem: Local L0-L2 validation evidence for acceptance
+    behaviorBoundary: acceptance_execution::local_static_unit_build_no_browser_no_provider_no_env_no_deploy
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 2
+    requiredOutcome: >-
+      Run the L0-L2 local static command set from the acceptance plan and record redacted command evidence. This task
+      may validate local lint, typecheck, unit, build, and whitespace gates only.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - package.json
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-l0-l2-static-gates.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-l0-l2-static-gates.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-l0-l2-static-gates.md
+    status: pending
+    result: not_started
+    retryCount: 0
+
+  - id: acceptance-use-case-matrix-run-2026-06-22
+    title: Acceptance use case matrix run
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-l0-l2-static-gates-2026-06-22
+    taskKind: acceptance_runtime_or_manual_gate
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_3_use_case_matrix
+    evidenceMode: full
+    validationPolicy: matrix_row_evidence_with_fresh_runtime_approval
+    queueSelectionMode: serial_acceptance_batch_child_3
+    targetClosureItem: Standard and Advanced use case acceptance matrix row results
+    behaviorBoundary: acceptance_execution::use_case_matrix_requires_explicit_runtime_boundary
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 3
+    requiredOutcome: >-
+      Produce per-row Standard and Advanced use case evidence using only approved validation surfaces. Browser/e2e,
+      dev-server, staging, real data, or manual owner acceptance execution requires fresh approval before this task
+      starts those actions.
+    freshApprovalRequiredBeforeExecution:
+      - browser_e2e_runtime_or_dev_server
+      - staging_owner_acceptance_runtime
+      - production_or_staging_data_access
+      - any_real_user_or_customer_like_data
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-22-acceptance-use-case-matrix-run.md docs/05-execution-logs/evidence/2026-06-22-acceptance-use-case-matrix-run.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-use-case-matrix-run.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-use-case-matrix-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-use-case-matrix-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-use-case-matrix-run.md
+    status: pending
+    result: not_started
+    retryCount: 0
+
+  - id: acceptance-ap-gate-decision-2026-06-22
+    title: Acceptance AP gate decision
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-use-case-matrix-run-2026-06-22
+    taskKind: acceptance_gate_decision
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_4_ap_gate_decision
+    evidenceMode: full
+    validationPolicy: ap_01_ap_11_hard_gate_review
+    queueSelectionMode: serial_acceptance_batch_child_4
+    targetClosureItem: AP-01 through AP-11 gate decision
+    behaviorBoundary: acceptance_execution::ap_gate_decision_no_new_runtime_scope
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 4
+    requiredOutcome: >-
+      Review AP-01 through AP-11 using evidence from prior tasks. Any failed hard gate must block final acceptance
+      until a repair task and retest evidence exist.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-22-acceptance-ap-gate-decision.md docs/05-execution-logs/evidence/2026-06-22-acceptance-ap-gate-decision.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ap-gate-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ap-gate-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ap-gate-decision.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ap-gate-decision.md
+    status: pending
+    result: not_started
+    retryCount: 0
+
+  - id: acceptance-ai-lifecycle-run-2026-06-22
+    title: Acceptance AI lifecycle run
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-ap-gate-decision-2026-06-22
+    taskKind: acceptance_ai_lifecycle_gate
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_5_ai_lifecycle
+    evidenceMode: full
+    validationPolicy: provider_disabled_first_fresh_approval_for_provider_runtime
+    queueSelectionMode: serial_acceptance_batch_child_5
+    targetClosureItem: Standard and Advanced AI lifecycle acceptance evidence
+    behaviorBoundary: acceptance_execution::ai_lifecycle_provider_disabled_first
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 5
+    requiredOutcome: >-
+      Validate Provider-disabled AI lifecycle behavior first. Real Provider/model calls, provider configuration,
+      quota/cost measurement, prompt/provider payload capture, staging runtime, or Cost Calibration Gate work require
+      fresh approval and separate redacted evidence.
+    freshApprovalRequiredBeforeExecution:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - cost_calibration_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - provider_cost_quota_pricing_measurement
+      - cost_calibration_gate
+    validationCommands:
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-22-acceptance-ai-lifecycle-run.md docs/05-execution-logs/evidence/2026-06-22-acceptance-ai-lifecycle-run.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ai-lifecycle-run.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ai-lifecycle-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ai-lifecycle-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ai-lifecycle-run.md
+    status: pending
+    result: not_started
+    retryCount: 0
+
+  - id: acceptance-final-decision-review-2026-06-22
+    title: Acceptance final decision review
+    phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
+    dependencies:
+      - acceptance-ai-lifecycle-run-2026-06-22
+    taskKind: acceptance_final_decision
+    moduleRunVersion: 2
+    executionProfile: acceptance_serial_child_6_final_decision
+    evidenceMode: full
+    validationPolicy: final_pass_fail_blocked_decision_only
+    queueSelectionMode: serial_acceptance_batch_child_6
+    targetClosureItem: Final Standard and Advanced MVP acceptance decision packet
+    behaviorBoundary: acceptance_execution::final_decision_from_prior_evidence_only
+    serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+    serialBatchRole: child
+    serialBatchOrder: 6
+    requiredOutcome: >-
+      Produce a final acceptance decision using only prior evidence. Allowed final states are Pass, Fail, or Blocked.
+      Pass is forbidden unless all required use case rows, AP gates, L6 owner gate, L2 static gates, and AI lifecycle
+      gates have passing evidence.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-22-acceptance-final-decision-review.md docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-final-decision-review.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-final-decision-review.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-final-decision-review.md
+    status: pending
+    result: not_started
+    retryCount: 0
