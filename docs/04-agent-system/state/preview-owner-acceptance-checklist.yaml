@@ -2,6 +2,12 @@ schemaVersion: 1
 taskId: preview-owner-acceptance-checklist-2026-06-22
 updatedAt: "2026-06-22T11:30:00-07:00"
 status: checklist_defined_docs_state_only
+namingPacket:
+  path: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
+  status: defined_pending_human_assignment
+  updatedAt: "2026-06-22T11:45:00-07:00"
+  realPersonNamesRecorded: false
+  reason: no_human_owner_names_were_provided_in_current_instruction
 scope:
   firstPreviewScope: web_only_owner_acceptance_preview
   providerDefault: disabled

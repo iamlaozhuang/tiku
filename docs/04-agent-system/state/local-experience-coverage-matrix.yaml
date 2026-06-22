@@ -1787,3 +1787,43 @@ lastPreviewOwnerAcceptanceChecklist20260622:
     - payment_external_service
     - cost_calibration_gate
   displacedTerminalArchivedTask: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+
+lastPreviewOwnerAcceptanceNamingPacket20260622:
+  taskId: preview-owner-acceptance-naming-packet-2026-06-22
+  evaluatedAt: "2026-06-22T11:45:00-07:00"
+  decision: docs_state_owner_role_naming_packet_defined_pending_human_assignment
+  namingPacketPath: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
+  checklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
+  evidence: docs/05-execution-logs/evidence/2026-06-22-preview-owner-acceptance-naming-packet.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-preview-owner-acceptance-naming-packet.md
+  rowStatusChanges: 0
+  realPersonNamesRecorded: false
+  assignmentStatus: pending_human_named_owner_assignment
+  ownerAcceptanceAccountRoles:
+    - accountInventoryOwner
+    - accountCreationOwner
+    - accountDisableOwner
+    - acceptanceReviewerOwner
+  sampleDataBoundaryRoles:
+    - sampleDataOwner
+    - sourceReviewOwner
+    - redactionVerifier
+    - resetOrSeedOwner
+  operationalOwnerRoles:
+    - monitoringOwner
+    - incidentOwner
+    - rollbackOwner
+    - stopOwner
+    - evidenceRedactionOwner
+  previewReleaseReadyClaim: false
+  blockedGates:
+    - account_creation_or_disable_action
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+  displacedTerminalArchivedTask: batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
