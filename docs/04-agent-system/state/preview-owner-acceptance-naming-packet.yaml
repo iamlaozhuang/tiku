@@ -1,14 +1,25 @@
 schemaVersion: 1
 taskId: preview-owner-acceptance-naming-packet-2026-06-22
-updatedAt: "2026-06-22T11:45:00-07:00"
+updatedAt: "2026-06-22T13:15:00-07:00"
 status: naming_packet_defined_pending_human_assignment
 sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
 ownerAssignmentStagingBoundaryPacket:
   path: docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
   status: defined_pending_human_owner_assignment_no_staging_resource_action
-  updatedAt: "2026-06-22T12:30:00-07:00"
+  updatedAt: "2026-06-22T13:15:00-07:00"
   stagingBoundaryStatus: planning_only_no_resource_action
   realPersonNamesRecorded: false
+baselineAndOwnerGateCheck:
+  taskId: acceptance-baseline-and-owner-gate-2026-06-22
+  checkedAt: "2026-06-22T13:15:00-07:00"
+  baselineFrozen: true
+  ownerGateStatus: blocked_pending_named_owner_assignment
+  realPersonNamesRecorded: false
+  namedOwnerRefCurrentValue: null
+  blockingReason: required_l6_owner_roles_remain_unnamed
+  noRuntimeActionTaken: true
+  previewReleaseReadyClaim: false
+  productionReadyClaim: false
 scope:
   firstPreviewScope: web_only_owner_acceptance_preview
   providerDefault: disabled

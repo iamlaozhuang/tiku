@@ -1,6 +1,6 @@
 schemaVersion: 1
 taskId: preview-owner-acceptance-owner-assignment-staging-boundary-packet-2026-06-22
-updatedAt: "2026-06-22T12:30:00-07:00"
+updatedAt: "2026-06-22T13:15:00-07:00"
 status: owner_assignment_staging_boundary_packet_defined_docs_state_only
 sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
 sourceNamingPacketPath: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
@@ -26,6 +26,17 @@ ownerAssignment:
       - redaction_boundary_for_any_personal_or_contact_detail
       - confirmation_owner_accepts_role
       - fresh_approval_before_staging_publication
+  baselineAndOwnerGateCheck:
+    taskId: acceptance-baseline-and-owner-gate-2026-06-22
+    checkedAt: "2026-06-22T13:15:00-07:00"
+    baselineFrozen: true
+    ownerGateStatus: blocked_pending_named_owner_assignment
+    realPersonNamesRecorded: false
+    namedOwnerRefCurrentValue: null
+    blockingReason: required_l6_owner_roles_remain_unnamed
+    noRuntimeActionTaken: true
+    previewReleaseReadyClaim: false
+    productionReadyClaim: false
   requiredBeforeFreshStagingPublicationApproval:
     ownerAcceptanceAccounts:
       accountInventoryOwner: pending_named_owner
