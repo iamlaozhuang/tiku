@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 7fc61de0521bf5215f3a1b0061a84803dd245e3f
   lastKnownOriginMasterSha: 7fc61de0521bf5215f3a1b0061a84803dd245e3f
 currentTask:
-  id: record-content-admin-ai-provider-baseline-decision
+  id: low-risk-audit-closeout-implementation-seed
   status: ready_for_closeout
-  result: pass_content_admin_ai_provider_baseline_decision_record
-  claimedAt: "2026-06-21T17:05:00-07:00"
-  validatedAt: "2026-06-21T17:06:41-07:00"
+  result: low_risk_audit_closeout_batch_registered
+  claimedAt: "2026-06-21T17:17:36-07:00"
+  validatedAt: "2026-06-21T17:20:00-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-content-admin-ai-provider-baseline
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-provider-baseline-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-provider-baseline-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-provider-baseline-decision.md
-  branch: codex/content-ai-provider-baseline-decision
+  sourceStory: current-user-2026-06-21-low-risk-local-implementation-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+  branch: codex/low-risk-audit-closeout-seed
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5442,8 +5442,99 @@ discoveredIssueClosureBatch20260621:
         source implementation, service/UI implementation, package or lockfile change, env/secret work, Provider calls,
         browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
-  currentSerialScopeStatus: content_admin_ai_provider_baseline_decision_recorded
+  currentSerialScopeStatus: low_risk_audit_closeout_implementation_seeded
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
     force-push, payment, external service, authorization model runtime behavior, or Cost Calibration Gate state.
+
+lowRiskAuditCloseoutImplementationBatch20260621:
+  batchId: low-risk-audit-closeout-implementation-2026-06-21
+  seededAt: "2026-06-21T17:17:36-07:00"
+  seedTaskId: low-risk-audit-closeout-implementation-seed
+  branch: codex/low-risk-audit-closeout-seed
+  sourceCoverage:
+    - current user 2026-06-21 explicit 14-task low-risk local implementation pool
+    - docs/04-agent-system/state/project-state.yaml approval decisions for paper and admin experience gap sequencing
+    - docs/04-agent-system/state/task-queue.yaml executable task registry
+  objective: >-
+    Serially close approved audit implementation gaps with local low-risk source/test changes, task-level plan,
+    evidence, audit review, independent commit, fast-forward merge to master, push origin/master, and short-branch
+    cleanup.
+  approvalBoundary:
+    allowed:
+      - short_lived_branch
+      - task_plan_evidence_audit_per_task
+      - task_queue_and_project_state_registration
+      - low_risk_source_and_focused_unit_tests
+      - validators_services_contracts_and_bounded_ui_feedback
+      - prettier_lint_typecheck_focused_unit_module_run_v2_gates
+      - local_commit_per_task
+      - fast_forward_merge_to_master
+      - push_origin_master
+      - merged_short_branch_cleanup
+    blockedWithoutFreshApproval:
+      - real_provider_call
+      - env_secret_access_or_change
+      - prompt_or_provider_payload_exposure
+      - schema_migration_seed_database_connection_or_data_change
+      - package_or_lockfile_change
+      - dev_server
+      - browser_or_playwright_e2e_runtime
+      - deploy
+      - pr
+      - force_push
+      - org_auth_runtime_behavior_change
+      - plaintext_redeem_code_or_secret_evidence
+      - payment_or_external_service
+      - cost_calibration_gate
+  serialTasks:
+    - id: paper-validator-service-package
+      order: 1
+      targetClosureItem: paper validator/service package
+    - id: paper-student-runtime-guard-package
+      order: 2
+      targetClosureItem: paper student runtime guard
+    - id: paper-admin-count-feedback-package
+      order: 3
+      targetClosureItem: paper admin count feedback
+    - id: paper-question-type-advisory-feedback-package
+      order: 4
+      targetClosureItem: paper question_type advisory feedback
+    - id: paper-legacy-alias-inventory-package
+      order: 5
+      targetClosureItem: paper legacy alias inventory
+    - id: close-question-material-binding-experience
+      order: 6
+      targetClosureItem: close question material binding experience
+    - id: close-question-reference-and-material-lock-surface
+      order: 7
+      targetClosureItem: close question reference and material lock surface
+    - id: close-kn-recommendation-review-experience
+      order: 8
+      targetClosureItem: close kn_recommendation review experience
+    - id: close-redeem-code-detail-contract
+      order: 9
+      targetClosureItem: close redeem_code detail contract
+    - id: close-redeem-code-detail-ui
+      order: 10
+      targetClosureItem: close redeem_code detail UI
+    - id: close-redeem-code-audit-redaction
+      order: 11
+      targetClosureItem: close redeem_code audit redaction
+    - id: close-organization-detail-management
+      order: 12
+      targetClosureItem: close organization detail management
+    - id: close-employee-import-management
+      order: 13
+      targetClosureItem: close employee import management
+    - id: close-employee-transfer-unbind-management
+      order: 14
+      targetClosureItem: close employee transfer unbind management
+  currentTaskId: paper-validator-service-package
+  currentTaskStatus: pending_seeded
+  boundary: >-
+    This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for
+    production changes, run local validation, write redacted evidence and audit review, commit independently, merge
+    fast-forward to master, push origin/master, and clean its short branch before the next task starts. High-risk
+    capabilities remain blocked unless the user grants fresh task-specific approval.

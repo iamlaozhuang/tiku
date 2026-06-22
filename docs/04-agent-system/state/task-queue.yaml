@@ -5724,3 +5724,690 @@ tasks:
     branch: codex/batch-243-organization-audit-log-redaction
     commitSha: e9f24ba2
     retryCount: 0
+  - id: low-risk-audit-closeout-implementation-seed
+    title: Low risk audit closeout implementation seed
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-2026-06-21-low-risk-local-implementation-batch
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits this seed to register the 14 low-risk local implementation tasks, create task
+      plan/evidence/audit artifacts, commit, fast-forward merge to master, push origin/master, and clean the merged
+      short branch. This seed must not modify product source, tests, package files, lockfiles, schema, migrations,
+      scripts, env/secret files, Provider configuration, database state, e2e/browser/dev-server surfaces, deploy, PR,
+      force-push, payment, external services, org_auth runtime behavior, or Cost Calibration Gate state.
+    targetClosureItem: register low-risk local implementation batch for serial audit closeout
+    behaviorBoundary: agent_system::low_risk_audit_closeout_implementation_seed
+    executionProfile: docs_state_governance_seed
+    evidenceMode: full
+    validationPolicy: docs_state_validation
+    queueSelectionMode: user_directed_low_risk_local_implementation_batch
+    taskKind: docs_state_governance_seed
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: low_risk_audit_closeout_batch_registered
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    claimedAt: "2026-06-21T17:17:36-07:00"
+    capabilities:
+      docsStateGovernance: approved
+      productSourceChange: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      orgAuthRuntimeChange: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+      - docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/glossary.yaml
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md
+      - docs/01-requirements/traceability/2026-06-21-admin-experience-gap-closure-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - package.json
+    plannedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+      - docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_decision
+      - governance_seed
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-21-low-risk-audit-closeout-implementation-seed.md docs\05-execution-logs\evidence\2026-06-21-low-risk-audit-closeout-implementation-seed.md docs\05-execution-logs\audits-reviews\2026-06-21-low-risk-audit-closeout-implementation-seed.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId low-risk-audit-closeout-implementation-seed
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId low-risk-audit-closeout-implementation-seed -SkipRemoteAheadCheck
+    redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, private answer text, full paper content, internal numeric ids, or publicId inventories
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_21_low_risk_batch
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_21_low_risk_batch
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_21_low_risk_batch
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_21_low_risk_batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-low-risk-audit-closeout-implementation-seed.md
+    retryCount: 0
+  - id: paper-validator-service-package
+    title: Paper validator service package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-1; paper-count-and-question-type-alias-policy
+    dependencies:
+      - low-risk-audit-closeout-implementation-seed
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk validator/service source and focused unit tests only: draft paper question
+      count accepts 0 to 100, published paper question count accepts 1 to 100, and 101 questions are rejected. No schema,
+      migration, seed, database connection, dependency, Provider/env, dev-server, browser/e2e, deploy, PR, force-push,
+      payment, external service, org_auth runtime behavior, or Cost Calibration Gate work is approved.
+    targetClosureItem: paper question count validator and service boundary
+    behaviorBoundary: paper::question_count_validator_service
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-paper-validator-service-package.md
+      - docs/05-execution-logs/evidence/2026-06-21-paper-validator-service-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-paper-validator-service-package.md
+    blockedFiles: &low_risk_blocked_files
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities: &low_risk_capabilities
+      localSourceChange: approved
+      focusedUnitTest: approved
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy: &low_risk_closeout_policy
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationCommands: &low_risk_validation_commands
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-validator-service-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-validator-service-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-validator-service-package.md
+    retryCount: 0
+  - id: paper-student-runtime-guard-package
+    title: Paper student runtime guard package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-2; paper-count-and-question-type-alias-policy
+    dependencies:
+      - paper-validator-service-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk student practice/mock_exam startup guards and focused unit tests before
+      runtime starts. Dev-server, browser/e2e runtime, database connection or data mutation, schema/migration, Provider,
+      env/secret, dependency, deploy, PR, force-push, payment, external service, and Cost Calibration Gate remain blocked.
+    targetClosureItem: practice and mock_exam reject illegal paper question counts before startup
+    behaviorBoundary: student_runtime::paper_question_count_guard
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/features/student/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-paper-student-runtime-guard-package.md
+      - docs/05-execution-logs/evidence/2026-06-21-paper-student-runtime-guard-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-paper-student-runtime-guard-package.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-student-runtime-guard-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-student-runtime-guard-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-student-runtime-guard-package.md
+    retryCount: 0
+  - id: paper-admin-count-feedback-package
+    title: Paper admin count feedback package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-3; paper-performance-acceptance
+    dependencies:
+      - paper-student-runtime-guard-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk admin composition count display and publish-risk feedback with focused unit
+      tests. Runtime proof with dev server/browser/e2e/data setup remains blocked for a later package.
+    targetClosureItem: admin paper composition count display and publish risk feedback
+    behaviorBoundary: admin_paper::count_feedback
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/features/**
+      - src/components/admin/**
+      - src/server/validators/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-paper-admin-count-feedback-package.md
+      - docs/05-execution-logs/evidence/2026-06-21-paper-admin-count-feedback-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-paper-admin-count-feedback-package.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-admin-count-feedback-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-admin-count-feedback-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-admin-count-feedback-package.md
+    retryCount: 0
+  - id: paper-question-type-advisory-feedback-package
+    title: Paper question type advisory feedback package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-4; paper-question-type-strategy
+    dependencies:
+      - paper-admin-count-feedback-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits advisory question_type distribution feedback only. It must not add hard ratio
+      enforcement or block draft save/publish except for already approved hard count validation.
+    targetClosureItem: admin paper question_type advisory distribution feedback
+    behaviorBoundary: admin_paper::question_type_advisory_feedback
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/features/**
+      - src/components/admin/**
+      - src/server/validators/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-paper-question-type-advisory-feedback-package.md
+      - docs/05-execution-logs/evidence/2026-06-21-paper-question-type-advisory-feedback-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-paper-question-type-advisory-feedback-package.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-question-type-advisory-feedback-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-question-type-advisory-feedback-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-question-type-advisory-feedback-package.md
+    retryCount: 0
+  - id: paper-legacy-alias-inventory-package
+    title: Paper legacy alias inventory package
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-5; question-type-alias-inventory-package
+    dependencies:
+      - paper-question-type-advisory-feedback-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits source/test inventory and compatibility-boundary tests for legacy question_type
+      aliases. It does not approve alias migration, alias removal, schema/data changes, import exceptions above 100
+      questions, or API output regression.
+    targetClosureItem: legacy question_type alias API and snapshot compatibility inventory
+    behaviorBoundary: paper::legacy_question_type_alias_inventory
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-paper-legacy-alias-inventory-package.md
+      - docs/05-execution-logs/evidence/2026-06-21-paper-legacy-alias-inventory-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-paper-legacy-alias-inventory-package.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-paper-legacy-alias-inventory-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-paper-legacy-alias-inventory-package.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-paper-legacy-alias-inventory-package.md
+    retryCount: 0
+  - id: close-question-material-binding-experience
+    title: Close question material binding experience
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-6; admin-experience-gap-sequencing
+    dependencies:
+      - paper-legacy-alias-inventory-package
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk content_admin question/material binding contract, service, validator, UI
+      feedback, and focused unit tests only. Schema/database/runtime proof remains blocked.
+    targetClosureItem: question material binding experience
+    behaviorBoundary: content_admin::question_material_binding_experience
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-question-material-binding-experience.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-question-material-binding-experience.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-question-material-binding-experience.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-material-binding-experience.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-material-binding-experience.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-material-binding-experience.md
+    retryCount: 0
+  - id: close-question-reference-and-material-lock-surface
+    title: Close question reference and material lock surface
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-7; admin-experience-gap-sequencing
+    dependencies:
+      - close-question-material-binding-experience
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk question reference and material lock surface source/test work. It must not
+      change schema, perform database writes, or introduce runtime locking backed by unapproved persistence.
+    targetClosureItem: question reference and material lock surface
+    behaviorBoundary: content_admin::question_reference_material_lock_surface
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-question-reference-and-material-lock-surface.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-question-reference-and-material-lock-surface.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-question-reference-and-material-lock-surface.md
+    retryCount: 0
+  - id: close-kn-recommendation-review-experience
+    title: Close knowledge_node recommendation review experience
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-8; admin-experience-gap-sequencing
+    dependencies:
+      - close-question-reference-and-material-lock-surface
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits local review experience for kn_recommendation without real Provider calls,
+      Provider payload exposure, raw generated content evidence, env/secret access, dependency changes, or database
+      state changes.
+    targetClosureItem: kn_recommendation review experience without Provider execution
+    behaviorBoundary: content_admin::kn_recommendation_review_experience
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-kn-recommendation-review-experience.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-kn-recommendation-review-experience.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-kn-recommendation-review-experience.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-kn-recommendation-review-experience.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-kn-recommendation-review-experience.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-kn-recommendation-review-experience.md
+    retryCount: 0
+  - id: close-redeem-code-detail-contract
+    title: Close redeem_code detail contract
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-9; admin-experience-gap-sequencing
+    dependencies:
+      - close-kn-recommendation-review-experience
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits redacted redeem_code detail DTO/route contract using publicId and focused unit tests.
+      Plaintext redeem_code, internal numeric ids, secrets, database URLs, raw rows, and publicId inventories must not
+      appear in logs or evidence.
+    targetClosureItem: redacted redeem_code detail DTO and route contract
+    behaviorBoundary: ops_admin::redeem_code_detail_contract
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/app/api/v1/redeem-codes/**
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-detail-contract.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-contract.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-contract.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-detail-contract.md
+    retryCount: 0
+  - id: close-redeem-code-detail-ui
+    title: Close redeem_code detail UI
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-10; admin-experience-gap-sequencing
+    dependencies:
+      - close-redeem-code-detail-contract
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk admin UI for redacted redeem_code detail using the contract from the prior
+      task. Plaintext redeem_code and internal numeric ids must not be rendered or captured in evidence.
+    targetClosureItem: redeem_code detail UI
+    behaviorBoundary: ops_admin::redeem_code_detail_ui
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-detail-ui.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-ui.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-ui.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-ui.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-detail-ui.md
+    retryCount: 0
+  - id: close-redeem-code-audit-redaction
+    title: Close redeem_code audit redaction
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-11; admin-experience-gap-sequencing
+    dependencies:
+      - close-redeem-code-detail-ui
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits audit_log and ai_call_log redaction contract/source/test work for redeem_code
+      references. No plaintext redeem_code, Provider payload, raw prompt, internal id, secret, token, database URL, or
+      raw DB row may be exposed.
+    targetClosureItem: redeem_code audit redaction
+    behaviorBoundary: ops_admin::redeem_code_audit_redaction
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-audit-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-audit-redaction.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-audit-redaction.md
+    retryCount: 0
+  - id: close-organization-detail-management
+    title: Close organization detail management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-12; admin-experience-gap-sequencing
+    dependencies:
+      - close-redeem-code-audit-redaction
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk organization detail management contract/service/validator/UI and focused
+      unit tests. org_auth authorization model runtime code, schema/database changes, and runtime proof remain blocked.
+    targetClosureItem: organization detail management
+    behaviorBoundary: ops_admin::organization_detail_management
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-organization-detail-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-organization-detail-management.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-organization-detail-management.md
+    retryCount: 0
+  - id: close-employee-import-management
+    title: Close employee import management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-13; admin-experience-gap-sequencing
+    dependencies:
+      - close-organization-detail-management
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk employee import management contracts, validators, services, UI feedback,
+      and focused unit tests. It must not perform real file upload storage, database writes, schema/migration, dev-server,
+      browser/e2e, dependency, Provider/env, deploy, PR, force-push, payment, or external service work.
+    targetClosureItem: employee import management
+    behaviorBoundary: ops_admin::employee_import_management
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities: *low_risk_capabilities
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-import-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-import-management.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-employee-import-management.md
+    retryCount: 0
+  - id: close-employee-transfer-unbind-management
+    title: Close employee transfer unbind management
+    phase: low-risk-audit-closeout-implementation-2026-06-21
+    sourceStory: current-user-low-risk-task-14; admin-experience-gap-sequencing
+    dependencies:
+      - close-employee-import-management
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Current user approval permits low-risk employee transfer and unbind management contract/service/validator/UI and
+      focused unit tests. It must not implement org_auth runtime model changes, schema/database writes, dev-server,
+      browser/e2e, dependency, Provider/env, deploy, PR, force-push, payment, external service, or Cost Calibration Gate.
+    targetClosureItem: employee transfer and unbind management
+    behaviorBoundary: ops_admin::employee_transfer_unbind_management
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: focused_unit_lint_typecheck_docs_gate
+    queueSelectionMode: user_directed_serial_low_risk_batch
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    plannedFiles:
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/features/**
+      - src/components/admin/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-21-close-employee-transfer-unbind-management.md
+      - docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
+      - docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
+    blockedFiles: *low_risk_blocked_files
+    capabilities:
+      <<: *low_risk_capabilities
+      orgAuthRuntimeChange: blocked
+    closeoutPolicy: *low_risk_closeout_policy
+    validationCommands: *low_risk_validation_commands
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-employee-transfer-unbind-management.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-employee-transfer-unbind-management.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-21-close-employee-transfer-unbind-management.md
+    retryCount: 0
