@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
-updatedAt: "2026-06-22T08:39:23-07:00"
+currentPhase: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+updatedAt: "2026-06-22T08:42:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 60b529efaac7e101ecc6c3df31afdadb75ce872c
-  lastKnownOriginMasterSha: 60b529efaac7e101ecc6c3df31afdadb75ce872c
+  lastKnownMasterSha: 80ff830c6845ffb15d674623ca00570577b76bfd
+  lastKnownOriginMasterSha: 80ff830c6845ffb15d674623ca00570577b76bfd
 currentTask:
-  id: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+  id: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
   status: closed
-  result: pass_ops_governance_redeem_code_redacted_reference_historical_reconcile
-  claimedAt: "2026-06-22T08:39:00-07:00"
-  validatedAt: "2026-06-22T08:39:23-07:00"
-  closedAt: "2026-06-22T08:39:23-07:00"
+  result: pass_ops_governance_log_retention_redaction_contracts_historical_reconcile
+  claimedAt: "2026-06-22T08:42:00-07:00"
+  validatedAt: "2026-06-22T08:42:50-07:00"
+  closedAt: "2026-06-22T08:42:50-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-  branch: codex/batch-281-ops-governance-redeem-code-redacted
+  planPath: docs/05-execution-logs/task-plans/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  branch: codex/batch-282-ops-governance-log-retention-redaction
   commitSha: null
   prUrl: null
   retryCount: 0

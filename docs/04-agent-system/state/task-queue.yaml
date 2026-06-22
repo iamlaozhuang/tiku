@@ -6801,7 +6801,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     validationCommands:
@@ -6809,11 +6809,17 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     planPath: docs/05-execution-logs/task-plans/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
     evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    status: pending
+    status: closed
+    result: pass_ops_governance_log_retention_redaction_contracts_historical_reconcile
+    claimedAt: "2026-06-22T08:42:00-07:00"
+    validatedAt: "2026-06-22T08:42:50-07:00"
+    closedAt: "2026-06-22T08:42:50-07:00"
+    branch: codex/batch-282-ops-governance-log-retention-redaction
     retryCount: 0
   - id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
     title: Module Run v2 ops-governance-and-retention implementation seed

@@ -29,10 +29,16 @@
 - Historical implementation reconcile:
   - Review existing ops-governance log retention/redaction contracts and focused tests before touching source.
   - Confirm retention behavior is represented as contract metadata only and does not delete, purge, recover, or expose raw log payloads.
-  - Do not change source if current implementation already satisfies the task.
+  - Existing implementation satisfies the task; no source or test edits were required.
 - Focused unit command:
-  - Replace the placeholder with an explicit scoped unit command before task closeout.
+  - `npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts`
 - Run `npm.cmd run lint`.
 - Run `npm.cmd run typecheck`.
 - Run `git diff --check`.
 - Run Module Run v2 precommit, closeout, and prepush gates before commit, merge, push, and cleanup.
+
+## Closeout Notes
+
+- Reconciled against historical evidence `batch-262-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda`.
+- Existing service emits local contract metadata for retention days, redacted audit/AI call log references, blocked raw viewers, blocked hard delete, and blocked Cost Calibration Gate.
+- No raw `audit_log` or `ai_call_log` rows, provider payloads, prompts, row data, destructive retention/recovery/purge operations, schema/database work, dependency changes, or external services were touched.
