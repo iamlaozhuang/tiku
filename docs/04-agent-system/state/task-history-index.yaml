@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: local-experience-closure-readiness-audit-2026-06-22
-  updatedAt: "2026-06-22T09:32:55-07:00"
+  updatedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  updatedAt: "2026-06-22T10:40:41-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -12046,3 +12046,73 @@ entries:
     commitSha: null
     completedAt: "2026-06-22"
     archivedByTask: local-experience-closure-readiness-audit-2026-06-22
+  - id: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    phase: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    phase: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    phase: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: module-run-v2-personal-ai-local-transport-contract-planning
+    phase: module-run-v2-personal-ai-local-transport-contract-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    phase: module-run-v2-personal-ai-local-ui-browser-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: module-run-v2-cross-role-local-flow-planning
+    phase: cross-role-local-flow-bridge-validation-2026-06-22
+    status: closed
+    taskKind: local_experience_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22
+  - id: queue-hygiene-archive-followup-2026-06-22
+    phase: queue-hygiene-archive-followup-2026-06-22
+    status: closed
+    taskKind: docs_state_queue_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: queue-hygiene-archive-followup-2-2026-06-22

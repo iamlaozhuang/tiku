@@ -18,6 +18,7 @@ function Write-FixtureFiles {
     New-Item -ItemType Directory -Path $Root -Force | Out-Null
     $projectStatePath = Join-Path -Path $Root -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $Root -ChildPath "task-queue.yaml"
+    $historyIndexPath = Join-Path -Path $Root -ChildPath "task-history-index.yaml"
     $matrixPath = Join-Path -Path $Root -ChildPath "matrix.yaml"
 
     @"
@@ -37,6 +38,11 @@ tasks:
   - id: module-run-v2-personal-ai-local-ui-browser-planning
     status: closed
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+entries: []
+"@ | Set-Content -LiteralPath $historyIndexPath -Encoding UTF8
 
     @"
 schemaVersion: 2
@@ -82,6 +88,7 @@ Cost Calibration Gate remains blocked
     return [pscustomobject]@{
         ProjectStatePath = $projectStatePath
         QueuePath        = $queuePath
+        HistoryIndexPath = $historyIndexPath
         MatrixPath       = $matrixPath
     }
 }
@@ -101,6 +108,7 @@ try {
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
+            -HistoryIndexPath $fixture.HistoryIndexPath `
             -MatrixPath $fixture.MatrixPath
     )
 
@@ -122,17 +130,41 @@ try {
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
+            -HistoryIndexPath $fixture.HistoryIndexPath `
             -MatrixPath $fixture.MatrixPath
     )
     Assert-Contains -Output $closedOutput -Pattern "^bridgeProposalDecision: no_bridge_candidate$"
 
+    @"
+schemaVersion: 1
+tasks:
+  - id: closed-current
+    status: closed
+  - id: module-run-v2-personal-ai-local-transport-contract-planning
+    status: closed
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    status: closed
+"@ | Set-Content -LiteralPath $fixture.QueuePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+entries:
+  - id: module-run-v2-cross-role-local-flow-planning
+    status: closed
+"@ | Set-Content -LiteralPath $fixture.HistoryIndexPath -Encoding UTF8
+
+    $historyOnlyOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $fixture.ProjectStatePath `
+            -QueuePath $fixture.QueuePath `
+            -HistoryIndexPath $fixture.HistoryIndexPath `
+            -MatrixPath $fixture.MatrixPath
+    )
+    Assert-Contains -Output $historyOnlyOutput -Pattern "^bridgeProposalDecision: no_bridge_candidate$"
+
     $afterMatrixHash = (Get-FileHash -LiteralPath $fixture.MatrixPath -Algorithm SHA256).Hash
     if ($beforeMatrixHash -ne $afterMatrixHash) {
         throw "Local experience bridge proposal smoke expected matrix read-only behavior."
-    }
-    $afterQueueHash = (Get-FileHash -LiteralPath $fixture.QueuePath -Algorithm SHA256).Hash
-    if ($beforeQueueHash -eq $afterQueueHash) {
-        throw "Smoke fixture setup expected queue hash to change only after explicit closed-candidate append."
     }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {

@@ -9,7 +9,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$HistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml"
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,6 +55,28 @@ function Remove-ValueQuotes {
 }
 
 function Get-TaskStatusMap {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $map = @{}
+    $currentId = ""
+    foreach ($line in $Lines) {
+        if ($line -match "^\s+- id:\s+(.+?)\s*$") {
+            $currentId = Remove-ValueQuotes -Value $Matches[1]
+            if (-not $map.ContainsKey($currentId)) {
+                $map[$currentId] = ""
+            }
+            continue
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($currentId) -and $line -match "^\s+status:\s*(.+?)\s*$") {
+            $map[$currentId] = Remove-ValueQuotes -Value $Matches[1]
+        }
+    }
+
+    return $map
+}
+
+function Get-HistoryTaskStatusMap {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
     $map = @{}
@@ -196,6 +222,10 @@ try {
     }
 
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
+    $historyLines = @()
+    if (Test-Path -LiteralPath $HistoryIndexPath) {
+        $historyLines = @(Get-Content -LiteralPath $HistoryIndexPath)
+    }
     $matrixLines = @(Get-Content -LiteralPath $MatrixPath)
     $matrixContent = $matrixLines -join "`n"
 
@@ -207,6 +237,12 @@ try {
     }
 
     $taskStatusMap = Get-TaskStatusMap -Lines $queueLines
+    $historyStatusMap = Get-HistoryTaskStatusMap -Lines $historyLines
+    foreach ($historyId in $historyStatusMap.Keys) {
+        if (-not $taskStatusMap.ContainsKey($historyId)) {
+            $taskStatusMap[$historyId] = $historyStatusMap[$historyId]
+        }
+    }
     $bridgePlan = Get-BridgePlan -Lines $matrixLines
     $candidateCount = @($bridgePlan.Candidates).Count
 

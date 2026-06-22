@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 lowRiskTaskTemplates:
   blockedFiles: &low_risk_blocked_files
     - .env*
@@ -299,7 +299,7 @@ tasks:
       prompt/provider payload exposure, formal content adoption code, package/dependency changes, env/secret changes,
       schema/migration/database work, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external
       service, and Cost Calibration Gate remain blocked.
-    targetClosureItem: content_admin AI 出题 and AI 组卷 product scope decision
+    targetClosureItem: content_admin AI 鍑洪 and AI 缁勫嵎 product scope decision
     behaviorBoundary: content_admin::ai_generation_scope_decision
     executionProfile: docs_decision
     evidenceMode: full
@@ -787,7 +787,7 @@ tasks:
       - decide-content-admin-ai-generation-scope
     taskPlanPolicy: required_before_edit
     humanApprovalBoundary: >-
-      User selected option A for content_admin AI 出题 and AI 组卷: first-release direction is reviewable drafts or
+      User selected option A for content_admin AI 鍑洪 and AI 缁勫嵎: first-release direction is reviewable drafts or
       suggestions only, with mandatory human confirmation before formal question, paper, publish, or mock_exam use.
       This task may record the decision in docs/state only. No real Provider calls, no prompt/provider payload
       exposure, no raw generated AI content evidence, no model output persistence, no formal content writes, no source
@@ -2075,7 +2075,7 @@ tasks:
     validationCommands:
       - git diff --check
       - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
-      - rg -n "TODO|TBD|占位|以后补" docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - rg -n "TODO|TBD|鍗犱綅|浠ュ悗琛? docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
     redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, private answer text, or full paper content
@@ -3188,1036 +3188,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
-    title: Module Run v2 ops-governance-and-retention implementation seed
-    phase: batch-281-ops-governance-and-retention-redeem-code-redacted-reference
-    sourceStory: module-run-v2-auto-seed-bridge
-    dependencies:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    autoDriveLocalImplementationApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
-    seededImplementationTask: true
-    seededExecutionModule: ops-governance-and-retention
-    targetClosureItem: redeem_code redacted reference
-    behaviorBoundary: ops-governance-and-retention::redeem_code redacted reference
-    requirementRefs:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    useCases:
-      - ops-governance-and-retention local implementation validates redeem_code redacted reference
-    acceptanceScenarios:
-      - redeem_code redacted reference passes L6-local-implementation without provider/env/schema/deploy/dependency changes
-    nonGoals:
-      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
-    validationProfile: L6-local-implementation
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: local_unit
-    queueSelectionMode: ready_set
-    localExperienceClosureGate: planned
-    localFullLoopGate: L6
-    blockedRemainder:
-      - none
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: true
-    autodrivePolicy:
-      mode: guarded_serial
-      allowedAgentActions:
-        - claim_task
-        - continue_task
-        - scaffold_task_plan
-        - run_validation
-        - write_evidence
-      blockedAgentActions:
-        - merge
-        - push
-        - pr
-        - deploy
-        - dependency_change
-        - schema_migration
-        - env_secret
-        - provider_call
-        - cost_calibration_gate
-      maxAutonomousSteps: 5
-      stopOn:
-        - hard_block
-        - blocked_gate
-        - validation_failure
-        - out_of_scope_change
-        - dirty_unknown_worktree
-        - active_owner_present
-    capabilities:
-      localDockerDatabase: task_approval_required
-      destructiveLocalDockerDatabase: blocked_without_task_approval
-      projectResourceRead: task_approval_required
-      providerKey: env_destination_confirmation_required
-      providerCall: blocked_without_task_approval
-      schemaMigration: blocked_without_task_approval
-      costCalibrationGate: blocked
-    registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
-      redactionRequired: true
-    taskKind: implementation
-    moduleRunVersion: 2
-    allowedFiles:
-      - src/server/models/**
-      - src/server/contracts/**
-      - src/server/validators/**
-      - src/server/services/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-    riskTypes:
-      - local_implementation
-      - local_validation
-      - evidence_redaction
-      - automation_policy
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test:unit -- src/server/services/ops-governance-redeem-code-redacted-reference-service.test.ts
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - npm.cmd run test:unit -- src/server/services/ops-governance-redeem-code-redacted-reference-service.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-281-ops-governance-and-retention-redeem-code-redacted-reference
-    planPath: docs/05-execution-logs/task-plans/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-    evidencePath: docs/05-execution-logs/evidence/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-281-ops-governance-and-retention-redeem-code-redacted-reference.md
-    status: closed
-    result: pass_ops_governance_redeem_code_redacted_reference_historical_reconcile
-    claimedAt: "2026-06-22T08:39:00-07:00"
-    validatedAt: "2026-06-22T08:39:23-07:00"
-    closedAt: "2026-06-22T08:39:23-07:00"
-    branch: codex/batch-281-ops-governance-redeem-code-redacted
-    retryCount: 0
-  - id: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-    title: Module Run v2 ops-governance-and-retention implementation seed
-    phase: batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-    sourceStory: module-run-v2-auto-seed-bridge
-    dependencies:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    autoDriveLocalImplementationApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
-    seededImplementationTask: true
-    seededExecutionModule: ops-governance-and-retention
-    targetClosureItem: audit_log and ai_call_log retention and redaction contracts
-    behaviorBoundary: ops-governance-and-retention::audit_log and ai_call_log retention and redaction contracts
-    requirementRefs:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    useCases:
-      - ops-governance-and-retention local implementation validates audit_log and ai_call_log retention and redaction contracts
-    acceptanceScenarios:
-      - audit_log and ai_call_log retention and redaction contracts passes L6-local-implementation without provider/env/schema/deploy/dependency changes
-    nonGoals:
-      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
-    validationProfile: L6-local-implementation
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: local_unit
-    queueSelectionMode: ready_set
-    localExperienceClosureGate: planned
-    localFullLoopGate: L6
-    blockedRemainder:
-      - none
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: true
-    autodrivePolicy:
-      mode: guarded_serial
-      allowedAgentActions:
-        - claim_task
-        - continue_task
-        - scaffold_task_plan
-        - run_validation
-        - write_evidence
-      blockedAgentActions:
-        - merge
-        - push
-        - pr
-        - deploy
-        - dependency_change
-        - schema_migration
-        - env_secret
-        - provider_call
-        - cost_calibration_gate
-      maxAutonomousSteps: 5
-      stopOn:
-        - hard_block
-        - blocked_gate
-        - validation_failure
-        - out_of_scope_change
-        - dirty_unknown_worktree
-        - active_owner_present
-    capabilities:
-      localDockerDatabase: task_approval_required
-      destructiveLocalDockerDatabase: blocked_without_task_approval
-      projectResourceRead: task_approval_required
-      providerKey: env_destination_confirmation_required
-      providerCall: blocked_without_task_approval
-      schemaMigration: blocked_without_task_approval
-      costCalibrationGate: blocked
-    registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
-      redactionRequired: true
-    taskKind: implementation
-    moduleRunVersion: 2
-    allowedFiles:
-      - src/server/models/**
-      - src/server/contracts/**
-      - src/server/validators/**
-      - src/server/services/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-    riskTypes:
-      - local_implementation
-      - local_validation
-      - evidence_redaction
-      - automation_policy
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
-    planPath: docs/05-execution-logs/task-plans/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    evidencePath: docs/05-execution-logs/evidence/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    status: closed
-    result: pass_ops_governance_log_retention_redaction_contracts_historical_reconcile
-    claimedAt: "2026-06-22T08:42:00-07:00"
-    validatedAt: "2026-06-22T08:42:50-07:00"
-    closedAt: "2026-06-22T08:42:50-07:00"
-    branch: codex/batch-282-ops-governance-log-retention-redaction
-    retryCount: 0
-  - id: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    title: Module Run v2 ops-governance-and-retention implementation seed
-    phase: batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    sourceStory: module-run-v2-auto-seed-bridge
-    dependencies:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    autoDriveLocalImplementationApproval: >-
-      autoDriveLocalImplementationApproval: User approved request_auto_seed_approval:ops-governance-and-retention on 2026-06-22, only after organization-analytics completed, merged to master, pushed to origin/master, and short branches cleaned, for guarded seed and serial low-risk local implementation closeout. standingUnattendedLocalCloseoutApproval: approved for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation or historical implementation reconcile, focused local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. No Provider/model calls, env/secret access or changes, schema/migration/seed/database work, dependency/package/lockfile changes, dev-server/browser/e2e runtime, deploy, PR, force-push, payment, external service, org_auth runtime changes, raw prompt/provider payload/raw generated content/raw employee answer/full paper content/plaintext redeem_code/token/db URL exposure, actual retention deletion/recovery/purge/destructive data operation, quota enforcement behavior or new permission rule, or Cost Calibration Gate execution.
-    seededByTask: phase-75-advanced-retention-log-governance-implementation-planning
-    seededImplementationTask: true
-    seededExecutionModule: ops-governance-and-retention
-    targetClosureItem: local recovery and expired-hidden boundary contracts
-    behaviorBoundary: ops-governance-and-retention::local recovery and expired-hidden boundary contracts
-    requirementRefs:
-      - phase-75-advanced-retention-log-governance-implementation-planning
-    useCases:
-      - ops-governance-and-retention local implementation validates local recovery and expired-hidden boundary contracts
-    acceptanceScenarios:
-      - local recovery and expired-hidden boundary contracts passes L6-local-implementation without provider/env/schema/deploy/dependency changes
-    nonGoals:
-      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
-    validationProfile: L6-local-implementation
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_unit_tdd
-    evidenceMode: full
-    validationPolicy: local_unit
-    queueSelectionMode: ready_set
-    localExperienceClosureGate: planned
-    localFullLoopGate: L6
-    blockedRemainder:
-      - none
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: true
-    autodrivePolicy:
-      mode: guarded_serial
-      allowedAgentActions:
-        - claim_task
-        - continue_task
-        - scaffold_task_plan
-        - run_validation
-        - write_evidence
-      blockedAgentActions:
-        - merge
-        - push
-        - pr
-        - deploy
-        - dependency_change
-        - schema_migration
-        - env_secret
-        - provider_call
-        - cost_calibration_gate
-      maxAutonomousSteps: 5
-      stopOn:
-        - hard_block
-        - blocked_gate
-        - validation_failure
-        - out_of_scope_change
-        - dirty_unknown_worktree
-        - active_owner_present
-    capabilities:
-      localDockerDatabase: task_approval_required
-      destructiveLocalDockerDatabase: blocked_without_task_approval
-      projectResourceRead: task_approval_required
-      providerKey: env_destination_confirmation_required
-      providerCall: blocked_without_task_approval
-      schemaMigration: blocked_without_task_approval
-      costCalibrationGate: blocked
-    registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
-      redactionRequired: true
-    taskKind: implementation
-    moduleRunVersion: 2
-    allowedFiles:
-      - src/server/models/**
-      - src/server/contracts/**
-      - src/server/validators/**
-      - src/server/services/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/**
-      - docs/05-execution-logs/evidence/**
-      - docs/05-execution-logs/audits-reviews/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
-    riskTypes:
-      - local_implementation
-      - local_validation
-      - evidence_redaction
-      - automation_policy
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: advisory_baseline
-        command: npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c -EvidencePath docs\05-execution-logs\evidence\2026-06-22-module-run-v2-auto-seed-ops-governance-and-retention.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
-    planPath: docs/05-execution-logs/task-plans/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    evidencePath: docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-    status: closed
-    result: pass_ops_governance_local_recovery_expired_hidden_boundary_contracts_historical_reconcile
-    claimedAt: "2026-06-22T08:46:00-07:00"
-    validatedAt: "2026-06-22T08:46:10-07:00"
-    closedAt: "2026-06-22T08:46:10-07:00"
-    branch: codex/batch-283-ops-governance-local-recovery-boundary
-    retryCount: 0
-
-  - id: module-run-v2-personal-ai-local-transport-contract-planning
-    title: Personal AI local transport contract planning reconciliation
-    phase: module-run-v2-personal-ai-local-transport-contract-planning
-    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
-    dependencies:
-      - local-experience-acceptance-bridge-readiness
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      localExperienceAcceptanceBridgeApproved: current 2026-06-22 08:53 user prompt approves
-      `module-run-v2-personal-ai-local-transport-contract-planning` only. Scope is limited to docs/state
-      reconciliation and read-only focused route-service validation because historical evidence already closes the L4
-      route bridge. This does not authorize product runtime edits, UI/browser/e2e, schema/migration, dependency/package
-      or lockfile changes, env/secret, provider/model, staging/prod/cloud/deploy/payment, external-service, PR,
-      force-push, or Cost Calibration Gate work.
-    localExperienceAcceptanceBridgeApproved: >-
-      Approved for planning and reconciliation of the personal-learning-ai-experience L4
-      local_api_or_server_action_contract bridge only.
-    targetClosureItem: personal-learning-ai local API or Server Action transport contract planning
-    behaviorBoundary: personal-learning-ai::local_api_or_server_action_contract_planning_reconciliation
-    targetExperienceChain: personal-learning-ai-experience
-    targetBridgeStep: local_api_or_server_action_contract
-    localFullLoopGate: L4
-    acceptanceScenarios:
-      - Current source contains the personal AI generation request API route, route service, and focused route-service test.
-      - Focused route-service unit validation passes without provider/model calls, env/secret access, schema/migration, dependency changes, UI/e2e, browser, or dev server execution.
-      - Active queue contains a closed L4 recovery marker so bridge proposal diagnostics can advance past the archived terminal candidate.
-    nonGoals:
-      - product source edits, route implementation, UI/browser/e2e work, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
-    validationProfile: docs_state_lite
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: docs_state_lite
-    evidenceMode: lite
-    validationPolicy: docs_state
-    queueSelectionMode: user_directed_acceptance_bridge
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    taskKind: docs_only
-    moduleRunVersion: 2
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - src/app/api/v1/personal-ai-generation-requests/route.ts
-      - src/server/services/personal-ai-generation-request-route.ts
-      - src/server/services/personal-ai-generation-request-route.test.ts
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-TikuNextAction.ps1
-      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - e2e/**
-      - tests/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    riskTypes:
-      - docs_state
-      - evidence_redaction
-      - local_experience_acceptance_bridge_reconciliation
-      - read_only_runtime_contract_validation
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning -SkipRemoteAheadCheck
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-transport-contract-planning.md
-    status: closed
-    result: pass_l4_transport_bridge_approval_reconciliation_current_approval
-    claimedAt: "2026-06-22T08:53:52-07:00"
-    validatedAt: "2026-06-22T08:53:52-07:00"
-    closedAt: "2026-06-22T08:53:52-07:00"
-    branch: codex/personal-ai-local-transport-bridge-approval-20260622
-    retryCount: 0
-
-  - id: module-run-v2-personal-ai-local-ui-browser-planning
-    title: Personal AI local UI browser bridge approval reconciliation
-    phase: module-run-v2-personal-ai-local-ui-browser-planning
-    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
-    dependencies:
-      - module-run-v2-personal-ai-local-transport-contract-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      localExperienceAcceptanceBridgeApproved: current 2026-06-22 user direction says to first process the currently
-      recommended `module-run-v2-personal-ai-local-ui-browser-planning` approval. Scope is limited to docs/state
-      reconciliation, read-only inventory of existing student personal AI UI/browser coverage, and focused unit
-      validation because historical evidence already covers the L5 local UI/browser planning candidate. This does not
-      authorize product runtime edits, browser/e2e/dev-server execution, e2e spec edits, Playwright auth/session repair,
-      schema/migration, dependency/package or lockfile changes, env/secret, provider/model, staging/prod/cloud/deploy/
-      payment, external-service, PR, force-push, or Cost Calibration Gate work.
-    localExperienceAcceptanceBridgeApproved: >-
-      Approved for planning and reconciliation of the personal-learning-ai-experience L5 `local_ui_browser_entry`
-      bridge only. Source, test, and e2e surfaces are read-only for this packet; any browser/e2e/dev-server need remains
-      blocked and must split to a fresh approval task.
-    targetClosureItem: personal-learning-ai local UI/browser entry planning
-    behaviorBoundary: personal-learning-ai::local_ui_browser_entry_planning_reconciliation
-    targetExperienceChain: personal-learning-ai-experience
-    targetBridgeStep: local_ui_browser_entry
-    localFullLoopGate: L5
-    acceptanceScenarios:
-      - Current source and tests contain the student personal AI generation page, local browser experience service unit coverage, and existing local Playwright spec inventory.
-      - Focused local unit validation passes without provider/model calls, env/secret access, schema/migration, dependency changes, browser/e2e, or dev-server execution.
-      - Active queue contains a closed L5 recovery marker so bridge proposal diagnostics can advance past the archived terminal candidate.
-    nonGoals:
-      - product source edits, UI implementation, route implementation, browser/dev-server/Playwright/e2e execution, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
-    validationProfile: docs_state_lite
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: docs_state_lite
-    evidenceMode: lite
-    validationPolicy: docs_state
-    queueSelectionMode: user_directed_acceptance_bridge
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    taskKind: docs_only
-    moduleRunVersion: 2
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/evidence/batch-113-personal-learning-ai-local-ui-browser-planning.md
-      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-flow-validation.md
-      - src/app/(student)/ai-generation/page.tsx
-      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
-      - tests/unit/student-personal-ai-generation-ui.test.ts
-      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
-      - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
-      - e2e/personal-ai-generation-local-request.spec.ts
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-TikuNextAction.ps1
-      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - e2e/**
-      - tests/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    riskTypes:
-      - docs_state
-      - evidence_redaction
-      - local_experience_acceptance_bridge_reconciliation
-      - read_only_ui_browser_inventory
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning -SkipRemoteAheadCheck
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-    status: closed
-    result: pass_l5_ui_browser_bridge_approval_reconciliation_current_approval
-    claimedAt: "2026-06-22T09:02:55-07:00"
-    validatedAt: "2026-06-22T09:02:55-07:00"
-    closedAt: "2026-06-22T09:02:55-07:00"
-    branch: codex/personal-ai-local-ui-browser-bridge-approval-20260622
-    retryCount: 0
-  - id: module-run-v2-cross-role-local-flow-planning
-    title: Cross-role local flow bridge approval and targeted localhost e2e validation
-    phase: cross-role-local-flow-bridge-validation-2026-06-22
-    sourceStory: localExperienceClosureGate.acceptanceBridgePlan
-    dependencies:
-      - module-run-v2-personal-ai-local-ui-browser-planning
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Approved by the current 2026-06-22 user prompt for
-      `module-run-v2-cross-role-local-flow-planning`. This approval is materialized as task-level
-      `localExperienceAcceptanceBridgeApproved` for the L6 `local_role_flow_and_e2e_readiness` bridge only. It allows
-      creating the bounded task packet, task plan/evidence/audit, state sync, read-only inspection of existing
-      role-flow/e2e inventory, focused unit validation, `npm.cmd run test:e2e -- --list`, targeted execution of the
-      named existing localhost-only Playwright specs, lint/typecheck/build/scoped formatting/diff/hardening/readiness
-      gates, local commit, fast-forward merge to master, push to origin/master, and merged short-branch cleanup. It does
-      not authorize product source edits, e2e spec edits, Playwright auth/session repair, headed/debug browser, new e2e
-      specs, full e2e suite execution, manual env/secret read/write/output, direct database access, destructive database
-      operations, schema/drizzle/migration, package/lockfile/dependency, provider/model calls,
-      staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost Calibration Gate work.
-    localExperienceAcceptanceBridgeApproved: >-
-      Approved for the personal-learning-ai-experience L6 `local_role_flow_and_e2e_readiness` bridge validation only.
-      The source, test, and e2e surfaces are read-only for this packet; any repair need becomes a blocked follow-up.
-    targetClosureItem: personal-learning-ai local role-flow and e2e readiness validation
-    behaviorBoundary: personal-learning-ai::local_role_flow_and_e2e_readiness_validation
-    useCases:
-      - Reconcile the current bridge proposal with historical L6 planning and existing role-flow evidence.
-      - Verify cross-role route/session denial, redaction, edition-aware authorization, personal AI request, and
-        organization-training role flow through focused existing local validation.
-      - Keep db-backed, env-backed, broad screenshot, and full-suite e2e work outside this task.
-      - Close the personal-learning-ai local experience bridge so preview release readiness can become the next human
-        planning decision.
-    acceptanceScenarios:
-      - Local capability gate accepts `local_full_flow` and `approved_localhost_only` for this task.
-      - Focused unit validation passes without source, schema, dependency, env, database, or Provider changes.
-      - Targeted existing localhost-only Playwright specs pass or produce redacted blocked evidence without repair.
-      - Closeout evidence records L6 validation and no remaining bridge candidate for the personal-learning-ai chain.
-    nonGoals:
-      - product source edits, unit/e2e spec edits, Playwright auth/session repair, headed/debug browser, new e2e specs, full e2e suite execution, manual env/secret access, direct database access, destructive database operations, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
-    validationProfile: local_full_flow
-    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
-    executionProfile: local_full_flow
-    evidenceMode: full
-    validationPolicy: local_full_flow
-    queueSelectionMode: user_directed_acceptance_bridge
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    taskKind: local_experience_audit
-    moduleRunVersion: 2
-    status: closed
-    result: pass_l6_role_flow_targeted_localhost_validation
-    claimedAt: "2026-06-22T04:42:16-07:00"
-    validatedAt: "2026-06-22T04:48:59-07:00"
-    closedAt: "2026-06-22T04:48:59-07:00"
-    branch: codex/cross-role-local-flow-bridge-20260622
-    capabilities:
-      localFullFlowGate: approved_localhost_only
-      localE2EValidation: approved_local_only_existing_specs
-      browserRuntime: approved_localhost_only
-      devServer: approved_localhost_only
-      productSourceChange: blocked
-      e2eSpecChange: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      costCalibrationGate: blocked
-      forcePush: blocked
-      pr: blocked
-    localFullFlowGate: approved_localhost_only
-    localE2EValidation: approved_local_only_existing_specs
-    localE2ESmokeTier: targeted_existing_localhost_specs
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/execution-profiles.yaml
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/sop/local-first-validation-governance.md
-      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
-      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
-      - docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
-      - docs/05-execution-logs/evidence/2026-06-20-module-run-v2-cross-role-local-flow-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-module-run-v2-personal-ai-local-ui-browser-planning.md
-      - playwright.config.ts
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/admin-role-denial-browser.spec.ts
-      - e2e/edition-aware-authorization-local-flow.spec.ts
-      - e2e/personal-ai-generation-local-request.spec.ts
-      - e2e/organization-training-local-full-flow.spec.ts
-      - tests/unit/auth/session-personal-auth-boundary.test.ts
-      - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
-      - tests/unit/student-personal-ai-generation-ui.test.ts
-      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-TikuNextAction.ps1
-      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
-      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
-      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
-      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
-      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - e2e/**
-      - tests/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    blockedGates:
-      - product runtime source edits
-      - e2e spec edits or Playwright auth/session repair
-      - headed/debug browser
-      - new e2e specs
-      - full e2e suite execution
-      - manual env/secret reads or writes
-      - direct database access or destructive database operation
-      - schema/drizzle/migration changes
-      - database migration execution
-      - provider/model calls or provider configuration
-      - dependency changes
-      - staging/prod/cloud/deploy/payment/external-service
-      - PR
-      - force push
-      - Cost Calibration Gate
-    riskTypes:
-      - local_full_flow
-      - evidence_redaction
-      - local_e2e_runtime_validation
-      - role_boundary
-      - targeted_existing_specs
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId module-run-v2-cross-role-local-flow-planning -Capability localFullFlowGate -Intent use_capability
-      - phase: post_edit
-        command: npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- --list
-      - phase: post_edit
-        command: npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/admin-role-denial-browser.spec.ts e2e/edition-aware-authorization-local-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: npm.cmd run build
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning -SkipRemoteAheadCheck
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId module-run-v2-cross-role-local-flow-planning -Capability localFullFlowGate -Intent use_capability
-      - npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
-      - npm.cmd run test:e2e -- --list
-      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts e2e/admin-role-denial-browser.spec.ts e2e/edition-aware-authorization-local-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/organization-training-local-full-flow.spec.ts
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - npm.cmd run build
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-cross-role-local-flow-planning -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
-    retryCount: 0
-  - id: queue-hygiene-archive-followup-2026-06-22
-    title: Queue hygiene archive follow-up after local bridge closeout
-    phase: queue-hygiene-archive-followup-2026-06-22
-    sourceStory: user-request-2026-06-22-serial-recommendation-queue-hygiene-archive-followup
-    dependencies:
-      - module-run-v2-personal-ai-local-ui-browser-planning
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User requested queue hygiene / archive follow-up after processing the current L5 bridge approval, to prevent
-      archived terminal tasks from repeatedly blocking bridge proposal diagnostics. This task may update docs/state,
-      move terminal active queue task blocks to the June archive, update task-history-index.yaml, create plan/evidence/
-      audit records, commit locally, fast-forward merge to master, push origin/master, and delete the merged short
-      branch. It must not modify product source, tests, package files, lockfiles, schema, migrations, scripts,
-      env/secret files, Provider configuration, database state, e2e/browser/dev-server surfaces, deploy, PR, force-push,
-      payment, external services, org_auth runtime, employee answer runtime, raw answer content, full paper content,
-      or Cost Calibration Gate execution.
-    targetClosureItem: terminal active queue archive follow-up
-    behaviorBoundary: agent_system::queue_hygiene_archive_followup
-    executionProfile: docs_state_queue_archive
-    evidenceMode: full
-    validationPolicy: docs_state_validation_lint_typecheck
-    queueSelectionMode: user_directed_queue_hygiene_archive_followup
-    taskKind: docs_state_queue_archive
-    moduleRunVersion: 2
-    status: closed
-    result: pass_queue_hygiene_archive_followup
-    claimedAt: "2026-06-22T09:14:17-07:00"
-    validatedAt: "2026-06-22T09:14:17-07:00"
-    closedAt: "2026-06-22T09:14:17-07:00"
-    branch: codex/queue-hygiene-archive-followup-20260622
-    archivedTaskCount: 23
-    activeQueueNonTerminalCountAfter: 43
-    activeQueueTerminalCountAfter: 8
-    terminalRecoveryWindow: 8
-    archiveCandidateCountAfter: 0
-    displacedRecoveryWindowArchivedTask: batch-279-organization-analytics-audit-log-redacted-reference
-    activeBridgeRecoveryMarkersRetained:
-      - module-run-v2-personal-ai-local-transport-contract-planning
-      - module-run-v2-personal-ai-local-ui-browser-planning
-      - module-run-v2-cross-role-local-flow-planning
-    capabilities:
-      docsStateGovernance: approved
-      queueArchiveMaintenance: approved
-      productSourceChange: blocked
-      e2eBrowserDevServer: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      schemaMigration: blocked
-      dependencyIntroduction: blocked
-      deploy: blocked
-      pr: blocked
-      forcePush: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup.md
-      - docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    riskTypes:
-      - docs_state
-      - queue_archive_maintenance
-      - evidence_redaction
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup.md docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup.md docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId queue-hygiene-archive-followup-2026-06-22
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId queue-hygiene-archive-followup-2026-06-22
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId queue-hygiene-archive-followup-2026-06-22 -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup.md
-    retryCount: 0
   - id: local-experience-closure-readiness-audit-2026-06-22
     title: Local Experience Closure readiness audit by experience chain
     phase: local-experience-closure-readiness-audit-2026-06-22
@@ -5062,4 +4032,113 @@ tasks:
     validatedAt: "2026-06-22T10:30:33-07:00"
     closedAt: "2026-06-22T10:30:33-07:00"
     branch: codex/module-run-v2-total-closeout-recheck-20260622
+    retryCount: 0
+
+  - id: queue-hygiene-archive-followup-2-2026-06-22
+    title: Queue hygiene archive follow-up 2
+    phase: queue-hygiene-archive-followup-2-2026-06-22
+    sourceStory: user-request-2026-06-22-queue-hygiene-local-experience-preview-serial-order
+    taskKind: mechanism_docs_state_queue_archive
+    moduleRunVersion: 2
+    executionProfile: mechanism_docs_state_queue_archive
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_queue_hygiene_archive_followup
+    targetClosureItem: terminal active queue archive follow-up with history-aware bridge diagnostic
+    behaviorBoundary: agent_system::queue_hygiene_archive_followup_history_aware_bridge
+    humanApproval: >-
+      User requested first doing an independent queue hygiene archive follow-up to process the current six terminal
+      archive candidates, then entering Local Experience Closure readiness/boundary audit only, then returning to the
+      preview owner acceptance mainline with Web-only, Provider off, synthetic data, AP-01 through AP-11 gates, and no
+      preview ready claim. This task stays in queue/archive/history/diagnostic mechanism scope and does not authorize
+      high-risk gates.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    allowedFiles:
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state
+      - mechanism_diagnostic
+      - queue_archive_maintenance
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1 docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup-2.md docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup-2.md docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup-2.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1 docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup-2.md docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup-2.md docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup-2.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId queue-hygiene-archive-followup-2-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-queue-hygiene-archive-followup-2.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-queue-hygiene-archive-followup-2.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-queue-hygiene-archive-followup-2.md
+    status: closed
+    result: pass_queue_hygiene_archive_followup_history_aware_bridge
+    claimedAt: "2026-06-22T10:40:41-07:00"
+    validatedAt: "2026-06-22T10:40:41-07:00"
+    closedAt: "2026-06-22T10:40:41-07:00"
+    branch: codex/queue-hygiene-archive-followup-20260622b
     retryCount: 0
