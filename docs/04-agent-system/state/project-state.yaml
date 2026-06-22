@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: low-risk-audit-closeout-implementation-2026-06-21
-updatedAt: "2026-06-21T23:00:59-07:00"
+updatedAt: "2026-06-21T23:26:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 598ef110522cf24257c598c314ad8b8ad4a36e6a
-  lastKnownOriginMasterSha: 598ef110522cf24257c598c314ad8b8ad4a36e6a
+  lastKnownMasterSha: b3cc3ff852852a7003482433382565ad3b0ea587
+  lastKnownOriginMasterSha: b3cc3ff852852a7003482433382565ad3b0ea587
 currentTask:
-  id: active-queue-slimming-2026-06-21-recovery-window
+  id: stopped-automation-hygiene-cleanup-2026-06-21
   status: closed
-  result: pass_docs_state_active_queue_slimming_recovery_window
-  claimedAt: "2026-06-21T23:00:59-07:00"
-  validatedAt: "2026-06-21T23:00:59-07:00"
-  closedAt: "2026-06-21T23:00:59-07:00"
-  sourceStory: current-user-2026-06-21-active-queue-slimming-recovery-window
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-active-queue-slimming-recovery-window.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-active-queue-slimming-recovery-window.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-active-queue-slimming-recovery-window.md
-  branch: codex/active-queue-slimming-recovery-window-20260621
-  commitSha: 598ef110522cf24257c598c314ad8b8ad4a36e6a
+  result: pass_stopped_automation_hygiene_cleanup
+  claimedAt: "2026-06-21T23:26:48-07:00"
+  validatedAt: "2026-06-21T23:26:48-07:00"
+  closedAt: "2026-06-21T23:26:48-07:00"
+  sourceStory: current-user-2026-06-21-approved-stopped-automation-hygiene-cleanup
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-stopped-automation-hygiene-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-stopped-automation-hygiene-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-stopped-automation-hygiene-cleanup.md
+  branch: codex/stopped-automation-hygiene-cleanup-20260621
+  commitSha: b3cc3ff852852a7003482433382565ad3b0ea587
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -4983,6 +4983,26 @@ lastActiveQueueSlimmingRecoveryWindow:
   boundary: >-
     This docs/state queue slimming task moved terminal historical task blocks to the June archive and updated
     task-history-index.yaml so active queue keeps only the recovery window. It did not execute or alter product
+    source, tests, e2e, schema, migration, scripts, env, dependency, Provider, payment, deploy, PR, force-push,
+    destructive DB, staging/prod/cloud database, org_auth runtime behavior, or Cost Calibration Gate state.
+
+lastStoppedAutomationHygieneCleanup:
+  taskId: stopped-automation-hygiene-cleanup-2026-06-21
+  cleanedAt: "2026-06-21T23:26:48-07:00"
+  branch: codex/stopped-automation-hygiene-cleanup-20260621
+  commitSha: b3cc3ff852852a7003482433382565ad3b0ea587
+  decision: pass_stopped_automation_hygiene_cleanup
+  cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+  cleanupMode: script_guarded_cleanup
+  cleanupCandidateKind: expired_active_terminal_registry
+  cleanupRegistryRunId: 7375a744fe17193c45f3bfe67e538d26e1602ed691a18ffdcced58d6d51eae3c
+  displacedArchiveTaskId: close-redeem-code-audit-redaction
+  activeQueueTaskCountAfter: 51
+  activeQueueTerminalCountAfter: 8
+  archiveCandidateCountAfter: 0
+  boundary: >-
+    This task executed stopped automation hygiene cleanup through the approved local script and kept the active
+    terminal recovery window at 8 by archiving the displaced terminal task. It did not execute or alter product
     source, tests, e2e, schema, migration, scripts, env, dependency, Provider, payment, deploy, PR, force-push,
     destructive DB, staging/prod/cloud database, org_auth runtime behavior, or Cost Calibration Gate state.
 
