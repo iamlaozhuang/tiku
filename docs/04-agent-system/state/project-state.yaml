@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
-updatedAt: "2026-06-22T10:05:52-07:00"
+currentPhase: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+updatedAt: "2026-06-22T10:10:04-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
   lastKnownOriginMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
 currentTask:
-  id: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  id: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
   status: closed
-  result: pass_provider_agnostic_ai_task_lifecycle_contract_historical_reconcile
-  claimedAt: "2026-06-22T10:05:52-07:00"
-  validatedAt: "2026-06-22T10:05:52-07:00"
-  closedAt: "2026-06-22T10:05:52-07:00"
+  result: pass_ai_task_request_policy_result_reference_historical_reconcile
+  claimedAt: "2026-06-22T10:10:04-07:00"
+  validatedAt: "2026-06-22T10:10:04-07:00"
+  closedAt: "2026-06-22T10:10:04-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  branch: codex/batch-284-ai-task-lifecycle-reconcile-20260622
+  planPath: docs/05-execution-logs/task-plans/batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  evidencePath: docs/05-execution-logs/evidence/batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  branch: codex/batch-285-ai-task-request-policy-reconcile-20260622
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5820,12 +5820,12 @@ aiTaskAndProviderGuardedImplementationBatch20260622:
     - batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
     - batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
     - batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
-  currentTaskId: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  currentTaskId: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
   currentTaskStatus: closed
-  nextCandidateTaskId: batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+  nextCandidateTaskId: batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
   seedClosedAt: "2026-06-22T09:50:50-07:00"
   seedStatus: closed
-  closedTaskCount: 1
+  closedTaskCount: 2
   approvalBoundary:
     allowed:
       - task_plan_evidence_audit_creation
