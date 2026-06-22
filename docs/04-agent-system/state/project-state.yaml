@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
-  lastKnownOriginMasterSha: aff3f3f069f2fb3c4647b526df28ce578013a66e
+  lastKnownMasterSha: ada5f8d74c472839d51280442057673410f44d84
+  lastKnownOriginMasterSha: ada5f8d74c472839d51280442057673410f44d84
 currentTask:
-  id: batch-249-personal-learning-ai-paper-and-mock-exam-context-selection
+  id: batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and
   status: closed
-  result: pass_existing_context_selection_reconciled_and_revalidated
-  claimedAt: "2026-06-22T01:21:53-07:00"
-  validatedAt: "2026-06-22T01:22:31-07:00"
-  closedAt: "2026-06-22T01:22:31-07:00"
+  result: pass_existing_local_browser_experience_reconciled_and_revalidated
+  claimedAt: "2026-06-22T01:28:55-07:00"
+  validatedAt: "2026-06-22T01:29:34-07:00"
+  closedAt: "2026-06-22T01:29:34-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
-  evidencePath: docs/05-execution-logs/evidence/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-249-personal-learning-ai-paper-and-mock-exam-context-selection.md
-  branch: codex/batch-249-personal-learning-ai-context-selection
-  commitSha: 22d453907e05081523a4cc4e2f3b96cab314792e
+  planPath: docs/05-execution-logs/task-plans/batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+  evidencePath: docs/05-execution-logs/evidence/batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-250-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+  branch: codex/batch-250-personal-learning-ai-local-ui-experience
+  commitSha: ada5f8d74c472839d51280442057673410f44d84
   prUrl: null
   retryCount: 0
   lastFailurePath: null
