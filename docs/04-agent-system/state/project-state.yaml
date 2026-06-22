@@ -500,8 +500,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5ad7b198e045e803eee8ff709a2b52b09dcc50e5
-  lastKnownOriginMasterSha: 5ad7b198e045e803eee8ff709a2b52b09dcc50e5
+  lastKnownMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
+  lastKnownOriginMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
 currentTask:
   id: local-experience-closure-readiness-audit-2026-06-22
   status: closed
@@ -5803,6 +5803,63 @@ opsGovernanceAndRetentionGuardedImplementationBatch20260622:
     operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
     model changes, plaintext redeem_code evidence, raw employee answer evidence, full paper content evidence, or Cost
     Calibration Gate work.
+
+aiTaskAndProviderGuardedImplementationBatch20260622:
+  batchId: ai-task-and-provider-guarded-implementation-2026-06-22
+  seededAt: "2026-06-22T09:50:50-07:00"
+  seedTaskId: module-run-v2-auto-seed-ai-task-and-provider
+  branch: codex/ai-task-provider-guarded-seed-20260622
+  seedSourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
+  seedEvidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md
+  seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md
+  autoDriveLocalImplementationApproval: recorded_current_user_2026_06_22
+  standingCloseoutApprovalRecorded: true
+  localFullLoopGate: L2
+  seededTaskIds:
+    - batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    - batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+    - batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    - batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  currentTaskId: none
+  currentTaskStatus: pending_seeded_tasks
+  nextCandidateTaskId: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  seedClosedAt: "2026-06-22T09:50:50-07:00"
+  seedStatus: closed
+  closedTaskCount: 0
+  approvalBoundary:
+    allowed:
+      - task_plan_evidence_audit_creation
+      - scoped_local_implementation_or_historical_reconcile
+      - focused_unit_validation
+      - lint_typecheck_diff_check
+      - module_run_v2_precommit_closeout_prepush
+      - local_commit
+      - fast_forward_merge_to_master
+      - push_origin_master
+      - merged_short_branch_cleanup
+    blockedWithoutFreshApproval:
+      - real_provider_call
+      - env_secret_access_or_change
+      - prompt_or_provider_payload_exposure
+      - schema_migration_seed_database_connection_or_data_change
+      - package_or_lockfile_change
+      - dev_server
+      - browser_or_playwright_e2e_runtime
+      - deploy
+      - pr
+      - force_push
+      - org_auth_runtime_behavior_change
+      - plaintext_redeem_code_exposure
+      - raw_employee_answer_or_full_paper_content_evidence
+      - token_or_db_url_exposure
+      - payment_or_external_service
+      - cost_calibration_gate
+  boundary: >-
+    This guarded seed transaction registers batch-284 through batch-287 only. It does not execute product source
+    implementation, Provider calls, env/secret work, dependency/package/lockfile changes, schema/migration/seed/database
+    operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
+    model changes, plaintext redeem_code evidence, raw employee answer evidence, full paper content evidence, token or
+    DB URL evidence, or Cost Calibration Gate work.
 
 personalAiLocalTransportBridgeReconciliation20260622:
   taskId: module-run-v2-personal-ai-local-transport-contract-planning

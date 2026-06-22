@@ -1,43 +1,66 @@
-# Module Run v2 Auto-Seed Plan: ai-task-and-provider
+# Task Plan: Module Run v2 Auto Seed Ai Task And Provider
 
-## Scope
+## Task
 
-Append guarded pending implementation tasks for `ai-task-and-provider` using the repository seed transaction script.
+- taskId: `module-run-v2-auto-seed-ai-task-and-provider`
+- branch: `codex/ai-task-provider-guarded-seed-20260622`
+- executionProfile: `docs_state_seed_transaction`
+- scope: guarded seed transaction for `request_auto_seed_approval:ai-task-and-provider`.
 
-## Read Before Work
+## Context Read
 
 - `AGENTS.md`
 - `docs/03-standards/code-taste-ten-commandments.md`
-- `docs/02-architecture/adr/`
+- `docs/02-architecture/adr/adr-001-tech-stack-selection.md`
+- `docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md`
+- `docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md`
+- `docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md`
+- `docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md`
+- `docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md`
+- `docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md`
 - `docs/04-agent-system/state/project-state.yaml`
 - `docs/04-agent-system/state/task-queue.yaml`
+- `docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml`
+- `scripts/agent-system/Get-TikuNextAction.ps1`
+- `scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1`
 - `scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1`
-- `scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1`
 
-## Allowed Changes
+## Approval
 
-- `docs/04-agent-system/state/task-queue.yaml`
-- `docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md`
-- `docs/05-execution-logs/evidence/2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md`
-- `docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-auto-seed-ai-task-and-provider.md`
-- seeded task evidence/audit templates under `docs/05-execution-logs/`
+The current user explicitly approved `request_auto_seed_approval:ai-task-and-provider`.
 
-## Blocked Changes
+This is treated as task-scoped approval for the guarded seed transaction only. The generated implementation tasks may
+use the standing low-risk local closeout policy already required by Module Run v2, but high-risk capability gates remain
+blocked.
 
-- Source, tests, package files, lockfiles, schema, migration, seed data, database connection or mutation.
-- `.env*`, Provider/model calls, prompt/provider payloads, raw generated content, browser/e2e/dev-server runtime.
-- Deployments, PRs, force push, payment/external services, `org_auth` runtime changes, and Cost Calibration Gate execution.
+## Seed Candidates
 
-## Plan
+- `batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`
+- `batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen`
+- `batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence`
+- `batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence`
 
-1. Confirm repository status and queue recommendation.
-2. Run `New-ModuleRunV2ImplementationSeed.ps1` with the current user approval statement and `-Apply`.
-3. Run seed self-review for all four seeded task ids.
-4. Run formatting and local governance checks.
-5. Commit the seed transaction, fast-forward merge to `master`, push `origin/master`, and delete the seed branch.
+## Implementation Plan
 
-## Risk Controls
+1. Run the read-only seed proposal and verify the module, source planning task, and candidate ids.
+2. Run `New-ModuleRunV2ImplementationSeed.ps1 -Apply` with the current approval statement.
+3. Verify the generated docs/state changes and seed evidence/audit templates.
+4. Run scoped Prettier, lint, typecheck, `git diff --check`, queue diagnostics, and Module Run v2 hardening/pre-push gates.
+5. Commit the seed transaction, fast-forward merge to `master`, push `origin/master`, and delete the merged short branch if gates pass.
 
-- Keep seeded tasks pending; implementation happens in separate short branches.
-- Do not change high-risk gates or claim preview release readiness.
-- Record only command/result summaries in evidence.
+## Risk Boundary
+
+Blocked for this seed transaction:
+
+- product source or test implementation
+- Provider/model calls or provider configuration
+- prompt/provider payload/raw generated content exposure
+- env/secret reads or writes
+- schema/migration/seed/database connection or data mutation
+- dependency/package/lockfile changes
+- dev server, Browser, Playwright, or e2e runtime
+- deploy, PR, force push
+- payment/external service
+- org_auth runtime behavior changes
+- raw employee answer, full paper content, plaintext redeem_code, token, DB URL, raw audit row, or raw ai_call_log evidence
+- Cost Calibration Gate
