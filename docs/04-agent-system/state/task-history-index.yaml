@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: queue-hygiene-archive-followup-2026-06-22
-  updatedAt: "2026-06-22T09:14:17-07:00"
+  updatedByTask: local-experience-closure-readiness-audit-2026-06-22
+  updatedAt: "2026-06-22T09:32:55-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -12036,3 +12036,13 @@ entries:
     commitSha: null
     completedAt: "2026-06-22"
     archivedByTask: queue-hygiene-archive-followup-2026-06-22
+  - id: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    phase: batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-22"
+    archivedByTask: local-experience-closure-readiness-audit-2026-06-22

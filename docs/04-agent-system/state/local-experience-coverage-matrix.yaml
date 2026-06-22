@@ -1522,6 +1522,70 @@ lastAp11SourceGovernanceChangeControlFreshApprovalRequired:
     - payment_ocr_export_external_service
     - cost_calibration_gate
     - raw_sensitive_evidence
+lastLocalExperienceClosureReadinessChainAudit20260622:
+  taskId: local-experience-closure-readiness-audit-2026-06-22
+  evaluatedAt: "2026-06-22T09:32:55-07:00"
+  decision: docs_state_chain_readiness_audit_no_coverage_row_status_change
+  evidence: docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-readiness-audit.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-readiness-audit.md
+  rowStatusChanges: 0
+  summaryCountChanges: 0
+  archivedDisplacedTerminalTask:
+    - batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  targetExperienceChains:
+    organization-training-experience:
+      decision: ready_closed_local_only
+      useCaseIds:
+        - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+        - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+        - UC-ADV-ORG-ANALYTICS-SUMMARY
+        - UC-ADV-ORG-PORTAL-ADMIN
+      releaseReadiness: not_claimed
+    ops-governance-experience:
+      decision: not_ready_for_experience_closed
+      useCaseIds:
+        - UC-ADV-OPS-AUTH-QUOTA
+        - UC-ADV-RETENTION-LOG-GOVERNANCE
+      blocker: ap02_cost_calibration_and_quota_release_gates_remain_blocked
+    retention-recovery-experience:
+      decision: not_ready_for_experience_closed
+      useCaseIds:
+        - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+        - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+        - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+        - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+        - UC-ADV-RETENTION-LOG-GOVERNANCE
+      blocker: service_contract_evidence_exists_but_chain_level_local_role_flow_closure_missing
+  previewOwnerAcceptanceReadonlyRecheck:
+    decision: existing_preview_scope_boundary_and_validation_plan_remain_docs_state_only
+    webOnly: true
+    providerDefault: disabled
+    dataMode: synthetic_or_reviewed_non_sensitive_sample_data_only
+    previewReleaseReadyClaim: false
+    releaseGatesRemain:
+      - AP-01
+      - AP-02
+      - AP-03
+      - AP-04
+      - AP-05
+      - AP-06
+      - AP-07
+      - AP-08
+      - AP-09
+      - AP-10
+      - AP-11
+  blockedGates:
+    - browser_e2e_runtime_or_dev_server
+    - staging_validation_or_deploy
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database_connection_or_data_change
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - org_auth_runtime_change
+    - pr_force_push_release_tag
+    - production_or_staging_data_access
+    - cost_calibration_gate
 lastManualFreshApprovalRequiredBeforeAnyAp03ProviderStagingExecution:
   taskId: manual_fresh_approval_required_before_any_ap03_provider_staging_execution
   evaluatedAt: "2026-06-19T23:53:38-07:00"
