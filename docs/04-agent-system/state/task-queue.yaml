@@ -3188,163 +3188,6 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
-  - id: local-experience-closure-readiness-audit-2026-06-22
-    title: Local Experience Closure readiness audit by experience chain
-    phase: local-experience-closure-readiness-audit-2026-06-22
-    sourceStory: user-request-2026-06-22-serial-recommendation-local-experience-closure
-    dependencies:
-      - queue-hygiene-archive-followup-2026-06-22
-    taskPlanPolicy: required_before_edit
-    humanApproval: >-
-      Current user direction approved entering Local Experience Closure after queue hygiene, by readiness audit over
-      experience chains rather than more business-code implementation. Scope is limited to docs/state/evidence/audit
-      updates, read-only inspection of matrices and existing evidence, local diagnostics, local commit, fast-forward
-      merge to master, push origin/master, and merged short-branch cleanup. It does not authorize product source/test
-      edits, dev-server/browser/e2e runtime, Provider/model calls, env/secret access, schema/migration/seed/database
-      work, dependency/package/lockfile changes, deploy, PR, force-push, payment/external service, org_auth runtime
-      changes, sensitive raw evidence, or Cost Calibration Gate execution.
-    useCaseId: all-selected-local-experience-chains
-    targetExperienceChains:
-      - organization-training-experience
-      - ops-governance-experience
-      - retention-recovery-experience
-    targetStatusTransition: current_matrix_facts_to_chain_readiness_classification_no_row_status_change
-    actor: platform_governance
-    entrySurface: docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-    freshEvidenceRequirement: >-
-      Evidence must record chain-level readiness decisions and blocked gates without raw employee answer text, full paper
-      content, plaintext redeem_code, provider payloads, secrets, tokens, DB URLs, raw audit rows, raw ai_call_log rows,
-      public identifier inventory, or private row data.
-    behaviorBoundary: agent_system::local_experience_closure_readiness_audit
-    executionProfile: local_experience_audit
-    evidenceMode: full
-    validationPolicy: docs_state_validation_lint_typecheck
-    queueSelectionMode: user_directed_local_experience_closure_readiness_audit
-    taskKind: local_experience_audit
-    moduleRunVersion: 2
-    status: closed
-    result: pass_docs_state_chain_readiness_audit
-    claimedAt: "2026-06-22T09:32:55-07:00"
-    validatedAt: "2026-06-22T09:32:55-07:00"
-    closedAt: "2026-06-22T09:32:55-07:00"
-    branch: codex/local-experience-closure-readiness-audit-20260622
-    capabilities:
-      docsStateGovernance: approved
-      localExperienceAudit: approved
-      productSourceChange: blocked
-      e2eBrowserDevServer: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      dependencyIntroduction: blocked
-      deploy: blocked
-      pr: blocked
-      forcePush: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit:
-        approved: true
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: true
-        target: origin/master
-      cleanup:
-        deleteShortBranch: true
-        parkWorktree: false
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-readiness-audit.md
-      - docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-readiness-audit.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-readiness-audit.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
-      - docs/04-agent-system/sop/local-experience-closure-governance.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-training-experience-closure-readiness-audit.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-analytics-summary-experience-closure-readiness-audit.md
-      - docs/05-execution-logs/evidence/2026-06-18-organization-portal-admin-experience-closure-readiness-audit.md
-      - docs/05-execution-logs/evidence/2026-06-18-admin-content-ops-local-experience-packet.md
-      - docs/05-execution-logs/evidence/2026-06-18-personal-learning-ai-local-experience-packet.md
-      - docs/05-execution-logs/evidence/2026-06-19-ap-02-ops-auth-quota-cost-calibration-release-gate-fresh-approval-required.md
-      - docs/05-execution-logs/evidence/batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-      - docs/05-execution-logs/evidence/2026-06-22-preview-release-scope-decision-package.md
-      - docs/05-execution-logs/evidence/2026-06-22-preview-staging-resource-boundary-planning.md
-      - docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-TikuNextAction.ps1
-      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
-      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
-      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    riskTypes:
-      - docs_state
-      - local_experience_audit
-      - evidence_redaction
-      - preview_owner_acceptance_readonly_recheck
-    validationCommandLifecycle:
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - phase: post_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - phase: post_edit
-        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-readiness-audit.md docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-readiness-audit.md
-      - phase: post_edit
-        command: npm.cmd run lint
-      - phase: post_edit
-        command: npm.cmd run typecheck
-      - phase: post_edit
-        command: git diff --check
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22
-      - phase: closeout
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22 -SkipRemoteAheadCheck
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-readiness-audit.md docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-readiness-audit.md docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-readiness-audit.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-closure-readiness-audit-2026-06-22 -SkipRemoteAheadCheck
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-readiness-audit.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-readiness-audit.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-readiness-audit.md
-    retryCount: 0
-
   - id: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
     title: Module Run v2 ai-task-and-provider implementation seed
     phase: batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
@@ -4141,4 +3984,105 @@ tasks:
     validatedAt: "2026-06-22T10:40:41-07:00"
     closedAt: "2026-06-22T10:40:41-07:00"
     branch: codex/queue-hygiene-archive-followup-20260622b
+    retryCount: 0
+
+  - id: local-experience-closure-boundary-followup-2026-06-22
+    title: Local Experience Closure boundary follow-up
+    phase: local-experience-closure-boundary-followup-2026-06-22
+    sourceStory: user-request-2026-06-22-queue-hygiene-local-experience-preview-serial-order
+    taskKind: local_experience_audit
+    moduleRunVersion: 2
+    executionProfile: local_experience_boundary_audit
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: user_directed_local_experience_boundary_followup
+    targetClosureItem: Local Experience Closure readiness and boundary follow-up
+    behaviorBoundary: local_experience_closure::readiness_boundary_followup_no_seed
+    humanApproval: >-
+      User directed continuing after queue hygiene into Local Experience Closure readiness/boundary audit only, without
+      blindly seeding new implementation work. This task records docs/state readiness and boundary conclusions and does
+      not authorize runtime validation or high-risk gates.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state
+      - local_experience_readiness_audit
+      - queue_archive_maintenance
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-boundary-followup.md docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-boundary-followup.md docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-boundary-followup.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/local-experience-coverage-matrix.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-boundary-followup.md docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-boundary-followup.md docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-boundary-followup.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-closure-boundary-followup-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-boundary-followup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-boundary-followup.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-local-experience-closure-boundary-followup.md
+    status: closed
+    result: pass_local_experience_closure_boundary_followup
+    claimedAt: "2026-06-22T10:55:00-07:00"
+    validatedAt: "2026-06-22T10:55:00-07:00"
+    closedAt: "2026-06-22T10:55:00-07:00"
+    branch: codex/local-experience-boundary-followup-20260622
     retryCount: 0

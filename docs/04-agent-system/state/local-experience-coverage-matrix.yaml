@@ -1674,3 +1674,34 @@ lastManualFreshApprovalRequiredBeforeAnyAp08OrgDataExportExecution:
     - payment_ocr_export_external_service
     - cost_calibration_gate
     - raw_sensitive_evidence
+
+lastLocalExperienceClosureBoundaryFollowup20260622:
+  taskId: local-experience-closure-boundary-followup-2026-06-22
+  evaluatedAt: "2026-06-22T10:55:00-07:00"
+  decision: docs_state_boundary_followup_no_coverage_row_status_change
+  evidence: docs/05-execution-logs/evidence/2026-06-22-local-experience-closure-boundary-followup.md
+  auditReview: docs/05-execution-logs/audits-reviews/2026-06-22-local-experience-closure-boundary-followup.md
+  rowStatusChanges: 0
+  localExperienceNextTaskDecision: no_candidate
+  bridgeProposalDecision: no_bridge_candidate
+  seedProposalDecision: no_seed_candidate
+  chains:
+    organization-training-experience:
+      decision: ready_closed_local_only
+      boundary: no_release_ready_or_staging_claim
+    ops-governance-experience:
+      decision: not_ready_for_experience_closed
+      blocker: ap02_cost_calibration_quota_provider_payment_external_service_gates
+    retention-recovery-experience:
+      decision: not_ready_for_experience_closed
+      blocker: no_chain_level_recovery_hidden_expired_local_role_flow_evidence_without_fresh_runtime_approval
+  nextSafeAction: preview_owner_acceptance_validation_plan_web_only_provider_off_synthetic_data_no_preview_ready_claim
+  blockedGates:
+    - browser_e2e_runtime_or_dev_server
+    - provider_model_call
+    - env_secret
+    - schema_migration_seed_database
+    - dependency_package_lockfile_change
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
