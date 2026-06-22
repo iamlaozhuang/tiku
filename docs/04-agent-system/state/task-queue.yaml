@@ -44,105 +44,6 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
-  - id: preview-readiness-queue-hygiene-archive-terminal-candidates
-    title: Preview readiness queue hygiene archive terminal candidates
-    phase: preview-readiness-queue-hygiene-2026-06-22
-    sourceStory: user-request-2026-06-22-four-docs-state-queue-hygiene-tasks
-    dependencies: []
-    taskPlanPolicy: required_before_edit
-    humanApprovalBoundary: >-
-      User requested four docs/state-only queue hygiene tasks executed serially with independent commits. This task may
-      move terminal active queue task packets into the June archive, update task-history-index.yaml, update
-      project-state.yaml currentTask metadata, and write its own plan/evidence/audit files. It must not modify product
-      source, tests, package files, lockfiles, schema, migrations, scripts, env/secret files, Provider configuration,
-      database state, e2e/browser/dev-server surfaces, deploy, PR, force-push, payment, external services, org_auth
-      runtime, employee answer runtime, raw answer content, full paper content, or Cost Calibration Gate execution.
-    targetClosureItem: terminal active queue archive candidates
-    behaviorBoundary: agent_system::preview_readiness_queue_hygiene_archive_terminal_candidates
-    executionProfile: docs_state_archive_maintenance
-    evidenceMode: full
-    validationPolicy: docs_state_validation_lint_typecheck
-    queueSelectionMode: user_directed_docs_state_queue_hygiene
-    taskKind: docs_state_archive
-    moduleRunVersion: 2
-    status: closed
-    result: pass_terminal_archive_candidates_moved
-    claimedAt: "2026-06-22T05:18:27-07:00"
-    validatedAt: "2026-06-22T05:18:27-07:00"
-    closedAt: "2026-06-22T05:25:11-07:00"
-    branch: codex/queue-hygiene-archive-terminal
-    archiveMovedTaskCount: 25
-    initialArchiveCandidateCount: 24
-    displacedRecoveryWindowArchiveCount: 1
-    terminalRecoveryWindowTarget: 8
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-      - docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-      - docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-    blockedFiles:
-      - .env
-      - .env.*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    capabilities:
-      docsStateGovernance: approved
-      queueArchiveMaintenance: approved
-      productSourceChange: blocked
-      testSourceChange: blocked
-      packageLockChange: blocked
-      schemaMigration: blocked
-      databaseConnection: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      browserRuntime: blocked
-      devServer: blocked
-      e2eRuntime: blocked
-      orgAuthRuntimeChange: blocked
-      employeeAnswerRuntimeChange: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    closeoutPolicy:
-      localCommit: approved
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-      push:
-        approved: false
-        target: origin/master
-        reason: fresh push approval is not part of this docs/state-only queue hygiene request
-      cleanup:
-        deleteShortBranch: true
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-readiness-queue-hygiene-archive-terminal-candidates
-    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-archive-terminal-candidates.md
-    retryCount: 0
   - id: discovered-issue-closure-governance-seed
     title: Discovered issue closure governance seed
     phase: discovered-issue-closure-2026-06-21
@@ -4030,4 +3931,108 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-cross-role-local-flow-planning.md
+    retryCount: 0
+  - id: preview-readiness-queue-hygiene-ready-for-closeout-review
+    title: Preview readiness queue hygiene ready for closeout review
+    phase: preview-readiness-queue-hygiene-2026-06-22
+    sourceStory: user-request-2026-06-22-four-docs-state-queue-hygiene-tasks
+    dependencies:
+      - preview-readiness-queue-hygiene-archive-terminal-candidates
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      User requested four docs/state-only queue hygiene tasks executed serially with independent commits. This task may
+      classify active ready_for_closeout queue packets, update project-state.yaml currentTask metadata, preserve the
+      terminal recovery window by archiving the displaced terminal task, and write its own plan/evidence/audit files. It
+      must not modify product source, tests, package files, lockfiles, schema, migrations, scripts, env/secret files,
+      Provider configuration, database state, e2e/browser/dev-server surfaces, deploy, PR, force-push, payment, external
+      services, org_auth runtime, employee answer runtime, raw answer content, full paper content, or Cost Calibration
+      Gate execution.
+    targetClosureItem: ready_for_closeout queue hygiene classification
+    behaviorBoundary: agent_system::preview_readiness_queue_hygiene_ready_for_closeout_review
+    executionProfile: docs_state_queue_review
+    evidenceMode: full
+    validationPolicy: docs_state_validation_lint_typecheck
+    queueSelectionMode: user_directed_docs_state_queue_hygiene
+    taskKind: docs_state_queue_review
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ready_for_closeout_review_classified
+    claimedAt: "2026-06-22T05:29:37-07:00"
+    validatedAt: "2026-06-22T05:29:37-07:00"
+    closedAt: "2026-06-22T05:29:37-07:00"
+    branch: codex/queue-hygiene-ready-closeout-review
+    readyForCloseoutTotal: 27
+    readyForCloseoutWithCloseoutPolicy: 3
+    readyForCloseoutMissingCloseoutPolicy: 24
+    statusMutationPolicy: classification_only_no_pre_existing_status_changes
+    displacedRecoveryWindowArchiveCount: 1
+    displacedRecoveryWindowArchivedTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+      - docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+    blockedFiles:
+      - .env
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      docsStateGovernance: approved
+      queueReview: approved
+      queueArchiveMaintenance: approved
+      productSourceChange: blocked
+      testSourceChange: blocked
+      packageLockChange: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      orgAuthRuntimeChange: blocked
+      employeeAnswerRuntimeChange: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+        reason: fresh push approval is not part of this docs/state-only queue hygiene request
+      cleanup:
+        deleteShortBranch: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId preview-readiness-queue-hygiene-ready-for-closeout-review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-ready-for-closeout-review.md
     retryCount: 0
