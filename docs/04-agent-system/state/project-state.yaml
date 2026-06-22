@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-278-organization-analytics-export-readiness-contracts-without-object-st
-updatedAt: "2026-06-22T08:20:32-07:00"
+currentPhase: batch-279-organization-analytics-audit-log-redacted-reference
+updatedAt: "2026-06-22T08:24:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 22574da9043be66c041a7a243e6217cb015260b0
-  lastKnownOriginMasterSha: 22574da9043be66c041a7a243e6217cb015260b0
+  lastKnownMasterSha: c971949248a17178c23d94ea54eee38ad76532c6
+  lastKnownOriginMasterSha: c971949248a17178c23d94ea54eee38ad76532c6
 currentTask:
-  id: batch-278-organization-analytics-export-readiness-contracts-without-object-st
+  id: batch-279-organization-analytics-audit-log-redacted-reference
   status: closed
-  result: pass_organization_analytics_export_readiness_contracts_historical_reconcile
-  claimedAt: "2026-06-22T08:20:00-07:00"
-  validatedAt: "2026-06-22T08:20:32-07:00"
-  closedAt: "2026-06-22T08:20:32-07:00"
+  result: pass_organization_analytics_audit_log_redacted_reference_historical_reconcile
+  claimedAt: "2026-06-22T08:24:00-07:00"
+  validatedAt: "2026-06-22T08:24:26-07:00"
+  closedAt: "2026-06-22T08:24:26-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
-  evidencePath: docs/05-execution-logs/evidence/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-278-organization-analytics-export-readiness-contracts-without-object-st.md
-  branch: codex/batch-278-organization-analytics-export-readiness
+  planPath: docs/05-execution-logs/task-plans/batch-279-organization-analytics-audit-log-redacted-reference.md
+  evidencePath: docs/05-execution-logs/evidence/batch-279-organization-analytics-audit-log-redacted-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-279-organization-analytics-audit-log-redacted-reference.md
+  branch: codex/batch-279-organization-analytics-audit-log
   commitSha: null
   prUrl: null
   retryCount: 0
