@@ -10,6 +10,13 @@ const now = new Date("2026-05-22T10:00:00.000Z");
 const testAdminSessionCredential = "admin-session-token";
 const expectedAdminAuthorization = `Bearer ${testAdminSessionCredential}`;
 
+type RedeemCodeDetailRouteHandlers = {
+  GET(
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ): Promise<Response>;
+};
+
 function createSessionService(role: "super_admin" | "content_admin") {
   return {
     async login() {
@@ -101,6 +108,29 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         },
       };
     },
+    async findRedeemCodeDetailByPublicId(publicId) {
+      if (publicId !== "redeem-code-public-001") {
+        return null;
+      }
+
+      return {
+        publicId: "redeem-code-public-001",
+        codeDisplay: "RC-2026-****",
+        canViewPlainText: false,
+        profession: "monopoly",
+        level: 3,
+        status: "used",
+        redeemedUserPublicId: "student-public-001",
+        redeemedAt: "2026-05-23T09:00:00.000Z",
+        durationDay: 365,
+        redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+        generationGroupId: "redeem-code-batch-public-001",
+        createdAt: now.toISOString(),
+        updatedAt: "2026-05-23T09:00:00.000Z",
+        redactionStatus: "redacted",
+        redactionReason: "plaintext_redeem_code_and_hash_hidden",
+      };
+    },
   };
 }
 
@@ -111,6 +141,16 @@ function createCookieBackedAdminRequest(url: string) {
       cookie: `tiku_session=${encodeURIComponent(testAdminSessionCredential)}`,
     },
   });
+}
+
+function getRedeemCodeDetailRouteHandlers(
+  handlers: ReturnType<typeof createAdminRedeemCodeRuntimeRouteHandlers>,
+): RedeemCodeDetailRouteHandlers {
+  return (
+    handlers.redeemCodes as unknown as {
+      detail: RedeemCodeDetailRouteHandlers;
+    }
+  ).detail;
 }
 
 describe("phase 8 admin redeem code runtime", () => {
@@ -225,6 +265,112 @@ describe("phase 8 admin redeem code runtime", () => {
         ],
       },
       message: "ok",
+    });
+  });
+
+  it("returns a redacted redeem_code detail by publicId without plaintext or internal ids", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    const response = await getRedeemCodeDetailRouteHandlers(handlers).GET(
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-001",
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "redeem-code-public-001" }),
+      },
+    );
+
+    const payload = await response.json();
+
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        redeemCode: {
+          publicId: "redeem-code-public-001",
+          codeDisplay: "RC-2026-****",
+          canViewPlainText: false,
+          profession: "monopoly",
+          level: 3,
+          status: "used",
+          redeemedUserPublicId: "student-public-001",
+          redeemedAt: "2026-05-23T09:00:00.000Z",
+          durationDay: 365,
+          redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+          generationGroupId: "redeem-code-batch-public-001",
+          createdAt: now.toISOString(),
+          updatedAt: "2026-05-23T09:00:00.000Z",
+          redactionStatus: "redacted",
+          redactionReason: "plaintext_redeem_code_and_hash_hidden",
+        },
+      },
+    });
+
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(serializedPayload).not.toContain('"id"');
+    expect(serializedPayload).not.toContain("codeHash");
+    expect(serializedPayload).not.toContain("codePlainText");
+    expect(serializedPayload).not.toContain("authUserId");
+    expect(serializedPayload).not.toContain("password");
+    expect(serializedPayload).not.toContain("admin-session-token");
+  });
+
+  it("rejects detail access for admin roles that cannot read redeem_code operations", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("content_admin"),
+    });
+
+    const response = await getRedeemCodeDetailRouteHandlers(handlers).GET(
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-001",
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "redeem-code-public-001" }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403601,
+      message: "Admin permission denied.",
+      data: null,
+    });
+  });
+
+  it("returns not found for missing redeem_code detail publicId", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    const response = await getRedeemCodeDetailRouteHandlers(handlers).GET(
+      new Request(
+        "http://localhost/api/v1/redeem-codes/redeem-code-public-missing",
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "redeem-code-public-missing" }),
+      },
+    );
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      code: 404601,
+      message: "Admin resource not found.",
+      data: null,
     });
   });
 

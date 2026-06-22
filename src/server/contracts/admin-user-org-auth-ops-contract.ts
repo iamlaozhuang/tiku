@@ -182,6 +182,19 @@ export type RedeemCodeListDto = {
   redeemCodes: RedeemCodeSummaryDto[];
 };
 
+export type RedeemCodeDetailDto = RedeemCodeSummaryDto & {
+  redeemedAt: string | null;
+  durationDay: number;
+  generationGroupId: string;
+  updatedAt: string;
+  redactionStatus: "redacted";
+  redactionReason: "plaintext_redeem_code_and_hash_hidden";
+};
+
+export type RedeemCodeDetailResultDto = {
+  redeemCode: RedeemCodeDetailDto;
+};
+
 export type RedeemCodeGenerationItemDto = {
   publicId: string;
   codePlainText: string;

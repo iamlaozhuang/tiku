@@ -21,6 +21,7 @@ import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
+  RedeemCodeDetailDto,
   RedeemCodeGenerationDto,
   RedeemCodeGenerationItemDto,
   RedeemCodeListDto,
@@ -49,6 +50,9 @@ export type AdminRedeemCodeRuntimeRepositories = {
   listRedeemCodes(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminRedeemCodePage<RedeemCodeListDto>>;
+  findRedeemCodeDetailByPublicId?(
+    publicId: string,
+  ): Promise<RedeemCodeDetailDto | null>;
   auditLogRepository?: {
     appendAuditLog(input: AppendRedeemCodeAuditLogInput): Promise<void>;
   };
@@ -217,6 +221,58 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
           createdAt: row.created_at.toISOString(),
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
+      };
+    },
+    async findRedeemCodeDetailByPublicId(publicId) {
+      const database = getDatabase();
+      const now = clock();
+      const [row] = await database
+        .select({
+          public_id: redeemCode.public_id,
+          code_display: redeemCode.code_display,
+          profession: redeemCode.profession,
+          level: redeemCode.level,
+          status: redeemCode.status,
+          used_by_user_id: redeemCode.used_by_user_id,
+          used_at: redeemCode.used_at,
+          duration_day: redeemCode.duration_day,
+          redeem_deadline_at: redeemCode.redeem_deadline_at,
+          generation_group_id: redeemCode.generation_group_id,
+          created_at: redeemCode.created_at,
+          updated_at: redeemCode.updated_at,
+        })
+        .from(redeemCode)
+        .where(eq(redeemCode.public_id, publicId))
+        .limit(1);
+
+      if (row === undefined) {
+        return null;
+      }
+
+      const redeemedUserPublicIds = await listRedeemedUserPublicIds(
+        database,
+        row.used_by_user_id === null ? [] : [row.used_by_user_id],
+      );
+
+      return {
+        publicId: row.public_id,
+        codeDisplay: maskRedeemCodeDisplay(row.code_display),
+        canViewPlainText: false,
+        profession: row.profession,
+        level: row.level,
+        status: getEffectiveRedeemCodeStatus(row, now),
+        redeemedUserPublicId:
+          row.used_by_user_id === null
+            ? null
+            : (redeemedUserPublicIds.get(row.used_by_user_id) ?? null),
+        redeemedAt: row.used_at?.toISOString() ?? null,
+        durationDay: row.duration_day,
+        redeemDeadlineAt: row.redeem_deadline_at.toISOString(),
+        generationGroupId: row.generation_group_id,
+        createdAt: row.created_at.toISOString(),
+        updatedAt: row.updated_at.toISOString(),
+        redactionStatus: "redacted",
+        redactionReason: "plaintext_redeem_code_and_hash_hidden",
       };
     },
     auditLogRepository: {

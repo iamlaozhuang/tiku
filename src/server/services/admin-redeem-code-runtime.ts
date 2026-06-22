@@ -63,6 +63,10 @@ type RedeemCodeBatchRequestResult =
       response: ApiResponse<null>;
     };
 
+type RedeemCodeDetailRouteContext = {
+  params: Promise<{ publicId: string }> | { publicId: string };
+};
+
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -79,10 +83,17 @@ const systemClock: AdminRedeemCodeClock = {
 const DEFAULT_REDEEM_CODE_DURATION_DAY = 365;
 const DEFAULT_REDEEM_CODE_PROFESSION: Profession = "monopoly";
 const DEFAULT_REDEEM_CODE_LEVEL = 3;
+const PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
+const NO_STORE_HEADERS = {
+  "cache-control": "no-store",
+} as const;
 const UTC_PLUS_8_OFFSET_MS = 8 * 60 * 60 * 1000;
 
-function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
-  return Response.json(response);
+function createJsonResponse<TData>(
+  response: ApiResponse<TData>,
+  init?: ResponseInit,
+): Response {
+  return Response.json(response, init);
 }
 
 function isAdminRedeemCodeRole(role: string): role is AdminRedeemCodeRole {
@@ -188,6 +199,15 @@ function readStatus(
   }
 
   return "all";
+}
+
+async function readRedeemCodeDetailPublicId(
+  context: RedeemCodeDetailRouteContext,
+): Promise<string | null> {
+  const params = await context.params;
+  const publicId = params.publicId.trim();
+
+  return PUBLIC_ID_PATTERN.test(publicId) ? publicId : null;
 }
 
 function normalizeRedeemCodeBatchRequest(
@@ -414,6 +434,61 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
         return createJsonResponse(
           createSuccessResponse(createdRedeemCodeBatch),
         );
+      },
+      detail: {
+        async GET(
+          request: Request,
+          context: RedeemCodeDetailRouteContext,
+        ): Promise<Response> {
+          const authError = await requireReadableAdminActor(request);
+
+          if (authError !== null) {
+            return createJsonResponse(authError, {
+              headers: NO_STORE_HEADERS,
+            });
+          }
+
+          const publicId = await readRedeemCodeDetailPublicId(context);
+
+          if (publicId === null) {
+            return createJsonResponse(
+              createErrorResponse(
+                ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+                "Redeem code publicId is invalid.",
+              ),
+              {
+                headers: NO_STORE_HEADERS,
+                status: 422,
+              },
+            );
+          }
+
+          const redeemCodeRepository =
+            repositories.findRedeemCodeDetailByPublicId;
+
+          if (redeemCodeRepository === undefined) {
+            throw new Error("Redeem code detail repository is required.");
+          }
+
+          const redeemCode = await redeemCodeRepository(publicId);
+
+          if (redeemCode === null) {
+            return createJsonResponse(
+              createErrorResponse(
+                ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+                "Admin resource not found.",
+              ),
+              {
+                headers: NO_STORE_HEADERS,
+                status: 404,
+              },
+            );
+          }
+
+          return createJsonResponse(createSuccessResponse({ redeemCode }), {
+            headers: NO_STORE_HEADERS,
+          });
+        },
       },
     },
   });

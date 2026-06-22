@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f5d17b6ef17d88a6fa39f10a948b8f508e1d5153
-  lastKnownOriginMasterSha: f5d17b6ef17d88a6fa39f10a948b8f508e1d5153
+  lastKnownMasterSha: 8142dc9be618543480ba56c0e546522c19111a0d
+  lastKnownOriginMasterSha: 8142dc9be618543480ba56c0e546522c19111a0d
 currentTask:
-  id: close-kn-recommendation-review-experience
+  id: close-redeem-code-detail-contract
   status: ready_for_closeout
-  result: pass_kn_recommendation_review_experience_local_validation
-  claimedAt: "2026-06-21T18:51:45-07:00"
-  validatedAt: "2026-06-21T18:55:07-07:00"
+  result: pass_redeem_code_detail_contract_local_validation
+  claimedAt: "2026-06-21T19:02:05-07:00"
+  validatedAt: "2026-06-21T19:08:10-07:00"
   closedAt: null
-  sourceStory: current-user-low-risk-task-8; admin-experience-gap-sequencing
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-kn-recommendation-review-experience.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-kn-recommendation-review-experience.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-kn-recommendation-review-experience.md
-  branch: codex/close-kn-recommendation-review-experience
+  sourceStory: current-user-low-risk-task-9; admin-experience-gap-sequencing
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-close-redeem-code-detail-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-close-redeem-code-detail-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-close-redeem-code-detail-contract.md
+  branch: codex/close-redeem-code-detail-contract
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5531,7 +5531,7 @@ lowRiskAuditCloseoutImplementationBatch20260621:
     - id: close-employee-transfer-unbind-management
       order: 14
       targetClosureItem: close employee transfer unbind management
-  currentTaskId: close-kn-recommendation-review-experience
+  currentTaskId: close-redeem-code-detail-contract
   currentTaskStatus: ready_for_closeout
   boundary: >-
     This batch seed registers implementation scope only. Each child task must still create its own plan, follow TDD for
