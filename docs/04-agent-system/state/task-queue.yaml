@@ -4988,3 +4988,78 @@ tasks:
     closedAt: "2026-06-22T10:23:30-07:00"
     branch: codex/module-run-v2-completion-marker-reconcile-20260622
     retryCount: 0
+
+  - id: module-run-v2-total-closeout-recheck-2026-06-22
+    title: Module Run v2 total closeout recheck
+    phase: module-run-v2-total-closeout-recheck-2026-06-22
+    sourceStory: user-request-2026-06-22-module-run-v2-total-closeout-local-experience-preview-recheck
+    taskKind: docs_state_total_closeout_recheck
+    moduleRunVersion: 2
+    targetClosureItem: total closeout queue archive status and preview owner acceptance recheck
+    behaviorBoundary: module-run-v2::total-closeout-recheck
+    humanApproval: >-
+      User directed entering Module Run v2 total closeout review, running Get-TikuProjectStatus.ps1 to confirm
+      queue/archive/status, then following the established order into Local Experience Closure readiness audit and
+      preview owner acceptance Web-only Provider-off synthetic-data AP-01 through AP-11 release-gate validation
+      planning. Current task is docs/state-only and does not authorize high-risk capability gates.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - scripts/**
+      - drizzle/**
+      - e2e/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-total-closeout-recheck.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-total-closeout-recheck.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-total-closeout-recheck.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceNextTaskProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-total-closeout-recheck.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-total-closeout-recheck.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-total-closeout-recheck.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-total-closeout-recheck-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-total-closeout-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-total-closeout-recheck.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-total-closeout-recheck.md
+    status: closed
+    result: pass_docs_state_total_closeout_recheck
+    claimedAt: "2026-06-22T10:30:33-07:00"
+    validatedAt: "2026-06-22T10:30:33-07:00"
+    closedAt: "2026-06-22T10:30:33-07:00"
+    branch: codex/module-run-v2-total-closeout-recheck-20260622
+    retryCount: 0
