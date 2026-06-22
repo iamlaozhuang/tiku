@@ -241,6 +241,30 @@ function createEmptyPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createPaperSnapshotWithQuestionCount(
+  questionCount: number,
+): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "count_boundary_paper",
+    paperSections: [
+      {
+        paperSectionTitle: "count boundary questions",
+        paperQuestions: Array.from({ length: questionCount }, (_, index) => ({
+          paperQuestionPublicId: `paper_question_public_${index + 1}`,
+          questionPublicId: `question_public_${index + 1}`,
+          questionType: "single_choice",
+          standardAnswerLabels: ["A"],
+          standardAnswerRichText: "<p>A</p>",
+          analysisRichText: "<p>analysis</p>",
+          score: "1.0",
+          scoringMethod: "auto_match",
+        })),
+      },
+    ],
+  };
+}
+
 function createScope(
   overrides: Partial<PracticeAuthorizationScopeRow> = {},
 ): PracticeAuthorizationScopeRow {
@@ -398,6 +422,56 @@ describe("practice service", () => {
       }),
     ]);
   });
+
+  it.each([
+    ["empty", 0],
+    ["oversized", 101],
+  ])(
+    "rejects %s published paper question count before starting practice",
+    async (_caseName, questionCount) => {
+      const sideEffects: string[] = [];
+      const service = createPracticeService(
+        createRepository({
+          async findPublishedPaperByPublicId() {
+            return createPaper({
+              paper_snapshot:
+                createPaperSnapshotWithQuestionCount(questionCount),
+            });
+          },
+          async listEffectiveAuthorizationScopes() {
+            sideEffects.push("list_effective_authorization_scope");
+
+            return [createScope()];
+          },
+          async findActivePracticeByPaper() {
+            sideEffects.push("find_active_practice");
+
+            return null;
+          },
+          async createPractice(input) {
+            sideEffects.push("create_practice");
+
+            return createPractice({
+              public_id: input.publicId,
+            });
+          },
+        }),
+        clock,
+        createIdFactory(),
+      );
+
+      await expect(
+        service.startPractice(userContext, {
+          paperPublicId: "paper_public_123",
+        }),
+      ).resolves.toEqual({
+        code: 422305,
+        message: "Practice paper question count is invalid.",
+        data: null,
+      });
+      expect(sideEffects).toEqual([]);
+    },
+  );
 
   it("resumes an existing active practice and expires stale progress before restarting", async () => {
     const resumedService = createPracticeService(

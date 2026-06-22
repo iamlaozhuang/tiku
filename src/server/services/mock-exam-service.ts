@@ -28,6 +28,7 @@ import {
   normalizeSubmitMockExamInput,
   type NormalizedMockExamAnswerInput,
 } from "../validators/mock-exam";
+import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 
 export type MockExamUserContext = {
   userPublicId: string;
@@ -449,6 +450,30 @@ function listMockExamQuestions(
   });
 }
 
+function countPaperSnapshotQuestions(
+  paperSnapshot: Record<string, unknown>,
+): number {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+
+  return paperSections.reduce((questionCount, paperSection) => {
+    if (
+      !isRecord(paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      return questionCount;
+    }
+
+    return (
+      questionCount +
+      paperSection.paperQuestions.filter((paperQuestion) =>
+        isRecord(paperQuestion),
+      ).length
+    );
+  }, 0);
+}
+
 function shouldReplaceMockExamSnapshot(
   activeMockExam: MockExamRow,
   paper: MockExamPaperRow,
@@ -868,6 +893,13 @@ function createMockExamAuthorizationTerminatedResponse(): ApiResponse<null> {
   );
 }
 
+function createMockExamPaperQuestionCountInvalidResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    422316,
+    "Mock exam paper question count is invalid.",
+  );
+}
+
 async function terminateMockExamForInvalidAuthorization(
   repository: MockExamRepository,
   mockExam: MockExamRow,
@@ -1201,6 +1233,14 @@ export function createMockExamService(
 
       if (paper === null) {
         return createErrorResponse(404311, "Mock exam paper does not exist.");
+      }
+
+      const questionCountValidation = validatePublishedPaperQuestionCount(
+        countPaperSnapshotQuestions(paper.paper_snapshot),
+      );
+
+      if (!questionCountValidation.success) {
+        return createMockExamPaperQuestionCountInvalidResponse();
       }
 
       const now = clock.now();

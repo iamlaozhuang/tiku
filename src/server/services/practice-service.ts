@@ -30,6 +30,7 @@ import type {
   NormalizedPracticeAnswerInput,
   NormalizedPracticeQuestionFavoriteInput,
 } from "../validators/practice";
+import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 
 export type PracticeUserContext = {
   userPublicId: string;
@@ -673,6 +674,13 @@ function createPracticeAuthorizationTerminatedResponse(): ApiResponse<null> {
   );
 }
 
+function createPracticePaperQuestionCountInvalidResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    422305,
+    "Practice paper question count is invalid.",
+  );
+}
+
 async function terminatePracticeForInvalidAuthorization(
   repository: PracticeRepository,
   practice: PracticeRow,
@@ -786,6 +794,14 @@ export function createPracticeService(
 
       if (paper === null) {
         return createErrorResponse(404301, "Practice paper does not exist.");
+      }
+
+      const questionCountValidation = validatePublishedPaperQuestionCount(
+        countPaperSnapshotQuestions(paper.paper_snapshot),
+      );
+
+      if (!questionCountValidation.success) {
+        return createPracticePaperQuestionCountInvalidResponse();
       }
 
       const now = clock.now();
