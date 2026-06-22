@@ -70,7 +70,22 @@ type ValidationResult<TValue> =
       message: string;
     };
 
+export type PaperQuestionCountValidationResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
+export const PAPER_QUESTION_COUNT_LIMIT = 100;
+
 const INVALID_PAPER_INPUT_MESSAGE = "Invalid paper input.";
+const DRAFT_PAPER_QUESTION_COUNT_LIMIT_MESSAGE =
+  "Draft paper cannot contain more than 100 questions.";
+const PUBLISHED_PAPER_QUESTION_COUNT_LIMIT_MESSAGE =
+  "Published paper must contain 1 to 100 questions.";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -84,6 +99,40 @@ function normalizeRequiredText(value: unknown): string | null {
   const text = value.trim();
 
   return text.length === 0 ? null : text;
+}
+
+export function validateDraftPaperQuestionCount(
+  questionCount: number,
+): PaperQuestionCountValidationResult {
+  if (
+    !Number.isInteger(questionCount) ||
+    questionCount < 0 ||
+    questionCount > PAPER_QUESTION_COUNT_LIMIT
+  ) {
+    return {
+      success: false,
+      message: DRAFT_PAPER_QUESTION_COUNT_LIMIT_MESSAGE,
+    };
+  }
+
+  return { success: true };
+}
+
+export function validatePublishedPaperQuestionCount(
+  questionCount: number,
+): PaperQuestionCountValidationResult {
+  if (
+    !Number.isInteger(questionCount) ||
+    questionCount < 1 ||
+    questionCount > PAPER_QUESTION_COUNT_LIMIT
+  ) {
+    return {
+      success: false,
+      message: PUBLISHED_PAPER_QUESTION_COUNT_LIMIT_MESSAGE,
+    };
+  }
+
+  return { success: true };
 }
 
 function normalizeOptionalText(value: unknown): string | null | undefined {

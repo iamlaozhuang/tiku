@@ -109,6 +109,7 @@ export type PaperPublishValidationIssueDto = {
     | "paper_question_score_missing"
     | "paper_total_score_missing"
     | "paper_total_score_mismatch"
+    | "paper_question_count_invalid"
     | "paper_has_no_counting_question"
     | "empty_paper_section"
     | "scoring_point_total_mismatch"

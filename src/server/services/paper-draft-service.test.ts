@@ -65,6 +65,32 @@ function createPaperQuestion(
   };
 }
 
+function createPaperQuestions(questionCount: number): PaperQuestionAccessRow[] {
+  return Array.from({ length: questionCount }, (_, questionIndex) => {
+    const questionNumber = questionIndex + 1;
+
+    return createPaperQuestion({
+      id: 300 + questionNumber,
+      public_id: `paper_question_public_${questionNumber}`,
+      source_question_public_id: `question_public_${questionNumber}`,
+      score: "1.0",
+      sort_order: questionNumber,
+      question_snapshot: {
+        ...createPaperQuestion().question_snapshot,
+        questionPublicId: `question_public_${questionNumber}`,
+      },
+      scoring_points: [
+        {
+          source_scoring_point_id: 500 + questionNumber,
+          description: `评分点 ${questionNumber}`,
+          score: "1.0",
+          sort_order: 1,
+        },
+      ],
+    });
+  });
+}
+
 function createFillBlankPaperQuestion(
   overrides: Partial<PaperQuestionAccessRow> = {},
 ): PaperQuestionAccessRow {
@@ -459,6 +485,54 @@ describe("paper draft service", () => {
     });
   });
 
+  it("rejects adding the 101st question to a draft paper", async () => {
+    let addQuestionCalled = false;
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            total_score: "100.0",
+            paper_sections: [
+              {
+                id: 201,
+                title: "题量上限",
+                description: null,
+                sort_order: 1,
+                total_score: "100.0",
+                paper_questions: createPaperQuestions(100),
+              },
+            ],
+            question_groups: [],
+          });
+        },
+        async addQuestionToDraftPaper() {
+          addQuestionCalled = true;
+          return createPaperQuestion();
+        },
+      }),
+    );
+
+    await expect(
+      service.addQuestionToDraftPaper("paper_public_123", {
+        questionPublicId: "question_public_101",
+        score: "1.0",
+        sortOrder: 101,
+        paperSection: {
+          title: "题量上限",
+          description: null,
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      }),
+    ).resolves.toEqual({
+      code: 422205,
+      message: "Draft paper cannot contain more than 100 questions.",
+      data: null,
+    });
+    expect(addQuestionCalled).toBe(false);
+  });
+
   it("updates and removes paper questions by public identifiers", async () => {
     const service = createPaperDraftService(createRepository());
 
@@ -679,6 +753,47 @@ describe("paper draft service", () => {
         materialPublicIds: ["material_public_123"],
       },
     ]);
+  });
+
+  it("rejects publishing a draft paper with more than 100 questions", async () => {
+    const publishedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            total_score: "101.0",
+            paper_sections: [
+              {
+                id: 201,
+                title: "题量超限",
+                description: null,
+                sort_order: 1,
+                total_score: "101.0",
+                paper_questions: createPaperQuestions(101),
+              },
+            ],
+            question_groups: [],
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({
+            public_id: input.paperPublicId,
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await expect(service.publishPaper("paper_public_123")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+    expect(publishedInputs).toEqual([]);
   });
 
   it("rejects publishing missing, non-draft, incomplete, and source-lock-invalid papers", async () => {

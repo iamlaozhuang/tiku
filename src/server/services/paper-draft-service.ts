@@ -31,6 +31,8 @@ import {
   normalizePaperListInput,
   normalizeUpdatePaperInput,
   normalizeUpdatePaperQuestionInput,
+  validateDraftPaperQuestionCount,
+  validatePublishedPaperQuestionCount,
 } from "../validators/paper-draft";
 
 export type PaperDraftService = {
@@ -77,6 +79,7 @@ const PAPER_NOT_FOUND_CODE = 404203;
 const PAPER_COMPOSITION_CONFLICT_CODE = 409203;
 const PAPER_PUBLISH_CONFLICT_CODE = 409204;
 const PAPER_PUBLISH_VALIDATION_CODE = 422204;
+const PAPER_QUESTION_COUNT_VALIDATION_CODE = 422205;
 const PAPER_DELETE_CONFLICT_CODE = 409205;
 const PAPER_COPY_CONFLICT_CODE = 409206;
 const PAPER_RUNTIME_UNAVAILABLE_CODE = 503203;
@@ -123,6 +126,12 @@ function createPaperPublishValidationResponse(): ApiResponse<null> {
     PAPER_PUBLISH_VALIDATION_CODE,
     "Paper publish validation failed.",
   );
+}
+
+function createPaperQuestionCountValidationResponse(
+  message: string,
+): ApiResponse<null> {
+  return createErrorResponse(PAPER_QUESTION_COUNT_VALIDATION_CODE, message);
 }
 
 function createNonPublishedArchiveResponse(): ApiResponse<null> {
@@ -230,6 +239,9 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
   );
   const paperTotalScore = convertScoreToHalfPoints(paper.total_score);
   const hasCountingQuestion = validQuestionScores.some((score) => score > 0);
+  const publishedQuestionCountValidation = validatePublishedPaperQuestionCount(
+    paperQuestions.length,
+  );
   const emptyPaperSection = paper.paper_sections.some(
     (paperSection) => paperSection.paper_questions.length === 0,
   );
@@ -268,6 +280,14 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
   });
   const questionScoreTotal = sumHalfPoints(validQuestionScores);
   const issues: PaperPublishValidationIssueDto[] = [
+    ...(!publishedQuestionCountValidation.success
+      ? [
+          {
+            code: "paper_question_count_invalid" as const,
+            message: publishedQuestionCountValidation.message,
+          },
+        ]
+      : []),
     ...(missingQuestionScore
       ? [
           {
@@ -426,6 +446,16 @@ export function createPaperDraftService(
 
       if (paper.paper_status !== "draft") {
         return createNonDraftPaperResponse();
+      }
+
+      const draftQuestionCountValidation = validateDraftPaperQuestionCount(
+        listPaperQuestions(paper.paper_sections).length + 1,
+      );
+
+      if (!draftQuestionCountValidation.success) {
+        return createPaperQuestionCountValidationResponse(
+          draftQuestionCountValidation.message,
+        );
       }
 
       const paperQuestion = await paperRepository.addQuestionToDraftPaper({
@@ -591,6 +621,17 @@ export function createPaperDraftService(
         paper.paper_status !== "archived"
       ) {
         return createPaperCopyConflictResponse();
+      }
+
+      const copiedDraftQuestionCountValidation =
+        validateDraftPaperQuestionCount(
+          listPaperQuestions(paper.paper_sections).length,
+        );
+
+      if (!copiedDraftQuestionCountValidation.success) {
+        return createPaperQuestionCountValidationResponse(
+          copiedDraftQuestionCountValidation.message,
+        );
       }
 
       const copiedPaper = await paperRepository.copyPaper(
