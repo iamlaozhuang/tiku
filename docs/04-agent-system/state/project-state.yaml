@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-auto-seed-organization-analytics
-updatedAt: "2026-06-22T08:10:00-07:00"
+currentPhase: batch-276-organization-analytics-aggregate-only-organization-metrics
+updatedAt: "2026-06-22T08:12:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7de340db73d2e49fffa95cd87af64c4211993719
-  lastKnownOriginMasterSha: 7de340db73d2e49fffa95cd87af64c4211993719
+  lastKnownMasterSha: e24f630d409b17472fe88b8d7c4ab23287db427a
+  lastKnownOriginMasterSha: e24f630d409b17472fe88b8d7c4ab23287db427a
 currentTask:
-  id: batch-275-organization-training-audit-log-redacted-reference
+  id: batch-276-organization-analytics-aggregate-only-organization-metrics
   status: closed
-  result: pass_organization_training_audit_log_redacted_reference_contract
-  claimedAt: "2026-06-22T07:52:10-07:00"
-  validatedAt: "2026-06-22T07:53:41-07:00"
-  closedAt: "2026-06-22T07:53:41-07:00"
+  result: pass_organization_analytics_aggregate_metrics_historical_reconcile
+  claimedAt: "2026-06-22T08:11:00-07:00"
+  validatedAt: "2026-06-22T08:12:00-07:00"
+  closedAt: "2026-06-22T08:12:00-07:00"
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-275-organization-training-audit-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-275-organization-training-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-275-organization-training-audit-log-redacted-reference.md
-  branch: codex/batch-275-organization-training-audit-log
+  planPath: docs/05-execution-logs/task-plans/batch-276-organization-analytics-aggregate-only-organization-metrics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-276-organization-analytics-aggregate-only-organization-metrics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-276-organization-analytics-aggregate-only-organization-metrics.md
+  branch: codex/batch-276-organization-analytics-aggregate-metrics
   commitSha: null
   prUrl: null
   retryCount: 0

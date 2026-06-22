@@ -5966,7 +5966,7 @@ tasks:
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/models/organization-analytics.test.ts src/server/contracts/organization-analytics-contract.test.ts src/server/validators/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-276-organization-analytics-aggregate-only-organization-metrics
     validationCommands:
@@ -5974,11 +5974,17 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
+      - npm.cmd run test:unit -- src/server/models/organization-analytics.test.ts src/server/contracts/organization-analytics-contract.test.ts src/server/validators/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-276-organization-analytics-aggregate-only-organization-metrics
     planPath: docs/05-execution-logs/task-plans/batch-276-organization-analytics-aggregate-only-organization-metrics.md
     evidencePath: docs/05-execution-logs/evidence/batch-276-organization-analytics-aggregate-only-organization-metrics.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-276-organization-analytics-aggregate-only-organization-metrics.md
-    status: pending
+    status: closed
+    result: pass_organization_analytics_aggregate_metrics_historical_reconcile
+    claimedAt: "2026-06-22T08:11:00-07:00"
+    validatedAt: "2026-06-22T08:12:00-07:00"
+    closedAt: "2026-06-22T08:12:00-07:00"
+    branch: codex/batch-276-organization-analytics-aggregate-metrics
     retryCount: 0
   - id: batch-277-organization-analytics-privacy-preserving-employee-statistics
     title: Module Run v2 organization-analytics implementation seed
