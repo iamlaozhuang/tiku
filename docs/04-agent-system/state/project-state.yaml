@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
-updatedAt: "2026-06-22T10:17:50-07:00"
+currentPhase: module-run-v2-completion-marker-reconcile-2026-06-22
+updatedAt: "2026-06-22T10:23:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
   lastKnownOriginMasterSha: cefd245c4a01f1c905c463aa2d28ca5f2fbef0bc
 currentTask:
-  id: batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  id: module-run-v2-completion-marker-reconcile-2026-06-22
   status: closed
-  result: pass_ai_task_provider_sandbox_proposal_historical_reconcile
-  claimedAt: "2026-06-22T10:17:50-07:00"
-  validatedAt: "2026-06-22T10:17:50-07:00"
-  closedAt: "2026-06-22T10:17:50-07:00"
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  branch: codex/batch-287-ai-task-sandbox-reconcile-20260622
+  result: pass_completion_marker_reconcile_duplicate_seed_suppression
+  claimedAt: "2026-06-22T10:23:30-07:00"
+  validatedAt: "2026-06-22T10:23:30-07:00"
+  closedAt: "2026-06-22T10:23:30-07:00"
+  sourceStory: user-request-2026-06-22-avoid-duplicate-personal-learning-ai-seed
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  branch: codex/module-run-v2-completion-marker-reconcile-20260622
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5860,6 +5860,57 @@ aiTaskAndProviderGuardedImplementationBatch20260622:
     operations, dev-server/browser/e2e runtime, deployment, PR, force-push, payment, external services, org_auth runtime
     model changes, plaintext redeem_code evidence, raw employee answer evidence, full paper content evidence, token or
     DB URL evidence, or Cost Calibration Gate work.
+
+moduleRunV2CompletionMarkerReconcile20260622:
+  taskId: module-run-v2-completion-marker-reconcile-2026-06-22
+  phase: module-run-v2-completion-marker-reconcile-2026-06-22
+  recordedAt: "2026-06-22T10:23:30-07:00"
+  branch: codex/module-run-v2-completion-marker-reconcile-20260622
+  taskStatus: closed
+  result: pass_completion_marker_reconcile_duplicate_seed_suppression
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md
+  trigger:
+    nextActionDecisionBefore: seed_proposal_available
+    seedModuleBefore: personal-learning-ai
+    seedCandidateSuppressed:
+      - batch-288-personal-learning-ai-personal-generation-request-flow
+      - batch-289-personal-learning-ai-paper-and-mock-exam-context-selection
+      - batch-290-personal-learning-ai-local-ui-browser-experience-for-request-and
+      - batch-291-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+  completionMarkersRecorded:
+    ai-task-and-provider:
+      - batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+      - batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+      - batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+      - batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    personal-learning-ai:
+      - batch-268-personal-learning-ai-personal-generation-request-flow
+      - batch-269-personal-learning-ai-paper-and-mock-exam-context-selection
+      - batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
+      - batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+    organization-training:
+      - batch-272-organization-training-organization-admin-training-draft-publish-ta
+      - batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+      - batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+      - batch-275-organization-training-audit-log-redacted-reference
+    organization-analytics:
+      - batch-276-organization-analytics-aggregate-only-organization-metrics
+      - batch-277-organization-analytics-privacy-preserving-employee-statistics
+      - batch-278-organization-analytics-export-readiness-contracts-without-object-st
+      - batch-279-organization-analytics-audit-log-redacted-reference
+    ops-governance-and-retention:
+      - batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+      - batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+      - batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+      - batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  boundary: >-
+    This docs/state-only reconcile records already closed terminal batches in the Module Run v2 matrix so the seed
+    proposal script does not recreate duplicate implementation tasks. It does not seed new tasks, edit product source,
+    run provider/model calls, access env/secrets, change schema/migrations/database, run browser/e2e/dev-server,
+    deploy, create PRs, force-push, change dependencies, execute payment/external-service work, or execute Cost
+    Calibration Gate.
 
 personalAiLocalTransportBridgeReconciliation20260622:
   taskId: module-run-v2-personal-ai-local-transport-contract-planning

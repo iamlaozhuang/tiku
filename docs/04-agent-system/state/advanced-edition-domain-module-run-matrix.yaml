@@ -111,21 +111,59 @@ sourcePlanningModules:
   - module: ai-task-domain
     sourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
     v2ExecutionModule: ai-task-and-provider
+    currentProgress:
+      completedBatches:
+        - batch-284-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+        - batch-285-ai-task-and-provider-local-task-request-policy-and-result-referen
+        - batch-286-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+        - batch-287-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+      latestContractStatus: ai_task_and_provider_l2_terminal_batches_recorded
   - module: personal-ai-generation
     sourcePlanningTask: phase-71-advanced-personal-ai-generation-implementation-planning
     v2ExecutionModule: personal-learning-ai
+    currentProgress:
+      completedBatches:
+        - batch-268-personal-learning-ai-personal-generation-request-flow
+        - batch-269-personal-learning-ai-paper-and-mock-exam-context-selection
+        - batch-270-personal-learning-ai-local-ui-browser-experience-for-request-and
+        - batch-271-personal-learning-ai-redacted-ai-call-log-reference-without-stori
+      latestContractStatus: personal_learning_ai_l5_terminal_batches_recorded
   - module: organization-training
     sourcePlanningTask: phase-72-advanced-organization-training-implementation-planning
     v2ExecutionModule: organization-training
+    currentProgress:
+      completedBatches:
+        - batch-272-organization-training-organization-admin-training-draft-publish-ta
+        - batch-273-organization-training-employee-answer-lifecycle-local-role-flow
+        - batch-274-organization-training-paper-and-mock-exam-context-usage-without-ex
+        - batch-275-organization-training-audit-log-redacted-reference
+      latestContractStatus: organization_training_l6_terminal_batches_recorded
   - module: organization-analytics
     sourcePlanningTask: phase-73-advanced-organization-analytics-implementation-planning
     v2ExecutionModule: organization-analytics
+    currentProgress:
+      completedBatches:
+        - batch-276-organization-analytics-aggregate-only-organization-metrics
+        - batch-277-organization-analytics-privacy-preserving-employee-statistics
+        - batch-278-organization-analytics-export-readiness-contracts-without-object-st
+        - batch-279-organization-analytics-audit-log-redacted-reference
+      latestContractStatus: organization_analytics_l5_terminal_batches_recorded
   - module: ops-authorization-quota
     sourcePlanningTask: phase-74-advanced-ops-auth-quota-implementation-planning
     v2ExecutionModule: ops-governance-and-retention
+    currentProgress:
+      completedBatches:
+        - batch-280-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+      latestContractStatus: ops_governance_auth_quota_terminal_batch_recorded
   - module: retention-log-governance
     sourcePlanningTask: phase-75-advanced-retention-log-governance-implementation-planning
     v2ExecutionModule: ops-governance-and-retention
+    currentProgress:
+      completedBatches:
+        - batch-281-ops-governance-and-retention-redeem-code-redacted-reference
+        - batch-282-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
+        - batch-283-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+      latestContractStatus: ops_governance_retention_terminal_batches_recorded
 sourceModuleMapping:
   authorization-context: authorization-and-access
   ai-task-domain: ai-task-and-provider

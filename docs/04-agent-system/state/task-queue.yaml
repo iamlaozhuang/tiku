@@ -4927,3 +4927,64 @@ tasks:
     closedAt: "2026-06-22T10:17:50-07:00"
     branch: codex/batch-287-ai-task-sandbox-reconcile-20260622
     retryCount: 0
+
+  - id: module-run-v2-completion-marker-reconcile-2026-06-22
+    title: Module Run v2 completion marker reconcile
+    phase: module-run-v2-completion-marker-reconcile-2026-06-22
+    sourceStory: user-request-2026-06-22-avoid-duplicate-personal-learning-ai-seed
+    taskKind: docs_state_queue_hygiene
+    moduleRunVersion: 2
+    targetClosureItem: completion marker reconcile for historical implementation batches
+    behaviorBoundary: module-run-v2::completion-marker-reconcile
+    humanApproval: >-
+      User directed after completing batch-284 through batch-287 to run Get-TikuNextAction.ps1 and seed proposal, and
+      if personal-learning-ai is recommended while historical coverage exists, perform a small completion reconcile /
+      queue hygiene follow-up instead of blindly seeding new duplicate tasks.
+    allowedFiles:
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - scripts/**
+      - drizzle/**
+      - e2e/**
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22 -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1 -MaxBatchCount 4
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-completion-marker-reconcile-2026-06-22 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-22-module-run-v2-completion-marker-reconcile.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-module-run-v2-completion-marker-reconcile.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-22-module-run-v2-completion-marker-reconcile.md
+    status: closed
+    result: pass_completion_marker_reconcile_duplicate_seed_suppression
+    claimedAt: "2026-06-22T10:23:30-07:00"
+    validatedAt: "2026-06-22T10:23:30-07:00"
+    closedAt: "2026-06-22T10:23:30-07:00"
+    branch: codex/module-run-v2-completion-marker-reconcile-20260622
+    retryCount: 0
