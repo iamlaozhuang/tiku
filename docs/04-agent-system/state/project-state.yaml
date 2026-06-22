@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: preview-release-validation-plan-2026-06-22
-updatedAt: "2026-06-22T06:17:34-07:00"
+currentPhase: ready-for-closeout-closeout-policy-repair-2026-06-22
+updatedAt: "2026-06-22T06:22:08-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: preview-release-validation-plan
+  id: ready-for-closeout-closeout-policy-repair
   status: closed
-  result: pass_preview_release_validation_plan_docs_state_only
-  claimedAt: "2026-06-22T06:17:34-07:00"
-  validatedAt: "2026-06-22T06:17:34-07:00"
-  closedAt: "2026-06-22T06:17:34-07:00"
+  result: pass_ready_for_closeout_closeout_policy_repair_docs_state_only
+  claimedAt: "2026-06-22T06:22:08-07:00"
+  validatedAt: "2026-06-22T06:22:08-07:00"
+  closedAt: "2026-06-22T06:22:08-07:00"
   sourceStory: user-request-2026-06-22-preview-release-docs-state-serial-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-release-validation-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-release-validation-plan.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-release-validation-plan.md
-  branch: codex/preview-release-validation-plan
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  branch: codex/ready-for-closeout-closeout-policy-repair
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -6285,3 +6285,66 @@ previewReleaseValidationPlan20260622:
     Preview release validation is defined as a matrix only. Local lint/typecheck/unit/build, redaction checks, git
     inventory, rollback, and stop conditions are mandatory before publication. Browser/e2e/dev-server and staging
     validation remain future fresh-approved work, and this packet does not claim previewReleaseReady.
+
+readyForCloseoutCloseoutPolicyRepair20260622:
+  taskId: ready-for-closeout-closeout-policy-repair
+  phase: ready-for-closeout-closeout-policy-repair-2026-06-22
+  recordedAt: "2026-06-22T06:22:08-07:00"
+  branch: codex/ready-for-closeout-closeout-policy-repair
+  taskStatus: closed
+  result: pass_ready_for_closeout_closeout_policy_repair_docs_state_only
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-ready-for-closeout-closeout-policy-repair.md
+  repairedReadyForCloseoutCloseoutPolicyCount: 24
+  repairedTaskStatusMutationCount: 0
+  forceClosedTaskCount: 0
+  readyForCloseoutMissingCloseoutPolicyAfter: 0
+  queueHealth:
+    activeQueueTaskCount: 51
+    activeQueueNonTerminalCount: 43
+    activeQueueTerminalCount: 8
+    terminalRecoveryWindow: 8
+    archiveCandidateCount: 0
+    displacedRecoveryWindowArchivedTask: module-run-v2-personal-ai-local-ui-browser-planning
+  repairedTaskIds:
+    - clarify-student-subject-and-paper-count-copy
+    - recheck-adr-006-ai-sdk-baseline
+    - decide-content-admin-ai-generation-scope
+    - decide-org-auth-scope-product-model
+    - decide-paper-count-and-question-type-policy
+    - plan-admin-experience-gap-closures
+    - plan-org-auth-implementation-split
+    - plan-advanced-enterprise-training-path
+    - record-org-auth-scope-child-table-decision
+    - record-content-admin-ai-human-review-decision
+    - record-content-admin-ai-storage-model-decision
+    - record-content-admin-ai-adoption-boundary-decision
+    - record-content-admin-ai-log-redaction-decision
+    - record-content-admin-ai-provider-approval-package-decision
+    - record-content-admin-ai-provider-baseline-decision
+    - record-paper-count-alias-policy-decision
+    - record-paper-question-type-strategy-decision
+    - record-paper-performance-acceptance-decision
+    - record-admin-experience-gap-sequencing-decision
+    - record-org-auth-contract-security-merge-decision
+    - record-enterprise-training-admin-first-decision
+    - org-auth-scope-contract-and-security-preflight
+    - org-auth-schema-approval-package
+    - org-auth-schema-implementation-plan
+  nextRecommendedTask: none_until_user_selects_next_preview_release_or_seed_task
+  blockedWithoutFreshApproval:
+    - source_or_test_changes
+    - package_lock_dependency_change
+    - schema_migration_seed_database_connection_or_data_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call
+    - browser_e2e_runtime_or_dev_server
+    - staging_validation_or_deploy
+    - payment_external_service
+    - org_auth_runtime_change
+    - pr_force_push_release_tag
+    - cost_calibration_gate
+  conclusion: >-
+    Structured closeoutPolicy metadata was added to 24 ready_for_closeout tasks without changing their statuses or
+    force-closing them. This packet remains docs/state-only and does not claim previewReleaseReady.
