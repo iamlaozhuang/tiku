@@ -104,12 +104,37 @@ This decision does not approve implementation, Provider calls, prompt/provider p
 persistence, formal content writes, schema, migration, database work, browser/e2e runtime, or a debugging-capture
 exception.
 
+## Provider Approval Package Preparation
+
+Follow-up approval on 2026-06-21 selected option B for the Provider/env/cost gate: prepare a Provider approval package
+only.
+
+Policy:
+
+1. The next Provider-related step for `content_admin` AI is a docs-only approval package, not live execution.
+2. The package must cover candidate `model_provider` and `model_config` baseline, draft-only use cases, env/secret
+   ownership, quota and cost caps, stop conditions, redaction rules, retention, access control, fallback behavior,
+   rollback or kill-switch rules, and validation evidence requirements.
+3. The package may cite ADR-006's installed AI SDK baseline as dependency availability only. It must not treat installed
+   packages as Provider/runtime approval.
+4. The package must preserve the earlier boundaries: generated output remains isolated and reviewable; formal
+   `question` or `paper` writes require separate human adoption; logs and evidence use redacted references only.
+5. Any future live Provider smoke, cost calibration, Provider configuration, `.env` work, prompt/payload handling,
+   model-output persistence, or runtime verification requires a separate task with fresh approval and explicit allowed
+   files.
+
+This decision does not approve real Provider calls, prompt/provider payload exposure, raw generated AI content evidence,
+model output persistence, `.env` reads or writes, secret creation, Provider configuration changes, source
+implementation, schema, migration, seed, database connection, package or lockfile change, browser/e2e/dev-server
+runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate work.
+
 ## Recommended Future Architecture
 
 Future implementation should be split into these reviewable tasks. Every implementation task must preserve the option A boundary: generation produces reviewable drafts or suggestions only; formal adoption remains a separate human action.
 
 1. Product UX/API contract package for `content_admin` AI generation request and review surfaces, including draft status and reviewer action semantics.
-2. Provider/env/cost approval package with redaction rules and stop conditions.
+2. Provider/env/cost approval package with redaction rules and stop conditions, following the option B docs-only
+   approval-package preparation decision above.
 3. Isolated generation result model or contract package, with no formal `question`/`paper` writes, following the option A
    isolated review-surface decision above.
 4. Manual review and formal adoption package for `question` drafts, following the option A two-step adoption boundary.

@@ -500,20 +500,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 46a092475c3dbe3bbcd879a2ba5c3230271e0777
-  lastKnownOriginMasterSha: 46a092475c3dbe3bbcd879a2ba5c3230271e0777
+  lastKnownMasterSha: be0a96179de4767cc0547a5ec24a250d49014701
+  lastKnownOriginMasterSha: be0a96179de4767cc0547a5ec24a250d49014701
 currentTask:
-  id: record-content-admin-ai-log-redaction-decision
+  id: record-content-admin-ai-provider-approval-package-decision
   status: ready_for_closeout
-  result: pass_content_admin_ai_log_redaction_decision_record
-  claimedAt: "2026-06-21T16:51:11-07:00"
-  validatedAt: "2026-06-21T16:52:48-07:00"
+  result: pass_content_admin_ai_provider_approval_package_decision_record
+  claimedAt: "2026-06-21T16:58:10-07:00"
+  validatedAt: "2026-06-21T16:59:59-07:00"
   closedAt: null
-  sourceStory: user-followup-approval-option-a-content-admin-ai-log-redaction
-  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-log-redaction-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-log-redaction-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-log-redaction-decision.md
-  branch: codex/content-admin-ai-log-redaction-decision
+  sourceStory: user-followup-approval-option-b-content-admin-ai-provider-approval-package
+  planPath: docs/05-execution-logs/task-plans/2026-06-21-record-content-admin-ai-provider-approval-package-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-provider-approval-package-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-provider-approval-package-decision.md
+  branch: codex/content-ai-provider-approval-package-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5038,6 +5038,11 @@ discoveredIssueClosureBatch20260621:
         - docs_decision
         - approval_blocked
         - security_review_required
+    - id: record-content-admin-ai-provider-approval-package-decision
+      classification:
+        - docs_decision
+        - approval_blocked
+        - security_review_required
     - id: record-paper-count-alias-policy-decision
       classification:
         - docs_decision
@@ -5192,6 +5197,28 @@ discoveredIssueClosureBatch20260621:
         implementation, schema, migration, seed, database connection, package or lockfile change, env/secret work,
         browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate
         work.
+    - decisionId: content-admin-ai-provider-approval-package
+      decidedAt: "2026-06-21T16:58:10-07:00"
+      source: user_selected_option_b
+      selectedOption: B
+      decision: prepare_provider_approval_package_without_provider_or_env_execution
+      appliesTo:
+        - content-admin-ai-provider-env-cost-approval-package
+        - content-admin-ai-generation-request-contract
+        - content-admin-ai-generation-result-review-surface
+        - content-admin-ai-audit-log-and-ai-call-log-redaction
+      implementationRule: >-
+        The next Provider-related step for content_admin AI is a docs-only Provider/env/cost approval package. The
+        package must cover candidate model_provider/model_config baseline, permitted draft-only use cases, env/secret
+        ownership, quota and cost caps, stop conditions, redaction, retention, access control, fallback behavior,
+        rollback or kill-switch rules, and validation evidence requirements before any real Provider execution can be
+        considered.
+      approvalBoundary: >-
+        This records a product and security planning decision only. It does not approve real Provider calls, prompt or
+        provider payload exposure, raw generated AI content evidence, model output persistence, `.env` reads or writes,
+        secret creation, Provider configuration changes, source implementation, schema, migration, seed, database
+        connection, package or lockfile change, browser/e2e/dev-server runtime, deploy, PR, force-push, payment,
+        external service, or Cost Calibration Gate work.
     - decisionId: paper-count-and-question-type-alias-policy
       decidedAt: "2026-06-21T15:38:50-07:00"
       source: user_selected_option_a
@@ -5390,7 +5417,7 @@ discoveredIssueClosureBatch20260621:
         source implementation, service/UI implementation, package or lockfile change, env/secret work, Provider calls,
         browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external service, or Cost Calibration Gate work.
   nextCandidateTaskId: null
-  currentSerialScopeStatus: content_admin_ai_log_redaction_decision_recorded
+  currentSerialScopeStatus: content_admin_ai_provider_approval_package_decision_recorded
   boundary: >-
     This seed registers scope only. It does not execute or alter product source, tests, package files, lockfiles, e2e,
     schema, migration, scripts, env, Provider configuration, database state, browser/dev-server runtime, deploy, PR,
