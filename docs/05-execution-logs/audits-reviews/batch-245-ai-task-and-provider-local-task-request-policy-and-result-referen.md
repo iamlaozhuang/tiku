@@ -1,12 +1,14 @@
-﻿# Module Run v2 Seeded Task Audit Review: batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen
+# Module Run v2 Seeded Task Audit Review: batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen
 
 ## Decision
 
-Pending implementation and closeout review.
+APPROVE: local task request policy and result reference contracts are locally covered by existing implementation and focused tests.
 
 ## Checks
 
-- RED/GREEN evidence must replace pending placeholders before closeout.
-- Commit evidence must replace pending placeholder before closeout.
-- localFullLoopGate, threadRolloverGate, and nextModuleRunCandidate decisions are required.
+- No blocking findings.
+- Existing implementation covers accepted requests, duplicate idempotent reuse, deterministic local rejection, caller-supplied result reference suppression, and organization authorization boundary behavior.
+- Focused unit validation passed with no product source edits.
+- Evidence remains redacted and contains no raw prompt, raw generated content, provider payload, database URL, Authorization header, secret, token, internal DB row, full paper content, raw employee answer text, or plaintext `redeem_code`.
+- Provider/env/dependency/schema/deploy/payment/PR/force-push work was not performed.
 - Cost Calibration Gate remains blocked.

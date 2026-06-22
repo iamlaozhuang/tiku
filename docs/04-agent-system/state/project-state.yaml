@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7f7426a7b147c038069590ef5ce2dda8351963c6
-  lastKnownOriginMasterSha: 7f7426a7b147c038069590ef5ce2dda8351963c6
+  lastKnownMasterSha: 0975c10f7e74b071e7a865449ea03247ab0489b1
+  lastKnownOriginMasterSha: 0975c10f7e74b071e7a865449ea03247ab0489b1
 currentTask:
-  id: batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  id: batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen
   status: closed
-  result: pass_ai_task_provider_lifecycle_contract
-  claimedAt: "2026-06-22T00:00:00-07:00"
-  validatedAt: "2026-06-22T00:09:08-07:00"
-  closedAt: "2026-06-22T00:09:08-07:00"
+  result: pass_ai_task_provider_request_policy_contract
+  claimedAt: "2026-06-22T00:16:00-07:00"
+  validatedAt: "2026-06-22T00:16:30-07:00"
+  closedAt: "2026-06-22T00:16:30-07:00"
   sourceStory: phase-70-advanced-ai-task-domain-implementation-planning
-  planPath: docs/05-execution-logs/task-plans/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-244-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
-  branch: codex/batch-244-ai-task-lifecycle-contract
-  commitSha: 078b3bc1
+  planPath: docs/05-execution-logs/task-plans/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  evidencePath: docs/05-execution-logs/evidence/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-245-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+  branch: codex/batch-245-ai-task-request-policy
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
