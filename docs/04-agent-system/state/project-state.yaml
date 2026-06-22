@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
   lastKnownOriginMasterSha: d436b16bd7643cb4f1ee4ca1ff7df7626d52a3c8
 currentTask:
-  id: preview-readiness-queue-hygiene-blocked-gate-classification
+  id: preview-readiness-queue-hygiene-preview-readiness-refresh
   status: closed
-  result: pass_blocked_gate_classification_recorded
-  claimedAt: "2026-06-22T05:35:59-07:00"
-  validatedAt: "2026-06-22T05:35:59-07:00"
-  closedAt: "2026-06-22T05:35:59-07:00"
+  result: pass_preview_readiness_queue_hygiene_checkpoint_refreshed
+  claimedAt: "2026-06-22T05:42:44-07:00"
+  validatedAt: "2026-06-22T05:42:44-07:00"
+  closedAt: "2026-06-22T05:42:44-07:00"
   sourceStory: user-request-2026-06-22-four-docs-state-queue-hygiene-tasks
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-blocked-gate-classification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-blocked-gate-classification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-blocked-gate-classification.md
-  branch: codex/queue-hygiene-blocked-gate-classification
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  branch: codex/queue-hygiene-preview-readiness-refresh
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -5977,3 +5977,72 @@ crossRoleLocalFlowBridgeValidation20260622:
     direct database access, destructive database operations, schema/drizzle/migration work, dependency/package/lockfile
     changes, Provider/model calls, staging/prod/cloud/deploy/payment/external-service work, PR, force-push, or Cost
     Calibration Gate execution.
+
+previewReadinessQueueHygieneCheckpoint20260622:
+  taskId: preview-readiness-queue-hygiene-preview-readiness-refresh
+  phase: preview-readiness-queue-hygiene-2026-06-22
+  recordedAt: "2026-06-22T05:42:44-07:00"
+  branch: codex/queue-hygiene-preview-readiness-refresh
+  taskStatus: closed
+  result: pass_preview_readiness_queue_hygiene_checkpoint_refreshed
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-preview-readiness-queue-hygiene-preview-readiness-refresh.md
+  queueHygieneTasks:
+    terminalArchiveTask: preview-readiness-queue-hygiene-archive-terminal-candidates
+    readyForCloseoutReviewTask: preview-readiness-queue-hygiene-ready-for-closeout-review
+    blockedGateClassificationTask: preview-readiness-queue-hygiene-blocked-gate-classification
+    previewReadinessRefreshTask: preview-readiness-queue-hygiene-preview-readiness-refresh
+  queueHealth:
+    queueSlimmingDecision: clean
+    activeQueueTaskCount: 51
+    activeQueueNonTerminalCount: 43
+    activeQueueTerminalCount: 8
+    terminalRecoveryWindow: 8
+    archiveCandidateCount: 0
+    selfRepairCandidateCount: 0
+    readyForCloseoutCount: 27
+    readyForCloseoutMissingCloseoutPolicy: 24
+    blockedTaskCount: 16
+    providerSmokeBlockedCount: 6
+    highRiskApprovalPackageBlockedCount: 10
+  localExperienceHealth:
+    useCaseCount: 32
+    experienceClosedCount: 21
+    releaseBlockedCount: 11
+    localExperienceCandidateTask: none
+    localExperienceSeedRequired: false
+    coverageRowsWaitingRepair: 0
+    coverageRowsWaitingClosure: 0
+  releasePreparationStatus:
+    previewReleaseReadyClaim: false
+    nextActionDecision: seed_proposal_available
+    seedProposalModule: ai-task-and-provider
+    seedProposalRequiresApproval: autoDriveLocalImplementationApproval
+    releaseGateGroupsBlocked:
+      - AP-01 provider smoke execution
+      - AP-02 ops auth quota cost calibration
+      - AP-03 provider staging execution
+      - AP-04 standard AI generation scope change
+      - AP-05 standard org self-service scope change
+      - AP-06 online payment
+      - AP-07 OCR auto import
+      - AP-08 org data export
+      - AP-09 runtime capability list
+      - AP-10 current checkpoint audit repair
+      - AP-11 source governance change
+    blockedWithoutFreshApproval:
+      - provider_model_call
+      - env_secret_access
+      - cost_calibration_gate
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - schema_migration
+      - dependency_package_lockfile_change
+      - product_source_test_e2e_change
+      - database_operation
+      - pr_or_force_push
+  conclusion: >-
+    Local docs/state queue hygiene is closed and the active queue is slim. This does not claim preview release
+    readiness. Preview release preparation still requires explicit approval and scope decisions for release gate groups
+    AP-01 through AP-11, and the next mechanism proposal is guarded seeding for ai-task-and-provider.
