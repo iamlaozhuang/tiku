@@ -503,18 +503,19 @@ repository:
   lastKnownMasterSha: 6c4085ed7bf2af16a99de475af86efe21a6db23b
   lastKnownOriginMasterSha: 6c4085ed7bf2af16a99de475af86efe21a6db23b
 currentTask:
-  id: provider-cost-staging-branch-merge-push-cleanup-2026-06-23
+  id: acceptance-runtime-blocker-final-review-2026-06-23
   status: closed
-  result: pass_master_pushed_and_local_branch_deleted
-  claimedAt: "2026-06-23T03:17:45-07:00"
-  validatedAt: "2026-06-23T03:20:59-07:00"
-  closedAt: "2026-06-23T03:20:59-07:00"
+  result: pass_final_review_decision_blocked_runtime_improved_external_and_role_gates_unclosed
+  decision: Blocked
+  claimedAt: "2026-06-23T03:24:18-07:00"
+  validatedAt: "2026-06-23T03:24:18-07:00"
+  closedAt: "2026-06-23T03:24:18-07:00"
   blockedAt: null
-  sourceStory: user-approved-2026-06-23-provider-cost-staging-merge-push-cleanup
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-provider-cost-staging-branch-merge-push-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-provider-cost-staging-branch-merge-push-cleanup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-provider-cost-staging-branch-merge-push-cleanup.md
-  branch: master
+  sourceStory: user-request-2026-06-23-runtime-blocker-final-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-final-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-final-review.md
+  branch: codex/acceptance-runtime-blocker-final-review-20260623
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -7732,7 +7733,7 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
   phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
   recordedAt: "2026-06-22T23:31:27-07:00"
   branch: codex/runtime-blocker-evidence-batch-20260623
-  status: provider_cost_staging_decision_closed_external_gates_deferred
+  status: final_review_closed_formal_acceptance_blocked
   sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
   sourceFinalDecisionEvidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
   batchPlanPath: docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md
@@ -7740,9 +7741,9 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
-  nextExecutableTaskId: acceptance-runtime-blocker-final-review-2026-06-23
-  nextExecutableTaskPurpose: recompute_final_pass_fail_blocked_after_runtime_repair_and_deferred_external_gates
-  nextApprovalRequired: none_for_decision_only_final_review
+  nextExecutableTaskId: null
+  nextExecutableTaskPurpose: owner_decision_required_for_next_acceptance_batch_or_closeout
+  nextApprovalRequired: fresh_approval_required_for_push_merge_closeout_or_next_execution_batch
   serialTasks:
     - acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
     - acceptance-l5-browser-runtime-scope-approval-2026-06-23
@@ -7956,10 +7957,54 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
       dependencyChanged: false
       productionOrStagingDataAccessed: false
       finalAcceptancePassClaim: false
+  runtimeBlockerFinalReview:
+    taskId: acceptance-runtime-blocker-final-review-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-final-review.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-final-review.md
+    status: closed
+    result: pass_final_review_decision_blocked_runtime_improved_external_and_role_gates_unclosed
+    decision: Blocked
+    validatedAt: "2026-06-23T03:24:18-07:00"
+    closedAt: "2026-06-23T03:24:18-07:00"
+    branch: codex/acceptance-runtime-blocker-final-review-20260623
+    finalScopeDecisions:
+      standardMvp: blocked
+      advancedMvp: blocked
+      previewStagingReadiness: blocked
+      productionReadiness: blocked
+      currentRuntimeBlockerBatch: closed_as_evidence_improved_not_acceptance_passing
+    improvedEvidence:
+      l5SeededLocalRoleFlow: pass_local_dev_evidence_only
+      l6OwnerPreview: partial_pass_with_repaired_prior_blockers
+      studentMistakeBookRuntimeBlocker: pass_scoped_local_repair
+      duplicateKeyRuntimeQualityGap: pass_scoped_local_repair
+    remainingBlockers:
+      roleSeparatedFinalCoverage: partial_or_unproven
+      providerRuntime: deferred
+      providerConfiguration: deferred
+      costCalibration: deferred
+      stagingPreview: deferred
+      paymentExternalService: rejected_for_current_batch
+      productionRelease: rejected_for_current_batch
+    executionBoundary:
+      providerCallExecuted: false
+      providerConfigurationEnabled: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      envSecretOpenedEditedOrRecorded: false
+      schemaMigrationDatabaseSeedExecuted: false
+      dependencyChanged: false
+      productionOrStagingDataAccessed: false
+      finalAcceptancePassClaim: false
   finalDecisionCarryForward:
     priorDecision: Blocked
     priorDecisionCode: blocked_by_approval_gate
+    currentDecision: Blocked
+    currentDecisionCode: blocked_by_unclosed_role_provider_cost_staging_and_release_gates
     priorPassForbidden: true
+    currentPassForbidden: true
     currentReleaseClaim: none
     currentFormalProductAcceptancePassClaim: false
   ownerModel:
