@@ -124,3 +124,17 @@ readiness, and production readiness remain blocked until fresh approval and task
 - boundary: no source, test, script, schema, migration, seed, database, package, lockfile, env, secret, Provider,
   browser/e2e, dev-server, deploy, payment, external-service, PR, force-push, Cost Calibration Gate, L5 walkthrough, or
   L6 owner preview action is approved by this closeout.
+
+## Post-Merge Closeout Evidence
+
+- merge: fast-forward merged `codex/acceptance-final-decision-review-20260622` into local `master`, updating
+  `39d157c2c21f5dd6fbb7b5d5eaece80cded5ee22..909327ad8b84532bac2fd240227d1d6f11d50665`.
+- postMergeBranchState: `master...origin/master [ahead 9]`, clean working tree before this closeout evidence update.
+- postMergeValidation:
+  - `git diff --check`: pass.
+  - `powershell -ExecutionPolicy Bypass -File scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId acceptance-final-decision-review-2026-06-22`:
+    pass.
+  - `powershell -ExecutionPolicy Bypass -File scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId acceptance-final-decision-review-2026-06-22`:
+    pass; local `master` ahead by nine commits and remote ahead by zero.
+- push: pending after this closeout evidence commit.
+- cleanup: pending until push succeeds.
