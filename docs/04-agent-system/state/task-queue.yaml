@@ -4668,9 +4668,14 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ai-lifecycle-run.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ai-lifecycle-run.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ai-lifecycle-run.md
-    status: pending
-    result: not_started
+    status: closed
+    result: pass_ai_lifecycle_provider_disabled_evidence_recorded_runtime_gates_blocked
+    claimedAt: "2026-06-22T15:30:00-07:00"
+    validatedAt: "2026-06-22T15:40:00-07:00"
+    closedAt: "2026-06-22T15:40:00-07:00"
+    branch: codex/acceptance-ai-lifecycle-run-20260622
     retryCount: 0
+    lastFailurePath: null
 
   - id: acceptance-final-decision-review-2026-06-22
     title: Acceptance final decision review
