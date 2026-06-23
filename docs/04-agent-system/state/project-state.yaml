@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T05:44:44-07:00"
+updatedAt: "2026-06-23T06:04:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-test-fixture-scope-approval-2026-06-23
+  id: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
   status: closed
-  result: pass_test_fixture_scope_approval_package_prepared_no_fixture_mutation
-  claimedAt: "2026-06-23T05:44:44-07:00"
-  validatedAt: "2026-06-23T05:44:44-07:00"
-  closedAt: "2026-06-23T05:44:44-07:00"
+  result: pass_static_fixture_supplement_playwright_runtime_deferred
+  claimedAt: "2026-06-23T05:55:57-07:00"
+  validatedAt: "2026-06-23T06:04:44-07:00"
+  closedAt: "2026-06-23T06:04:44-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
   branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: test_fixture_scope_package_prepared_waiting_owner_approval
+  status: test_fixture_static_supplement_completed_waiting_runtime_approval
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8068,9 +8068,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
-  nextExecutableTaskId: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
-  nextExecutableTaskPurpose: execute_test_only_fixture_supplement_only_if_owner_approves_scope_package
-  nextApprovalRequired: ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+  nextExecutableTaskId: acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
+  nextExecutableTaskPurpose: run_single_approved_test_only_fixture_spec_if_owner_approves_playwright_runtime
+  nextApprovalRequired: ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8078,6 +8078,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     - acceptance-role-separated-account-fixture-gap-decision-2026-06-23
     - acceptance-role-separated-account-test-fixture-scope-approval-2026-06-23
     - acceptance-role-separated-account-test-fixture-supplement-2026-06-23
+    - acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
     - acceptance-role-separated-account-runtime-walkthrough-2026-06-23
     - acceptance-role-separated-account-coverage-review-2026-06-23
   mandatoryCoverageRows:
@@ -8100,8 +8101,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     accountInventoryExecuted: true
     fixtureGapDecisionCompleted: true
     testFixtureScopeApprovalPackagePrepared: true
+    testFixtureSupplementImplemented: true
     accountActionExecuted: false
-    fixtureMutationExecuted: false
+    fixtureMutationExecuted: true
     databaseSeedExecuted: false
     schemaMigrationDatabaseSeedExecuted: false
     devServerStarted: false
@@ -8247,7 +8249,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
     status: closed
     result: pass_test_fixture_scope_approval_package_prepared_no_fixture_mutation
-    packageStatus: prepared_not_approved_for_execution
+    packageStatus: approved_for_execution_by_laozhuang_2026_06_23
     validatedAt: "2026-06-23T05:44:44-07:00"
     closedAt: "2026-06-23T05:44:44-07:00"
     nextTaskBlockedUntilApproval: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
@@ -8273,6 +8275,42 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       accountActionExecuted: false
       databaseSeedExecuted: false
       browserE2eExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      finalAcceptancePassClaim: false
+  testFixtureSupplement:
+    taskId: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+    fixtureSpecPath: e2e/role-separated-account-fixture-supplement.spec.ts
+    status: closed
+    result: pass_static_fixture_supplement_playwright_runtime_deferred
+    approvalConsumed:
+      packageId: ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+      auditorScope: excluded_from_this_fixture_supplement
+      playwrightRuntime: explicitly_deferred_until_after_fixture_change
+    validatedAt: "2026-06-23T06:04:44-07:00"
+    closedAt: "2026-06-23T06:04:44-07:00"
+    coveredRoleRows:
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    auditorIncluded: false
+    playwrightRuntimeExecuted: false
+    nextRuntimeApprovalRequired: ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
+    executionBoundary:
+      fixtureMutationExecuted: true
+      testOnlyFixtureSpecAdded: true
+      e2eRuntimeExecuted: false
+      accountActionExecuted: false
+      databaseSeedExecuted: false
+      schemaMigrationDatabaseSeedExecuted: false
       providerCallExecuted: false
       costCalibrationExecuted: false
       stagingOrProductionDeployExecuted: false
