@@ -8314,9 +8314,74 @@ tasks:
       Prepare a fresh owner approval package for browser/manual runtime walkthrough using the local role-separated
       accounts created by the prior task. This task must not read, print, or commit credential values; run browser or
       Playwright; call Provider; run Cost Calibration; touch staging/prod/payment; or claim final acceptance Pass.
-    status: pending
+    status: closed
+    result: pass_local_account_runtime_rerun_scope_package_prepared_no_runtime_execution
+    claimedAt: "2026-06-23T09:35:00-07:00"
+    validatedAt: "2026-06-23T09:35:00-07:00"
+    closedAt: "2026-06-23T09:35:00-07:00"
     approvalPackageIdToPrepare: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    packageStatus: prepared_not_approved_for_runtime_execution
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md
     sourceProvisioningEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    nextTaskBlockedUntilApproval: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
+    nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    rowsInScope:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    credentialHandlingRule: laozhuang_reads_private_file_and_enters_credentials_codex_never_reads_or_types_credentials
+    localTargets:
+      - http://127.0.0.1:3000
+      - http://localhost:3000
+    allowedEvidenceFields:
+      - role_row_name
+      - local_account_label
+      - local_route_or_workflow_label
+      - observed_allowed_behavior_status
+      - observed_denied_behavior_status
+      - access_denied_or_error_class_if_visible
+      - pass_fail_or_blocked
+      - redacted_blocker_notes
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
     blockedWithoutFreshApproval:
       - password_values_in_git_evidence_chat_screenshots_logs_env_or_terminal_transcripts
       - credential_document_read_by_codex_or_credential_entry_by_codex
@@ -8324,6 +8389,46 @@ tasks:
       - staging_prod_cloud_deploy
       - provider_model_call_or_provider_enablement
       - provider_cost_quota_pricing_measurement
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
+    title: Run local role-separated account runtime walkthrough
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_local_account_runtime_rerun
+    evidenceMode: full_redacted
+    validationPolicy: local_browser_manual_runtime_walkthrough_owner_enters_credentials
+    queueSelectionMode: serial_role_separated_account_batch_child_15
+    targetClosureItem: Runtime role evidence using local role-separated accounts
+    behaviorBoundary: acceptance_runtime::local_only_owner_entered_credentials_no_secret_capture
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 15
+    requiredOutcome: >-
+      If laozhuang approves ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23, run a local-only manual/browser
+      walkthrough for the prepared role-separated accounts. laozhuang must enter credentials manually. Codex must not
+      read credential files, type passwords, capture password values, run Provider, Cost Calibration, staging/prod,
+      payment, or claim final acceptance Pass.
+    status: blocked
+    blockedReason: requires_owner_approval_ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    requiredApprovalPackageId: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    blockedWithoutFreshApproval:
+      - ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+      - password_values_in_git_evidence_chat_screenshots_logs_env_or_terminal_transcripts
+      - credential_document_read_by_codex_or_credential_entry_by_codex
+      - source_test_fixture_schema_migration_dependency_or_env_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
       - payment_external_service
       - production_or_staging_data_access
       - cost_calibration_gate
