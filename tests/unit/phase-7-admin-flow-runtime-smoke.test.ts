@@ -4,7 +4,9 @@ import {
   createAdminFlowRuntimeRouteHandlers,
   type AdminFlowRuntimeRepositories,
 } from "@/server/services/admin-flow-runtime";
+import { createPostgresAdminFlowRuntimeRepositories } from "@/server/repositories/admin-flow-runtime-repository";
 import type { SessionService } from "@/server/services/session-service";
+import { personalAuth } from "@/db/schema";
 
 const now = new Date("2026-05-21T08:00:00.000Z");
 const updatedAt = "2026-05-21T08:00:00.000Z";
@@ -161,6 +163,105 @@ function createRepositories(): AdminFlowRuntimeRepositories {
 }
 
 describe("phase 7 admin flow runtime smoke", () => {
+  it("keeps the runtime user list unique by publicId when a user has multiple personal_auth rows", async () => {
+    const duplicatedUserRows = [
+      {
+        auth_status: "expired",
+        created_at: now,
+        name: "Dev Student",
+        organization_name: null,
+        organization_public_id: null,
+        phone: "13900000002",
+        public_id: "user-dev-student",
+        status: "active",
+        user_type: "personal",
+      },
+      {
+        auth_status: "active",
+        created_at: now,
+        name: "Dev Student",
+        organization_name: null,
+        organization_public_id: null,
+        phone: "13900000002",
+        public_id: "user-dev-student",
+        status: "active",
+        user_type: "personal",
+      },
+    ];
+    let selectCallCount = 0;
+    const mainListBuilder = {
+      from() {
+        return mainListBuilder;
+      },
+      groupBy() {
+        return {
+          as() {
+            return {
+              auth_status: personalAuth.status,
+              user_id: personalAuth.user_id,
+            };
+          },
+        };
+      },
+      leftJoin() {
+        return mainListBuilder;
+      },
+      where() {
+        return mainListBuilder;
+      },
+      orderBy() {
+        return mainListBuilder;
+      },
+      limit() {
+        return mainListBuilder;
+      },
+      async offset() {
+        return duplicatedUserRows;
+      },
+    };
+    const countBuilder = {
+      from() {
+        return countBuilder;
+      },
+      async where() {
+        return [{ value: 1 }];
+      },
+    };
+    const database = {
+      select() {
+        selectCallCount += 1;
+
+        return selectCallCount === 3 ? countBuilder : mainListBuilder;
+      },
+    };
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => database as never,
+    });
+
+    const result = await repositories.userOrgAuthRepository.listUsers({
+      keyword: null,
+      page: 1,
+      pageSize: 20,
+      sortBy: "updatedAt",
+      sortOrder: "desc",
+      status: "all",
+      userType: "all",
+    });
+
+    expect(result).toMatchObject({
+      pagination: {
+        total: 1,
+      },
+      users: [
+        {
+          authStatus: "active",
+          publicId: "user-dev-student",
+        },
+      ],
+    });
+    expect(result.users).toHaveLength(1);
+  });
+
   it("requires an authenticated admin session before returning admin data", async () => {
     const handlers = createAdminFlowRuntimeRouteHandlers({
       sessionService: createSessionService(),

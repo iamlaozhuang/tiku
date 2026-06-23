@@ -148,6 +148,70 @@ function createPagination(
   };
 }
 
+type AdminUserListItem = AdminUserListDto["users"][number];
+type AdminUserAuthStatus = AdminUserListItem["authStatus"];
+type AdminUserListRow = {
+  auth_status: AdminUserAuthStatus;
+  created_at: Date;
+  name: string;
+  organization_name: string | null;
+  organization_public_id: string | null;
+  phone: string;
+  public_id: string;
+  status: AdminUserListItem["status"];
+  user_type: AdminUserListItem["userType"];
+};
+
+const adminUserAuthStatusPriority = {
+  active: 3,
+  expired: 2,
+  cancelled: 1,
+} satisfies Record<NonNullable<AdminUserAuthStatus>, number>;
+
+function selectAdminUserAuthStatus(
+  leftStatus: AdminUserAuthStatus,
+  rightStatus: AdminUserAuthStatus,
+): AdminUserAuthStatus {
+  if (leftStatus === null) {
+    return rightStatus;
+  }
+
+  if (rightStatus === null) {
+    return leftStatus;
+  }
+
+  return adminUserAuthStatusPriority[rightStatus] >
+    adminUserAuthStatusPriority[leftStatus]
+    ? rightStatus
+    : leftStatus;
+}
+
+function mergeAdminUserListRows(rows: AdminUserListRow[]): AdminUserListRow[] {
+  const rowsByPublicId = new Map<string, AdminUserListRow>();
+
+  for (const row of rows) {
+    const existingRow = rowsByPublicId.get(row.public_id);
+
+    if (existingRow === undefined) {
+      rowsByPublicId.set(row.public_id, row);
+      continue;
+    }
+
+    rowsByPublicId.set(row.public_id, {
+      ...existingRow,
+      auth_status: selectAdminUserAuthStatus(
+        existingRow.auth_status,
+        row.auth_status,
+      ),
+      organization_name: existingRow.organization_name ?? row.organization_name,
+      organization_public_id:
+        existingRow.organization_public_id ?? row.organization_public_id,
+    });
+  }
+
+  return Array.from(rowsByPublicId.values());
+}
+
 export function createPostgresAdminFlowRuntimeRepositories(
   options: AdminFlowRuntimeRepositoryOptions = {},
 ): AdminFlowRuntimeRepositories {
@@ -172,9 +236,22 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     async listUsers(query) {
       const database = getDatabase();
       const conditions = createUserConditions(query);
+      const personalAuthStatusByUser = database
+        .select({
+          auth_status: sql<AdminUserAuthStatus>`case
+            when bool_or(${personalAuth.status} = 'active') then 'active'
+            when bool_or(${personalAuth.status} = 'expired') then 'expired'
+            when bool_or(${personalAuth.status} = 'cancelled') then 'cancelled'
+            else null
+          end`.as("auth_status"),
+          user_id: personalAuth.user_id,
+        })
+        .from(personalAuth)
+        .groupBy(personalAuth.user_id)
+        .as("personal_auth_status_by_user");
       const rows = await database
         .select({
-          auth_status: personalAuth.status,
+          auth_status: personalAuthStatusByUser.auth_status,
           created_at: user.created_at,
           name: user.name,
           organization_name: organization.name,
@@ -187,7 +264,10 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         .from(user)
         .leftJoin(employee, eq(employee.user_id, user.id))
         .leftJoin(organization, eq(organization.id, employee.organization_id))
-        .leftJoin(personalAuth, eq(personalAuth.user_id, user.id))
+        .leftJoin(
+          personalAuthStatusByUser,
+          eq(personalAuthStatusByUser.user_id, user.id),
+        )
         .where(and(...conditions))
         .orderBy(
           query.sortOrder === "asc"
@@ -202,7 +282,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         .where(and(...conditions));
 
       return {
-        users: rows.map((row) => ({
+        users: mergeAdminUserListRows(rows).map((row) => ({
           publicId: row.public_id,
           phone: row.phone,
           name: row.name,

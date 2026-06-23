@@ -503,16 +503,16 @@ repository:
   lastKnownMasterSha: 7cca0d306493d6039317a82a624b96d747f797c5
   lastKnownOriginMasterSha: 7cca0d306493d6039317a82a624b96d747f797c5
 currentTask:
-  id: acceptance-l6-owner-preview-actual-walkthrough-2026-06-23
+  id: fix-l6-runtime-blockers-mistake-book-and-duplicate-key-2026-06-23
   status: closed
-  result: reviewed_with_blocking_student_mistake_book_auth_gap_and_recorded_l6_residual_gaps
-  claimedAt: "2026-06-23T02:09:07-07:00"
-  validatedAt: "2026-06-23T02:33:49-07:00"
+  result: pass_local_runtime_blockers_repaired_with_tests_and_student_browser_recheck
+  claimedAt: "2026-06-23T02:46:00-07:00"
+  validatedAt: "2026-06-23T02:51:49-07:00"
   blockedAt: null
-  sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l6-owner-preview-actual-walkthrough.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l6-owner-preview-actual-walkthrough.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l6-owner-preview-actual-walkthrough.md
+  sourceStory: user-approved-2026-06-23-runtime-blocker-repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
   branch: codex/runtime-blocker-evidence-batch-20260623
   commitSha: null
   prUrl: null
@@ -7826,6 +7826,32 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
       - dedicated_role_accounts_still_partial
       - provider_cost_staging_release_gates_blocked
     decisionImpact: final_acceptance_pass_forbidden_provider_cost_staging_should_defer_or_remain_decision_only
+  runtimeBlockerRepair:
+    taskId: fix-l6-runtime-blockers-mistake-book-and-duplicate-key-2026-06-23
+    approvalConsumed: user_approved_runtime_blocker_repair_2026_06_23
+    approvedAt: "2026-06-23T02:46:00-07:00"
+    approvedBy: laozhuang
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-fix-l6-runtime-blockers-mistake-book-and-duplicate-key.md
+    status: closed
+    result: pass_local_runtime_blockers_repaired_with_tests_and_student_browser_recheck
+    validatedAt: "2026-06-23T02:51:49-07:00"
+    target: local_only_127_0_0_1_or_localhost
+    scope:
+      - student_mistake_book_cookie_backed_session
+      - admin_user_list_duplicate_public_id_key
+    blockedUntilClosed:
+      - acceptance-provider-cost-staging-decision-2026-06-23
+    executionBoundary:
+      providerCallExecuted: false
+      providerConfigurationEnabled: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      envSecretOpenedEditedOrRecorded: false
+      schemaMigrationDatabaseSeedExecuted: false
+      dependencyChanged: false
+      finalAcceptancePassClaim: false
   finalDecisionCarryForward:
     priorDecision: Blocked
     priorDecisionCode: blocked_by_approval_gate

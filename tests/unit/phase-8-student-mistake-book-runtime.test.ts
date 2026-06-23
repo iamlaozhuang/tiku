@@ -9,6 +9,7 @@ import type {
   MistakeBookRow,
   UpdateMistakeBookStateInput,
 } from "@/server/repositories/mistake-book-repository";
+import { SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
 
 const now = new Date("2026-05-22T05:00:00.000Z");
 const latestWrongAt = new Date("2026-05-21T05:00:00.000Z");
@@ -144,16 +145,20 @@ function createRepository(
 
 function createHandlers(
   options: {
+    acceptedAuthorization?: string;
     repository?: MistakeBookRepository;
     sessionResponse?: ApiResponse<AuthContextDto>;
   } = {},
 ) {
+  const acceptedAuthorization =
+    options.acceptedAuthorization ?? "Bearer student-session-token";
+
   return createStudentMistakeBookRuntimeRouteHandlers({
     mistakeBookRepository: options.repository ?? createRepository(),
     now: () => now,
     sessionService: {
       async getCurrentSession(input) {
-        return input.authorization === "Bearer student-session-token"
+        return input.authorization === acceptedAuthorization
           ? (options.sessionResponse ?? createStudentSession())
           : {
               code: 401001,
@@ -204,6 +209,28 @@ describe("phase 8 student mistake_book runtime", () => {
       (body as { data: { mistakeBooks: Array<Record<string, unknown>> } }).data
         .mistakeBooks[0],
     ).not.toHaveProperty("id");
+  });
+
+  it("uses the HttpOnly session cookie for local browser mistake_book access when no Authorization header exists", async () => {
+    const handlers = createHandlers();
+    const response = await handlers.collection.GET(
+      new Request("http://localhost/api/v1/mistake-books?page=1&pageSize=20", {
+        headers: {
+          cookie: `${SESSION_COOKIE_NAME}=student-session-token`,
+        },
+      }),
+    );
+
+    await expect(readJson(response)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mistakeBooks: [
+          {
+            publicId: "mistake_book_public_123",
+          },
+        ],
+      },
+    });
   });
 
   it("rejects missing session and admin session with the contract-safe auth error", async () => {

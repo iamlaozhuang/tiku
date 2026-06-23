@@ -1,4 +1,5 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import type { ApiResponse } from "../contracts/api-response";
 import type { RagRetrievalResultDto } from "../contracts/ai-rag-contract";
 import type { Profession } from "../models/auth";
@@ -62,7 +63,7 @@ export function createStudentMistakeBookUserResolver(
 ): MistakeBookUserResolver {
   return async (request) => {
     const sessionResponse = await sessionService.getCurrentSession({
-      authorization: request.headers.get("authorization"),
+      authorization: getRequestAuthorization(request),
     });
 
     if (!isSuccessfulSessionResponse(sessionResponse)) {
