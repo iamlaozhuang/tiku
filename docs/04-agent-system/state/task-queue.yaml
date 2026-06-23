@@ -5242,7 +5242,129 @@ tasks:
     validatedAt: "2026-06-23T00:11:44-07:00"
     closedAt: "2026-06-23T00:11:44-07:00"
     packageId: L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
-    nextApprovalRequired: L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
+    nextApprovalRequired: fulfilled_by_acceptance-l5-seeded-local-account-run-2026-06-23
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-l5-seeded-local-account-run-2026-06-23
+    title: Run approved L5 seeded local account evidence
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l5-seeded-local-account-scope-approval-2026-06-23
+    taskKind: acceptance_local_runtime_role_flow
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l5_seeded_local_account_run
+    evidenceMode: full
+    validationPolicy: local_runtime_l5_seeded_local_account_package_approved
+    queueSelectionMode: user_directed_blocker_repair_after_seeded_scope_approval
+    targetClosureItem: Seeded local account and DB-backed L5 role-flow evidence
+    behaviorBoundary: acceptance_execution::seeded_local_account_existing_specs_no_provider_no_staging
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: blocker_repair_child
+    serialBatchOrder: 2.7
+    sourceBlockedTaskId: acceptance-l5-standard-role-flow-run-2026-06-23
+    sourceScopeApprovalTaskId: acceptance-l5-seeded-local-account-scope-approval-2026-06-23
+    requiredOutcome: >-
+      Execute only the approved local dev seed script and listed existing Playwright specs, then record redacted
+      DB-backed, seeded-local, and role-flow evidence for Standard and Advanced MVP acceptance gaps without claiming
+      formal final acceptance Pass.
+    freshApprovalStatus: current_user_fresh_approval_materialized_for_package_execution
+    approvalPackageId: L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
+    approvedAt: "2026-06-23T00:22:02-07:00"
+    approvedBy: laozhuang
+    capabilities:
+      localBrowserRuntime: approved_local_only
+      devServer: approved_existing_project_script_only
+      localE2EValidation: approved_local_only_existing_specs
+      localE2ESmokeTier: seeded_local_account_task_specific_existing_specs
+      localDatabaseSeed: approved_local_dev_existing_script_only
+      envSecretAccess: blocked_existing_script_internal_env_loading_no_env_output
+      schemaMigration: blocked
+      destructiveDatabaseOperation: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      pushPrForcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-run.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-run.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-human-verification.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/fresh-local-dev-db-validation-playbook.md
+      - docs/05-execution-logs/acceptance/2026-06-23-l5-seeded-local-account-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+      - package.json
+      - playwright.config.ts
+      - scripts/db/Seed-DevDatabase.ps1
+      - src/db/dev-seed.ts
+      - e2e/edition-aware-authorization-db-backed-local-flow.spec.ts
+      - e2e/organization-training-local-full-flow.spec.ts
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - e2e/validation-data-prep.spec.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - Get-NetTCPConnection -LocalPort 3000 -State Listen
+      - Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000 -Method Head
+      - npm.cmd run test:e2e -- --list
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/edition-aware-authorization-db-backed-local-flow.spec.ts
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/organization-training-local-full-flow.spec.ts
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - conditional_only_if_needed: $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/validation-data-prep.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-run.md docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-run.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-run.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-l5-seeded-local-account-run-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-23-l5-seeded-local-account-scope-approval-package.md
+    blockedWithoutFreshApproval:
+      - env_secret_access_or_env_file_change
+      - schema_migration_or_drizzle_push
+      - destructive_database_reset_drop_truncate
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - push_pr_force_push
+      - final_acceptance_pass
+    status: closed
+    result: pass_seeded_local_account_existing_paths_with_dedicated_role_account_gaps_recorded
+    claimedAt: "2026-06-23T00:22:02-07:00"
+    validatedAt: "2026-06-23T00:26:47-07:00"
+    closedAt: "2026-06-23T00:26:47-07:00"
     retryCount: 0
     lastFailurePath: null
 
@@ -5251,7 +5373,7 @@ tasks:
     phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
     sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
     dependencies:
-      - acceptance-l5-standard-role-flow-run-2026-06-23
+      - acceptance-l5-seeded-local-account-run-2026-06-23
     taskKind: acceptance_local_runtime_role_flow
     moduleRunVersion: 2
     executionProfile: acceptance_runtime_l5_advanced_role_flow
@@ -5266,6 +5388,14 @@ tasks:
     requiredOutcome: >-
       Execute only the Advanced MVP local L5/browser surfaces approved by the previous scope package and record
       redacted advanced role-flow evidence, Provider-disabled boundaries, quota blockers, defects, and decision impact.
+    supersededByTaskId: acceptance-l5-seeded-local-account-run-2026-06-23
+    supersededReason: >-
+      The seeded local account run executed the approved DB-backed Standard and Advanced authorization specs plus
+      existing local role-flow specs. Advanced Provider, Cost Calibration, staging, and dedicated-role-account gaps
+      remain blocked and are not considered passed.
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-run.md
     freshApprovalRequiredBeforeExecution:
       - browser_e2e_runtime_or_dev_server
       - l5_role_walkthrough_execution
@@ -5279,7 +5409,11 @@ tasks:
       - payment_external_service
       - production_or_staging_data_access
       - cost_calibration_gate
-    status: pending
+    status: closed
+    result: superseded_by_seeded_local_account_run_existing_paths_provider_cost_staging_and_dedicated_accounts_blocked
+    claimedAt: "2026-06-23T00:26:47-07:00"
+    validatedAt: "2026-06-23T00:26:47-07:00"
+    closedAt: "2026-06-23T00:26:47-07:00"
     retryCount: 0
     lastFailurePath: null
 
@@ -5288,7 +5422,7 @@ tasks:
     phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
     sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
     dependencies:
-      - acceptance-l5-advanced-role-flow-run-2026-06-23
+      - acceptance-l5-seeded-local-account-run-2026-06-23
     taskKind: acceptance_owner_preview_readiness
     moduleRunVersion: 2
     executionProfile: acceptance_runtime_l6_owner_preview_readiness
