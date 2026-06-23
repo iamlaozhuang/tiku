@@ -503,16 +503,16 @@ repository:
   lastKnownMasterSha: 7cca0d306493d6039317a82a624b96d747f797c5
   lastKnownOriginMasterSha: 7cca0d306493d6039317a82a624b96d747f797c5
 currentTask:
-  id: acceptance-l5-fixture-only-role-coverage-run-2026-06-23
+  id: acceptance-l5-seeded-local-account-scope-approval-2026-06-23
   status: closed
-  result: pass_fixture_only_existing_specs_with_seeded_account_gaps_recorded
-  claimedAt: "2026-06-23T00:03:20-07:00"
-  validatedAt: "2026-06-23T00:05:20-07:00"
+  result: pass_l5_seeded_local_account_scope_approval_package_prepared_no_seed_executed
+  claimedAt: "2026-06-23T00:11:44-07:00"
+  validatedAt: "2026-06-23T00:11:44-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
   branch: codex/runtime-blocker-evidence-batch-20260623
   commitSha: null
   prUrl: null
@@ -7739,14 +7739,15 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
-  nextExecutableTaskId: none_fixture_only_gaps_require_owner_decision
-  nextExecutableTaskPurpose: await_seeded_local_account_or_fixture_expansion_scope_decision
-  nextApprovalRequired: seeded_local_account_scope_or_test_only_fixture_expansion_for_missing_rows
+  nextExecutableTaskId: none_seeded_local_account_scope_package_prepared
+  nextExecutableTaskPurpose: await_exact_l5_seeded_local_account_scope_approval
+  nextApprovalRequired: L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
   serialTasks:
     - acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
     - acceptance-l5-browser-runtime-scope-approval-2026-06-23
     - acceptance-l5-standard-role-flow-run-2026-06-23
     - acceptance-l5-fixture-only-role-coverage-run-2026-06-23
+    - acceptance-l5-seeded-local-account-scope-approval-2026-06-23
     - acceptance-l5-advanced-role-flow-run-2026-06-23
     - acceptance-l6-owner-preview-readiness-2026-06-23
     - acceptance-provider-cost-staging-decision-2026-06-23
@@ -8035,3 +8036,81 @@ acceptanceL5FixtureOnlyRoleCoverageRun20260623:
     files; call Provider/model services; deploy staging/prod/cloud resources; touch payment or external services;
     execute Cost Calibration; or claim Standard MVP, Advanced MVP, staging, release, production, or final acceptance
     Pass.
+
+acceptanceL5SeededLocalAccountScopeApproval20260623:
+  taskId: acceptance-l5-seeded-local-account-scope-approval-2026-06-23
+  phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+  recordedAt: "2026-06-23T00:11:44-07:00"
+  branch: codex/runtime-blocker-evidence-batch-20260623
+  taskStatus: closed
+  result: pass_l5_seeded_local_account_scope_approval_package_prepared_no_seed_executed
+  serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+  sourceBlockedTaskId: acceptance-l5-standard-role-flow-run-2026-06-23
+  sourceFixtureOnlyEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-23-l5-seeded-local-account-scope-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-seeded-local-account-scope-approval.md
+  packageId: L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
+  packageStatus: prepared_not_approved_for_execution
+  approvalConsumed:
+    scope: prepare_seeded_local_account_scope_package_only
+    approvedAt: "2026-06-23T00:11:44-07:00"
+    approvedBy: laozhuang
+    codexRole: execution_assistant_and_evidence_preparer_only
+  discoveredExistingLocalSeedSurface:
+    devSeedScript: scripts/db/Seed-DevDatabase.ps1
+    devSeedSource: src/db/dev-seed.ts
+    existingStaticSeedRoles:
+      - student
+      - super_admin
+    existingDynamicFlowRoles:
+      - validation_student
+      - organization_training_employee
+      - role_based_acceptance_student
+    existingDbBackedSpecs:
+      - e2e/edition-aware-authorization-db-backed-local-flow.spec.ts
+      - e2e/organization-training-local-full-flow.spec.ts
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - e2e/validation-data-prep.spec.ts
+  proposedIfApproved:
+    localTarget: http://127.0.0.1:3000
+    highestLocalValidationLevel: L6_local_role_flow
+    allowedDatabaseAction: local_dev_seed_and_acceptance_owned_test_data_only
+    allowedBrowserAction: local_playwright_existing_specs_only
+    allowedEvidence: command_status_test_counts_role_labels_and_redacted_summary_only
+    expectedResidualGap: dedicated_content_admin_ops_admin_org_admin_auditor_accounts_may_require_follow_up_seed_expansion
+  executionBoundary:
+    docsOnlyApprovalPackage: true
+    sourceCodeChanged: false
+    dependencyChanged: false
+    devServerStarted: false
+    browserE2EExecuted: false
+    seededLocalAccountExecuted: false
+    databaseConnectionOrSeedExecuted: false
+    envSecretOpenedEditedOrRecorded: false
+    providerCallExecuted: false
+    providerConfigurationEnabled: false
+    stagingOrProductionDeployExecuted: false
+    paymentExternalServiceTouched: false
+    accountActionExecuted: false
+    acceptancePassClaim: false
+    previewReleaseReadyClaim: false
+    productionReadyClaim: false
+  blockedWithoutFreshApproval:
+    - L5_SEEDED_LOCAL_ACCOUNT_SCOPE_2026_06_23
+    - env_secret_access_or_env_file_change
+    - schema_migration_or_drizzle_push
+    - destructive_database_reset_drop_truncate
+    - provider_model_call_or_provider_enablement
+    - staging_prod_cloud_deploy
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - production_or_staging_data_access
+    - cost_calibration_gate
+  boundary: >-
+    This task prepares the seeded local account scope approval package only. It does not run the dev seed script,
+    connect to a database, create or disable accounts, log in with credentials, start browser or Playwright execution,
+    read or edit env/secrets, change source/test/package/schema/migration files, call Provider/model services, deploy
+    staging/prod/cloud resources, touch payment or external services, execute Cost Calibration, or claim Standard MVP,
+    Advanced MVP, staging, release, production, or final acceptance Pass.
