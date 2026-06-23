@@ -13,15 +13,17 @@ targetBranch: master
 
 The source branch was fast-forward merged into `master`.
 
-| Item                    | Value                                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| Pre-merge `master` SHA  | `5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5`                           |
-| Merged head SHA         | `3671026bf`                                                          |
-| Merge mode              | `fast-forward`                                                       |
-| Source branch           | `codex/role-separated-account-coverage-batch-20260623`               |
-| Target branch           | `master`                                                             |
-| Push approval source    | laozhuang approved "提交合入推送并清理" in the current user request. |
-| Push status at evidence | pending; result will be reported in delivery summary after push.     |
+| Item                    | Value                                                                      |
+| ----------------------- | -------------------------------------------------------------------------- |
+| Pre-merge `master` SHA  | `5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5`                                 |
+| Merged head SHA         | `3671026bf`                                                                |
+| Merge mode              | `fast-forward`                                                             |
+| Source branch           | `codex/role-separated-account-coverage-batch-20260623`                     |
+| Target branch           | `master`                                                                   |
+| Push approval source    | laozhuang approved "提交合入推送并清理" in the current user request.       |
+| Push status at evidence | completed; `master` pushed to `origin/master` successfully.                |
+| Push retry note         | Initial default HTTPS pushes failed with TLS EOF; HTTP/1.1 push succeeded. |
+| Local branch cleanup    | completed; local source branch was deleted after successful push.          |
 
 ## Scope Summary
 
