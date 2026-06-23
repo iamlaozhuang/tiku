@@ -7865,6 +7865,102 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: acceptance-role-separated-account-closeout-e2e-gate-repair-2026-06-23
+    title: Repair role-based e2e pre-redemption route expectation for branch closeout
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-branch-closeout
+    dependencies:
+      - acceptance-role-separated-account-account-provisioning-decision-2026-06-23
+    taskKind: acceptance_closeout_gate_repair
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_closeout_e2e_gate_repair
+    evidenceMode: full
+    validationPolicy: e2e_spec_repair_with_full_gate_rerun
+    queueSelectionMode: closeout_gate_repair
+    targetClosureItem: Full e2e closeout gate failure in role-based acceptance Student Positive Flow
+    behaviorBoundary: acceptance_testing::repair_e2e_expectation_no_production_runtime_change
+    requiredOutcome: >-
+      Repair the existing role-based e2e acceptance spec so the new learner flow expects `/redeem-code` before
+      redemption and `/home` after redemption. This task may update only the specific failing e2e spec and docs/state
+      evidence. It cannot change production source, create accounts outside existing e2e behavior, read or write
+      credentials, change seed scripts, touch env/secrets, Provider, Cost Calibration, staging/prod, payment, or final
+      acceptance.
+    capabilities:
+      e2eSpecRepair: allowed
+      productionSourceChange: blocked
+      accountAction: blocked
+      credentialDocumentRead: blocked
+      credentialEntryByCodex: blocked
+      credentialProvisioning: blocked
+      databaseConnectionOutsideExistingE2e: blocked
+      databaseSeedOrWriteOutsideExistingE2e: blocked
+      schemaMigration: blocked
+      fixtureOrOtherE2eFileChange: blocked
+      browserRuntimeOutsideE2e: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - playwright.config.ts
+      - package.json
+      - test-results/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown e2e/role-based-acceptance/role-based-full-flow.spec.ts docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - npm.cmd run test:unit
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-closeout-e2e-gate-repair-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    specPath: e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    status: closed
+    result: pass_closeout_e2e_gate_repair_applied
+    claimedAt: "2026-06-23T08:11:57-07:00"
+    validatedAt: "2026-06-23T08:11:57-07:00"
+    closedAt: "2026-06-23T08:11:57-07:00"
+    redEvidence:
+      command: $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e
+      result: failed_before_repair_39_passed_1_failed_2_skipped_then_40_passed_1_failed_1_skipped
+      failingSpec: e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      failingSteps:
+        - 4_student_positive_flow
+        - 5_student_negative_flow
+      rootCause: stale_pre_redemption_home_route_expectation
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
     title: Prepare local account provisioning and credential handoff scope approval package
     phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23

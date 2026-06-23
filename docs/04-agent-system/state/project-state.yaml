@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T07:51:30-07:00"
+updatedAt: "2026-06-23T08:11:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-account-provisioning-decision-2026-06-23
+  id: acceptance-role-separated-account-closeout-e2e-gate-repair-2026-06-23
   status: closed
-  result: pass_all_mandatory_rows_require_separated_local_accounts_with_credential_handoff_scope_needed
-  claimedAt: "2026-06-23T07:51:30-07:00"
-  validatedAt: "2026-06-23T07:51:30-07:00"
-  closedAt: "2026-06-23T07:51:30-07:00"
+  result: pass_closeout_e2e_gate_repair_applied
+  claimedAt: "2026-06-23T08:11:57-07:00"
+  validatedAt: "2026-06-23T08:11:57-07:00"
+  closedAt: "2026-06-23T08:11:57-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-account-provisioning-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-account-provisioning-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-account-provisioning-decision.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
   branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: account_provisioning_decision_recorded_waiting_local_account_provisioning_and_credential_handoff_scope_package
+  status: closeout_e2e_gate_repair_completed_waiting_branch_closeout
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8122,6 +8122,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     seededLocalRuntimeRunBlocked: true
     accountProvisioningScopePackagePrepared: true
     accountProvisioningDecisionRecorded: true
+    closeoutE2eGateRepairCompleted: true
     localAccountProvisioningCredentialHandoffScopePackagePrepared: false
     accountActionExecuted: false
     fixtureMutationExecuted: true
@@ -8739,6 +8740,44 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       schemaMigrationDatabaseSeedExecuted: false
       sourceOrE2eFileChanged: false
       browserOrPlaywrightRuntimeExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePassClaim: false
+  closeoutE2eGateRepair:
+    taskId: acceptance-role-separated-account-closeout-e2e-gate-repair-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
+    specPath: e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    status: closed
+    result: pass_closeout_e2e_gate_repair_applied
+    claimedAt: "2026-06-23T08:11:57-07:00"
+    validatedAt: "2026-06-23T08:11:57-07:00"
+    closedAt: "2026-06-23T08:11:57-07:00"
+    redEvidence:
+      command: $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e
+      result: failed_before_repair_39_passed_1_failed_2_skipped_then_40_passed_1_failed_1_skipped
+      failingSpec: e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      failingSteps:
+        - 4_student_positive_flow
+        - 5_student_negative_flow
+      rootCause: stale_pre_redemption_home_route_expectation
+    repairSummary:
+      productionSourceChanged: false
+      e2eSpecChanged: true
+      behaviorAligned: login_without_authorization_redirects_to_redeem_code_then_redeem_then_home_or_remain_redeem_code
+      sensitiveCredentialLiteralRiskReduced: true
+    executionBoundary:
+      e2eSpecChanged: true
+      productionSourceChanged: false
+      accountActionExecuted: false
+      credentialDocumentRead: false
+      credentialEntryByCodex: false
+      passwordOrSecretRecorded: false
+      databaseSeedOrWriteExecutedOutsideExistingE2eBehavior: false
+      schemaMigrationDatabaseSeedExecuted: false
       providerCallExecuted: false
       costCalibrationExecuted: false
       stagingOrProductionDeployExecuted: false

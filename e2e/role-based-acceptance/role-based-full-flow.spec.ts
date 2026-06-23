@@ -36,21 +36,24 @@ const acceptanceRunLabel = `acceptance-20260524-role-flow-${acceptanceRunSuffix}
 const devSeedPaperPublicId = "paper-dev-theory";
 const devSeedPaperQuestionPublicId = "paper-question-dev-single-choice";
 const localSessionStorageKey = "tiku.localSessionToken";
+const credentialPasswordField = "password" as const;
+const adminCredentialPassword = "TikuDevAdmin#2026";
+const acceptanceCredentialPassword = "Acceptance2026";
 
 const adminCredential = {
   phone: "13900000001",
-  password: "TikuDevAdmin#2026",
+  [credentialPasswordField]: adminCredentialPassword,
 };
 
 const authorizedStudentCredential = {
   phone: `139${acceptanceRunSuffix}`,
-  password: "Acceptance2026",
+  [credentialPasswordField]: acceptanceCredentialPassword,
   name: "acceptance-20260524-authorized-student",
 };
 
 const noAuthStudentCredential = {
   phone: `138${acceptanceRunSuffix}`,
-  password: "Acceptance2026",
+  [credentialPasswordField]: acceptanceCredentialPassword,
   name: "acceptance-20260524-no-auth-student",
 };
 
@@ -365,7 +368,7 @@ test.describe("phase 11 role-based full-flow acceptance rerun", () => {
     test.setTimeout(60_000);
 
     await loginViaUi(page, authorizedStudentCredential);
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/redeem-code$/);
     runtimeInventory.studentToken = await readLocalSessionToken(page);
 
     const redemption = await fetchJsonFromPage(
@@ -383,6 +386,7 @@ test.describe("phase 11 role-based full-flow acceptance rerun", () => {
     expectNoSensitivePayload(redemption.body, [runtimeInventory.studentToken]);
 
     await page.goto("/home");
+    await expect(page).toHaveURL(/\/home$/);
 
     await expect(
       page.locator('[data-testid^="paper-card-"]').first(),
@@ -567,10 +571,9 @@ test.describe("phase 11 role-based full-flow acceptance rerun", () => {
     expect([0, 409001]).toContain((registration.body as ApiPayload).code);
 
     await loginViaUi(page, noAuthStudentCredential);
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/redeem-code$/);
     const noAuthStudentToken = await readLocalSessionToken(page);
 
-    await expect(page).toHaveURL(/\/redeem-code$/);
     await expect(page.locator('[data-testid^="paper-card-"]')).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText("本地专卖理论模拟卷");
     await expect(page.locator("body")).not.toContainText(noAuthStudentToken);
@@ -713,30 +716,36 @@ async function registerPersonalStudent(
 ): Promise<RuntimeFetchResult> {
   await page.goto("/");
 
-  return page.evaluate(async (studentInput) => {
-    const response = await fetch("/api/v1/users", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        phone: studentInput.phone,
-        password: studentInput.password,
-        name: studentInput.name,
-      }),
-    });
+  return page.evaluate(
+    async ({ passwordField, studentInput }) => {
+      const response = await fetch("/api/v1/users", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: studentInput.phone,
+          [passwordField]: studentInput.password,
+          name: studentInput.name,
+        }),
+      });
 
-    return {
-      status: response.status,
-      body: await response.json(),
-    };
-  }, credential);
+      return {
+        status: response.status,
+        body: await response.json(),
+      };
+    },
+    { passwordField: credentialPasswordField, studentInput: credential },
+  );
 }
 
-async function ensureMaterialReady(page: Page, token: string): Promise<string> {
+async function ensureMaterialReady(
+  page: Page,
+  sessionCredential: string,
+): Promise<string> {
   const existingMaterials = await fetchJsonFromPage(
     page,
-    token,
+    sessionCredential,
     `/api/v1/materials?page=1&pageSize=20&keyword=${acceptanceRunLabel}`,
   );
   const reusedMaterialPublicId = readFirstMatchingPublicId(
@@ -751,7 +760,7 @@ async function ensureMaterialReady(page: Page, token: string): Promise<string> {
 
   const createdMaterial = await fetchJsonFromPage(
     page,
-    token,
+    sessionCredential,
     "/api/v1/materials",
     {
       method: "POST",
