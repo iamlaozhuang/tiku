@@ -4747,3 +4747,338 @@ tasks:
     branch: codex/acceptance-final-decision-review-20260622
     retryCount: 0
     lastFailurePath: null
+
+  - id: acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
+    title: Seed runtime and blocked-gate evidence batch
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-final-decision-review-2026-06-22
+    taskKind: docs_state_governance_seed
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_blocker_batch_seed
+    evidenceMode: full
+    validationPolicy: docs_state_validation
+    queueSelectionMode: user_directed_runtime_blocker_batch_seed
+    targetClosureItem: Register runtime and blocked-gate evidence batch after final decision Blocked
+    behaviorBoundary: acceptance_execution::batch_seed_no_runtime_no_provider_no_staging
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: seed
+    serialBatchOrder: 0
+    requiredOutcome: >-
+      Create a serial runtime evidence batch that prioritizes L5 role flow, browser runtime acceptance, L6 owner
+      preview readiness, and later Provider, Cost Calibration, and staging decisions without executing those blocked
+      capabilities during the seed.
+    freshApprovalStatus: current_user_fresh_approval_materialized_for_docs_state_batch_seed_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/local-human-verification.md
+      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+      - docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+      - docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - l5_role_walkthrough_execution
+      - l6_owner_preview_execution
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
+    status: closed
+    result: pass_runtime_blocker_evidence_batch_seeded_no_runtime_executed
+    claimedAt: "2026-06-22T23:31:27-07:00"
+    validatedAt: "2026-06-22T23:31:27-07:00"
+    closedAt: "2026-06-22T23:31:27-07:00"
+    branch: codex/runtime-blocker-evidence-batch-20260623
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-l5-browser-runtime-scope-approval-2026-06-23
+    title: Prepare L5 browser runtime scope and approval package
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
+    taskKind: acceptance_runtime_approval_package
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l5_browser_scope_approval
+    evidenceMode: full
+    validationPolicy: docs_only_runtime_approval_package
+    queueSelectionMode: serial_runtime_blocker_batch_child_1
+    targetClosureItem: Exact L5 role flow and local browser runtime approval package
+    behaviorBoundary: acceptance_execution::approval_package_no_runtime_execution
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 1
+    requiredOutcome: >-
+      Produce the exact local-only L5/browser approval package covering roles, routes, local URLs, allowed commands,
+      redaction rules, account labels, sample data labels, stop conditions, and whether the next tasks may start a dev
+      server or browser runtime.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-human-verification.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md
+      - docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - l5_role_walkthrough_execution
+      - l6_owner_preview_execution
+      - provider_model_call_or_provider_enablement
+      - env_secret_access_or_env_file_change
+      - schema_migration_seed_database_connection_or_data_change
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    validationCommands:
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-browser-runtime-scope-approval.md
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-l5-standard-role-flow-run-2026-06-23
+    title: Run Standard MVP L5 local role flow evidence
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l5-browser-runtime-scope-approval-2026-06-23
+    taskKind: acceptance_local_runtime_role_flow
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l5_standard_role_flow
+    evidenceMode: full
+    validationPolicy: local_runtime_l5_requires_fresh_approval
+    queueSelectionMode: serial_runtime_blocker_batch_child_2
+    targetClosureItem: Standard MVP L5 local role flow evidence
+    behaviorBoundary: acceptance_execution::standard_l5_local_only_no_provider_no_staging
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 2
+    requiredOutcome: >-
+      Execute only the Standard MVP local L5/browser surfaces approved by the previous task and record redacted
+      role-flow evidence, defects, blocked gates, and decision impact.
+    freshApprovalRequiredBeforeExecution:
+      - browser_e2e_runtime_or_dev_server
+      - l5_role_walkthrough_execution
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - env_secret_access_or_env_file_change
+      - schema_migration_seed_database_connection_or_data_change
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-l5-advanced-role-flow-run-2026-06-23
+    title: Run Advanced MVP L5 local role flow evidence
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l5-standard-role-flow-run-2026-06-23
+    taskKind: acceptance_local_runtime_role_flow
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l5_advanced_role_flow
+    evidenceMode: full
+    validationPolicy: local_runtime_l5_requires_fresh_approval_provider_disabled
+    queueSelectionMode: serial_runtime_blocker_batch_child_3
+    targetClosureItem: Advanced MVP L5 local role flow evidence with Provider disabled unless approved
+    behaviorBoundary: acceptance_execution::advanced_l5_local_only_provider_disabled_no_staging
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 3
+    requiredOutcome: >-
+      Execute only the Advanced MVP local L5/browser surfaces approved by the previous scope package and record
+      redacted advanced role-flow evidence, Provider-disabled boundaries, quota blockers, defects, and decision impact.
+    freshApprovalRequiredBeforeExecution:
+      - browser_e2e_runtime_or_dev_server
+      - l5_role_walkthrough_execution
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - schema_migration_seed_database_connection_or_data_change
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-l6-owner-preview-readiness-2026-06-23
+    title: Prepare L6 owner preview readiness evidence
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l5-advanced-role-flow-run-2026-06-23
+    taskKind: acceptance_owner_preview_readiness
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l6_owner_preview_readiness
+    evidenceMode: full
+    validationPolicy: owner_preview_readiness_no_staging_without_fresh_approval
+    queueSelectionMode: serial_runtime_blocker_batch_child_4
+    targetClosureItem: L6 owner preview readiness and staging boundary decision inputs
+    behaviorBoundary: acceptance_execution::l6_owner_preview_readiness_no_staging_execution_by_default
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 4
+    requiredOutcome: >-
+      Prepare L6 owner preview readiness using laozhuang as the accountable owner and Codex as evidence assistant only.
+      If actual owner preview or staging execution is requested, stop for fresh approval.
+    blockedWithoutFreshApproval:
+      - l6_owner_preview_execution
+      - staging_prod_cloud_deploy
+      - env_secret_access_or_env_file_change
+      - production_or_staging_data_access
+      - provider_model_call_or_provider_enablement
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - cost_calibration_gate
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-provider-cost-staging-decision-2026-06-23
+    title: Decide Provider Cost Calibration and staging approval path
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l6-owner-preview-readiness-2026-06-23
+    taskKind: acceptance_blocked_gate_decision_package
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_provider_cost_staging_decision
+    evidenceMode: full
+    validationPolicy: decision_only_no_provider_no_cost_no_staging_execution
+    queueSelectionMode: serial_runtime_blocker_batch_child_5
+    targetClosureItem: Provider Cost Calibration and staging approval decision package
+    behaviorBoundary: acceptance_execution::decision_package_no_provider_no_cost_no_staging_execution
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 5
+    requiredOutcome: >-
+      Decide whether to approve, defer, or reject Provider runtime, Cost Calibration, staging preview, payment/external
+      service, and production release follow-up packages. This task does not execute those gates.
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - staging_prod_cloud_deploy
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-runtime-blocker-final-review-2026-06-23
+    title: Final review for runtime blocker evidence batch
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-provider-cost-staging-decision-2026-06-23
+    taskKind: acceptance_final_decision
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_blocker_final_review
+    evidenceMode: full
+    validationPolicy: final_pass_fail_blocked_decision_only
+    queueSelectionMode: serial_runtime_blocker_batch_child_6
+    targetClosureItem: Recompute Standard and Advanced MVP acceptance decision after runtime blocker evidence
+    behaviorBoundary: acceptance_execution::final_decision_from_new_evidence_only
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 6
+    requiredOutcome: >-
+      Produce a final Pass, Fail, or Blocked decision using only evidence from this batch and prior accepted evidence.
+      Pass is forbidden unless all required rows and gates have passing evidence.
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - staging_prod_cloud_deploy
+      - schema_migration_seed_database_connection_or_data_change
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    status: pending
+    retryCount: 0
+    lastFailurePath: null
