@@ -4739,6 +4739,11 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-final-decision-review.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-final-decision-review.md
-    status: pending
-    result: not_started
+    status: closed
+    result: pass_final_decision_blocked_release_and_runtime_gates_unsatisfied
+    claimedAt: "2026-06-22T15:50:00-07:00"
+    validatedAt: "2026-06-22T16:00:00-07:00"
+    closedAt: "2026-06-22T16:00:00-07:00"
+    branch: codex/acceptance-final-decision-review-20260622
     retryCount: 0
+    lastFailurePath: null
