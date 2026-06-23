@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T06:34:11-07:00"
+updatedAt: "2026-06-23T06:49:35-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-runtime-walkthrough-2026-06-23
+  id: acceptance-role-separated-account-coverage-review-2026-06-23
   status: closed
-  result: blocked_runtime_walkthrough_requires_separated_role_sessions_or_owner_exclusions
-  claimedAt: "2026-06-23T06:28:58-07:00"
-  validatedAt: "2026-06-23T06:34:11-07:00"
-  closedAt: "2026-06-23T06:34:11-07:00"
+  result: blocked_role_separated_account_coverage_requires_seeded_local_accounts_or_owner_exclusions
+  claimedAt: "2026-06-23T06:44:49-07:00"
+  validatedAt: "2026-06-23T06:49:35-07:00"
+  closedAt: "2026-06-23T06:49:35-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-runtime-walkthrough.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-runtime-walkthrough.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-runtime-walkthrough.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-review.md
   branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: role_separated_account_runtime_walkthrough_blocked_waiting_review
+  status: role_separated_account_coverage_review_blocked_waiting_seeded_or_owner_exclusion_scope
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8068,8 +8068,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
-  nextExecutableTaskId: acceptance-role-separated-account-coverage-review-2026-06-23
-  nextExecutableTaskPurpose: review_role_separated_account_blocker_status_from_current_evidence
+  nextExecutableTaskId: acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-2026-06-23
+  nextExecutableTaskPurpose: prepare_owner_approval_package_for_seeded_local_accounts_or_role_level_exclusions
   nextApprovalRequired: null
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
@@ -8081,6 +8081,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     - acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
     - acceptance-role-separated-account-runtime-walkthrough-2026-06-23
     - acceptance-role-separated-account-coverage-review-2026-06-23
+    - acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-2026-06-23
   mandatoryCoverageRows:
     - personal_standard_student
     - personal_advanced_student
@@ -8107,6 +8108,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     roleSeparatedRuntimeWalkthroughInProgress: false
     roleSeparatedRuntimeWalkthroughExecuted: true
     roleSeparatedRuntimeWalkthroughBlocked: true
+    roleSeparatedCoverageReviewCompleted: true
+    seededLocalOrOwnerExclusionScopePackagePrepared: false
     accountActionExecuted: false
     fixtureMutationExecuted: true
     databaseSeedExecuted: false
@@ -8389,6 +8392,54 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
         - personal_advanced_student
     executionBoundary:
       currentBrowserRuntimeInspectionStarted: true
+      accountActionExecuted: false
+      credentialDocumentRead: false
+      passwordOrSecretRecorded: false
+      databaseSeedOrWriteExecuted: false
+      schemaMigrationDatabaseSeedExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      finalAcceptancePassClaim: false
+  coverageReview:
+    taskId: acceptance-role-separated-account-coverage-review-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-review.md
+    decisionPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-review.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-review.md
+    status: closed
+    result: blocked_role_separated_account_coverage_requires_seeded_local_accounts_or_owner_exclusions
+    claimedAt: "2026-06-23T06:44:49-07:00"
+    validatedAt: "2026-06-23T06:49:35-07:00"
+    closedAt: "2026-06-23T06:49:35-07:00"
+    blockerDecision: remains_blocked
+    needsSeededLocalAccountOrOwnerExclusion: true
+    recommendedNextTaskId: acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-2026-06-23
+    recommendedNextPackageId: ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23
+    rowsStillBlocking:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    partialRows:
+      - personal_standard_student
+      - personal_advanced_student
+    blockedRows:
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    acceptableClosurePaths:
+      - seeded_local_account_runtime_evidence_by_role
+      - explicit_owner_mvp_exclusion_by_role
+      - explicit_owner_fixture_only_or_variance_acceptance_by_role
+    executionBoundary:
       accountActionExecuted: false
       credentialDocumentRead: false
       passwordOrSecretRecorded: false
