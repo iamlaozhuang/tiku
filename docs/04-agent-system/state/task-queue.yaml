@@ -6323,7 +6323,70 @@ tasks:
     requiredOutcome: >-
       Prepare a natural-language scope approval package that names the role rows, account labels, route/workflow checks,
       evidence redaction rules, stop conditions, and fresh approvals required before inventory or runtime execution.
-    status: pending
+    capabilities:
+      docsStateEdit: approved
+      accountInventory: blocked_until_owner_approves_ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+      accountAction: blocked
+      fixtureMutation: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      localDevServer: blocked
+      browserRuntime: blocked
+      localE2EValidation: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      prForcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-scope-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-batch-plan.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-scope-approval.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-scope-approval-package.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-scope-approval.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-scope-approval-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-scope-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-scope-approval.md
+    packagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-scope-approval-package.md
+    packageId: ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+    nextTaskBlockedUntilApproval: acceptance-role-separated-account-inventory-2026-06-23
+    status: closed
+    result: pass_scope_approval_package_prepared_no_account_or_runtime_executed
+    claimedAt: "2026-06-23T03:58:00-07:00"
+    validatedAt: "2026-06-23T03:58:00-07:00"
+    closedAt: "2026-06-23T03:58:00-07:00"
     blockedWithoutFreshApproval:
       - account_creation_disable_password_reset_or_fixture_mutation
       - database_seed_or_write
@@ -6333,6 +6396,8 @@ tasks:
       - staging_prod_cloud_deploy
       - cost_calibration_gate
       - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
 
   - id: acceptance-role-separated-account-inventory-2026-06-23
     title: Inventory existing role separated local and fixture accounts
@@ -6354,7 +6419,8 @@ tasks:
     requiredOutcome: >-
       Inventory whether existing safe local or fixture accounts cover mandatory role rows, record only labels and gaps,
       and avoid password, cookie, secret, localStorage, database URL, raw DB row, or staging/prod evidence.
-    status: pending
+    status: blocked
+    blockedReason: requires_owner_approval_ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
     blockedWithoutFreshApproval:
       - password_or_secret_evidence
       - account_creation_disable_password_reset_or_fixture_mutation
