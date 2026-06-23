@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
-updatedAt: "2026-06-23T02:09:07-07:00"
+currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+updatedAt: "2026-06-23T03:44:41-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -500,21 +500,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8b224265af46e3956ebb0a003c214d56d8a652b2
-  lastKnownOriginMasterSha: 8b224265af46e3956ebb0a003c214d56d8a652b2
+  lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
+  lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: runtime-blocker-final-review-branch-merge-push-cleanup-2026-06-23
+  id: acceptance-role-separated-account-coverage-batch-seed-2026-06-23
   status: closed
-  result: pass_master_pushed_and_local_branch_deleted
-  claimedAt: "2026-06-23T03:31:44-07:00"
-  validatedAt: "2026-06-23T03:39:22-07:00"
-  closedAt: "2026-06-23T03:39:22-07:00"
+  result: pass_role_separated_account_coverage_batch_seeded_no_runtime_or_account_action_executed
+  claimedAt: "2026-06-23T03:44:41-07:00"
+  validatedAt: "2026-06-23T03:44:41-07:00"
+  closedAt: "2026-06-23T03:44:41-07:00"
   blockedAt: null
-  sourceStory: user-approved-2026-06-23-runtime-blocker-final-review-merge-push-cleanup
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
-  branch: master
+  sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -7740,9 +7740,9 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-runtime-blocker-evidence-batch-seed.md
-  nextExecutableTaskId: null
-  nextExecutableTaskPurpose: role_separated_account_coverage_batch_to_start_on_short_lived_branch
-  nextApprovalRequired: fresh_approval_required_for_push_merge_closeout_or_next_execution_batch
+  nextExecutableTaskId: acceptance-role-separated-account-scope-approval-2026-06-23
+  nextExecutableTaskPurpose: role_separated_account_coverage_scope_approval_before_provider_cost_staging
+  nextApprovalRequired: fresh_approval_required_for_account_runtime_fixture_seed_or_external_gate_execution
   serialTasks:
     - acceptance-runtime-blocker-evidence-batch-seed-2026-06-23
     - acceptance-l5-browser-runtime-scope-approval-2026-06-23
@@ -8053,6 +8053,87 @@ acceptanceRuntimeBlockerEvidenceBatch20260623:
     services, access env/secrets, perform database or schema work, deploy staging/prod/cloud resources, touch payment or
     external services, execute Cost Calibration, or claim Pass, preview readiness, staging readiness, release readiness,
     or production readiness.
+
+acceptanceRoleSeparatedAccountCoverageBatch20260623:
+  batchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+  phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+  recordedAt: "2026-06-23T03:44:41-07:00"
+  branch: codex/role-separated-account-coverage-batch-20260623
+  status: seeded_not_executed
+  sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+  sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
+  sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
+  batchPlanPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-batch-plan.md
+  seedTaskId: acceptance-role-separated-account-coverage-batch-seed-2026-06-23
+  seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+  nextExecutableTaskId: acceptance-role-separated-account-scope-approval-2026-06-23
+  nextExecutableTaskPurpose: prepare_exact_account_fixture_route_redaction_and_stop_rules
+  nextApprovalRequired: fresh_approval_required_for_account_runtime_fixture_seed_or_database_action
+  serialTasks:
+    - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
+    - acceptance-role-separated-account-scope-approval-2026-06-23
+    - acceptance-role-separated-account-inventory-2026-06-23
+    - acceptance-role-separated-account-fixture-gap-decision-2026-06-23
+    - acceptance-role-separated-account-runtime-walkthrough-2026-06-23
+    - acceptance-role-separated-account-coverage-review-2026-06-23
+  mandatoryCoverageRows:
+    - personal_standard_student
+    - personal_advanced_student
+    - org_standard_employee
+    - org_advanced_employee
+    - org_standard_admin
+    - org_advanced_admin
+    - content_admin
+    - ops_admin
+  boundaryCoverageRows:
+    - unauthenticated_visitor
+    - super_admin
+    - auditor_if_supported
+  executionBoundary:
+    docsOnlySeed: true
+    accountActionExecuted: false
+    fixtureMutationExecuted: false
+    databaseSeedExecuted: false
+    schemaMigrationDatabaseSeedExecuted: false
+    devServerStarted: false
+    browserE2eExecuted: false
+    providerCallExecuted: false
+    providerConfigurationEnabled: false
+    quotaCostPricingMeasured: false
+    envSecretOpenedEditedOrRecorded: false
+    stagingOrProductionDeployExecuted: false
+    paymentExternalServiceTouched: false
+    finalAcceptancePassClaim: false
+  blockedWithoutFreshApproval:
+    - account_creation_disable_password_reset_or_fixture_mutation
+    - database_seed_or_write
+    - browser_e2e_runtime_or_dev_server
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - schema_migration_or_drizzle_push
+    - destructive_database_reset_drop_truncate
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - production_or_staging_data_access
+    - cost_calibration_gate
+    - final_acceptance_pass
+  ownerModel:
+    accountableOwner: laozhuang
+    codexRole: execution_assistant_and_evidence_preparer_only
+    codexAccountableOwner: false
+  acceptanceRule: >-
+    The role-separated account blocker can close only after every mandatory row has redacted evidence for a separated
+    role account or an owner-accepted MVP exclusion, including at least one allowed behavior and one denied behavior.
+    Any unproven mandatory row keeps the blocker in Blocked status.
+  boundary: >-
+    This batch is seeded to fill role-separated account coverage before Provider, Cost Calibration, or staging gates.
+    The seed does not create accounts, mutate fixtures, run seeds, start browser/runtime validation, access credentials
+    or secrets, perform database work, call Provider/model services, deploy staging/prod/cloud resources, touch payment
+    or external services, execute Cost Calibration, or claim final acceptance Pass.
 
 acceptanceL5BrowserRuntimeScopeApproval20260623:
   taskId: acceptance-l5-browser-runtime-scope-approval-2026-06-23

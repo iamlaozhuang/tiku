@@ -6202,3 +6202,262 @@ tasks:
     closedAt: "2026-06-23T03:39:22-07:00"
     retryCount: 0
     lastFailurePath: null
+
+  - id: acceptance-role-separated-account-coverage-batch-seed-2026-06-23
+    title: Seed role separated account coverage batch
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - runtime-blocker-final-review-branch-merge-push-cleanup-2026-06-23
+    taskKind: docs_state_governance_seed
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_coverage_seed
+    evidenceMode: full
+    validationPolicy: docs_state_only_no_runtime_no_account_action
+    queueSelectionMode: user_directed_next_acceptance_batch_seed
+    targetClosureItem: Role-separated account coverage batch registered with coverage matrix and next scope task
+    behaviorBoundary: acceptance_execution::docs_state_seed_no_runtime_no_account_no_db_no_external_gate
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: seed
+    serialBatchOrder: 0
+    requiredOutcome: >-
+      Register a local-only role-separated account coverage batch, define mandatory role rows, preserve prior Blocked
+      decision, and point the next executable task at scope approval before any account, fixture, runtime, database, or
+      external gate work.
+    capabilities:
+      docsStateEdit: approved
+      accountAction: blocked
+      fixtureMutation: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      localDevServer: blocked
+      browserRuntime: blocked
+      localE2EValidation: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      prForcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-batch-plan.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
+      - docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-batch-plan.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-coverage-batch-seed-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
+    blockedWithoutFreshApproval:
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - database_seed_or_write
+      - browser_e2e_runtime_or_dev_server
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - schema_migration_or_drizzle_push
+      - destructive_database_reset_drop_truncate
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_or_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    status: closed
+    result: pass_role_separated_account_coverage_batch_seeded_no_runtime_or_account_action_executed
+    claimedAt: "2026-06-23T03:44:41-07:00"
+    validatedAt: "2026-06-23T03:44:41-07:00"
+    closedAt: "2026-06-23T03:44:41-07:00"
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-role-separated-account-scope-approval-2026-06-23
+    title: Prepare role separated account coverage scope approval
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
+    taskKind: acceptance_scope_approval_package
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_scope_approval
+    evidenceMode: full
+    validationPolicy: docs_only_no_runtime_no_account_action
+    queueSelectionMode: serial_role_separated_account_batch_child_1
+    targetClosureItem: Exact role account, fixture, route, redaction, and stop-condition scope package prepared
+    behaviorBoundary: acceptance_execution::scope_package_no_account_no_runtime_no_db
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 1
+    requiredOutcome: >-
+      Prepare a natural-language scope approval package that names the role rows, account labels, route/workflow checks,
+      evidence redaction rules, stop conditions, and fresh approvals required before inventory or runtime execution.
+    status: pending
+    blockedWithoutFreshApproval:
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - database_seed_or_write
+      - browser_e2e_runtime_or_dev_server
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - cost_calibration_gate
+      - final_acceptance_pass
+
+  - id: acceptance-role-separated-account-inventory-2026-06-23
+    title: Inventory existing role separated local and fixture accounts
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-scope-approval-2026-06-23
+    taskKind: acceptance_account_inventory
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_inventory
+    evidenceMode: redacted_account_labels_only
+    validationPolicy: inventory_only_no_password_evidence_no_mutation
+    queueSelectionMode: serial_role_separated_account_batch_child_2
+    targetClosureItem: Existing safe local or fixture account labels mapped to mandatory role rows
+    behaviorBoundary: acceptance_execution::inventory_no_secret_no_password_no_mutation
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 2
+    requiredOutcome: >-
+      Inventory whether existing safe local or fixture accounts cover mandatory role rows, record only labels and gaps,
+      and avoid password, cookie, secret, localStorage, database URL, raw DB row, or staging/prod evidence.
+    status: pending
+    blockedWithoutFreshApproval:
+      - password_or_secret_evidence
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - database_seed_or_write
+      - browser_e2e_runtime_or_dev_server
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - cost_calibration_gate
+      - final_acceptance_pass
+
+  - id: acceptance-role-separated-account-fixture-gap-decision-2026-06-23
+    title: Decide fixture or seeded account gap handling
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-inventory-2026-06-23
+    taskKind: acceptance_blocked_gate_decision_package
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_fixture_gap_decision
+    evidenceMode: full
+    validationPolicy: decision_only_no_fixture_no_seed_no_db_execution
+    queueSelectionMode: serial_role_separated_account_batch_child_3
+    targetClosureItem: Decision on whether missing roles need test-only fixture or seeded local account changes
+    behaviorBoundary: acceptance_execution::decision_package_no_fixture_no_seed_no_db_mutation
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 3
+    requiredOutcome: >-
+      Decide whether gaps should be handled by existing accounts, owner-accepted MVP exclusions, new test-only fixture
+      data, or seeded local accounts. This task does not perform the changes.
+    status: pending
+    blockedWithoutFreshApproval:
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - database_seed_or_write
+      - schema_migration_or_drizzle_push
+      - browser_e2e_runtime_or_dev_server
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - cost_calibration_gate
+      - final_acceptance_pass
+
+  - id: acceptance-role-separated-account-runtime-walkthrough-2026-06-23
+    title: Run approved role separated account runtime walkthrough
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-fixture-gap-decision-2026-06-23
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_runtime_walkthrough
+    evidenceMode: redacted_route_status_summary_only
+    validationPolicy: requires_fresh_runtime_and_account_scope_approval
+    queueSelectionMode: serial_role_separated_account_batch_child_4
+    targetClosureItem: Mandatory role rows walked through locally with allowed and denied behavior evidence
+    behaviorBoundary: acceptance_execution::local_runtime_only_after_fresh_approval
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 4
+    requiredOutcome: >-
+      Run approved local role-separated walkthrough for mandatory rows, recording redacted allowed and denied behavior
+      only. Provider, Cost Calibration, staging, production, payment, and external-service work remain blocked.
+    status: blocked
+    blockedReason: requires_fresh_runtime_account_and_redaction_scope_approval_after_inventory_and_gap_decision
+    blockedWithoutFreshApproval:
+      - browser_e2e_runtime_or_dev_server
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - database_seed_or_write
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - cost_calibration_gate
+      - final_acceptance_pass
+
+  - id: acceptance-role-separated-account-coverage-review-2026-06-23
+    title: Review role separated account coverage blocker decision
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-runtime-walkthrough-2026-06-23
+    taskKind: acceptance_blocker_review
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_account_coverage_review
+    evidenceMode: full
+    validationPolicy: pass_fail_blocked_for_role_separated_blocker_only
+    queueSelectionMode: serial_role_separated_account_batch_child_5
+    targetClosureItem: Decide whether the role-separated account blocker is closed, failed, or still blocked
+    behaviorBoundary: acceptance_execution::role_blocker_review_no_final_mvp_pass
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 5
+    requiredOutcome: >-
+      Decide only the role-separated account coverage blocker status using prior batch evidence. This task cannot claim
+      Standard or Advanced MVP final Pass and cannot approve Provider, Cost Calibration, staging, or release readiness.
+    status: blocked
+    blockedReason: requires_runtime_walkthrough_evidence_or_owner_accepted_mvp_exclusions
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+      - final_acceptance_pass
