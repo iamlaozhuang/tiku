@@ -6,6 +6,7 @@ resultDetail: pass_final_decision_blocked_release_and_runtime_gates_unsatisfied
 status: closed
 recordedAt: "2026-06-22T16:00:00-07:00"
 branch: codex/acceptance-final-decision-review-20260622
+Commit: `9716e9dc5d87fe209920cf3a38dfaf195f69d0af`
 Decision evidence commit before closeout metadata correction: `168d004601022af5d937df63d6fe362ded2de3a2`
 
 ## Batch range
