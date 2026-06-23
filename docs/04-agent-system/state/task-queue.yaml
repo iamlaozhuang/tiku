@@ -7198,12 +7198,127 @@ tasks:
       account/runtime evidence and which rows, if any, receive explicit MVP exclusion or fixture-only/variance
       acceptance. This task cannot execute account creation, credential handling, seed/database work, Provider, Cost
       Calibration, staging, or final acceptance.
-    status: pending
+    capabilities:
+      approvalPackagePreparation: approved_by_current_user_enter_task_2026_06_23
+      accountAction: blocked
+      credentialDocumentRead: blocked
+      credentialEntryByCodex: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      browserRuntime: blocked
+      playwrightRuntime: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-coverage-review.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-review.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-runtime-walkthrough.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-package.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-2026-06-23
+    packagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval.md
+    status: closed
+    result: pass_scope_approval_package_prepared_no_account_seed_or_runtime_executed
+    packageStatus: prepared_not_approved_for_execution
     recommendedPackageId: ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23
+    claimedAt: "2026-06-23T06:55:40-07:00"
+    validatedAt: "2026-06-23T07:00:28-07:00"
+    closedAt: "2026-06-23T07:00:28-07:00"
+    nextTaskBlockedUntilApproval: acceptance-role-separated-account-seeded-local-or-owner-exclusion-decision-2026-06-23
+    nextApprovalRequired: ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23
+    recommendedDefault: seeded_local_runtime_required_for_all_eight_mandatory_rows
+    rowsRequiringOwnerDecision:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
     blockedWithoutFreshApproval:
       - account_creation_disable_password_reset_or_fixture_mutation
       - credential_document_read_or_codex_entered_credentials
       - database_seed_or_write
+      - env_secret_access_or_env_file_change
+      - schema_migration_or_drizzle_push
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-role-separated-account-seeded-local-or-owner-exclusion-decision-2026-06-23
+    title: Decide role-by-role seeded local account or owner exclusion handling
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-seeded-local-or-owner-exclusion-scope-approval-2026-06-23
+    taskKind: acceptance_owner_decision_record
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_seeded_or_owner_exclusion_decision
+    evidenceMode: full
+    validationPolicy: docs_state_only_owner_decision_record
+    queueSelectionMode: serial_role_separated_account_batch_child_7
+    targetClosureItem: Row-by-row owner decision for seeded local runtime evidence or explicit exclusions
+    behaviorBoundary: acceptance_planning::record_owner_decision_no_account_or_seed_execution
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 7
+    requiredOutcome: >-
+      If laozhuang approves ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23, record the row-by-row
+      decision for all eight mandatory role rows. This task cannot execute account creation, credential handling,
+      seed/database work, browser runtime, Provider, Cost Calibration, staging, or final acceptance.
+    status: blocked
+    blockedReason: requires_owner_approval_ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23
+    requiredApprovalPackageId: ROLE_SEPARATED_SEEDED_LOCAL_OR_OWNER_EXCLUSION_SCOPE_2026_06_23
+    blockedWithoutFreshApproval:
+      - account_creation_disable_password_reset_or_fixture_mutation
+      - credential_document_read_or_codex_entered_credentials
+      - database_seed_or_write
+      - browser_runtime_or_playwright_runtime
       - env_secret_access_or_env_file_change
       - schema_migration_or_drizzle_push
       - provider_model_call_or_provider_enablement
