@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T08:56:57-07:00"
+updatedAt: "2026-06-23T09:18:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
+  id: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution-2026-06-23
   status: closed
-  result: pass_local_account_provisioning_credential_handoff_scope_package_prepared_no_execution
-  claimedAt: "2026-06-23T08:56:57-07:00"
-  validatedAt: "2026-06-23T08:56:57-07:00"
-  closedAt: "2026-06-23T08:56:57-07:00"
+  result: pass_local_role_accounts_provisioned_private_credential_handoff_created_runtime_still_blocked
+  claimedAt: "2026-06-23T09:18:16-07:00"
+  validatedAt: "2026-06-23T09:18:16-07:00"
+  closedAt: "2026-06-23T09:18:16-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
   branch: codex/local-account-provisioning-credential-handoff-scope-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: local_account_provisioning_credential_handoff_scope_package_prepared_waiting_owner_approval
+  status: local_account_provisioning_credential_handoff_completed_runtime_rerun_scope_pending
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8068,9 +8068,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
-  nextExecutableTaskId: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
-  nextExecutableTaskPurpose: prepare_scope_package_for_local_account_provisioning_and_private_credential_handoff
-  nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_PROVISIONING_AND_CREDENTIAL_HANDOFF_SCOPE_2026_06_23
+  nextExecutableTaskId: acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+  nextExecutableTaskPurpose: prepare_scope_package_for_local_runtime_rerun_with_role_separated_accounts
+  nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8088,6 +8088,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     - acceptance-role-separated-account-account-provisioning-scope-approval-2026-06-23
     - acceptance-role-separated-account-account-provisioning-decision-2026-06-23
     - acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
+    - acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution-2026-06-23
+    - acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
   mandatoryCoverageRows:
     - personal_standard_student
     - personal_advanced_student
@@ -8128,11 +8130,12 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     masterPushCompleted: true
     localSourceBranchDeleted: true
     localAccountProvisioningCredentialHandoffScopePackagePrepared: true
-    localAccountProvisioningCredentialHandoffExecutionCompleted: false
-    accountActionExecuted: false
+    localAccountProvisioningCredentialHandoffExecutionCompleted: true
+    accountActionExecuted: true
     fixtureMutationExecuted: true
-    databaseSeedExecuted: false
-    schemaMigrationDatabaseSeedExecuted: false
+    databaseSeedExecuted: true
+    schemaMigrationDatabaseSeedExecuted: true
+    schemaMigrationExecuted: false
     devServerStarted: false
     browserE2eExecuted: false
     browserRuntimeExecuted: true
@@ -8144,8 +8147,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     paymentExternalServiceTouched: false
     finalAcceptancePassClaim: false
   blockedWithoutFreshApproval:
-    - account_creation_disable_password_reset_or_fixture_mutation
-    - database_seed_or_write
+    - password_values_in_git_evidence_chat_screenshots_logs_env_or_terminal_transcripts
+    - credential_document_read_by_codex_or_credential_entry_by_codex
     - browser_e2e_runtime_or_dev_server
     - env_secret_access_or_env_file_change
     - provider_model_call_or_provider_enablement
@@ -8876,15 +8879,93 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       stagingOrProductionDeployExecuted: false
       paymentExternalServiceTouched: false
       finalAcceptancePassClaim: false
+  localAccountProvisioningCredentialHandoffExecution:
+    taskId: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution-2026-06-23
+    approvalConsumed: ROLE_SEPARATED_LOCAL_ACCOUNT_PROVISIONING_AND_CREDENTIAL_HANDOFF_SCOPE_2026_06_23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    status: closed
+    result: pass_local_role_accounts_provisioned_private_credential_handoff_created_runtime_still_blocked
+    claimedAt: "2026-06-23T09:18:16-07:00"
+    validatedAt: "2026-06-23T09:18:16-07:00"
+    closedAt: "2026-06-23T09:18:16-07:00"
+    credentialHandoffPath: local_private_credential_file_outside_repo
+    privateCredentialFilePath: D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    privateCredentialFileCreated: true
+    privateCredentialFileOutsideRepo: true
+    redactedDbVerification:
+      authUserCount: 8
+      authAccountPasswordHashCount: 8
+      personalUserCount: 2
+      studentCount: 2
+      personalStandardAuthCount: 1
+      personalAdvancedAuthCount: 1
+      organizationCount: 2
+      orgStandardAuthCount: 1
+      orgAdvancedAuthCount: 1
+      employeeCount: 2
+      adminCount: 4
+      contentAdminCount: 1
+      opsAdminCount: 1
+      organizationBoundAdminCount: 2
+    rowsCovered:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    knownLimitation: >-
+      Current schema has no independent org_admin enum. Enterprise admin rows are organization-bound admin accounts
+      using the existing ops_admin role plus admin_organization linkage; final permission separation remains subject
+      to later runtime walkthrough and product authorization model review.
+    nextExecutableTaskId: acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+    nextApprovalPackageId: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    executionBoundary:
+      accountActionExecuted: true
+      credentialPrivateFileCreated: true
+      credentialDocumentReadByCodex: false
+      credentialEntryByCodex: false
+      passwordOrSecretRecordedInGitEvidenceOrChat: false
+      localDatabaseSeedOrWriteExecuted: true
+      schemaMigrationExecuted: false
+      sourceOrE2eFileChanged: false
+      browserOrPlaywrightRuntimeExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePassClaim: false
+  localAccountRuntimeRerunScopeApproval:
+    taskId: acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+    packageIdToPrepare: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    sourceProvisioningEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+    status: pending
+    purpose: prepare_scope_package_for_browser_or_manual_runtime_walkthrough_using_role_separated_local_accounts
+    blockedWithoutFreshApproval:
+      - password_values_in_git_evidence_chat_screenshots_logs_env_or_terminal_transcripts
+      - credential_document_read_by_codex_or_credential_entry_by_codex
+      - browser_runtime_or_playwright_runtime_walkthrough
+      - staging_prod_cloud_deploy
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+      - final_acceptance_pass
   acceptanceRule: >-
     The role-separated account blocker can close only after every mandatory row has redacted evidence for a separated
     role account or an owner-accepted MVP exclusion, including at least one allowed behavior and one denied behavior.
     Any unproven mandatory row keeps the blocker in Blocked status.
   boundary: >-
-    This batch is seeded to fill role-separated account coverage before Provider, Cost Calibration, or staging gates.
-    The seed does not create accounts, mutate fixtures, run seeds, start browser/runtime validation, access credentials
-    or secrets, perform database work, call Provider/model services, deploy staging/prod/cloud resources, touch payment
-    or external services, execute Cost Calibration, or claim final acceptance Pass.
+    This batch is filling role-separated account coverage before Provider, Cost Calibration, or staging gates. The local
+    account provisioning execution has created or updated approved local dev accounts and a private credential handoff
+    file outside the repository. It still does not approve password values in git/evidence/chat/logs/env, browser or
+    Playwright runtime walkthrough, Provider/model services, staging/prod/cloud deployment, payment or external
+    services, Cost Calibration, or final acceptance Pass.
 
 acceptanceL5BrowserRuntimeScopeApproval20260623:
   taskId: acceptance-l5-browser-runtime-scope-approval-2026-06-23
