@@ -5028,6 +5028,116 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: acceptance-l5-fixture-only-role-coverage-run-2026-06-23
+    title: Run fixture-only L5 role coverage evidence
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
+    dependencies:
+      - acceptance-l5-browser-runtime-scope-approval-2026-06-23
+    taskKind: acceptance_fixture_only_role_coverage
+    moduleRunVersion: 2
+    executionProfile: acceptance_runtime_l5_fixture_only_role_coverage
+    evidenceMode: full
+    validationPolicy: local_runtime_fixture_only_existing_specs
+    queueSelectionMode: user_directed_blocker_repair_after_standard_l5_blocked
+    targetClosureItem: Fixture-only Standard and Advanced L5 role coverage and gap evidence
+    behaviorBoundary: acceptance_execution::fixture_only_existing_specs_no_seed_no_credentials_no_provider_no_staging
+    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    serialBatchRole: blocker_repair_child
+    serialBatchOrder: 2.5
+    sourceBlockedTaskId: acceptance-l5-standard-role-flow-run-2026-06-23
+    requiredOutcome: >-
+      Execute only approved existing fixture-only Playwright specs and record which requested role and edition
+      scenarios are covered, partially covered, or still missing. This task must not create seeded local accounts, use
+      real credentials, connect to a database, or claim formal L5 acceptance completion.
+    freshApprovalRequiredBeforeExecution:
+      - browser_e2e_runtime_or_dev_server
+      - fixture_only_existing_local_e2e_specs
+    freshApprovalStatus: current_user_fresh_approval_materialized
+    approvedAt: "2026-06-23T00:03:20-07:00"
+    capabilities:
+      fixtureOnlyRoleCoverage: approved_local_only_existing_specs
+      localBrowserRuntime: approved_local_only
+      devServer: approved_existing_project_script_only
+      localE2EValidation: approved_local_only_existing_specs
+      localE2ESmokeTier: fixture_only_task_specific_existing_specs
+      providerCall: blocked
+      envSecretAccess: blocked
+      schemaMigration: blocked
+      databaseConnectionOrSeed: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+    validationProfile: L5-fixture-only-e2e
+    localFullLoopGate: L5_fixture_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/local-human-verification.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-23-l5-browser-runtime-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md
+      - package.json
+      - playwright.config.ts
+      - e2e/edition-aware-authorization-local-flow.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/edition-aware-authorization-local-flow.spec.ts
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/admin-role-denial-browser.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-l5-fixture-only-role-coverage-run-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+    blockedWithoutFreshApproval:
+      - seeded_local_account_creation_or_login
+      - database_connection_seed_migration_or_data_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - cost_calibration_gate
+    status: closed
+    result: pass_fixture_only_existing_specs_with_seeded_account_gaps_recorded
+    claimedAt: "2026-06-23T00:03:20-07:00"
+    validatedAt: "2026-06-23T00:05:20-07:00"
+    closedAt: "2026-06-23T00:05:20-07:00"
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l5-advanced-role-flow-run-2026-06-23
     title: Run Advanced MVP L5 local role flow evidence
     phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
