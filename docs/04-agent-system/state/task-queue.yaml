@@ -5833,7 +5833,10 @@ tasks:
       - production_or_staging_data_access
       - pr_or_force_push
       - final_acceptance_pass
-    status: ready_for_closeout
+    status: closed
+    result: pass_master_pushed_and_local_branch_deleted
+    validatedAt: "2026-06-23T03:06:05-07:00"
+    closedAt: "2026-06-23T03:06:05-07:00"
     claimedAt: "2026-06-23T03:02:04-07:00"
     retryCount: 0
     lastFailurePath: null
