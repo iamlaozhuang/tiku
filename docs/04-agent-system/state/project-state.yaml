@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T03:58:00-07:00"
+updatedAt: "2026-06-23T04:32:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-scope-approval-2026-06-23
+  id: acceptance-role-separated-account-inventory-2026-06-23
   status: closed
-  result: pass_scope_approval_package_prepared_no_account_or_runtime_executed
-  claimedAt: "2026-06-23T03:58:00-07:00"
-  validatedAt: "2026-06-23T03:58:00-07:00"
-  closedAt: "2026-06-23T03:58:00-07:00"
+  result: pass_inventory_completed_with_dedicated_account_gaps_recorded
+  claimedAt: "2026-06-23T04:32:18-07:00"
+  validatedAt: "2026-06-23T04:32:18-07:00"
+  closedAt: "2026-06-23T04:32:18-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-scope-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-scope-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-scope-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-inventory.md
   branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: scope_approval_package_prepared_waiting_owner_approval
+  status: inventory_completed_gap_decision_required
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8068,9 +8068,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
-  nextExecutableTaskId: acceptance-role-separated-account-inventory-2026-06-23
-  nextExecutableTaskPurpose: inventory_existing_safe_local_or_fixture_account_labels_after_scope_approval
-  nextApprovalRequired: ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+  nextExecutableTaskId: acceptance-role-separated-account-fixture-gap-decision-2026-06-23
+  nextExecutableTaskPurpose: decide_fixture_seed_or_owner_exclusion_handling_for_recorded_role_gaps
+  nextApprovalRequired: fresh_owner_decision_required_before_fixture_seed_runtime_or_external_gate_execution
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8094,7 +8094,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   executionBoundary:
     docsOnlySeed: true
     scopeApprovalPackagePrepared: true
-    ownerScopeApprovalReceived: false
+    ownerScopeApprovalReceived: true
+    accountInventoryExecuted: true
     accountActionExecuted: false
     fixtureMutationExecuted: false
     databaseSeedExecuted: false
@@ -8142,6 +8143,43 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     nextApprovalRequired: ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
     executionBoundary:
       accountInventoryExecuted: false
+      accountActionExecuted: false
+      fixtureMutationExecuted: false
+      databaseSeedExecuted: false
+      browserE2eExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      finalAcceptancePassClaim: false
+  inventory:
+    taskId: acceptance-role-separated-account-inventory-2026-06-23
+    packageId: ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-inventory.md
+    inventoryPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-inventory.md
+    status: closed
+    result: pass_inventory_completed_with_dedicated_account_gaps_recorded
+    validatedAt: "2026-06-23T04:32:18-07:00"
+    closedAt: "2026-06-23T04:32:18-07:00"
+    coverageSummary:
+      mandatoryRows: 8
+      coveredAccountOrSeededLocal: 1
+      authorizationOnlyRows: 3
+      partialFixtureOrFlowOnlyRows: 4
+      readyForFinalBlockerClosure: 0
+      boundaryRowsRecorded: 3
+    dedicatedAccountGaps:
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+      - auditor_if_supported
+    executionBoundary:
+      accountInventoryExecuted: true
       accountActionExecuted: false
       fixtureMutationExecuted: false
       databaseSeedExecuted: false

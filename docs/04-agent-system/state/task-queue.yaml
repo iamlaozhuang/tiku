@@ -6419,8 +6419,79 @@ tasks:
     requiredOutcome: >-
       Inventory whether existing safe local or fixture accounts cover mandatory role rows, record only labels and gaps,
       and avoid password, cookie, secret, localStorage, database URL, raw DB row, or staging/prod evidence.
-    status: blocked
-    blockedReason: requires_owner_approval_ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+    capabilities:
+      docsStateEdit: approved
+      accountInventory: approved_by_ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+      accountAction: blocked
+      fixtureMutation: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      localDevServer: blocked
+      browserRuntime: blocked
+      localE2EValidation: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      prForcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-seeded-local-account-run.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-fixture-only-role-coverage-run.md
+      - e2e/edition-aware-authorization-local-flow.spec.ts
+      - e2e/edition-aware-authorization-db-backed-local-flow.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/organization-training-local-full-flow.spec.ts
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-inventory.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-inventory.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-inventory.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-inventory.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-inventory-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-inventory.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-inventory.md
+    inventoryPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-inventory.md
+    approvalConsumed:
+      packageId: ROLE_SEPARATED_ACCOUNT_SCOPE_2026_06_23
+      approvedAt: "2026-06-23T04:17:29-07:00"
+      approvedBy: laozhuang
+      codexRole: execution_assistant_and_evidence_preparer_only
+    status: closed
+    result: pass_inventory_completed_with_dedicated_account_gaps_recorded
+    claimedAt: "2026-06-23T04:32:18-07:00"
+    validatedAt: "2026-06-23T04:32:18-07:00"
+    closedAt: "2026-06-23T04:32:18-07:00"
     blockedWithoutFreshApproval:
       - password_or_secret_evidence
       - account_creation_disable_password_reset_or_fixture_mutation
@@ -6431,6 +6502,8 @@ tasks:
       - staging_prod_cloud_deploy
       - cost_calibration_gate
       - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
 
   - id: acceptance-role-separated-account-fixture-gap-decision-2026-06-23
     title: Decide fixture or seeded account gap handling
