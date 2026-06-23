@@ -1,9 +1,10 @@
 # Acceptance Baseline And Owner Gate Evidence
 
 taskId: acceptance-baseline-and-owner-gate-2026-06-22
-result: blocked_pending_named_owner_assignment
-status: baseline_frozen_owner_gate_blocked
-recordedAt: "2026-06-22T13:15:00-07:00"
+result: pass
+resultDetail: acceptance_baseline_frozen_single_owner_gate_assigned
+status: baseline_frozen_owner_gate_passed_for_single_owner_model
+recordedAt: "2026-06-22T13:45:00-07:00"
 branch: codex/acceptance-baseline-owner-gate-20260622
 Commit: `39d157c2c21f5dd6fbb7b5d5eaece80cded5ee22`
 
@@ -17,30 +18,32 @@ Commit: `39d157c2c21f5dd6fbb7b5d5eaece80cded5ee22`
 - frozenOriginMasterSha: `39d157c2c21f5dd6fbb7b5d5eaece80cded5ee22`
 - localFullLoopGate: not_executed_for_this_docs_state_owner_gate
 - threadRolloverGate: current thread can continue after owner assignment; no new thread required for this blocked record.
-- nextModuleRunCandidate: human_named_owner_assignment_required_before_acceptance-l0-l2-static-gates-2026-06-22
+- nextModuleRunCandidate: acceptance-l0-l2-static-gates-2026-06-22
 
 ## Baseline Decision
 
-RED: The acceptance baseline existed, but required L6 owner assignments were not named in the owner checklist,
-naming packet, or staging boundary packet.
+RED: The first closeout found that required L6 owner assignments were not named in the owner checklist, naming packet,
+or staging boundary packet.
 
-GREEN: The baseline is now frozen to the current acceptance plan, serial batch, and master/origin commit. The owner
-gate is recorded as blocked instead of being treated as accepted.
+GREEN: The baseline remains frozen to the current acceptance plan, serial batch, and master/origin commit. User approved
+the single-owner model: `laozhuang` is the accountable owner for accounts, data, evidence, monitoring, incident
+response, rollback, stop authority, staging boundary, and final acceptance review. Codex is only an execution and
+evidence-preparation assistant and is not an accountable owner.
 
 The blocked remainder remains blocked: AP-01 through AP-11, Provider/model execution, staging/prod/cloud deployment,
 env/secret access, schema/migration/seed/database work, dependency changes, browser/e2e runtime, payment/external
 services, previewReleaseReady, productionReady, L8 release, and the Cost Calibration Gate remains blocked.
 
-## Blocking Findings
+## Resolved Findings
 
-- BF-01: `realPersonNamesRecorded` is `false` in the owner acceptance checklist and related owner packets.
-- BF-02: `namedOwnerRefCurrentValue` is `null`; no non-sensitive named owner reference is recorded.
-- BF-03: Required L6 owner roles remain unnamed, so L6 owner preview, staging publication, evidence publication, and
-  formal acceptance cannot proceed.
+- RF-01: `namedOwnerRefCurrentValue` is now `laozhuang` in the owner acceptance checklist and related owner packets.
+- RF-02: Required L6 owner roles are assigned to `laozhuang` under a single-owner project model.
+- RF-03: Conditional roles remain assigned to `laozhuang` only if their future scope is requested and fresh approval
+  exists.
 
-## Pending Required Owner Roles
+## Required Owner Roles
 
-Required before L6, staging publication, evidence publication, or formal owner acceptance:
+Assigned to `laozhuang` for owner-gate purposes:
 
 - `accountInventoryOwner`
 - `accountCreationOwner`
@@ -56,7 +59,7 @@ Required before L6, staging publication, evidence publication, or formal owner a
 - `evidenceRedactionOwner`
 - `stagingResourceOwner`
 
-Conditionally required if that scope is requested:
+Assigned to `laozhuang` only if that future scope is requested and fresh approval exists:
 
 - `resetOrSeedOwner`
 - `stagingDomainTlsOwner`
@@ -64,12 +67,19 @@ Conditionally required if that scope is requested:
 - `migrationRollbackOwner`
 - `providerFeatureFlagOwner`
 
+Codex role:
+
+- Codex may execute local allowed commands, organize evidence, and point out risk.
+- Codex does not own accounts, data, staging resources, stop authority, rollback authority, release decisions, or final
+  acceptance decisions.
+
 ## Non-Executed Actions
 
 - No source, test, script, schema, migration, seed, database, package, lockfile, env, or secret file was changed.
 - No browser/e2e test, dev server, Provider/model call, staging/prod/cloud deploy, account action, payment action, PR,
   force push, release tag, or Cost Calibration Gate execution was performed.
-- No previewReleaseReady, productionReady, L6 readiness, L8 release, or acceptance-pass claim is made.
+- No previewReleaseReady, productionReady, L6 execution readiness, L8 release, or formal product acceptance claim is
+  made. This evidence only passes the baseline and owner assignment gate.
 
 ## Validation Commands
 
@@ -86,6 +96,6 @@ Conditionally required if that scope is requested:
 
 ## Closeout Position
 
-This is a blocked evidence closeout, not an acceptance pass. The smallest next repair is to provide reviewed,
-non-secret named owner references for the required L6 roles, then rerun the owner gate before starting the L0-L2 static
-acceptance child task.
+This closes the baseline and owner assignment gate for the single-owner model. The next serial task may proceed to
+`acceptance-l0-l2-static-gates-2026-06-22`, subject to its own validation scope and without treating this evidence as a
+formal product acceptance, previewReleaseReady, productionReady, or release-ready decision.

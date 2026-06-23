@@ -1,22 +1,22 @@
 schemaVersion: 1
 taskId: preview-owner-acceptance-naming-packet-2026-06-22
-updatedAt: "2026-06-22T13:15:00-07:00"
-status: naming_packet_defined_pending_human_assignment
+updatedAt: "2026-06-22T13:45:00-07:00"
+status: naming_packet_defined_single_owner_assignment_recorded
 sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
 ownerAssignmentStagingBoundaryPacket:
   path: docs/04-agent-system/state/preview-owner-acceptance-owner-assignment-staging-boundary-packet.yaml
-  status: defined_pending_human_owner_assignment_no_staging_resource_action
-  updatedAt: "2026-06-22T13:15:00-07:00"
+  status: defined_single_owner_assignment_no_staging_resource_action
+  updatedAt: "2026-06-22T13:45:00-07:00"
   stagingBoundaryStatus: planning_only_no_resource_action
-  realPersonNamesRecorded: false
+  realPersonNamesRecorded: true
 baselineAndOwnerGateCheck:
   taskId: acceptance-baseline-and-owner-gate-2026-06-22
-  checkedAt: "2026-06-22T13:15:00-07:00"
+  checkedAt: "2026-06-22T13:45:00-07:00"
   baselineFrozen: true
-  ownerGateStatus: blocked_pending_named_owner_assignment
-  realPersonNamesRecorded: false
-  namedOwnerRefCurrentValue: null
-  blockingReason: required_l6_owner_roles_remain_unnamed
+  ownerGateStatus: pass_single_owner_assignment_recorded
+  realPersonNamesRecorded: true
+  namedOwnerRefCurrentValue: laozhuang
+  blockingReason: null
   noRuntimeActionTaken: true
   previewReleaseReadyClaim: false
   productionReadyClaim: false
@@ -27,120 +27,130 @@ scope:
   previewReleaseReadyClaim: false
   deploymentApproved: false
   productionReadyClaim: false
-  realPersonNamesRecorded: false
-  assignmentReason: no_human_owner_names_were_provided_in_current_instruction
+  realPersonNamesRecorded: true
+  assignmentReason: user_approved_single_owner_model_laozhuang
 assignmentPolicy:
   namedOwnerRefType: non_sensitive_role_or_reviewed_public_business_identifier_only
-  namedOwnerRefCurrentValue: null
-  realPersonOrContactDetailsAllowedHere: false
+  namedOwnerRefCurrentValue: laozhuang
+  contactDetailsAllowedHere: false
   futureAssignmentRequires:
     - explicit_human_named_owner_input
     - redaction_boundary_for_any_personal_or_contact_detail
     - confirmation_owner_accepts_role
     - fresh_approval_before_staging_publication
+singleOwnerModel:
+  accountableOwnerRef: laozhuang
+  ownerModelStatus: approved_by_user
+  ownerCombinesRoles: true
+  codexRole: execution_assistant_and_evidence_preparer_only
+  codexAccountableOwner: false
+  approvedByUserStatement: >-
+    User approved that laozhuang is the single acceptance owner for accounts, data, evidence, monitoring, incident
+    response, rollback, stop authority, staging boundary, and final acceptance review. Codex is only an execution and
+    evidence-preparation assistant and is not an accountable owner.
 ownerAcceptanceAccounts:
-  status: pending_named_owner_assignment
+  status: assigned_to_single_owner
   roles:
     - roleKey: accountInventoryOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: fresh_staging_publication_approval
       responsibility:
         - approve_non_production_owner_acceptance_account_inventory
         - confirm_no_production_account_reuse
         - confirm_role_scope_for_each_reviewer_account
     - roleKey: accountCreationOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_account_creation_or_staging_publication
       responsibility:
         - own_future_account_creation_request
         - confirm_no_secret_or_password_is_recorded_in_evidence
         - confirm_account_creation_has_fresh_approval
     - roleKey: accountDisableOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_account_creation_or_staging_publication
       responsibility:
         - own_disable_or_reset_plan_for_owner_acceptance_accounts
         - confirm post_acceptance_access_shutdown_path
     - roleKey: acceptanceReviewerOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: fresh_staging_publication_approval
       responsibility:
         - approve_owner_acceptance_reviewer_list
         - confirm web_only_acceptance_scope
         - confirm no_preview_ready_claim_before_gate_evidence
 sampleDataBoundary:
-  status: pending_named_owner_assignment
+  status: assigned_to_single_owner
   roles:
     - roleKey: sampleDataOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_sample_data_publication_or_staging_seed_request
       responsibility:
         - approve synthetic_or_reviewed_non_sensitive_sample_data_set
         - confirm no_production_database_clone_or_object_storage_reuse
     - roleKey: sourceReviewOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_imported_content_or_reviewed_sample_metadata_use
       responsibility:
         - approve sample_source_origin
         - confirm no_private_customer_like_content
         - confirm no_full_paper_content_in_evidence
     - roleKey: redactionVerifier
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_preview_publication_or_evidence_claim
       responsibility:
         - verify no_secret_token_authorization_header_or_database_url
         - verify no_raw_prompt_provider_payload_or_raw_generated_content
         - verify no_raw_employee_answer_plaintext_redeem_code_or_full_paper_content
     - roleKey: resetOrSeedOwner
-      namedOwnerRef: null
-      assignmentStatus: conditionally_pending_named_owner_if_seed_or_reset_is_requested
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner_if_seed_or_reset_is_requested_with_fresh_approval
       requiredBefore: any_seed_reset_command_or_database_mutation
       responsibility:
         - approve exact seed_or_reset_target
         - approve backup_disposable_or_rollback_boundary
         - confirm fresh approval exists_before_command
 monitoringRollbackStopOwners:
-  status: pending_named_owner_assignment
+  status: assigned_to_single_owner
   roles:
     - roleKey: monitoringOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: fresh_staging_publication_approval
       responsibility:
         - approve monitoring_signal_list
         - review application_health_auth_callback_and_redaction_signals
     - roleKey: incidentOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: fresh_staging_publication_approval
       responsibility:
         - own incident_response_path_for_preview_publication
         - confirm escalation_and_status_update_boundary
     - roleKey: rollbackOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_staging_deploy_or_publication
       responsibility:
         - approve rollback_target_identifier_policy
         - confirm rollback_or_disablement_path
         - confirm migration_presence_or_absence_statement
     - roleKey: stopOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_staging_deploy_or_publication
       responsibility:
         - authorize stop_on_failed_gate_or_sensitive_evidence
         - authorize stop_on_unapproved_provider_env_db_deploy_browser_e2e_or_dependency_action
     - roleKey: evidenceRedactionOwner
-      namedOwnerRef: null
-      assignmentStatus: pending_named_owner
+      namedOwnerRef: laozhuang
+      assignmentStatus: assigned_to_single_owner
       requiredBefore: any_preview_publication_evidence
       responsibility:
         - approve evidence_redaction_boundary

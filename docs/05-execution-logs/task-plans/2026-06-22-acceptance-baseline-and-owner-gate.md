@@ -3,7 +3,7 @@
 taskId: acceptance-baseline-and-owner-gate-2026-06-22
 branch: codex/acceptance-baseline-owner-gate-20260622
 createdAt: "2026-06-22T13:15:00-07:00"
-status: blocked_closeout_validated
+status: owner_assignment_repair_validated
 
 ## Read Inputs
 
@@ -37,6 +37,22 @@ previewReleaseReady, productionReady, or acceptance-pass claims.
 3. Record the L6 owner gate as blocked if required owner roles remain unnamed.
 4. Update queue and project state so later serial acceptance tasks cannot proceed until this gate is repaired.
 5. Write redacted evidence and audit review records that make the stop condition explicit.
+
+## 2026-06-22 Owner Assignment Repair
+
+User approved a single-owner model: `laozhuang` is the accountable owner for accounts, data, evidence, monitoring,
+incident response, rollback, stop authority, staging boundary, and final acceptance review. Codex is only an execution
+and evidence-preparation assistant and is not an accountable owner.
+
+Repair approach:
+
+1. Record `laozhuang` as the non-sensitive named owner reference for required L6 owner roles.
+2. Keep conditional roles assigned to `laozhuang` only if the related scope is later requested and fresh approval
+   exists.
+3. Keep account creation/disablement, staging resources, Provider/model calls, env/secret changes, database work,
+   browser/e2e runtime, deployment, payment/external-service work, PR/force-push/release, and Cost Calibration Gate
+   blocked without future fresh approval.
+4. Close the baseline and owner gate task after local validation evidence passes.
 
 ## Risk Controls
 

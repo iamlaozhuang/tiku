@@ -1,6 +1,6 @@
 schemaVersion: 1
 taskId: preview-owner-acceptance-owner-assignment-staging-boundary-packet-2026-06-22
-updatedAt: "2026-06-22T13:15:00-07:00"
+updatedAt: "2026-06-22T13:45:00-07:00"
 status: owner_assignment_staging_boundary_packet_defined_docs_state_only
 sourceChecklistPath: docs/04-agent-system/state/preview-owner-acceptance-checklist.yaml
 sourceNamingPacketPath: docs/04-agent-system/state/preview-owner-acceptance-naming-packet.yaml
@@ -14,10 +14,10 @@ scope:
   stagingResourceActionApproved: false
   accountActionApproved: false
 ownerAssignment:
-  status: pending_human_named_owner_assignment
-  realPersonNamesRecorded: false
-  reason: no_human_owner_names_were_provided_in_current_instruction
-  namedOwnerRefCurrentValue: null
+  status: single_owner_assignment_recorded
+  realPersonNamesRecorded: true
+  reason: user_approved_single_owner_model_laozhuang
+  namedOwnerRefCurrentValue: laozhuang
   policy:
     namedOwnerRefType: non_sensitive_role_or_reviewed_public_business_identifier_only
     contactDetailsAllowedHere: false
@@ -26,40 +26,46 @@ ownerAssignment:
       - redaction_boundary_for_any_personal_or_contact_detail
       - confirmation_owner_accepts_role
       - fresh_approval_before_staging_publication
+  singleOwnerModel:
+    accountableOwnerRef: laozhuang
+    ownerModelStatus: approved_by_user
+    ownerCombinesRoles: true
+    codexRole: execution_assistant_and_evidence_preparer_only
+    codexAccountableOwner: false
   baselineAndOwnerGateCheck:
     taskId: acceptance-baseline-and-owner-gate-2026-06-22
-    checkedAt: "2026-06-22T13:15:00-07:00"
+    checkedAt: "2026-06-22T13:45:00-07:00"
     baselineFrozen: true
-    ownerGateStatus: blocked_pending_named_owner_assignment
-    realPersonNamesRecorded: false
-    namedOwnerRefCurrentValue: null
-    blockingReason: required_l6_owner_roles_remain_unnamed
+    ownerGateStatus: pass_single_owner_assignment_recorded
+    realPersonNamesRecorded: true
+    namedOwnerRefCurrentValue: laozhuang
+    blockingReason: null
     noRuntimeActionTaken: true
     previewReleaseReadyClaim: false
     productionReadyClaim: false
   requiredBeforeFreshStagingPublicationApproval:
     ownerAcceptanceAccounts:
-      accountInventoryOwner: pending_named_owner
-      accountCreationOwner: pending_named_owner
-      accountDisableOwner: pending_named_owner
-      acceptanceReviewerOwner: pending_named_owner
+      accountInventoryOwner: laozhuang
+      accountCreationOwner: laozhuang
+      accountDisableOwner: laozhuang
+      acceptanceReviewerOwner: laozhuang
     sampleDataBoundary:
-      sampleDataOwner: pending_named_owner
-      sourceReviewOwner: pending_named_owner
-      redactionVerifier: pending_named_owner
-      resetOrSeedOwner: conditionally_pending_named_owner_if_seed_or_reset_is_requested
+      sampleDataOwner: laozhuang
+      sourceReviewOwner: laozhuang
+      redactionVerifier: laozhuang
+      resetOrSeedOwner: laozhuang_if_seed_or_reset_is_requested_with_fresh_approval
     operationsAndSafety:
-      monitoringOwner: pending_named_owner
-      incidentOwner: pending_named_owner
-      rollbackOwner: pending_named_owner
-      stopOwner: pending_named_owner
-      evidenceRedactionOwner: pending_named_owner
+      monitoringOwner: laozhuang
+      incidentOwner: laozhuang
+      rollbackOwner: laozhuang
+      stopOwner: laozhuang
+      evidenceRedactionOwner: laozhuang
     stagingResourceBoundary:
-      stagingResourceOwner: pending_named_owner
-      stagingDomainTlsOwner: pending_named_owner
-      authCallbackOwner: pending_named_owner
-      migrationRollbackOwner: conditionally_pending_named_owner_if_staging_database_or_migration_is_requested
-      providerFeatureFlagOwner: conditionally_pending_named_owner_if_provider_enablement_is_requested
+      stagingResourceOwner: laozhuang
+      stagingDomainTlsOwner: laozhuang_if_public_url_is_requested_with_fresh_approval
+      authCallbackOwner: laozhuang_if_auth_flow_is_requested_with_fresh_approval
+      migrationRollbackOwner: laozhuang_if_staging_database_or_migration_is_requested_with_fresh_approval
+      providerFeatureFlagOwner: laozhuang_if_provider_enablement_is_requested_with_fresh_approval
 stagingBoundary:
   status: planning_only_no_resource_action
   resourceActionTaken: false
@@ -135,9 +141,9 @@ freshApprovalRequiredFor:
   - cost_calibration_gate
 boundaryStatement: >-
   This packet binds the existing preview owner acceptance checklist and naming packet to a staging boundary decision
-  surface. It records no real person names or contact details because none were provided, creates or disables no
-  accounts, creates or changes no staging resources, reads or writes no env/secret files, runs no Provider/model calls,
-  connects to no database, runs no schema/migration/seed/data mutation, starts no dev server, runs no browser/e2e,
-  deploys nothing, creates no PR, performs no force push, changes no dependencies, touches no payment/external service,
-  mutates no org_auth runtime behavior, declares no previewReleaseReady/productionReady status, and leaves the Cost
-  Calibration Gate blocked.
+  surface. It records laozhuang as the non-sensitive single owner reference and records no contact details,
+  credentials, or account identifiers. It creates or disables no accounts, creates or changes no staging resources,
+  reads or writes no env/secret files, runs no Provider/model calls, connects to no database, runs no
+  schema/migration/seed/data mutation, starts no dev server, runs no browser/e2e, deploys nothing, creates no PR,
+  performs no force push, changes no dependencies, touches no payment/external service, mutates no org_auth runtime
+  behavior, declares no previewReleaseReady/productionReady status, and leaves the Cost Calibration Gate blocked.

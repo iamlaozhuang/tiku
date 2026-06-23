@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: acceptance-baseline-and-owner-gate-2026-06-22
-updatedAt: "2026-06-22T13:15:00-07:00"
+updatedAt: "2026-06-22T13:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,11 +504,11 @@ repository:
   lastKnownOriginMasterSha: 9629319a5271df68e22309ddebd29f3b9536630e
 currentTask:
   id: acceptance-baseline-and-owner-gate-2026-06-22
-  status: blocked
-  result: blocked_pending_named_owner_assignment
+  status: closed
+  result: pass_acceptance_baseline_frozen_single_owner_gate_assigned
   claimedAt: "2026-06-22T13:15:00-07:00"
-  validatedAt: "2026-06-22T13:15:00-07:00"
-  blockedAt: "2026-06-22T13:15:00-07:00"
+  validatedAt: "2026-06-22T13:45:00-07:00"
+  closedAt: "2026-06-22T13:45:00-07:00"
   sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
   planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-baseline-and-owner-gate.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-baseline-and-owner-gate.md
@@ -517,7 +517,7 @@ currentTask:
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-baseline-and-owner-gate.md
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint
@@ -7303,7 +7303,7 @@ acceptanceSerialBatchOrchestration20260622:
     - acceptance-ai-lifecycle-run-2026-06-22
     - acceptance-final-decision-review-2026-06-22
   serialOrderEnforced: true
-  nextExecutableTaskId: acceptance-baseline-and-owner-gate-2026-06-22
+  nextExecutableTaskId: acceptance-l0-l2-static-gates-2026-06-22
   highRiskApprovalBoundary:
     e2eBrowserDevServer: future_fresh_approval_required
     stagingProdCloudDeploy: future_fresh_approval_required
@@ -7323,10 +7323,10 @@ acceptanceSerialBatchOrchestration20260622:
 acceptanceBaselineAndOwnerGate20260622:
   taskId: acceptance-baseline-and-owner-gate-2026-06-22
   phase: acceptance-baseline-and-owner-gate-2026-06-22
-  recordedAt: "2026-06-22T13:15:00-07:00"
+  recordedAt: "2026-06-22T13:45:00-07:00"
   branch: codex/acceptance-baseline-owner-gate-20260622
-  taskStatus: blocked
-  result: blocked_pending_named_owner_assignment
+  taskStatus: closed
+  result: pass_acceptance_baseline_frozen_single_owner_gate_assigned
   serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
   sourceAcceptancePlanPath: docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-baseline-and-owner-gate.md
@@ -7344,31 +7344,34 @@ acceptanceBaselineAndOwnerGate20260622:
     previewReleaseReadyClaim: false
     productionReadyClaim: false
   l6OwnerGate:
-    status: blocked_pending_named_owner_assignment
-    realPersonNamesRecorded: false
-    namedOwnerRefCurrentValue: null
-    requiredOwnerRolesPending:
-      - accountInventoryOwner
-      - accountCreationOwner
-      - accountDisableOwner
-      - acceptanceReviewerOwner
-      - sampleDataOwner
-      - sourceReviewOwner
-      - redactionVerifier
-      - monitoringOwner
-      - incidentOwner
-      - rollbackOwner
-      - stopOwner
-      - evidenceRedactionOwner
-      - stagingResourceOwner
-    conditionalOwnerRolesPendingIfScopeRuns:
-      - resetOrSeedOwner
-      - stagingDomainTlsOwner
-      - authCallbackOwner
-      - migrationRollbackOwner
-      - providerFeatureFlagOwner
-    blockingReason: required_l6_owner_roles_remain_unnamed
-  nextModuleRunCandidate: human_named_owner_assignment_required_before_acceptance-l0-l2-static-gates-2026-06-22
+    status: pass_single_owner_assignment_recorded
+    realPersonNamesRecorded: true
+    namedOwnerRefCurrentValue: laozhuang
+    accountableOwnerRef: laozhuang
+    codexRole: execution_assistant_and_evidence_preparer_only
+    codexAccountableOwner: false
+    requiredOwnerRolesAssigned:
+      accountInventoryOwner: laozhuang
+      accountCreationOwner: laozhuang
+      accountDisableOwner: laozhuang
+      acceptanceReviewerOwner: laozhuang
+      sampleDataOwner: laozhuang
+      sourceReviewOwner: laozhuang
+      redactionVerifier: laozhuang
+      monitoringOwner: laozhuang
+      incidentOwner: laozhuang
+      rollbackOwner: laozhuang
+      stopOwner: laozhuang
+      evidenceRedactionOwner: laozhuang
+      stagingResourceOwner: laozhuang
+    conditionalOwnerRolesAssignedIfScopeRuns:
+      resetOrSeedOwner: laozhuang_if_seed_or_reset_is_requested_with_fresh_approval
+      stagingDomainTlsOwner: laozhuang_if_public_url_is_requested_with_fresh_approval
+      authCallbackOwner: laozhuang_if_auth_flow_is_requested_with_fresh_approval
+      migrationRollbackOwner: laozhuang_if_staging_database_or_migration_is_requested_with_fresh_approval
+      providerFeatureFlagOwner: laozhuang_if_provider_enablement_is_requested_with_fresh_approval
+    blockingReason: null
+  nextModuleRunCandidate: acceptance-l0-l2-static-gates-2026-06-22
   executionBoundary:
     docsOnly: true
     sourceCodeChanged: false
@@ -7393,7 +7396,8 @@ acceptanceBaselineAndOwnerGate20260622:
     - production_or_staging_data_access
     - cost_calibration_gate
   boundary: >-
-    This baseline gate freezes the Standard and Advanced MVP acceptance baseline for the serial batch and records that
-    the L6 owner gate is blocked because no human named owner assignments are recorded. Later serial acceptance tasks
-    must not claim formal acceptance, previewReleaseReady, productionReady, L6 readiness, or release readiness until the
-    missing owners are assigned and a future evidence packet proves the gate.
+    This baseline gate freezes the Standard and Advanced MVP acceptance baseline for the serial batch and records
+    laozhuang as the single accountable owner for account, data, evidence, monitoring, incident response, rollback, stop
+    authority, staging boundary, and final acceptance review responsibilities. Codex is only an execution and
+    evidence-preparation assistant, not an accountable owner. This gate does not claim formal acceptance,
+    previewReleaseReady, productionReady, L6 execution, or release readiness.
