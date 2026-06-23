@@ -6624,12 +6624,128 @@ tasks:
       Prepare the exact owner approval package for test-only fixture supplement. The task may define proposed fixture
       role rows and redaction rules, but it must not edit fixtures, source, e2e, seed scripts, database, or runtime
       surfaces.
-    status: pending
+    capabilities:
+      docsStateEdit: approved
+      fixtureMutation: blocked_until_owner_approves_ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+      e2eFileChange: blocked_until_owner_approves_ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+      accountAction: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      localDevServer: blocked
+      browserRuntime: blocked
+      localE2EValidation: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      prForcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-test-fixture-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-fixture-gap-decision.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-fixture-gap-decision.md
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-test-fixture-scope-approval-package.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-test-fixture-scope-approval-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-scope-approval.md
+    packagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-test-fixture-scope-approval-package.md
+    packageId: ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+    nextTaskBlockedUntilApproval: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
+    status: closed
+    result: pass_test_fixture_scope_approval_package_prepared_no_fixture_mutation
+    claimedAt: "2026-06-23T05:44:44-07:00"
+    validatedAt: "2026-06-23T05:44:44-07:00"
+    closedAt: "2026-06-23T05:44:44-07:00"
     blockedWithoutFreshApproval:
       - fixture_mutation_or_new_e2e_execution
       - account_creation_disable_password_reset_or_seed_change
       - database_seed_or_write
       - schema_migration_or_drizzle_push
+      - browser_e2e_runtime_or_dev_server
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - staging_prod_cloud_deploy
+      - cost_calibration_gate
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
+    title: Implement approved role separated test-only fixture supplement
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
+    dependencies:
+      - acceptance-role-separated-account-test-fixture-scope-approval-2026-06-23
+    taskKind: test_only_fixture_supplement
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_test_fixture_supplement
+    evidenceMode: redacted_fixture_role_labels_only
+    validationPolicy: requires_owner_approval_before_fixture_or_e2e_change
+    queueSelectionMode: serial_role_separated_account_batch_child_3b
+    targetClosureItem: Test-only fixture supplement for role-separated account gaps
+    behaviorBoundary: acceptance_execution::test_only_fixture_change_after_owner_approval
+    serialBatchId: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    serialBatchRole: child
+    serialBatchOrder: 3.2
+    requiredOutcome: >-
+      If laozhuang approves ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23, implement only the approved
+      test-only fixture supplement and write redacted evidence. Without that approval this task remains blocked.
+    proposedIfApproved:
+      preferredFiles:
+        - e2e/role-separated-account-fixture-supplement.spec.ts
+      fallbackFiles:
+        - e2e/admin-role-denial-browser.spec.ts
+        - e2e/edition-aware-authorization-local-flow.spec.ts
+      docsStateEvidenceFiles:
+        - docs/04-agent-system/state/project-state.yaml
+        - docs/04-agent-system/state/task-queue.yaml
+        - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+        - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+        - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+    status: blocked
+    blockedReason: requires_owner_approval_ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+    blockedWithoutFreshApproval:
+      - ROLE_SEPARATED_TEST_FIXTURE_SUPPLEMENT_SCOPE_2026_06_23
+      - runtime_playwright_execution_unless_explicitly_included_in_owner_approval
+      - account_creation_disable_password_reset_or_seed_change
+      - database_seed_or_write
+      - schema_migration_or_drizzle_push
+      - product_source_change
+      - package_or_lockfile_change
       - browser_e2e_runtime_or_dev_server
       - env_secret_access_or_env_file_change
       - provider_model_call_or_provider_enablement
@@ -6642,7 +6758,7 @@ tasks:
     phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
     sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
     dependencies:
-      - acceptance-role-separated-account-fixture-gap-decision-2026-06-23
+      - acceptance-role-separated-account-test-fixture-supplement-2026-06-23
     taskKind: acceptance_runtime_walkthrough
     moduleRunVersion: 2
     executionProfile: acceptance_role_separated_account_runtime_walkthrough
