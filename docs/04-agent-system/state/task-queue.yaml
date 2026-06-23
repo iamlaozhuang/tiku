@@ -4520,9 +4520,14 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-use-case-matrix-run.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-use-case-matrix-run.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-use-case-matrix-run.md
-    status: pending
-    result: not_started
+    status: closed
+    result: pass_use_case_matrix_static_evidence_recorded_runtime_gates_blocked
+    claimedAt: "2026-06-22T14:35:00-07:00"
+    validatedAt: "2026-06-22T14:45:00-07:00"
+    closedAt: "2026-06-22T14:45:00-07:00"
+    branch: codex/acceptance-use-case-matrix-run-20260622
     retryCount: 0
+    lastFailurePath: null
 
   - id: acceptance-ap-gate-decision-2026-06-22
     title: Acceptance AP gate decision
