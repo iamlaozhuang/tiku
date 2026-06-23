@@ -6,7 +6,7 @@ resultDetail: pass_final_decision_blocked_release_and_runtime_gates_unsatisfied
 status: closed
 recordedAt: "2026-06-22T16:00:00-07:00"
 branch: codex/acceptance-final-decision-review-20260622
-Commit: `29af8c9f87d39fb54c983b338b7bd532e2255835`
+Decision evidence commit before closeout metadata correction: `168d004601022af5d937df63d6fe362ded2de3a2`
 
 ## Batch range
 
@@ -111,3 +111,15 @@ No new P0/P1 defect is introduced by this final decision packet. The blocking it
 This closes the Standard and Advanced MVP acceptance serial batch with final decision `Blocked`. The repository has
 current L0-L2 and docs/state evidence, but formal product acceptance, Provider readiness, staging readiness, release
 readiness, and production readiness remain blocked until fresh approval and task-specific evidence exist.
+
+## Git Closeout Approval
+
+- approval: current user approved closing out the current branch after final decision review.
+- approvedActions: fast-forward merge to `master`, run required gates on `master`, push `origin/master`, and clean the
+  merged short-lived branch.
+- approvalTime: 2026-06-22 after the final decision review task was locally committed.
+- evidenceCorrection: replaced the stale commit reference from the prior AI lifecycle task with the final decision
+  commit `168d004601022af5d937df63d6fe362ded2de3a2`.
+- boundary: no source, test, script, schema, migration, seed, database, package, lockfile, env, secret, Provider,
+  browser/e2e, dev-server, deploy, payment, external-service, PR, force-push, Cost Calibration Gate, L5 walkthrough, or
+  L6 owner preview action is approved by this closeout.
