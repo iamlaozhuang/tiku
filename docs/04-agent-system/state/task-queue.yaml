@@ -6863,6 +6863,7 @@ tasks:
       finalAcceptancePass: blocked
     allowedCommands:
       - npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
     allowedEvidence:
       - command_name
       - spec_path
@@ -6885,10 +6886,59 @@ tasks:
       - raw_prompts
       - raw_answers
       - full_paper_or_material_content
-    status: blocked
-    blockedReason: requires_fresh_owner_approval_to_run_only_the_new_role_separated_fixture_spec
+    previousBlockedReason: requires_fresh_owner_approval_to_run_only_the_new_role_separated_fixture_spec
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - e2e/role-separated-account-fixture-supplement.spec.ts
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    approvalConsumed:
+      packageId: ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
+      approvedAt: "2026-06-23T06:15:14-07:00"
+      approvedBy: laozhuang
+      codexRole: execution_assistant_and_evidence_preparer_only
+    status: closed
+    result: pass_single_spec_runtime_after_existing_server_reuse_retry
+    claimedAt: "2026-06-23T06:15:14-07:00"
+    validatedAt: "2026-06-23T06:19:12-07:00"
+    closedAt: "2026-06-23T06:19:12-07:00"
+    runtimeEvidence:
+      primaryAttempt: blocked_before_tests_port_3000_in_use
+      retryWithExplicitExistingServerReuse: pass_6_tests
     blockedWithoutFreshApproval:
-      - ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
       - full_e2e_suite
       - any_spec_other_than_e2e_role_separated_account_fixture_supplement_spec
       - headed_browser_or_debug_mode
@@ -6901,6 +6951,8 @@ tasks:
       - staging_prod_cloud_deploy
       - cost_calibration_gate
       - final_acceptance_pass
+    retryCount: 1
+    lastFailurePath: null
 
   - id: acceptance-role-separated-account-runtime-walkthrough-2026-06-23
     title: Run approved role separated account runtime walkthrough

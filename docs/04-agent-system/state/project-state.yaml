@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T06:04:44-07:00"
+updatedAt: "2026-06-23T06:19:12-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-test-fixture-supplement-2026-06-23
+  id: acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
   status: closed
-  result: pass_static_fixture_supplement_playwright_runtime_deferred
-  claimedAt: "2026-06-23T05:55:57-07:00"
-  validatedAt: "2026-06-23T06:04:44-07:00"
-  closedAt: "2026-06-23T06:04:44-07:00"
+  result: pass_single_spec_runtime_after_existing_server_reuse_retry
+  claimedAt: "2026-06-23T06:15:14-07:00"
+  validatedAt: "2026-06-23T06:19:12-07:00"
+  closedAt: "2026-06-23T06:19:12-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-supplement.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
   branch: codex/role-separated-account-coverage-batch-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: test_fixture_static_supplement_completed_waiting_runtime_approval
+  status: test_fixture_single_spec_runtime_passed_waiting_walkthrough_approval
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8068,9 +8068,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
-  nextExecutableTaskId: acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
-  nextExecutableTaskPurpose: run_single_approved_test_only_fixture_spec_if_owner_approves_playwright_runtime
-  nextApprovalRequired: ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
+  nextExecutableTaskId: acceptance-role-separated-account-runtime-walkthrough-2026-06-23
+  nextExecutableTaskPurpose: decide_and_run_role_separated_account_runtime_walkthrough_if_owner_approves_scope
+  nextApprovalRequired: fresh_runtime_account_and_redaction_scope_approval
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8102,6 +8102,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     fixtureGapDecisionCompleted: true
     testFixtureScopeApprovalPackagePrepared: true
     testFixtureSupplementImplemented: true
+    testFixtureSingleSpecRuntimeInProgress: false
+    testFixtureSingleSpecRuntimePassed: true
     accountActionExecuted: false
     fixtureMutationExecuted: true
     databaseSeedExecuted: false
@@ -8311,6 +8313,39 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       accountActionExecuted: false
       databaseSeedExecuted: false
       schemaMigrationDatabaseSeedExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      finalAcceptancePassClaim: false
+  testFixtureRuntimeRun:
+    taskId: acceptance-role-separated-account-test-fixture-runtime-run-2026-06-23
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-test-fixture-runtime-run.md
+    fixtureSpecPath: e2e/role-separated-account-fixture-supplement.spec.ts
+    status: closed
+    result: pass_single_spec_runtime_after_existing_server_reuse_retry
+    approvalConsumed:
+      packageId: ROLE_SEPARATED_TEST_FIXTURE_SINGLE_SPEC_RUNTIME_2026_06_23
+      approvedAt: "2026-06-23T06:15:14-07:00"
+      approvedBy: laozhuang
+    allowedCommand: npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
+    retryCommand: TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER=1; npm.cmd run test:e2e -- e2e/role-separated-account-fixture-supplement.spec.ts
+    claimedAt: "2026-06-23T06:15:14-07:00"
+    validatedAt: "2026-06-23T06:19:12-07:00"
+    closedAt: "2026-06-23T06:19:12-07:00"
+    runtimeEvidence:
+      primaryAttempt: blocked_before_tests_port_3000_in_use
+      retryWithExplicitExistingServerReuse: pass_6_tests
+    executionBoundary:
+      singleSpecPlaywrightRuntimeExecuted: true
+      fullE2ESuiteExecuted: false
+      otherSpecExecuted: false
+      headedOrDebugModeExecuted: false
+      accountActionExecuted: false
+      databaseSeedExecuted: false
+      schemaMigrationDatabaseSeedExecuted: false
+      envSecretOpenedEditedOrRecorded: false
       providerCallExecuted: false
       costCalibrationExecuted: false
       stagingOrProductionDeployExecuted: false
