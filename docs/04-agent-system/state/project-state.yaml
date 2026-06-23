@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T08:11:57-07:00"
+updatedAt: "2026-06-23T08:43:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-closeout-e2e-gate-repair-2026-06-23
+  id: acceptance-role-separated-account-coverage-batch-branch-closeout-2026-06-23
   status: closed
-  result: pass_closeout_e2e_gate_repair_applied
-  claimedAt: "2026-06-23T08:11:57-07:00"
-  validatedAt: "2026-06-23T08:11:57-07:00"
-  closedAt: "2026-06-23T08:11:57-07:00"
+  result: pass_branch_merged_to_master_and_master_gates_passed
+  claimedAt: "2026-06-23T08:43:47-07:00"
+  validatedAt: "2026-06-23T08:43:47-07:00"
+  closedAt: "2026-06-23T08:43:47-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-closeout-e2e-gate-repair.md
-  branch: codex/role-separated-account-coverage-batch-20260623
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+  branch: master
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: closeout_e2e_gate_repair_completed_waiting_branch_closeout
+  status: branch_closeout_merged_to_master_waiting_push_and_local_branch_cleanup
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8123,6 +8123,10 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     accountProvisioningScopePackagePrepared: true
     accountProvisioningDecisionRecorded: true
     closeoutE2eGateRepairCompleted: true
+    branchMergedToMaster: true
+    masterValidationPassedAfterMerge: true
+    masterPushCompleted: false
+    localSourceBranchDeleted: false
     localAccountProvisioningCredentialHandoffScopePackagePrepared: false
     accountActionExecuted: false
     fixtureMutationExecuted: true
@@ -8777,6 +8781,47 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       credentialEntryByCodex: false
       passwordOrSecretRecorded: false
       databaseSeedOrWriteExecutedOutsideExistingE2eBehavior: false
+      schemaMigrationDatabaseSeedExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePassClaim: false
+  branchCloseout:
+    taskId: acceptance-role-separated-account-coverage-batch-branch-closeout-2026-06-23
+    sourceBranch: codex/role-separated-account-coverage-batch-20260623
+    targetBranch: master
+    preMergeMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
+    mergedHeadSha: 3671026bf
+    mergeMode: fast_forward
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
+    status: closed
+    result: pass_branch_merged_to_master_and_master_gates_passed
+    claimedAt: "2026-06-23T08:43:47-07:00"
+    validatedAt: "2026-06-23T08:43:47-07:00"
+    closedAt: "2026-06-23T08:43:47-07:00"
+    pushStatus: pending
+    cleanupStatus: pending
+    masterValidation:
+      unit: pass_297_files_1263_tests
+      e2e: pass_42_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      diffCheck: pass
+    nextExecutableTaskId: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
+    executionBoundary:
+      branchMergedToMaster: true
+      masterValidationPassedAfterMerge: true
+      masterPushCompleted: false
+      localSourceBranchDeleted: false
+      accountActionExecuted: false
+      credentialDocumentRead: false
+      credentialEntryByCodex: false
+      passwordOrSecretRecorded: false
+      databaseSeedOrWriteExecutedOutsideExistingValidationTests: false
       schemaMigrationDatabaseSeedExecuted: false
       providerCallExecuted: false
       costCalibrationExecuted: false
