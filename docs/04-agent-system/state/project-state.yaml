@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-23T08:51:13-07:00"
+updatedAt: "2026-06-23T08:56:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,18 +503,18 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-coverage-batch-branch-closeout-2026-06-23
+  id: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
   status: closed
-  result: pass_branch_merged_to_master_and_master_gates_passed
-  claimedAt: "2026-06-23T08:43:47-07:00"
-  validatedAt: "2026-06-23T08:43:47-07:00"
-  closedAt: "2026-06-23T08:43:47-07:00"
+  result: pass_local_account_provisioning_credential_handoff_scope_package_prepared_no_execution
+  claimedAt: "2026-06-23T08:56:57-07:00"
+  validatedAt: "2026-06-23T08:56:57-07:00"
+  closedAt: "2026-06-23T08:56:57-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-role-separated-account-coverage-batch-branch-closeout.md
-  branch: master
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+  branch: codex/local-account-provisioning-credential-handoff-scope-20260623
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -8059,7 +8059,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: branch_closeout_pushed_and_local_source_branch_cleaned
+  status: local_account_provisioning_credential_handoff_scope_package_prepared_waiting_owner_approval
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8070,7 +8070,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   nextExecutableTaskId: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
   nextExecutableTaskPurpose: prepare_scope_package_for_local_account_provisioning_and_private_credential_handoff
-  nextApprovalRequired: fresh_approval_required_after_scope_package_for_account_provisioning_seed_or_credential_handoff_execution
+  nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_PROVISIONING_AND_CREDENTIAL_HANDOFF_SCOPE_2026_06_23
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8127,7 +8127,8 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     masterValidationPassedAfterMerge: true
     masterPushCompleted: true
     localSourceBranchDeleted: true
-    localAccountProvisioningCredentialHandoffScopePackagePrepared: false
+    localAccountProvisioningCredentialHandoffScopePackagePrepared: true
+    localAccountProvisioningCredentialHandoffExecutionCompleted: false
     accountActionExecuted: false
     fixtureMutationExecuted: true
     databaseSeedExecuted: false
@@ -8827,6 +8828,49 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       passwordOrSecretRecorded: false
       databaseSeedOrWriteExecutedOutsideExistingValidationTests: false
       schemaMigrationDatabaseSeedExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePassClaim: false
+  localAccountProvisioningCredentialHandoffScopeApproval:
+    taskId: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-2026-06-23
+    packageId: ROLE_SEPARATED_LOCAL_ACCOUNT_PROVISIONING_AND_CREDENTIAL_HANDOFF_SCOPE_2026_06_23
+    packagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval-package.md
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-scope-approval.md
+    status: closed
+    result: pass_local_account_provisioning_credential_handoff_scope_package_prepared_no_execution
+    packageStatus: prepared_not_approved_for_execution
+    claimedAt: "2026-06-23T08:56:57-07:00"
+    validatedAt: "2026-06-23T08:56:57-07:00"
+    closedAt: "2026-06-23T08:56:57-07:00"
+    nextTaskBlockedUntilApproval: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution-2026-06-23
+    nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_PROVISIONING_AND_CREDENTIAL_HANDOFF_SCOPE_2026_06_23
+    recommendedCredentialHandoffPath: local_private_credential_file_outside_repo
+    alternativeCredentialHandoffPath: owner_manual_password_setup
+    proposedPrivateCredentialFilePath: D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    rowsInScope:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    executionBoundary:
+      approvalPackagePrepared: true
+      accountActionExecuted: false
+      credentialPrivateFileCreated: false
+      credentialDocumentRead: false
+      credentialEntryByCodex: false
+      passwordOrSecretRecordedInGitEvidenceOrChat: false
+      databaseSeedOrWriteExecuted: false
+      schemaMigrationDatabaseSeedExecuted: false
+      sourceOrE2eFileChanged: false
+      browserOrPlaywrightRuntimeExecuted: false
       providerCallExecuted: false
       costCalibrationExecuted: false
       stagingOrProductionDeployExecuted: false
