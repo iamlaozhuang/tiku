@@ -4590,9 +4590,14 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ap-gate-decision.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ap-gate-decision.md
     planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ap-gate-decision.md
-    status: pending
-    result: not_started
+    status: closed
+    result: pass_ap_gate_decision_all_release_gates_recorded_blocked_or_deferred
+    claimedAt: "2026-06-22T15:00:00-07:00"
+    validatedAt: "2026-06-22T15:10:00-07:00"
+    closedAt: "2026-06-22T15:10:00-07:00"
+    branch: codex/acceptance-ap-gate-decision-20260622
     retryCount: 0
+    lastFailurePath: null
 
   - id: acceptance-ai-lifecycle-run-2026-06-22
     title: Acceptance AI lifecycle run

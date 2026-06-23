@@ -503,17 +503,17 @@ repository:
   lastKnownMasterSha: 9629319a5271df68e22309ddebd29f3b9536630e
   lastKnownOriginMasterSha: 9629319a5271df68e22309ddebd29f3b9536630e
 currentTask:
-  id: acceptance-use-case-matrix-run-2026-06-22
+  id: acceptance-ap-gate-decision-2026-06-22
   status: closed
-  result: pass_use_case_matrix_static_evidence_recorded_runtime_gates_blocked
-  claimedAt: "2026-06-22T14:35:00-07:00"
-  validatedAt: "2026-06-22T14:45:00-07:00"
-  closedAt: "2026-06-22T14:45:00-07:00"
+  result: pass_ap_gate_decision_all_release_gates_recorded_blocked_or_deferred
+  claimedAt: "2026-06-22T15:00:00-07:00"
+  validatedAt: "2026-06-22T15:10:00-07:00"
+  closedAt: "2026-06-22T15:10:00-07:00"
   sourceStory: user-request-2026-06-22-acceptance-serial-batch-approval
-  planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-use-case-matrix-run.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-use-case-matrix-run.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-use-case-matrix-run.md
-  branch: codex/acceptance-use-case-matrix-run-20260622
+  planPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ap-gate-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ap-gate-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ap-gate-decision.md
+  branch: codex/acceptance-ap-gate-decision-20260622
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -7303,7 +7303,7 @@ acceptanceSerialBatchOrchestration20260622:
     - acceptance-ai-lifecycle-run-2026-06-22
     - acceptance-final-decision-review-2026-06-22
   serialOrderEnforced: true
-  nextExecutableTaskId: acceptance-ap-gate-decision-2026-06-22
+  nextExecutableTaskId: acceptance-ai-lifecycle-run-2026-06-22
   highRiskApprovalBoundary:
     e2eBrowserDevServer: future_fresh_approval_required
     stagingProdCloudDeploy: future_fresh_approval_required
@@ -7511,3 +7511,62 @@ acceptanceUseCaseMatrixRun20260622:
     This task closes only the use case matrix evidence package for the Standard and Advanced MVP acceptance serial
     batch. It attaches approved L0-L2 static evidence to each matrix row and keeps all runtime, L5, L6, Provider,
     staging, release, and Cost Calibration claims blocked until future fresh approval and task-specific evidence exist.
+
+acceptanceApGateDecision20260622:
+  taskId: acceptance-ap-gate-decision-2026-06-22
+  phase: acceptance-ap-gate-decision-2026-06-22
+  recordedAt: "2026-06-22T15:10:00-07:00"
+  branch: codex/acceptance-ap-gate-decision-20260622
+  taskStatus: closed
+  result: pass_ap_gate_decision_all_release_gates_recorded_blocked_or_deferred
+  serialBatchId: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
+  sourceAcceptancePlanPath: docs/05-execution-logs/acceptance/2026-06-22-standard-advanced-mvp-acceptance-execution-plan.md
+  useCaseMatrixEvidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-use-case-matrix-run.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-22-acceptance-ap-gate-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-22-acceptance-ap-gate-decision.md
+  taskPlanPath: docs/05-execution-logs/task-plans/2026-06-22-acceptance-ap-gate-decision.md
+  apGateSummary:
+    AP-01: blocked_fresh_provider_env_cost_approval_required
+    AP-02: blocked_cost_calibration_gate
+    AP-03: blocked_staging_provider_deploy_approval_required
+    AP-04: deferred_product_scope_change_required
+    AP-05: deferred_product_privacy_schema_api_ui_approval_required
+    AP-06: deferred_payment_external_service_approval_required
+    AP-07: deferred_ocr_storage_provider_schema_approval_required
+    AP-08: deferred_export_privacy_object_storage_approval_required
+    AP-09: deferred_runtime_capability_exact_scope_approval_required
+    AP-10: deferred_current_checkpoint_repair_scope_required
+    AP-11: audit_only_source_governance_change_blocked
+  nextModuleRunCandidate: acceptance-ai-lifecycle-run-2026-06-22
+  executionBoundary:
+    docsOnlyStateUpdate: true
+    sourceCodeChanged: false
+    dependencyChanged: false
+    browserE2eExecuted: false
+    devServerStarted: false
+    providerCallExecuted: false
+    envSecretOpenedEditedOrRecorded: false
+    schemaMigrationDatabaseSeedExecuted: false
+    stagingOrProductionDeployExecuted: false
+    paymentExternalServiceTouched: false
+    accountActionExecuted: false
+    apGateExecuted: false
+    acceptancePassClaim: false
+    previewReleaseReadyClaim: false
+    productionReadyClaim: false
+  blockedWithoutFreshApproval:
+    - browser_e2e_runtime_or_dev_server
+    - staging_prod_cloud_deploy
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - schema_migration_seed_database_connection_or_data_change
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - production_or_staging_data_access
+    - cost_calibration_gate
+  boundary: >-
+    This task closes only the AP-01 through AP-11 release gate decision package for the Standard and Advanced MVP
+    acceptance serial batch. Every AP gate is recorded as blocked or deferred, no AP gate is executed, and all Provider,
+    staging, env, database, deployment, payment, external-service, browser/e2e, L6, L8, previewReleaseReady,
+    productionReady, final acceptance, and Cost Calibration claims remain blocked until future fresh approval and
+    task-specific evidence exist.
