@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 lowRiskTaskTemplates:
   blockedFiles: &low_risk_blocked_files
     - .env*
@@ -299,7 +299,7 @@ tasks:
       prompt/provider payload exposure, formal content adoption code, package/dependency changes, env/secret changes,
       schema/migration/database work, browser/e2e/dev-server runtime, deploy, PR, force-push, payment, external
       service, and Cost Calibration Gate remain blocked.
-    targetClosureItem: content_admin AI 鍑洪 and AI 缁勫嵎 product scope decision
+    targetClosureItem: content_admin AI 閸戞椽顣?and AI 缂佸嫬宓?product scope decision
     behaviorBoundary: content_admin::ai_generation_scope_decision
     executionProfile: docs_decision
     evidenceMode: full
@@ -787,7 +787,7 @@ tasks:
       - decide-content-admin-ai-generation-scope
     taskPlanPolicy: required_before_edit
     humanApprovalBoundary: >-
-      User selected option A for content_admin AI 鍑洪 and AI 缁勫嵎: first-release direction is reviewable drafts or
+      User selected option A for content_admin AI 閸戞椽顣?and AI 缂佸嫬宓? first-release direction is reviewable drafts or
       suggestions only, with mandatory human confirmation before formal question, paper, publish, or mock_exam use.
       This task may record the decision in docs/state only. No real Provider calls, no prompt/provider payload
       exposure, no raw generated AI content evidence, no model output persistence, no formal content writes, no source
@@ -2075,7 +2075,7 @@ tasks:
     validationCommands:
       - git diff --check
       - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
-      - rg -n "TODO|TBD|鍗犱綅|浠ュ悗琛? docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
+      - rg -n "TODO|TBD|閸楃姳缍厊娴犮儱鎮楃悰? docs\01-requirements\traceability\requirement-fulfillment-matrix.md docs\01-requirements\traceability\role-experience-fulfillment-matrix.md docs\05-execution-logs\task-plans\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\evidence\2026-06-21-requirement-fulfillment-and-role-experience-review.md docs\05-execution-logs\audits-reviews\2026-06-21-requirement-fulfillment-and-role-experience-review.md
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId requirement-fulfillment-role-experience-review-audit-closeout
     redactionPolicy: command/result summary only; no secrets, tokens, database URLs, Authorization headers, raw DB rows, plaintext redeem_code, raw prompt, raw generated AI content, provider payloads, private answer text, or full paper content
@@ -8309,6 +8309,134 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: acceptance-advanced-ai-entry-ui-ux-contract-2026-06-23
+    title: Define advanced AI entry UI/UX acceptance contract
+    phase: standard-advanced-mvp-advanced-ai-entry-ui-ux-contract-2026-06-23
+    sourceStory: user-request-2026-06-23-advanced-ai-entry-ui-ux-contract
+    dependencies:
+      - advanced-ai-generation-requirement-clarification-2026-06-23
+    taskKind: acceptance_contract_docs
+    moduleRunVersion: 2
+    executionProfile: docs_only_ui_ux_acceptance_contract
+    evidenceMode: full
+    validationPolicy: docs_static_validation
+    queueSelectionMode: user_directed_after_requirement_clarification
+    targetClosureItem: Advanced AI entry naming, placement, role landing, workspace separation, and logout acceptance contract
+    behaviorBoundary: acceptance_planning::advanced_ai_entry_ui_ux_contract_no_runtime_or_implementation
+    requiredOutcome: >-
+      Produce a natural-language UI/UX acceptance contract for advanced AI entries covering personal advanced learner,
+      organization advanced employee, organization admin, content admin, ops/content separation, multi-role backend
+      account handling, backend logout, URL-only access failures, role-aware landing, and later implementation gates.
+    capabilities:
+      docsAcceptanceContract: allowed
+      productDesignContextDiscovery: allowed
+      sourceCodeChange: blocked
+      routeOrUiImplementation: blocked
+      fixtureOrE2eChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      prCreation: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-23-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/02-architecture/system-design/frontend/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - src/app/**
+      - src/components/**
+      - src/features/**
+      - src/server/contracts/user-auth/session-boundary.ts
+      - tests/unit/**
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd --no-install prettier --check --ignore-unknown docs/05-execution-logs/acceptance/2026-06-23-advanced-ai-entry-ui-ux-contract.md docs/05-execution-logs/task-plans/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md docs/05-execution-logs/evidence/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
+      - git diff --check
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-23-advanced-ai-entry-ui-ux-contract.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+    branch: codex/advanced-ai-entry-ui-ux-contract-20260623
+    status: closed
+    result: pass_advanced_ai_entry_ui_ux_contract_owner_reviewed_and_closed_no_runtime_pass
+    claimedAt: "2026-06-23T19:51:30-07:00"
+    validatedAt: "2026-06-23T19:58:00-07:00"
+    closedAt: "2026-06-24T00:31:21-07:00"
+    closeoutApproval:
+      approvalSource: current_user_fresh_approval_2026_06_24_handle_remaining_branch_cleanup
+      approvalTextSummary: User asked to handle remaining unprocessed branches and keep repository clean.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_24_handle_remaining_branch_cleanup
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_24_handle_remaining_branch_cleanup
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_24_handle_remaining_branch_cleanup
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_24_handle_remaining_branch_cleanup
+    blockedWithoutFreshApproval:
+      - source_code_route_or_ui_implementation
+      - fixture_or_e2e_change
+      - browser_runtime_or_playwright_runtime
+      - dev_server_start
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - env_secret_access_or_env_file_change
+      - schema_migration_or_drizzle_push
+      - database_seed_or_write
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_creation
+      - force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution-2026-06-23
     title: Execute local role account provisioning and private credential handoff
     phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
@@ -8585,6 +8713,10 @@ tasks:
       - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
       - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
       - docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
+      - docs/05-execution-logs/acceptance/2026-06-23-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-advanced-ai-entry-ui-ux-contract.md
     readOnlyAllowedFiles:
       - AGENTS.md
       - docs/03-standards/code-taste-ten-commandments.md
