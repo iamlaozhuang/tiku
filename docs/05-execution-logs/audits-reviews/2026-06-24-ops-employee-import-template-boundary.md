@@ -5,7 +5,7 @@
 - Task id: `ops-employee-import-template-boundary-2026-06-24`.
 - Branch: `codex/ops-employee-import-template-boundary-20260624`.
 - Review type: implementation TDD self-review plus authorization boundary review.
-- Current verdict: pass local validation and ready for closeout.
+- Current verdict: closed after fast-forward merge to `master` and post-merge validation.
 - Non-claim: this review does not declare standard/advanced MVP final Pass.
 
 ## SSOT Read List
@@ -59,8 +59,10 @@
 - Pass: RED/GREEN client unit evidence was recorded.
 - Pass: RED/GREEN service unit evidence was recorded.
 - Pass: scoped unit, lint, typecheck, diff, hardening, and pre-push readiness validation passed.
+- Pass: fast-forward merge to `master` completed at implementation commit `d62d473e079753bbb413d7c509df59c7f7a0a41e`.
+- Pass: post-merge Prettier, targeted unit, lint, typecheck, diff, hardening, and pre-push readiness validation passed on `master`.
 
 ## Verdict
 
 - No blocking findings.
-- Pass: task is ready for local commit, fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup under the task closeout policy.
+- Pass: task is ready for push to `origin/master` and short-branch cleanup under the task closeout policy.

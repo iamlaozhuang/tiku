@@ -5,7 +5,7 @@
 - Task id: `ops-employee-import-template-boundary-2026-06-24`.
 - Branch: `codex/ops-employee-import-template-boundary-20260624`.
 - Task kind: `implementation_tdd`.
-- Status: ready for closeout after local validation.
+- Status: closed after fast-forward merge to `master` and post-merge validation.
 - Scope: operations employee import template/input boundary for forbidden scope fields.
 - Non-claim: this evidence does not declare standard/advanced MVP final Pass.
 
@@ -82,6 +82,19 @@
   - `git diff --check`: passed with no whitespace errors.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-employee-import-template-boundary-2026-06-24`: passed. Output showed nine files in scope and `Cost Calibration Gate remains blocked`.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-employee-import-template-boundary-2026-06-24 -SkipRemoteAheadCheck`: passed. Output showed branch `codex/ops-employee-import-template-boundary-20260624`, `master`, `origin/master`, and state SHAs aligned at `45a7f14f3b524052421aa0f26f127ee9a4847b4f`.
+
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Implementation commit: `d62d473e079753bbb413d7c509df59c7f7a0a41e`.
+- Timestamp: `2026-06-24T10:02:01-07:00`.
+- `npx.cmd prettier --check --ignore-unknown ...`: passed on `master` with `All matched files use Prettier code style!`.
+- `npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts`: passed on `master`. Output showed `Test Files 2 passed (2)` and `Tests 20 passed (20)`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `git diff --check`: passed on `master` with no whitespace errors.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-employee-import-template-boundary-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-employee-import-template-boundary-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`. Output showed `master` at `d62d473e079753bbb413d7c509df59c7f7a0a41e`, `origin/master` at `45a7f14f3b524052421aa0f26f127ee9a4847b4f`, and state master SHA as an accepted ancestor.
 
 ## Changed Files
 
