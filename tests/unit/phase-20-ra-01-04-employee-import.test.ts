@@ -286,4 +286,55 @@ describe("phase 20 RA-01-04 employee import", () => {
     ]);
     expect(JSON.stringify(auditInputs)).not.toContain("abc12345");
   });
+
+  it("rejects employee import CSV headers that include authorization scope fields", async () => {
+    const auditInputs: unknown[] = [];
+    const serviceInputs: unknown[] = [];
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService: createEmployeeAccountService({ serviceInputs }),
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const response = await handlers.employees.importBatch.POST(
+      new Request("http://localhost/api/v1/employees/import", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          sourceFormat: "csv",
+          content: [
+            "phone,name,initialPassword,organizationPublicId,profession,level,edition,orgAuthScopePublicId",
+            "13900001001,Employee One,abc12345,organization-public-001,monopoly,3,advanced,scope-public-001",
+          ].join("\n"),
+        }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        importedEmployees: [],
+        rejectedRows: [
+          {
+            rowNumber: 1,
+            userPublicId: null,
+            organizationPublicId: null,
+            reason: "invalid_row",
+          },
+        ],
+      },
+    });
+    expect(serviceInputs).toEqual([]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "employee.import",
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted employee import metadata; imported=0 rejected=1",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain("scope-public-001");
+    expect(JSON.stringify(auditInputs)).not.toContain("abc12345");
+  });
 });

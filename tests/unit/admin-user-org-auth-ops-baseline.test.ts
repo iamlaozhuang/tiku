@@ -1058,6 +1058,39 @@ describe("admin user organization authorization ops baseline", () => {
     });
   });
 
+  it("blocks employee import templates that contain authorization scope fields", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+    const employeeImportContent = [
+      "phone,name,initialPassword,organizationPublicId,profession,level,edition,orgAuthScopePublicId",
+      "13900001111,Import One,Passw0rd!,org-district-001,monopoly,3,advanced,scope-public-001",
+    ].join("\n");
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("employee-import-textarea");
+
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: employeeImportContent },
+    });
+
+    const importPreview = screen.getByTestId("employee-import-preview");
+    expect(importPreview).toHaveTextContent("profession");
+    expect(importPreview).toHaveTextContent("level");
+    expect(importPreview).toHaveTextContent("edition");
+    expect(importPreview).toHaveTextContent("orgAuthScopePublicId");
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+
+    fireEvent.click(screen.getByTestId("employee-import-submit"));
+
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url]) => String(url) === "/api/v1/employees/import",
+      ),
+    ).toBe(false);
+  });
+
   it("manages employee unbind feedback and marks transfer as approval required", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetch();

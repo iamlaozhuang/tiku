@@ -368,7 +368,39 @@ function parseDelimitedLine(line: string, delimiter: "," | "\t"): string[] {
 }
 
 function normalizeHeaderName(value: string): string {
-  return value.trim().toLowerCase();
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/gu, "");
+}
+
+const employeeAccountImportHeaderNames = new Set([
+  "phone",
+  "name",
+  "initialpassword",
+  "organizationpublicid",
+  "userpublicid",
+]);
+
+const forbiddenEmployeeImportScopeHeaderNames = new Set([
+  "profession",
+  "level",
+  "edition",
+  "orgauthscopepublicid",
+]);
+
+function hasForbiddenEmployeeImportScopeHeader(
+  firstHeaderNames: Set<string>,
+): boolean {
+  const forbiddenHeaderCount = Array.from(
+    forbiddenEmployeeImportScopeHeaderNames,
+  ).filter((name) => firstHeaderNames.has(name)).length;
+  const looksLikeHeader =
+    Array.from(firstHeaderNames).some((name) =>
+      employeeAccountImportHeaderNames.has(name),
+    ) || forbiddenHeaderCount > 1;
+
+  return looksLikeHeader && forbiddenHeaderCount > 0;
 }
 
 function readEmployeeAccountCell(input: {
@@ -402,6 +434,22 @@ function parseEmployeeAccountImportContent(input: {
 
   const firstRow = parsedRows[0];
   const firstHeaderNames = new Set(firstRow?.cells.map(normalizeHeaderName));
+
+  if (hasForbiddenEmployeeImportScopeHeader(firstHeaderNames)) {
+    return {
+      kind: "employee_account",
+      employeeAccounts: [],
+      rejectedRows: [
+        {
+          rowNumber: firstRow.rowNumber,
+          userPublicId: null,
+          organizationPublicId: null,
+          reason: "invalid_row",
+        },
+      ],
+    };
+  }
+
   const hasHeader =
     firstHeaderNames.has("phone") &&
     firstHeaderNames.has("name") &&

@@ -256,6 +256,24 @@ const employeeImportRejectedReasonLabels = {
   string
 >;
 
+const employeeImportKnownHeaderNames = new Set([
+  "phone",
+  "name",
+  "initialpassword",
+  "organizationpublicid",
+  "userpublicid",
+]);
+
+const forbiddenEmployeeImportScopeHeaderLabels = [
+  { label: "profession", normalizedName: "profession" },
+  { label: "level", normalizedName: "level" },
+  { label: "edition", normalizedName: "edition" },
+  {
+    label: "orgAuthScopePublicId",
+    normalizedName: "orgauthscopepublicid",
+  },
+] as const;
+
 const defaultOrgAuthFormState: OrgAuthFormState = {
   accountQuota: "100",
   authScopeType: "current_and_descendants",
@@ -609,6 +627,39 @@ function normalizeOptionalOrganizationText(value: string): string | null {
   return text.length === 0 ? null : text;
 }
 
+function normalizeEmployeeImportHeaderCell(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/gu, "");
+}
+
+function findForbiddenEmployeeImportScopeHeaders(lines: string[]): string[] {
+  const firstLine = lines[0] ?? "";
+  const delimiter = firstLine.includes("\t") ? "\t" : ",";
+  const firstHeaderNames = new Set(
+    firstLine
+      .split(delimiter)
+      .map(normalizeEmployeeImportHeaderCell)
+      .filter((name) => name.length > 0),
+  );
+  const forbiddenLabels = forbiddenEmployeeImportScopeHeaderLabels
+    .filter(({ normalizedName }) => firstHeaderNames.has(normalizedName))
+    .map(({ label }) => label);
+  const looksLikeHeader =
+    Array.from(firstHeaderNames).some((name) =>
+      employeeImportKnownHeaderNames.has(name),
+    ) || forbiddenLabels.length > 1;
+
+  return looksLikeHeader ? forbiddenLabels : [];
+}
+
+function buildForbiddenEmployeeImportScopeHeaderMessage(
+  forbiddenLabels: string[],
+): string {
+  return `员工导入模板不得包含 ${forbiddenLabels.join(", ")}；专业、等级、版本与授权范围必须从组织授权继承。`;
+}
+
 function buildOrganizationInput(
   formState: OrganizationFormState,
   organizations: AdminOrgAuthData["organizations"],
@@ -678,6 +729,17 @@ function buildEmployeeImportInput(value: string): {
     .split(/\r?\n/u)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders(lines);
+
+  if (forbiddenScopeHeaders.length > 0) {
+    return {
+      input: null,
+      message: buildForbiddenEmployeeImportScopeHeaderMessage(
+        forbiddenScopeHeaders,
+      ),
+    };
+  }
+
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") &&
@@ -730,6 +792,19 @@ function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
     .split(/\r?\n/u)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+  const forbiddenScopeHeaders = findForbiddenEmployeeImportScopeHeaders(lines);
+
+  if (forbiddenScopeHeaders.length > 0) {
+    return {
+      formatLabel: "员工导入范围字段被阻断",
+      isReady: false,
+      message: buildForbiddenEmployeeImportScopeHeaderMessage(
+        forbiddenScopeHeaders,
+      ),
+      rowCount: 0,
+    };
+  }
+
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") &&
@@ -1607,7 +1682,9 @@ function EmployeeImportActionPanel({
           </h2>
           <p className="text-text-secondary text-sm leading-6">
             支持 userPublicId,organizationPublicId，或粘贴
-            phone,name,initialPassword,organizationPublicId CSV/TSV。
+            phone,name,initialPassword,organizationPublicId
+            CSV/TSV。员工导入仅绑定 organization，不得包含
+            profession,level,edition,orgAuthScopePublicId。
           </p>
         </div>
         <textarea
