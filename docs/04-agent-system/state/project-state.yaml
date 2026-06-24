@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: student-home-ai-organization-training-entry-repair-2026-06-24
-updatedAt: "2026-06-24T04:31:51-07:00"
+updatedAt: "2026-06-24T04:35:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,16 +501,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 75cc52a09989e5a41b98985ec597d43411b80257
+  lastKnownMasterSha: d7d9910915d92ca8b19278292beecde517f87fc6
   lastKnownOriginMasterSha: 75cc52a09989e5a41b98985ec597d43411b80257
 currentTask:
   id: student-home-ai-organization-training-entry-repair-2026-06-24
-  status: ready_for_closeout
-  result: learner_home_ai_and_organization_training_entries_validated
+  status: closed
+  result: pass_learner_home_ai_and_organization_training_entries_closed_on_master
   claimedAt: "2026-06-24T03:48:18-07:00"
   validatedAt: "2026-06-24T03:57:54-07:00"
-  reviewedAt: null
-  closedAt: null
+  reviewedAt: "2026-06-24T04:35:33-07:00"
+  closedAt: "2026-06-24T04:35:33-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-2
   planPath: docs/05-execution-logs/task-plans/2026-06-24-student-home-ai-organization-training-entry-repair.md
@@ -533,7 +533,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
   branch: codex/student-home-ai-org-training-entries-20260624
-  commitSha: null
+  commitSha: d7d9910915d92ca8b19278292beecde517f87fc6
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -4796,11 +4796,13 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-student-home-ai-organization-training-entry-repair.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: learner_home_ai_and_organization_training_entries_validated
+    status: closed
+    result: pass_learner_home_ai_and_organization_training_entries_closed_on_master
     claimedAt: "2026-06-24T03:48:18-07:00"
     approvedAt: "2026-06-24T03:48:18-07:00"
     validatedAt: "2026-06-24T03:57:54-07:00"
+    reviewedAt: "2026-06-24T04:35:33-07:00"
+    closedAt: "2026-06-24T04:35:33-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_approval_2026_06_24_claim_candidate_2
     roleMapping:

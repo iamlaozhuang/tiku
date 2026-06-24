@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current status: ready_for_closeout after local validation.
-- Fresh closeout approval is recorded for fast-forward merge to `master`, push to `origin/master`, and deletion of the merged short branch.
+- Current status: closed on `master` after fast-forward merge and local post-merge validation.
+- Fresh closeout approval is recorded for push to `origin/master` and deletion of the merged short branch.
 - No standard/advanced MVP final Pass is claimed.
 
 ## SSOT Read List
@@ -49,3 +49,4 @@
 - Lint and typecheck passed.
 - Prettier initially warned only on newly created Markdown evidence/audit files; the files were mechanically formatted and the final check is rerun during closeout.
 - Final Prettier check, `git diff --check`, and Module Run v2 pre-commit hardening passed.
+- Post-merge `master` validation passed: focused unit 3 files / 24 tests, lint, typecheck, Prettier allowlist, `git diff --check`, and Module Run v2 hardening.

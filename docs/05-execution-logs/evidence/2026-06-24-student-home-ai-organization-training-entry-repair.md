@@ -2,7 +2,7 @@
 
 ## Status
 
-- Current status: ready_for_closeout after local validation; fresh closeout approval is recorded for fast-forward merge to `master`, push to `origin/master`, and deletion of the merged short branch.
+- Current status: closed on `master` after fast-forward merge and local post-merge validation; push and short-branch deletion are approved and pending in this closeout run.
 - Branch: codex/student-home-ai-org-training-entries-20260624
 - Scope: learner home `AI训练` and `企业训练` entry discoverability plus learner AI page product labels.
 - Explicit non-claim: this evidence does not declare standard/advanced MVP final Pass.
@@ -62,3 +62,13 @@
 | `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                                                           | pass                            | Final full allowlist check reported: `All matched files use Prettier code style!`.                                                                                                 |
 | `git diff --check`                                                                                                                                                                                        | pass                            | Exit 0 with no whitespace findings.                                                                                                                                                |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId student-home-ai-organization-training-entry-repair-2026-06-24`             | pass                            | Module Run v2 hardening passed; SSOT Read List and Requirement Mapping Result were accepted; 9 files scanned in task scope.                                                        |
+
+## Master Closeout Verification
+
+- `git merge --ff-only codex/student-home-ai-org-training-entries-20260624`: pass; `master` fast-forwarded to `d7d9910915d92ca8b19278292beecde517f87fc6`.
+- `npm.cmd run test:unit -- tests/unit/student-home-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/organization-training-employee-entry-surface.test.ts`: pass on `master`; 3 files passed, 24 tests passed.
+- `npm.cmd run lint`: pass on `master`; ESLint exit 0.
+- `npm.cmd run typecheck`: pass on `master`; `tsc --noEmit` exit 0.
+- `npx.cmd prettier --check --ignore-unknown ...`: pass on `master`; all matched files use Prettier code style.
+- `git diff --check`: pass on `master`; no whitespace findings.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId student-home-ai-organization-training-entry-repair-2026-06-24`: pass on `master`; no changed files before closeout status update.
