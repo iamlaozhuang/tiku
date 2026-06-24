@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-multi-scope-design-2026-06-24`.
 - Branch: `codex/ops-org-auth-multi-scope-design-20260624`.
 - Review type: docs-only planning self-review plus authorization boundary review.
-- Current verdict: ready for closeout after local validation.
+- Current verdict: closed after fast-forward merge to `master` and post-merge validation.
 - Non-claim: this review does not declare runtime behavior changed or standard/advanced MVP final Pass.
 
 ## SSOT Read List
@@ -59,8 +59,11 @@
 - Pass: `git diff --check` passed.
 - Pass: pre-commit hardening passed with `OK_SSOT_READ_LIST` and `OK_REQUIREMENT_MAPPING_RESULT`.
 - Pass: pre-push readiness passed with `master` and `origin/master` aligned at `8a73203e612acc2ef47cf033b6301f6c3da4427e`.
+- Pass: fast-forward merge to `master` completed at design commit `58291ba6592df05f0086fb48f9f1400b158d2940`.
+- Pass: post-merge scoped Prettier, diff, pre-commit hardening, and pre-push readiness passed on `master`.
 
 ## Verdict
 
 - No blocking planning findings.
-- Ready for local commit, fast-forward merge, push to `origin/master`, and merged short-branch cleanup under the task closeout policy.
+- Pass: design packet has been merged to `master`.
+- Pass: push target remains `origin/master`; short branch cleanup is allowed after successful push.

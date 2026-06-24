@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-multi-scope-design-2026-06-24`.
 - Branch: `codex/ops-org-auth-multi-scope-design-20260624`.
 - Task kind: `docs_only`.
-- Status: ready for closeout after local validation.
+- Status: closed after fast-forward merge to `master` and post-merge validation.
 - Scope: docs/contract/security design packet for future multi-scope `org_auth` bundles and atomic child-scope implementation.
 - Non-claim: this evidence does not declare runtime behavior changed and does not declare standard/advanced MVP final Pass.
 
@@ -65,6 +65,16 @@
 - `git diff --check`: passed with no whitespace errors.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-multi-scope-design-2026-06-24`: passed. Output included `OK_SSOT_READ_LIST`, `OK_REQUIREMENT_MAPPING_RESULT`, all five changed files in scope, `Cost Calibration Gate remains blocked`, and `pre-commit hardening passed`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-multi-scope-design-2026-06-24 -SkipRemoteAheadCheck`: passed. Output showed branch `codex/ops-org-auth-multi-scope-design-20260624`, `master` and `origin/master` aligned at `8a73203e612acc2ef47cf033b6301f6c3da4427e`, evidence/audit paths found, and `pre-push readiness passed`.
+
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Design commit: `58291ba6592df05f0086fb48f9f1400b158d2940`.
+- Timestamp: `2026-06-24T09:46:49-07:00`.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-multi-scope-design.md docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-multi-scope-design.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-multi-scope-design.md`: passed on `master`.
+- `git diff --check`: passed on `master` with no whitespace errors.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-multi-scope-design-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-multi-scope-design-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`; output showed `master` at `58291ba6592df05f0086fb48f9f1400b158d2940` and `origin/master` at `8a73203e612acc2ef47cf033b6301f6c3da4427e`.
 
 ## Changed Files
 

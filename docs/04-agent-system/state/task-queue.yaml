@@ -5781,18 +5781,18 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-multi-scope-design.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-multi-scope-design.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: pass_org_auth_multi_scope_design_local_validation
+    status: closed
+    result: pass_org_auth_multi_scope_design_merged_and_post_merge_validated
     claimedAt: "2026-06-24T09:41:13-07:00"
     approvedAt: "2026-06-24T09:41:13-07:00"
     plannedAt: "2026-06-24T09:41:13-07:00"
     validatedAt: "2026-06-24T09:44:16-07:00"
     reviewedAt: "2026-06-24T09:44:16-07:00"
-    closedAt: null
+    closedAt: "2026-06-24T09:46:49-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_docs_state_closeout
     branch: codex/ops-org-auth-multi-scope-design-20260624
-    commitSha: null
+    commitSha: 58291ba6592df05f0086fb48f9f1400b158d2940
     blockedWithoutFreshApproval:
       - source_or_test_implementation
       - schema_migration_or_database_write

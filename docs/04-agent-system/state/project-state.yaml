@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ops-org-auth-multi-scope-design-2026-06-24
-updatedAt: "2026-06-24T09:44:16-07:00"
+updatedAt: "2026-06-24T09:46:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -505,13 +505,13 @@ repository:
   lastKnownOriginMasterSha: 8a73203e612acc2ef47cf033b6301f6c3da4427e
 currentTask:
   id: ops-org-auth-multi-scope-design-2026-06-24
-  status: ready_for_closeout
-  result: pass_org_auth_multi_scope_design_local_validation
+  status: closed
+  result: pass_org_auth_multi_scope_design_merged_and_post_merge_validated
   claimedAt: "2026-06-24T09:41:13-07:00"
   plannedAt: "2026-06-24T09:41:13-07:00"
   validatedAt: "2026-06-24T09:44:16-07:00"
   reviewedAt: "2026-06-24T09:44:16-07:00"
-  closedAt: null
+  closedAt: "2026-06-24T09:46:49-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-4
   planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-multi-scope-design.md
@@ -534,7 +534,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
   branch: codex/ops-org-auth-multi-scope-design-20260624
-  commitSha: null
+  commitSha: 58291ba6592df05f0086fb48f9f1400b158d2940
   prUrl: null
   retryCount: 0
   lastFailurePath: null
