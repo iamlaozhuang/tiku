@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ops-auth-runtime-validation-redacted-2026-06-24
-updatedAt: "2026-06-24T10:14:06-07:00"
+currentPhase: ops-repair-package-state-convergence-2026-06-24
+updatedAt: "2026-06-24T10:30:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,43 +501,113 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d73249bd839fe71e12ce130657e2b6d2e19d8e75
-  lastKnownOriginMasterSha: cff57ff2679d53dacb47c34c3d46849372c49ba3
+  lastKnownMasterSha: 4f2f09b98793a5f29312310e00cb79a9a238c855
+  lastKnownOriginMasterSha: 4f2f09b98793a5f29312310e00cb79a9a238c855
 currentTask:
-  id: ops-auth-runtime-validation-redacted-2026-06-24
+  id: ops-repair-package-state-convergence-2026-06-24
   status: closed
-  result: pass_ops_auth_runtime_validation_redacted_merged_and_post_merge_validated
-  claimedAt: "2026-06-24T10:05:17-07:00"
-  plannedAt: "2026-06-24T10:05:17-07:00"
-  validatedAt: "2026-06-24T10:14:06-07:00"
-  reviewedAt: "2026-06-24T10:14:06-07:00"
-  closedAt: "2026-06-24T10:14:06-07:00"
+  result: pass_ops_repair_package_state_convergence_ready_for_closeout
+  claimedAt: "2026-06-24T10:27:06-07:00"
+  plannedAt: "2026-06-24T10:27:06-07:00"
+  validatedAt: "2026-06-24T10:30:55-07:00"
+  reviewedAt: "2026-06-24T10:30:55-07:00"
+  closedAt: "2026-06-24T10:30:55-07:00"
   blockedAt: null
-  sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-6
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-auth-runtime-validation-redacted.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-auth-runtime-validation-redacted.md
+  sourceStory: user-request-2026-06-24-ops-repair-package-state-convergence-then-gap-planning
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
-  branch: codex/ops-auth-runtime-validation-redacted-20260624
-  commitSha: d73249bd839fe71e12ce130657e2b6d2e19d8e75
+      approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+  branch: codex/ops-repair-state-convergence-20260624
+  commitSha: pending_report_in_final_handoff
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+opsRepairPackageStateConvergence20260624:
+  taskId: ops-repair-package-state-convergence-2026-06-24
+  phase: post-role-separated-ops-repair-state-convergence-2026-06-24
+  recordedAt: "2026-06-24T10:27:06-07:00"
+  sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  status: closed
+  branch: codex/ops-repair-state-convergence-20260624
+  scope: docs_state_only_status_convergence_no_runtime_claim
+  closedRepairTasks:
+    - id: backend-workspace-landing-logout-separation-repair-2026-06-24
+      result: pass_backend_workspace_landing_logout_separation_repair_closed_on_master
+    - id: learner-home-ai-organization-training-entry-repair-2026-06-24
+      result: pass_learner_home_ai_and_organization_training_entries_closed_on_master
+    - id: admin-ai-generation-entry-repair-2026-06-24
+      result: pass_admin_ai_generation_entries_pushed_and_short_branch_cleaned
+    - id: ops-authorization-repair-planning-2026-06-24
+      result: pass_ops_authorization_repair_planning_merged_and_closeout_validated
+    - id: ops-redeem-code-generation-scope-entry-2026-06-24
+      result: pass_ops_redeem_code_generation_scope_entry_merged_and_post_merge_validated
+    - id: ops-org-auth-edition-selector-entry-2026-06-24
+      result: pass_org_auth_edition_selector_entry_merged_and_post_merge_validated
+    - id: ops-org-auth-manual-upgrade-planning-2026-06-24
+      result: pass_org_auth_manual_upgrade_preflight_merged_and_post_merge_validated
+    - id: ops-org-auth-multi-scope-design-2026-06-24
+      result: pass_org_auth_multi_scope_design_merged_and_post_merge_validated
+    - id: ops-employee-import-template-boundary-2026-06-24
+      result: pass_employee_import_template_boundary_merged_and_post_merge_validated
+    - id: ops-auth-runtime-validation-redacted-2026-06-24
+      result: pass_ops_auth_runtime_validation_redacted_merged_and_post_merge_validated
+  diagnosticsBaseline:
+    projectStatusDecision: idle_no_pending_task
+    nextExecutableTask: none
+    seedProposalDecision: no_seed_candidate
+    queueSlimmingDecision: slimming_candidates
+    archiveCandidateCount: 56
+    archiveCandidateCountAfterTaskRegistration: 57
+    selfRepairCandidateCount: 0
+    highRiskRepairBlockedCount: 59
+  archiveBoundary:
+    archiveApplyExecuted: false
+    note: >-
+      This task records the archive candidate baseline only. Moving terminal queue entries requires a separate
+      approved archive/index task with exact candidate ids and archive target files.
+  nextCandidateTasks:
+    - id: role-separated-mvp-post-repair-gap-planning-2026-06-24
+      status: candidate_after_this_task
+      approvalStatus: approved_by_current_user_for_next_serial_task
+      scope: docs_requirement_acceptance_gap_planning_no_final_pass
+    - id: active-queue-slimming-post-ops-window-2026-06-24
+      status: optional_candidate
+      approvalStatus: fresh_archive_task_scope_required_before_apply
+      scope: docs_state_archive_only_for_terminal_queue_candidates
+    - id: role-separated-runtime-acceptance-rerun-after-gap-planning
+      status: future_candidate
+      approvalStatus: fresh_runtime_or_owner_credential_approval_required
+      scope: redacted_runtime_acceptance_only_after_gap_plan
+  blockedWithoutFreshApproval:
+    - source_or_test_implementation
+    - queue_archive_apply_or_task_move
+    - schema_migration_or_database_write
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - browser_or_playwright_runtime
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 qualityGates:
   desired:
     - lint

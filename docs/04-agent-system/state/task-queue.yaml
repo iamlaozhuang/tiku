@@ -6056,6 +6056,153 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: ops-repair-package-state-convergence-2026-06-24
+    title: Converge ops repair package state and next-task candidates
+    phase: post-role-separated-ops-repair-state-convergence-2026-06-24
+    sourceStory: user-request-2026-06-24-ops-repair-package-state-convergence-then-gap-planning
+    dependencies:
+      - ops-auth-runtime-validation-redacted-2026-06-24
+    taskKind: docs_state_only
+    moduleRunVersion: 2
+    executionProfile: docs_state_only_ops_repair_package_convergence
+    evidenceMode: full_redacted
+    validationPolicy: docs_state_prettier_diff_precommit_prepush
+    queueSelectionMode: user_directed_serial_state_convergence_then_gap_planning
+    targetClosureItem: Ops repair package closed-state summary, archive candidate baseline, and next candidate task list
+    behaviorBoundary: docs_state_only::no_runtime_no_archive_apply_no_final_pass
+    requiredOutcome: >-
+      Record that the 2026-06-24 role-separated ops repair package tasks are closed, record the current diagnostic
+      archive candidate baseline, and list the next candidate tasks before entering a separate gap planning task. This
+      task must not move queue entries to archive, change product source or tests, or declare standard/advanced MVP
+      final Pass.
+    capabilities:
+      docsStateUpdate: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      localCommit: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      mergeToMaster: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      pushOriginMaster: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      sourceOrTestChange: blocked
+      queueArchiveApply: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-backend-workspace-landing-logout-separation-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-redeem-code-generation-scope-entry.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-edition-selector-entry.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-manual-upgrade-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-multi-scope-design.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-employee-import-template-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - queue_state_convergence
+      - archive_candidate_baseline
+      - no_runtime_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-repair-package-state-convergence-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-repair-package-state-convergence-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-repair-package-state-convergence-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-repair-package-state-convergence-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_ops_repair_package_state_convergence_ready_for_closeout
+    claimedAt: "2026-06-24T10:27:06-07:00"
+    plannedAt: "2026-06-24T10:27:06-07:00"
+    validatedAt: "2026-06-24T10:30:55-07:00"
+    reviewedAt: "2026-06-24T10:30:55-07:00"
+    closedAt: "2026-06-24T10:30:55-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+    branch: codex/ops-repair-state-convergence-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
