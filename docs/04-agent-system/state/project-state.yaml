@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-entry-repair-2026-06-24
-updatedAt: "2026-06-24T04:35:33-07:00"
+currentPhase: ops-redeem-code-generation-scope-entry-2026-06-24
+updatedAt: "2026-06-24T06:24:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,40 +501,40 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e6d6b44351620dfd22f5c17b6670d69802c4a81d
-  lastKnownOriginMasterSha: a4e0be6a40953667ce3f81c0e62094977d762d4c
+  lastKnownMasterSha: 51f97d4be97f7427e2729d265ba85680af1b7a18
+  lastKnownOriginMasterSha: 51f97d4be97f7427e2729d265ba85680af1b7a18
 currentTask:
-  id: ops-authorization-entry-repair-planning-2026-06-24
-  status: closed
-  result: pass_ops_authorization_repair_planning_merged_and_closeout_validated
-  claimedAt: "2026-06-24T05:54:00-07:00"
-  plannedAt: "2026-06-24T05:54:00-07:00"
-  validatedAt: "2026-06-24T06:04:29-07:00"
-  reviewedAt: "2026-06-24T06:04:29-07:00"
-  closedAt: "2026-06-24T06:08:45-07:00"
+  id: ops-redeem-code-generation-scope-entry-2026-06-24
+  status: ready_for_closeout
+  result: pass_ops_redeem_code_generation_scope_entry_local_validation
+  claimedAt: "2026-06-24T06:24:26-07:00"
+  plannedAt: "2026-06-24T06:24:26-07:00"
+  validatedAt: "2026-06-24T07:10:08-07:00"
+  reviewedAt: "2026-06-24T07:10:08-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-4
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
+  sourceStory: user-approved-2026-06-24-ops-authorization-repair-follow-up-1
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-redeem-code-generation-scope-entry.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-redeem-code-generation-scope-entry.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-redeem-code-generation-scope-entry.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      approvalSource: current_user_continue_repair_task_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      approvalSource: current_user_continue_repair_task_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      approvalSource: current_user_continue_repair_task_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
-  branch: codex/ops-authorization-repair-planning-20260624
-  commitSha: e6d6b44351620dfd22f5c17b6670d69802c4a81d
+      approvalSource: current_user_continue_repair_task_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+  branch: codex/ops-redeem-code-generation-scope-entry-20260624
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null

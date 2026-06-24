@@ -98,6 +98,25 @@ type OrganizationFormState = {
 
 type AdminRedeemCodeData = RedeemCodeListDto;
 
+type CreateRedeemCodeInput = {
+  count: number;
+  durationDay: number;
+  level: number;
+  profession: Profession;
+  redeemDeadlineDate: string;
+};
+
+type RedeemCodeGenerationMode = "batch" | "single";
+
+type RedeemCodeGenerationFormState = {
+  count: string;
+  durationDay: string;
+  generationMode: RedeemCodeGenerationMode;
+  level: string;
+  profession: Profession | "";
+  redeemDeadlineDate: string;
+};
+
 type OrgAuthConfirmationState =
   | {
       kind: "createOrgAuth";
@@ -153,6 +172,7 @@ type EmployeeConfirmationState =
 
 type RedeemCodeConfirmationState = {
   kind: "generateRedeemCode";
+  input: CreateRedeemCodeInput;
 } | null;
 
 type OrganizationMutationInput = {
@@ -170,7 +190,7 @@ type ToastMessage = {
   tone: "error" | "success";
 };
 
-type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCodes"][number];
+type GeneratedRedeemCodeSummary = RedeemCodeGenerationDto["generation"];
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const DEFAULT_LIST_QUERY = "page=1&pageSize=20";
@@ -244,6 +264,15 @@ const defaultOrgAuthFormState: OrgAuthFormState = {
   profession: "monopoly",
   purchaserOrganizationPublicId: "",
   startsAt: "2026-05-25",
+};
+
+const defaultRedeemCodeGenerationFormState: RedeemCodeGenerationFormState = {
+  count: "1",
+  durationDay: "365",
+  generationMode: "single",
+  level: "",
+  profession: "",
+  redeemDeadlineDate: "2026-06-24",
 };
 
 const defaultOrganizationFormState: OrganizationFormState = {
@@ -513,6 +542,58 @@ function buildOrgAuthInput(
   };
 }
 
+function buildRedeemCodeGenerationInput(
+  formState: RedeemCodeGenerationFormState,
+): { input: CreateRedeemCodeInput | null; message: string | null } {
+  const count =
+    formState.generationMode === "single" ? 1 : Number(formState.count);
+  const durationDay = Number(formState.durationDay);
+  const level = Number(formState.level);
+  const profession = formState.profession;
+  const redeemDeadlineDate = formState.redeemDeadlineDate.trim();
+
+  if (profession === "") {
+    return { input: null, message: "请选择卡密授权专业。" };
+  }
+
+  if (!Number.isInteger(level) || level < 1 || level > 5) {
+    return { input: null, message: "卡密授权等级必须为 1 到 5。" };
+  }
+
+  if (!Number.isInteger(count) || count < 1 || count > 100) {
+    return { input: null, message: "卡密数量必须为 1 到 100。" };
+  }
+
+  if (!Number.isInteger(durationDay) || durationDay < 1 || durationDay > 1095) {
+    return { input: null, message: "授权天数必须为 1 到 1095。" };
+  }
+
+  if (redeemDeadlineDate.length === 0) {
+    return { input: null, message: "请选择卡密兑换截止日期。" };
+  }
+
+  return {
+    input: {
+      count,
+      durationDay,
+      level,
+      profession,
+      redeemDeadlineDate,
+    },
+    message: null,
+  };
+}
+
+function maskRedeemCodeDisplay(codeDisplay: string): string {
+  const normalizedCodeDisplay = codeDisplay.trim();
+
+  if (normalizedCodeDisplay.length <= 4) {
+    return "****";
+  }
+
+  return `${normalizedCodeDisplay.slice(0, 4)}****`;
+}
+
 function normalizeOptionalOrganizationText(value: string): string | null {
   const text = value.trim();
 
@@ -712,16 +793,6 @@ function getOrganizationDepthPaddingClassName(organizationDepth: number) {
       )
     ] ?? organizationDepthPaddingClassNames[0]
   );
-}
-
-function createDefaultRedeemCodeInput() {
-  return {
-    count: 3,
-    durationDay: 365,
-    level: 3,
-    profession: "monopoly",
-    redeemDeadlineDate: "2026-06-24",
-  };
 }
 
 function AdminSurfaceStatus({
@@ -2193,9 +2264,11 @@ function OrganizationTreeActionPanel({
 }
 
 function RedeemCodeConfirmationDialog({
+  input,
   onCancel,
   onConfirm,
 }: {
+  input: CreateRedeemCodeInput;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -2216,13 +2289,15 @@ function RedeemCodeConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm">
-          批量生成会调用后端原子创建流程；明文只在本次响应中显示，不能写入
-          evidence。
+          将生成 {input.count} 个 {input.profession} {input.level} 级卡密，
+          有效期 {input.durationDay} 天，兑换截止日期 {input.redeemDeadlineDate}
+          。普通页面和 evidence 只记录脱敏摘要。
         </p>
         <div className="flex gap-2">
           <button
             type="button"
             className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            data-testid="redeem-code-generation-confirm-action"
             onClick={onConfirm}
           >
             确认生成
@@ -2487,59 +2562,206 @@ function OrgAuthActionPanel({
 }
 
 function RedeemCodeActionPanel({
+  disabled,
+  formState,
   id,
   keyword,
   onGenerateRedeemCode,
+  onFormChange,
   onKeywordChange,
   onStatusChange,
   status,
 }: {
+  disabled: boolean;
+  formState: RedeemCodeGenerationFormState;
   id?: string;
   keyword: string;
-  onGenerateRedeemCode: () => void;
+  onFormChange: (formState: RedeemCodeGenerationFormState) => void;
+  onGenerateRedeemCode: (input: CreateRedeemCodeInput) => void;
   onKeywordChange: (value: string) => void;
   onStatusChange: (value: RedeemCodeStatus | "all") => void;
   status: RedeemCodeStatus | "all";
 }) {
+  const formValidation = buildRedeemCodeGenerationInput(formState);
+  const isGenerateDisabled = disabled || formValidation.input === null;
+
+  function updateFormState(nextFields: Partial<RedeemCodeGenerationFormState>) {
+    onFormChange({
+      ...formState,
+      ...nextFields,
+    });
+  }
+
+  function handleGenerateRedeemCode() {
+    if (formValidation.input === null) {
+      return;
+    }
+
+    onGenerateRedeemCode(formValidation.input);
+  }
+
   return (
     <section
-      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
       id={id}
     >
-      <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
-        <span className="text-text-secondary">卡密状态</span>
-        <select
-          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-          value={status}
-          onChange={(event) =>
-            onStatusChange(event.target.value as RedeemCodeStatus | "all")
-          }
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">卡密状态</span>
+          <select
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            value={status}
+            onChange={(event) =>
+              onStatusChange(event.target.value as RedeemCodeStatus | "all")
+            }
+          >
+            <option value="all">全部状态</option>
+            <option value="unused">未使用</option>
+            <option value="used">已使用</option>
+            <option value="expired">已过期</option>
+          </select>
+        </label>
+        <label className="flex min-w-56 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">卡密搜索</span>
+          <input
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            placeholder="卡密号或批次关键词"
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-12">
+        <div className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+          <span className="text-text-secondary">生成模式</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] ${
+                formState.generationMode === "single"
+                  ? "bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted hover:text-foreground border"
+              }`}
+              data-testid="redeem-code-generation-mode-single"
+              onClick={() =>
+                updateFormState({
+                  count: "1",
+                  generationMode: "single",
+                })
+              }
+            >
+              单个
+            </button>
+            <button
+              type="button"
+              className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] ${
+                formState.generationMode === "batch"
+                  ? "bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted hover:text-foreground border"
+              }`}
+              data-testid="redeem-code-generation-mode-batch"
+              onClick={() =>
+                updateFormState({
+                  generationMode: "batch",
+                })
+              }
+            >
+              批量
+            </button>
+          </div>
+        </div>
+
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+          <span className="text-text-secondary">数量</span>
+          <input
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            data-testid="redeem-code-generation-count-input"
+            disabled={formState.generationMode === "single"}
+            max={100}
+            min={1}
+            type="number"
+            value={formState.count}
+            onChange={(event) => updateFormState({ count: event.target.value })}
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+          <span className="text-text-secondary">专业</span>
+          <select
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="redeem-code-generation-profession-select"
+            value={formState.profession}
+            onChange={(event) =>
+              updateFormState({
+                profession: event.target.value as Profession | "",
+              })
+            }
+          >
+            <option value="">请选择</option>
+            <option value="monopoly">{professionLabels.monopoly}</option>
+            <option value="marketing">{professionLabels.marketing}</option>
+            <option value="logistics">{professionLabels.logistics}</option>
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-1">
+          <span className="text-text-secondary">等级</span>
+          <input
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="redeem-code-generation-level-input"
+            max={5}
+            min={1}
+            type="number"
+            value={formState.level}
+            onChange={(event) => updateFormState({ level: event.target.value })}
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+          <span className="text-text-secondary">授权天数</span>
+          <input
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="redeem-code-generation-duration-input"
+            max={1095}
+            min={1}
+            type="number"
+            value={formState.durationDay}
+            onChange={(event) =>
+              updateFormState({ durationDay: event.target.value })
+            }
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+          <span className="text-text-secondary">兑换截止</span>
+          <input
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="redeem-code-generation-deadline-input"
+            type="date"
+            value={formState.redeemDeadlineDate}
+            onChange={(event) =>
+              updateFormState({ redeemDeadlineDate: event.target.value })
+            }
+          />
+        </label>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-text-muted text-sm">
+          {formValidation.message ??
+            "筛选变化自动刷新；生成操作需要二次确认，普通页面只显示脱敏摘要。"}
+        </p>
+        <button
+          type="button"
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          data-testid="redeem-code-generate-button"
+          disabled={isGenerateDisabled}
+          onClick={handleGenerateRedeemCode}
         >
-          <option value="all">全部状态</option>
-          <option value="unused">未使用</option>
-          <option value="used">已使用</option>
-          <option value="expired">已过期</option>
-        </select>
-      </label>
-      <label className="flex min-w-56 flex-col gap-2 text-sm font-medium">
-        <span className="text-text-secondary">卡密搜索</span>
-        <input
-          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-          placeholder="卡密号或批次关键词"
-          value={keyword}
-          onChange={(event) => onKeywordChange(event.target.value)}
-        />
-      </label>
-      <button
-        type="button"
-        className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
-        onClick={onGenerateRedeemCode}
-      >
-        生成卡密
-      </button>
-      <p className="text-text-muted text-sm">
-        筛选变化自动刷新；生成操作需要二次确认。
-      </p>
+          生成卡密
+        </button>
+      </div>
     </section>
   );
 }
@@ -3458,8 +3680,12 @@ export function AdminRedeemCodePage() {
     useAdminRedeemCodeData(redeemCodeListQuery);
   const [confirmationState, setConfirmationState] =
     useState<RedeemCodeConfirmationState>(null);
-  const [generatedRedeemCode, setGeneratedRedeemCode] =
-    useState<GeneratedRedeemCode | null>(null);
+  const [redeemCodeGenerationFormState, setRedeemCodeGenerationFormState] =
+    useState<RedeemCodeGenerationFormState>(
+      defaultRedeemCodeGenerationFormState,
+    );
+  const [generatedRedeemCodeSummary, setGeneratedRedeemCodeSummary] =
+    useState<GeneratedRedeemCodeSummary | null>(null);
   const [selectedRedeemCodePublicId, setSelectedRedeemCodePublicId] = useState<
     string | null
   >(null);
@@ -3502,7 +3728,11 @@ export function AdminRedeemCodePage() {
   async function handleConfirmRedeemCodeAction() {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || confirmationState === null) {
+    if (confirmationState === null) {
+      return;
+    }
+
+    if (sessionToken === null) {
       setConfirmationState(null);
       setLoadState("unauthorized");
       return;
@@ -3511,7 +3741,7 @@ export function AdminRedeemCodePage() {
     const createResponse = await postAdminApi<RedeemCodeGenerationDto>(
       "/api/v1/redeem-codes",
       sessionToken,
-      createDefaultRedeemCodeInput(),
+      confirmationState.input,
     );
 
     setConfirmationState(null);
@@ -3524,15 +3754,14 @@ export function AdminRedeemCodePage() {
       return;
     }
 
-    const firstGeneratedRedeemCode = createResponse.data.redeemCodes[0] ?? null;
     const generatedRedeemCodes = createResponse.data.redeemCodes;
 
-    setGeneratedRedeemCode(firstGeneratedRedeemCode);
+    setGeneratedRedeemCodeSummary(createResponse.data.generation);
     setData((currentData) => ({
       redeemCodes: [
         ...generatedRedeemCodes.map((redeemCode) => ({
-          canViewPlainText: true,
-          codeDisplay: redeemCode.codeDisplay,
+          canViewPlainText: false,
+          codeDisplay: maskRedeemCodeDisplay(redeemCode.codeDisplay),
           createdAt: redeemCode.createdAt,
           level: redeemCode.level,
           profession: redeemCode.profession,
@@ -3593,11 +3822,14 @@ export function AdminRedeemCodePage() {
       />
 
       <RedeemCodeActionPanel
+        disabled={false}
+        formState={redeemCodeGenerationFormState}
         id="redeem-code-generate-panel"
         keyword={redeemCodeKeyword}
         status={redeemCodeStatus}
-        onGenerateRedeemCode={() =>
-          setConfirmationState({ kind: "generateRedeemCode" })
+        onFormChange={setRedeemCodeGenerationFormState}
+        onGenerateRedeemCode={(input) =>
+          setConfirmationState({ kind: "generateRedeemCode", input })
         }
         onKeywordChange={setRedeemCodeKeyword}
         onStatusChange={setRedeemCodeStatus}
@@ -3605,20 +3837,23 @@ export function AdminRedeemCodePage() {
 
       <SystemOpsPurchaseGuidanceContactConfig />
 
-      {generatedRedeemCode === null ? null : (
+      {generatedRedeemCodeSummary === null ? null : (
         <section
           aria-label="本地卡密生成结果"
           className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
+          data-testid="redeem-code-generation-redacted-summary"
         >
           <div className="space-y-2">
             <p className="text-text-primary text-sm font-semibold">
-              卡密已生成，请仅在本地验证时复制给学员
+              卡密已生成，普通页面仅显示脱敏摘要。
             </p>
             <p className="text-text-secondary text-xs">
-              明文仅在本次创建响应中展示；提交 evidence 时只记录脱敏摘要。
-            </p>
-            <p className="text-text-primary font-mono text-base font-semibold tracking-normal">
-              {generatedRedeemCode.codePlainText}
+              generationGroupId:
+              {generatedRedeemCodeSummary.generationGroupId}; count:
+              {generatedRedeemCodeSummary.count}; profession:
+              {generatedRedeemCodeSummary.profession}; level:
+              {generatedRedeemCodeSummary.level}; deadline:
+              {generatedRedeemCodeSummary.redeemDeadlineAt}
             </p>
           </div>
         </section>
@@ -3686,6 +3921,7 @@ export function AdminRedeemCodePage() {
 
       {confirmationState === null ? null : (
         <RedeemCodeConfirmationDialog
+          input={confirmationState.input}
           onCancel={() => setConfirmationState(null)}
           onConfirm={() => void handleConfirmRedeemCodeAction()}
         />

@@ -335,6 +335,34 @@ describe("phase 11 redeem_code batch management loop", () => {
     expect(createInputs).toEqual([]);
   });
 
+  it("rejects redeem_code generation without explicit profession and level before repository mutation", async () => {
+    const auditInputs: unknown[] = [];
+    const { createInputs, repositories } = createAdminRepositories(auditInputs);
+    const handlers = createAdminHandlers(repositories);
+
+    const response = await handlers.redeemCodes.POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer admin-session-token",
+        },
+        body: JSON.stringify({
+          count: 1,
+          durationDay: 365,
+          redeemDeadlineDate: "2026-06-24",
+        }),
+      }),
+    );
+
+    await expect(readJson(response)).resolves.toEqual({
+      code: 422601,
+      message: "Redeem code generation requires explicit profession and level.",
+      data: null,
+    });
+    expect(createInputs).toEqual([]);
+    expect(auditInputs).toEqual([]);
+  });
+
   it("passes search, status, pagination, and expiry sorting filters into the list runtime", async () => {
     const { listQueries, repositories } = createAdminRepositories();
     const handlers = createAdminHandlers(repositories);

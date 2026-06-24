@@ -81,8 +81,6 @@ const systemClock: AdminRedeemCodeClock = {
   },
 };
 const DEFAULT_REDEEM_CODE_DURATION_DAY = 365;
-const DEFAULT_REDEEM_CODE_PROFESSION: Profession = "monopoly";
-const DEFAULT_REDEEM_CODE_LEVEL = 3;
 const PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
 const NO_STORE_HEADERS = {
   "cache-control": "no-store",
@@ -220,11 +218,8 @@ function normalizeRedeemCodeBatchRequest(
     source.durationDay,
     DEFAULT_REDEEM_CODE_DURATION_DAY,
   );
-  const profession = readProfession(
-    source.profession,
-    DEFAULT_REDEEM_CODE_PROFESSION,
-  );
-  const level = readInteger(source.level, DEFAULT_REDEEM_CODE_LEVEL);
+  const profession = readProfession(source.profession);
+  const level = readOptionalInteger(source.level);
 
   if (count < 1 || count > REDEEM_CODE_BATCH_CREATE_LIMIT) {
     return {
@@ -232,6 +227,16 @@ function normalizeRedeemCodeBatchRequest(
       response: createErrorResponse(
         ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
         `Redeem code batch count must be between 1 and ${REDEEM_CODE_BATCH_CREATE_LIMIT}.`,
+      ),
+    };
+  }
+
+  if (profession === null || level === null) {
+    return {
+      success: false,
+      response: createErrorResponse(
+        ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+        "Redeem code generation requires explicit profession and level.",
       ),
     };
   }
@@ -299,10 +304,22 @@ function readInteger(value: unknown, fallback: number): number {
   return fallback;
 }
 
-function readProfession(value: unknown, fallback: Profession): Profession {
+function readOptionalInteger(value: unknown): number | null {
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && /^\d+$/u.test(value)) {
+    return Number(value);
+  }
+
+  return null;
+}
+
+function readProfession(value: unknown): Profession | null {
   return value === "monopoly" || value === "marketing" || value === "logistics"
     ? value
-    : fallback;
+    : null;
 }
 
 function createDefaultRedeemDeadlineAt(now: Date, durationDay: number): Date {

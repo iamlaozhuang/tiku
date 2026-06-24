@@ -204,21 +204,21 @@ const generatedRedeemCodePayload = {
   data: {
     generation: {
       generationGroupId: "redeem-code-batch-public-001",
-      count: 3,
-      profession: "monopoly",
-      level: 3,
-      durationDay: 365,
-      redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+      count: 2,
+      profession: "logistics",
+      level: 4,
+      durationDay: 180,
+      redeemDeadlineAt: "2026-07-01T15:59:59.999Z",
     },
     redeemCodes: [
       {
         publicId: "redeem-code-public-generated-001",
         codePlainText: "LOCALTST",
         codeDisplay: "LOCALTST",
-        profession: "monopoly",
-        level: 3,
+        profession: "logistics",
+        level: 4,
         status: "unused",
-        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+        redeemDeadlineAt: "2026-07-01T15:59:59.999Z",
         createdAt: "2026-05-25T00:00:00.000Z",
       },
     ],
@@ -1082,14 +1082,52 @@ describe("admin user organization authorization ops baseline", () => {
       expect.anything(),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
+    fireEvent.click(screen.getByTestId("redeem-code-generation-mode-batch"));
+    fireEvent.change(screen.getByTestId("redeem-code-generation-count-input"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(
+      screen.getByTestId("redeem-code-generation-profession-select"),
+      {
+        target: { value: "logistics" },
+      },
+    );
+    fireEvent.change(screen.getByTestId("redeem-code-generation-level-input"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(
+      screen.getByTestId("redeem-code-generation-duration-input"),
+      {
+        target: { value: "180" },
+      },
+    );
+    fireEvent.change(
+      screen.getByTestId("redeem-code-generation-deadline-input"),
+      {
+        target: { value: "2026-07-01" },
+      },
+    );
+
+    fireEvent.click(screen.getByTestId("redeem-code-generate-button"));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认生成卡密？");
-    fireEvent.click(screen.getByRole("button", { name: "确认生成" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("2");
+    expect(screen.getByRole("alertdialog")).not.toHaveTextContent("LOCALTST");
+    fireEvent.click(
+      screen.getByTestId("redeem-code-generation-confirm-action"),
+    );
 
     expect(await screen.findByRole("status")).toHaveTextContent(
       "卡密已生成，请仅在本地验证时复制给学员",
     );
-    expect(screen.getAllByText("LOCALTST").length).toBeGreaterThan(0);
+    const generationSummary = await screen.findByTestId(
+      "redeem-code-generation-redacted-summary",
+    );
+    expect(generationSummary).toHaveTextContent("redeem-code-batch-public-001");
+    expect(generationSummary).toHaveTextContent("2");
+    expect(generationSummary).toHaveTextContent("logistics");
+    expect(generationSummary).toHaveTextContent("4");
+    expect(generationSummary).not.toHaveTextContent("LOCALTST");
+    expect(screen.queryByText("LOCALTST")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/redeem-codes",
       expect.objectContaining({
@@ -1100,11 +1138,11 @@ describe("admin user organization authorization ops baseline", () => {
       ([url]) => String(url) === "/api/v1/redeem-codes",
     );
     expect(JSON.parse(String(generateCall?.[1]?.body))).toMatchObject({
-      count: 3,
-      profession: "monopoly",
-      level: 3,
-      durationDay: 365,
-      redeemDeadlineDate: "2026-06-24",
+      count: 2,
+      profession: "logistics",
+      level: 4,
+      durationDay: 180,
+      redeemDeadlineDate: "2026-07-01",
     });
   });
 
