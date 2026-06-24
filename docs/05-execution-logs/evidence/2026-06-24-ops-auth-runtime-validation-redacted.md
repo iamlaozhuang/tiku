@@ -5,7 +5,7 @@
 - Task id: `ops-auth-runtime-validation-redacted-2026-06-24`.
 - Branch: `codex/ops-auth-runtime-validation-redacted-20260624`.
 - Task kind: `runtime_validation_redacted_with_fixture_repair`.
-- Status: ready for closeout after local validation.
+- Status: closed after fast-forward merge to `master` and post-merge validation.
 - Scope: redacted local unit validation for operations authorization, role/workspace separation, `redeem_code`, `org_auth`, employee import, and related audit boundaries after the serial repair package.
 - Non-claim: this evidence does not declare standard/advanced MVP final Pass.
 
@@ -78,6 +78,19 @@
 - `git diff --check`: passed with no whitespace errors.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24`: passed. Output showed seven files in scope and `Cost Calibration Gate remains blocked`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24 -SkipRemoteAheadCheck`: passed. Output showed branch `codex/ops-auth-runtime-validation-redacted-20260624`, `master`, `origin/master`, and state SHAs aligned at `cff57ff2679d53dacb47c34c3d46849372c49ba3`.
+
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Validation commit: `d73249bd839fe71e12ce130657e2b6d2e19d8e75`.
+- Timestamp: `2026-06-24T10:14:06-07:00`.
+- `npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts tests/unit/phase-20-ra-06-04-org-auth-detail-route-alignment.test.ts tests/unit/phase-21-admin-redeem-code-concurrency.test.ts`: passed on `master`. Output showed `Test Files 13 passed (13)` and `Tests 66 passed (66)`.
+- `npx.cmd prettier --check --ignore-unknown ...`: passed on `master` with `All matched files use Prettier code style!`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `git diff --check`: passed on `master` with no whitespace errors.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`. Output showed `master` at `d73249bd839fe71e12ce130657e2b6d2e19d8e75`, `origin/master` at `cff57ff2679d53dacb47c34c3d46849372c49ba3`, and state master SHA as an accepted ancestor.
 
 ## Changed Files
 

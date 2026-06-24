@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ops-auth-runtime-validation-redacted-2026-06-24
-updatedAt: "2026-06-24T10:05:17-07:00"
+updatedAt: "2026-06-24T10:14:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,17 +501,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cff57ff2679d53dacb47c34c3d46849372c49ba3
+  lastKnownMasterSha: d73249bd839fe71e12ce130657e2b6d2e19d8e75
   lastKnownOriginMasterSha: cff57ff2679d53dacb47c34c3d46849372c49ba3
 currentTask:
   id: ops-auth-runtime-validation-redacted-2026-06-24
-  status: ready_for_closeout
-  result: pass_ops_auth_runtime_validation_redacted_local_validation
+  status: closed
+  result: pass_ops_auth_runtime_validation_redacted_merged_and_post_merge_validated
   claimedAt: "2026-06-24T10:05:17-07:00"
   plannedAt: "2026-06-24T10:05:17-07:00"
-  validatedAt: "2026-06-24T10:11:06-07:00"
-  reviewedAt: "2026-06-24T10:11:06-07:00"
-  closedAt: null
+  validatedAt: "2026-06-24T10:14:06-07:00"
+  reviewedAt: "2026-06-24T10:14:06-07:00"
+  closedAt: "2026-06-24T10:14:06-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-6
   planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-auth-runtime-validation-redacted.md
@@ -534,7 +534,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
   branch: codex/ops-auth-runtime-validation-redacted-20260624
-  commitSha: null
+  commitSha: d73249bd839fe71e12ce130657e2b6d2e19d8e75
   prUrl: null
   retryCount: 0
   lastFailurePath: null
