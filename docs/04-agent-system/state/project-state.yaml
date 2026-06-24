@@ -503,17 +503,20 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+  id: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
   status: closed
-  result: pass_local_account_runtime_rerun_scope_package_prepared_no_runtime_execution
-  claimedAt: "2026-06-23T09:35:00-07:00"
-  validatedAt: "2026-06-23T09:35:00-07:00"
-  closedAt: "2026-06-23T09:35:00-07:00"
+  result: blocked_role_separated_runtime_gate_all_8_observed_zero_pass
+  claimedAt: "2026-06-23T09:48:37-07:00"
+  validatedAt: "2026-06-23T23:06:11-07:00"
+  closedAt: "2026-06-23T23:06:11-07:00"
   blockedAt: null
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+  requirementDecisionPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
+  postClarificationCloseoutAt: "2026-06-24T00:07:32-07:00"
+  postClarificationCloseoutResult: pass_docs_package_validated_gate_still_blocked_no_commit
   branch: codex/local-account-provisioning-credential-handoff-scope-20260623
   commitSha: null
   prUrl: null
@@ -8059,7 +8062,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
   recordedAt: "2026-06-23T03:44:41-07:00"
   branch: codex/role-separated-account-coverage-batch-20260623
-  status: local_account_runtime_rerun_scope_package_prepared_waiting_owner_approval
+  status: local_account_runtime_rerun_in_progress_owner_entered_credentials_required
   sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
   sourceFinalReviewEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-runtime-blocker-final-review.md
   sourceCloseoutEvidencePath: docs/05-execution-logs/evidence/2026-06-23-runtime-blocker-final-review-branch-merge-push-cleanup.md
@@ -8070,7 +8073,7 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   seedAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-coverage-batch-seed.md
   nextExecutableTaskId: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
   nextExecutableTaskPurpose: run_local_runtime_walkthrough_with_owner_entered_role_separated_accounts
-  nextApprovalRequired: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+  nextApprovalRequired: null
   serialTasks:
     - acceptance-role-separated-account-coverage-batch-seed-2026-06-23
     - acceptance-role-separated-account-scope-approval-2026-06-23
@@ -8133,13 +8136,15 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
     localAccountProvisioningCredentialHandoffScopePackagePrepared: true
     localAccountProvisioningCredentialHandoffExecutionCompleted: true
     localAccountRuntimeRerunScopePackagePrepared: true
-    localAccountRuntimeRerunExecuted: false
+    localAccountRuntimeRerunInProgress: false
+    localAccountRuntimeRerunExecuted: true
+    localAccountRuntimeRerunBlocked: true
     accountActionExecuted: true
     fixtureMutationExecuted: true
     databaseSeedExecuted: true
     schemaMigrationDatabaseSeedExecuted: true
     schemaMigrationExecuted: false
-    devServerStarted: false
+    devServerStarted: true
     browserE2eExecuted: false
     browserRuntimeExecuted: true
     providerCallExecuted: false
@@ -8996,6 +9001,138 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
       - production_or_staging_data_access
       - cost_calibration_gate
       - final_acceptance_pass
+  localAccountRuntimeRerun:
+    taskId: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
+    status: closed
+    result: blocked_role_separated_runtime_gate_all_8_observed_zero_pass
+    approvalConsumed: ROLE_SEPARATED_LOCAL_ACCOUNT_RUNTIME_RERUN_SCOPE_2026_06_23
+    approvedAt: "2026-06-23T09:48:37-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-23T09:48:37-07:00"
+    validatedAt: "2026-06-23T23:06:11-07:00"
+    closedAt: "2026-06-23T23:06:11-07:00"
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+    requirementDecisionPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
+    postClarificationCloseoutAt: "2026-06-24T00:07:32-07:00"
+    postClarificationCloseoutResult: pass_docs_package_validated_gate_still_blocked_no_commit
+    sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md
+    credentialHandlingRule: laozhuang_reads_private_file_and_enters_credentials_codex_never_reads_or_types_credentials
+    localTargets:
+      - http://127.0.0.1:3000
+      - http://localhost:3000
+    rowsInScope:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    roleObservationSummary:
+      mandatoryRows: 8
+      observedRows: 8
+      strictRuntimePassRows: 0
+      blockedRows: 1
+      failRows: 7
+      pendingRows: 0
+      roleSeparatedRuntimeGate: blocked
+      opsAdminResult:
+        status: fail
+        allowedBehavior: ops_users_and_ops_organizations_reachable_with_ops_navigation
+        deniedBehavior: content_papers_and_content_questions_reachable_without_access_denial
+        blocker: ops_admin_content_backend_not_separated
+    uiUxFindings:
+      - id: personal_advanced_ai_entry_not_visible_after_login
+        status: fail
+        summary: >-
+          A personal advanced learner can reach learner home and profile, but the learner home does not expose a
+          prominent personal AI entry. Direct /ai-generation access shows a disabled action with a login prompt.
+        acceptanceImpact: advanced_personal_user_experience_not_complete
+      - id: advanced_learner_ai_generation_entry_and_capability_missing
+        status: fail
+        summary: >-
+          Advanced edition requirements include personal learning AI question generation and AI paper generation for
+          personal users and enterprise employees when their authorization context allows advanced capability. The
+          sampled personal advanced learner and organization advanced employee did not see a prominent AI entry on
+          learner home, and direct /ai-generation showed a disabled action with a login prompt.
+        acceptanceImpact: advanced_personal_and_employee_ai_generation_experience_not_complete
+      - id: employee_organization_training_entry_missing_from_learner_navigation
+        status: fail
+        summary: >-
+          Requirement sources expect employees to reach visible organization training from student-side organization
+          training entry. The sampled standard and advanced organization employee home pages did not expose an
+          organization training entry; direct /organization-training access only proves the route exists.
+        acceptanceImpact: organization_training_employee_flow_not_acceptance_ready_and_future_mini_program_flow_would_break
+      - id: backend_role_landing_and_shell_ux_confusing
+        status: fail
+        summary: >-
+          Owner-entered content_admin login at /login first landed on the system operations backend, then required
+          manual selection of the content backend before /content/papers was reached.
+        acceptanceImpact: backend_role_aware_login_routing_and_shell_ux_not_acceptance_ready
+      - id: content_admin_ai_generation_entry_absent
+        status: blocked
+        summary: >-
+          The sampled content backend exposed paper, question, material, and knowledge node management, but no visible
+          content-admin AI question generation or AI paper generation entry. The 2026-06-21 content admin AI scope
+          decision keeps those buttons/routes blocked pending fresh product, Provider, env, cost, storage, redaction,
+          and manual adoption approvals.
+        acceptanceImpact: content_admin_ai_generation_not_covered_by_current_acceptance_batch
+      - id: backend_logout_control_missing
+        status: fail
+        summary: >-
+          The sampled operations backend page at /ops/users and content backend page at /content/papers exposed role
+          navigation and management actions, but no visible logout, exit, sign-out, or equivalent session-ending control
+          was found in the sampled links or buttons.
+        acceptanceImpact: backend_session_control_usability_and_security_gap
+    authorizationFindings:
+      - id: enterprise_admin_rows_resolve_to_system_ops_backend
+        status: fail
+        summary: >-
+          The sampled org_standard_admin and org_advanced_admin sessions reached /ops/users and showed system
+          operations menus. Provisioning evidence records that enterprise admin rows use the existing ops_admin role
+          plus organization linkage because the current schema has no first-class org_admin enum.
+        acceptanceImpact: organization_admin_role_separation_not_proven
+      - id: content_admin_default_landing_not_content_scoped
+        status: fail
+        summary: >-
+          Owner-entered content_admin login first landed on the system operations backend. After manual selection of the
+          content backend, /content/papers was reachable and showed content-scoped navigation for paper, question,
+          material, and knowledge node management.
+        acceptanceImpact: content_admin_role_separation_and_login_routing_not_proven
+    codexUiUxSkillRecord:
+      recordedAt: "2026-06-23T09:48:37-07:00"
+      primaryFutureSkills:
+        - product-design:index
+        - product-design:get-context
+      visualExplorationSkills:
+        - product-design:ideate
+        - product-design:image-to-code
+      implementationAndQaSkills:
+        - build-web-apps:frontend-testing-debugging
+        - build-web-apps:react-best-practices
+        - build-web-apps:shadcn
+        - browser:control-in-app-browser
+      futureUseRule: >-
+        For UI/UX optimization batches, first use product-design:get-context to lock the design brief, then use visual
+        ideation or existing design-system implementation as appropriate, and verify rendered behavior with Browser
+        evidence before claiming acceptance.
+    executionBoundary:
+      localBrowserRuntimeExecuted: true
+      devServerStartedByCodex: true
+      privateCredentialFileReadByCodex: false
+      credentialEntryByCodex: false
+      passwordOrSecretRecordedInGitEvidenceOrChat: false
+      sourceOrE2eFileChanged: false
+      databaseSeedOrWriteExecuted: false
+      schemaMigrationExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingOrProductionDeployExecuted: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePassClaim: false
   acceptanceRule: >-
     The role-separated account blocker can close only after every mandatory row has redacted evidence for a separated
     role account or an owner-accepted MVP exclusion, including at least one allowed behavior and one denied behavior.
@@ -9003,8 +9140,9 @@ acceptanceRoleSeparatedAccountCoverageBatch20260623:
   boundary: >-
     This batch is filling role-separated account coverage before Provider, Cost Calibration, or staging gates. The local
     account provisioning execution has created or updated approved local dev accounts and a private credential handoff
-    file outside the repository. It still does not approve password values in git/evidence/chat/logs/env, browser or
-    Playwright runtime walkthrough, Provider/model services, staging/prod/cloud deployment, payment or external
+    file outside the repository. The approved local browser runtime rerun has now completed with the role-separated gate
+    blocked. It still does not approve password values in git/evidence/chat/logs/env, additional browser or Playwright
+    runtime walkthroughs outside this scope, Provider/model services, staging/prod/cloud deployment, payment or external
     services, Cost Calibration, or final acceptance Pass.
 
 acceptanceL5BrowserRuntimeScopeApproval20260623:
