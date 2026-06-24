@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
-updatedAt: "2026-06-24T15:47:01-07:00"
+currentPhase: role-separated-post-repair-runtime-rerun-2026-06-24
+updatedAt: "2026-06-24T16:48:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,39 +504,41 @@ repository:
   lastKnownMasterSha: 1a046d13b90e35b3a0bd5ad2c5350e7db0231c9f
   lastKnownOriginMasterSha: 1a046d13b90e35b3a0bd5ad2c5350e7db0231c9f
 currentTask:
-  id: role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
-  status: closed
-  result: pass_runtime_rerun_scope_approval_package_prepared_no_runtime_executed
-  claimedAt: "2026-06-24T15:43:11-07:00"
-  plannedAt: "2026-06-24T15:43:11-07:00"
-  validatedAt: "2026-06-24T15:47:01-07:00"
-  reviewedAt: "2026-06-24T15:47:01-07:00"
-  closedAt: "2026-06-24T15:47:01-07:00"
+  id: role-separated-post-repair-runtime-rerun-2026-06-24
+  status: ready_for_closeout
+  result: runtime_observation_completed_8_rows_strict_acceptance_fail_gaps_recorded
+  claimedAt: "2026-06-24T15:55:45-07:00"
+  plannedAt: "2026-06-24T15:55:45-07:00"
+  validatedAt: "2026-06-24T16:46:08-07:00"
+  reviewedAt: "2026-06-24T16:46:08-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: user-approval-2026-06-24-recommended-runtime-rerun-scope-approval-package
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+  sourceStory: successor-of-role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+  approvalConsumed: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+  approvalSource: current_user_fresh_approval_2026_06_24_package_id
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
   approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
   acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      approvalSource: current_user_fresh_closeout_approval_2026_06_24
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      approvalSource: current_user_fresh_closeout_approval_2026_06_24
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      approvalSource: current_user_fresh_closeout_approval_2026_06_24
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
-  branch: codex/post-repair-runtime-rerun-scope-approval-20260624
-  commitSha: pending_report_in_final_handoff
+      approvalSource: current_user_fresh_closeout_approval_2026_06_24
+  branch: codex/post-repair-runtime-rerun-20260624
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -554,13 +556,55 @@ roleSeparatedPostRepairRuntimeRerunScopeApproval20260624:
   approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
   scope: docs_runtime_scope_approval_package_no_runtime_no_final_pass
   successorTaskId: role-separated-post-repair-runtime-rerun-2026-06-24
-  successorTaskStatus: blocked_pending_fresh_package_approval
+  successorTaskStatus: approved_planned_pending_local_target_check
   runtimeExecutedByThisTask: false
   finalPassClaim: false
   blockedWithoutFreshApproval:
     - browser_or_playwright_runtime
     - owner_credential_entry
     - credential_document_read_by_codex
+    - account_creation_disable_password_reset_or_seed
+    - database_read_write_or_migration
+    - source_test_script_or_e2e_change
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+roleSeparatedPostRepairRuntimeRerun20260624:
+  taskId: role-separated-post-repair-runtime-rerun-2026-06-24
+  phase: post-role-separated-repair-runtime-rerun-2026-06-24
+  recordedAt: "2026-06-24T15:55:45-07:00"
+  sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+  status: ready_for_closeout
+  result: runtime_observation_completed_8_rows_strict_acceptance_fail_gaps_recorded
+  branch: codex/post-repair-runtime-rerun-20260624
+  approvalConsumed:
+    packageId: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+    approvedAt: "2026-06-24T15:55:45-07:00"
+    approvedBy: laozhuang
+    scope: local_browser_runtime_observation_owner_entered_credentials_only
+  runtimeBoundary:
+    localTargets:
+      - http://127.0.0.1:3000
+      - http://localhost:3000
+    devServerStartApproved: false
+    credentialEntryByCodex: false
+    credentialDocumentReadByCodex: false
+    sessionLogoutByCodex: approved_by_laozhuang_chat_instruction_2026_06_24
+    finalPassClaim: false
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  blockedWithoutFreshApproval:
+    - dev_server_start
+    - credential_document_read_by_codex
+    - credential_entry_by_codex
     - account_creation_disable_password_reset_or_seed
     - database_read_write_or_migration
     - source_test_script_or_e2e_change
