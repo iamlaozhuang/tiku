@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  ClipboardList,
   Eye,
   History,
   Loader2,
@@ -80,13 +81,14 @@ type StudentPersonalAiGenerationRequestDraft = {
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 
 const copy = {
-  title: "\u4e2a\u4eba AI \u5b66\u4e60",
+  title: "AI训练",
   subtitle:
-    "\u4ece\u5b66\u5458\u7aef\u53d1\u8d77\u672c\u5730\u5408\u7ea6\u8bf7\u6c42\uff0c\u4ec5\u5c55\u793a\u8131\u654f\u6458\u8981\u548c\u72b6\u6001\u3002",
+    "面向高级授权学员的 AI出题 和 AI组卷入口；当前仅展示本地合约摘要和脱敏状态。",
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
   emptyDescription:
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730 route contract \u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
-  requestButton: "\u53d1\u8d77\u672c\u5730 AI \u8bf7\u6c42",
+  requestButton: "AI出题",
+  paperButton: "AI组卷",
   loadingTitle: "\u6b63\u5728\u53d1\u8d77\u672c\u5730\u8bf7\u6c42",
   errorTitle: "\u672c\u5730 AI \u8bf7\u6c42\u5931\u8d25",
   errorDescription:
@@ -1089,19 +1091,29 @@ export function StudentPersonalAiGenerationPage() {
         <p className="text-text-secondary text-sm leading-6">{copy.subtitle}</p>
       </div>
 
-      <button
-        type="button"
-        disabled={!hasSessionToken || pageState === "loading"}
-        onClick={() => void handleSubmitPersonalAiGenerationRequest()}
-        className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {pageState === "loading" ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-        ) : (
-          <Sparkles className="size-4" aria-hidden="true" />
-        )}
-        {copy.requestButton}
-      </button>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          disabled={!hasSessionToken || pageState === "loading"}
+          onClick={() => void handleSubmitPersonalAiGenerationRequest()}
+          className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {pageState === "loading" ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles className="size-4" aria-hidden="true" />
+          )}
+          {copy.requestButton}
+        </button>
+        <button
+          type="button"
+          disabled
+          className="border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <ClipboardList className="size-4" aria-hidden="true" />
+          {copy.paperButton}
+        </button>
+      </div>
 
       {pageState === "loading" ? (
         <section

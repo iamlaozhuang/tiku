@@ -147,6 +147,25 @@ describe("StudentPersonalAiGenerationPage", () => {
         data: [],
       },
     );
+    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+        formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+        results: [],
+      },
+    });
+  });
+
+  it("uses learner-facing AI training labels for question and paper generation", () => {
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(screen.getByRole("heading", { name: "AI训练" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "AI出题" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "AI组卷" })).toBeInTheDocument();
   });
 
   it("loads and renders redacted personal AI generation result history", async () => {

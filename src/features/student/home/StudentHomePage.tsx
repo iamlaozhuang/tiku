@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   BookOpen,
+  BrainCircuit,
+  Building2,
   ClipboardList,
   Clock3,
   History,
@@ -20,6 +22,10 @@ import {
   fetchStudentApi,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
+import type {
+  EffectiveAuthorizationContextDto,
+  EffectiveAuthorizationListDto,
+} from "@/server/contracts/effective-authorization-contract";
 import type {
   StudentPaperListDto,
   StudentPaperScopeDto,
@@ -39,6 +45,7 @@ type StudentHomePageProps = {
   state?: StudentHomePageState;
   scopes?: StudentPaperScopeDto[];
   papers?: StudentPaperSummaryDto[];
+  authorizationContexts?: EffectiveAuthorizationContextDto[];
   rememberedScope?: StudentHomeScopeSelection;
 };
 
@@ -49,6 +56,7 @@ type SubjectGroup = {
 
 type StudentPaperScopePayload = StudentPaperScopesDto | StudentPaperScopeDto[];
 type StudentPaperListPayload = StudentPaperListDto | StudentPaperSummaryDto[];
+type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
 
 type AuthExpiryReminder = {
   scope: StudentPaperScopeDto;
@@ -409,6 +417,56 @@ function readStudentPapers(
   return Array.isArray(payload) ? payload : payload.papers;
 }
 
+function readAuthorizationContexts(
+  payload: StudentAuthorizationListPayload,
+): EffectiveAuthorizationContextDto[] {
+  return payload.authorizationContexts ?? [];
+}
+
+async function fetchAuthorizationContextsFailClosed(): Promise<
+  EffectiveAuthorizationContextDto[]
+> {
+  try {
+    const authorizationPayload =
+      await fetchStudentApi<StudentAuthorizationListPayload>(
+        "/api/v1/authorizations",
+      );
+
+    if (
+      isStudentUnauthorizedResponse(authorizationPayload) ||
+      authorizationPayload.code !== 0 ||
+      authorizationPayload.data === null
+    ) {
+      return [];
+    }
+
+    return readAuthorizationContexts(authorizationPayload.data);
+  } catch {
+    return [];
+  }
+}
+
+function canShowAiTraining(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): boolean {
+  return authorizationContexts.some(
+    (authorizationContext) =>
+      authorizationContext.effectiveEdition === "advanced" &&
+      (authorizationContext.capabilities.canGenerateAiQuestion ||
+        authorizationContext.capabilities.canGenerateAiPaper),
+  );
+}
+
+function canShowOrganizationTraining(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): boolean {
+  return authorizationContexts.some(
+    (authorizationContext) =>
+      authorizationContext.effectiveEdition === "advanced" &&
+      authorizationContext.capabilities.canAnswerOrganizationTraining,
+  );
+}
+
 function StudentHomeStatusMessage({
   title,
   description,
@@ -571,6 +629,7 @@ export function StudentHomePage({
   state = "ready",
   scopes,
   papers,
+  authorizationContexts,
   rememberedScope,
 }: StudentHomePageProps) {
   const router = useRouter();
@@ -583,6 +642,8 @@ export function StudentHomePage({
   const [runtimePapers, setRuntimePapers] = useState<StudentPaperSummaryDto[]>(
     [],
   );
+  const [runtimeAuthorizationContexts, setRuntimeAuthorizationContexts] =
+    useState<EffectiveAuthorizationContextDto[]>([]);
   const [authExpiryReminderDismissals, setAuthExpiryReminderDismissals] =
     useState(readAuthExpiryReminderDismissals);
   const [storedRememberedScope] = useState(readStudentHomeSelectedScope);
@@ -591,6 +652,12 @@ export function StudentHomePage({
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayScopes = scopes ?? runtimeScopes;
   const displayPapers = papers ?? runtimePapers;
+  const displayAuthorizationContexts =
+    authorizationContexts ?? runtimeAuthorizationContexts;
+  const showAiTraining = canShowAiTraining(displayAuthorizationContexts);
+  const showOrganizationTraining = canShowOrganizationTraining(
+    displayAuthorizationContexts,
+  );
   const initialScope = findInitialScope(
     displayScopes,
     effectiveRememberedScope,
@@ -646,7 +713,14 @@ export function StudentHomePage({
           nextScopes,
           effectiveRememberedScope,
         );
+        const nextAuthorizationContexts =
+          await fetchAuthorizationContextsFailClosed();
 
+        if (!isActive) {
+          return;
+        }
+
+        setRuntimeAuthorizationContexts(nextAuthorizationContexts);
         setRuntimeScopes(nextScopes);
         setSelectedScopeKey(
           nextScope === null ? "" : createScopeKey(nextScope),
@@ -808,7 +882,7 @@ export function StudentHomePage({
           </div>
         </div>
         <nav
-          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6"
           aria-label="学员导航"
         >
           <Link
@@ -825,6 +899,24 @@ export function StudentHomePage({
             <Ticket className="size-4" aria-hidden="true" />
             兑换卡密
           </Link>
+          {showAiTraining ? (
+            <Link
+              href="/ai-generation"
+              className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              <BrainCircuit className="size-4" aria-hidden="true" />
+              AI训练
+            </Link>
+          ) : null}
+          {showOrganizationTraining ? (
+            <Link
+              href="/organization-training"
+              className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              <Building2 className="size-4" aria-hidden="true" />
+              企业训练
+            </Link>
+          ) : null}
           <Link
             href="/mistake-book"
             className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"

@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import {
   cleanup,
   fireEvent,
@@ -13,6 +13,10 @@ import {
   StudentHomePage,
   studentHomeFixture,
 } from "@/features/student/home/StudentHomePage";
+import type {
+  EffectiveAuthorizationCapabilitiesDto,
+  EffectiveAuthorizationContextDto,
+} from "@/server/contracts/effective-authorization-contract";
 
 const routerReplaceMock = vi.hoisted(() => vi.fn());
 
@@ -21,6 +25,56 @@ vi.mock("next/navigation", () => ({
     replace: routerReplaceMock,
   }),
 }));
+
+type StudentHomePagePropsWithAuthorizationContexts = ComponentProps<
+  typeof StudentHomePage
+> & {
+  authorizationContexts?: EffectiveAuthorizationContextDto[];
+};
+
+type AuthorizationContextOverrides = Omit<
+  Partial<EffectiveAuthorizationContextDto>,
+  "capabilities"
+> & {
+  capabilities?: Partial<EffectiveAuthorizationCapabilitiesDto>;
+};
+
+const baseAuthorizationCapabilities = {
+  canGenerateAiQuestion: false,
+  canGenerateAiPaper: false,
+  canCreateOrganizationTraining: false,
+  canAnswerOrganizationTraining: false,
+  canViewOrganizationTrainingSummary: false,
+  canManageAuthorizationQuota: false,
+} satisfies EffectiveAuthorizationCapabilitiesDto;
+
+function createAuthorizationContext(
+  overrides: AuthorizationContextOverrides = {},
+): EffectiveAuthorizationContextDto {
+  return {
+    profession: "marketing",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    edition: "standard",
+    effectiveEdition: "standard",
+    upgradeStatus: "none",
+    expiresAt: "2026-09-30T15:59:59Z",
+    displayStatus: "active",
+    authorizationSource: "personal_auth",
+    authorizationPublicId: "authorization-context-ui-001",
+    ownerType: "personal",
+    ownerPublicId: "student-public-ui-001",
+    organizationPublicId: null,
+    quotaOwnerType: "personal",
+    quotaOwnerPublicId: "student-public-ui-001",
+    blockedReason: null,
+    ...overrides,
+    capabilities: {
+      ...baseAuthorizationCapabilities,
+      ...(overrides.capabilities ?? {}),
+    },
+  };
+}
 
 afterEach(() => {
   cleanup();
@@ -31,6 +85,106 @@ afterEach(() => {
 });
 
 describe("StudentHomePage", () => {
+  it("shows the AI training entry for personal advanced learner capabilities", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            effectiveEdition: "advanced",
+            edition: "advanced",
+            authorizationSource: "personal_auth",
+            authorizationPublicId: "personal-auth-advanced-ui-001",
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    expect(screen.getByRole("link", { name: "AI训练" })).toHaveAttribute(
+      "href",
+      "/ai-generation",
+    );
+    expect(screen.queryByRole("link", { name: "企业训练" })).toBeNull();
+  });
+
+  it("shows AI and organization training entries for advanced organization employee capabilities", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            effectiveEdition: "advanced",
+            edition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org-auth-advanced-ui-001",
+            ownerType: "organization",
+            ownerPublicId: "organization-public-ui-001",
+            organizationPublicId: "organization-public-ui-001",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "organization-public-ui-001",
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+              canAnswerOrganizationTraining: true,
+            },
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    expect(screen.getByRole("link", { name: "AI训练" })).toHaveAttribute(
+      "href",
+      "/ai-generation",
+    );
+    expect(screen.getByRole("link", { name: "企业训练" })).toHaveAttribute(
+      "href",
+      "/organization-training",
+    );
+  });
+
+  it("hides advanced learner home entries when authorization capabilities are absent", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            effectiveEdition: "standard",
+            edition: "standard",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org-auth-standard-ui-001",
+            ownerType: "organization",
+            ownerPublicId: "organization-public-ui-001",
+            organizationPublicId: "organization-public-ui-001",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "organization-public-ui-001",
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    expect(screen.queryByRole("link", { name: "AI训练" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "企业训练" })).toBeNull();
+  });
+
   it("selects the remembered authorization scope and groups papers by subject", () => {
     render(
       createElement(StudentHomePage, {
@@ -244,6 +398,39 @@ describe("StudentHomePage", () => {
           };
         }
 
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                authorizations: [],
+                effectiveAuthorizations: [],
+                authorizationContexts: [
+                  createAuthorizationContext({
+                    effectiveEdition: "advanced",
+                    edition: "advanced",
+                    authorizationSource: "org_auth",
+                    authorizationPublicId: "org-auth-runtime-ui-001",
+                    ownerType: "organization",
+                    ownerPublicId: "organization-runtime-ui-001",
+                    organizationPublicId: "organization-runtime-ui-001",
+                    quotaOwnerType: "organization",
+                    quotaOwnerPublicId: "organization-runtime-ui-001",
+                    capabilities: {
+                      canGenerateAiQuestion: true,
+                      canGenerateAiPaper: true,
+                      canAnswerOrganizationTraining: true,
+                    },
+                  }),
+                ],
+              },
+            }),
+          };
+        }
+
         if (
           String(url) ===
           "/api/v1/student-papers?profession=marketing&level=3&page=1&pageSize=20"
@@ -309,7 +496,82 @@ describe("StudentHomePage", () => {
       "true",
     );
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole("link", { name: "AI训练" })).toHaveAttribute(
+      "href",
+      "/ai-generation",
+    );
+    expect(screen.getByRole("link", { name: "企业训练" })).toHaveAttribute(
+      "href",
+      "/organization-training",
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  });
+
+  it("keeps student papers visible when authorization context loading fails closed", async () => {
+    const runtimePaper = {
+      ...studentHomeFixture.papers[1],
+      publicId: "paper-runtime-without-auth-context-001",
+      name: "授权上下文失败时仍展示试卷",
+      publishedAt: "2026-05-25T04:40:00.000Z",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init).toMatchObject({ credentials: "same-origin" });
+        expect(init).not.toHaveProperty("headers");
+
+        if (String(url) === "/api/v1/student-papers/scopes") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: [studentHomeFixture.scopes[1]],
+            }),
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          throw new Error("authorization contexts unavailable");
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/student-papers?profession=marketing&level=3&page=1&pageSize=20"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: [runtimePaper],
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentHomePage));
+
+    expect(
+      await screen.findByText("授权上下文失败时仍展示试卷"),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "AI训练" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "企业训练" })).toBeNull();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
   });
 
   it("shows an authorization expiry reminder for scopes expiring within 15 days", () => {
