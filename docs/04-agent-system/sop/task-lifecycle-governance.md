@@ -67,7 +67,11 @@ Before implementation or substantive docs edits, create a task plan that records
 
 - task id, branch, and task kind;
 - documents and source files read;
+- `SSOT Read List` that starts from `docs/01-requirements/00-index.md`;
+- `Requirement Decision Map` naming active traceability decisions;
 - requirement or module mapping;
+- `Evidence-Only Sources` for execution logs that are read as history rather than requirement SSOT;
+- `Conflict Check` explaining whether requirements, traceability, and evidence agree;
 - allowed and blocked scope;
 - implementation or documentation approach;
 - risk defenses;
@@ -76,6 +80,10 @@ Before implementation or substantive docs edits, create a task plan that records
 - stop conditions.
 
 The plan must distinguish verified facts from assumptions. Unconfirmed items must not be written as settled conclusions.
+
+Requirement reading must follow `docs/04-agent-system/sop/requirement-ssot-reading-governance.md`. For implementation,
+docs requirement alignment, docs-only, and mechanism hardening tasks, execution logs alone are not enough. If a runtime
+evidence file contains a new requirement, open or complete a docs-only requirement alignment task before implementation.
 
 ## TDD And Implementation Gate
 
@@ -173,6 +181,8 @@ Evidence must include:
 - task id, branch, and task kind;
 - changed files;
 - approval boundary;
+- `Requirement Mapping Result`, `Role Mapping Result`, or `Acceptance Mapping Result` when the task kind requires SSOT
+  mapping;
 - blocked-work statement;
 - validation command outputs or summaries;
 - residual gaps;
@@ -202,6 +212,9 @@ debug output.
 Before committing:
 
 - changed files must match `allowedFiles` and avoid `blockedFiles`;
+- task plan must satisfy the SSOT read list and requirement mapping rules in
+  `docs/04-agent-system/sop/requirement-ssot-reading-governance.md`;
+- evidence or audit review must include the applicable mapping result heading before hardening passes;
 - evidence must contain validation results;
 - audit review must be complete when required;
 - `git status --short --branch` must show only task-scoped changes;

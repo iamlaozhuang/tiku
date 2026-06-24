@@ -48,9 +48,64 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-commit hardening script: $scriptPath"
 }
 
-$taskId = "module-run-v2-low-risk-experience-batch-mechanism-tuning"
+$taskId = "precommit-hardening-smoke-task"
+$normalFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-normal-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $normalFixtureRoot | Out-Null
+& git -C $normalFixtureRoot init | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to initialize normal pre-commit fixture repository."
+}
 
-$allowedOutput = @(& $scriptPath -TaskId $taskId -ChangedFiles "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1")
+New-Item -ItemType Directory -Force -Path `
+    (Join-Path -Path $normalFixtureRoot -ChildPath "docs\04-agent-system\state"), `
+    (Join-Path -Path $normalFixtureRoot -ChildPath "docs\05-execution-logs\task-plans"), `
+    (Join-Path -Path $normalFixtureRoot -ChildPath "docs\05-execution-logs\evidence"), `
+    (Join-Path -Path $normalFixtureRoot -ChildPath "docs\05-execution-logs\audits-reviews") | Out-Null
+
+$normalProjectStatePath = Join-Path -Path $normalFixtureRoot -ChildPath "docs\04-agent-system\state\project-state.yaml"
+$normalQueuePath = Join-Path -Path $normalFixtureRoot -ChildPath "docs\04-agent-system\state\task-queue.yaml"
+$normalMatrixPath = Join-Path -Path $normalFixtureRoot -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+@"
+schemaVersion: 1
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $normalProjectStatePath -Encoding UTF8
+@"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    taskKind: read_only
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - e2e/**
+"@ | Set-Content -LiteralPath $normalQueuePath -Encoding UTF8
+@"
+moduleRunVersion: 2
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $normalMatrixPath -Encoding UTF8
+
+try {
+Push-Location $normalFixtureRoot
+try {
+    $allowedOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
+    )
+} finally {
+    Pop-Location
+}
 Assert-Contains -Output $allowedOutput -Pattern "Module Run v2 Pre-Commit Hardening"
 Assert-Contains -Output $allowedOutput -Pattern "preCommitMode: hard_block"
 Assert-Contains -Output $allowedOutput -Pattern "OK_SCOPE scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
@@ -78,7 +133,17 @@ Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "scopeScan: delegated
 Assert-Contains -Output $lowRiskBatchShadowOutput -Pattern "pre-commit hardening passed"
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE package.json" -Command {
-    & $scriptPath -TaskId $taskId -ChangedFiles "package.json"
+    Push-Location $normalFixtureRoot
+    try {
+        & $scriptPath `
+            -ProjectStatePath $normalProjectStatePath `
+            -QueuePath $normalQueuePath `
+            -MatrixPath $normalMatrixPath `
+            -TaskId $taskId `
+            -ChangedFiles "package.json"
+    } finally {
+        Pop-Location
+    }
 }
 
 $seedFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-seed-" + [guid]::NewGuid().ToString("N"))
@@ -178,7 +243,18 @@ try {
     Set-Content -LiteralPath $sensitiveFixture -Value "$headerName`: Bearer example-token" -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SENSITIVE_EVIDENCE" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $sensitiveFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $sensitiveFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 
     $termFixture = Join-Path -Path $fixtureRoot -ChildPath "banned-term.md"
@@ -186,7 +262,18 @@ try {
     Set-Content -LiteralPath $termFixture -Value "Do not use $nonGlossaryAuthTerm in Tiku authorization surfaces." -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BANNED_TERM" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $termFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $termFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 
     $aiTextFixture = Join-Path -Path $fixtureRoot -ChildPath "ai-protected-evidence.md"
@@ -194,7 +281,18 @@ try {
     Set-Content -LiteralPath $aiTextFixture -Value "$protectedAiField`: This protected AI request text is long enough to require redaction." -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "ai_protected_text" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $aiTextFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $aiTextFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 
     $payloadFixture = Join-Path -Path $fixtureRoot -ChildPath "provider-payload-evidence.md"
@@ -202,7 +300,18 @@ try {
     Set-Content -LiteralPath $payloadFixture -Value "$payloadField`: { ""request"": ""protected provider payload that must not be recorded"" }" -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "ai_protected_text" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $payloadFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $payloadFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 
     $redeemCodeFixture = Join-Path -Path $fixtureRoot -ChildPath "redeem-code-evidence.md"
@@ -210,7 +319,18 @@ try {
     Set-Content -LiteralPath $redeemCodeFixture -Value "$redeemCodeField`: ABCD-1234-EFGH" -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "plaintext_redeem_code" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $redeemCodeFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $redeemCodeFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 
     $databaseUrlFixture = Join-Path -Path $fixtureRoot -ChildPath "database-url-evidence.md"
@@ -218,11 +338,28 @@ try {
     Set-Content -LiteralPath $databaseUrlFixture -Value "connection: ${databaseScheme}://user:pass@localhost:5432/tiku" -Encoding UTF8
 
     Invoke-ExpectFailure -ExpectedPattern "database_connection_url" -Command {
-        & $scriptPath -TaskId $taskId -ChangedFiles $databaseUrlFixture -SkipScopeScan
+        Push-Location $normalFixtureRoot
+        try {
+            & $scriptPath `
+                -ProjectStatePath $normalProjectStatePath `
+                -QueuePath $normalQueuePath `
+                -MatrixPath $normalMatrixPath `
+                -TaskId $taskId `
+                -ChangedFiles $databaseUrlFixture `
+                -SkipScopeScan
+        } finally {
+            Pop-Location
+        }
     }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
+    }
+}
+
+} finally {
+    if (Test-Path -LiteralPath $normalFixtureRoot) {
+        Remove-Item -LiteralPath $normalFixtureRoot -Recurse -Force
     }
 }
 

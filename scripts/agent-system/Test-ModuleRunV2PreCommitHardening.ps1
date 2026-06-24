@@ -124,6 +124,196 @@ function Get-ListValues {
     return $values.ToArray()
 }
 
+function Get-ScalarValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Block,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim().Trim('"').Trim("'")
+        }
+    }
+
+    return ""
+}
+
+function Get-TaskPlanPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$TaskBlock,
+
+        [Parameter(Mandatory = $true)]
+        [string]$TaskId
+    )
+
+    $planPath = Get-ScalarValue -Block $TaskBlock -Key "planPath"
+    if (-not [string]::IsNullOrWhiteSpace($planPath)) {
+        return (ConvertTo-NormalizedPath -Path $planPath)
+    }
+
+    $taskPlanDirectory = Join-Path -Path $RepositoryRoot -ChildPath "docs\05-execution-logs\task-plans"
+    if (-not (Test-Path -LiteralPath $taskPlanDirectory)) {
+        return ""
+    }
+
+    $taskPlanCandidates = @(
+        Get-ChildItem -LiteralPath $taskPlanDirectory -File -Filter "*.md" |
+            Where-Object { $_.Name -match [regex]::Escape($TaskId) } |
+            Sort-Object LastWriteTimeUtc -Descending
+    )
+
+    if ($taskPlanCandidates.Count -eq 0) {
+        return ""
+    }
+
+    $relativePath = $taskPlanCandidates[0].FullName.Substring($RepositoryRoot.Length) -replace "^[\\/]+", ""
+    return (ConvertTo-NormalizedPath -Path $relativePath)
+}
+
+function Test-RequirementSsotReadiness {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory = $true)]
+        [string]$TaskId,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$TaskBlock,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    if ($TaskBlock.Count -eq 0) {
+        Write-Output "requirementSsotReadiness: skipped_no_task_block"
+        return
+    }
+
+    if ($Files.Count -eq 0) {
+        Write-Output "requirementSsotReadiness: skipped_no_changed_files"
+        return
+    }
+
+    $taskKind = Get-ScalarValue -Block $TaskBlock -Key "taskKind"
+    if ([string]::IsNullOrWhiteSpace($taskKind)) {
+        $taskKind = "unknown"
+    }
+
+    if ($taskKind -match "^(read_only|read_only_audit|terminal_diagnostic|diagnostic)$") {
+        Write-Output "requirementSsotReadiness: advisory_skip_$taskKind"
+        return
+    }
+
+    $strictRequirementKinds = @("implementation", "docs_requirement_alignment", "docs_only", "mechanism_hardening")
+    $acceptanceMappingKinds = @("acceptance_runtime_walkthrough")
+    $requiresStrictRequirementMapping = $strictRequirementKinds -contains $taskKind
+    $requiresAcceptanceMapping = $acceptanceMappingKinds -contains $taskKind
+    $requiresSsotReadList = $requiresStrictRequirementMapping -or $requiresAcceptanceMapping
+
+    if (-not $requiresSsotReadList) {
+        Write-Output "requirementSsotReadiness: advisory_skip_taskKind_$taskKind"
+        return
+    }
+
+    $planPath = Get-TaskPlanPath -RepositoryRoot $RepositoryRoot -TaskBlock $TaskBlock -TaskId $TaskId
+    if ([string]::IsNullOrWhiteSpace($planPath)) {
+        Add-Finding "FAIL_SSOT_READ_LIST_MISSING task_plan_missing"
+        return
+    }
+
+    $planFullPath = Resolve-ScanPath -RepositoryRoot $RepositoryRoot -Path $planPath
+    if (-not (Test-Path -LiteralPath $planFullPath)) {
+        Add-Finding "FAIL_SSOT_READ_LIST_MISSING task_plan_not_found $planPath"
+        return
+    }
+
+    $planText = Get-Content -LiteralPath $planFullPath -Raw
+    $normalizedPlanText = $planText.Replace("\", "/")
+    $normalizedTaskText = (($TaskBlock -join "`n") + "`n" + ($Files -join "`n") + "`n" + $normalizedPlanText).Replace("\", "/")
+
+    if ($normalizedPlanText -notmatch "(?m)^##\s+SSOT Read List\s*$") {
+        Add-Finding "FAIL_SSOT_READ_LIST_MISSING $planPath"
+    } else {
+        Write-Output "OK_SSOT_READ_LIST $planPath"
+    }
+
+    $hasRequirementRoot = $normalizedPlanText -match [regex]::Escape("docs/01-requirements/00-index.md")
+    $hasRequirementSource = $normalizedPlanText -match [regex]::Escape("docs/01-requirements/")
+    $hasExecutionLogSource = $normalizedPlanText -match [regex]::Escape("docs/05-execution-logs/")
+
+    if (-not $hasRequirementRoot) {
+        Add-Finding "FAIL_REQUIREMENT_SOURCE_MISSING docs/01-requirements/00-index.md"
+    }
+
+    if ($hasExecutionLogSource -and -not $hasRequirementSource) {
+        Add-Finding "FAIL_EXECUTION_LOG_ONLY_REQUIREMENT_SOURCE $planPath"
+    }
+
+    $mentionsAdvancedEdition = $normalizedTaskText -match "(?i)advanced-edition|advanced edition|advanced_edition|advanced mvp|advanced capability"
+    if ($mentionsAdvancedEdition -and $normalizedPlanText -notmatch [regex]::Escape("docs/01-requirements/advanced-edition/00-index.md")) {
+        Add-Finding "FAIL_ADVANCED_INDEX_MISSING docs/01-requirements/advanced-edition/00-index.md"
+    }
+
+    $authorizationPattern = "(?i)\b(org_auth|personal_auth|redeem_code|effectiveEdition|auth_upgrade)\b|edition-aware|authorization|授权|卡密"
+    if ($normalizedTaskText -match $authorizationPattern -and $normalizedPlanText -notmatch [regex]::Escape("docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md")) {
+        Add-Finding "FAIL_AUTHORIZATION_SSOT_MISSING docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md"
+    }
+
+    $roleSeparatedPattern = "(?i)role-separated|role separated|role acceptance|acceptance-role|角色验收"
+    if ($normalizedTaskText -match $roleSeparatedPattern) {
+        $requirementAlignmentPath = Get-ScalarValue -Block $TaskBlock -Key "requirementAlignmentPath"
+        $hasQueueAlignmentPath = -not [string]::IsNullOrWhiteSpace($requirementAlignmentPath)
+        $hasRoleAlignmentRead = $normalizedPlanText -match "docs/01-requirements/traceability/[^`r`n]*role-separated-mvp-requirement-alignment\.md"
+        $hasRoleMatrixRead = $normalizedPlanText -match [regex]::Escape("docs/01-requirements/traceability/role-experience-fulfillment-matrix.md")
+
+        if (-not $hasQueueAlignmentPath -and -not ($hasRoleAlignmentRead -and $hasRoleMatrixRead)) {
+            Add-Finding "FAIL_ROLE_ALIGNMENT_SOURCE_MISSING role-separated traceability alignment and role-experience matrix"
+        }
+    }
+
+    $mappingText = ""
+    $mappingPaths = @(
+        (Get-ScalarValue -Block $TaskBlock -Key "evidencePath"),
+        (Get-ScalarValue -Block $TaskBlock -Key "auditReviewPath")
+    )
+    foreach ($mappingPath in $mappingPaths) {
+        if ([string]::IsNullOrWhiteSpace($mappingPath)) {
+            continue
+        }
+
+        $mappingFullPath = Resolve-ScanPath -RepositoryRoot $RepositoryRoot -Path $mappingPath
+        if (Test-Path -LiteralPath $mappingFullPath) {
+            $mappingText += "`n" + (Get-Content -LiteralPath $mappingFullPath -Raw)
+        }
+    }
+
+    if ($requiresStrictRequirementMapping -or $requiresAcceptanceMapping) {
+        $mappingHeadingPattern = "(?m)^##\s+(Requirement Mapping Result|Role Mapping Result|Acceptance Mapping Result)\s*$"
+        if ($mappingText -match $mappingHeadingPattern) {
+            Write-Output "OK_REQUIREMENT_MAPPING_RESULT"
+        } else {
+            Add-Finding "FAIL_REQUIREMENT_SOURCE_MISSING requirement_mapping_result_missing"
+        }
+    }
+}
+
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
@@ -661,6 +851,7 @@ $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
 $isDocsOnlyBatchScope = -not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)
 $isLowRiskExperienceBatchScope = -not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)
+$taskBlock = @()
 
 if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
     throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
@@ -768,6 +959,18 @@ if ($isDocsOnlyBatchScope) {
 if ($isLowRiskExperienceBatchScope) {
     Write-Section -Title "Low-Risk Experience Batch Readiness"
     Invoke-LowRiskExperienceBatchReadiness -BatchId $LowRiskExperienceBatchId -Mode $LowRiskExperienceBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -Files $filesToScan
+}
+
+Write-Section -Title "Requirement SSOT Readiness"
+if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
+    Write-Output "requirementSsotReadiness: skipped_$(
+        if ($isSeedTransactionScope) { "seed_transaction" }
+        elseif ($isMechanicRepairScope) { "mechanic_repair" }
+        elseif ($isDocsOnlyBatchScope) { "docs_only_batch" }
+        else { "low_risk_experience_batch" }
+    )"
+} else {
+    Test-RequirementSsotReadiness -RepositoryRoot $repositoryRoot -TaskId $TaskId -TaskBlock $taskBlock -Files $filesToScan
 }
 
 Write-Section -Title "Scope Scan"

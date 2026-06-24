@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-advanced-mvp-role-separated-requirement-alignment-2026-06-24
-updatedAt: "2026-06-24T01:00:19-07:00"
+currentPhase: requirement-ssot-reading-governance-2026-06-24
+updatedAt: "2026-06-24T02:07:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -29,6 +29,7 @@ automation:
   readinessScorecardModeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
   codeStageTaskSeedingSopPath: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
   requirementTaskCoverageGapAuditSopPath: docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
+  requirementSsotReadingGovernanceSopPath: docs/04-agent-system/sop/requirement-ssot-reading-governance.md
   taskQueueArchivalIndexSopPath: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
   activeQueueSlimmingPlanPath: docs/04-agent-system/sop/active-queue-slimming-plan.md
   threadRolloverHandoffSopPath: docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
@@ -503,35 +504,35 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: role-separated-mvp-requirement-alignment-2026-06-24
-  status: closed
-  result: pass_requirement_ssot_alignment_role_gate_still_blocked
-  claimedAt: "2026-06-24T00:49:33-07:00"
-  validatedAt: "2026-06-24T01:00:19-07:00"
-  closedAt: "2026-06-24T01:00:19-07:00"
+  id: requirement-ssot-reading-governance-2026-06-24
+  status: ready_for_closeout
+  result: pass_requirement_ssot_reading_governance_local_validation
+  claimedAt: "2026-06-24T01:20:00-07:00"
+  validatedAt: "2026-06-24T02:07:05-07:00"
+  reviewedAt: "2026-06-24T02:07:05-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: user-request-2026-06-24-role-separated-mvp-requirement-alignment
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-requirement-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-requirement-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-requirement-alignment.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  requirementDecisionSourcePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
+  sourceStory: user-approved-plan-2026-06-24-requirement-ssot-reading-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-requirement-ssot-reading-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-requirement-ssot-reading-governance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-requirement-ssot-reading-governance.md
+  requirementSsotGovernancePath: docs/04-agent-system/sop/requirement-ssot-reading-governance.md
   closeoutPolicy:
     localCommit:
-      approved: false
-      approvalSource: fresh_approval_required_after_requirement_alignment_review
+      approved: true
+      approvalSource: current_user_plan_approval_2026_06_24_requirement_ssot_reading_governance
     mergeToMaster:
       approved: false
       targetBranch: master
-      approvalSource: fresh_approval_required_after_requirement_alignment_review
+      approvalSource: fresh_approval_required_after_local_commit
     push:
       approved: false
       target: origin/master
-      approvalSource: fresh_approval_required_after_requirement_alignment_review
+      approvalSource: fresh_approval_required_after_local_commit
     cleanup:
       deleteShortBranch: false
-      approvalSource: fresh_approval_required_after_requirement_alignment_review
-  branch: codex/role-separated-mvp-requirement-alignment-20260624
+      approvalSource: fresh_approval_required_after_local_commit
+  branch: codex/requirement-ssot-reading-governance-20260624
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -9657,3 +9658,37 @@ acceptanceL6OwnerPreviewReadiness20260623:
     interaction, e2e, dev seed, database write, env/secret access, schema migration, destructive database operation,
     Provider/model call, Cost Calibration, staging/prod/cloud/deploy, payment, external service, push, PR, force push,
     or final acceptance Pass.
+
+requirementSsotReadingGovernance20260624:
+  taskId: requirement-ssot-reading-governance-2026-06-24
+  phase: requirement-ssot-reading-governance-2026-06-24
+  recordedAt: "2026-06-24T01:20:00-07:00"
+  branch: codex/requirement-ssot-reading-governance-20260624
+  taskStatus: ready_for_closeout
+  taskKind: mechanism_hardening
+  result: pass_requirement_ssot_reading_governance_local_validation
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-requirement-ssot-reading-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-requirement-ssot-reading-governance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-requirement-ssot-reading-governance.md
+  requirementSsotGovernancePath: docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+  requiredSmokeScriptPath: scripts/agent-system/Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
+  validatedAt: "2026-06-24T02:07:05-07:00"
+  reviewedAt: "2026-06-24T02:07:05-07:00"
+  scope:
+    productSourceChanged: false
+    schemaMigration: false
+    dependencyChanged: false
+    envSecretTouched: false
+    providerOrCostCalibrationTouched: false
+    stagingProdDeployTouched: false
+    paymentExternalServiceTouched: false
+  blockedWithoutFreshApproval:
+    - source_product_implementation
+    - schema_migration_or_database_write
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - merge_push_or_cleanup_without_fresh_closeout_approval

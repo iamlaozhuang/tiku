@@ -32,7 +32,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 6. `docs/04-agent-system/state/task-queue.yaml`.
 7. `docs/04-agent-system/state/mechanism-source-of-truth-index.yaml`.
 8. Latest task plan, evidence, and audit review referenced by durable state.
-9. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
+9. `docs/04-agent-system/sop/requirement-ssot-reading-governance.md` when the task may affect requirements, docs,
+   mechanism gates, acceptance, or implementation.
+10. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
 
 ## Single Source Of Truth Rules
 
@@ -41,6 +43,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 - Module completion should be derived from queue status plus evidence, not manually duplicated in multiple active files.
 - `project-state.yaml` stores mode, current recovery pointer, approval boundaries, and accepted repository checkpoints.
 - Evidence and audit reviews store observed validation and review conclusions.
+- Requirement SSOT is rooted in `docs/01-requirements/00-index.md`; advanced edition tasks must additionally read
+  `docs/01-requirements/advanced-edition/00-index.md`.
+- `docs/05-execution-logs/` is evidence and history, not a standalone requirement source.
 - Chat memory is never a durable source of truth.
 
 ## Active Queue Status Policy
@@ -176,6 +181,8 @@ Every task closeout must record:
 - task plan;
 - evidence with command results;
 - audit review when governance, queue, state, scope, approval, evidence, or blocked-gate behavior changes;
+- SSOT read list and `Requirement Mapping Result`, `Role Mapping Result`, or `Acceptance Mapping Result` when required
+  by task kind;
 - changed-file inventory;
 - validation result;
 - blocked remainder;
@@ -277,3 +284,17 @@ blocked gates, validation needed, recommended action, and stop reason.
 When no pending task is executable and the current task is terminal, the next-action diagnostic should also summarize
 the guarded Module Run v2 seed proposal as `seedProposalDecision`, `seedModule`, `seedRequiredApproval`, and
 `recommendedHumanDecision`. This is proposal-only. It does not write queue entries or approve implementation.
+
+## Mechanism Smoke Tools
+
+Requirement SSOT readiness is enforced through pre-commit hardening:
+
+```powershell
+.\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId <task-id>
+```
+
+The focused smoke for that gate is:
+
+```powershell
+.\scripts\agent-system\Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
+```

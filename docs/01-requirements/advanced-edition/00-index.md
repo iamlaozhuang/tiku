@@ -6,6 +6,14 @@ This directory is the derived requirement reading surface for the advanced editi
 
 These files do not replace the advanced edition source documents. If a conflict exists, the source documents listed below remain authoritative until a follow-up decision resolves the conflict.
 
+Advanced edition tasks must also follow
+`docs/04-agent-system/sop/requirement-ssot-reading-governance.md`. The standard requirement root remains
+`docs/01-requirements/00-index.md`; this file is the additional required entry for advanced edition, edition-aware
+authorization, quota, AI generation, organization training, and role-separated advanced capability work.
+
+`docs/05-execution-logs/` may explain why a gap was observed, but advanced edition implementation scope must map back to
+this index, the relevant advanced module or story, and the latest traceability decision.
+
 ## Source Documents
 
 Primary sources:

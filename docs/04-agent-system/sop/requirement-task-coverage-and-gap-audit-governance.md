@@ -35,6 +35,10 @@ Before running a coverage audit, read and record:
 
 - `AGENTS.md`;
 - relevant ADRs;
+- `docs/01-requirements/00-index.md`;
+- relevant requirement modules, advanced modules, stories, and use-case matrices under `docs/01-requirements/`;
+- latest applicable traceability decisions and matrices under `docs/01-requirements/traceability/`;
+- `docs/04-agent-system/sop/requirement-ssot-reading-governance.md`;
 - module lifecycle governance;
 - task lifecycle governance;
 - code-stage task seeding governance;
@@ -48,23 +52,27 @@ Before running a coverage audit, read and record:
 
 If a source is stale, missing, or contradictory, create a docs-only clarification task instead of closing the module.
 
+Coverage audits must map every audited requirement back to `docs/01-requirements/`. Execution logs can support observed
+validation and residual gap decisions, but they cannot be the only source for a requirement row.
+
 ## Mapping Requirements
 
 Every audited module must produce or reference a coverage matrix with these columns:
 
-| Column             | Required Meaning                                                            |
-| ------------------ | --------------------------------------------------------------------------- |
-| requirementId      | stable source requirement, story, SOP, or decision id                       |
-| moduleId           | kebab-case module id                                                        |
-| userRole           | affected actor such as `student`, `admin`, `employee`, or platform operator |
-| userUseCase        | user-facing flow or governance action being covered                         |
-| taskId             | task queue id that covers the scenario                                      |
-| taskKind           | declared task kind from `task-queue.yaml`                                   |
-| acceptanceScenario | observable scenario or audit condition                                      |
-| validationEvidence | evidence path or reason validation is not yet possible                      |
-| riskTags           | relevant risks, including project terms when applicable                     |
-| coverageStatus     | `covered`, `partial`, `gap`, `blocked`, or `not_applicable`                 |
-| gapDecision        | next task, blocked gate, explicit exclusion, or accepted residual risk      |
+| Column             | Required Meaning                                                              |
+| ------------------ | ----------------------------------------------------------------------------- |
+| requirementId      | stable source requirement, story, SOP, or decision id                         |
+| requirementSource  | `docs/01-requirements` module, story, use-case, traceability decision, or ADR |
+| moduleId           | kebab-case module id                                                          |
+| userRole           | affected actor such as `student`, `admin`, `employee`, or platform operator   |
+| userUseCase        | user-facing flow or governance action being covered                           |
+| taskId             | task queue id that covers the scenario                                        |
+| taskKind           | declared task kind from `task-queue.yaml`                                     |
+| acceptanceScenario | observable scenario or audit condition                                        |
+| validationEvidence | evidence path or reason validation is not yet possible                        |
+| riskTags           | relevant risks, including project terms when applicable                       |
+| coverageStatus     | `covered`, `partial`, `gap`, `blocked`, or `not_applicable`                   |
+| gapDecision        | next task, blocked gate, explicit exclusion, or accepted residual risk        |
 
 Do not use a free-form paragraph as the only coverage record when a matrix is needed.
 

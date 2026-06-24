@@ -181,3 +181,22 @@ This section does not replace the standard edition `modules/` and `stories/` doc
 Cost Calibration Gate remains blocked pending fresh explicit approval. Code-stage queue seeding remains paused unless explicitly approved later.
 
 ---
+
+## Requirement SSOT Reading Protocol
+
+Task planning and implementation must follow the requirement SSOT reading protocol in
+`docs/04-agent-system/sop/requirement-ssot-reading-governance.md`.
+
+Minimum reading entry:
+
+- Start from this file for all standard MVP and shared standard/advanced MVP work.
+- Read the relevant `modules/`, `stories/`, and `use-cases/` files for the affected domain.
+- Read `advanced-edition/00-index.md` for every advanced edition, edition, quota, AI generation, organization training,
+  or authorization task.
+- Read `advanced-edition/edition-aware-authorization-requirements.md` for `authorization`, `personal_auth`, `org_auth`,
+  `redeem_code`, `effectiveEdition`, `edition`, or `auth_upgrade` work.
+- Read the latest relevant traceability decision or matrix before using execution logs as evidence.
+
+`docs/05-execution-logs/` remains valid evidence and history, but it is not sufficient as requirement SSOT by itself.
+New requirements found in execution logs must first be promoted into `docs/01-requirements/` or traceability before
+implementation starts.

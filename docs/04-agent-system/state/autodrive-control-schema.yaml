@@ -866,6 +866,32 @@ validationSurface:
     - no_owner_recovery_needed
     - manual_required_owner_recovery
   executionRule: stale dirty active run registries with safeToAdopt=false must not be auto-adopted or cleaned; startup may use this read-only classifier to produce manual_required_owner_recovery instead of a generic hard block.
+requirementSsotReadiness:
+  sopPath: docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+  hardeningScriptPath: scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+  smokePath: scripts/agent-system/Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
+  outputs:
+    ok:
+      - OK_SSOT_READ_LIST
+      - OK_REQUIREMENT_MAPPING_RESULT
+    fail:
+      - FAIL_SSOT_READ_LIST_MISSING
+      - FAIL_REQUIREMENT_SOURCE_MISSING
+      - FAIL_EXECUTION_LOG_ONLY_REQUIREMENT_SOURCE
+      - FAIL_ADVANCED_INDEX_MISSING
+      - FAIL_AUTHORIZATION_SSOT_MISSING
+      - FAIL_ROLE_ALIGNMENT_SOURCE_MISSING
+  requiredTaskKinds:
+    - implementation
+    - docs_requirement_alignment
+    - docs_only
+    - mechanism_hardening
+    - acceptance_runtime_walkthrough
+  evidenceMappingHeadings:
+    - Requirement Mapping Result
+    - Role Mapping Result
+    - Acceptance Mapping Result
+  executionRule: task plans must declare requirement SSOT reads before implementation or docs mechanism changes. Execution logs may be evidence-only sources, but they cannot be the only requirement source.
 runRegistryFinalizer:
   scriptPath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
   smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1

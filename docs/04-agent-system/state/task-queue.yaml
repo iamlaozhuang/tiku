@@ -4378,6 +4378,127 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: requirement-ssot-reading-governance-2026-06-24
+    title: Enforce requirement SSOT reading governance in task gates
+    phase: requirement-ssot-reading-governance-2026-06-24
+    sourceStory: user-approved-plan-2026-06-24-requirement-ssot-reading-governance
+    dependencies:
+      - role-separated-mvp-requirement-alignment-2026-06-24
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    executionProfile: docs_and_agent_system_mechanism_hardening
+    evidenceMode: full_redacted
+    validationPolicy: docs_prettier_diff_check_precommit_hardening_smoke_two_independent_reviews
+    requiredOutcome: >-
+      Add a requirement SSOT reading governance SOP, update requirement and lifecycle entry points, extend task plan
+      templates, harden pre-commit checks, and add smoke coverage so later tasks cannot rely only on execution logs or
+      omit requirement mapping. Do not change product source, tests, schema, dependencies, environments, Provider, Cost
+      Calibration, staging/prod, payment, or external services.
+    capabilities:
+      mechanismHardening: approved_by_current_user_2026_06_24
+      docsGovernanceUpdate: approved_by_current_user_2026_06_24
+      scriptGateUpdate: approved_by_current_user_2026_06_24
+      smokeScriptUpdate: approved_by_current_user_2026_06_24
+      sourceOrE2eFileChange: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - scripts/agent-system/New-TaskPlan.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
+      - docs/05-execution-logs/task-plans/2026-06-24-requirement-ssot-reading-governance.md
+      - docs/05-execution-logs/evidence/2026-06-24-requirement-ssot-reading-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-requirement-ssot-reading-governance.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/autodrive-control-schema.yaml docs/04-agent-system/operating-manual.md docs/04-agent-system/sop/requirement-ssot-reading-governance.md docs/04-agent-system/sop/task-lifecycle-governance.md docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md scripts/agent-system/New-TaskPlan.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1 scripts/agent-system/Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1 docs/05-execution-logs/task-plans/2026-06-24-requirement-ssot-reading-governance.md docs/05-execution-logs/evidence/2026-06-24-requirement-ssot-reading-governance.md docs/05-execution-logs/audits-reviews/2026-06-24-requirement-ssot-reading-governance.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirement-ssot-reading-governance-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-requirement-ssot-reading-governance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-requirement-ssot-reading-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-requirement-ssot-reading-governance.md
+    status: ready_for_closeout
+    result: pass_requirement_ssot_reading_governance_local_validation
+    claimedAt: "2026-06-24T01:20:00-07:00"
+    approvedAt: "2026-06-24T01:20:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approval_2026_06_24_requirement_ssot_reading_governance
+    validatedAt: "2026-06-24T02:07:05-07:00"
+    reviewedAt: "2026-06-24T02:07:05-07:00"
+    blockedWithoutFreshApproval:
+      - source_product_implementation
+      - schema_migration_or_database_write
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - final_acceptance_pass
+      - merge_push_or_cleanup_without_fresh_closeout_approval
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_plan_approval_2026_06_24_requirement_ssot_reading_governance
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required_after_local_commit
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required_after_local_commit
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required_after_local_commit
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
