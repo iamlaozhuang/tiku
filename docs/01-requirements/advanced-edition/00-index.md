@@ -13,6 +13,7 @@ Primary sources:
 - `docs/superpowers/specs/2026-06-05-advanced-edition-ai-generation-design.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md`
+- `docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md`
 - `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md`
@@ -35,7 +36,8 @@ Implementation planning references:
 
 Advanced edition MVP focuses on:
 
-- personal user AI question generation and AI `paper` generation;
+- personal advanced learner and organization advanced employee AI question generation and AI `paper` generation;
+- organization admin AI question generation and AI `paper` generation for organization-owned content;
 - organization admin creates organization training;
 - employee answer statistics;
 - platform operations governance for `authorization`, `redeem_code`, quota, `audit_log`, and `ai_call_log`.
@@ -46,15 +48,16 @@ Advanced edition MVP focuses on:
 | ---------------------------------- | -------------------------------------------------------------------------------------------- |
 | Edition-aware authorization source | [edition-aware-authorization-requirements.md](./edition-aware-authorization-requirements.md) |
 
-| Module                             | File                                                                               |
-| ---------------------------------- | ---------------------------------------------------------------------------------- |
-| Authorization context              | [modules/01-authorization-context.md](./modules/01-authorization-context.md)       |
-| AI task domain                     | [modules/02-ai-task-domain.md](./modules/02-ai-task-domain.md)                     |
-| Personal AI generation             | [modules/03-personal-ai-generation.md](./modules/03-personal-ai-generation.md)     |
-| Organization training              | [modules/04-organization-training.md](./modules/04-organization-training.md)       |
-| Organization analytics             | [modules/05-organization-analytics.md](./modules/05-organization-analytics.md)     |
-| Operations authorization and quota | [modules/06-ops-authorization-quota.md](./modules/06-ops-authorization-quota.md)   |
-| Retention and log governance       | [modules/07-retention-log-governance.md](./modules/07-retention-log-governance.md) |
+| Module                             | File                                                                                   |
+| ---------------------------------- | -------------------------------------------------------------------------------------- |
+| Authorization context              | [modules/01-authorization-context.md](./modules/01-authorization-context.md)           |
+| AI task domain                     | [modules/02-ai-task-domain.md](./modules/02-ai-task-domain.md)                         |
+| Learner AI generation              | [modules/03-personal-ai-generation.md](./modules/03-personal-ai-generation.md)         |
+| Organization training              | [modules/04-organization-training.md](./modules/04-organization-training.md)           |
+| Organization analytics             | [modules/05-organization-analytics.md](./modules/05-organization-analytics.md)         |
+| Operations authorization and quota | [modules/06-ops-authorization-quota.md](./modules/06-ops-authorization-quota.md)       |
+| Retention and log governance       | [modules/07-retention-log-governance.md](./modules/07-retention-log-governance.md)     |
+| Organization AI generation         | [modules/08-organization-ai-generation.md](./modules/08-organization-ai-generation.md) |
 
 ## Stories
 
@@ -66,10 +69,14 @@ Advanced edition MVP focuses on:
 | Operations authorization and quota governance | [stories/epic-04-ops-authorization-quota-governance.md](./stories/epic-04-ops-authorization-quota-governance.md) |
 | Formal content separation                     | [stories/epic-05-formal-content-separation.md](./stories/epic-05-formal-content-separation.md)                   |
 | Retention and log governance                  | [stories/epic-06-retention-log-governance.md](./stories/epic-06-retention-log-governance.md)                     |
+| Organization AI generation                    | [stories/epic-07-organization-ai-generation.md](./stories/epic-07-organization-ai-generation.md)                 |
 
 ## Cross-Cutting Boundaries
 
 - AI generated learning content must not automatically write to formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
+- Advanced learner, organization admin, and content admin AI generation entries must be discoverable; URL-only access fails acceptance.
+- Organization-owned AI generated content must remain separate from the platform formal question bank and paper library unless a later governed adoption path is explicitly approved.
+- Content admin AI generated content must remain in an isolated review surface until governed formal adoption is complete.
 - Organization training answer statistics must not be mixed into formal `exam_report` or formal `mistake_book`.
 - `effectiveEdition` is service-computed from source authorization, `edition`, upgrade state, expiry, revocation, and scope; UI visibility is not an authorization boundary.
 - `audit_log` and `ai_call_log` evidence must use redacted summaries.

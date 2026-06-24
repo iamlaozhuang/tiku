@@ -10,20 +10,23 @@ Keep advanced edition generated content and organization training data separate 
 
 ## Acceptance Scenario
 
-1. AI or organization training produces derived learning content.
-2. The system stores the result in its own advanced edition domain.
+1. Learner AI, organization admin AI, content admin AI, or organization training produces derived learning content.
+2. The system stores the result in its owning domain: learner AI content, organization-owned AI content, isolated content review draft, or organization training content.
 3. Formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` records remain unchanged.
 4. Any later adoption into formal `question` or `paper` draft flow requires explicit review and governance.
 
 ## Data Boundary
 
 - AI generated content is not automatically formal content.
+- Organization-owned AI generated content is not platform formal content.
+- Content admin AI generated content remains reviewable draft or suggestion content until governed adoption is complete.
 - Organization training statistics are not formal `exam_report` or formal `mistake_book`.
 - Adoption, if later approved, must record source, reviewer, validation result, timestamp, and `audit_log`.
 
 ## Source Links
 
 - `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
+- `docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 
 Cost Calibration Gate remains blocked pending fresh explicit approval.

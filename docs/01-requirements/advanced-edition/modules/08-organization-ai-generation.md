@@ -1,0 +1,46 @@
+# Advanced Edition Organization AI Generation Requirements
+
+## Purpose
+
+Define how advanced organization admins use AI question generation and AI `paper` generation for organization-owned content.
+
+## Source Documents
+
+- `docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md`
+- `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
+- `docs/01-requirements/advanced-edition/modules/04-organization-training.md`
+- `docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md`
+
+## Scope
+
+- Organization admins request AI question generation and AI `paper` generation inside valid advanced `org_auth` and organization scope.
+- The generated output belongs to the `organization` and is managed by organization admins.
+- Generated output may support organization-managed training or internal learning use after organization admin confirmation.
+- Generated output must remain separate from platform formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` records.
+- The organization backend must expose a discoverable entry; requiring manual URL input is not acceptable.
+- Organization-owned AI generation consumes organization quota according to the approved quota owner rules; exact point values remain under the Cost Calibration Gate.
+
+## Acceptance Boundaries
+
+- Organization admins can find an organization AI generation entry from the organization backend.
+- The system checks effective advanced organization authorization before allowing generation.
+- AI question generation and AI `paper` generation create trackable tasks and redacted operational evidence.
+- Organization-owned AI output is not written into the platform formal question bank or paper library.
+- Employee-visible training or paper-like assignments require explicit organization admin confirmation.
+- Unpublished organization drafts are editable before publish.
+- Published organization training/content cannot be directly edited; changes require copying to a new draft and publishing a new version.
+- Takedown stops new employee answers while preserving historical result summaries and audit evidence.
+
+## Confirmed Boundaries
+
+- Organization admins cannot inspect raw employee learner AI outputs, prompt, raw AI input/output, generated content summaries, single-task details, or task-list summaries.
+- Organization admins can inspect organization-scoped usage summaries, training statistics, quota consumption summaries, and redacted audit summaries.
+- Organization training unpublished drafts follow the first-release draft retention policy.
+- Published organization training/content follows the approved long-term published retention policy.
+- Employee statistics export and organization aggregate export remain deferred in the first release.
+
+## Non-Goals
+
+- No automatic platform formal content adoption.
+- No direct publish to formal `paper` or formal `mock_exam`.
+- No Provider, env/secret, staging/prod/cloud/deploy, payment, or Cost Calibration Gate work.

@@ -18,6 +18,19 @@ The product decision package is:
 6. AI 组卷 output may propose paper structure, candidate questions, or selection rationale only. It must not create a publishable `paper`, attach full paper content to evidence, or make the paper available to students until a `content_admin` reviewer explicitly accepts and validates it.
 7. AI 出题 output may propose question drafts only. It must not create formal `question`, `question_option`, `standard_answer`, `analysis`, `scoring_point`, `material`, or `question_group` records until a reviewer accepts the draft through a separately approved adoption workflow.
 
+## 2026-06-23 Requirement Clarification
+
+The 2026-06-23 product clarification supersedes the earlier "future direction only" stance for the requirement itself:
+`content_admin` must have discoverable AI question generation and AI `paper` generation entries in the content backend.
+
+The implementation gate remains unchanged:
+
+1. This clarification does not approve source, route, UI, schema, Provider, prompt, env/secret, database, browser/e2e, deploy, PR, payment, or Cost Calibration work.
+2. Content admin AI output must first land in an isolated reviewable draft or suggestion surface.
+3. Formal adoption into platform `question` or `paper` must follow governed review, validation, source attribution, reviewer attribution, and `audit_log`.
+4. Direct write into formal `question`, `paper`, publish, `mock_exam`, or student-visible content remains forbidden.
+5. Requiring content operators to type an unpublished URL fails the entry requirement; future acceptance must prove discoverable navigation.
+
 ## Product Boundary
 
 | capability                            | current status | future entry condition                                                                                          |
@@ -28,6 +41,10 @@ The product decision package is:
 | formal `question` adoption            | blocked        | Requires manual review gate, audit_log entry, validation, duplicate detection, and source attribution.          |
 | formal `paper` adoption               | blocked        | Requires manual review gate, paper draft lifecycle rules, snapshot semantics, and publish validation.           |
 | real Provider execution               | blocked        | Requires Provider/env/cost approvals and redacted evidence rules.                                               |
+
+Note: the two button or route rows above are superseded by the 2026-06-23 clarification at the requirement level. The
+required entries are confirmed, while implementation remains blocked until a scoped implementation task approves exact
+UI/API/source files and evidence gates.
 
 ## Generated Result Storage Model
 
