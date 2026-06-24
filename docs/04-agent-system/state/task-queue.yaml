@@ -6203,6 +6203,160 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: role-separated-mvp-post-repair-gap-planning-2026-06-24
+    title: Plan post-repair role-separated MVP acceptance gaps without final Pass
+    phase: post-role-separated-repair-gap-planning-2026-06-24
+    sourceStory: user-request-2026-06-24-no-final-pass-post-repair-gap-planning
+    dependencies:
+      - ops-repair-package-state-convergence-2026-06-24
+    taskKind: acceptance_gap_planning
+    moduleRunVersion: 2
+    executionProfile: docs_acceptance_gap_planning_no_runtime
+    evidenceMode: full_redacted
+    validationPolicy: docs_acceptance_prettier_diff_precommit_prepush
+    queueSelectionMode: user_directed_serial_state_convergence_then_gap_planning
+    targetClosureItem: Post-repair role-separated MVP gap list and next approval candidates
+    behaviorBoundary: docs_acceptance_planning::no_runtime_no_final_pass_no_provider
+    requiredOutcome: >-
+      Based on the 2026-06-24 role-separated MVP requirement alignment and the completed repair package, produce a
+      no-final-Pass gap list that separates already repaired but unaccepted items, remaining required implementation or
+      design work, and work that needs fresh human approval before execution.
+    capabilities:
+      docsStateUpdate: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      acceptanceGapPlanning: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      localCommit: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      mergeToMaster: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      pushOriginMaster: approved_by_current_user_2026_06_24_state_convergence_then_gap_planning_serial
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      ownerCredentialEntry: blocked
+      accountAction: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+      - docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-backend-workspace-landing-logout-separation-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - acceptance_gap_planning
+      - requirement_mapping
+      - role_mapping
+      - blocked_gate_classification
+      - no_runtime_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-post-repair-gap-planning.md docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-post-repair-gap-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-mvp-post-repair-gap-planning-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-mvp-post-repair-gap-planning-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-post-repair-gap-planning.md docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-post-repair-gap-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-mvp-post-repair-gap-planning-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-mvp-post-repair-gap-planning-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+    acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_post_repair_gap_planning_ready_for_runtime_scope_approval
+    claimedAt: "2026-06-24T10:35:43-07:00"
+    plannedAt: "2026-06-24T10:35:43-07:00"
+    validatedAt: "2026-06-24T10:40:21-07:00"
+    reviewedAt: "2026-06-24T10:40:21-07:00"
+    closedAt: "2026-06-24T10:40:21-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+    branch: codex/role-separated-post-repair-gap-planning-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ops-repair-package-state-convergence-2026-06-24
-updatedAt: "2026-06-24T10:30:55-07:00"
+currentPhase: role-separated-mvp-post-repair-gap-planning-2026-06-24
+updatedAt: "2026-06-24T10:40:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,22 +501,23 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 4f2f09b98793a5f29312310e00cb79a9a238c855
-  lastKnownOriginMasterSha: 4f2f09b98793a5f29312310e00cb79a9a238c855
+  lastKnownMasterSha: 16eb7c7630f06320522c1fa8e9b3353f8c4e66fe
+  lastKnownOriginMasterSha: 16eb7c7630f06320522c1fa8e9b3353f8c4e66fe
 currentTask:
-  id: ops-repair-package-state-convergence-2026-06-24
+  id: role-separated-mvp-post-repair-gap-planning-2026-06-24
   status: closed
-  result: pass_ops_repair_package_state_convergence_ready_for_closeout
-  claimedAt: "2026-06-24T10:27:06-07:00"
-  plannedAt: "2026-06-24T10:27:06-07:00"
-  validatedAt: "2026-06-24T10:30:55-07:00"
-  reviewedAt: "2026-06-24T10:30:55-07:00"
-  closedAt: "2026-06-24T10:30:55-07:00"
+  result: pass_post_repair_gap_planning_ready_for_runtime_scope_approval
+  claimedAt: "2026-06-24T10:35:43-07:00"
+  plannedAt: "2026-06-24T10:35:43-07:00"
+  validatedAt: "2026-06-24T10:40:21-07:00"
+  reviewedAt: "2026-06-24T10:40:21-07:00"
+  closedAt: "2026-06-24T10:40:21-07:00"
   blockedAt: null
-  sourceStory: user-request-2026-06-24-ops-repair-package-state-convergence-then-gap-planning
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-repair-package-state-convergence.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-repair-package-state-convergence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-repair-package-state-convergence.md
+  sourceStory: user-request-2026-06-24-no-final-pass-post-repair-gap-planning
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-post-repair-gap-planning.md
+  acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
@@ -533,11 +534,41 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_fresh_approval_2026_06_24_state_convergence_then_gap_planning_serial
-  branch: codex/ops-repair-state-convergence-20260624
+  branch: codex/role-separated-post-repair-gap-planning-20260624
   commitSha: pending_report_in_final_handoff
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+roleSeparatedPostRepairGapPlanning20260624:
+  taskId: role-separated-mvp-post-repair-gap-planning-2026-06-24
+  phase: post-role-separated-repair-gap-planning-2026-06-24
+  recordedAt: "2026-06-24T10:35:43-07:00"
+  sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  status: closed
+  result: pass_post_repair_gap_planning_ready_for_runtime_scope_approval
+  closedAt: "2026-06-24T10:40:21-07:00"
+  branch: codex/role-separated-post-repair-gap-planning-20260624
+  gapAnalysisPath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+  scope: docs_acceptance_gap_planning_no_final_pass_no_runtime
+  nextRecommendedTask: role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+  baseline:
+    latestRuntimeGate: blocked_role_separated_runtime_gate_all_8_observed_zero_pass
+    closedRepairPackageStateTask: ops-repair-package-state-convergence-2026-06-24
+    noFinalPassClaim: true
+  blockedWithoutFreshApproval:
+    - source_or_test_implementation
+    - browser_or_playwright_runtime
+    - owner_credential_entry_or_account_action
+    - schema_migration_or_database_write
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 opsRepairPackageStateConvergence20260624:
   taskId: ops-repair-package-state-convergence-2026-06-24
   phase: post-role-separated-ops-repair-state-convergence-2026-06-24
