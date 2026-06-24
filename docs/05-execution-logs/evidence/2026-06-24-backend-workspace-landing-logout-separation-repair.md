@@ -157,6 +157,21 @@ Result:
   - `Cost Calibration Gate remains blocked`
   - `pre-commit hardening passed`
 
+## Master Merge Validation And Closeout
+
+- Fast-forward merge target: `master`
+- Merged branch: `codex/backend-workspace-landing-logout-20260624`
+- Merged branch head: `998bd2c686bb997f32fb15a44fd1f976606249ce`
+- Merge mode: `git merge --ff-only`
+- Master validation timestamp: 2026-06-24T03:43:49-07:00
+- Master validation result:
+  - focused unit tests: 4 files passed, 22 tests passed
+  - `npm.cmd run lint`: exit code 0
+  - `npm.cmd run typecheck`: exit code 0
+  - scoped Prettier check: exit code 0
+  - `git diff --check`: exit code 0
+  - Module Run v2 pre-commit hardening: exit code 0
+
 ## Boundary And Residual Risk
 
 - Fresh closeout approval received at 2026-06-24T03:40:40-07:00 from the current user message: execute commit, merge,

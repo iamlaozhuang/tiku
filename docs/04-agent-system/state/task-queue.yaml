@@ -4620,14 +4620,24 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-backend-workspace-landing-logout-separation-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-backend-workspace-landing-logout-separation-repair.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: pass_backend_workspace_landing_logout_separation_repair_local_validation
+    status: closed
+    result: pass_backend_workspace_landing_logout_separation_repair_closed_on_master
     claimedAt: "2026-06-24T03:23:49-07:00"
     approvedAt: "2026-06-24T03:23:49-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_approval_2026_06_24_serial_steps_1_to_4
     validatedAt: "2026-06-24T03:34:45-07:00"
     reviewedAt: "2026-06-24T03:34:45-07:00"
+    closedAt: "2026-06-24T03:43:49-07:00"
+    implementationCommitSha: c3ddf1f34
+    closeoutApprovalCommitSha: 998bd2c68
+    mergedMasterHeadSha: 998bd2c686bb997f32fb15a44fd1f976606249ce
+    closeoutReality:
+      branchMerged: true
+      pushedToOriginMaster: pending_push_after_master_closeout_record
+      shortBranchPresent: pending_cleanup_after_push
+      masterValidationPassed: true
+      recordedBy: backend-workspace-landing-logout-separation-repair-2026-06-24
     roleMapping:
       inScope:
         - super_admin

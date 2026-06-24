@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: backend-workspace-landing-logout-separation-repair-2026-06-24
-updatedAt: "2026-06-24T03:40:40-07:00"
+updatedAt: "2026-06-24T03:43:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,16 +501,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c06c103f70d967e23babf91d44df21b3ad100b17
+  lastKnownMasterSha: 998bd2c686bb997f32fb15a44fd1f976606249ce
   lastKnownOriginMasterSha: c06c103f70d967e23babf91d44df21b3ad100b17
 currentTask:
   id: backend-workspace-landing-logout-separation-repair-2026-06-24
-  status: ready_for_closeout
-  result: pass_backend_workspace_landing_logout_separation_repair_local_validation
+  status: closed
+  result: pass_backend_workspace_landing_logout_separation_repair_closed_on_master
   claimedAt: "2026-06-24T03:23:49-07:00"
   validatedAt: "2026-06-24T03:34:45-07:00"
   reviewedAt: "2026-06-24T03:34:45-07:00"
-  closedAt: null
+  closedAt: "2026-06-24T03:43:49-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-1
   planPath: docs/05-execution-logs/task-plans/2026-06-24-backend-workspace-landing-logout-separation-repair.md
@@ -533,7 +533,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_fresh_approval_2026_06_24_commit_merge_push_cleanup_backend_workspace_package_1
   branch: codex/backend-workspace-landing-logout-20260624
-  commitSha: null
+  commitSha: 998bd2c686bb997f32fb15a44fd1f976606249ce
   prUrl: null
   retryCount: 0
   lastFailurePath: null
