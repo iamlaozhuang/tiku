@@ -2,7 +2,7 @@
 
 ## Status
 
-- Current status: reviewed.
+- Current status: closed.
 - Branch: `codex/ops-authorization-repair-planning-20260624`.
 - Audit type: docs-only planning self-review.
 - No standard/advanced MVP final Pass is claimed.
@@ -49,4 +49,7 @@
 
 - Pass for docs-only planning.
 - Validation passed for Prettier check, `git diff --check`, and Module Run v2 pre-commit hardening.
+- Fast-forward merge to `master` completed at planning commit `e6d6b44351620dfd22f5c17b6670d69802c4a81d`.
+- Post-merge `master` validation passed before closeout evidence was written.
+- Final closeout validation passed after closeout evidence/state updates; pre-commit hardening reported changed files in task scope and preserved SSOT readiness.
 - This review does not close runtime acceptance and does not declare standard/advanced MVP final Pass.

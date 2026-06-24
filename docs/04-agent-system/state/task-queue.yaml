@@ -5143,15 +5143,19 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: reviewed
-    result: pass_docs_planning_package_validated_reviewed_pending_commit
+    status: closed
+    result: pass_ops_authorization_repair_planning_merged_and_closeout_validated
     claimedAt: "2026-06-24T05:54:00-07:00"
     approvedAt: "2026-06-24T05:54:00-07:00"
     plannedAt: "2026-06-24T05:54:00-07:00"
     validatedAt: "2026-06-24T06:04:29-07:00"
     reviewedAt: "2026-06-24T06:04:29-07:00"
+    closedAt: "2026-06-24T06:08:45-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+    planningCommitSha: e6d6b44351620dfd22f5c17b6670d69802c4a81d
+    mergedToMasterAt: "2026-06-24T06:08:45-07:00"
+    postMergeValidatedAt: "2026-06-24T06:08:45-07:00"
     blockedWithoutFreshApproval:
       - source_test_fixture_schema_migration_dependency_or_env_change
       - database_seed_or_write
