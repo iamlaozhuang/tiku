@@ -2,10 +2,8 @@
 
 ## Status
 
-- Current status: ready for closeout retry after remote push failed following local `master` fast-forward merge and
-  local post-merge validation.
-- Local `master` contains the implementation and closeout commits; `origin/master` remains behind because remote push
-  failed.
+- Current status: closed after remote push succeeded and the merged short branch was deleted.
+- Local `master` and `origin/master` are aligned at `6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87`.
 - Branch: codex/admin-ai-generation-entries-20260624.
 - Scope: content backend and organization backend `AI出题` / `AI组卷` entry discoverability.
 - Explicit non-claim: this evidence does not declare standard/advanced MVP final Pass.
@@ -143,9 +141,26 @@
 - Closeout retry after marking the task `ready_for_closeout`: `git push origin master` failed again with GitHub HTTPS TLS
   connect error `unexpected eof while reading`. Retry count is now 2, and branch cleanup remains deferred.
 
+## Final Remote Closeout
+
+- `git credential-manager github login --username iamlaozhuang --browser --force`: pass; GCM account list shows
+  `iamlaozhuang`.
+- `git ls-remote --heads origin master`: pass before final push; remote was
+  `7d42f6ab5f41d84aa08ee7d78966f21cca72f329`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1`:
+  pass; local ahead count was 5 and remote ahead count was 0.
+- `git push origin master`: first retry still failed with TLS connect error; second retry passed and pushed
+  `master -> master` from `7d42f6ab5` to `6b49ee15f`.
+- `git ls-remote --heads origin master`: pass after push; remote is
+  `6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87`.
+- `git branch -d codex/admin-ai-generation-entries-20260624`: pass; branch deleted after confirming it was merged.
+- `git status --short --branch`: pass; local `master` and `origin/master` were aligned before this final closeout
+  evidence commit.
+
 ## Blocked Remainder
 
 - Real AI generation execution, Provider setup/calls, prompt handling, cost/quota measurement, AI task persistence,
   content adoption into formal `question` or `paper`, schema/migration, and runtime browser evidence remain blocked or
   deferred.
-- Remote push and short-branch deletion remain pending until GitHub HTTPS authentication/connectivity succeeds.
+- Provider setup/calls, prompt handling, cost/quota measurement, AI task persistence, schema/migration, and browser/e2e
+  runtime evidence remain blocked or deferred.

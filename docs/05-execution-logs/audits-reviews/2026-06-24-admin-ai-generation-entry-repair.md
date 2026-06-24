@@ -2,8 +2,7 @@
 
 ## Status
 
-- Current status: ready for closeout retry after remote push failed following local `master` fast-forward merge and
-  local post-merge validation.
+- Current status: closed after remote push succeeded and the merged short branch was deleted.
 - Branch: codex/admin-ai-generation-entries-20260624.
 - No standard/advanced MVP final Pass is claimed.
 
@@ -66,4 +65,6 @@
 - Remote push did not complete. Attempts failed first at TLS connection, then at HTTP 401; `origin/master` remained at
   `7d42f6ab5f41d84aa08ee7d78966f21cca72f329`.
 - A later closeout retry after restoring `ready_for_closeout` status failed again with GitHub HTTPS TLS connect error.
-- Short branch deletion is correctly deferred because the push did not succeed.
+- Final closeout succeeded after GCM browser login restored the account and a limited push retry succeeded:
+  `origin/master` advanced to `6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87`, and the merged short branch
+  `codex/admin-ai-generation-entries-20260624` was deleted.
