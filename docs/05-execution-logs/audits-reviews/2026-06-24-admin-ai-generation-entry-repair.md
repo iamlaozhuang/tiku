@@ -2,7 +2,7 @@
 
 ## Status
 
-- Current status: ready_for_closeout after local validation.
+- Current status: closed on `master` after fast-forward merge and local post-merge validation.
 - Branch: codex/admin-ai-generation-entries-20260624.
 - No standard/advanced MVP final Pass is claimed.
 
@@ -60,3 +60,5 @@
 - Lint and typecheck passed.
 - Scoped Prettier write completed and focused unit tests remained green after formatting.
 - Final focused unit, lint, typecheck, Prettier check, `git diff --check`, and Module Run v2 hardening passed.
+- Post-merge `master` validation passed: focused unit 4 files / 16 tests, lint, typecheck, Prettier allowlist,
+  `git diff --check`, and Module Run v2 hardening.

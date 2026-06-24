@@ -2,7 +2,8 @@
 
 ## Status
 
-- Current status: ready_for_closeout after local validation.
+- Current status: closed on `master` after fast-forward merge and local post-merge validation; push and short-branch
+  cleanup remain approved closeout actions for this run.
 - Branch: codex/admin-ai-generation-entries-20260624.
 - Scope: content backend and organization backend `AI出题` / `AI组卷` entry discoverability.
 - Explicit non-claim: this evidence does not declare standard/advanced MVP final Pass.
@@ -106,6 +107,20 @@
 | `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                                                                                                        | pass                           | All matched files use Prettier code style.                                                                                                                                                                           |
 | `git diff --check`                                                                                                                                                                                                                                     | pass                           | Exit 0 with no whitespace findings.                                                                                                                                                                                  |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-entry-repair-2026-06-24`                                                                            | pass                           | Module Run v2 hardening passed; SSOT Read List and Requirement Mapping Result were accepted; 20 files scanned in task scope.                                                                                         |
+
+## Master Closeout Verification
+
+- Implementation commit: `e7a770ece811c00678fbd93c02164b4d24646aae`.
+- `git merge --ff-only codex/admin-ai-generation-entries-20260624`: pass; `master` fast-forwarded to
+  `e7a770ece811c00678fbd93c02164b4d24646aae`.
+- `npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts`:
+  pass on `master`; 4 files passed, 16 tests passed.
+- `npm.cmd run lint`: pass on `master`; ESLint exit 0.
+- `npm.cmd run typecheck`: pass on `master`; `tsc --noEmit` exit 0.
+- `npx.cmd prettier --check --ignore-unknown ...`: pass on `master`; all matched files use Prettier code style.
+- `git diff --check`: pass on `master`; no whitespace findings.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-entry-repair-2026-06-24`:
+  pass on `master`; no changed files before closeout status update.
 
 ## Blocked Remainder
 
