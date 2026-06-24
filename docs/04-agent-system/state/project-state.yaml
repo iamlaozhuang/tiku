@@ -501,42 +501,43 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87
-  lastKnownOriginMasterSha: 6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87
+  lastKnownMasterSha: a4e0be6a40953667ce3f81c0e62094977d762d4c
+  lastKnownOriginMasterSha: a4e0be6a40953667ce3f81c0e62094977d762d4c
 currentTask:
-  id: admin-ai-generation-entry-repair-2026-06-24
-  status: closed
-  result: pass_admin_ai_generation_entries_pushed_and_short_branch_cleaned
-  claimedAt: "2026-06-24T04:46:25-07:00"
-  validatedAt: "2026-06-24T04:58:05-07:00"
-  reviewedAt: "2026-06-24T05:04:07-07:00"
-  closedAt: "2026-06-24T05:37:55-07:00"
+  id: ops-authorization-entry-repair-planning-2026-06-24
+  status: reviewed
+  result: pass_docs_planning_package_validated_reviewed_pending_commit
+  claimedAt: "2026-06-24T05:54:00-07:00"
+  plannedAt: "2026-06-24T05:54:00-07:00"
+  validatedAt: "2026-06-24T06:04:29-07:00"
+  reviewedAt: "2026-06-24T06:04:29-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-3
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
+  sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-4
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
-  branch: codex/admin-ai-generation-entries-20260624
-  commitSha: 6b49ee15fecb9ea00313b31e70ce4f6ea9e47f87
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+  branch: codex/ops-authorization-repair-planning-20260624
+  commitSha: null
   prUrl: null
-  retryCount: 2
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+  retryCount: 0
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint

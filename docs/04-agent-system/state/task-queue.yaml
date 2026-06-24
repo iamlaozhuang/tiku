@@ -5030,6 +5030,158 @@ tasks:
     retryCount: 2
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
 
+  - id: ops-authorization-entry-repair-planning-2026-06-24
+    title: Plan operations authorization entry repair package
+    phase: standard-advanced-mvp-role-separated-repair-package-4-2026-06-24
+    sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-4
+    dependencies:
+      - admin-ai-generation-entry-repair-2026-06-24
+    taskKind: docs_only
+    moduleRunVersion: 2
+    executionProfile: docs_only_requirement_ssot_planning
+    evidenceMode: full_redacted
+    validationPolicy: docs_prettier_diff_check_precommit_hardening
+    queueSelectionMode: user_directed_serial_role_separated_repair
+    requiredOutcome: >-
+      Create a reviewable repair planning package for operations `redeem_code`, `org_auth` standard/advanced selector,
+      manual upgrade entry, multi-`profession` multi-`level` authorization package direction, and employee import
+      template binding-only scope. This task plans follow-up implementation packets only. It must not change source,
+      tests, schema, migrations, database, dependencies, `.env*`, Provider, Cost Calibration, staging/prod, payment,
+      external services, PRs, force push, or standard/advanced MVP final Pass claims.
+    capabilities:
+      docsStateUpdate: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      repairPlanning: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      requirementSsotMapping: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      sourceOrTestChange: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+      - docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/services/admin-user-org-auth-ops-service.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/validators/org-auth.ts
+      - src/server/validators/redeem-code.ts
+      - src/app/api/v1/org-auths/route.ts
+      - src/app/api/v1/redeem-codes/route.ts
+      - src/app/api/v1/employees/import/route.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - authorization_planning
+      - redeem_code_redaction
+      - org_auth_multi_scope_planning
+      - employee_import_template_boundary
+      - evidence_redaction
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-authorization-entry-repair-planning-2026-06-24
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-authorization-entry-repair-planning-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-authorization-entry-repair-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-authorization-entry-repair-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-authorization-entry-repair-planning.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: reviewed
+    result: pass_docs_planning_package_validated_reviewed_pending_commit
+    claimedAt: "2026-06-24T05:54:00-07:00"
+    approvedAt: "2026-06-24T05:54:00-07:00"
+    plannedAt: "2026-06-24T05:54:00-07:00"
+    validatedAt: "2026-06-24T06:04:29-07:00"
+    reviewedAt: "2026-06-24T06:04:29-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+    blockedWithoutFreshApproval:
+      - source_test_fixture_schema_migration_dependency_or_env_change
+      - database_seed_or_write
+      - auth_runtime_behavior_change
+      - code_stage_implementation
+      - browser_or_playwright_runtime
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_4
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
