@@ -71,6 +71,16 @@ tasks may satisfy the mapping proof with `Role Mapping Result` or `Acceptance Ma
   plan/evidence/audit paths and local-commit-only closeout policy.
 - After recovery, hardening was rerun against this task before retrying commit.
 
+## Closeout Approval
+
+- Fresh approval received from laozhuang on 2026-06-24 after local commit `8f053cb7c`.
+- Approved closeout actions:
+  - merge branch `codex/requirement-ssot-reading-governance-20260624` to `master`;
+  - push `master` to `origin/master`;
+  - delete the merged local short branch.
+- Still blocked: PR, force push, product source implementation, schema/database work, dependency/package changes,
+  env/secret access, Provider, Cost Calibration, staging/prod/cloud/deploy, payment, and external-service work.
+
 ## Blocked Work Statement
 
 This task did not change product code, tests, schema, migrations, package files, lockfiles, env files, Provider config,

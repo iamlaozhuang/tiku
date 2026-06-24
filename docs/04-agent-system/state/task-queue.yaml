@@ -4486,16 +4486,16 @@ tasks:
         approved: true
         approvalSource: current_user_plan_approval_2026_06_24_requirement_ssot_reading_governance
       mergeToMaster:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_approval_required_after_local_commit
+        approvalSource: current_user_fresh_approval_2026_06_24_merge_push_cleanup
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_approval_required_after_local_commit
+        approvalSource: current_user_fresh_approval_2026_06_24_merge_push_cleanup
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_approval_required_after_local_commit
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_24_merge_push_cleanup
     retryCount: 0
     lastFailurePath: null
 
