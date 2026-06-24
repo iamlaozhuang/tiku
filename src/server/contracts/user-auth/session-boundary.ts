@@ -8,7 +8,7 @@ export type PostLoginSessionUser = {
 
 export type PostLoginSessionBoundary = {
   exposeBearerTokenToClient: false;
-  redirectPath: "/home" | "/ops/users";
+  redirectPath: "/home" | "/ops/users" | "/content/papers";
   sessionPersistenceMode: "server_session";
 };
 
@@ -28,12 +28,30 @@ function isAdminLoginUser(loginUser: PostLoginSessionUser) {
   );
 }
 
+export function resolveAdminWorkspaceLandingPath(
+  loginUser: PostLoginSessionUser,
+): "/ops/users" | "/content/papers" {
+  const adminRoles = loginUser.adminRoles ?? [];
+
+  if (
+    adminRoles.includes("content_admin") &&
+    !adminRoles.includes("ops_admin") &&
+    !adminRoles.includes("super_admin")
+  ) {
+    return "/content/papers";
+  }
+
+  return "/ops/users";
+}
+
 export function createPostLoginSessionBoundary(
   loginUser: PostLoginSessionUser,
 ): PostLoginSessionBoundary {
   return {
     exposeBearerTokenToClient: false,
-    redirectPath: isAdminLoginUser(loginUser) ? "/ops/users" : "/home",
+    redirectPath: isAdminLoginUser(loginUser)
+      ? resolveAdminWorkspaceLandingPath(loginUser)
+      : "/home",
     sessionPersistenceMode: "server_session",
   };
 }

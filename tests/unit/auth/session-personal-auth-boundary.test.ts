@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { createPostLoginSessionBoundary } from "@/server/contracts/user-auth/session-boundary";
+
 const workspaceRoot = process.cwd();
 
 function readAllowedSource(sourcePath: string) {
@@ -18,6 +20,30 @@ function readOptionalAllowedSource(sourcePath: string) {
 }
 
 describe("unified repair auth session personal auth boundary", () => {
+  it("routes modeled admin roles to role-specific backend workspaces", () => {
+    expect(
+      createPostLoginSessionBoundary({
+        userType: null,
+        adminPublicId: "admin-ops-public-001",
+        adminRoles: ["ops_admin"],
+      }).redirectPath,
+    ).toBe("/ops/users");
+    expect(
+      createPostLoginSessionBoundary({
+        userType: null,
+        adminPublicId: "admin-content-public-001",
+        adminRoles: ["content_admin"],
+      }).redirectPath,
+    ).toBe("/content/papers");
+    expect(
+      createPostLoginSessionBoundary({
+        userType: null,
+        adminPublicId: "admin-super-public-001",
+        adminRoles: ["super_admin"],
+      }).redirectPath,
+    ).toBe("/ops/users");
+  });
+
   it("keeps login out of browser localStorage bearer-token persistence", async () => {
     const loginPageSource = readAllowedSource("src/app/(auth)/login/page.tsx");
     const sessionBoundarySource = readOptionalAllowedSource(

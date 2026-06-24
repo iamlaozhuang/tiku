@@ -59,7 +59,7 @@ const adminSessionPayload = {
       employeePublicId: null,
       organizationPublicId: null,
       adminPublicId: "admin-public-001",
-      adminRoles: ["content_admin"],
+      adminRoles: ["ops_admin"],
     },
     session: {
       expiresAt: "2026-05-29T04:00:00.000Z",

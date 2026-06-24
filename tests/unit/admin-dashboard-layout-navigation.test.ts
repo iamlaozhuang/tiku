@@ -36,6 +36,50 @@ const adminSessionPayload = {
   },
 };
 
+const opsAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-ops-admin-public",
+      phone: "13900000003",
+      name: "Ops Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "admin-ops-public-001",
+      adminRoles: ["ops_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
+const contentAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-content-admin-public",
+      phone: "13900000004",
+      name: "Content Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "admin-content-public-001",
+      adminRoles: ["content_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -70,5 +114,84 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/ops/ai-audit-logs",
     );
+  });
+
+  it("shows a visible logout control for an allowed backend workspace", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => contentAdminSessionPayload,
+      })),
+    );
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    expect(await screen.findByText("content page")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "退出登录" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("内容后台").length).toBeGreaterThan(0);
+  });
+
+  it("denies content admins from the operations workspace", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => contentAdminSessionPayload,
+      })),
+    );
+    pathnameMock = "/ops/users";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "ops page"),
+      ),
+    );
+
+    const denialAlert = await screen.findByRole("alert");
+    expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
+    expect(screen.queryByText("ops page")).toBeNull();
+    expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
+  });
+
+  it("denies ops admins from the content workspace", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => opsAdminSessionPayload,
+      })),
+    );
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    const denialAlert = await screen.findByRole("alert");
+    expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
+    expect(screen.queryByText("content page")).toBeNull();
+    expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
   });
 });
