@@ -11,6 +11,7 @@ describe("org auth validators", () => {
         authScopeType: "specified_nodes",
         profession: "monopoly",
         level: 3,
+        edition: "standard",
         accountQuota: 100,
         startsAt: "2026-05-18T04:00:00.000Z",
         expiresAt: "2027-05-18T04:00:00.000Z",
@@ -30,6 +31,24 @@ describe("org auth validators", () => {
         expiresAt: new Date("2027-05-18T04:00:00.000Z"),
         organizationPublicIds: ["org_city_123", "org_district_456"],
       },
+    });
+  });
+
+  it("rejects org auth input without an explicit edition", () => {
+    expect(
+      normalizeCreateOrgAuthInput({
+        name: "standard enterprise auth",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "current_and_descendants",
+        profession: "monopoly",
+        level: 3,
+        accountQuota: 100,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid org auth input.",
     });
   });
 

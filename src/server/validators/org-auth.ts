@@ -78,10 +78,6 @@ function isProfession(value: unknown): value is Profession {
 function normalizeAuthorizationEdition(
   value: unknown,
 ): AuthorizationEdition | null {
-  if (value === undefined) {
-    return "standard";
-  }
-
   return typeof value === "string" &&
     authorizationEditionValues.includes(value as AuthorizationEdition)
     ? (value as AuthorizationEdition)

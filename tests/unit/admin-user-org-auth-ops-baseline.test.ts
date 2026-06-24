@@ -734,6 +734,11 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await screen.findByTestId("org-auth-create-form");
+    fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
+      target: { value: "standard" },
+    });
+
     await screen.findByRole("heading", { name: "企业授权运营" });
 
     fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
@@ -759,6 +764,7 @@ describe("admin user organization authorization ops baseline", () => {
       authScopeType: "current_and_descendants",
       profession: "monopoly",
       level: 3,
+      edition: "standard",
       accountQuota: 100,
       organizationPublicIds: ["organization-public-001"],
     });
@@ -785,6 +791,36 @@ describe("admin user organization authorization ops baseline", () => {
     );
   });
 
+  it("requires explicit org_auth edition selection before create submit", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("org-auth-create-form");
+
+    const createButton = screen.getByTestId("org-auth-create-button");
+
+    expect(createButton).toBeDisabled();
+
+    fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
+      target: { value: "advanced" },
+    });
+
+    expect(createButton).not.toBeDisabled();
+
+    fireEvent.click(createButton);
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("advanced");
+    fireEvent.click(screen.getByTestId("org-auth-confirm-action"));
+
+    const createCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/org-auths",
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
+      edition: "advanced",
+    });
+  });
+
   it("submits full org_auth scope fields for specified organization nodes", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
@@ -805,6 +841,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
     fireEvent.change(screen.getByLabelText("专业"), {
       target: { value: "logistics" },
+    });
+    fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
+      target: { value: "advanced" },
     });
     fireEvent.change(screen.getByLabelText("等级"), {
       target: { value: "5" },
@@ -839,6 +878,7 @@ describe("admin user organization authorization ops baseline", () => {
       level: 5,
       name: "杭州市县区联合授权",
       organizationPublicIds: ["org-district-001"],
+      edition: "advanced",
       profession: "logistics",
       purchaserOrganizationPublicId: "org-city-001",
       startsAt: "2026-06-01T00:00:00.000Z",

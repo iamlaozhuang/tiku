@@ -63,6 +63,7 @@ type AdminOrgAuthData = {
 type CreateOrgAuthInput = {
   accountQuota: number;
   authScopeType: AuthScopeType;
+  edition: AuthorizationEdition;
   expiresAt: string;
   level: number;
   name: string;
@@ -75,6 +76,7 @@ type CreateOrgAuthInput = {
 type OrgAuthFormState = {
   accountQuota: string;
   authScopeType: AuthScopeType;
+  edition: AuthorizationEdition | "";
   expiresAt: string;
   level: string;
   name: string;
@@ -257,6 +259,7 @@ const employeeImportRejectedReasonLabels = {
 const defaultOrgAuthFormState: OrgAuthFormState = {
   accountQuota: "100",
   authScopeType: "current_and_descendants",
+  edition: "",
   expiresAt: "2027-05-25",
   level: "3",
   name: "本地验证企业授权",
@@ -487,6 +490,7 @@ function buildOrgAuthInput(
     findFirstOrganizationPublicId(organizations);
   const name = formState.name.trim();
   const accountQuota = Number(formState.accountQuota);
+  const edition = formState.edition;
   const level = Number(formState.level);
   const organizationPublicIds =
     formState.authScopeType === "specified_nodes"
@@ -505,6 +509,10 @@ function buildOrgAuthInput(
 
   if (!Number.isInteger(accountQuota) || accountQuota <= 0) {
     return { input: null, message: "账号额度必须为正整数。" };
+  }
+
+  if (edition === "") {
+    return { input: null, message: "请选择授权版本。" };
   }
 
   if (!Number.isInteger(level) || level <= 0) {
@@ -530,6 +538,7 @@ function buildOrgAuthInput(
     input: {
       accountQuota,
       authScopeType: formState.authScopeType,
+      edition,
       expiresAt: toStartOfDayIso(formState.expiresAt),
       level,
       name,
@@ -1955,6 +1964,8 @@ function OrgAuthConfirmationDialog({
   onConfirm: () => void;
 }) {
   const isCreate = confirmationState.kind === "createOrgAuth";
+  const createOrgAuthInput =
+    confirmationState.kind === "createOrgAuth" ? confirmationState.input : null;
 
   return (
     <div
@@ -1977,6 +1988,11 @@ function OrgAuthConfirmationDialog({
             ? "创建会提交企业 publicId、授权范围、专业等级、额度和有效期，由后端执行重叠校验。"
             : "取消会终止该企业授权，并由后端处理受影响的练习和模拟考试会话。"}
         </p>
+        {createOrgAuthInput === null ? null : (
+          <p className="text-text-secondary text-xs">
+            edition: {createOrgAuthInput.edition}
+          </p>
+        )}
         <div className="flex gap-2">
           <button
             type="button"
@@ -1985,6 +2001,7 @@ function OrgAuthConfirmationDialog({
                 ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                 : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
             }
+            data-testid={isCreate ? "org-auth-confirm-action" : undefined}
             onClick={onConfirm}
           >
             {isCreate ? "确认创建" : "确认取消"}
@@ -2444,6 +2461,24 @@ function OrgAuthActionPanel({
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">授权版本</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              data-testid="org-auth-edition-select"
+              value={formState.edition}
+              onChange={(event) =>
+                updateFormState({
+                  edition: event.target.value as AuthorizationEdition | "",
+                })
+              }
+            >
+              <option value="">请选择</option>
+              <option value="standard">标准版</option>
+              <option value="advanced">高级版</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
             <span className="text-text-secondary">等级</span>
             <input
               className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -2550,6 +2585,7 @@ function OrgAuthActionPanel({
           <button
             type="button"
             className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="org-auth-create-button"
             disabled={isCreateDisabled}
             onClick={onCreateOrgAuth}
           >
