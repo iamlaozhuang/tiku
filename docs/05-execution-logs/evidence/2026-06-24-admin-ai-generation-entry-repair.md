@@ -2,7 +2,8 @@
 
 ## Status
 
-- Current status: blocked at remote push after local `master` fast-forward merge and local post-merge validation.
+- Current status: ready for closeout retry after remote push failed following local `master` fast-forward merge and
+  local post-merge validation.
 - Local `master` contains the implementation and closeout commits; `origin/master` remains behind because remote push
   failed.
 - Branch: codex/admin-ai-generation-entries-20260624.
