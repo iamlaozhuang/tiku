@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-manual-upgrade-planning-2026-06-24`.
 - Branch: `codex/ops-org-auth-manual-upgrade-planning-20260624`.
 - Review type: docs-only planning self-review plus authorization boundary review.
-- Current verdict: ready_for_closeout after docs/state validation.
+- Current verdict: closed after fast-forward merge to `master` and post-merge validation.
 - Non-claim: this review does not declare runtime behavior changed or standard/advanced MVP final Pass.
 
 ## SSOT Read List
@@ -62,4 +62,6 @@
 ## Verdict
 
 - No blocking planning findings.
-- Ready for local commit, fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup under the task closeout policy.
+- Pass: fast-forward merge to `master` completed at planning commit `b40ea2208f28651370f35dd22b9f5c1a05895069`.
+- Pass: post-merge scoped Prettier, diff, pre-commit hardening, and pre-push readiness passed on `master`.
+- Pass: push target remains `origin/master`; short branch cleanup is allowed after successful push.

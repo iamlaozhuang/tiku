@@ -5625,17 +5625,18 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-manual-upgrade-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-manual-upgrade-planning.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: pass_org_auth_manual_upgrade_preflight_planned
+    status: closed
+    result: pass_org_auth_manual_upgrade_preflight_merged_and_post_merge_validated
     claimedAt: "2026-06-24T09:07:56-07:00"
     approvedAt: "2026-06-24T09:07:56-07:00"
     plannedAt: "2026-06-24T09:07:56-07:00"
     validatedAt: "2026-06-24T09:19:43-07:00"
     reviewedAt: "2026-06-24T09:19:43-07:00"
-    closedAt: null
+    closedAt: "2026-06-24T09:24:50-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_docs_state_closeout
     branch: codex/ops-org-auth-manual-upgrade-planning-20260624
+    commitSha: b40ea2208f28651370f35dd22b9f5c1a05895069
     blockedWithoutFreshApproval:
       - source_or_test_implementation
       - schema_migration_or_database_write

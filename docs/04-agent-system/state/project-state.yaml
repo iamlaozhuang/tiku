@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ops-org-auth-manual-upgrade-planning-2026-06-24
-updatedAt: "2026-06-24T09:19:43-07:00"
+updatedAt: "2026-06-24T09:24:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,17 +501,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f03174f7b8fe8c8441c189bffcba581b564cfdcd
+  lastKnownMasterSha: b40ea2208f28651370f35dd22b9f5c1a05895069
   lastKnownOriginMasterSha: f03174f7b8fe8c8441c189bffcba581b564cfdcd
 currentTask:
   id: ops-org-auth-manual-upgrade-planning-2026-06-24
-  status: ready_for_closeout
-  result: pass_org_auth_manual_upgrade_preflight_planned
+  status: closed
+  result: pass_org_auth_manual_upgrade_preflight_merged_and_post_merge_validated
   claimedAt: "2026-06-24T09:07:56-07:00"
   plannedAt: "2026-06-24T09:07:56-07:00"
   validatedAt: "2026-06-24T09:19:43-07:00"
   reviewedAt: "2026-06-24T09:19:43-07:00"
-  closedAt: null
+  closedAt: "2026-06-24T09:24:50-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-3
   planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-manual-upgrade-planning.md
@@ -534,7 +534,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
   branch: codex/ops-org-auth-manual-upgrade-planning-20260624
-  commitSha: null
+  commitSha: b40ea2208f28651370f35dd22b9f5c1a05895069
   prUrl: null
   retryCount: 0
   lastFailurePath: null

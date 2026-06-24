@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-manual-upgrade-planning-2026-06-24`.
 - Branch: `codex/ops-org-auth-manual-upgrade-planning-20260624`.
 - Task kind: `docs_only`.
-- Status: ready_for_closeout; docs/state validation passed.
+- Status: closed after fast-forward merge to `master` and post-merge validation.
 - Scope: docs/contract/security preflight for governed organization standard-to-advanced manual upgrade.
 - Non-claim: this evidence does not declare runtime behavior changed and does not declare standard/advanced MVP final Pass.
 
@@ -65,6 +65,16 @@
 - First `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-manual-upgrade-planning-2026-06-24`: failed as expected for missing exact `## Requirement Mapping Result` heading even though the combined mapping paragraph existed.
 - After adding exact `Requirement Mapping Result`, `Role Mapping Result`, and `Acceptance Mapping Result` headings, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-manual-upgrade-planning-2026-06-24`: passed. Output included `OK_SSOT_READ_LIST`, `OK_REQUIREMENT_MAPPING_RESULT`, all five changed files in scope, `Cost Calibration Gate remains blocked`, and `pre-commit hardening passed`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-manual-upgrade-planning-2026-06-24 -SkipRemoteAheadCheck`: passed. Output included clean git readiness for branch `codex/ops-org-auth-manual-upgrade-planning-20260624`, `master` and `origin/master` at `f03174f7b8fe8c8441c189bffcba581b564cfdcd`, evidence/audit paths found, and `pre-push readiness passed`.
+
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Planning commit: `b40ea2208f28651370f35dd22b9f5c1a05895069`.
+- Timestamp: `2026-06-24T09:24:50-07:00`.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-manual-upgrade-planning.md docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-manual-upgrade-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-manual-upgrade-planning.md`: passed on `master`.
+- `git diff --check`: passed on `master` with no whitespace errors.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-manual-upgrade-planning-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-manual-upgrade-planning-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`; output showed `master` at `b40ea2208f28651370f35dd22b9f5c1a05895069` and `origin/master` at `f03174f7b8fe8c8441c189bffcba581b564cfdcd`.
 
 ## Changed Files
 
