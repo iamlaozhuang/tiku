@@ -140,6 +140,8 @@
 - Local state after blocker: `master` is `e2de0b8da9ebc9d0e41ab9a4bc9c1e4de3f896ff`, `origin/master` is
   `7d42f6ab5f41d84aa08ee7d78966f21cca72f329`, and local branch `codex/admin-ai-generation-entries-20260624` remains
   present. Short branch cleanup is intentionally not executed before successful push.
+- Closeout retry after marking the task `ready_for_closeout`: `git push origin master` failed again with GitHub HTTPS TLS
+  connect error `unexpected eof while reading`. Retry count is now 2, and branch cleanup remains deferred.
 
 ## Blocked Remainder
 

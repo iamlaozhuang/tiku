@@ -5024,7 +5024,7 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
-    retryCount: 1
+    retryCount: 2
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
 
   - id: acceptance-l0-l2-static-gates-2026-06-22

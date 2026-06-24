@@ -65,4 +65,5 @@
   `git diff --check`, and Module Run v2 hardening.
 - Remote push did not complete. Attempts failed first at TLS connection, then at HTTP 401; `origin/master` remained at
   `7d42f6ab5f41d84aa08ee7d78966f21cca72f329`.
+- A later closeout retry after restoring `ready_for_closeout` status failed again with GitHub HTTPS TLS connect error.
 - Short branch deletion is correctly deferred because the push did not succeed.

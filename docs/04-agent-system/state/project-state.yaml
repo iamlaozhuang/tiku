@@ -535,7 +535,7 @@ currentTask:
   branch: codex/admin-ai-generation-entries-20260624
   commitSha: e7a770ece811c00678fbd93c02164b4d24646aae
   prUrl: null
-  retryCount: 1
+  retryCount: 2
   lastFailurePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
 qualityGates:
   desired:
