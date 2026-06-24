@@ -80,6 +80,50 @@ const contentAdminSessionPayload = {
   },
 };
 
+const orgStandardAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-org-standard-admin-public",
+      phone: "13900000005",
+      name: "Org Standard Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-standard-public-001",
+      adminPublicId: "admin-org-standard-public-001",
+      adminRoles: ["org_standard_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
+const orgAdvancedAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-org-advanced-admin-public",
+      phone: "13900000006",
+      name: "Org Advanced Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-advanced-public-001",
+      adminPublicId: "admin-org-advanced-public-001",
+      adminRoles: ["org_advanced_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -141,6 +185,72 @@ describe("AdminDashboardLayout navigation", () => {
       screen.getByRole("button", { name: "退出登录" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("内容后台").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /AI出题/u })).toHaveAttribute(
+      "href",
+      "/content/ai-question-generation",
+    );
+    expect(screen.getByRole("link", { name: /AI组卷/u })).toHaveAttribute(
+      "href",
+      "/content/ai-paper-generation",
+    );
+  });
+
+  it("shows organization AI entries only for advanced organization admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => orgAdvancedAdminSessionPayload,
+      })),
+    );
+    pathnameMock = "/organization/portal";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "organization page"),
+      ),
+    );
+
+    expect(await screen.findByText("organization page")).toBeInTheDocument();
+    expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /AI出题/u })).toHaveAttribute(
+      "href",
+      "/organization/ai-question-generation",
+    );
+    expect(screen.getByRole("link", { name: /AI组卷/u })).toHaveAttribute(
+      "href",
+      "/organization/ai-paper-generation",
+    );
+  });
+
+  it("hides organization AI entries for standard organization admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => orgStandardAdminSessionPayload,
+      })),
+    );
+    pathnameMock = "/organization/portal";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "organization page"),
+      ),
+    );
+
+    expect(await screen.findByText("organization page")).toBeInTheDocument();
+    expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
   });
 
   it("denies content admins from the operations workspace", async () => {

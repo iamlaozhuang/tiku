@@ -1,4 +1,9 @@
-export type PostLoginAdminRole = "super_admin" | "ops_admin" | "content_admin";
+export type PostLoginAdminRole =
+  | "super_admin"
+  | "ops_admin"
+  | "content_admin"
+  | "org_standard_admin"
+  | "org_advanced_admin";
 
 export type PostLoginSessionUser = {
   userType: string | null;
@@ -8,11 +13,21 @@ export type PostLoginSessionUser = {
 
 export type PostLoginSessionBoundary = {
   exposeBearerTokenToClient: false;
-  redirectPath: "/home" | "/ops/users" | "/content/papers";
+  redirectPath:
+    | "/home"
+    | "/ops/users"
+    | "/content/papers"
+    | "/organization/portal";
   sessionPersistenceMode: "server_session";
 };
 
-const ADMIN_ROLES = ["super_admin", "ops_admin", "content_admin"] as const;
+const ADMIN_ROLES = [
+  "super_admin",
+  "ops_admin",
+  "content_admin",
+  "org_standard_admin",
+  "org_advanced_admin",
+] as const;
 
 function hasAdminRole(loginUser: PostLoginSessionUser) {
   return (loginUser.adminRoles ?? []).some((adminRole) =>
@@ -30,7 +45,7 @@ function isAdminLoginUser(loginUser: PostLoginSessionUser) {
 
 export function resolveAdminWorkspaceLandingPath(
   loginUser: PostLoginSessionUser,
-): "/ops/users" | "/content/papers" {
+): "/ops/users" | "/content/papers" | "/organization/portal" {
   const adminRoles = loginUser.adminRoles ?? [];
 
   if (
@@ -39,6 +54,16 @@ export function resolveAdminWorkspaceLandingPath(
     !adminRoles.includes("super_admin")
   ) {
     return "/content/papers";
+  }
+
+  if (
+    (adminRoles.includes("org_standard_admin") ||
+      adminRoles.includes("org_advanced_admin")) &&
+    !adminRoles.includes("ops_admin") &&
+    !adminRoles.includes("content_admin") &&
+    !adminRoles.includes("super_admin")
+  ) {
+    return "/organization/portal";
   }
 
   return "/ops/users";

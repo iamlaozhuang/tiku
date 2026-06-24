@@ -42,6 +42,20 @@ describe("unified repair auth session personal auth boundary", () => {
         adminRoles: ["super_admin"],
       }).redirectPath,
     ).toBe("/ops/users");
+    expect(
+      createPostLoginSessionBoundary({
+        userType: null,
+        adminPublicId: "admin-org-standard-public-001",
+        adminRoles: ["org_standard_admin"],
+      }).redirectPath,
+    ).toBe("/organization/portal");
+    expect(
+      createPostLoginSessionBoundary({
+        userType: null,
+        adminPublicId: "admin-org-advanced-public-001",
+        adminRoles: ["org_advanced_admin"],
+      }).redirectPath,
+    ).toBe("/organization/portal");
   });
 
   it("keeps login out of browser localStorage bearer-token persistence", async () => {

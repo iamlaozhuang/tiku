@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BarChart3, BookOpenCheck, Building2, ShieldCheck } from "lucide-react";
+import {
+  BarChart3,
+  BookOpenCheck,
+  Building2,
+  FileText,
+  ShieldCheck,
+  WandSparkles,
+} from "lucide-react";
 
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 
@@ -35,7 +42,7 @@ const organizationPortalDestinations: OrganizationPortalDestination[] = [
   {
     description:
       "Create organization training drafts, bind metadata-only sources, publish versions, and copy versions through local routes.",
-    href: "/content/organization-training",
+    href: "/organization/organization-training",
     icon: <BookOpenCheck aria-hidden="true" className="size-4" />,
     label: "Organization Training",
     stateLabel: "Local admin flow ready",
@@ -44,13 +51,38 @@ const organizationPortalDestinations: OrganizationPortalDestination[] = [
   {
     description:
       "Load aggregate-only dashboard summaries for the organization analytics local entry.",
-    href: "/content/organization-analytics",
+    href: "/organization/organization-analytics",
     icon: <BarChart3 aria-hidden="true" className="size-4" />,
     label: "Organization Analytics",
     stateLabel: "Summary-only entry ready",
     testId: "organization-portal-destination-analytics",
   },
+  {
+    description:
+      "Prepare organization-owned AI question drafts without writing platform formal question records.",
+    href: "/organization/ai-question-generation",
+    icon: <WandSparkles aria-hidden="true" className="size-4" />,
+    label: "AI出题",
+    stateLabel: "Advanced organization only",
+    testId: "organization-portal-destination-ai-question-generation",
+  },
+  {
+    description:
+      "Prepare organization-owned AI paper drafts without publishing formal paper records.",
+    href: "/organization/ai-paper-generation",
+    icon: <FileText aria-hidden="true" className="size-4" />,
+    label: "AI组卷",
+    stateLabel: "Advanced organization only",
+    testId: "organization-portal-destination-ai-paper-generation",
+  },
 ];
+
+function hasAdvancedOrganizationAdminRole(adminRoles: readonly string[]) {
+  return (
+    adminRoles.includes("org_advanced_admin") ||
+    adminRoles.includes("super_admin")
+  );
+}
 
 export function AdminOrganizationPortalPage() {
   const [loadState, setLoadState] =
@@ -58,6 +90,7 @@ export function AdminOrganizationPortalPage() {
   const [organizationPublicId, setOrganizationPublicId] = useState<
     string | null
   >(null);
+  const [adminRoles, setAdminRoles] = useState<readonly string[]>([]);
 
   useEffect(() => {
     let isActive = true;
@@ -86,6 +119,7 @@ export function AdminOrganizationPortalPage() {
         }
 
         setOrganizationPublicId(sessionResponse.data.user.organizationPublicId);
+        setAdminRoles(sessionResponse.data.user.adminRoles ?? []);
         setLoadState("ready");
       } catch {
         if (isActive) {
@@ -117,6 +151,10 @@ export function AdminOrganizationPortalPage() {
       />
     );
   }
+
+  const visibleDestinations = hasAdvancedOrganizationAdminRole(adminRoles)
+    ? organizationPortalDestinations
+    : [];
 
   return (
     <section className="space-y-6" data-testid="organization-portal-shell">
@@ -163,7 +201,7 @@ export function AdminOrganizationPortalPage() {
         aria-label="Organization portal destinations"
         className="grid gap-4 lg:grid-cols-2"
       >
-        {organizationPortalDestinations.map((destination) => (
+        {visibleDestinations.map((destination) => (
           <PortalDestinationLink
             destination={destination}
             key={destination.href}

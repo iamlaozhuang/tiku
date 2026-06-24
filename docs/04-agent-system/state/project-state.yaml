@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: student-home-ai-organization-training-entry-repair-2026-06-24
+currentPhase: admin-ai-generation-entry-repair-2026-06-24
 updatedAt: "2026-06-24T04:35:33-07:00"
 architecture:
   status: complete
@@ -501,39 +501,39 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d7d9910915d92ca8b19278292beecde517f87fc6
-  lastKnownOriginMasterSha: 75cc52a09989e5a41b98985ec597d43411b80257
+  lastKnownMasterSha: 7d42f6ab5f41d84aa08ee7d78966f21cca72f329
+  lastKnownOriginMasterSha: 7d42f6ab5f41d84aa08ee7d78966f21cca72f329
 currentTask:
-  id: student-home-ai-organization-training-entry-repair-2026-06-24
-  status: closed
-  result: pass_learner_home_ai_and_organization_training_entries_closed_on_master
-  claimedAt: "2026-06-24T03:48:18-07:00"
-  validatedAt: "2026-06-24T03:57:54-07:00"
-  reviewedAt: "2026-06-24T04:35:33-07:00"
-  closedAt: "2026-06-24T04:35:33-07:00"
+  id: admin-ai-generation-entry-repair-2026-06-24
+  status: ready_for_closeout
+  result: pass_admin_ai_generation_entries_local_validation
+  claimedAt: "2026-06-24T04:46:25-07:00"
+  validatedAt: "2026-06-24T04:58:05-07:00"
+  reviewedAt: "2026-06-24T04:58:05-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-2
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-student-home-ai-organization-training-entry-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-student-home-ai-organization-training-entry-repair.md
+  sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-3
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approval_2026_06_24_claim_candidate_2
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
-  branch: codex/student-home-ai-org-training-entries-20260624
-  commitSha: d7d9910915d92ca8b19278292beecde517f87fc6
+      approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+  branch: codex/admin-ai-generation-entries-20260624
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null

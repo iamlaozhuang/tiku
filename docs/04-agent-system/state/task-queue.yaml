@@ -4846,6 +4846,184 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: admin-ai-generation-entry-repair-2026-06-24
+    title: Repair content and organization backend AI generation entries
+    phase: standard-advanced-mvp-role-separated-repair-package-3-2026-06-24
+    sourceStory: user-approved-2026-06-24-role-separated-mvp-repair-package-3
+    dependencies:
+      - student-home-ai-organization-training-entry-repair-2026-06-24
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_scoped_repair
+    evidenceMode: full_redacted
+    validationPolicy: focused_unit_lint_typecheck_docs_precommit
+    queueSelectionMode: user_directed_serial_role_separated_repair
+    requiredOutcome: >-
+      Repair discoverable content backend and organization backend entries for `AI出题` and `AI组卷`. Content admin
+      entries must lead to a draft/review placeholder surface and must not write formal `question` or `paper`.
+      Organization advanced admin entries must be discoverable from the organization backend workspace, while
+      `org_standard_admin` must not see or use organization AI generation. The task must not add schema, migrations,
+      database writes, Provider calls, dependencies, e2e/browser runtime, staging/prod, payment, external services, PR,
+      force push, or standard/advanced MVP final Pass claims.
+    capabilities:
+      localSourceChange: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      focusedUnitTest: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      docsStateUpdate: approved_by_current_user_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - src/app/(admin)/organization/portal/page.tsx
+      - src/app/(admin)/organization/organization-training/page.tsx
+      - src/app/(admin)/organization/organization-analytics/page.tsx
+      - src/app/(admin)/organization/ai-question-generation/page.tsx
+      - src/app/(admin)/organization/ai-paper-generation/page.tsx
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/organization-portal-admin-entry-surface.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/evidence/2026-06-24-backend-workspace-landing-logout-separation-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-backend-workspace-landing-logout-separation-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-student-home-ai-organization-training-entry-repair.md
+      - package.json
+      - src/app/(admin)/layout.tsx
+      - src/app/(admin)/content/organization-portal/page.tsx
+      - src/app/(admin)/content/organization-training/page.tsx
+      - src/app/(admin)/content/organization-analytics/page.tsx
+      - src/features/admin/content-admin-runtime.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - scripts/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - backend_ai_entry_discoverability
+      - role_separated_workspace_visibility
+      - content_draft_review_boundary
+      - organization_standard_advanced_boundary
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/components/AdminDashboardLayout/AdminDashboardLayout.tsx src/server/contracts/user-auth/session-boundary.ts src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/app/(admin)/content/ai-question-generation/page.tsx src/app/(admin)/content/ai-paper-generation/page.tsx src/app/(admin)/organization/portal/page.tsx src/app/(admin)/organization/organization-training/page.tsx src/app/(admin)/organization/organization-analytics/page.tsx src/app/(admin)/organization/ai-question-generation/page.tsx src/app/(admin)/organization/ai-paper-generation/page.tsx tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-entry-repair-2026-06-24
+    validationCommandLifecycle:
+      post_edit:
+        - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+      closeout:
+        - npm.cmd run lint
+        - npm.cmd run typecheck
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/components/AdminDashboardLayout/AdminDashboardLayout.tsx src/server/contracts/user-auth/session-boundary.ts src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/app/(admin)/content/ai-question-generation/page.tsx src/app/(admin)/content/ai-paper-generation/page.tsx src/app/(admin)/organization/portal/page.tsx src/app/(admin)/organization/organization-training/page.tsx src/app/(admin)/organization/organization-analytics/page.tsx src/app/(admin)/organization/ai-question-generation/page.tsx src/app/(admin)/organization/ai-paper-generation/page.tsx tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-entry-repair-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-admin-ai-generation-entry-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-admin-ai-generation-entry-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: ready_for_closeout
+    result: pass_admin_ai_generation_entries_local_validation
+    claimedAt: "2026-06-24T04:46:25-07:00"
+    approvedAt: "2026-06-24T04:46:25-07:00"
+    validatedAt: "2026-06-24T04:58:05-07:00"
+    reviewedAt: "2026-06-24T04:58:05-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+    roleMapping:
+      inScope:
+        - content_admin
+        - org_standard_admin
+        - org_advanced_admin
+        - ops_admin
+      explicitlyOutOfScope:
+        - personal_standard_student
+        - personal_advanced_student
+        - org_standard_employee
+        - org_advanced_employee
+    blockedWithoutFreshApproval:
+      - source_db_schema_or_migration_change
+      - database_seed_or_write
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - browser_or_playwright_runtime
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approval_2026_06_24_serial_steps_1_to_4_continue_candidate_3
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22

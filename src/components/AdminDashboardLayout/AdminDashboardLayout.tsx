@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   AlertCircle,
+  BarChart3,
   BookOpenText,
+  BookOpenCheck,
   Boxes,
   Building2,
   FileText,
@@ -16,6 +18,7 @@ import {
   LogOut,
   Network,
   ScrollText,
+  WandSparkles,
   UserRoundCog,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -34,12 +37,19 @@ interface MenuItem {
   href: string;
   label: string;
   Icon: LucideIcon;
+  advancedOrganizationOnly?: boolean;
 }
 
 const CONTENT_MENU: MenuItem[] = [
   { href: "/content/papers", label: "试卷管理", Icon: FileText },
   { href: "/content/questions", label: "题库管理", Icon: BookOpenText },
   { href: "/content/materials", label: "材料管理", Icon: Boxes },
+  {
+    href: "/content/ai-question-generation",
+    label: "AI出题",
+    Icon: WandSparkles,
+  },
+  { href: "/content/ai-paper-generation", label: "AI组卷", Icon: FileText },
   { href: "/content/knowledge-nodes", label: "知识点树", Icon: Network },
 ];
 
@@ -52,28 +62,86 @@ const OPS_MENU: MenuItem[] = [
   { href: "/ops/ai-audit-logs", label: "审计日志", Icon: ScrollText },
 ];
 
+const ORGANIZATION_MENU: MenuItem[] = [
+  { href: "/organization/portal", label: "组织概览", Icon: Building2 },
+  {
+    href: "/organization/organization-training",
+    label: "企业训练",
+    Icon: BookOpenCheck,
+    advancedOrganizationOnly: true,
+  },
+  {
+    href: "/organization/organization-analytics",
+    label: "统计摘要",
+    Icon: BarChart3,
+    advancedOrganizationOnly: true,
+  },
+  {
+    href: "/organization/ai-question-generation",
+    label: "AI出题",
+    Icon: WandSparkles,
+    advancedOrganizationOnly: true,
+  },
+  {
+    href: "/organization/ai-paper-generation",
+    label: "AI组卷",
+    Icon: FileText,
+    advancedOrganizationOnly: true,
+  },
+];
+
 type AdminDashboardLayoutStatus =
   | "checking"
   | "authorized"
   | "unauthorized"
   | "forbidden";
-type AdminWorkspace = "ops" | "content";
+type AdminWorkspace = "ops" | "content" | "organization";
 type AdminDashboardAuthState = {
   status: AdminDashboardLayoutStatus;
   workspace: AdminWorkspace | null;
+  adminRoles: readonly string[];
 };
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
 function getWorkspaceFromPath(pathname: string): AdminWorkspace {
-  return pathname.startsWith("/content") ? "content" : "ops";
+  if (pathname.startsWith("/content")) {
+    return "content";
+  }
+
+  if (pathname.startsWith("/organization")) {
+    return "organization";
+  }
+
+  return "ops";
 }
 
-function getWorkspacePresentation(workspace: AdminWorkspace) {
+function hasAdvancedOrganizationRole(adminRoles: readonly string[]) {
+  return (
+    adminRoles.includes("super_admin") ||
+    adminRoles.includes("org_advanced_admin")
+  );
+}
+
+function getWorkspacePresentation(
+  workspace: AdminWorkspace,
+  adminRoles: readonly string[],
+) {
   if (workspace === "content") {
     return {
       menuItems: CONTENT_MENU,
       portalName: "内容后台",
+    };
+  }
+
+  if (workspace === "organization") {
+    return {
+      menuItems: ORGANIZATION_MENU.filter(
+        (item) =>
+          item.advancedOrganizationOnly !== true ||
+          hasAdvancedOrganizationRole(adminRoles),
+      ),
+      portalName: "组织后台",
     };
   }
 
@@ -95,7 +163,7 @@ function canAccessWorkspace(
   authContext: AuthContextDto,
   workspace: AdminWorkspace,
 ): boolean {
-  const adminRoles = authContext.user.adminRoles ?? [];
+  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
 
   if (adminRoles.includes("super_admin")) {
     return true;
@@ -105,7 +173,14 @@ function canAccessWorkspace(
     return adminRoles.includes("ops_admin");
   }
 
-  return adminRoles.includes("content_admin");
+  if (workspace === "content") {
+    return adminRoles.includes("content_admin");
+  }
+
+  return (
+    adminRoles.includes("org_standard_admin") ||
+    adminRoles.includes("org_advanced_admin")
+  );
 }
 
 async function fetchAdminAuthContext(): Promise<
@@ -163,13 +238,19 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const workspace = getWorkspaceFromPath(pathname);
-  const { menuItems, portalName } = getWorkspacePresentation(workspace);
   const [authState, setAuthState] = useState<AdminDashboardAuthState>({
     status: "checking",
     workspace: null,
+    adminRoles: [],
   });
   const status =
     authState.workspace === workspace ? authState.status : "checking";
+  const adminRoles =
+    authState.workspace === workspace ? authState.adminRoles : [];
+  const { menuItems, portalName } = getWorkspacePresentation(
+    workspace,
+    adminRoles,
+  );
 
   useEffect(() => {
     let isCurrentCheck = true;
@@ -190,11 +271,12 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
               ? "authorized"
               : "forbidden",
             workspace,
+            adminRoles: sessionResponse.data.user.adminRoles ?? [],
           });
           return;
         }
 
-        setAuthState({ status: "unauthorized", workspace });
+        setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
         router.replace("/login");
       })
       .catch(() => {
@@ -202,7 +284,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           return;
         }
 
-        setAuthState({ status: "unauthorized", workspace });
+        setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
         router.replace("/login");
       });
 
@@ -213,7 +295,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
 
   function handleLogoutClick() {
     localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
-    setAuthState({ status: "unauthorized", workspace });
+    setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
     router.replace("/login");
   }
 
