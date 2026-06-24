@@ -62,6 +62,19 @@
 
 - `npm.cmd run build`: blocked by external Google font download resolution during Next/Turbopack build. The failure occurred while requesting `fonts.gstatic.com` resources for `noto_sans_sc` from `src/app/layout.tsx` import trace. No dependency, `.env*`, Provider, staging/prod, or source workaround was introduced because external-service/font-network changes are outside this task boundary.
 
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Implementation commit: `ca911d84eb27fae7b528bce57fddc624a58847d2`.
+- Timestamp: `2026-06-24T07:17:45-07:00`.
+- `npm.cmd run test:unit -- tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts`: passed on `master`. Output: 2 files passed, 20 tests passed.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx src/server/services/admin-redeem-code-runtime.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts docs/05-execution-logs/task-plans/2026-06-24-ops-redeem-code-generation-scope-entry.md docs/05-execution-logs/evidence/2026-06-24-ops-redeem-code-generation-scope-entry.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-redeem-code-generation-scope-entry.md`: passed on `master`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `git diff --check`: passed on `master`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-redeem-code-generation-scope-entry-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-redeem-code-generation-scope-entry-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`; output showed `master` at `ca911d84eb27fae7b528bce57fddc624a58847d2` and `origin/master` at `51f97d4be97f7427e2729d265ba85680af1b7a18`.
+
 ## Implementation Summary
 
 - Backend `redeem_code` generation normalization now rejects missing or invalid `profession`/`level` instead of silently defaulting to `monopoly` and level 3.

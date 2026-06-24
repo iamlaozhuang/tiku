@@ -5306,16 +5306,20 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-redeem-code-generation-scope-entry.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-redeem-code-generation-scope-entry.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: pass_ops_redeem_code_generation_scope_entry_local_validation
+    status: closed
+    result: pass_ops_redeem_code_generation_scope_entry_merged_and_post_merge_validated
     claimedAt: "2026-06-24T06:24:26-07:00"
     approvedAt: "2026-06-24T06:24:26-07:00"
     plannedAt: "2026-06-24T06:24:26-07:00"
     validatedAt: "2026-06-24T07:10:08-07:00"
     reviewedAt: "2026-06-24T07:10:08-07:00"
+    closedAt: "2026-06-24T07:17:45-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_continue_repair_task_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
     branch: codex/ops-redeem-code-generation-scope-entry-20260624
+    implementationCommitSha: ca911d84eb27fae7b528bce57fddc624a58847d2
+    mergedToMasterAt: "2026-06-24T07:17:45-07:00"
+    postMergeValidatedAt: "2026-06-24T07:17:45-07:00"
     blockedWithoutFreshApproval:
       - schema_migration_or_database_write
       - dependency_package_lockfile_change
