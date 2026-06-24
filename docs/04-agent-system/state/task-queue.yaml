@@ -5468,17 +5468,18 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-edition-selector-entry.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-edition-selector-entry.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: ready_for_closeout
-    result: pass_org_auth_edition_selector_entry_local_validation
+    status: closed
+    result: pass_org_auth_edition_selector_entry_merged_and_post_merge_validated
     claimedAt: "2026-06-24T07:34:37-07:00"
     approvedAt: "2026-06-24T07:34:37-07:00"
     plannedAt: "2026-06-24T07:34:37-07:00"
     validatedAt: "2026-06-24T08:41:17-07:00"
     reviewedAt: "2026-06-24T08:41:17-07:00"
-    closedAt: null
+    closedAt: "2026-06-24T08:53:06-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
     branch: codex/ops-org-auth-edition-selector-entry-20260624
+    commitSha: 4aecf645cd8a4cf747fba2b1adfe9f657f256805
     blockedWithoutFreshApproval:
       - schema_migration_or_database_write
       - dependency_package_lockfile_change

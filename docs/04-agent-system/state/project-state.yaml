@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ops-org-auth-edition-selector-entry-2026-06-24
-updatedAt: "2026-06-24T08:41:17-07:00"
+updatedAt: "2026-06-24T08:53:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,17 +501,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3a6691ffe4c03fec04114af157e81e9bda9d6bd8
+  lastKnownMasterSha: 4aecf645cd8a4cf747fba2b1adfe9f657f256805
   lastKnownOriginMasterSha: 3a6691ffe4c03fec04114af157e81e9bda9d6bd8
 currentTask:
   id: ops-org-auth-edition-selector-entry-2026-06-24
-  status: ready_for_closeout
-  result: pass_org_auth_edition_selector_entry_local_validation
+  status: closed
+  result: pass_org_auth_edition_selector_entry_merged_and_post_merge_validated
   claimedAt: "2026-06-24T07:34:37-07:00"
   plannedAt: "2026-06-24T07:34:37-07:00"
   validatedAt: "2026-06-24T08:41:17-07:00"
   reviewedAt: "2026-06-24T08:41:17-07:00"
-  closedAt: null
+  closedAt: "2026-06-24T08:53:06-07:00"
   blockedAt: null
   sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-2
   planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-edition-selector-entry.md
@@ -534,7 +534,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
   branch: codex/ops-org-auth-edition-selector-entry-20260624
-  commitSha: null
+  commitSha: 4aecf645cd8a4cf747fba2b1adfe9f657f256805
   prUrl: null
   retryCount: 0
   lastFailurePath: null

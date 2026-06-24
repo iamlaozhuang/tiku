@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-edition-selector-entry-2026-06-24`.
 - Branch: `codex/ops-org-auth-edition-selector-entry-20260624`.
 - Review type: planned implementation self-review plus authorization boundary review.
-- Current verdict: ready_for_closeout after local implementation and validation.
+- Current verdict: closed after fast-forward merge to `master` and post-merge validation.
 
 ## SSOT Read List
 
@@ -69,4 +69,6 @@
 ## Verdict
 
 - No blocking implementation findings after local unit/static/mechanism validation.
-- Ready for local commit, fast-forward merge to `master`, post-merge validation, push to `origin/master`, and short-branch cleanup under the task closeout policy.
+- Pass: fast-forward merge to `master` completed at implementation commit `4aecf645cd8a4cf747fba2b1adfe9f657f256805`.
+- Pass: post-merge focused unit, lint, typecheck, Prettier, diff, pre-commit hardening, and pre-push readiness passed on `master`.
+- Pass: push target remains `origin/master`; short branch cleanup is allowed after successful push.

@@ -5,7 +5,7 @@
 - Task id: `ops-org-auth-edition-selector-entry-2026-06-24`.
 - Branch: `codex/ops-org-auth-edition-selector-entry-20260624`.
 - Task kind: `implementation`.
-- Status: ready_for_closeout; implementation and local validation passed.
+- Status: closed after fast-forward merge to `master` and post-merge validation.
 - Approval boundary: current user approved serial operations authorization repair tasks on 2026-06-24; this task materializes only low-risk local implementation, validation, local commit, fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup after gates pass.
 
 ## SSOT Read List
@@ -82,6 +82,19 @@
 - `git diff --check`: passed with no whitespace errors.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-edition-selector-entry-2026-06-24`: passed. Output included `OK_SSOT_READ_LIST`, `OK_REQUIREMENT_MAPPING_RESULT`, all 9 changed files in scope, `Cost Calibration Gate remains blocked`, and `pre-commit hardening passed`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-edition-selector-entry-2026-06-24 -SkipRemoteAheadCheck`: passed. Output included clean git readiness for branch `codex/ops-org-auth-edition-selector-entry-20260624`, `master` and `origin/master` at `3a6691ffe4c03fec04114af157e81e9bda9d6bd8`, evidence/audit paths found, and `pre-push readiness passed`.
+
+## Post-Merge Master Validation Results
+
+- Fast-forward merge target: `master`.
+- Implementation commit: `4aecf645cd8a4cf747fba2b1adfe9f657f256805`.
+- Timestamp: `2026-06-24T08:53:06-07:00`.
+- `npm.cmd run test:unit -- src/server/validators/org-auth.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts`: passed on `master`. Output: 3 files passed, 25 tests passed.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx src/server/validators/org-auth.ts src/server/validators/org-auth.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-edition-selector-entry.md docs/05-execution-logs/evidence/2026-06-24-ops-org-auth-edition-selector-entry.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-org-auth-edition-selector-entry.md`: passed on `master`.
+- `git diff --check`: passed on `master`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-org-auth-edition-selector-entry-2026-06-24`: passed on `master` with `filesToScan: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-org-auth-edition-selector-entry-2026-06-24 -SkipRemoteAheadCheck`: passed on `master`; output showed `master` at `4aecf645cd8a4cf747fba2b1adfe9f657f256805` and `origin/master` at `3a6691ffe4c03fec04114af157e81e9bda9d6bd8`.
 
 ## Changed Files
 
