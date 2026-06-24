@@ -5941,6 +5941,121 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: ops-auth-runtime-validation-redacted-2026-06-24
+    title: Operations authorization runtime validation redacted evidence
+    phase: role-separated-mvp-requirement-alignment-repair-2026-06-24
+    sourceStory: user-approved-2026-06-24-serial-ops-auth-repair-follow-up-6
+    dependencies:
+      - ops-employee-import-template-boundary-2026-06-24
+    taskKind: runtime_validation_redacted_with_fixture_repair
+    moduleRunVersion: 2
+    executionProfile: local_ops_authorization_role_runtime_validation_redacted_fixture_repair
+    evidenceMode: redacted_command_summary
+    validationPolicy: local_static_and_selected_unit_no_browser_no_provider
+    queueSelectionMode: serial_user_approved_ops_auth_repair
+    targetClosureItem: Redacted local validation for operations authorization repair package
+    behaviorBoundary: ops_auth_runtime_validation::selected_unit_anchors_no_source_no_e2e_no_provider
+    requiredOutcome: >-
+      Run selected local unit anchors covering role/workspace separation, operations `redeem_code`, `org_auth`,
+      employee import, contact config, and redacted audit behavior after the serial repair package. Record command
+      status and safe summaries only. Do not declare final standard/advanced MVP Pass.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts
+      - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-redeem-code-generation-scope-entry.md
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-edition-selector-entry.md
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-manual-upgrade-planning.md
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-org-auth-multi-scope-design.md
+      - docs/05-execution-logs/task-plans/2026-06-24-ops-employee-import-template-boundary.md
+      - src/**
+      - tests/**
+      - package.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+    blockedWithoutFreshApproval:
+      - production_source_implementation
+      - broad_test_rewrite
+      - schema_migration_or_database_write
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - browser_or_playwright_runtime
+      - e2e_runtime
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-ops-auth-runtime-validation-redacted.md docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md docs/05-execution-logs/audits-reviews/2026-06-24-ops-auth-runtime-validation-redacted.md
+      - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts tests/unit/phase-20-ra-06-04-org-auth-detail-route-alignment.test.ts tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-auth-runtime-validation-redacted-2026-06-24 -SkipRemoteAheadCheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-ops-auth-runtime-validation-redacted.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-ops-auth-runtime-validation-redacted.md
+    status: ready_for_closeout
+    result: pass_ops_auth_runtime_validation_redacted_local_validation
+    claimedAt: "2026-06-24T10:05:17-07:00"
+    plannedAt: "2026-06-24T10:05:17-07:00"
+    validatedAt: "2026-06-24T10:11:06-07:00"
+    reviewedAt: "2026-06-24T10:11:06-07:00"
+    closedAt: null
+    approvedBy: laozhuang
+    approvalConsumed: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+    branch: codex/ops-auth-runtime-validation-redacted-20260624
+    commitSha: null
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_ops_auth_repair_approval_2026_06_24_plus_standing_low_risk_module_run_v2_closeout
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22

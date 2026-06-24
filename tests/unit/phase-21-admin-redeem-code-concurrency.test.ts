@@ -180,6 +180,8 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         },
         body: JSON.stringify({
           count: 1,
+          profession: "monopoly",
+          level: 3,
           redeemDeadlineDate: "2026-06-24",
         }),
       }),
