@@ -6357,6 +6357,238 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+    title: Prepare post-repair role-separated runtime rerun scope approval package
+    phase: post-role-separated-repair-runtime-rerun-scope-approval-2026-06-24
+    sourceStory: user-approval-2026-06-24-recommended-runtime-rerun-scope-approval-package
+    dependencies:
+      - role-separated-mvp-post-repair-gap-planning-2026-06-24
+    taskKind: runtime_scope_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_runtime_scope_approval_no_runtime
+    evidenceMode: full_redacted
+    validationPolicy: docs_acceptance_prettier_diff_precommit_prepush
+    queueSelectionMode: user_directed_after_post_repair_gap_planning
+    targetClosureItem: Scope approval package for local post-repair runtime rerun
+    behaviorBoundary: runtime_scope_approval::docs_only_no_runtime_no_credentials_no_final_pass
+    requiredOutcome: >-
+      Prepare a local-only role-separated runtime rerun approval package for all 8 mandatory role rows after the
+      completed repair package. Do not run browser/runtime/e2e, read or type credentials, modify source/tests/schema/env,
+      call Provider, or claim final Pass.
+    capabilities:
+      docsStateUpdate: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      runtimeScopePackage: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      successorTaskRegistration: approved_blocked_successor_only
+      localCommit: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      mergeToMaster: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      pushOriginMaster: approved_by_current_user_2026_06_24_runtime_rerun_scope_approval_package
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      ownerCredentialEntry: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      seedOrFixtureMutation: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+      - docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-backend-workspace-landing-logout-separation-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-student-home-ai-organization-training-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-admin-ai-generation-entry-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-ops-auth-runtime-validation-redacted.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - runtime_scope_approval
+      - role_mapping
+      - acceptance_mapping
+      - evidence_redaction
+      - no_runtime_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    approvalPackageId: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+    successorTaskId: role-separated-post-repair-runtime-rerun-2026-06-24
+    status: closed
+    result: pass_runtime_rerun_scope_approval_package_prepared_no_runtime_executed
+    claimedAt: "2026-06-24T15:43:11-07:00"
+    plannedAt: "2026-06-24T15:43:11-07:00"
+    validatedAt: "2026-06-24T15:47:01-07:00"
+    reviewedAt: "2026-06-24T15:47:01-07:00"
+    closedAt: "2026-06-24T15:47:01-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+    branch: codex/post-repair-runtime-rerun-scope-approval-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_24_runtime_rerun_scope_approval_package
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: role-separated-post-repair-runtime-rerun-2026-06-24
+    title: Run post-repair local role-separated runtime rerun
+    phase: post-role-separated-repair-runtime-rerun-2026-06-24
+    sourceStory: successor-of-role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+    dependencies:
+      - role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: acceptance_role_separated_post_repair_local_runtime_rerun
+    evidenceMode: full_redacted
+    validationPolicy: blocked_until_fresh_runtime_scope_approval
+    queueSelectionMode: blocked_successor_requires_fresh_package_approval
+    targetClosureItem: Fresh post-repair runtime evidence for all 8 role rows
+    behaviorBoundary: acceptance_runtime::local_only_owner_entered_credentials_no_secret_capture
+    requiredApprovalPackageId: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+    requiredOutcome: >-
+      Execute the local-only runtime rerun for all 8 role-separated rows only after laozhuang explicitly approves
+      ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24. Evidence must remain redacted and must not claim final
+      Pass.
+    capabilities:
+      localBrowserRuntimeObservation: requires_fresh_approval_ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+      ownerCredentialEntry: required_by_owner_only_after_future_approval
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      sourceOrE2eFileChange: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+    readOnlyAllowedFiles:
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    status: blocked
+    result: requires_fresh_approval_ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
+    blockedAt: "2026-06-24T15:43:11-07:00"
+    branch: codex/post-repair-runtime-rerun-20260624
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
