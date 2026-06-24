@@ -25,12 +25,12 @@
 为控制 MVP 开发量，以下能力首期不做：
 
 - 在线支付。
-- 企业后台。
+- 企业后台（标准版基础 MVP 不开放企业自助后台；标准/高级版角色分离修复新增一等 `organization` 管理后台工作区，见 2026-06-24 对齐补充）。
 - 培训机构模型和培训机构后台。
 - 课程学习、教材阅读、章节学习、课件播放、学习进度。
 - 专项刷题，包括按分类刷题、按知识点刷题、专项练习入口。
-- 智能组卷，包括规则组卷、随机组卷、AI 智能组卷。
-- AI 出题、AI 生成题入库、用户 AI 生成个人题库。
+- 智能组卷，包括规则组卷、随机组卷、AI 智能组卷（标准版基础 MVP 不做；高级版 AI `paper` 生成和内容后台 AI 组卷草稿/评审能力见高级版需求与 2026-06-24 对齐补充）。
+- AI 出题、AI 生成题入库、用户 AI 生成个人题库（标准版基础 MVP 不做；高级版个人/企业 AI 出题以及内容后台 AI 出题草稿/评审能力见高级版需求与 2026-06-24 对齐补充，且不得直接写入正式 `question` 或 `paper`）。
 - 排行榜、排名、通过线、证书、正式考试合规流程。
 - 数据看板、管理端 BI 统计图。
 - 试卷 PDF/Word 自动导入。
@@ -46,6 +46,19 @@
 - PDF/Word 原卷对照录入器。
 - 类 Word 整卷标注式题目录入器。
 - 备份/恢复流程细化。MVP 需求阶段只要求业务数据长期保留，正式上线前在部署方案中配置数据库和对象存储备份。
+
+### 2.1 标准/高级版 MVP 角色分离补充范围
+
+2026-06-24 起，标准/高级版 MVP 角色分离修复需求由以下需求树文档承载为 SSOT：
+
+- [Role-Separated MVP Requirement Alignment](./traceability/2026-06-24-role-separated-mvp-requirement-alignment.md)
+- [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
+- [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
+- [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
+
+上述补充不改变标准版基础 MVP 的排除范围；它只明确标准/高级版合并验收中已经确认进入修复范围的能力：角色分离后台工作区、企业标准/高级管理员边界、高级学员 `AI训练`、高级企业员工 `AI训练` 与 `企业训练`、内容后台 `AI出题`/`AI组卷` 草稿评审、运营后台 `redeem_code` 和 `org_auth` 开通/升级/多范围授权治理。
+
+该补充仍不批准代码、数据库、Provider、Cost Calibration、staging/prod、支付、外部服务或最终验收 Pass。
 
 ---
 
@@ -163,6 +176,7 @@ This section does not replace the standard edition `modules/` and `stories/` doc
 - Advanced edition index: [advanced-edition/00-index.md](./advanced-edition/00-index.md)
 - Advanced edition modules: [advanced-edition/modules/](./advanced-edition/modules/)
 - Advanced edition stories: [advanced-edition/stories/](./advanced-edition/stories/)
+- Role-separated MVP requirement alignment: [traceability/2026-06-24-role-separated-mvp-requirement-alignment.md](./traceability/2026-06-24-role-separated-mvp-requirement-alignment.md)
 
 Cost Calibration Gate remains blocked pending fresh explicit approval. Code-stage queue seeding remains paused unless explicitly approved later.
 

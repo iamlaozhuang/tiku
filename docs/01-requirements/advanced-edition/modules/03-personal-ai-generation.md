@@ -19,10 +19,18 @@ Define the learner-facing experience for AI question generation and AI `paper` g
 - Generated content may use formal `question`, `paper`, and `knowledge_node` metadata as read-only sources when allowed.
 - Generated output stays in the learner AI learning content domain. Personal output is owned by the user; organization employee output is scoped to the employee/user inside the organization authorization context.
 - Personal learning entrypoints default to the personal authorization context when available. Organization context is used only for organization entrypoints or when the user explicitly chooses to use organization authorization.
+- The approved learner entry label for role-separated MVP repair is `AI训练`, with visible actions for `AI出题` and AI `paper` generation (`AI组卷`).
+- `personal_standard_student` must not receive advanced AI generation capability. The acceptable standard outcome is hidden advanced entry, clear upgrade guidance, or clear denial for direct advanced routes.
+- `personal_advanced_student` must see a discoverable `AI训练` entry after login; direct URL-only access is not acceptable.
+- `org_standard_employee` must not see learner `AI训练` from organization context.
+- `org_advanced_employee` must see learner `AI训练` when valid advanced `org_auth` and organization context permit it.
 
 ## Acceptance Boundaries
 
 - The learner entry is visible and obvious for eligible advanced learners; requiring manual URL input is not acceptable.
+- The learner home or equivalent primary learner surface must make `AI训练` discoverable without explaining a hidden route outside the workflow.
+- The UI must distinguish personal and organization authorization context before consuming organization quota.
+- Standard learners and standard organization employees must receive clear unavailable/denied states for direct advanced AI route access.
 - Personal AI generated content is visible to the owning user.
 - Organization employee AI generated content is visible to the owning employee/user by default.
 - Organization admins can see redacted employee AI usage, quota, and audit summaries for organization-context usage, but cannot see raw generated content, prompt, raw input/output, generated content summaries, single-task details, or task-list summaries.

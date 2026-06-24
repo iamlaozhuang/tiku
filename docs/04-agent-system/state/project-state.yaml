@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
-updatedAt: "2026-06-24T00:07:32-07:00"
+currentPhase: standard-advanced-mvp-role-separated-requirement-alignment-2026-06-24
+updatedAt: "2026-06-24T01:00:19-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -503,36 +503,35 @@ repository:
   lastKnownMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
   lastKnownOriginMasterSha: 5d7a904f578bbcb3db2e8f41ced13309b8bdf8c5
 currentTask:
-  id: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
+  id: role-separated-mvp-requirement-alignment-2026-06-24
   status: closed
-  result: blocked_role_separated_runtime_gate_all_8_observed_zero_pass
-  claimedAt: "2026-06-23T09:48:37-07:00"
-  validatedAt: "2026-06-23T23:06:11-07:00"
-  closedAt: "2026-06-23T23:06:11-07:00"
+  result: pass_requirement_ssot_alignment_role_gate_still_blocked
+  claimedAt: "2026-06-24T00:49:33-07:00"
+  validatedAt: "2026-06-24T01:00:19-07:00"
+  closedAt: "2026-06-24T01:00:19-07:00"
   blockedAt: null
-  sourceStory: user-request-2026-06-23-role-separated-account-coverage-next-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
-  requirementDecisionPath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
-  postClarificationCloseoutAt: "2026-06-24T00:07:32-07:00"
-  postClarificationCloseoutResult: pass_docs_package_validated_gate_still_blocked_no_commit
+  sourceStory: user-request-2026-06-24-role-separated-mvp-requirement-alignment
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-mvp-requirement-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-mvp-requirement-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-mvp-requirement-alignment.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  requirementDecisionSourcePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-mvp-repair-issue-list-and-requirement-decisions.md
   closeoutPolicy:
     localCommit:
-      approved: true
-      approvalSource: current_user_fresh_approval_2026_06_24_commit_merge_push_cleanup
+      approved: false
+      approvalSource: fresh_approval_required_after_requirement_alignment_review
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_24_commit_merge_push_cleanup
+      approvalSource: fresh_approval_required_after_requirement_alignment_review
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_24_commit_merge_push_cleanup
+      approvalSource: fresh_approval_required_after_requirement_alignment_review
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_24_commit_merge_push_cleanup
-  branch: codex/local-account-provisioning-credential-handoff-scope-20260623
+      deleteShortBranch: false
+      approvalSource: fresh_approval_required_after_requirement_alignment_review
+  branch: codex/role-separated-mvp-requirement-alignment-20260624
   commitSha: null
   prUrl: null
   retryCount: 0

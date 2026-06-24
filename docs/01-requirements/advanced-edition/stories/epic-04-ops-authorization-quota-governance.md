@@ -15,6 +15,11 @@ Govern advanced edition `authorization`, `redeem_code`, and quota state through 
 3. The admin performs an allowed governance action.
 4. The system records the action in `audit_log`.
 5. AI consumption summaries reference redacted `ai_call_log` data when relevant.
+6. The admin can generate one `redeem_code` or a specified quantity after choosing `profession` and `level`.
+7. The admin can create `org_auth` as `standard` or `advanced` through an explicit selector.
+8. The admin can open a governed standard-to-advanced organization upgrade entry based on `auth_upgrade.source_type = ops_manual`.
+9. The admin can create one enterprise authorization package with multiple `profession + level` combinations, with expanded atomic scopes and conflict warnings before submit.
+10. The admin can download or view employee import template guidance that binds employees to `organization` only.
 
 ## Data Boundary
 
@@ -22,6 +27,7 @@ Govern advanced edition `authorization`, `redeem_code`, and quota state through 
 - `auth_upgrade` is the governed source for standard-to-advanced upgrade state; source authorization is not overwritten by upgrade actions.
 - Production quota point defaults remain undecided until Cost Calibration Gate approval.
 - Payment, external-service integration, provider cost measurement, and env/secret work remain out of scope.
+- Employee import templates must not include `profession`, `level`, `edition`, or `orgAuthScopePublicId`.
 
 ## Source Links
 

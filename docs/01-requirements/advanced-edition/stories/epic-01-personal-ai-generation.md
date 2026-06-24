@@ -16,12 +16,17 @@ Use AI to generate learning questions and AI `paper` content for personal or org
 4. The system creates a trackable AI task and shows safe status information.
 5. The generated result remains in the learner AI learning content domain.
 6. Organization employee output stays scoped to the employee/user and organization authorization context.
+7. `personal_advanced_student` sees `AI训练` with `AI出题` and `AI组卷` actions without manual URL entry.
+8. `personal_standard_student` cannot use advanced AI generation and receives hidden, upgrade, or denied state.
+9. `org_advanced_employee` sees `AI训练` when the active organization context has effective advanced access.
+10. `org_standard_employee` cannot use learner AI generation from organization context.
 
 ## Data Boundary
 
 - Generated content must not automatically write to formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
 - Prompt, provider payload, secret, token, and raw provider response must not appear in evidence.
 - Related `ai_call_log` information must be redacted.
+- Runtime evidence must not record prompts, Provider payloads, raw AI output, plaintext `redeem_code`, tokens, cookies, localStorage, or database rows.
 
 ## Source Links
 

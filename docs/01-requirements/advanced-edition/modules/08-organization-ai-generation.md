@@ -18,12 +18,17 @@ Define how advanced organization admins use AI question generation and AI `paper
 - Generated output may support organization-managed training or internal learning use after organization admin confirmation.
 - Generated output must remain separate from platform formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` records.
 - The organization backend must expose a discoverable entry; requiring manual URL input is not acceptable.
+- The approved role-separated MVP entry labels are `AI出题` and `AI组卷` inside the organization advanced backend.
+- `org_standard_admin` must not see or use organization AI generation. Direct route access must be denied or show standard-unavailable state.
+- `org_advanced_admin` must see organization AI generation entries from the organization backend navigation or equivalent primary workspace surface.
 - Organization-owned AI generation consumes organization quota according to the approved quota owner rules; exact point values remain under the Cost Calibration Gate.
 
 ## Acceptance Boundaries
 
 - Organization admins can find an organization AI generation entry from the organization backend.
 - The system checks effective advanced organization authorization before allowing generation.
+- The organization backend landing and navigation must prove a separated organization admin workspace, not a redirect into system operations pages.
+- Organization standard admin access to organization AI generation must fail with a clear denied/unavailable state.
 - AI question generation and AI `paper` generation create trackable tasks and redacted operational evidence.
 - Organization-owned AI output is not written into the platform formal question bank or paper library.
 - Employee-visible training or paper-like assignments require explicit organization admin confirmation.

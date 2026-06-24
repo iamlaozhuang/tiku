@@ -77,3 +77,19 @@ Required future task packages:
 - Contract/service/UI implementation.
 - Browser/e2e/dev-server runtime verification.
 - `.env`, Provider, dependency, package, lockfile, deploy, PR, force-push, payment, external-service, or Cost Calibration Gate work.
+
+## 2026-06-24 Role-Separated MVP Alignment Addendum
+
+The 2026-06-24 role-separated MVP requirement alignment confirmed that this decision remains the correct direction for enterprise standard/advanced repair:
+
+- One commercial enterprise authorization package may cover multiple `profession + level` combinations.
+- `org_auth` remains the authorization bundle or purchase record.
+- Multi-scope authorization must decompose into atomic authorization scopes. Do not store arrays or comma-joined professional/level values in one `org_auth` row.
+- One atomic scope is organization coverage plus one `profession`, one `level`, one `subject`, one `edition`, one time window, and one quota rule.
+- Future implementation target remains `org_auth` plus a reviewed atomic child-scope direction such as `org_auth_scope` and organization coverage child rows.
+- `auth_scope_type` continues to describe organization coverage only and must not be overloaded for `profession`, `level`, `subject`, or `edition`.
+- Active overlapping atomic scopes for the same effective `organization`, `profession`, `level`, `subject`, `edition`, and time window remain denied unless a later approved upgrade, renewal, or extension rule defines resolution.
+- Quota is attributed per atomic scope. UI may aggregate quota for display, but service, audit, and consumption must retain the atomic scope that granted access.
+- Employee import binds employees to `organization` only. Templates must not include `profession`, `level`, `edition`, or `orgAuthScopePublicId`; effective scopes are derived from organization membership plus active authorization scopes.
+
+This addendum is a requirement clarification only. It still does not approve schema, migration, seed, database, API, service, UI, runtime, e2e, Provider, payment, deployment, PR, merge, push, or final MVP Pass.

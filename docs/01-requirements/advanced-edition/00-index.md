@@ -14,6 +14,7 @@ Primary sources:
 - `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md`
 - `docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md`
+- `docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md`
 - `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md`
@@ -80,6 +81,11 @@ Advanced edition MVP focuses on:
 - Organization training answer statistics must not be mixed into formal `exam_report` or formal `mistake_book`.
 - `effectiveEdition` is service-computed from source authorization, `edition`, upgrade state, expiry, revocation, and scope; UI visibility is not an authorization boundary.
 - `audit_log` and `ai_call_log` evidence must use redacted summaries.
+- Role-separated runtime acceptance remains blocked until all 8 mandatory roles pass strict runtime observation; `Covered` UI/UX contract status is not runtime Pass.
+- `personal_standard_student`, `org_standard_employee`, and `org_standard_admin` must not receive advanced AI or enterprise training capabilities from frontend visibility alone or by manual URL access.
+- `personal_advanced_student`, `org_advanced_employee`, `org_advanced_admin`, and `content_admin` require discoverable entries for their approved AI or enterprise-training capabilities.
+- `ops_admin`, `content_admin`, and organization admins require separated backend workspaces, role-aware landing, visible logout, scoped menus, and unrelated-surface denial.
+- Backend UI/UX optimization for enterprise, content, and operations workspaces must be preceded by a design-first artifact that defines information architecture, routes, component reuse, states, role/edition boundaries, and allowed implementation scope.
 - Cost Calibration Gate remains blocked pending fresh explicit approval.
 - Provider, env/secret, staging/prod/cloud/deploy, payment, and external-service work remain out of scope.
 - Code-stage queue seeding remains paused unless explicitly approved later.

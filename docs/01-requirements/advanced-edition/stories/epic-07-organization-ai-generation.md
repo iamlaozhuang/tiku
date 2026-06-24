@@ -16,12 +16,16 @@ Use AI to generate organization-owned questions and AI `paper` content for enter
 4. The system creates a trackable AI task and shows safe status information.
 5. The generated result remains in the organization-owned AI content domain.
 6. The generated result does not enter the platform formal question bank or paper library.
+7. `org_advanced_admin` can discover `AI出题` and `AI组卷` from the organization backend workspace.
+8. `org_standard_admin` cannot discover or use organization AI generation by menu visibility or direct URL entry.
+9. Organization AI generation routes must not redirect organization admins into system operations or content-authoring workspaces.
 
 ## Data Boundary
 
 - Generated content must not automatically write to formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
 - Prompt, provider payload, secret, token, and raw provider response must not appear in evidence.
 - Related `audit_log` and `ai_call_log` information must be redacted.
+- Standard organization denial evidence records only route, role, state, and redacted summary.
 
 ## Source Links
 

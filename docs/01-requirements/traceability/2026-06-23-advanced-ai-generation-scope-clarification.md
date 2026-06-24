@@ -63,6 +63,18 @@ Recommended baseline for the UI/UX decision package:
 4. The UI must not rely on hidden routes, manual URL entry, or explanatory copy outside the workflow to make the capability discoverable.
 5. Exact Chinese labels, icon choice, mobile layout, sidebar grouping, and interaction details should be finalized in a scoped UI/UX contract before implementation.
 
+## 2026-06-24 Role-Separated MVP Alignment Addendum
+
+The 2026-06-24 role-separated MVP requirement alignment narrows the pending UI/UX entry decision into confirmed repair requirements:
+
+- Learner label: eligible advanced learners use `AI训练`; page-level or card-level actions must expose `AI出题` and `AI组卷`.
+- Personal standard learners do not receive advanced AI capabilities; upgrade guidance or clear denial is acceptable.
+- Organization standard employees do not receive learner `AI训练` or `企业训练`.
+- Organization advanced employees receive both learner `AI训练` and enterprise `企业训练` when valid advanced `org_auth` and organization context permit it.
+- Organization advanced admins receive organization backend `AI出题` and `AI组卷`; organization standard admins do not.
+- Content admins receive content backend `AI出题` and `AI组卷` entries that lead to draft/review, not direct formal writes.
+- The existing UI/UX contract `Covered` status means requirement/contract coverage only. It is not runtime Pass and does not close the role-separated acceptance gate.
+
 ## Blocked Gates
 
 This clarification does not approve:
