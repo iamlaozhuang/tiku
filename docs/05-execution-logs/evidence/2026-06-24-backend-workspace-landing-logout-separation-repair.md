@@ -159,6 +159,12 @@ Result:
 
 ## Boundary And Residual Risk
 
+- Fresh closeout approval received at 2026-06-24T03:40:40-07:00 from the current user message: execute commit, merge,
+  push, cleanup, then claim candidate direction 2.
+- Approved closeout target:
+  - merge `codex/backend-workspace-landing-logout-20260624` to `master`
+  - push `master` to `origin/master`
+  - delete the merged local short branch after master validation evidence is recorded
 - Visible logout currently clears the local session marker and returns the user to `/login`. Server-side cookie
   invalidation was not implemented because the allowed scope did not include adding a session delete route or changing
   session runtime behavior.
