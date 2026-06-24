@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: student-home-ai-organization-training-entry-repair-2026-06-24
-updatedAt: "2026-06-24T03:57:54-07:00"
+updatedAt: "2026-06-24T04:31:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -522,16 +522,16 @@ currentTask:
       approved: true
       approvalSource: current_user_approval_2026_06_24_claim_candidate_2
     mergeToMaster:
-      approved: false
+      approved: true
       targetBranch: master
-      approvalSource: fresh_closeout_approval_required_after_validation
+      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
     push:
-      approved: false
+      approved: true
       target: origin/master
-      approvalSource: fresh_closeout_approval_required_after_validation
+      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
     cleanup:
-      deleteShortBranch: false
-      approvalSource: fresh_closeout_approval_required_after_validation
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval_2026_06_24_merge_push_delete_short_branch_candidate_2
   branch: codex/student-home-ai-org-training-entries-20260624
   commitSha: null
   prUrl: null

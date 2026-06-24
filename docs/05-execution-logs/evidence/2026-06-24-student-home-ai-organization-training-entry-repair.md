@@ -2,10 +2,16 @@
 
 ## Status
 
-- Current status: ready_for_closeout after local validation; local commit is approved by task policy, while merge, push, and cleanup still require fresh closeout approval.
+- Current status: ready_for_closeout after local validation; fresh closeout approval is recorded for fast-forward merge to `master`, push to `origin/master`, and deletion of the merged short branch.
 - Branch: codex/student-home-ai-org-training-entries-20260624
 - Scope: learner home `AI训练` and `企业训练` entry discoverability plus learner AI page product labels.
 - Explicit non-claim: this evidence does not declare standard/advanced MVP final Pass.
+
+## Closeout Approval
+
+- Approval source: user message on 2026-06-24, "合入 master、push、删除短分支，然后继续推进下一步工作" followed by "继续".
+- Approved actions: fast-forward merge into `master`, push `master` to `origin/master`, and delete merged short branch `codex/student-home-ai-org-training-entries-20260624`.
+- Still blocked: PR, force push, staging/prod deploy, Provider enablement, payment/external services, and standard/advanced MVP final Pass claims.
 
 ## SSOT Read List
 

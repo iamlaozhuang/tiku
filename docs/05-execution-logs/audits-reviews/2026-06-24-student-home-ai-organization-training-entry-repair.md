@@ -3,7 +3,7 @@
 ## Status
 
 - Current status: ready_for_closeout after local validation.
-- Local commit is approved by task policy; merge, push, and cleanup remain blocked until fresh closeout approval.
+- Fresh closeout approval is recorded for fast-forward merge to `master`, push to `origin/master`, and deletion of the merged short branch.
 - No standard/advanced MVP final Pass is claimed.
 
 ## SSOT Read List
