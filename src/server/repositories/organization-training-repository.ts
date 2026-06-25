@@ -13,7 +13,7 @@ import {
   organizationTrainingSourceContext,
   organizationTrainingVersion,
 } from "@/db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
@@ -164,6 +164,7 @@ export type OrganizationTrainingEmployeeAnswerPersistenceLineageLookupInput = {
 export type OrganizationTrainingEmployeeVisibleVersionListInput = {
   employeePublicId: string;
   organizationPublicId: string;
+  visibleOrganizationPublicIds?: readonly string[];
 };
 
 export type OrganizationTrainingVersionLookupInput = {
@@ -1002,6 +1003,12 @@ function normalizeRequiredText(value: string): string | null {
   return trimmedValue.length > 0 ? trimmedValue : null;
 }
 
+function normalizeTextList(values: readonly string[]): string[] {
+  return values
+    .map((value) => normalizeRequiredText(value))
+    .filter((value): value is string => value !== null);
+}
+
 function normalizeTrustedPersistenceLineageLookupInput(
   input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
 ): OrganizationTrainingTrustedPersistenceLineageLookupInput | null {
@@ -1272,14 +1279,25 @@ function normalizeEmployeeVisibleVersionListInput(
   const organizationPublicId = normalizeRequiredText(
     input.organizationPublicId,
   );
+  const visibleOrganizationPublicIds = [
+    ...new Set([
+      organizationPublicId,
+      ...normalizeTextList(input.visibleOrganizationPublicIds ?? []),
+    ]),
+  ].filter((value): value is string => value !== null);
 
-  if (employeePublicId === null || organizationPublicId === null) {
+  if (
+    employeePublicId === null ||
+    organizationPublicId === null ||
+    visibleOrganizationPublicIds.length === 0
+  ) {
     return null;
   }
 
   return {
     employeePublicId,
     organizationPublicId,
+    visibleOrganizationPublicIds,
   };
 }
 
@@ -1969,6 +1987,11 @@ async function listPublishedVersionsForEmployeeOrganization(
   database: RuntimeDatabase,
   input: OrganizationTrainingEmployeeVisibleVersionListInput,
 ): Promise<OrganizationTrainingVersionRow[]> {
+  const visibleOrganizationPublicIds =
+    input.visibleOrganizationPublicIds?.length === undefined ||
+    input.visibleOrganizationPublicIds.length === 0
+      ? [input.organizationPublicId]
+      : [...input.visibleOrganizationPublicIds];
   const rows = await database
     .select(organizationTrainingVersionSelection)
     .from(organizationTrainingVersion)
@@ -1982,6 +2005,7 @@ async function listPublishedVersionsForEmployeeOrganization(
         eq(employee.public_id, input.employeePublicId),
         eq(organization.public_id, input.organizationPublicId),
         eq(organizationTrainingVersion.version_status, "published"),
+        sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${visibleOrganizationPublicIds}`,
       ),
     )
     .orderBy(desc(organizationTrainingVersion.published_at));

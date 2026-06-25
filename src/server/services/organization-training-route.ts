@@ -750,6 +750,8 @@ function createRepositoryBackedEmployeeVisibleVersionsReader(
     repository.listEmployeeVisibleVersions({
       employeePublicId: employeeContext.employeePublicId,
       organizationPublicId: employeeContext.currentOrganizationPublicId,
+      visibleOrganizationPublicIds:
+        employeeContext.visibleOrganizationPublicIds,
     });
 }
 

@@ -1532,6 +1532,7 @@ describe("organization training repository", () => {
     expect(listPublishedVersionsForEmployeeOrganization).toHaveBeenCalledWith({
       employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
+      visibleOrganizationPublicIds: ["organization_public_123"],
     });
     expect(findPublishedVersionByPublicId).toHaveBeenCalledWith({
       trainingVersionPublicId: "training_version_public_123",
@@ -1544,6 +1545,7 @@ describe("organization training repository", () => {
       {
         employeePublicId: "employee_public_123",
         organizationPublicId: "organization_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
       },
     ]);
     expect(getVersionLookupInputs()).toEqual([
@@ -1585,6 +1587,47 @@ describe("organization training repository", () => {
       submittedAt: "2026-06-16T09:05:00.000Z",
       resultSummaryVisible: true,
     });
+  });
+
+  it("passes employee visible organization scope to the visible version gateway", async () => {
+    const {
+      getEmployeeVisibleVersionListInputs,
+      listPublishedVersionsForEmployeeOrganization,
+      gateway,
+    } = createGateway();
+    const repository = createOrganizationTrainingRepository(gateway);
+    const input = {
+      employeePublicId: " employee_public_123 ",
+      organizationPublicId: " organization_branch_public_456 ",
+      visibleOrganizationPublicIds: [
+        " organization_branch_public_456 ",
+        "organization_public_123",
+        "organization_public_123",
+      ],
+    } as Parameters<typeof repository.listEmployeeVisibleVersions>[0] & {
+      visibleOrganizationPublicIds: string[];
+    };
+
+    await repository.listEmployeeVisibleVersions(input);
+
+    expect(listPublishedVersionsForEmployeeOrganization).toHaveBeenCalledWith({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_branch_public_456",
+      visibleOrganizationPublicIds: [
+        "organization_branch_public_456",
+        "organization_public_123",
+      ],
+    });
+    expect(getEmployeeVisibleVersionListInputs()).toEqual([
+      {
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+      },
+    ]);
   });
 
   it("rejects invalid trusted internal lineage returned by the gateway", async () => {
