@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-org-employee-ai-entry-session-repair-2026-06-25
-updatedAt: "2026-06-25T07:46:38-07:00"
+currentPhase: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+updatedAt: "2026-06-25T08:17:24-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,23 +501,23 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b646bd79d4ec400603c6e44fa6a7396de76b6100
-  lastKnownOriginMasterSha: b646bd79d4ec400603c6e44fa6a7396de76b6100
+  lastKnownMasterSha: 613c56693b31d2d16d825fd20492b04be2ba7e24
+  lastKnownOriginMasterSha: 613c56693b31d2d16d825fd20492b04be2ba7e24
 currentTask:
-  id: learner-org-employee-ai-entry-session-repair-2026-06-25
+  id: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
   status: closed
-  result: pass_employee_ai_local_contract_session_classification_focused_validation_no_browser
-  claimedAt: "2026-06-25T07:53:41-07:00"
-  plannedAt: "2026-06-25T07:53:41-07:00"
-  validatedAt: "2026-06-25T08:03:12-07:00"
-  reviewedAt: "2026-06-25T08:03:12-07:00"
-  closedAt: "2026-06-25T08:03:12-07:00"
-  sourceStory: current-user-directed-serial-task-3-minimal-source-repair
-  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
-  approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-entry-session-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  result: pass_docs_state_gap_refresh_ai_session_subblocker_unit_repaired_runtime_gate_blocked_no_final_pass
+  claimedAt: "2026-06-25T08:14:17-07:00"
+  plannedAt: "2026-06-25T08:14:17-07:00"
+  validatedAt: "2026-06-25T08:17:24-07:00"
+  reviewedAt: "2026-06-25T08:17:24-07:00"
+  closedAt: "2026-06-25T08:17:24-07:00"
+  sourceStory: current-user-approved-serial-next-steps-after-learner-ai-repair
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+  approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorGapRefreshTaskId: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
   predecessorGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
@@ -525,15 +525,16 @@ currentTask:
   predecessorRerunScopePackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
   predecessorEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
   predecessorEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  predecessorOrgAdminPostRepairTaskId: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
-  predecessorOrgAdminPostRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
-  predecessorOrgAdminPostRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+  predecessorLearnerAiRepairTaskId: learner-org-employee-ai-entry-session-repair-2026-06-25
+  predecessorLearnerAiRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  predecessorLearnerAiRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-entry-session-repair.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localSourceChange: true
-    focusedUnitTests: true
-    learnerAiEntryRepair: true
-    employeeSessionClassificationRepair: true
+    gapRefresh: true
+    localSourceChange: false
+    focusedUnitTests: false
+    learnerAiEntryRepair: false
+    employeeSessionClassificationRepair: false
     localBrowserRuntimeRerun: false
     ownerManualCredentialEntry: false
     sessionSummaryObservationWithoutTokenCapture: false
@@ -552,43 +553,82 @@ currentTask:
     e2eRuntime: false
     e2eSpecChange: false
     finalPassClaim: false
-  selectedRepair:
-    candidate: learner_org_employee_ai_entry_and_login_state_misclassification
-    source: predecessor_gap_refresh_and_rerun_scope_package
-    browserExecutionInThisTask: false
-    databaseOrSchemaChange: false
-    focusedUnitTests: pass
-    lint: pass
-    typecheck: pass
-    moduleRunV2Hardening: pass
-    prePushReadiness: pass
+  refreshedGate:
+    strictEightRowRuntimeGate: blocked
+    strictPassRows: 0
+    releaseBlockedRows: 8
+    orgAdminWrongLandingAndSampledDenialSubBlocker: locally_closed_for_two_private_accounts
+    learnerOrgEmployeeAiSessionContextSubBlocker: unit_level_repaired_runtime_unconfirmed
     finalPassClaim: false
+  nextApprovedTask:
+    id: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+    packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+    approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+  nextMinimalSourceRepairCandidateAfterRerun: organization_training_employee_entry_guard_repair_if_ai_login_state_no_longer_first_blocker
   finalPassClaim: false
   runtimeEvidence:
     browserExecutedInThisTask: false
     databaseExecutedInThisTask: false
-    sourceChangeExecuted: true
+    sourceChangeExecuted: false
     finalMvpPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
-  branch: codex/learner-org-ai-entry-session-repair-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+  branch: codex/post-ai-entry-gap-refresh-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+roleSeparatedPostAiEntryRepairGapRefreshNoFinalPass20260625:
+  taskId: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+  phase: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+  recordedAt: "2026-06-25T08:14:17-07:00"
+  status: closed
+  result: pass_docs_state_gap_refresh_ai_session_subblocker_unit_repaired_runtime_gate_blocked_no_final_pass
+  validatedAt: "2026-06-25T08:17:24-07:00"
+  reviewedAt: "2026-06-25T08:17:24-07:00"
+  closedAt: "2026-06-25T08:17:24-07:00"
+  branch: codex/post-ai-entry-gap-refresh-20260625
+  entryMasterSha: 613c56693b31d2d16d825fd20492b04be2ba7e24
+  entryOriginMasterSha: 613c56693b31d2d16d825fd20492b04be2ba7e24
+  approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+  sourceLearnerAiRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  sourcePostOrgAdminGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  sourceRerunScopePackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  refreshedGate:
+    strictEightRowRuntimeGate: blocked
+    strictPassRows: 0
+    releaseBlockedRows: 8
+    learnerOrgEmployeeAiSessionContextSubBlocker: unit_level_repaired_runtime_unconfirmed
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - database_seed_schema_or_account_mutation
+    - source_or_test_change
+    - env_secret_access_or_env_file_change
+    - credential_document_read_by_codex_or_credential_entry_by_codex
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 roleSeparatedPostOrgAdminRepairGapRefreshNoFinalPass20260625:
   taskId: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
   phase: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25

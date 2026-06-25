@@ -4378,6 +4378,160 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+    title: Refresh role-separated blockers after learner and org employee AI entry repair
+    phase: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+    sourceStory: current-user-approved-serial-next-steps-after-learner-ai-repair
+    dependencies:
+      - learner-org-employee-ai-entry-session-repair-2026-06-25
+    taskKind: docs_state_gap_refresh
+    moduleRunVersion: 2
+    executionProfile: docs_state_only_gap_refresh
+    evidenceMode: full_redacted
+    validationPolicy: docs_prettier_diff_check_precommit_prepush
+    queueSelectionMode: current_user_fresh_serial_approval_post_ai_gap_refresh
+    targetClosureItem: Role-separated remaining blocker accounting after learner/org employee AI source repair
+    behaviorBoundary: docs_state_only_no_runtime_no_final_pass
+    requiredOutcome: >-
+      Based on the 2026-06-24 eight-role runtime matrix, the 2026-06-25 organization admin post-repair evidence, and
+      the 2026-06-25 learner/org employee AI entry source repair evidence, refresh remaining blockers. Clearly separate
+      unit-level AI session/context sub-blockers from runtime acceptance blockers. Do not run browser, read credentials,
+      touch DB/seed/schema/source/tests/env/Provider/Cost, staging/prod, payment, external services, or claim final MVP
+      Pass.
+    status: closed
+    result: pass_docs_state_gap_refresh_ai_session_subblocker_unit_repaired_runtime_gate_blocked_no_final_pass
+    approvedAt: "2026-06-25T08:14:17-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+      approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+    claimedAt: "2026-06-25T08:14:17-07:00"
+    plannedAt: "2026-06-25T08:14:17-07:00"
+    validatedAt: "2026-06-25T08:17:24-07:00"
+    reviewedAt: "2026-06-25T08:17:24-07:00"
+    closedAt: "2026-06-25T08:17:24-07:00"
+    capabilities:
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      gapRefresh: approved
+      localBrowserRuntimeExecution: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      sourceOrTestChange: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+      - docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+      - docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - browser_runtime_or_e2e_execution
+      - database_seed_schema_or_account_mutation
+      - source_or_test_change
+      - env_secret_access_or_env_file_change
+      - credential_document_read_by_codex_or_credential_entry_by_codex
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - docs_state_gap_refresh
+      - evidence_redaction
+      - unit_runtime_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+    predecessorLearnerAiRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+    predecessorPostOrgAdminGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+    predecessorRerunScopePackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+    branch: codex/post-ai-entry-gap-refresh-20260625
+    refreshedGate:
+      strictEightRowRuntimeGate: blocked
+      strictPassRows: 0
+      releaseBlockedRows: 8
+      learnerOrgEmployeeAiSessionContextSubBlocker: unit_level_repaired_runtime_unconfirmed
+      finalPassClaim: false
+    nextApprovedTask:
+      id: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+      packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_post_ai_gap_refresh
+    retryCount: 0
+    lastFailurePath: null
+
   - id: learner-org-employee-ai-entry-session-repair-2026-06-25
     title: Repair learner and organization employee AI entry session classification
     phase: learner-org-employee-ai-entry-session-repair-2026-06-25
