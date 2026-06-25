@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-runtime-effective-role-source-repair-2026-06-25
+currentPhase: organization-admin-runtime-effective-role-source-db-and-browser-verification-approval-2026-06-25
 updatedAt: "2026-06-25T06:03:05-07:00"
 architecture:
   status: complete
@@ -501,61 +501,51 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5f15f8279a3bcd77384dc9c3747f29ad325de491
-  lastKnownOriginMasterSha: 5f15f8279a3bcd77384dc9c3747f29ad325de491
+  lastKnownMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
+  lastKnownOriginMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
 currentTask:
-  id: organization-admin-runtime-effective-role-source-repair-2026-06-25
-  status: closed
-  result: pass_local_session_runtime_org_admin_role_organization_binding_repair_no_db_no_browser_no_final_pass
-  claimedAt: "2026-06-25T06:03:05-07:00"
-  plannedAt: "2026-06-25T06:03:05-07:00"
-  validatedAt: "2026-06-25T06:08:56-07:00"
-  reviewedAt: "2026-06-25T06:08:56-07:00"
-  closedAt: "2026-06-25T06:14:11-07:00"
-  sourceStory: successor-of-organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
-  approvalConsumed: current_user_fresh_runtime_role_session_source_repair_and_closeout_2026_06_25
-  approvalSource: current_user_message_runtime_role_session_source_tests_local_session_runtime_repair_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-runtime-effective-role-source-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-runtime-effective-role-source-repair.md
+  id: organization-admin-runtime-effective-role-source-db-and-browser-verification-approval-2026-06-25
+  status: ready_for_closeout
+  result: pass_local_db_dev_seed_browser_rerun_no_seed_repair_private_accounts_unverified
+  claimedAt: "2026-06-25T06:25:02-07:00"
+  plannedAt: "2026-06-25T06:25:02-07:00"
+  validatedAt: "2026-06-25T06:42:04-07:00"
+  reviewedAt: "2026-06-25T06:42:04-07:00"
+  sourceStory: successor-of-organization-admin-runtime-effective-role-source-repair-2026-06-25
+  approvalConsumed: current_user_fresh_db_account_state_seed_browser_rerun_2026_06_25
+  approvalSource: current_user_message_db_account_state_seed_browser_rerun_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorPlanningTaskId: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
-  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  predecessorSourceRepairTaskId: organization-admin-runtime-effective-role-source-repair-2026-06-25
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-repair.md
   predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
   predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
-  predecessorSourceRepairTaskId: organization-admin-runtime-session-hydration-repair-2026-06-24
-  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
-  taskQueueEntryMaterializedByThisTask: true
-  queueDiagnosticAtEntry:
-    projectStatusDecision: idle_no_pending_task
-    nextExecutableTask: none
-    expectedNextTaskFromPreviousPlanning: organization-admin-runtime-effective-role-source-repair-2026-06-25
   allowedScope:
     docsStateEvidenceAudit: true
+    localDatabaseAccountStateReadOnlyDiagnostic: true
+    localSeedOrAccountRepairWhenProvenNecessary: true
+    localBrowserRuntimeRerun: true
+    ownerManualCredentialEntry: attempted_timeout
+    devSeedFixtureCredentialUse: true
     readOnlySourceDiagnosis: true
-    sourceRepair: true
+    devSeedSourceRepairIfProvenNecessary: true
     focusedUnitTests: true
-    runtimeRoleSessionSourceTests: true
-    localSessionRuntimeRoleOrganizationBindingRepair: true
     e2eSpecChange: false
-    databaseMigrationOrSeed: false
-    localDatabaseAccess: false
+    databaseMigrationOrSchemaChange: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
-    ownerManualCredentialEntry: false
-    browserRuntimeExecution: false
+    privateAccountFileRead: false
     finalPassClaim: false
   repairScope:
     effectiveRoleSource: AuthContextDto.user.adminRoles
     persistedRoleSource: admin.admin_role
     organizationBindingSource: admin_organization_to_organization_public_id
-    loginSessionSourceUnderTest: default_local_session_runtime_login_admin_branch
-    currentSessionSourceUnderTest: default_local_session_runtime_active_admin_branch
-    schemaMigrationOrSeed: blocked
-    dbInspection: blocked
-    browserRerun: blocked
-    actualPrivateRuntimeAccountRowsInspected: false
-    databaseReadApproved: false
+    schemaMigration: blocked
+    localDbReadOnlyDiagnostic: approved_current_task_local_dev_only
+    localSeedOrAccountRepair: not_executed_not_needed_for_dev_seed_accounts
+    browserRerun: approved_current_task_local_only
     finalPassClaim: false
   rootCauseHypothesisState:
     confirmed:
@@ -563,44 +553,105 @@ currentTask:
       - local_session_runtime_maps_admin_roles_from_admin_admin_role
       - correct_org_roles_would_land_in_organization_and_be_denied_from_ops
       - admin_session_auth_context_does_not_hydrate_admin_organization_public_id
+      - local_dev_seed_org_admin_accounts_now_resolve_to_org_roles_with_org_binding
+      - default_tiku_database_is_stale_for_org_admin_schema
     pending:
       - owner_entered_runtime_accounts_may_still_have_ops_admin_persisted_role_or_private_account_source
-      - actual_runtime_database_may_not_match_updated_dev_seed_fixture_state
+      - old_private_acceptance_accounts_may_not_be_same_as_dev_seed_fixture_accounts
       - org_api_write_paths_may_still_need_visible_organization_scope_after_role_source_repair
+      - default_tiku_database_alignment_requires_separate_schema_migration_seed_task_if_it_must_be_runtime_target
     excluded:
       - logout_session_invalidation_as_primary_cause
       - effectiveEdition_as_direct_landing_or_workspace_guard_source
       - ui_only_landing_function_bug_for_correct_org_admin_roles
-  validationSummary:
-    focusedRedTest: fail_expected_2_failed_org_public_id_null_before_repair
-    focusedGreenTest: pass_3_files_17_tests
-    lint: pass
-    typecheck: pass
-    prettierCheck: pass
-    diffCheck: pass
-    preCommitHardening: pass
-    prePushReadiness: pass
+      - seed_account_repair_needed_for_current_dev_seed_org_admin_accounts
+  runtimeEvidence:
+    localDockerPostgres: pass_service_healthy
+    defaultTikuDb: stale_missing_org_admin_enum_and_admin_organization
+    currentSchemaCandidateDb: pass_org_standard_and_org_advanced_each_active_with_one_binding
+    manualBrowserLogin: timed_out_no_post_login_evidence
+    devSeedBrowserRerun: pass_both_org_admin_roles_landing_workspace_denials_logout
+    seedOrAccountRepairExecuted: false
+    schemaMigrationExecuted: false
+    finalMvpPassClaim: false
   finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_runtime_role_session_source_repair_and_closeout_2026_06_25
+      approvalSource: current_user_fresh_db_account_state_seed_browser_rerun_2026_06_25
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_runtime_role_session_source_repair_and_closeout_2026_06_25
+      approvalSource: fresh_closeout_approval_required_after_runtime_evidence
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_runtime_role_session_source_repair_and_closeout_2026_06_25
+      approvalSource: fresh_closeout_approval_required_after_runtime_evidence
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_runtime_role_session_source_repair_and_closeout_2026_06_25
-  branch: codex/org-admin-effective-role-source-repair-20260625
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required_after_runtime_evidence
+  branch: codex/org-admin-db-account-browser-rerun-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+organizationAdminRuntimeEffectiveRoleSourceDbBrowserVerification20260625:
+  taskId: organization-admin-runtime-effective-role-source-db-and-browser-verification-approval-2026-06-25
+  phase: organization-admin-runtime-effective-role-source-db-and-browser-verification-approval-2026-06-25
+  recordedAt: "2026-06-25T06:25:02-07:00"
+  status: ready_for_closeout
+  result: pass_local_db_dev_seed_browser_rerun_no_seed_repair_private_accounts_unverified
+  validatedAt: "2026-06-25T06:42:04-07:00"
+  reviewedAt: "2026-06-25T06:42:04-07:00"
+  branch: codex/org-admin-db-account-browser-rerun-20260625
+  entryMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
+  entryOriginMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
+  approvalSource: current_user_message_db_account_state_seed_browser_rerun_2026_06_25
+  predecessorSourceRepairTaskId: organization-admin-runtime-effective-role-source-repair-2026-06-25
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  executionScope:
+    localDatabaseAccountStateReadOnlyDiagnostic: true
+    localSeedOrAccountRepairWhenProvenNecessary: true
+    localBrowserRuntimeRerun: true
+    ownerManualCredentialEntry: attempted_timeout
+    devSeedFixtureCredentialUse: true
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
+    privateAccountFileRead: false
+    envSecretAccess: false
+    schemaMigration: false
+    destructiveDatabaseOperation: false
+    providerCall: false
+    stagingProdDeploy: false
+    finalPassClaim: false
+  runtimeEvidence:
+    localDockerPostgres: pass_service_healthy
+    defaultTikuDb: stale_missing_org_admin_enum_and_admin_organization
+    currentSchemaCandidateDb: pass_org_standard_and_org_advanced_each_active_with_one_binding
+    manualBrowserLogin: timed_out_no_post_login_evidence
+    devSeedBrowserRerun: pass_both_org_admin_roles_landing_workspace_denials_logout
+    seedOrAccountRepairExecuted: false
+    schemaMigrationExecuted: false
+    finalMvpPassClaim: false
+  blockedWithoutFreshApproval:
+    - env_secret_access_or_env_file_change
+    - credential_document_read_by_codex
+    - credential_entry_by_codex
+    - private_account_file_read
+    - schema_migration_or_drizzle_push
+    - destructive_database_reset_drop_truncate
+    - dependency_package_lockfile_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 organizationAdminRuntimeEffectiveRoleSourceRepair20260625:
   taskId: organization-admin-runtime-effective-role-source-repair-2026-06-25
   phase: organization-admin-runtime-effective-role-source-repair-2026-06-25
