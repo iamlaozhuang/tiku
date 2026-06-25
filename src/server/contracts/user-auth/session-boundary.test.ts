@@ -27,16 +27,13 @@ describe("post-login session boundary", () => {
     });
   });
 
-  it.fails(
-    "red: organization admin role contamination must not route to the global operations workspace",
-    () => {
-      expect(
-        createPostLoginSessionBoundary({
-          adminPublicId: "admin-org-standard",
-          adminRoles: ["org_standard_admin", "ops_admin"],
-          userType: null,
-        }).redirectPath,
-      ).not.toBe("/ops/users");
-    },
-  );
+  it("does not route contaminated organization admin roles to the global operations workspace", () => {
+    expect(
+      createPostLoginSessionBoundary({
+        adminPublicId: "admin-org-standard",
+        adminRoles: ["org_standard_admin", "ops_admin"],
+        userType: null,
+      }).redirectPath,
+    ).toBe("/organization/portal");
+  });
 });

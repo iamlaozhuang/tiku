@@ -293,6 +293,41 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
   });
 
+  it("denies contaminated organization admins from the operations workspace", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ...orgStandardAdminSessionPayload,
+          data: {
+            ...orgStandardAdminSessionPayload.data,
+            user: {
+              ...orgStandardAdminSessionPayload.data.user,
+              adminRoles: ["org_standard_admin", "ops_admin"],
+            },
+          },
+        }),
+      })),
+    );
+    pathnameMock = "/ops/users";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "ops page"),
+      ),
+    );
+
+    const denialAlert = await screen.findByRole("alert");
+    expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
+    expect(screen.queryByText("ops page")).toBeNull();
+    expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
+  });
+
   it("denies ops admins from the content workspace", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     vi.stubGlobal(

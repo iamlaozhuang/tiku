@@ -43,27 +43,31 @@ function isAdminLoginUser(loginUser: PostLoginSessionUser) {
   );
 }
 
+function hasOrganizationAdminRole(adminRoles: readonly PostLoginAdminRole[]) {
+  return (
+    adminRoles.includes("org_standard_admin") ||
+    adminRoles.includes("org_advanced_admin")
+  );
+}
+
 export function resolveAdminWorkspaceLandingPath(
   loginUser: PostLoginSessionUser,
 ): "/ops/users" | "/content/papers" | "/organization/portal" {
   const adminRoles = loginUser.adminRoles ?? [];
 
-  if (
-    adminRoles.includes("content_admin") &&
-    !adminRoles.includes("ops_admin") &&
-    !adminRoles.includes("super_admin")
-  ) {
-    return "/content/papers";
+  if (adminRoles.includes("super_admin")) {
+    return "/ops/users";
+  }
+
+  if (hasOrganizationAdminRole(adminRoles)) {
+    return "/organization/portal";
   }
 
   if (
-    (adminRoles.includes("org_standard_admin") ||
-      adminRoles.includes("org_advanced_admin")) &&
-    !adminRoles.includes("ops_admin") &&
-    !adminRoles.includes("content_admin") &&
-    !adminRoles.includes("super_admin")
+    adminRoles.includes("content_admin") &&
+    !adminRoles.includes("ops_admin")
   ) {
-    return "/organization/portal";
+    return "/content/papers";
   }
 
   return "/ops/users";

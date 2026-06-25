@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
-updatedAt: "2026-06-25T03:25:56-07:00"
+currentPhase: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+updatedAt: "2026-06-25T03:43:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,63 +501,101 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b2d168cf9eb16a46856fe5f0653859ea9da05098
-  lastKnownOriginMasterSha: b2d168cf9eb16a46856fe5f0653859ea9da05098
+  lastKnownMasterSha: e02bf25b935829ebf70de19f44c3ccfbfa344b11
+  lastKnownOriginMasterSha: e02bf25b935829ebf70de19f44c3ccfbfa344b11
 currentTask:
-  id: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+  id: organization-admin-session-role-mapping-runtime-repair-2026-06-24
   status: closed
-  result: pass_source_repair_plan_and_expected_fail_red_test_recorded_no_final_pass
-  claimedAt: "2026-06-25T03:22:16-07:00"
-  plannedAt: "2026-06-25T03:22:16-07:00"
-  validatedAt: "2026-06-25T03:25:56-07:00"
-  reviewedAt: "2026-06-25T03:25:56-07:00"
-  closedAt: "2026-06-25T03:25:56-07:00"
+  result: pass_source_repair_unit_validated_no_final_pass
+  claimedAt: "2026-06-25T03:34:20-07:00"
+  plannedAt: "2026-06-25T03:34:20-07:00"
+  validatedAt: "2026-06-25T03:43:43-07:00"
+  reviewedAt: "2026-06-25T03:43:43-07:00"
+  closedAt: "2026-06-25T03:43:43-07:00"
   sourceStory: successor-of-organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
-  approvalConsumed: current_user_next_task_source_repair_planning_red_test_closeout_approval_2026_06_25
-  approvalSource: current_user_message_next_task_organization_admin_session_role_mapping_runtime_repair_planning_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
+  approvalConsumed: current_user_source_repair_closeout_approval_2026_06_25
+  approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorRuntimeTaskId: organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
-  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+  predecessorPlanningTaskId: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
   allowedScope:
-    sourceRepairPlanning: true
-    focusedRedTest: true
-    sourceImplementationChange: false
+    sourceRepair: true
+    focusedUnitTests: true
+    docsStateEvidenceAudit: true
     databaseMigrationOrSeed: false
     browserRuntime: false
   validationSummary:
-    focusedRedTest: pass_one_expected_fail_recorded
-    sourceRootCausePlan: pass
-    firstPrePushReadiness: fail_repository_sha_checkpoint_drift_remediated
-    closeoutGates: pass_prettier_diff_check_precommit_hardening_prepush_readiness
-  nextRecommendedTask: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    redTests: pass_expected_failures_observed_before_source_fix
+    focusedUnitTests: pass_2_files_9_tests
+    lint: pass
+    typecheck: pass
+    closeoutGates: pass_after_plan_path_alias_fix
+  nextRecommendedTask: organization-admin-workspace-runtime-rerun-2026-06-24
   nextRecommendedTaskReason: >-
-    This task is limited to planning and red-test capture. If the red test confirms session/account role contamination
-    or nondeterministic login mapping, run a separately scoped source repair task before any further organization admin
-    runtime acceptance.
+    After source repair closes, rerun the organization admin runtime walkthrough with owner-entered credentials and
+    redacted evidence before any layer-2 business closure.
   finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_message_next_task_organization_admin_session_role_mapping_runtime_repair_planning_2026_06_25
+      approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_message_next_task_organization_admin_session_role_mapping_runtime_repair_planning_2026_06_25
+      approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_message_next_task_organization_admin_session_role_mapping_runtime_repair_planning_2026_06_25
+      approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_message_next_task_organization_admin_session_role_mapping_runtime_repair_planning_2026_06_25
-  branch: codex/org-admin-session-role-mapping-planning-20260625
+      approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+  branch: codex/org-admin-session-role-mapping-runtime-repair-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+organizationAdminSessionRoleMappingRuntimeRepair20260624:
+  taskId: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+  phase: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+  recordedAt: "2026-06-25T03:34:20-07:00"
+  status: closed
+  result: pass_source_repair_unit_validated_no_final_pass
+  branch: codex/org-admin-session-role-mapping-runtime-repair-20260625
+  entryMasterSha: e02bf25b935829ebf70de19f44c3ccfbfa344b11
+  entryOriginMasterSha: e02bf25b935829ebf70de19f44c3ccfbfa344b11
+  approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+  predecessorPlanningTaskId: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  allowedScope:
+    sourceRepair: true
+    focusedUnitTests: true
+    docsStateEvidenceAudit: true
+    databaseMigrationOrSeed: false
+    browserRuntime: false
+  blockedScope:
+    envFileEditOrDisclosure: true
+    providerCostCalibration: true
+    stagingProdDeploy: true
+    paymentExternalService: true
+    finalPassClaim: true
+  finalPassClaim: false
+  validationSummary:
+    redTests: pass_expected_failures_observed_before_source_fix
+    focusedUnitTests: pass_2_files_9_tests
+    lint: pass
+    typecheck: pass
+    closeoutGates: pass_after_plan_path_alias_fix
+  validatedAt: "2026-06-25T03:43:43-07:00"
+  reviewedAt: "2026-06-25T03:43:43-07:00"
+  closedAt: "2026-06-25T03:43:43-07:00"
 organizationAdminSessionRoleMappingRuntimeRepairPlanning20260624:
   taskId: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
   phase: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24

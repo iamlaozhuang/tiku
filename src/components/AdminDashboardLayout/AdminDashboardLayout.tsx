@@ -123,6 +123,13 @@ function hasAdvancedOrganizationRole(adminRoles: readonly string[]) {
   );
 }
 
+function hasOrganizationAdminRole(adminRoles: readonly string[]) {
+  return (
+    adminRoles.includes("org_standard_admin") ||
+    adminRoles.includes("org_advanced_admin")
+  );
+}
+
 function getWorkspacePresentation(
   workspace: AdminWorkspace,
   adminRoles: readonly string[],
@@ -169,6 +176,10 @@ function canAccessWorkspace(
     return true;
   }
 
+  if (hasOrganizationAdminRole(adminRoles)) {
+    return workspace === "organization";
+  }
+
   if (workspace === "ops") {
     return adminRoles.includes("ops_admin");
   }
@@ -177,10 +188,7 @@ function canAccessWorkspace(
     return adminRoles.includes("content_admin");
   }
 
-  return (
-    adminRoles.includes("org_standard_admin") ||
-    adminRoles.includes("org_advanced_admin")
-  );
+  return false;
 }
 
 async function fetchAdminAuthContext(): Promise<

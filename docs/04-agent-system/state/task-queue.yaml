@@ -4951,6 +4951,165 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    title: Repair organization admin session role mapping runtime boundary
+    phase: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    sourceStory: successor-of-organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+    dependencies:
+      - organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionProfile: source_repair_with_focused_unit_red_green_no_runtime_no_db
+    evidenceMode: full_redacted
+    validationPolicy: focused_unit_red_green_lint_typecheck_docs_prettier_diff_check_precommit_prepush_readiness
+    queueSelectionMode: user_approved_next_task_2026_06_25
+    targetClosureItem: Organization admin login landing and workspace guard reject ops role contamination
+    behaviorBoundary: implementation::source_only_role_mapping_boundary_repair
+    requiredOutcome: >-
+      Convert the existing expected-fail contaminated organization admin role test into a normal red test, add a
+      workspace-guard regression test, and implement a minimal source repair so organization admin role sessions are
+      kept in the organization workspace unless they are explicitly super_admin. Do not run browser runtime, read
+      credentials, execute database migrations or seeds, touch env files, or claim final Pass.
+    status: closed
+    result: pass_source_repair_unit_validated_no_final_pass
+    claimedAt: "2026-06-25T03:34:20-07:00"
+    plannedAt: "2026-06-25T03:34:20-07:00"
+    validatedAt: "2026-06-25T03:43:43-07:00"
+    reviewedAt: "2026-06-25T03:43:43-07:00"
+    closedAt: "2026-06-25T03:43:43-07:00"
+    approvalConsumed:
+      packageId: ORGANIZATION_ADMIN_SESSION_ROLE_MAPPING_RUNTIME_REPAIR_2026_06_24
+      approvedAt: "2026-06-25T03:34:20-07:00"
+      approvedBy: laozhuang
+      approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+    capabilities:
+      sourceImplementationChange: approved_by_current_user_2026_06_25
+      focusedUnitTests: approved_by_current_user_2026_06_25
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      schemaMigration: blocked
+      databaseSeedOrWrite: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/server/contracts/user-auth/session-boundary.test.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/session-route.ts
+      - src/server/services/session-service.ts
+      - src/server/repositories/session-repository.ts
+      - src/app/(auth)/login/page.tsx
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - src/db/dev-seed.ts
+      - drizzle/**
+      - scripts/db/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/contracts/user-auth/session-boundary.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md src/server/contracts/user-auth/session-boundary.ts src/server/contracts/user-auth/session-boundary.test.ts src/components/AdminDashboardLayout/AdminDashboardLayout.tsx tests/unit/admin-dashboard-layout-navigation.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-session-role-mapping-runtime-repair-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-session-role-mapping-runtime-repair-2026-06-24 -SkipRemoteAheadCheck
+    validationSummary:
+      redTests: pass_expected_failures_observed_before_source_fix
+      focusedUnitTests: pass_2_files_9_tests
+      lint: pass
+      typecheck: pass
+      closeoutGates: pass_after_plan_path_alias_fix
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+    taskPlanPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    nextRecommendedTask: organization-admin-workspace-runtime-rerun-2026-06-24
+    nextRecommendedTaskReason: >-
+      After source repair closeout, rerun the organization admin workspace runtime acceptance with owner-entered
+      credentials and redacted UI language checks before layer-2 business closure.
+    blockedWithoutFreshApproval:
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - browser_runtime_or_playwright_runtime_walkthrough
+      - dev_server_start
+      - database_connection_or_query
+      - database_migration_or_seed_execution
+      - schema_migration_or_drizzle_push
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_creation
+      - force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_message_push_organization_admin_session_role_mapping_runtime_repair_2026_06_25
+    branch: codex/org-admin-session-role-mapping-runtime-repair-20260625
+    retryCount: 0
+    lastFailurePath: null
+
   - id: requirement-ssot-reading-governance-2026-06-24
     title: Enforce requirement SSOT reading governance in task gates
     phase: requirement-ssot-reading-governance-2026-06-24
