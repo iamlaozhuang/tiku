@@ -6566,6 +6566,166 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
+    title: Rerun private organization admin post-repair browser matrix
+    phase: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
+    sourceStory: post-repair-verification-after-private-org-admin-account-reconciliation
+    dependencies:
+      - organization-admin-private-account-state-reconciliation-2026-06-25
+      - default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
+    taskKind: local_browser_post_repair_acceptance_rerun
+    moduleRunVersion: 2
+    executionProfile: local_private_org_admin_browser_rerun_owner_credentials
+    evidenceMode: full_redacted_browser_route_matrix
+    validationPolicy: manual_browser_route_matrix_docs_gates
+    queueSelectionMode: current_user_fresh_approval_post_repair_rerun
+    targetClosureItem: Private org admin post-repair browser evidence
+    behaviorBoundary: browser_runtime::owner_entered_credentials_no_db_no_source_no_final_pass
+    requiredOutcome: >-
+      Rerun local real browser route matrix for repaired old/private `org_standard_admin` and `org_advanced_admin`.
+      Owner enters credentials manually. Record only redacted session/route outcomes. Do not read `.env*`, credential
+      files, token/cookie/localStorage, screenshots/traces, write DB, change source/e2e/schema/seed, or claim final MVP
+      Pass.
+    status: closed
+    result: closed_private_org_admin_post_repair_browser_rerun_pass
+    approvedAt: "2026-06-25T07:23:07-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      approvalSource: current_user_message_private_org_admin_post_repair_browser_rerun_2026_06_25
+    claimedAt: "2026-06-25T07:23:07-07:00"
+    plannedAt: "2026-06-25T07:23:07-07:00"
+    validatedAt: "2026-06-25T07:26:56-07:00"
+    reviewedAt: "2026-06-25T07:26:56-07:00"
+    closedAt: "2026-06-25T07:26:56-07:00"
+    capabilities:
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      localBrowserRuntimeExecution: approved_local_only
+      ownerManualCredentialEntry: required
+      routeMatrixObservation: approved
+      sessionSummaryObservationWithoutTokenCapture: approved
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      privateAccountFileRead: blocked
+      envSecretAccess: blocked
+      databaseWrite: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      sourceOrE2eFileChange: blocked
+      destructiveDatabaseOperation: blocked
+      dependencyIntroduction: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - env_secret_access_or_env_file_change
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - private_account_file_read
+      - database_write_seed_or_schema_migration
+      - source_or_e2e_file_change
+      - destructive_database_reset_drop_truncate
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - browser_runtime
+      - credential_redaction
+      - route_matrix_evidence
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-private-account-post-repair-browser-rerun-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-private-account-post-repair-browser-rerun-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+    predecessorPrivateAccountEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-state-reconciliation.md
+    predecessorDefaultDbEvidencePath: docs/05-execution-logs/evidence/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+    branch: codex/org-admin-post-repair-rerun-20260625
+    expectedVerification:
+      privateStandardBrowserMatrix: pass_org_routes_allowed_unrelated_routes_denied_logout_pass
+      privateAdvancedBrowserMatrix: pass_org_routes_allowed_unrelated_routes_denied_logout_pass
+      finalMvpPassClaim: false
+    runtimeEvidence:
+      privateStandardLogin: organization_portal_role_org_standard_admin_binding_present
+      privateStandardOrganizationRoutes: allowed_all_five_checked_routes
+      privateStandardUnrelatedRoutes: denied_ops_users_ops_redeem_codes_content_papers
+      privateStandardLogout: pass_login_session_unauthenticated
+      privateAdvancedLogin: organization_portal_role_org_advanced_admin_binding_present
+      privateAdvancedOrganizationRoutes: allowed_all_five_checked_routes
+      privateAdvancedUnrelatedRoutes: denied_ops_users_ops_redeem_codes_content_papers
+      privateAdvancedLogout: pass_login_session_unauthenticated
+      dbWriteOrSchemaExecuted: false
+      sourceChangeExecuted: false
+      finalMvpPassClaim: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+    retryCount: 0
+    lastFailurePath: null
+
   - id: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
     title: Align default tiku DB organization admin schema and seed
     phase: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
