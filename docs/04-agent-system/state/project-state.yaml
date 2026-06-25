@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-ai-and-enterprise-training-entry-runtime-repair-2026-06-24
-updatedAt: "2026-06-24T23:59:32-07:00"
+currentPhase: organization-admin-workspace-runtime-gap-planning-2026-06-24
+updatedAt: "2026-06-24T23:59:58-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,25 +501,26 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f8a73c33a68085e798868ec0a1058e48b928b832
-  lastKnownOriginMasterSha: f8a73c33a68085e798868ec0a1058e48b928b832
+  lastKnownMasterSha: 8d252ae417248815137c290fafe56a7e89ba62d4
+  lastKnownOriginMasterSha: 8d252ae417248815137c290fafe56a7e89ba62d4
 currentTask:
-  id: learner-ai-and-enterprise-training-entry-runtime-repair-2026-06-24
+  id: organization-admin-workspace-runtime-gap-planning-2026-06-24
   status: closed
-  result: pass_learner_ai_and_enterprise_training_entry_runtime_repaired_static_validated_no_runtime_no_final_pass
-  claimedAt: "2026-06-24T23:59:32-07:00"
-  plannedAt: "2026-06-24T23:59:32-07:00"
-  validatedAt: "2026-06-24T23:59:32-07:00"
-  reviewedAt: "2026-06-24T23:59:32-07:00"
-  closedAt: "2026-06-24T23:59:32-07:00"
+  result: pass_organization_admin_workspace_gap_scope_planned_no_source_no_runtime_no_final_pass
+  claimedAt: "2026-06-24T23:59:58-07:00"
+  plannedAt: "2026-06-24T23:59:58-07:00"
+  validatedAt: "2026-06-24T23:59:58-07:00"
+  reviewedAt: "2026-06-24T23:59:58-07:00"
+  closedAt: "2026-06-24T23:59:58-07:00"
   blockedAt: null
-  sourceStory: successor-of-learner-ai-and-enterprise-training-entry-runtime-repair-planning-2026-06-24
+  sourceStory: successor-of-learner-ai-and-enterprise-training-entry-runtime-repair-2026-06-24
   approvalConsumed: current_user_serial_completion_approval_2026_06_24
   approvalSource: current_user_message_continue_until_all_done_2026_06_24
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-learner-ai-and-enterprise-training-entry-runtime-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-learner-ai-and-enterprise-training-entry-runtime-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-learner-ai-and-enterprise-training-entry-runtime-repair.md
-  sourcePlanningPath: docs/05-execution-logs/acceptance/2026-06-24-learner-ai-and-enterprise-training-entry-runtime-repair-planning.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  planningOutputPath: docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  sourcePlanningPath: docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
@@ -536,7 +537,7 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_serial_completion_approval_2026_06_24
-  branch: codex/learner-entry-runtime-repair-20260624
+  branch: codex/org-admin-workspace-gap-planning-20260624
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -1114,6 +1115,66 @@ learnerAiAndEnterpriseTrainingEntryRuntimeRepair20260624:
   nextRecommendedTask: organization-admin-workspace-runtime-gap-planning-2026-06-24
   nextTaskStatus: pending_after_learner_entry_repair_closeout
   blockedWithoutFreshApproval:
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - owner_credential_entry_or_account_action
+    - database_read_write_or_migration
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+organizationAdminWorkspaceRuntimeGapPlanning20260624:
+  taskId: organization-admin-workspace-runtime-gap-planning-2026-06-24
+  phase: organization-admin-workspace-runtime-gap-planning-2026-06-24
+  recordedAt: "2026-06-24T23:59:58-07:00"
+  sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  sourceGapListPath: docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+  status: closed
+  result: pass_organization_admin_workspace_gap_scope_planned_no_source_no_runtime_no_final_pass
+  branch: codex/org-admin-workspace-gap-planning-20260624
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  planningOutputPath: docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-gap-planning.md
+  scope: docs_requirement_alignment_for_gap_org_01_no_source_no_runtime
+  baseline:
+    sourceGapId: GAP-ORG-01
+    affectedRows:
+      - org_standard_admin
+      - org_advanced_admin
+    productSourceChangedByThisTask: false
+    browserRuntimeExecutedByThisTask: false
+    finalPassClaim: false
+  plannedNextTasks:
+    - id: organization-admin-workspace-design-first-scope-2026-06-24
+      status: pending
+      purpose: design_first_artifact_before_backend_workspace_source_change
+    - id: organization-admin-workspace-runtime-repair-2026-06-24
+      status: blocked_until_design_first_scope_closes
+      purpose: later_scoped_source_repair_after_exact_allowed_files_are_defined
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_serial_completion_approval_2026_06_24
+    mergeToMaster:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_serial_completion_approval_2026_06_24
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_serial_completion_approval_2026_06_24
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_serial_completion_approval_2026_06_24
+  nextRecommendedTask: organization-admin-workspace-design-first-scope-2026-06-24
+  blockedWithoutFreshApproval:
+    - product_source_or_test_change
     - browser_or_playwright_runtime
     - dev_server_start
     - owner_credential_entry_or_account_action
