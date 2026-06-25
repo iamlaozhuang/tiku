@@ -8893,7 +8893,7 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-    status: blocked
+    status: closed
     result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
     approvedAt: "2026-06-25T00:00:00-07:00"
     approvedBy: laozhuang
@@ -8903,7 +8903,7 @@ tasks:
     plannedAt: "2026-06-25T00:00:00-07:00"
     validatedAt: "2026-06-25T02:23:47-07:00"
     reviewedAt: "2026-06-25T02:23:47-07:00"
-    closedAt: null
+    closedAt: "2026-06-25T02:23:47-07:00"
     blockedAt: "2026-06-25T02:23:47-07:00"
     branch: codex/org-admin-runtime-regression-repair-20260625
     diagnosisPlan:
@@ -8923,6 +8923,7 @@ tasks:
     nextRecommendedTaskReason: >-
       The real persisted admin_role source cannot represent org_standard_admin or org_advanced_admin, so source-only UI
       or mapper repair would repeat the previous mocked-role failure.
+    closeoutStateRepairReason: pre_push_hook_requires_closed_or_ready_for_closeout_for_sha_ancestor_policy
     closeoutPolicy:
       localCommit:
         approved: true

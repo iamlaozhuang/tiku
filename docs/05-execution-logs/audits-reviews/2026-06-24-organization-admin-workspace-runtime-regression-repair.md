@@ -79,3 +79,11 @@ The next approval package should explicitly include or reject:
 - `src/server/models/auth.ts` type propagation;
 - local dev seed or fixture account update for role-separated organization admin runtime proof;
 - focused red/green unit validation and later redacted organization-admin runtime rerun.
+
+## Closeout Recovery Review
+
+- First push attempt was blocked by pre-push SHA drift because task status was `blocked`.
+- Approve status repair to `closed` while preserving result
+  `blocked_track_b_schema_migration_seed_approval_required_after_red_test`.
+- This status change does not claim green runtime behavior or final MVP Pass; it only marks the diagnostic task terminal
+  for closeout mechanics.

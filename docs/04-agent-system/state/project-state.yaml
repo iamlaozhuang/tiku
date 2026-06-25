@@ -505,13 +505,13 @@ repository:
   lastKnownOriginMasterSha: 595912c397ddace1c328348aeb63484073b96151
 currentTask:
   id: organization-admin-workspace-runtime-regression-repair-2026-06-24
-  status: blocked
+  status: closed
   result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
   claimedAt: "2026-06-25T00:00:00-07:00"
   plannedAt: "2026-06-25T00:00:00-07:00"
   validatedAt: "2026-06-25T02:23:47-07:00"
   reviewedAt: "2026-06-25T02:23:47-07:00"
-  closedAt: null
+  closedAt: "2026-06-25T02:23:47-07:00"
   blockedAt: "2026-06-25T02:23:47-07:00"
   sourceStory: successor-of-organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
   approvalConsumed: current_user_request_start_regression_repair_with_real_session_account_mapping_red_test_2026_06_25
@@ -560,7 +560,7 @@ organizationAdminWorkspaceRuntimeRegressionRepair20260624:
   taskId: organization-admin-workspace-runtime-regression-repair-2026-06-24
   phase: organization-admin-workspace-runtime-regression-repair-2026-06-24
   recordedAt: "2026-06-25T00:00:00-07:00"
-  status: blocked
+  status: closed
   result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
   branch: codex/org-admin-runtime-regression-repair-20260625
   entryMasterSha: 595912c397ddace1c328348aeb63484073b96151
@@ -585,6 +585,7 @@ organizationAdminWorkspaceRuntimeRegressionRepair20260624:
   repairPathDecision: upgrade_to_schema_migration_seed_approval_required
   nextRecommendedTask: organization-admin-role-persistence-schema-seed-approval-2026-06-24
   closeoutApprovalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+  closeoutStateRepairReason: pre_push_hook_requires_closed_or_ready_for_closeout_for_sha_ancestor_policy
   redTestAssertionRetainedInMerge: false
   redTestAssertionRetentionReason: avoid_intentionally_failing_master_unit_baseline_before_track_b_green_fix
   productSourceChangedByThisTask: false
