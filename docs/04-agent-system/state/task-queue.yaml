@@ -6883,6 +6883,140 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: post-repair-gap-list-refresh-no-final-pass-2026-06-24
+    title: Refresh post-repair gap list without final Pass
+    phase: post-repair-gap-list-refresh-no-final-pass-2026-06-24
+    sourceStory: successor-of-content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+    dependencies:
+      - content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    executionProfile: docs_acceptance_gap_refresh_no_runtime
+    evidenceMode: redacted_docs_only
+    validationPolicy: scoped_docs_requirement_alignment_validation
+    queueSelectionMode: user_approved_serial_post_repair_acceptance_followup
+    targetClosureItem: Refreshed no-final-Pass gap list after role-separated rerun and content_admin AI draft validation
+    behaviorBoundary: docs_acceptance::gap_refresh_no_runtime_no_final_pass
+    requiredOutcome: >-
+      Refresh the post-repair gap list, distinguish functional content_admin AI draft boundary evidence from real
+      Provider-backed generation, record archive candidates and next executable task candidates, and preserve the no
+      final Pass boundary.
+    capabilities:
+      docsRequirementAlignment: approved
+      stateQueueDocumentation: approved
+      nextTaskCandidateRecording: approved
+      productSourceChange: blocked
+      browserRuntimeObservation: blocked
+      devServerStart: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+      - docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+      - docs/05-execution-logs/evidence/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md docs/05-execution-logs/evidence/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md docs/05-execution-logs/audits-reviews/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-repair-gap-list-refresh-no-final-pass-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+    acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_gap_list_refreshed_no_final_pass_next_candidates_recorded
+    approvalConsumed: current_user_chat_approval_2026_06_24_execute_post_repair_gap_refresh
+    approvedAt: "2026-06-24T22:05:00-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-24T22:05:00-07:00"
+    plannedAt: "2026-06-24T22:05:00-07:00"
+    validatedAt: "2026-06-24T22:09:00-07:00"
+    reviewedAt: "2026-06-24T22:09:00-07:00"
+    closedAt: "2026-06-24T22:09:00-07:00"
+    blockedAt: null
+    branch: codex/post-repair-gap-refresh-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+    refreshedGapSummary:
+      highestPriorityLocalBlocker: GAP-UI-01_visible_chinese_ui_technical_label_cleanup
+      providerBackedAiGeneration: blocked_requires_fresh_provider_env_cost_approval
+      nextRecommendedTask: visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    nextExecutableTaskCandidates:
+      - visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+      - visible-chinese-ui-technical-label-cleanup-2026-06-24
+      - learner-ai-and-enterprise-training-entry-runtime-repair-planning-2026-06-24
+      - organization-admin-workspace-runtime-gap-planning-2026-06-24
+      - provider-env-cost-approval-package-ai-generation-2026-06-24
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
