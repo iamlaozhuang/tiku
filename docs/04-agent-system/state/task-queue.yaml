@@ -6748,6 +6748,141 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+    title: Validate content_admin AI draft workflow runtime
+    phase: content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+    sourceStory: successor-of-post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+    dependencies:
+      - post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: local_content_admin_ai_draft_workflow_runtime_validation
+    evidenceMode: redacted_runtime_summary_only
+    validationPolicy: local_browser_runtime_observation_with_scoped_docs_validation
+    queueSelectionMode: user_approved_serial_post_repair_acceptance_followup
+    targetClosureItem: Content backend AI question and AI paper draft workflow runtime evidence
+    behaviorBoundary: content_admin::ai_draft_review_runtime_no_provider_no_formal_write
+    requiredOutcome: >-
+      Validate whether content_admin can use discoverable AI出题 and AI组卷 entries as draft/review workflows, record
+      Chinese UI language findings, and preserve all Provider, credential, database, formal write, and final Pass
+      boundaries.
+    capabilities:
+      localBrowserRuntimeObservation: approved_by_current_user_serial_advancement_approval_2026_06_24
+      ownerCredentialEntry: required_if_login_needed
+      sessionLogoutByCodex: requires_visible_user_instruction_or_safe_visible_logout_after_observation
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      browserStorageInspection: blocked
+      screenshotEvidence: blocked
+      rawHtmlEvidence: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      formalContentWrite: blocked
+      contentAdoption: blocked
+      paperPublish: blocked
+      accountAction: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - docs/05-execution-logs/evidence/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md docs/05-execution-logs/evidence/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md docs/05-execution-logs/audits-reviews/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: runtime_observation_completed_functional_pass_ui_language_fail_no_final_pass
+    approvalConsumed: current_user_serial_advancement_approval_2026_06_24_content_admin_ai_runtime_validation
+    approvedAt: "2026-06-24T21:48:08-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-24T21:48:08-07:00"
+    plannedAt: "2026-06-24T21:48:08-07:00"
+    validatedAt: "2026-06-24T21:56:16-07:00"
+    reviewedAt: "2026-06-24T21:56:16-07:00"
+    closedAt: "2026-06-24T21:57:14-07:00"
+    blockedAt: null
+    branch: codex/content-admin-ai-draft-runtime-20260624
+    runtimeResult:
+      entryDiscoverability: pass
+      aiQuestionDraftRoute: pass
+      aiPaperDraftRoute: pass
+      draftReviewBoundary: pass
+      providerExecutionBoundary: pass
+      deniedOpsBoundarySample: pass
+      deniedOrganizationBoundarySample: pass
+      browserWarnOrErrorCount: 0
+      logout: pass
+      chineseUiLanguageCheck: fail
+      strictAcceptanceResult: fail
+      finalPassClaim: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_advancement_approval_2026_06_24
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
