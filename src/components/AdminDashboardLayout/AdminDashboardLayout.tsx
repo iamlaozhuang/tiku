@@ -54,7 +54,7 @@ const CONTENT_MENU: MenuItem[] = [
 ];
 
 const OPS_MENU: MenuItem[] = [
-  { href: "/ops/contact-config", label: "contact_config", Icon: UserRoundCog },
+  { href: "/ops/contact-config", label: "购买联系方式", Icon: UserRoundCog },
   { href: "/ops/users", label: "用户管理", Icon: UserRoundCog },
   { href: "/ops/organizations", label: "企业管理", Icon: Building2 },
   { href: "/ops/redeem-codes", label: "卡密管理", Icon: KeyRound },

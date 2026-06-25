@@ -10,8 +10,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StudentPersonalAiGenerationPage } from "@/features/student/ai-generation/StudentPersonalAiGenerationPage";
 
-const pageTitle = "\u4e2a\u4eba AI \u5b66\u4e60";
-const requestButtonLabel = "\u53d1\u8d77\u672c\u5730 AI \u8bf7\u6c42";
+const pageTitle = "AI训练";
+const requestButtonLabel = "AI出题";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
@@ -398,12 +398,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       await screen.findByText("2026-06-12T10:00:00.000Z"),
     ).toBeInTheDocument();
-    expect(screen.getByText("status")).toBeInTheDocument();
-    expect(screen.getByText("succeeded")).toBeInTheDocument();
-    expect(screen.getByText("requestedAt")).toBeInTheDocument();
-    expect(screen.getByText("redactionStatus")).toBeInTheDocument();
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(screen.getByText("sufficient")).toBeInTheDocument();
+    expect(screen.getByText("状态")).toBeInTheDocument();
+    expect(screen.getByText("已完成")).toBeInTheDocument();
+    expect(screen.getByText("请求时间")).toBeInTheDocument();
+    expect(screen.getByText("脱敏状态")).toBeInTheDocument();
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.getByText("证据充分")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
     expectRenderedTextToHideValues([
       serverHistoryResponse.data[0].requestPublicId,
@@ -488,15 +488,15 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
-    expect(screen.getByText("student_local_browser")).toBeInTheDocument();
-    expect(screen.getByText("accepted")).toBeInTheDocument();
-    expect(screen.getByText("contentVisibility")).toBeInTheDocument();
-    expect(screen.getByText("referenceRedactionStatus")).toBeInTheDocument();
-    expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
-    expect(screen.getByText("summary_only")).toBeInTheDocument();
-    expect(screen.getByText("isFormalAdoptionBlocked")).toBeInTheDocument();
-    expect(screen.getByText("true")).toBeInTheDocument();
+    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
+    expect(screen.getByText("学员本地页面")).toBeInTheDocument();
+    expect(screen.getByText("已受理")).toBeInTheDocument();
+    expect(screen.getByText("内容可见性")).toBeInTheDocument();
+    expect(screen.getByText("引用脱敏状态")).toBeInTheDocument();
+    expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
+    expect(screen.getByText("仅摘要")).toBeInTheDocument();
+    expect(screen.getByText("是否阻断正式入库")).toBeInTheDocument();
+    expect(screen.getByText("是")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
@@ -638,7 +638,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     await waitFor(() => expect(submittedBodies).toHaveLength(1));
-    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
@@ -676,14 +676,14 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
     expect(
       await screen.findByText("2026-06-12T12:30:00.000Z"),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("none").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("无证据").length).toBeGreaterThan(0);
     expect(screen.getAllByText("0").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
     expectRenderedTextToHideValues([
       serverHistoryAfterSubmitResponse.data[0].requestPublicId,
       serverHistoryAfterSubmitResponse.data[0].taskPublicId,
@@ -733,7 +733,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
     expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("database stack");
     expect(document.body.textContent).not.toContain("provider payload");
@@ -787,7 +787,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(await screen.findByText(blockedTitle)).toBeInTheDocument();
-    expect(screen.getByText("quota_insufficient")).toBeInTheDocument();
+    expect(screen.getByText("额度不足")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("generated content");
@@ -860,14 +860,14 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
-    expect(screen.getAllByText("contentVisibility").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("summary_only").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("evidenceStatus").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("sufficient").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("citationCount").length).toBeGreaterThan(0);
+    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
+    expect(screen.getAllByText("内容可见性").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("仅摘要").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("证据状态").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("证据充分").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("引用数量").length).toBeGreaterThan(0);
     expect(screen.getAllByText("2").length).toBeGreaterThan(0);
-    expect(screen.getByText("referenceRedactionStatus")).toBeInTheDocument();
+    expect(screen.getByText("引用脱敏状态")).toBeInTheDocument();
     expectRenderedTextToHideValues([
       redactedReferenceResponse.data.resultState.taskPublicId,
       redactedReferenceResponse.data.resultState.resultPublicId,
@@ -961,10 +961,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("taskPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("resultPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("aiCallLogPublicId")).not.toBeInTheDocument();
-    expect(screen.getByText("requestedAt")).toBeInTheDocument();
-    expect(screen.getAllByText("weak").length).toBeGreaterThan(0);
+    expect(screen.getByText("请求时间")).toBeInTheDocument();
+    expect(screen.getAllByText("证据较弱").length).toBeGreaterThan(0);
     expect(screen.getAllByText("3").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
     expectRenderedTextToHideValues([
       redactedReferenceResponse.data.resultState.taskPublicId,
       redactedReferenceResponse.data.resultState.resultPublicId,

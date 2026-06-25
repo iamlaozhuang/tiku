@@ -287,7 +287,7 @@ describe("phase 11 audit_log coverage hardening", () => {
       await screen.findByRole("heading", { name: "运营后台闭环" }),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Audit log keyword"), {
+    fireEvent.change(screen.getByLabelText("审计日志关键词"), {
       target: { value: "user.reset_password" },
     });
 

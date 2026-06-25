@@ -691,20 +691,16 @@ describe("AdminQuestionMaterialManagement", () => {
     const boundQuestion = screen.getByTestId(
       "question-binding-question-marketing-001",
     );
-    expect(boundQuestion).toHaveTextContent("material: material-marketing-001");
-    expect(boundQuestion).toHaveTextContent(
-      "knowledge_node: knowledge-node-sampling",
-    );
-    expect(boundQuestion).toHaveTextContent("tag: tag-research");
+    expect(boundQuestion).toHaveTextContent("关联材料：material-marketing-001");
+    expect(boundQuestion).toHaveTextContent("知识点：knowledge-node-sampling");
+    expect(boundQuestion).toHaveTextContent("标签：tag-research");
 
     const unboundQuestion = screen.getByTestId(
       "question-binding-question-logistics-002",
     );
-    expect(unboundQuestion).toHaveTextContent("material: null");
-    expect(unboundQuestion).toHaveTextContent(
-      "knowledge_node: knowledge-node-costing",
-    );
-    expect(unboundQuestion).toHaveTextContent("tag: none");
+    expect(unboundQuestion).toHaveTextContent("关联材料：无");
+    expect(unboundQuestion).toHaveTextContent("知识点：knowledge-node-costing");
+    expect(unboundQuestion).toHaveTextContent("标签：无");
   });
 
   it("starts question review from a knowledge_node durable binding handoff", async () => {
@@ -790,16 +786,14 @@ describe("AdminQuestionMaterialManagement", () => {
 
     expect(
       screen.getByTestId("question-lock-question-marketing-001"),
-    ).toHaveTextContent("status: editable");
+    ).toHaveTextContent("状态：可编辑");
 
     const lockedQuestion = screen.getByTestId(
       "question-lock-question-logistics-002",
     );
+    expect(lockedQuestion).toHaveTextContent("状态：已被已发布试卷引用锁定");
     expect(lockedQuestion).toHaveTextContent(
-      "status: locked by published paper reference",
-    );
-    expect(lockedQuestion).toHaveTextContent(
-      "lockedAt: 2026-05-18T08:00:00.000Z",
+      "锁定时间：2026-05-18T08:00:00.000Z",
     );
     expect(lockedQuestion).not.toHaveTextContent('"id"');
   });
@@ -882,23 +876,21 @@ describe("AdminQuestionMaterialManagement", () => {
     const materialReferences = screen.getByTestId(
       "material-reference-summary-material-marketing-001",
     );
-    expect(materialReferences).toHaveTextContent("question count: 1");
+    expect(materialReferences).toHaveTextContent("题目引用数：1");
     expect(materialReferences).toHaveTextContent(
-      "question-marketing-001 (single_choice, available)",
+      "question-marketing-001 (单选题, 可用)",
     );
-    expect(materialReferences).toHaveTextContent("paper count: 1");
+    expect(materialReferences).toHaveTextContent("试卷引用数：1");
     expect(materialReferences).toHaveTextContent(
-      "paper-material-ref-001 (published)",
+      "paper-material-ref-001 (已发布)",
     );
 
     const lockedMaterial = screen.getByTestId(
       "material-lock-material-locked-002",
     );
+    expect(lockedMaterial).toHaveTextContent("状态：已被已发布试卷引用锁定");
     expect(lockedMaterial).toHaveTextContent(
-      "status: locked by published paper reference",
-    );
-    expect(lockedMaterial).toHaveTextContent(
-      "lockedAt: 2026-05-19T07:00:00.000Z",
+      "锁定时间：2026-05-19T07:00:00.000Z",
     );
     expect(lockedMaterial).not.toHaveTextContent('"id"');
   });
@@ -999,7 +991,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("科目"), {
       target: { value: "skill" },
     });
-    fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+    fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
       target: { value: "material-marketing-001" },
     });
     fireEvent.change(questionForm.getByLabelText("题干"), {
@@ -1269,7 +1261,7 @@ describe("AdminQuestionMaterialManagement", () => {
       fireEvent.change(questionForm.getByLabelText("评分方式"), {
         target: { value: "ai_scoring" },
       });
-      fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+      fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
         target: { value: "material-marketing-001" },
       });
       fireEvent.change(questionForm.getByLabelText("题干"), {
@@ -1348,20 +1340,20 @@ describe("AdminQuestionMaterialManagement", () => {
 
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
 
-    expect(questionForm.getByLabelText("知识点 publicIds")).toHaveValue(
+    expect(questionForm.getByLabelText("知识点业务标识")).toHaveValue(
       "knowledge-node-sampling",
     );
-    expect(questionForm.getByLabelText("标签 publicIds")).toHaveValue(
+    expect(questionForm.getByLabelText("标签业务标识")).toHaveValue(
       "tag-research",
     );
 
-    fireEvent.change(questionForm.getByLabelText("知识点 publicIds"), {
+    fireEvent.change(questionForm.getByLabelText("知识点业务标识"), {
       target: {
         value:
           "knowledge-node-sampling\nknowledge-node-retail, knowledge-node-price",
       },
     });
-    fireEvent.change(questionForm.getByLabelText("标签 publicIds"), {
+    fireEvent.change(questionForm.getByLabelText("标签业务标识"), {
       target: { value: "tag-research tag-compliance" },
     });
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
@@ -1411,31 +1403,31 @@ describe("AdminQuestionMaterialManagement", () => {
     const bindingPreview = screen.getByTestId("question-binding-preview");
 
     expect(bindingPreview).toHaveTextContent(
-      "material: material-marketing-001",
+      "关联材料：material-marketing-001",
     );
     expect(bindingPreview).toHaveTextContent(
-      "knowledge_node: 1 knowledge-node-sampling",
+      "知识点：1 个 knowledge-node-sampling",
     );
-    expect(bindingPreview).toHaveTextContent("tag: 1 tag-research");
+    expect(bindingPreview).toHaveTextContent("标签：1 个 tag-research");
 
-    fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+    fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
       target: { value: "" },
     });
-    fireEvent.change(questionForm.getByLabelText("知识点 publicIds"), {
+    fireEvent.change(questionForm.getByLabelText("知识点业务标识"), {
       target: {
         value:
           "knowledge-node-sampling\nknowledge-node-retail knowledge-node-retail",
       },
     });
-    fireEvent.change(questionForm.getByLabelText("标签 publicIds"), {
+    fireEvent.change(questionForm.getByLabelText("标签业务标识"), {
       target: { value: "" },
     });
 
-    expect(bindingPreview).toHaveTextContent("material: null");
+    expect(bindingPreview).toHaveTextContent("关联材料：无");
     expect(bindingPreview).toHaveTextContent(
-      "knowledge_node: 2 knowledge-node-sampling, knowledge-node-retail",
+      "知识点：2 个 knowledge-node-sampling, knowledge-node-retail",
     );
-    expect(bindingPreview).toHaveTextContent("tag: 0 none");
+    expect(bindingPreview).toHaveTextContent("标签：0 个 无");
   });
 
   it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
@@ -1447,7 +1439,7 @@ describe("AdminQuestionMaterialManagement", () => {
     await screen.findByTestId("question-row-question-marketing-001");
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Recommend knowledge nodes for question-marketing-001",
+        name: "为题目 question-marketing-001 推荐知识点",
       }),
     );
 
@@ -1458,12 +1450,10 @@ describe("AdminQuestionMaterialManagement", () => {
     const reviewSummary = screen.getByTestId(
       "knowledge-recommendation-review-summary-question-marketing-001",
     );
-    expect(reviewSummary).toHaveTextContent(
-      "target question: question-marketing-001",
-    );
-    expect(reviewSummary).toHaveTextContent("accepted: 0");
-    expect(reviewSummary).toHaveTextContent("discarded: 0");
-    expect(reviewSummary).toHaveTextContent("pending: 2");
+    expect(reviewSummary).toHaveTextContent("目标题目：question-marketing-001");
+    expect(reviewSummary).toHaveTextContent("已采纳：0");
+    expect(reviewSummary).toHaveTextContent("已丢弃：0");
+    expect(reviewSummary).toHaveTextContent("待确认： 2");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-row-knowledge-node-sampling-v2",
@@ -1481,7 +1471,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Accept recommendation knowledge-node-sampling-v2",
+        name: "采纳推荐 knowledge-node-sampling-v2",
       }),
     );
 
@@ -1502,30 +1492,28 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Discard recommendation knowledge-node-segmentation",
+        name: "丢弃推荐 knowledge-node-segmentation",
       }),
     );
     expect(
       screen.getByTestId(
         "knowledge-recommendation-row-knowledge-node-segmentation",
       ),
-    ).toHaveTextContent("discarded");
-    expect(reviewSummary).toHaveTextContent("accepted: 1");
-    expect(reviewSummary).toHaveTextContent("discarded: 1");
-    expect(reviewSummary).toHaveTextContent("pending: 0");
+    ).toHaveTextContent("已丢弃");
+    expect(reviewSummary).toHaveTextContent("已采纳：1");
+    expect(reviewSummary).toHaveTextContent("已丢弃：1");
+    expect(reviewSummary).toHaveTextContent("待确认： 0");
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-review-trace-question-marketing-001",
+      ),
+    ).toHaveTextContent("已采纳 knowledge-node-sampling-v2 -> question.update");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-review-trace-question-marketing-001",
       ),
     ).toHaveTextContent(
-      "accepted knowledge-node-sampling-v2 -> question.update",
-    );
-    expect(
-      screen.getByTestId(
-        "knowledge-recommendation-review-trace-question-marketing-001",
-      ),
-    ).toHaveTextContent(
-      "discarded knowledge-node-segmentation -> local_review_only",
+      "已丢弃 knowledge-node-segmentation -> local_review_only",
     );
 
     fireEvent.click(

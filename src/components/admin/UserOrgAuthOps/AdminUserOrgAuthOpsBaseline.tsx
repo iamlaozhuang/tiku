@@ -110,7 +110,7 @@ export function AdminUserOrgAuthOpsBaseline({
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">Admin Ops</p>
+          <p className="text-brand-primary text-sm font-medium">运营后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             用户、组织与授权运营
           </h1>

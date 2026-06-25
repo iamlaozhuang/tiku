@@ -17,17 +17,15 @@ afterEach(() => {
 describe("admin model config management UI", () => {
   it("renders loading, empty, and error states", () => {
     render(createElement(AdminModelConfigManagement, { state: "loading" }));
-    expect(screen.getByText("Loading model configuration")).toBeInTheDocument();
+    expect(screen.getByText("正在加载模型配置")).toBeInTheDocument();
 
     cleanup();
     render(createElement(AdminModelConfigManagement, { state: "empty" }));
-    expect(screen.getByText("No model configuration yet")).toBeInTheDocument();
+    expect(screen.getByText("暂无模型配置")).toBeInTheDocument();
 
     cleanup();
     render(createElement(AdminModelConfigManagement, { state: "error" }));
-    expect(
-      screen.getByText("Model configuration failed to load"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("模型配置加载失败")).toBeInTheDocument();
   });
 
   it("creates model providers with short-lived secret input and only renders masked state", () => {
@@ -35,28 +33,28 @@ describe("admin model config management UI", () => {
 
     render(createElement(AdminModelConfigManagement));
 
-    fireEvent.change(screen.getByLabelText("Provider key"), {
+    fireEvent.change(screen.getByLabelText("供应商标识"), {
       target: { value: "local_mock" },
     });
-    fireEvent.change(screen.getByLabelText("Provider display name"), {
+    fireEvent.change(screen.getByLabelText("供应商显示名称"), {
       target: { value: "Local Mock" },
     });
-    fireEvent.change(screen.getByLabelText("Secret value"), {
+    fireEvent.change(screen.getByLabelText("密钥值"), {
       target: { value: syntheticSecret },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save provider" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存供应商" }));
 
     const providerRow = screen.getByTestId("admin-model-provider-local_mock");
     expect(providerRow).toHaveTextContent("Local Mock");
-    expect(providerRow).toHaveTextContent("configured");
+    expect(providerRow).toHaveTextContent("已配置");
     expect(providerRow).toHaveTextContent("****3456");
-    expect(screen.getByLabelText("Secret value")).toHaveValue("");
+    expect(screen.getByLabelText("密钥值")).toHaveValue("");
     expect(document.body.textContent).not.toContain(syntheticSecret);
 
     fireEvent.click(
-      within(providerRow).getByRole("button", { name: "Disable provider" }),
+      within(providerRow).getByRole("button", { name: "禁用供应商" }),
     );
-    expect(providerRow).toHaveTextContent("disabled");
+    expect(providerRow).toHaveTextContent("已停用");
   });
 
   it("shows model config fallback controls and prompt template metadata without raw prompt bodies", () => {
@@ -119,21 +117,21 @@ describe("admin model config management UI", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
     const configRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
-    expect(configRow).toHaveTextContent("fallback: identifier values folded");
+    expect(configRow).toHaveTextContent("备用：标识符已隐藏");
     expect(configRow).not.toHaveTextContent("model-config-public-fallback");
-    expect(configRow).toHaveTextContent("priority: 10");
-    expect(configRow).toHaveTextContent("redacted_metadata");
+    expect(configRow).toHaveTextContent("优先级： 10");
+    expect(configRow).toHaveTextContent("脱敏元数据");
 
     fireEvent.click(
-      within(configRow).getByRole("button", { name: "Disable config" }),
+      within(configRow).getByRole("button", { name: "禁用配置" }),
     );
-    expect(configRow).toHaveTextContent("disabled");
+    expect(configRow).toHaveTextContent("已停用");
 
-    fireEvent.click(screen.getByRole("tab", { name: "Prompt templates" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Prompt 模板" }));
     const templateRow = screen.getByTestId(
       "admin-prompt-template-prompt-template-public-001",
     );
@@ -141,19 +139,19 @@ describe("admin model config management UI", () => {
     expect(templateRow).toHaveTextContent("Hint template preview [redacted]");
     expect(document.body.textContent).not.toContain(rawPromptBody);
 
-    fireEvent.change(screen.getByLabelText("Template key"), {
+    fireEvent.change(screen.getByLabelText("模板标识"), {
       target: { value: "ai_explanation_v1" },
     });
-    fireEvent.change(screen.getByLabelText("Template title"), {
+    fireEvent.change(screen.getByLabelText("模板标题"), {
       target: { value: "Explanation V1" },
     });
-    fireEvent.change(screen.getByLabelText("Body digest"), {
+    fireEvent.change(screen.getByLabelText("正文摘要"), {
       target: { value: "sha256:explanation" },
     });
-    fireEvent.change(screen.getByLabelText("Masked body preview"), {
+    fireEvent.change(screen.getByLabelText("脱敏正文预览"), {
       target: { value: "Explanation preview [redacted]" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save template" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存模板" }));
 
     expect(screen.getByText("Explanation V1")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain(rawPromptBody);

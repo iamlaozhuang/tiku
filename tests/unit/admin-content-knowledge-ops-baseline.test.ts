@@ -692,7 +692,7 @@ describe("admin content and knowledge ops baseline", () => {
     expect(within(firstNode).getByText("绑定题目 18")).toBeInTheDocument();
     expect(
       within(firstNode).getByRole("link", {
-        name: "Review durable recommendation binding for knowledge-node-public-001",
+        name: "查看 knowledge-node-public-001 的知识点推荐绑定",
       }),
     ).toHaveAttribute(
       "href",
@@ -813,7 +813,7 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.change(createDialog.getByLabelText("适用等级"), {
       target: { value: "2,3" },
     });
-    fireEvent.change(createDialog.getByLabelText("父级 publicId"), {
+    fireEvent.change(createDialog.getByLabelText("父级业务标识"), {
       target: { value: "knowledge-node-public-001" },
     });
     fireEvent.change(createDialog.getByLabelText("排序"), {
@@ -911,7 +911,7 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.click(screen.getByRole("button", { name: "移动节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("移动知识点节点");
     const moveDialog = within(screen.getByRole("alertdialog"));
-    fireEvent.change(moveDialog.getByLabelText("新父级 publicId"), {
+    fireEvent.change(moveDialog.getByLabelText("新父级业务标识"), {
       target: { value: "knowledge-node-public-002" },
     });
     fireEvent.change(moveDialog.getByLabelText("新排序"), {

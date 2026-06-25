@@ -591,13 +591,13 @@ export function AdminOpsManagement() {
     <main className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">Admin Ops</p>
+          <p className="text-brand-primary text-sm font-medium">运营后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             运营后台闭环
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm leading-6">
             用户、企业、员工、企业授权、卡密、审计日志和 AI
-            调用日志均通过受保护的 runtime API 加载，页面只使用 publicId。
+            调用日志均通过受保护接口加载，页面只使用业务标识。
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -644,8 +644,8 @@ export function AdminOpsManagement() {
         <label className="flex min-w-64 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">审计关键词</span>
           <Input
-            aria-label="Audit log keyword"
-            placeholder="actionType / publicId / metadata"
+            aria-label="审计日志关键词"
+            placeholder="操作类型 / 业务标识 / 元数据摘要"
             value={auditKeyword}
             onChange={(event) => setAuditKeyword(event.target.value)}
           />
@@ -839,7 +839,7 @@ export function AdminOpsManagement() {
                 </p>
                 <p className="text-text-muted text-xs">
                   {aiCallLog.providerDisplayName} / {aiCallLog.modelAlias} /{" "}
-                  {aiCallLog.totalTokenCount ?? 0} tokens /{" "}
+                  Token 数 {aiCallLog.totalTokenCount ?? 0} /{" "}
                   {aiCallLog.promptSummary ?? "已脱敏"}
                 </p>
               </div>
@@ -855,7 +855,8 @@ export function AdminOpsManagement() {
                   {summary.bucket} / {summary.aiFuncType}
                 </p>
                 <p className="text-text-muted text-xs">
-                  {summary.callCount} 次 / {summary.estimatedCostCny} CNY
+                  调用次数 {summary.callCount} 次 / 预估成本{" "}
+                  {summary.estimatedCostCny} 元
                 </p>
               </div>
             </AdminRow>
@@ -1193,9 +1194,9 @@ function AdminOpsConfirmationDialog({
         </div>
         <p className="text-text-muted text-sm">
           {isResetPassword
-            ? "重置只提交用户 publicId，响应不会返回明文密码。"
+            ? "重置只提交用户业务标识，响应不会返回明文密码。"
             : isDisableUser
-              ? "停用用户会提交 publicId，并撤销该用户现有会话。"
+              ? "停用用户会提交业务标识，并撤销该用户现有会话。"
               : isEnableUser
                 ? "启用用户只恢复账号状态，不创建新授权。"
                 : "批量生成卡密必须由后端原子操作保护；当前提示并发冲突以防止重复生成。"}

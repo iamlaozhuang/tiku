@@ -7285,18 +7285,35 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
     planningSourcePath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
-    status: pending
-    result: null
-    approvalRequiredBeforeClaim: user_or_standing_local_implementation_approval
-    approvedAt: null
-    approvedBy: null
-    claimedAt: null
-    plannedAt: null
-    validatedAt: null
-    reviewedAt: null
+    status: ready_for_closeout
+    result: pass_visible_chinese_ui_technical_labels_cleaned_static_validated_no_runtime
+    approvalRequiredBeforeClaim: satisfied_by_current_user_next_task_selection
+    approvalConsumed: current_user_next_task_selection_visible_chinese_ui_cleanup_2026_06_24
+    approvalSource: current_user_message_next_task_visible_chinese_ui_cleanup_2026_06_24
+    approvedAt: "2026-06-24T22:52:06-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-24T22:52:06-07:00"
+    plannedAt: "2026-06-24T22:52:06-07:00"
+    validatedAt: "2026-06-24T23:18:55-07:00"
+    reviewedAt: "2026-06-24T23:18:55-07:00"
     closedAt: null
     blockedAt: null
-    branch: null
+    branch: codex/visible-chinese-ui-label-cleanup-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_next_task_selection_visible_chinese_ui_cleanup_2026_06_24
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required
     retryCount: 0
     lastFailurePath: null
 

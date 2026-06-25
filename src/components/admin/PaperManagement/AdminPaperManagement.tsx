@@ -308,15 +308,13 @@ export function AdminPaperManagement({
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Content Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">内容后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             试卷管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
             管理草稿组卷、发布校验、下架复制、原始文件与模拟考试记录概览；本基线只展示
-            publicId 与契约字段。
+            业务标识与契约字段。
           </p>
         </div>
         <ActionBar hasRows={filteredPapers.length > 0} />
@@ -413,7 +411,7 @@ function FilterPanel({
             <Input
               aria-label="关键词"
               className="pl-8"
-              placeholder="试卷名称、来源、publicId、大题或文件名"
+              placeholder="试卷名称、来源、业务标识、大题或文件名"
               value={keyword}
               onChange={(event) => onKeywordChange(event.target.value)}
             />

@@ -34,7 +34,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(paperRouteSource).toContain('workspace="content"');
     expect(paperRouteSource).toContain('generationKind="paper"');
     expect(sharedSurfaceSource).toContain("内容 AI 草稿/评审");
-    expect(sharedSurfaceSource).toContain("正式 question / paper 写入仍需评审");
+    expect(sharedSurfaceSource).toContain("正式题目或试卷写入仍需评审");
     expect(sharedSurfaceSource).not.toContain("modelProvider");
     expect(sharedSurfaceSource).not.toContain("providerPayload");
   });

@@ -68,6 +68,25 @@ const emptyTemplateForm = {
 
 export type PromptTemplateFormInput = typeof emptyTemplateForm;
 
+const aiFuncTypeLabels: Partial<Record<AdminAiFunctionType, string>> = {
+  ai_explanation: "AI 讲解",
+  ai_hint: "AI 提示",
+  ai_scoring: "AI 评分",
+};
+
+const modelConfigStatusLabels: Record<string, string> = {
+  active: "已启用",
+  configured: "已配置",
+  disabled: "已停用",
+  enabled: "已启用",
+  not_configured: "未配置",
+  redacted_metadata: "脱敏元数据",
+};
+
+function formatModelConfigStatus(value: string) {
+  return modelConfigStatusLabels[value] ?? value;
+}
+
 export function AdminModelConfigManagement({
   state = "ready",
   initialModelProviders = emptyModelProviders,
@@ -100,17 +119,15 @@ export function AdminModelConfigManagement({
   );
 
   if (state === "loading") {
-    return <AdminModelConfigStatePanel title="Loading model configuration" />;
+    return <AdminModelConfigStatePanel title="正在加载模型配置" />;
   }
 
   if (state === "empty") {
-    return <AdminModelConfigStatePanel title="No model configuration yet" />;
+    return <AdminModelConfigStatePanel title="暂无模型配置" />;
   }
 
   if (state === "error") {
-    return (
-      <AdminModelConfigStatePanel title="Model configuration failed to load" />
-    );
+    return <AdminModelConfigStatePanel title="模型配置加载失败" />;
   }
 
   async function handleSaveProvider() {
@@ -129,9 +146,9 @@ export function AdminModelConfigManagement({
 
       setModelProviders((current) => [...current, provider]);
       setProviderForm(emptyProviderForm);
-      setActionMessage("Model provider saved.");
+      setActionMessage("模型供应商已保存。");
     } catch {
-      setActionMessage("Model provider save failed.");
+      setActionMessage("模型供应商保存失败。");
     }
   }
 
@@ -151,9 +168,9 @@ export function AdminModelConfigManagement({
 
       setModelConfigs((current) => [...current, modelConfig]);
       setConfigForm(emptyConfigForm);
-      setActionMessage("Model config saved.");
+      setActionMessage("模型配置已保存。");
     } catch {
-      setActionMessage("Model config save failed.");
+      setActionMessage("模型配置保存失败。");
     }
   }
 
@@ -180,48 +197,47 @@ export function AdminModelConfigManagement({
 
       setPromptTemplates((current) => [...current, promptTemplate]);
       setTemplateForm(emptyTemplateForm);
-      setActionMessage("Prompt template saved.");
+      setActionMessage("Prompt 模板已保存。");
     } catch {
-      setActionMessage("Prompt template save failed.");
+      setActionMessage("Prompt 模板保存失败。");
     }
   }
 
   return (
-    <section className="space-y-5" aria-label="Model configuration management">
+    <section className="space-y-5" aria-label="模型配置管理">
       <header className="flex flex-col gap-2">
         <h1 className="font-heading text-text-primary text-2xl font-semibold">
-          Model configuration
+          模型配置
         </h1>
         <p className="text-text-muted max-w-3xl text-sm">
-          Manage local redaction-safe provider metadata, fallback ordering, and
-          prompt template metadata without exposing secret values or raw
-          prompts.
+          维护脱敏的模型供应商元数据、备用顺序和 Prompt
+          模板元数据，不展示密钥值或原始 Prompt。
         </p>
       </header>
 
       <div className="border-border bg-surface flex flex-wrap gap-2 rounded-md border p-2">
         <AdminModelConfigTab
           activeTab={activeTab}
-          label="Model providers"
+          label="模型供应商"
           tab="model_provider"
           onSelect={setActiveTab}
         />
         <AdminModelConfigTab
           activeTab={activeTab}
-          label="Model configs"
+          label="模型配置"
           tab="model_config"
           onSelect={setActiveTab}
         />
         <AdminModelConfigTab
           activeTab={activeTab}
-          label="Prompt templates"
+          label="Prompt 模板"
           tab="prompt_template"
           onSelect={setActiveTab}
         />
       </div>
 
       {!hasAnyData ? (
-        <p className="text-text-muted text-sm">No saved model metadata yet.</p>
+        <p className="text-text-muted text-sm">暂无已保存的模型元数据。</p>
       ) : null}
 
       {activeTab === "model_provider" ? (
@@ -247,7 +263,7 @@ export function AdminModelConfigManagement({
               ),
             );
             void onToggleProvider?.(publicId, nextEnabled).catch(() => {
-              setActionMessage("Model provider status update failed.");
+              setActionMessage("模型供应商状态更新失败。");
             });
           }}
         />
@@ -277,7 +293,7 @@ export function AdminModelConfigManagement({
               ),
             );
             void onToggleConfig?.(publicId, nextEnabled).catch(() => {
-              setActionMessage("Model config status update failed.");
+              setActionMessage("模型配置状态更新失败。");
             });
           }}
         />
@@ -307,7 +323,7 @@ export function AdminModelConfigManagement({
               ),
             );
             void onToggleTemplate?.(publicId, nextActive).catch(() => {
-              setActionMessage("Prompt template status update failed.");
+              setActionMessage("Prompt 模板状态更新失败。");
             });
           }}
         />
@@ -459,37 +475,37 @@ function AdminModelProviderPanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="Provider form">
+      <AdminPanel title="供应商表单">
         <div className="space-y-3">
           <AdminTextField
-            label="Provider key"
+            label="供应商标识"
             value={form.providerKey}
             onChange={(value) => onChange({ ...form, providerKey: value })}
           />
           <AdminTextField
-            label="Provider display name"
+            label="供应商显示名称"
             value={form.displayName}
             onChange={(value) => onChange({ ...form, displayName: value })}
           />
           <AdminTextField
-            label="Secret value"
+            label="密钥值"
             type="password"
             value={form.secretValue}
             onChange={(value) => onChange({ ...form, secretValue: value })}
           />
           <AdminTextField
-            label="Base URL"
+            label="基础地址"
             value={form.baseUrl}
             onChange={(value) => onChange({ ...form, baseUrl: value })}
           />
           <Button disabled={!canSave} onClick={onSave}>
             <Save aria-hidden="true" className="mr-2 size-4" />
-            Save provider
+            保存供应商
           </Button>
         </div>
       </AdminPanel>
 
-      <AdminPanel title="Model providers">
+      <AdminPanel title="模型供应商">
         {modelProviders.map((provider) => (
           <AdminProviderRow
             key={provider.publicId}
@@ -520,50 +536,50 @@ function AdminModelConfigPanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="Config form">
+      <AdminPanel title="配置表单">
         <div className="space-y-3">
           <AdminTextField
-            label="Provider public id"
+            label="供应商业务标识"
             value={form.modelProviderPublicId}
             onChange={(value) =>
               onChange({ ...form, modelProviderPublicId: value })
             }
           />
           <AdminTextField
-            label="Model name"
+            label="模型名称"
             value={form.modelName}
             onChange={(value) => onChange({ ...form, modelName: value })}
           />
           <AdminTextField
-            label="Model alias"
+            label="模型别名"
             value={form.modelAlias}
             onChange={(value) => onChange({ ...form, modelAlias: value })}
           />
           <AdminTextField
-            label="Config display name"
+            label="配置显示名称"
             value={form.displayName}
             onChange={(value) => onChange({ ...form, displayName: value })}
           />
           <AdminTextField
-            label="Fallback model config public id"
+            label="备用模型配置业务标识"
             value={form.fallbackModelConfigPublicId}
             onChange={(value) =>
               onChange({ ...form, fallbackModelConfigPublicId: value })
             }
           />
           <AdminTextField
-            label="Fallback priority"
+            label="备用优先级"
             value={form.fallbackPriority}
             onChange={(value) => onChange({ ...form, fallbackPriority: value })}
           />
           <Button disabled={!canSave} onClick={onSave}>
             <Save aria-hidden="true" className="mr-2 size-4" />
-            Save config
+            保存配置
           </Button>
         </div>
       </AdminPanel>
 
-      <AdminPanel title="Model configs">
+      <AdminPanel title="模型配置">
         {modelConfigs.map((modelConfig) => (
           <AdminConfigRow
             key={modelConfig.publicId}
@@ -597,27 +613,27 @@ function AdminPromptTemplatePanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="Template form">
+      <AdminPanel title="模板表单">
         <div className="space-y-3">
           <AdminTextField
-            label="Template key"
+            label="模板标识"
             value={form.promptTemplateKey}
             onChange={(value) =>
               onChange({ ...form, promptTemplateKey: value })
             }
           />
           <AdminTextField
-            label="Template title"
+            label="模板标题"
             value={form.title}
             onChange={(value) => onChange({ ...form, title: value })}
           />
           <AdminTextField
-            label="Body digest"
+            label="正文摘要"
             value={form.bodyDigest}
             onChange={(value) => onChange({ ...form, bodyDigest: value })}
           />
           <AdminTextField
-            label="Masked body preview"
+            label="脱敏正文预览"
             value={form.bodyPreviewMasked}
             onChange={(value) =>
               onChange({ ...form, bodyPreviewMasked: value })
@@ -625,12 +641,12 @@ function AdminPromptTemplatePanel({
           />
           <Button disabled={!canSave} onClick={onSave}>
             <Save aria-hidden="true" className="mr-2 size-4" />
-            Save template
+            保存模板
           </Button>
         </div>
       </AdminPanel>
 
-      <AdminPanel title="Prompt templates">
+      <AdminPanel title="Prompt 模板">
         {promptTemplates.map((promptTemplate) => (
           <AdminPromptTemplateRow
             key={promptTemplate.publicId}
@@ -689,10 +705,8 @@ function AdminProviderRow({
   onToggle: (publicId: string) => void;
   provider: ModelProviderSummaryDto;
 }) {
-  const statusText = provider.isEnabled ? "enabled" : "disabled";
-  const actionLabel = provider.isEnabled
-    ? "Disable provider"
-    : "Enable provider";
+  const statusText = provider.isEnabled ? "已启用" : "已停用";
+  const actionLabel = provider.isEnabled ? "禁用供应商" : "启用供应商";
 
   return (
     <div
@@ -705,8 +719,9 @@ function AdminProviderRow({
           {provider.displayName}
         </p>
         <p className="text-text-muted text-xs">
-          {provider.providerKey} / {provider.secretStatus} /{" "}
-          {provider.maskedSecret ?? "not configured"} / {statusText}
+          {provider.providerKey} /{" "}
+          {formatModelConfigStatus(provider.secretStatus)} /{" "}
+          {provider.maskedSecret ?? "未配置"} / {statusText}
         </p>
       </div>
       <Button variant="outline" onClick={() => onToggle(provider.publicId)}>
@@ -728,22 +743,24 @@ function AdminConfigRow({
   modelConfig: ModelConfigSummaryDto;
   onToggle: (publicId: string) => void;
 }) {
-  const actionLabel = modelConfig.isEnabled
-    ? "Disable config"
-    : "Enable config";
+  const actionLabel = modelConfig.isEnabled ? "禁用配置" : "启用配置";
   const runtimeAlignment = modelConfig.runtimeAlignment ?? null;
   const runtimeText =
     runtimeAlignment === null
-      ? "runtime: not evaluated"
+      ? "运行时：未评估"
       : runtimeAlignment.isRuntimeSelected
-        ? `runtime: selected ${runtimeAlignment.selectionReason ?? "primary"} / ${runtimeAlignment.promptTemplateKey ?? "template pending"}`
+        ? `运行时：已选中 ${
+            runtimeAlignment.selectionReason === "primary"
+              ? "主配置"
+              : (runtimeAlignment.selectionReason ?? "主配置")
+          } / ${runtimeAlignment.promptTemplateKey ?? "模板待定"}`
         : runtimeAlignment.selectedModelConfigPublicId === null
-          ? "runtime: standby / selected: none"
-          : "runtime: standby / selected identifier folded";
+          ? "运行时：备用 / 未选中"
+          : "运行时：备用 / 已隐藏选中标识";
   const fallbackText =
     modelConfig.fallbackModelConfigPublicId === null
-      ? "fallback: none"
-      : "fallback: identifier values folded";
+      ? "备用：无"
+      : "备用：标识符已隐藏";
 
   return (
     <div
@@ -756,13 +773,15 @@ function AdminConfigRow({
           {modelConfig.displayName}
         </p>
         <p className="text-text-muted text-xs">
-          {modelConfig.aiFuncType} / {modelConfig.modelAlias} /{" "}
-          {modelConfig.status} / priority: {modelConfig.fallbackPriority} /
-          {fallbackText} / {modelConfig.snapshotPolicy} / {runtimeText}
+          {aiFuncTypeLabels[modelConfig.aiFuncType] ?? modelConfig.aiFuncType} /{" "}
+          {modelConfig.modelAlias} /{" "}
+          {formatModelConfigStatus(modelConfig.status)} / 优先级：{" "}
+          {modelConfig.fallbackPriority} / {fallbackText} /{" "}
+          {formatModelConfigStatus(modelConfig.snapshotPolicy)} / {runtimeText}
         </p>
         <div className="mt-2 flex flex-wrap gap-1">
-          <AdminMetadataBadge label="metadata-only" />
-          <AdminMetadataBadge label="redacted" />
+          <AdminMetadataBadge label="仅元数据" />
+          <AdminMetadataBadge label="已脱敏" />
         </div>
       </div>
       <Button variant="outline" onClick={() => onToggle(modelConfig.publicId)}>
@@ -792,9 +811,7 @@ function AdminPromptTemplateRow({
   onToggle: (publicId: string) => void;
   promptTemplate: PromptTemplateSummaryDto;
 }) {
-  const actionLabel = promptTemplate.isActive
-    ? "Disable template"
-    : "Enable template";
+  const actionLabel = promptTemplate.isActive ? "禁用模板" : "启用模板";
 
   return (
     <div
@@ -808,8 +825,8 @@ function AdminPromptTemplateRow({
         </p>
         <p className="text-text-muted text-xs">
           {promptTemplate.promptTemplateKey} / v{promptTemplate.version} /{" "}
-          {promptTemplate.status} / {promptTemplate.bodyDigest} /{" "}
-          {promptTemplate.bodyPreviewMasked}
+          {formatModelConfigStatus(promptTemplate.status)} /{" "}
+          {promptTemplate.bodyDigest} / {promptTemplate.bodyPreviewMasked}
         </p>
       </div>
       <Button

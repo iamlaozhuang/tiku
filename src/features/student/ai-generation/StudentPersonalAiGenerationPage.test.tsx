@@ -186,9 +186,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         },
       );
     });
-    expect(
-      await screen.findByText("blocked_without_follow_up_task"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("待后续任务审批")).toBeInTheDocument();
     expect(screen.getByText("masked preview ui 501")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_result_public_ui_501"),
@@ -229,8 +227,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       await screen.findByText("2026-06-14T09:00:00.000Z"),
     ).toBeInTheDocument();
-    expect(screen.getByText("succeeded")).toBeInTheDocument();
-    expect(screen.getByText("weak")).toBeInTheDocument();
+    expect(screen.getByText("已完成")).toBeInTheDocument();
+    expect(screen.getByText("证据较弱")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_request_history_public_ui_701"),
     ).not.toBeInTheDocument();
@@ -299,14 +297,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       await screen.findByText("\u8131\u654f\u7ed3\u679c\u8be6\u60c5"),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("local_contract_only").length).toBeGreaterThan(
-      0,
-    );
-    expect(screen.getAllByText("redacted_snapshot").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("blocked_without_follow_up_task").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("仅本地合约").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("脱敏快照").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("待后续任务审批").length).toBeGreaterThan(0);
     expect(screen.getByText("masked preview detail 501")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_result_public_ui_501"),

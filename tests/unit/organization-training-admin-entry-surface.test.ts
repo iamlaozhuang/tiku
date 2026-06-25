@@ -221,10 +221,10 @@ describe("AdminOrganizationTrainingPage", () => {
     const draftForm = within(
       screen.getByRole("form", { name: "组织培训草稿表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织 publicId"), {
+    fireEvent.change(draftForm.getByLabelText("组织业务标识"), {
       target: { value: "organization-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("企业授权 publicId"), {
+    fireEvent.change(draftForm.getByLabelText("企业授权业务标识"), {
       target: { value: "org-auth-admin-scope-001" },
     });
     fireEvent.change(draftForm.getByLabelText("培训标题"), {
@@ -258,7 +258,7 @@ describe("AdminOrganizationTrainingPage", () => {
     const sourceForm = within(
       screen.getByRole("form", { name: "组织培训来源表单" }),
     );
-    fireEvent.change(sourceForm.getByLabelText("来源 publicId"), {
+    fireEvent.change(sourceForm.getByLabelText("来源业务标识"), {
       target: { value: "paper-source-ui-001" },
     });
     fireEvent.change(sourceForm.getByLabelText("来源标题"), {
@@ -301,7 +301,7 @@ describe("AdminOrganizationTrainingPage", () => {
     const copyForm = within(
       screen.getByRole("form", { name: "组织培训复制表单" }),
     );
-    fireEvent.change(copyForm.getByLabelText("版本 publicId"), {
+    fireEvent.change(copyForm.getByLabelText("版本业务标识"), {
       target: { value: "organization-training-version-ui-001" },
     });
     fireEvent.change(copyForm.getByLabelText("新草稿标题"), {

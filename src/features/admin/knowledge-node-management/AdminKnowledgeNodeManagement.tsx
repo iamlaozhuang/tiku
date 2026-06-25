@@ -358,15 +358,13 @@ export function AdminKnowledgeNodeManagement() {
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Content Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">内容后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             知识点树维护
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
             按专业维护知识点节点、适用等级、排序、停用状态与绑定题目数量；页面只展示
-            publicId，不暴露内部自增 id。
+            业务标识，不暴露内部自增 id。
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -449,7 +447,7 @@ export function AdminKnowledgeNodeManagement() {
               <Input
                 aria-label="关键词"
                 className="pl-8"
-                placeholder="节点名称、路径或 publicId"
+                placeholder="节点名称、路径或业务标识"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
               />
@@ -808,8 +806,8 @@ function KnowledgeNodeActionDialog({
           {actionType === "create"
             ? "按专业、父级、等级和排序创建知识点节点。"
             : actionType === "move"
-              ? "将目标节点移动到指定 publicId 父节点下，并同步提交排序值。"
-              : "操作仅提交 publicId 和允许的 JSON 字段，不提交内部自增 id。"}
+              ? "将目标节点移动到指定父级业务标识下，并同步提交排序值。"
+              : "操作仅提交业务标识和允许的结构化字段，不提交内部自增 id。"}
         </p>
         {formValues === undefined ? null : (
           <KnowledgeNodeForm
@@ -896,9 +894,9 @@ function KnowledgeNodeForm({
         />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">父级 publicId</span>
+        <span className="text-text-secondary">父级业务标识</span>
         <Input
-          aria-label="父级 publicId"
+          aria-label="父级业务标识"
           disabled={disabled}
           placeholder="根节点留空"
           value={values.parentKnowledgeNodePublicId}
@@ -938,9 +936,9 @@ function KnowledgeNodeMoveForm({
   return (
     <div className="grid gap-3">
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">新父级 publicId</span>
+        <span className="text-text-secondary">新父级业务标识</span>
         <Input
-          aria-label="新父级 publicId"
+          aria-label="新父级业务标识"
           disabled={disabled}
           placeholder="移到根节点可留空"
           value={values.parentKnowledgeNodePublicId}
@@ -1067,7 +1065,7 @@ function KnowledgeNodeList({
               </div>
               {knowledgeNode.isRecommendable ? (
                 <a
-                  aria-label={`Review durable recommendation binding for ${knowledgeNode.publicId}`}
+                  aria-label={`查看 ${knowledgeNode.publicId} 的知识点推荐绑定`}
                   className="border-border text-text-secondary hover:bg-muted hover:text-foreground mt-4 inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-all active:translate-y-px"
                   href={createRecommendationBindingReviewHref(
                     knowledgeNode.publicId,

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
-updatedAt: "2026-06-24T22:45:26-07:00"
+currentPhase: visible-chinese-ui-technical-label-cleanup-2026-06-24
+updatedAt: "2026-06-24T23:18:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,42 +504,41 @@ repository:
   lastKnownMasterSha: d506c0afea2050e1217aa92d0ce7435a7c8c16b4
   lastKnownOriginMasterSha: d506c0afea2050e1217aa92d0ce7435a7c8c16b4
 currentTask:
-  id: visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
-  status: closed
-  result: pass_visible_chinese_ui_cleanup_scope_planned_no_source_change
-  claimedAt: "2026-06-24T22:38:12-07:00"
-  plannedAt: "2026-06-24T22:38:12-07:00"
-  validatedAt: "2026-06-24T22:45:26-07:00"
-  reviewedAt: "2026-06-24T22:45:26-07:00"
-  closedAt: "2026-06-24T22:45:26-07:00"
+  id: visible-chinese-ui-technical-label-cleanup-2026-06-24
+  status: ready_for_closeout
+  result: pass_visible_chinese_ui_technical_labels_cleaned_static_validated_no_runtime
+  claimedAt: "2026-06-24T22:52:06-07:00"
+  plannedAt: "2026-06-24T22:52:06-07:00"
+  validatedAt: "2026-06-24T23:18:55-07:00"
+  reviewedAt: "2026-06-24T23:18:55-07:00"
+  closedAt: null
   blockedAt: null
-  sourceStory: successor-of-post-repair-gap-list-refresh-no-final-pass-2026-06-24
-  approvalConsumed: current_user_direct_next_task_selection_2026_06_24
-  approvalSource: current_user_message_next_task_visible_chinese_ui_cleanup_planning_2026_06_24
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
-  acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+  sourceStory: successor-of-visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+  approvalConsumed: current_user_next_task_selection_visible_chinese_ui_cleanup_2026_06_24
+  approvalSource: current_user_message_next_task_visible_chinese_ui_cleanup_2026_06_24
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  planningSourcePath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_direct_next_task_selection_2026_06_24
+      approvalSource: current_user_next_task_selection_visible_chinese_ui_cleanup_2026_06_24
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_direct_next_task_selection_2026_06_24
+      approvalSource: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_direct_next_task_selection_2026_06_24
+      approvalSource: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_direct_next_task_selection_2026_06_24
-  branch: codex/visible-chinese-ui-cleanup-planning-20260624
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
+  branch: codex/visible-chinese-ui-label-cleanup-20260624
   commitSha: null
   prUrl: null
-  nextRecommendedTask: visible-chinese-ui-technical-label-cleanup-2026-06-24
   retryCount: 0
   lastFailurePath: null
 roleSeparatedPostRepairRuntimeRerunScopeApproval20260624:
@@ -861,6 +860,55 @@ visibleChineseUiTechnicalLabelCleanupPlanning20260624:
   nextTaskStatus: pending
   blockedWithoutFreshApproval:
     - product_source_or_test_change
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - owner_credential_entry_or_account_action
+    - database_read_write_or_migration
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+visibleChineseUiTechnicalLabelCleanup20260624:
+  taskId: visible-chinese-ui-technical-label-cleanup-2026-06-24
+  phase: visible-chinese-ui-technical-label-cleanup-2026-06-24
+  recordedAt: "2026-06-24T22:52:06-07:00"
+  status: ready_for_closeout
+  result: pass_visible_chinese_ui_technical_labels_cleaned_static_validated_no_runtime
+  validatedAt: "2026-06-24T23:18:55-07:00"
+  reviewedAt: "2026-06-24T23:18:55-07:00"
+  branch: codex/visible-chinese-ui-label-cleanup-20260624
+  sourcePlanningPath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+  sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+  scope: low_risk_visible_ui_copy_cleanup_no_runtime_no_provider
+  baseline:
+    sourceGapId: GAP-UI-01
+    productSourceChangedByThisTask: true
+    browserRuntimeExecutedByThisTask: false
+    finalPassClaim: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_next_task_selection_visible_chinese_ui_cleanup_2026_06_24
+    mergeToMaster:
+      approved: false
+      targetBranch: master
+      approvalSource: fresh_closeout_approval_required
+    push:
+      approved: false
+      target: origin/master
+      approvalSource: fresh_closeout_approval_required
+    cleanup:
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
+  blockedWithoutFreshApproval:
     - browser_or_playwright_runtime
     - dev_server_start
     - owner_credential_entry_or_account_action

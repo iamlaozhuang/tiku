@@ -86,7 +86,7 @@ const copy = {
     "面向高级授权学员的 AI出题 和 AI组卷入口；当前仅展示本地合约摘要和脱敏状态。",
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
   emptyDescription:
-    "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730 route contract \u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
+    "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730\u63a5\u53e3\u5951\u7ea6\u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
   requestButton: "AI出题",
   paperButton: "AI组卷",
   loadingTitle: "\u6b63\u5728\u53d1\u8d77\u672c\u5730\u8bf7\u6c42",
@@ -118,6 +118,54 @@ const copy = {
   resultDetailErrorTitle: "\u7ed3\u679c\u8be6\u60c5\u6682\u4e0d\u53ef\u7528",
   resultDetailUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
+};
+
+const contractFieldLabelMap: Record<string, string> = {
+  citationCount: "引用数量",
+  contentDigest: "内容摘要哈希",
+  contentPreviewMasked: "脱敏预览",
+  contentReferenceRedactionStatus: "内容引用脱敏状态",
+  contentReferenceVisibility: "内容引用可见性",
+  contentVisibility: "内容可见性",
+  detailDisplayMode: "详情展示模式",
+  evidenceStatus: "证据状态",
+  experienceSurface: "体验入口",
+  flowStatus: "流程状态",
+  formalAdoptionStatus: "正式入库状态",
+  formalAdoptionWriteStatus: "正式入库写入状态",
+  isFormalAdoptionBlocked: "是否阻断正式入库",
+  persistedAt: "持久化时间",
+  redactionStatus: "脱敏状态",
+  referenceRedactionStatus: "引用脱敏状态",
+  requestedAt: "请求时间",
+  resultStatus: "结果状态",
+  runtimeStatus: "运行状态",
+  status: "状态",
+  taskType: "任务类型",
+};
+
+const contractValueLabelMap: Record<string, string> = {
+  accepted: "已受理",
+  ai_question_generation: "AI出题",
+  blocked: "已阻断",
+  blocked_without_follow_up_task: "待后续任务审批",
+  draft: "草稿",
+  false: "否",
+  local_contract_only: "仅本地合约",
+  metadata_only: "仅元数据",
+  none: "无证据",
+  pending: "处理中",
+  quota_insufficient: "额度不足",
+  ready: "就绪",
+  redacted: "已脱敏",
+  redacted_snapshot: "脱敏快照",
+  student_local_browser: "学员本地页面",
+  succeeded: "已完成",
+  sufficient: "证据充分",
+  summary_only: "仅摘要",
+  true: "是",
+  unknown: "未知原因",
+  weak: "证据较弱",
 };
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
@@ -269,9 +317,11 @@ function StudentPersonalAiGenerationStateMessage({
 function ContractField({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-border flex items-center justify-between gap-3 border-b py-3 last:border-b-0">
-      <dt className="text-text-secondary text-sm">{label}</dt>
+      <dt className="text-text-secondary text-sm">
+        {contractFieldLabelMap[label] ?? label}
+      </dt>
       <dd className="text-text-primary max-w-[12rem] truncate text-right text-sm font-medium">
-        {value}
+        {contractValueLabelMap[value] ?? value}
       </dd>
     </div>
   );
@@ -292,14 +342,19 @@ function StudentPersonalAiGenerationContractSummary({
           {copy.contractTitle}
         </h2>
         <span className="bg-secondary text-secondary-foreground rounded-lg px-2 py-1 text-xs font-medium">
-          {experience.redactionStatus}
+          {contractValueLabelMap[experience.redactionStatus] ??
+            experience.redactionStatus}
         </span>
       </div>
 
       {experience.requestState.status === "blocked" ? (
         <div className="bg-warning/10 text-warning mb-3 rounded-lg px-3 py-2 text-sm">
           <strong className="font-semibold">{copy.blockedTitle}</strong>
-          <span className="ml-2">{disabledReason ?? "unknown"}</span>
+          <span className="ml-2">
+            {contractValueLabelMap[disabledReason ?? "unknown"] ??
+              disabledReason ??
+              "未知原因"}
+          </span>
         </div>
       ) : null}
 
@@ -1082,9 +1137,7 @@ export function StudentPersonalAiGenerationPage() {
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
       <div className="space-y-2">
-        <p className="text-brand-primary text-sm font-medium">
-          personal-learning-ai
-        </p>
+        <p className="text-brand-primary text-sm font-medium">个人 AI 训练</p>
         <h1 className="font-heading text-text-primary text-2xl font-semibold">
           {copy.title}
         </h1>

@@ -43,6 +43,33 @@ const formalAdoptionTargetResourceType = "personal_ai_generation_result";
 const formalAdoptionReviewTargetType = "question";
 const formalAdoptionReviewReasonCategory = "content_quality_passed";
 
+const adminOpsDefinitionLabelMap: Record<string, string> = {
+  formalTargetWriteStatus: "正式写入状态",
+  redactionStatus: "脱敏状态",
+  reviewStatus: "复核状态",
+};
+
+const adminOpsDisplayValueMap: Record<string, string> = {
+  ai_scoring: "AI 评分",
+  approved_for_manual_adoption: "已通过人工入库复核",
+  awaiting_metadata_review: "等待元数据复核",
+  blocked_without_follow_up_task: "待后续任务审批",
+  metadata_only: "仅元数据",
+  "metadata-only": "仅元数据",
+  model_config: "模型配置",
+  "model_config.enable": "启用模型配置",
+  personal_ai_generation_result: "个人 AI 训练结果",
+  "personal_ai_generation_result.formal_adoption_review.ready":
+    "正式入库复核就绪",
+  redacted: "已脱敏",
+  success: "成功",
+  summary_only: "仅摘要",
+};
+
+function formatAdminOpsDisplayValue(value: string) {
+  return adminOpsDisplayValueMap[value] ?? value;
+}
+
 const staticRuntimeData: AdminAiAuditRuntimeData = {
   modelProviders: [
     {
@@ -307,13 +334,13 @@ export function AdminAiAuditLogOpsBaseline({
   return (
     <div className="space-y-6" data-testid="admin-ai-audit-runtime-ready">
       <header className="flex flex-col gap-2">
-        <p className="text-brand-primary text-sm font-medium">AI Ops</p>
+        <p className="text-brand-primary text-sm font-medium">AI 配置与日志</p>
         <h1 className="font-heading text-text-primary text-2xl font-semibold">
           AI 配置与日志运营
         </h1>
         <p className="text-text-secondary max-w-3xl text-sm leading-6">
-          模型配置、Prompt 模板、审计日志与 AI 调用日志均通过本地 runtime API
-          加载；页面默认折叠标识符值，仅展示脱敏摘要和状态语义。
+          模型配置、Prompt 模板、审计日志与 AI
+          调用日志均通过本地受保护接口加载；页面默认折叠标识符值，仅展示脱敏摘要和状态语义。
         </p>
       </header>
 
@@ -338,12 +365,12 @@ export function AdminAiAuditLogOpsBaseline({
           {runtimeData.auditLogs.map((auditLog) => (
             <AdminOpsSummaryRow
               key={auditLog.publicId}
-              label={auditLog.actionType}
+              label={formatAdminOpsDisplayValue(auditLog.actionType)}
               meta={[
-                "identifier values hidden",
-                auditLog.targetResourceType,
-                auditLog.resultStatus,
-                auditLog.metadataSummary ?? "redacted metadata",
+                "标识符已隐藏",
+                formatAdminOpsDisplayValue(auditLog.targetResourceType),
+                formatAdminOpsDisplayValue(auditLog.resultStatus),
+                auditLog.metadataSummary ?? "已脱敏元数据",
               ].join(" / ")}
               badges={["metadata-only", "redacted", "summary_only"]}
               publicId={auditLog.publicId}
@@ -357,13 +384,13 @@ export function AdminAiAuditLogOpsBaseline({
           {runtimeData.aiCallLogs.map((aiCallLog) => (
             <AdminOpsSummaryRow
               key={aiCallLog.publicId}
-              label={aiCallLog.aiFuncType}
+              label={formatAdminOpsDisplayValue(aiCallLog.aiFuncType)}
               meta={[
                 aiCallLog.providerDisplayName,
                 aiCallLog.modelAlias,
-                aiCallLog.callStatus,
-                `${aiCallLog.totalTokenCount ?? 0} tokens`,
-                aiCallLog.promptSummary ?? "redacted prompt",
+                formatAdminOpsDisplayValue(aiCallLog.callStatus),
+                `Token 数：${aiCallLog.totalTokenCount ?? 0}`,
+                aiCallLog.promptSummary ?? "Prompt 摘要已脱敏",
               ].join(" / ")}
               publicId={aiCallLog.publicId}
               testId={`admin-ai-call-log-${aiCallLog.publicId}`}
@@ -379,12 +406,14 @@ export function AdminAiAuditLogOpsBaseline({
                 costSummary.aiFuncType,
                 costSummary.modelAlias,
               ].join("-")}
-              label={`${costSummary.bucket} / ${costSummary.aiFuncType}`}
+              label={`${costSummary.bucket} / ${formatAdminOpsDisplayValue(
+                costSummary.aiFuncType,
+              )}`}
               meta={[
                 costSummary.providerDisplayName,
                 costSummary.modelAlias,
-                `${costSummary.callCount} calls`,
-                `${costSummary.estimatedCostCny} CNY`,
+                `调用次数：${costSummary.callCount}`,
+                `预估成本：${costSummary.estimatedCostCny} 元`,
               ].join(" / ")}
               publicId={`${costSummary.bucket}-${costSummary.aiFuncType}`}
             />
@@ -683,8 +712,7 @@ function AdminFormalAdoptionReviewPanel({
             正式入库复核
           </h2>
           <p className="text-text-secondary max-w-3xl text-sm leading-6">
-            仅提交 metadata-only 人工复核，结果保持
-            redacted；正式题库写入仍被后续任务阻断。
+            仅提交元数据人工复核，结果保持脱敏；正式题库写入仍被后续任务阻断。
           </p>
           <div className="flex flex-wrap gap-2">
             <AdminOpsStatusBadge label="metadata-only" />
@@ -750,7 +778,7 @@ function AdminOpsStatePanel({
 function AdminOpsStatusBadge({ label }: { label: string }) {
   return (
     <span className="bg-secondary text-secondary-foreground rounded-lg px-2 py-1 text-xs font-medium">
-      {label}
+      {formatAdminOpsDisplayValue(label)}
     </span>
   );
 }
@@ -764,8 +792,12 @@ function AdminOpsDefinition({
 }) {
   return (
     <div className="border-border border-b py-3 last:border-b-0 md:border-r md:border-b-0 md:px-3 md:first:pl-0 md:last:border-r-0">
-      <dt className="text-text-muted text-xs">{label}</dt>
-      <dd className="text-text-primary mt-1 text-sm font-medium">{value}</dd>
+      <dt className="text-text-muted text-xs">
+        {adminOpsDefinitionLabelMap[label] ?? label}
+      </dt>
+      <dd className="text-text-primary mt-1 text-sm font-medium">
+        {formatAdminOpsDisplayValue(value)}
+      </dd>
     </div>
   );
 }

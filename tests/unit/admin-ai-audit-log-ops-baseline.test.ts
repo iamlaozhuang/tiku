@@ -492,7 +492,7 @@ describe("admin ai and audit log ops baseline", () => {
 
     await screen.findByTestId("admin-ai-audit-runtime-ready");
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
-    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
 
     expect(
       screen.getByTestId("admin-model-config-runtime-model-config-001"),
@@ -526,7 +526,7 @@ describe("admin ai and audit log ops baseline", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: /AI/ }),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
     expect(
       screen.getByTestId("admin-model-config-model-config-public-001"),
     ).toHaveAttribute("data-public-id", "model-config-public-001");
@@ -535,12 +535,12 @@ describe("admin ai and audit log ops baseline", () => {
     ).not.toHaveAttribute("data-id");
     expect(
       screen.getByTestId("admin-model-config-model-config-public-001"),
-    ).toHaveTextContent("redacted_metadata");
+    ).toHaveTextContent("脱敏元数据");
     expect(screen.queryByText("sk-real-secret-1234")).toBeNull();
     const modelConfigRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
-    fireEvent.click(screen.getByRole("button", { name: "Disable config" }));
-    expect(modelConfigRow).toHaveTextContent("disabled");
+    fireEvent.click(screen.getByRole("button", { name: "禁用配置" }));
+    expect(modelConfigRow).toHaveTextContent("已停用");
   });
 });

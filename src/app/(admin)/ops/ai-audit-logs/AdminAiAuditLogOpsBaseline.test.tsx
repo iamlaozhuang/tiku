@@ -75,11 +75,9 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
     render(<AdminAiAuditLogOpsBaseline />);
 
     expect(screen.getByText("正式入库复核")).toBeInTheDocument();
-    expect(screen.getAllByText("metadata-only").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("blocked_without_follow_up_task").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("仅元数据").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("待后续任务审批").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "提交元数据复核" }),
     ).toBeInTheDocument();
@@ -95,9 +93,9 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
       "admin-audit-log-audit-log-formal-review-candidate-public-001",
     );
 
-    expect(within(auditLogRow).getByText("metadata-only")).toBeInTheDocument();
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(within(auditLogRow).getByText("summary_only")).toBeInTheDocument();
+    expect(within(auditLogRow).getByText("仅元数据")).toBeInTheDocument();
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(within(auditLogRow).getByText("仅摘要")).toBeInTheDocument();
     expect(
       within(auditLogRow).queryByText(
         "audit-log-formal-review-candidate-public-001",
@@ -125,23 +123,21 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
       "model-provider-public-001",
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
     const modelConfigRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
 
     expect(modelConfigRow).not.toHaveTextContent("model-config-public-001");
     expect(modelConfigRow).not.toHaveTextContent("model-config-public-002");
-    expect(
-      within(modelConfigRow).getByText("metadata-only"),
-    ).toBeInTheDocument();
-    expect(within(modelConfigRow).getByText("redacted")).toBeInTheDocument();
+    expect(within(modelConfigRow).getByText("仅元数据")).toBeInTheDocument();
+    expect(within(modelConfigRow).getByText("已脱敏")).toBeInTheDocument();
     expect(modelConfigRow).toHaveAttribute(
       "data-public-id",
       "model-config-public-001",
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Prompt templates" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Prompt 模板" }));
     const promptTemplateRow = screen.getByTestId(
       "admin-prompt-template-prompt-template-public-001",
     );
@@ -200,14 +196,10 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
         }),
       );
     });
-    expect(
-      await screen.findByText("approved_for_manual_adoption"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByText("blocked_without_follow_up_task").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("metadata-only").length).toBeGreaterThan(0);
+    expect(await screen.findByText("已通过人工入库复核")).toBeInTheDocument();
+    expect(screen.getAllByText("待后续任务审批").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("仅元数据").length).toBeGreaterThan(0);
   });
 
   it("does not render raw prompts, raw answers, provider payloads, or public identifier lists from review success data", async () => {
@@ -217,7 +209,7 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "提交元数据复核" }));
 
-    await screen.findByText("approved_for_manual_adoption");
+    await screen.findByText("已通过人工入库复核");
     expect(
       screen.queryByText("DO_NOT_RENDER_RAW_PROMPT"),
     ).not.toBeInTheDocument();

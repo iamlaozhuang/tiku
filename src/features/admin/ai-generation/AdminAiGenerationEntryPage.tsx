@@ -67,9 +67,9 @@ function getPageCopy(
       eyebrow: "内容 AI 草稿/评审",
       title: isQuestionGeneration ? "内容 AI出题" : "内容 AI组卷",
       description:
-        "生成结果只进入内容 AI 草稿/评审域，正式 question / paper 写入仍需评审、编辑、校验和 audit_log。",
+        "生成结果只进入内容 AI 草稿/评审池，正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
       actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
-      boundaryLabel: "不直接写入正式 question / paper",
+      boundaryLabel: "不直接写入正式题目或试卷",
     };
   }
 
@@ -77,9 +77,9 @@ function getPageCopy(
     eyebrow: "组织高级 AI 草稿",
     title: isQuestionGeneration ? "组织 AI出题" : "组织 AI组卷",
     description:
-      "生成结果归属 organization，保留在组织内容草稿域，不进入平台正式题库或试卷库。",
+      "生成结果归属当前组织，保留在组织内容草稿池，不进入平台正式题库或试卷库。",
     actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
-    boundaryLabel: "组织 owned draft only",
+    boundaryLabel: "仅创建组织草稿",
   };
 }
 
@@ -191,7 +191,7 @@ export function AdminAiGenerationEntryPage({
             <h2>{pageCopy.actionLabel}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            本地入口已就绪，Provider 执行仍由后续任务审批。
+            本地入口已就绪，模型服务执行仍由后续任务审批。
           </p>
         </section>
 

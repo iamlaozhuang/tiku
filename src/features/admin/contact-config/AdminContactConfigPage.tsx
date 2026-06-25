@@ -194,12 +194,12 @@ export function AdminContactConfigPage() {
       setContactConfig(response.data.contactConfig);
       setFormState(toFormState(response.data.contactConfig));
       setToastMessage({
-        message: "Contact config saved.",
+        message: "购买联系方式已保存。",
         tone: "success",
       });
     } catch {
       setToastMessage({
-        message: "Contact config save failed.",
+        message: "购买联系方式保存失败。",
         tone: "error",
       });
     } finally {
@@ -208,7 +208,7 @@ export function AdminContactConfigPage() {
   }
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="Loading contact_config" />;
+    return <AdminLoadingState label="正在加载购买联系方式" />;
   }
 
   if (loadState === "unauthorized") {
@@ -218,8 +218,8 @@ export function AdminContactConfigPage() {
   if (loadState === "error" || contactConfig === null) {
     return (
       <AdminErrorState
-        description="Refresh the page or sign in again before managing contact_config."
-        title="Contact config failed to load"
+        description="请刷新页面或重新登录后再管理购买联系方式。"
+        title="购买联系方式加载失败"
       />
     );
   }
@@ -228,18 +228,19 @@ export function AdminContactConfigPage() {
     <main className="space-y-6" data-testid="admin-contact-config-page">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">Admin Ops</p>
+          <p className="text-brand-primary text-sm font-medium">运营后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            Contact config
+            购买联系方式
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm leading-6">
-            Purchase guidance uses the active contact_config returned by the
-            runtime API.
+            学员购买引导使用当前启用的购买联系方式配置，并通过受保护接口加载。
           </p>
         </div>
         <div className="border-border bg-surface flex items-center gap-2 rounded-md border px-3 py-2 text-sm shadow-sm">
           <ShieldCheck aria-hidden="true" className="size-4" />
-          <span className="text-text-secondary">{contactConfig.publicId}</span>
+          <span className="text-text-secondary">
+            配置业务标识：{contactConfig.publicId}
+          </span>
         </div>
       </header>
 
@@ -261,9 +262,9 @@ export function AdminContactConfigPage() {
           }}
         >
           <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Title</span>
+            <span className="text-text-secondary">展示标题</span>
             <Input
-              aria-label="Contact config title"
+              aria-label="购买联系方式标题"
               value={formState.title}
               onChange={(event) =>
                 setFormState((current) => ({
@@ -275,9 +276,9 @@ export function AdminContactConfigPage() {
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Summary</span>
+            <span className="text-text-secondary">展示摘要</span>
             <textarea
-              aria-label="Contact config summary"
+              aria-label="购买联系方式摘要"
               className="border-input bg-background rounded-md border px-3 py-2 text-sm"
               rows={3}
               value={formState.summary}
@@ -292,9 +293,9 @@ export function AdminContactConfigPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-sm font-medium">
-              <span className="text-text-secondary">Channel type</span>
+              <span className="text-text-secondary">联系渠道类型</span>
               <select
-                aria-label="Contact config channel type"
+                aria-label="联系渠道类型"
                 className="border-input bg-background rounded-md border px-3 py-2 text-sm"
                 value={formState.channelType}
                 onChange={(event) =>
@@ -305,14 +306,14 @@ export function AdminContactConfigPage() {
                   }))
                 }
               >
-                <option value="phone">phone</option>
-                <option value="wechat_work">wechat_work</option>
+                <option value="phone">电话</option>
+                <option value="wechat_work">企业微信</option>
               </select>
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              <span className="text-text-secondary">Channel label</span>
+              <span className="text-text-secondary">渠道名称</span>
               <Input
-                aria-label="Contact config channel label"
+                aria-label="购买联系方式渠道名称"
                 value={formState.channelLabel}
                 onChange={(event) =>
                   setFormState((current) => ({
@@ -323,9 +324,9 @@ export function AdminContactConfigPage() {
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              <span className="text-text-secondary">Channel value</span>
+              <span className="text-text-secondary">渠道值</span>
               <Input
-                aria-label="Contact config channel value"
+                aria-label="购买联系方式渠道值"
                 value={formState.channelValue}
                 onChange={(event) =>
                   setFormState((current) => ({
@@ -336,9 +337,9 @@ export function AdminContactConfigPage() {
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              <span className="text-text-secondary">Service hours</span>
+              <span className="text-text-secondary">服务时间</span>
               <Input
-                aria-label="Contact config service hours"
+                aria-label="购买联系方式服务时间"
                 value={formState.serviceHours}
                 onChange={(event) =>
                   setFormState((current) => ({
@@ -351,9 +352,9 @@ export function AdminContactConfigPage() {
           </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Usage</span>
+            <span className="text-text-secondary">使用场景</span>
             <Input
-              aria-label="Contact config usage"
+              aria-label="购买联系方式使用场景"
               value={formState.usage}
               onChange={(event) =>
                 setFormState((current) => ({
@@ -365,9 +366,9 @@ export function AdminContactConfigPage() {
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Href</span>
+            <span className="text-text-secondary">跳转链接</span>
             <Input
-              aria-label="Contact config href"
+              aria-label="购买联系方式跳转链接"
               value={formState.href}
               onChange={(event) =>
                 setFormState((current) => ({
@@ -379,9 +380,9 @@ export function AdminContactConfigPage() {
           </label>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Safety notice</span>
+            <span className="text-text-secondary">安全提示</span>
             <textarea
-              aria-label="Contact config safety notice"
+              aria-label="购买联系方式安全提示"
               className="border-input bg-background rounded-md border px-3 py-2 text-sm"
               rows={3}
               value={formState.safetyNotice}
@@ -396,14 +397,14 @@ export function AdminContactConfigPage() {
 
           <Button disabled={isSaving} type="submit">
             <Save aria-hidden="true" className="size-4" />
-            {isSaving ? "Saving" : "Save contact config"}
+            {isSaving ? "保存中" : "保存购买联系方式"}
           </Button>
         </form>
 
         <aside className="border-border bg-surface space-y-4 rounded-md border p-4 shadow-sm">
           <div className="space-y-2">
             <h2 className="font-heading text-text-primary text-base font-semibold">
-              Active preview
+              当前预览
             </h2>
             <p className="text-text-secondary text-sm leading-6">
               {contactConfig.title}
@@ -422,7 +423,7 @@ export function AdminContactConfigPage() {
             ))}
           </div>
           <p className="text-text-muted text-xs">
-            Updated at {contactConfig.updatedAt}
+            更新时间 {contactConfig.updatedAt}
           </p>
         </aside>
       </section>

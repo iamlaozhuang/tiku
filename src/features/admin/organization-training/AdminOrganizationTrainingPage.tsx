@@ -348,14 +348,12 @@ export function AdminOrganizationTrainingPage() {
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Organization Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">企业后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             组织培训
           </h1>
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
-            创建组织培训草稿，绑定来源 metadata，并从已发布版本复制为新草稿。
+            创建组织培训草稿，绑定来源元数据，并从已发布版本复制为新草稿。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
@@ -439,14 +437,14 @@ function DraftForm({
         title="创建草稿"
       />
       <TextField
-        label="组织 publicId"
+        label="组织业务标识"
         value={values.organizationPublicId}
         onChange={(value) =>
           onChange({ ...values, organizationPublicId: value })
         }
       />
       <TextField
-        label="企业授权 publicId"
+        label="企业授权业务标识"
         value={values.authorizationPublicId}
         onChange={(value) =>
           onChange({ ...values, authorizationPublicId: value })
@@ -497,7 +495,7 @@ function SourceContextForm({
         title="绑定来源"
       />
       <TextField
-        label="来源 publicId"
+        label="来源业务标识"
         value={values.sourcePublicId}
         onChange={(value) => onChange({ ...values, sourcePublicId: value })}
       />
@@ -548,7 +546,7 @@ function CopyToDraftForm({
         title="复制版本"
       />
       <TextField
-        label="版本 publicId"
+        label="版本业务标识"
         value={values.sourceVersionPublicId}
         onChange={(value) =>
           onChange({ ...values, sourceVersionPublicId: value })

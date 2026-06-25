@@ -183,6 +183,27 @@ const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
   disabled: "已停用",
 };
 
+const paperStatusLabels: Record<string, string> = {
+  archived: "已下架",
+  draft: "草稿",
+  published: "已发布",
+};
+
+const recommendationReviewStatusLabels: Record<
+  RecommendationReviewStatus | "pending",
+  string
+> = {
+  accepted: "已采纳",
+  discarded: "已丢弃",
+  pending: "待确认",
+};
+
+const recommendationConfirmationStatusLabels: Record<string, string> = {
+  accepted: "已采纳",
+  discarded: "已丢弃",
+  pending_confirmation: "待确认",
+};
+
 const questionTypeLabels: Record<QuestionDto["questionType"], string> = {
   case_analysis: "案例分析题",
   calculation: "计算题",
@@ -536,24 +557,26 @@ function formatPublicIdList(publicIds: string[]): string {
 }
 
 function formatBindingPublicId(value: string | null): string {
-  return value === null || value.trim().length === 0 ? "null" : value.trim();
+  return value === null || value.trim().length === 0 ? "无" : value.trim();
 }
 
 function formatBindingPublicIdList(publicIds: string[]): string {
-  return publicIds.length === 0 ? "none" : publicIds.join(", ");
+  return publicIds.length === 0 ? "无" : publicIds.join(", ");
 }
 
 function formatMaterialQuestionReferences(
   references: MaterialDto["references"]["questions"],
 ): string {
   if (references.length === 0) {
-    return "none";
+    return "无";
   }
 
   return references
     .map(
       (reference) =>
-        `${reference.questionPublicId} (${reference.questionType}, ${reference.status})`,
+        `${reference.questionPublicId} (${
+          questionTypeLabels[reference.questionType] ?? reference.questionType
+        }, ${statusLabels[reference.status] ?? reference.status})`,
     )
     .join(", ");
 }
@@ -562,11 +585,16 @@ function formatMaterialPaperReferences(
   references: MaterialDto["references"]["papers"],
 ): string {
   if (references.length === 0) {
-    return "none";
+    return "无";
   }
 
   return references
-    .map((reference) => `${reference.paperPublicId} (${reference.paperStatus})`)
+    .map(
+      (reference) =>
+        `${reference.paperPublicId} (${
+          paperStatusLabels[reference.paperStatus] ?? reference.paperStatus
+        })`,
+    )
     .join(", ");
 }
 
@@ -1063,15 +1091,13 @@ export function AdminQuestionMaterialManagement({
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Content Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">内容后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             题库与材料管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
-            管理题目、材料、知识点标签与试卷引用关系；页面只展示 runtime DTO
-            中的 publicId，不暴露内部自增 id。
+            管理题目、材料、知识点标签与试卷引用关系；页面只展示运行时数据中的业务标识，不暴露内部自增
+            id。
           </p>
         </div>
         <ActionBar
@@ -1238,7 +1264,7 @@ export function AdminQuestionMaterialManagement({
                 {activeForm.kind === "question" ? "题目" : "材料"}
               </p>
               <p className="text-text-muted text-xs">
-                {activeForm.publicId ?? "new local draft"}
+                {activeForm.publicId ?? "新建本地草稿"}
               </p>
             </div>
             {activeForm.kind === "question" ? (
@@ -1347,7 +1373,7 @@ function ContentDangerConfirmationDialog({
           确认停用{noun}？
         </h2>
         <p className="text-text-secondary text-sm">
-          将提交 {action.publicId} 的停用操作；操作只使用 publicId。
+          将提交 {action.publicId} 的停用操作；操作只使用业务标识。
         </p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="destructive" onClick={onConfirm}>
@@ -1512,9 +1538,9 @@ function QuestionWriteForm({
           }
         />
         <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">关联材料 publicId</span>
+          <span className="text-text-secondary">关联材料业务标识</span>
           <Input
-            aria-label="关联材料 publicId"
+            aria-label="关联材料业务标识"
             value={formValues.materialPublicId}
             onChange={(event) =>
               setFormValues({
@@ -1531,9 +1557,9 @@ function QuestionWriteForm({
         </legend>
         <div className="grid gap-3 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-medium">
-            <span className="text-text-secondary">知识点 publicIds</span>
+            <span className="text-text-secondary">知识点业务标识</span>
             <textarea
-              aria-label="知识点 publicIds"
+              aria-label="知识点业务标识"
               className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
               placeholder="knowledge-node-public-001"
               value={formValues.knowledgeNodePublicIdsText}
@@ -1546,9 +1572,9 @@ function QuestionWriteForm({
             />
           </label>
           <label className="grid gap-2 text-sm font-medium">
-            <span className="text-text-secondary">标签 publicIds</span>
+            <span className="text-text-secondary">标签业务标识</span>
             <textarea
-              aria-label="标签 publicIds"
+              aria-label="标签业务标识"
               className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
               placeholder="tag-public-001"
               value={formValues.tagPublicIdsText}
@@ -1810,14 +1836,14 @@ function QuestionBindingPreview({
       data-testid="question-binding-preview"
     >
       <p className="text-text-secondary">
-        material: {formatBindingPublicId(materialPublicId)}
+        关联材料：{formatBindingPublicId(materialPublicId)}
       </p>
       <p className="text-text-secondary">
-        knowledge_node: {knowledgeNodePublicIds.length}{" "}
+        知识点：{knowledgeNodePublicIds.length} 个{" "}
         {formatBindingPublicIdList(knowledgeNodePublicIds)}
       </p>
       <p className="text-text-secondary">
-        tag: {tagPublicIds.length} {formatBindingPublicIdList(tagPublicIds)}
+        标签：{tagPublicIds.length} 个 {formatBindingPublicIdList(tagPublicIds)}
       </p>
     </div>
   );
@@ -2052,7 +2078,7 @@ function FilterPanel({
             <Input
               aria-label="关键词"
               className="pl-8"
-              placeholder="题干、材料、publicId、知识点或标签"
+              placeholder="题干、材料、业务标识、知识点或标签"
               value={keyword}
               onChange={(event) => onKeywordChange(event.target.value)}
             />
@@ -2118,7 +2144,7 @@ function FilterPanel({
             <span className="text-text-secondary">知识点筛选</span>
             <Input
               aria-label="知识点筛选"
-              placeholder="知识点 publicId"
+              placeholder="知识点业务标识"
               value={knowledgeNodeFilter}
               onChange={(event) =>
                 onKnowledgeNodeFilterChange(event.target.value)
@@ -2129,7 +2155,7 @@ function FilterPanel({
             <span className="text-text-secondary">标签筛选</span>
             <Input
               aria-label="标签筛选"
-              placeholder="标签 publicId"
+              placeholder="标签业务标识"
               value={tagFilter}
               onChange={(event) => onTagFilterChange(event.target.value)}
             />
@@ -2262,7 +2288,7 @@ function QuestionList({
                 复制
               </Button>
               <Button
-                aria-label={`Recommend knowledge nodes for ${question.publicId}`}
+                aria-label={`为题目 ${question.publicId} 推荐知识点`}
                 size="sm"
                 type="button"
                 variant="outline"
@@ -2295,14 +2321,14 @@ function QuestionBindingSummary({ question }: { question: QuestionDto }) {
       data-testid={`question-binding-${question.publicId}`}
     >
       <p className="text-text-secondary">
-        material: {formatBindingPublicId(question.materialPublicId)}
+        关联材料：{formatBindingPublicId(question.materialPublicId)}
       </p>
       <p className="text-text-secondary">
-        knowledge_node:{" "}
+        知识点：
         {formatBindingPublicIdList(question.knowledgeNodePublicIds)}
       </p>
       <p className="text-text-secondary">
-        tag: {formatBindingPublicIdList(question.tagPublicIds)}
+        标签：{formatBindingPublicIdList(question.tagPublicIds)}
       </p>
     </div>
   );
@@ -2315,11 +2341,10 @@ function QuestionLockSummary({ question }: { question: QuestionDto }) {
       data-testid={`question-lock-${question.publicId}`}
     >
       <p className="text-text-secondary">
-        status:{" "}
-        {question.isLocked ? "locked by published paper reference" : "editable"}
+        状态：{question.isLocked ? "已被已发布试卷引用锁定" : "可编辑"}
       </p>
       <p className="text-text-secondary">
-        lockedAt: {question.lockedAt ?? "null"}
+        锁定时间：{question.lockedAt ?? "无"}
       </p>
     </div>
   );
@@ -2377,9 +2402,7 @@ function KnowledgeRecommendationReviewPanel({
             知识点推荐审查
           </h3>
           <p className="text-text-secondary text-xs leading-5">
-            {isStale
-              ? "stale: question updated after recommendation"
-              : "current: pending_confirmation recommendations"}
+            {isStale ? "已过期：题目在推荐后发生更新" : "当前推荐待确认"}
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
@@ -2390,13 +2413,13 @@ function KnowledgeRecommendationReviewPanel({
         className="text-text-secondary mt-3 grid gap-1 text-xs leading-5"
         data-testid={`knowledge-recommendation-review-summary-${question.publicId}`}
       >
-        <p>target question: {question.publicId}</p>
+        <p>目标题目：{question.publicId}</p>
         <p>
-          accepted: {acceptedCount} | discarded: {discardedCount} | pending:{" "}
+          已采纳：{acceptedCount} | 已丢弃：{discardedCount} | 待确认：{" "}
           {pendingCount}
         </p>
         <p>
-          recommendation snapshot:{" "}
+          推荐快照：
           {reviewState.recommendation.reviewState.questionUpdatedAt}
         </p>
       </div>
@@ -2405,12 +2428,13 @@ function KnowledgeRecommendationReviewPanel({
         data-testid={`knowledge-recommendation-review-trace-${question.publicId}`}
       >
         {reviewActions.length === 0 ? (
-          <li>no local review action yet</li>
+          <li>暂无本地审查操作</li>
         ) : (
           reviewActions.map((reviewAction) => (
             <li key={reviewAction.knowledgeNodePublicId}>
-              {reviewAction.reviewStatus} {reviewAction.knowledgeNodePublicId}{" "}
-              -&gt; {reviewAction.auditAction}
+              {recommendationReviewStatusLabels[reviewAction.reviewStatus]}{" "}
+              {reviewAction.knowledgeNodePublicId} -&gt;{" "}
+              {reviewAction.auditAction}
             </li>
           ))
         )}
@@ -2442,7 +2466,8 @@ function KnowledgeRecommendationReviewPanel({
                         {recommendation.confidence}
                       </span>
                       <span className="text-text-muted text-xs">
-                        {reviewStatus}
+                        {recommendationConfirmationStatusLabels[reviewStatus] ??
+                          reviewStatus}
                       </span>
                     </div>
                     <p className="text-text-primary text-sm font-medium">
@@ -2457,7 +2482,7 @@ function KnowledgeRecommendationReviewPanel({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      aria-label={`Accept recommendation ${recommendation.knowledgeNodePublicId}`}
+                      aria-label={`采纳推荐 ${recommendation.knowledgeNodePublicId}`}
                       size="sm"
                       type="button"
                       variant="secondary"
@@ -2473,7 +2498,7 @@ function KnowledgeRecommendationReviewPanel({
                       采纳
                     </Button>
                     <Button
-                      aria-label={`Discard recommendation ${recommendation.knowledgeNodePublicId}`}
+                      aria-label={`丢弃推荐 ${recommendation.knowledgeNodePublicId}`}
                       size="sm"
                       type="button"
                       variant="outline"
@@ -2630,11 +2655,10 @@ function MaterialLockSummary({ material }: { material: MaterialDto }) {
       data-testid={`material-lock-${material.publicId}`}
     >
       <p className="text-text-secondary">
-        status:{" "}
-        {material.isLocked ? "locked by published paper reference" : "editable"}
+        状态：{material.isLocked ? "已被已发布试卷引用锁定" : "可编辑"}
       </p>
       <p className="text-text-secondary">
-        lockedAt: {material.lockedAt ?? "null"}
+        锁定时间：{material.lockedAt ?? "无"}
       </p>
     </div>
   );
@@ -2647,13 +2671,13 @@ function MaterialReferenceSummary({ material }: { material: MaterialDto }) {
       data-testid={`material-reference-summary-${material.publicId}`}
     >
       <p className="text-text-secondary">
-        question count: {material.references.questions.length}
+        题目引用数：{material.references.questions.length}
       </p>
       <p className="text-text-secondary">
         {formatMaterialQuestionReferences(material.references.questions)}
       </p>
       <p className="text-text-secondary">
-        paper count: {material.references.papers.length}
+        试卷引用数：{material.references.papers.length}
       </p>
       <p className="text-text-secondary">
         {formatMaterialPaperReferences(material.references.papers)}
