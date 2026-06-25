@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-private-account-state-reconciliation-2026-06-25
-updatedAt: "2026-06-25T06:51:43-07:00"
+currentPhase: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
+updatedAt: "2026-06-25T07:09:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,87 +504,135 @@ repository:
   lastKnownMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
   lastKnownOriginMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
 currentTask:
-  id: organization-admin-private-account-state-reconciliation-2026-06-25
+  id: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
   status: closed
-  result: closed_private_owner_org_admin_account_state_reconciled_browser_rerun
-  claimedAt: "2026-06-25T06:51:43-07:00"
-  plannedAt: "2026-06-25T06:51:43-07:00"
-  validatedAt: "2026-06-25T07:05:57-07:00"
-  reviewedAt: "2026-06-25T07:05:57-07:00"
-  closedAt: "2026-06-25T07:07:11-07:00"
-  sourceStory: serial-step-2-after-org-admin-db-browser-dev-seed-verification
-  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_2_private_account_reconciliation
+  result: closed_default_tiku_db_org_admin_schema_seed_alignment
+  claimedAt: "2026-06-25T07:09:49-07:00"
+  plannedAt: "2026-06-25T07:09:49-07:00"
+  validatedAt: "2026-06-25T07:12:59-07:00"
+  reviewedAt: "2026-06-25T07:12:59-07:00"
+  closedAt: "2026-06-25T07:14:02-07:00"
+  sourceStory: serial-step-3-after-private-org-admin-account-reconciliation
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_3_schema_migration_seed
   approvalSource: current_user_message_serial_1_2_3_approval_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-private-account-state-reconciliation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-state-reconciliation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-state-reconciliation.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorDevSeedBrowserTaskId: organization-admin-runtime-effective-role-source-db-and-browser-verification-approval-2026-06-25
-  predecessorDevSeedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-runtime-effective-role-source-db-and-browser-verification-approval.md
+  predecessorPrivateAccountTaskId: organization-admin-private-account-state-reconciliation-2026-06-25
+  predecessorPrivateAccountEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-state-reconciliation.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localDatabaseAccountStateReadOnlyDiagnostic: true
-    targetedPrivateAccountRoleBindingRepairWhenProvenNecessary: true
-    localBrowserRuntimeRerun: true
-    ownerManualCredentialEntry: required
-    sessionSummaryObservationWithoutTokenCapture: true
+    localDefaultTikuDatabaseSchemaAlignment: true
+    localDefaultTikuDatabaseSeedAlignment: true
+    existingMigrationSqlReuse: true
+    targetedDevSeedRows: true
+    localBrowserRuntimeRerun: false
+    ownerManualCredentialEntry: false
     privateAccountFileRead: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
-    broadOpsAdminBulkRepair: false
+    envSecretAccess: false
+    destructiveDatabaseOperation: false
     focusedUnitTests: false
     e2eSpecChange: false
-    databaseMigrationOrSchemaChange: false
     finalPassClaim: false
   repairScope:
     effectiveRoleSource: AuthContextDto.user.adminRoles
     persistedRoleSource: admin.admin_role
     organizationBindingSource: admin_organization_to_organization_public_id
-    schemaMigration: blocked
-    targetedLocalAccountUpdate: approved_only_after_manual_login_identifies_exact_account
-    browserRerun: approved_current_task_local_only_owner_enters_credentials
+    schemaMigration: approved_current_task_local_default_tiku_only
+    devSeed: approved_current_task_targeted_org_admin_seed_only
+    destructiveDatabaseOperation: blocked
+    browserRerun: not_in_scope
     finalPassClaim: false
   rootCauseHypothesisState:
     confirmed:
-      - old_private_standard_admin_row_was_ops_admin_with_existing_org_binding
-      - old_private_advanced_admin_row_was_ops_admin_with_existing_org_binding
-      - targeted_role_updates_plus_existing_bindings_restore_org_workspace_runtime
+      - default_tiku_db_missing_admin_organization_table
+      - default_tiku_db_missing_org_admin_role_enum_values
+      - existing_drizzle_and_seed_tools_read_env_local_so_manual_local_docker_sql_path_required
+      - default_tiku_db_schema_seed_alignment_completed_without_destructive_reset
     pending:
-      - default_tiku_database_alignment_requires_separate_schema_migration_seed_task
+      - none
     excluded:
-      - source_code_landing_or_guard_bug_for_dev_seed_accounts
-      - broad_ops_admin_bulk_reclassification
-  runtimeEvidence:
-    privateStandardInitial: ops_admin_landed_ops_users_org_routes_denied_binding_present
-    privateStandardRepair: one_exact_row_role_updated_to_org_standard_admin
-    privateStandardRecheck: pass_landing_organization_portal_role_org_standard_admin_binding_present
-    privateAdvancedInitial: ops_admin_landed_ops_users_binding_present
-    privateAdvancedRepair: one_exact_row_role_updated_to_org_advanced_admin
-    privateAdvancedRecheck: pass_landing_organization_portal_role_org_advanced_admin_binding_present_routes_separated
-    finalDbAggregate: ops_admin_binding_zero_org_standard_two_bindings_org_advanced_two_bindings
-    schemaMigrationExecuted: false
-    finalMvpPassClaim: false
+      - need_for_destructive_default_db_reset
   finalPassClaim: false
+  runtimeEvidence:
+    preState: admin_organization_missing_admin_role_enum_missing_org_roles
+    schemaAlignment: pass_enum_values_added_admin_organization_created
+    seedAlignment: pass_two_org_admin_auth_user_auth_account_admin_rows_seeded
+    bindingAlignment: pass_two_org_admin_bindings_inserted
+    finalAggregate: org_standard_one_binding_org_advanced_one_binding_admin_organization_two
+    envSecretAccess: false
+    destructiveDatabaseOperation: false
+    finalMvpPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2
-  branch: codex/org-admin-private-account-reconcile-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3
+  branch: codex/default-tiku-db-schema-seed-align-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+defaultTikuDbOrganizationAdminSchemaSeedAlignment20260625:
+  taskId: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
+  phase: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
+  recordedAt: "2026-06-25T07:09:49-07:00"
+  status: closed
+  result: closed_default_tiku_db_org_admin_schema_seed_alignment
+  validatedAt: "2026-06-25T07:12:59-07:00"
+  reviewedAt: "2026-06-25T07:12:59-07:00"
+  closedAt: "2026-06-25T07:14:02-07:00"
+  branch: codex/default-tiku-db-schema-seed-align-20260625
+  entryMasterSha: 575e719a736fda70070d74fe2fbfbc8d3fce4752
+  entryOriginMasterSha: 575e719a736fda70070d74fe2fbfbc8d3fce4752
+  approvalSource: current_user_message_serial_1_2_3_approval_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  executionScope:
+    localDefaultTikuDatabaseSchemaAlignment: true
+    localDefaultTikuDatabaseSeedAlignment: true
+    existingMigrationSqlReuse: true
+    targetedDevSeedRows: true
+    envSecretAccess: false
+    destructiveDatabaseOperation: false
+    providerCall: false
+    stagingProdDeploy: false
+    finalPassClaim: false
+  runtimeEvidence:
+    preState: admin_organization_missing_admin_role_enum_missing_org_roles
+    schemaAlignment: pass_enum_values_added_admin_organization_created
+    seedAlignment: pass_two_org_admin_auth_user_auth_account_admin_rows_seeded
+    bindingAlignment: pass_two_org_admin_bindings_inserted
+    finalAggregate: org_standard_one_binding_org_advanced_one_binding_admin_organization_two
+    envSecretAccess: false
+    destructiveDatabaseOperation: false
+    finalMvpPassClaim: false
+  blockedWithoutFreshApproval:
+    - env_secret_access_or_env_file_change
+    - destructive_database_reset_drop_truncate
+    - staging_prod_connection
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - dependency_package_lockfile_change
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 organizationAdminPrivateAccountStateReconciliation20260625:
   taskId: organization-admin-private-account-state-reconciliation-2026-06-25
   phase: organization-admin-private-account-state-reconciliation-2026-06-25
