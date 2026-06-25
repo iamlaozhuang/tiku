@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
-updatedAt: "2026-06-25T09:07:54-07:00"
+currentPhase: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
+updatedAt: "2026-06-25T09:21:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3bca5743580fead47f5a91653ee0903b2f533e2e
-  lastKnownOriginMasterSha: 3bca5743580fead47f5a91653ee0903b2f533e2e
+  lastKnownMasterSha: df3c7a94fc6a03e9831d6e2286228632cab1b319
+  lastKnownOriginMasterSha: df3c7a94fc6a03e9831d6e2286228632cab1b319
 currentTask:
-  id: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
+  id: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
   status: closed
-  result: pass_effective_authorization_capability_discovery_repair_focused_validation_no_browser
-  claimedAt: "2026-06-25T09:07:54-07:00"
-  plannedAt: "2026-06-25T09:07:54-07:00"
-  validatedAt: "2026-06-25T09:11:00-07:00"
-  reviewedAt: "2026-06-25T09:11:00-07:00"
-  closedAt: "2026-06-25T09:14:29-07:00"
-  sourceStory: current-user-approved-next-step-after-four-row-cookie-session-rerun
-  approvalConsumed: current_user_message_approve_next_suggestion_2026_06_25
-  approvalSource: current_user_message_approve_next_suggestion_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
+  result: blocked_standard_direct_ai_route_workflow_visible_home_entries_repaired_no_full_eight_row_no_final_pass
+  claimedAt: "2026-06-25T09:21:43-07:00"
+  plannedAt: "2026-06-25T09:21:43-07:00"
+  validatedAt: "2026-06-25T09:27:28-07:00"
+  reviewedAt: "2026-06-25T09:27:28-07:00"
+  closedAt: "2026-06-25T09:27:28-07:00"
+  sourceStory: current-user-approved-post-source-repair-browser-rerun-then-conditional-full-eight-row-rerun
+  approvalConsumed: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
+  approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
+  credentialReadApprovalSource: current_user_message_allow_input_or_read_credentials_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
   predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-cookie-session-post-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localBrowserRuntimeRerun: false
-    localSourceChange: true
-    focusedUnitTests: true
-    credentialDocumentReadByCodex: false
-    credentialEntryByCodex: false
+    localBrowserRuntimeRerun: true
+    localSourceChange: false
+    focusedUnitTests: false
+    credentialDocumentReadByCodex: true
+    credentialEntryByCodex: true
     databaseWrite: false
     schemaMigration: false
     dependencyIntroduction: false
@@ -536,51 +538,112 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  repairScope:
+  rerunScope:
     targetRows:
-      - personal_advanced_student
-      - org_advanced_employee
-    deniedRowsProtected:
       - personal_standard_student
+      - personal_advanced_student
       - org_standard_employee
-    sourceFiles:
-      - src/server/services/effective-authorization-service.ts
-    testFiles:
-      - src/server/services/effective-authorization-service.test.ts
-    browserRuntimeExecuted: false
+      - org_advanced_employee
+    primaryRoutes:
+      - /home
+      - /ai-generation
+      - /organization-training
+    conditionalNextStep:
+      fullEightRowRerunIfPass: true
+      minimalRepairIfStandardEmployeeTrainingWorkflowReachable: organization_training_employee_entry_guard
     finalPassClaim: false
   validationSummary:
-    redFocusedUnit: pass_failed_for_expected_missing_capability_flags
-    effectiveAuthorizationServiceUnit: pass_6_tests
-    studentHomeUiUnit: pass_13_tests
-    lint: pass
-    typecheck: pass
-    prettierCheck: pass
+    browserRuntimeExecuted: true
+    personalStandardStudent: fail_direct_ai_workflow_visible
+    personalAdvancedStudent: pass_home_ai_entry_and_direct_ai_workflow
+    orgStandardEmployee: fail_direct_ai_workflow_visible_training_empty_state_not_workflow
+    orgAdvancedEmployee: fail_training_workflow_not_proven_empty_state
+    homeEntryRepairObserved: pass
+    standardDirectAiRouteWorkflowVisible: true
+    orgStandardEmployeeTrainingWorkflowReachable: false
+    nextMinimalRepair: learner-org-employee-ai-direct-route-authorization-guard-repair-2026-06-25
+    fullEightRowGateExecuted: false
+    docsPrettierCheck: pass
     diffCheck: pass
-    preCommitHardening: pass
+    preCommitHardening: pass_after_ssot_read_list_repair
     prePushReadiness: pass_skip_remote_ahead_check
-    browserRuntimeExecuted: false
     finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_message_approve_next_suggestion_2026_06_25
+      approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_message_approve_next_suggestion_2026_06_25
+      approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_message_approve_next_suggestion_2026_06_25
+      approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_message_approve_next_suggestion_2026_06_25
-  branch: codex/home-entry-visibility-repair-20260625
+      approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
+  branch: codex/home-entry-browser-rerun-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+learnerOrgEmployeeHomeEntryCapabilityPostRepairBrowserRerun20260625:
+  taskId: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
+  phase: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
+  recordedAt: "2026-06-25T09:21:43-07:00"
+  status: closed
+  result: blocked_standard_direct_ai_route_workflow_visible_home_entries_repaired_no_full_eight_row_no_final_pass
+  validatedAt: "2026-06-25T09:27:28-07:00"
+  reviewedAt: "2026-06-25T09:27:28-07:00"
+  closedAt: "2026-06-25T09:27:28-07:00"
+  branch: codex/home-entry-browser-rerun-20260625
+  entryMasterSha: df3c7a94fc6a03e9831d6e2286228632cab1b319
+  entryOriginMasterSha: df3c7a94fc6a03e9831d6e2286228632cab1b319
+  approvalSource: current_user_message_approve_execute_conditional_rerun_and_closeout_2026_06_25
+  credentialReadApprovalSource: current_user_message_allow_input_or_read_credentials_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
+  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-cookie-session-post-repair-browser-rerun.md
+  rowsInScope:
+    - personal_standard_student
+    - personal_advanced_student
+    - org_standard_employee
+    - org_advanced_employee
+  primaryCheck: home_entry_visibility_and_direct_route_guard_after_capability_discovery_repair
+  conditionalNextStep:
+    fullEightRowRerunIfPass: true
+    minimalRepairIfStandardEmployeeTrainingWorkflowReachable: organization_training_employee_entry_guard
+  runtimeResult:
+    browserRuntimeExecuted: true
+    primaryPassRows: 1
+    primaryFailRows: 3
+    homeEntryRepairObserved: pass
+    standardDirectAiRouteWorkflowVisible: true
+    orgStandardEmployeeTrainingWorkflowReachable: false
+    nextMinimalRepair: learner-org-employee-ai-direct-route-authorization-guard-repair-2026-06-25
+    fullEightRowGateExecuted: false
+    docsPrettierCheck: pass
+    diffCheck: pass
+    preCommitHardening: pass_after_ssot_read_list_repair
+    prePushReadiness: pass_skip_remote_ahead_check
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - source_or_test_change
+    - database_seed_schema_or_account_mutation
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - dependency_package_lockfile_change
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 learnerOrgEmployeeHomeEntryCapabilityDiscoveryRepair20260625:
   taskId: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
   phase: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
