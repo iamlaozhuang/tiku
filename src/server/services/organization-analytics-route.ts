@@ -127,8 +127,7 @@ export type OrganizationAnalyticsEmployeeStatisticsRuntimeRouteOptions =
 
 type OrganizationAnalyticsDashboardSummaryRuntimeAdminRole =
   | "super_admin"
-  | "ops_admin"
-  | "content_admin";
+  | "org_advanced_admin";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -149,9 +148,7 @@ function normalizeRequiredText(value: string): string | null {
 function isOrganizationAnalyticsDashboardSummaryRuntimeAdminRole(
   role: string,
 ): role is OrganizationAnalyticsDashboardSummaryRuntimeAdminRole {
-  return (
-    role === "super_admin" || role === "ops_admin" || role === "content_admin"
-  );
+  return role === "super_admin" || role === "org_advanced_admin";
 }
 
 async function readUnavailableDashboardSummary(): Promise<ApiResponse<null>> {

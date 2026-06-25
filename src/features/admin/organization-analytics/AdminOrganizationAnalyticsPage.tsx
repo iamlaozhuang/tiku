@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertCircle, BarChart3, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import type { OrganizationAnalyticsDashboardRouteDto } from "@/server/contracts/
 import {
   AdminErrorState,
   AdminLoadingState,
+  AdminSurfaceStatus,
   AdminUnauthorizedState,
   fetchAdminApi,
   getStoredSessionToken,
@@ -21,6 +22,7 @@ import {
 type AdminOrganizationAnalyticsLoadState =
   | "loading"
   | "ready"
+  | "standard-unavailable"
   | "unauthorized"
   | "error";
 
@@ -51,7 +53,44 @@ function formatPercent(value: number) {
 }
 
 function formatNullableNumber(value: number | null) {
-  return value === null ? "N/A" : String(value);
+  return value === null ? "暂无" : String(value);
+}
+
+function formatRedactionStatus(value: string) {
+  if (value === "aggregate_only") {
+    return "聚合脱敏";
+  }
+
+  if (value === "summary_only") {
+    return "摘要脱敏";
+  }
+
+  return "已脱敏";
+}
+
+const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
+const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
+
+function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
+  return expectedRoles.some((expectedRole) =>
+    adminRoles.includes(expectedRole),
+  );
+}
+
+function resolveOrganizationAnalyticsLoadState(
+  authContext: AuthContextDto,
+): AdminOrganizationAnalyticsLoadState {
+  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
+
+  if (hasAnyRole(adminRoles, ["super_admin", ORGANIZATION_ADVANCED_ROLE])) {
+    return "ready";
+  }
+
+  if (adminRoles.includes(ORGANIZATION_STANDARD_ROLE)) {
+    return "standard-unavailable";
+  }
+
+  return "unauthorized";
 }
 
 export function AdminOrganizationAnalyticsPage() {
@@ -92,13 +131,20 @@ export function AdminOrganizationAnalyticsPage() {
           return;
         }
 
-        setFormValues((currentValues) => ({
-          ...currentValues,
-          organizationPublicId:
-            sessionResponse.data?.user.organizationPublicId ??
-            currentValues.organizationPublicId,
-        }));
-        setLoadState("ready");
+        const nextLoadState = resolveOrganizationAnalyticsLoadState(
+          sessionResponse.data,
+        );
+
+        if (nextLoadState === "ready") {
+          setFormValues((currentValues) => ({
+            ...currentValues,
+            organizationPublicId:
+              sessionResponse.data?.user.organizationPublicId ??
+              currentValues.organizationPublicId,
+          }));
+        }
+
+        setLoadState(nextLoadState);
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -114,18 +160,29 @@ export function AdminOrganizationAnalyticsPage() {
   }, []);
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="Loading organization analytics" />;
+    return <AdminLoadingState label="正在加载组织统计" />;
   }
 
   if (loadState === "unauthorized") {
     return <AdminUnauthorizedState />;
   }
 
+  if (loadState === "standard-unavailable") {
+    return (
+      <AdminSurfaceStatus
+        description="标准版组织后台暂不开放统计摘要，请在组织概览查看员工管理和授权状态。"
+        icon={<AlertCircle aria-hidden="true" className="size-5" />}
+        state="permission-denied"
+        title="标准版暂不可用"
+      />
+    );
+  }
+
   if (loadState === "error") {
     return (
       <AdminErrorState
-        title="Organization analytics unavailable"
-        description="Refresh the page or sign in again before loading organization analytics."
+        title="组织统计加载失败"
+        description="请刷新页面，或重新登录后再进入组织统计。"
       />
     );
   }
@@ -153,15 +210,15 @@ export function AdminOrganizationAnalyticsPage() {
 
       if (response.code !== 0 || response.data === null) {
         setSummary(null);
-        setErrorMessage("Dashboard summary could not be loaded.");
+        setErrorMessage("统计摘要加载失败。");
         return;
       }
 
       setSummary(response.data);
-      setMessage("Dashboard summary loaded.");
+      setMessage("统计摘要已加载。");
     } catch {
       setSummary(null);
-      setErrorMessage("Dashboard summary could not be loaded.");
+      setErrorMessage("统计摘要加载失败。");
     } finally {
       setIsSubmitting(false);
     }
@@ -171,15 +228,12 @@ export function AdminOrganizationAnalyticsPage() {
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Organization Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">组织后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            Organization Analytics
+            统计摘要
           </h1>
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
-            Aggregate-only organization dashboard summary for local admin
-            validation.
+            查看组织训练聚合统计，仅展示脱敏汇总，不展示员工原始作答。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
@@ -223,7 +277,7 @@ function DashboardSummaryForm({
 }) {
   return (
     <form
-      aria-label="Organization analytics summary form"
+      aria-label="组织统计摘要表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm lg:grid-cols-[1fr_1fr_1fr_auto]"
       onSubmit={(event) => {
         event.preventDefault();
@@ -231,26 +285,26 @@ function DashboardSummaryForm({
       }}
     >
       <TextField
-        label="Organization publicId"
+        label="组织业务标识"
         value={values.organizationPublicId}
         onChange={(value) =>
           onChange({ ...values, organizationPublicId: value })
         }
       />
       <TextField
-        label="Start at"
+        label="开始时间"
         value={values.startAt}
         onChange={(value) => onChange({ ...values, startAt: value })}
       />
       <TextField
-        label="End at"
+        label="结束时间"
         value={values.endAt}
         onChange={(value) => onChange({ ...values, endAt: value })}
       />
       <div className="flex items-end">
         <Button className="w-full" disabled={isSubmitting} type="submit">
           <RefreshCw aria-hidden="true" className="size-4" />
-          Load dashboard summary
+          加载统计摘要
         </Button>
       </div>
     </form>
@@ -272,50 +326,48 @@ function DashboardSummaryCard({
         <div className="space-y-1">
           <h2 className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <BarChart3 aria-hidden="true" className="size-4" />
-            Dashboard summary
+            统计摘要
           </h2>
           <p className="text-text-secondary text-sm">
             {summary.organizationPublicId}
           </p>
         </div>
         <span className="bg-success/10 text-success rounded-md px-3 py-1 text-xs font-medium">
-          {summary.redactionStatus}
+          {formatRedactionStatus(summary.redactionStatus)}
         </span>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="eligible employees"
+          label="可参与员工"
           value={summary.trainingSummary.eligibleEmployeeCount}
         />
         <MetricCard
-          label="submitted employees"
+          label="已提交员工"
           value={summary.trainingSummary.submittedEmployeeCount}
         />
         <MetricCard
-          label="completion"
+          label="完成率"
           value={formatPercent(summary.trainingSummary.completionRate)}
         />
         <MetricCard
-          label="average score"
+          label="平均分"
           value={formatNullableNumber(summary.trainingSummary.averageScore)}
         />
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         <section className="border-border rounded-md border p-3">
-          <h3 className="text-text-primary text-sm font-semibold">
-            Training range
-          </h3>
+          <h3 className="text-text-primary text-sm font-semibold">训练范围</h3>
           <dl className="text-text-secondary mt-3 grid gap-2 text-sm">
-            <Row label="Start" value={summary.dateRange.startAt} />
-            <Row label="End" value={summary.dateRange.endAt} />
+            <Row label="开始" value={summary.dateRange.startAt} />
+            <Row label="结束" value={summary.dateRange.endAt} />
             <Row
-              label="Unfinished"
-              value={`${summary.trainingSummary.unfinishedEmployeeCount} employees`}
+              label="未完成"
+              value={`${summary.trainingSummary.unfinishedEmployeeCount} 人`}
             />
             <Row
-              label="Score range"
+              label="分数区间"
               value={`${formatNullableNumber(
                 summary.trainingSummary.minScore,
               )} - ${formatNullableNumber(summary.trainingSummary.maxScore)}`}
@@ -324,27 +376,25 @@ function DashboardSummaryCard({
         </section>
 
         <section className="border-border rounded-md border p-3">
-          <h3 className="text-text-primary text-sm font-semibold">
-            Summary-only signals
-          </h3>
+          <h3 className="text-text-primary text-sm font-semibold">汇总信号</h3>
           <dl className="text-text-secondary mt-3 grid gap-2 text-sm">
             <Row
-              label="Formal practice"
-              value={`${summary.formalLearningSummary?.formalPracticeCount ?? 0} formal practices`}
+              label="正式练习"
+              value={`${summary.formalLearningSummary?.formalPracticeCount ?? 0} 次正式练习`}
             />
             <Row
-              label="Formal mock"
-              value={`${summary.formalLearningSummary?.formalMockExamCount ?? 0} mock exams`}
+              label="正式模拟"
+              value={`${summary.formalLearningSummary?.formalMockExamCount ?? 0} 次模拟考试`}
             />
             <Row
-              label="AI tasks"
-              value={`${summary.quotaSummary?.employeeAiTaskCount ?? 0} employee tasks`}
+              label="AI任务"
+              value={`${summary.quotaSummary?.employeeAiTaskCount ?? 0} 次员工任务`}
             />
             <Row
-              label="Quota"
+              label="额度"
               value={`${formatNullableNumber(
                 summary.quotaSummary?.quotaRemainingPoint ?? null,
-              )} quota remaining`}
+              )} 剩余额度`}
             />
           </dl>
         </section>

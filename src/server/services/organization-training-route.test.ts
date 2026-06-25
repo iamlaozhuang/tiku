@@ -379,7 +379,9 @@ function createAdminAuthContext(
       employeePublicId: null,
       organizationPublicId: null,
       adminPublicId: "organization_admin_route_public_401",
-      adminRoles: ["ops_admin"],
+      adminRoles: [
+        "org_advanced_admin",
+      ] as unknown as AuthContextDto["user"]["adminRoles"],
       ...overrides,
     },
     session: {
@@ -1080,6 +1082,48 @@ describe("organization training publish route handlers", () => {
       authorizationPublicId: "org_auth_route_public_401",
       organizationPublicId: "organization_route_public_401",
     });
+  });
+
+  it("rejects standard organization admins before trusted training lineage lookup", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext({
+        adminRoles: [
+          "org_standard_admin",
+        ] as unknown as AuthContextDto["user"]["adminRoles"],
+      }),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput(), {
+        headers: {
+          authorization: "Bearer organization_training_standard_session_401",
+        },
+      }),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403063,
+      message:
+        "Organization training publish organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(sessionService.requests).toEqual([
+      {
+        authorization: "Bearer organization_training_standard_session_401",
+      },
+    ]);
+    expect(
+      runtimeRepositoryMock.lookupVisibleOrganizationScope,
+    ).not.toHaveBeenCalled();
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).not.toHaveBeenCalled();
   });
 
   it("uses repository visible organization scope for the runtime organization-admin actor context", async () => {

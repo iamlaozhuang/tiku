@@ -217,6 +217,14 @@ describe("AdminDashboardLayout navigation", () => {
 
     expect(await screen.findByText("organization page")).toBeInTheDocument();
     expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /企业训练/u })).toHaveAttribute(
+      "href",
+      "/organization/organization-training",
+    );
+    expect(screen.getByRole("link", { name: /统计摘要/u })).toHaveAttribute(
+      "href",
+      "/organization/organization-analytics",
+    );
     expect(screen.getByRole("link", { name: /AI出题/u })).toHaveAttribute(
       "href",
       "/organization/ai-question-generation",
@@ -225,6 +233,8 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/organization/ai-paper-generation",
     );
+    expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
   });
 
   it("hides organization AI entries for standard organization admins", async () => {
@@ -249,8 +259,12 @@ describe("AdminDashboardLayout navigation", () => {
 
     expect(await screen.findByText("organization page")).toBeInTheDocument();
     expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("link", { name: /企业训练/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /统计摘要/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
   });
 
   it("denies content admins from the operations workspace", async () => {

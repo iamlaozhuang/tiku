@@ -29,53 +29,73 @@ type AdminOrganizationPortalLoadState =
   | "unauthorized"
   | "error";
 
-type OrganizationPortalDestination = {
+type OrganizationPortalSummary = {
   description: string;
-  href: string;
   icon: React.ReactNode;
   label: string;
   stateLabel: string;
   testId: string;
 };
 
-const organizationPortalDestinations: OrganizationPortalDestination[] = [
+type OrganizationPortalDestination = OrganizationPortalSummary & {
+  href: string;
+};
+
+const organizationPortalSummaries: OrganizationPortalSummary[] = [
   {
     description:
-      "Create organization training drafts, bind metadata-only sources, publish versions, and copy versions through local routes.",
-    href: "/organization/organization-training",
-    icon: <BookOpenCheck aria-hidden="true" className="size-4" />,
-    label: "Organization Training",
-    stateLabel: "Local admin flow ready",
-    testId: "organization-portal-destination-training",
+      "查看当前组织范围内的员工管理入口状态，不进入运营后台用户列表。",
+    icon: <Building2 aria-hidden="true" className="size-4" />,
+    label: "员工管理",
+    stateLabel: "组织范围内",
+    testId: "organization-portal-summary-employees",
   },
   {
     description:
-      "Load aggregate-only dashboard summaries for the organization analytics local entry.",
-    href: "/organization/organization-analytics",
-    icon: <BarChart3 aria-hidden="true" className="size-4" />,
-    label: "Organization Analytics",
-    stateLabel: "Summary-only entry ready",
-    testId: "organization-portal-destination-analytics",
-  },
-  {
-    description:
-      "Prepare organization-owned AI question drafts without writing platform formal question records.",
-    href: "/organization/ai-question-generation",
-    icon: <WandSparkles aria-hidden="true" className="size-4" />,
-    label: "AI出题",
-    stateLabel: "Advanced organization only",
-    testId: "organization-portal-destination-ai-question-generation",
-  },
-  {
-    description:
-      "Prepare organization-owned AI paper drafts without publishing formal paper records.",
-    href: "/organization/ai-paper-generation",
-    icon: <FileText aria-hidden="true" className="size-4" />,
-    label: "AI组卷",
-    stateLabel: "Advanced organization only",
-    testId: "organization-portal-destination-ai-paper-generation",
+      "查看当前组织授权版本和有效期状态，升级或续期仍按后续人工流程处理。",
+    icon: <ShieldCheck aria-hidden="true" className="size-4" />,
+    label: "授权状态",
+    stateLabel: "标准/高级授权",
+    testId: "organization-portal-summary-authorization",
   },
 ];
+
+const advancedOrganizationPortalDestinations: OrganizationPortalDestination[] =
+  [
+    {
+      description:
+        "创建企业训练草稿、绑定来源元数据，并在组织范围内发布训练版本。",
+      href: "/organization/organization-training",
+      icon: <BookOpenCheck aria-hidden="true" className="size-4" />,
+      label: "企业训练",
+      stateLabel: "高级版组织可用",
+      testId: "organization-portal-destination-training",
+    },
+    {
+      description: "查看组织训练聚合统计，不展示员工原始作答内容。",
+      href: "/organization/organization-analytics",
+      icon: <BarChart3 aria-hidden="true" className="size-4" />,
+      label: "统计摘要",
+      stateLabel: "聚合摘要",
+      testId: "organization-portal-destination-analytics",
+    },
+    {
+      description: "准备组织归属的 AI 题目草稿，不写入平台正式题库。",
+      href: "/organization/ai-question-generation",
+      icon: <WandSparkles aria-hidden="true" className="size-4" />,
+      label: "AI出题",
+      stateLabel: "组织草稿",
+      testId: "organization-portal-destination-ai-question-generation",
+    },
+    {
+      description: "准备组织归属的 AI 组卷草稿，不发布正式试卷记录。",
+      href: "/organization/ai-paper-generation",
+      icon: <FileText aria-hidden="true" className="size-4" />,
+      label: "AI组卷",
+      stateLabel: "组织草稿",
+      testId: "organization-portal-destination-ai-paper-generation",
+    },
+  ];
 
 function hasAdvancedOrganizationAdminRole(adminRoles: readonly string[]) {
   return (
@@ -136,7 +156,7 @@ export function AdminOrganizationPortalPage() {
   }, []);
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="Loading organization portal" />;
+    return <AdminLoadingState label="正在加载组织后台" />;
   }
 
   if (loadState === "unauthorized") {
@@ -146,29 +166,24 @@ export function AdminOrganizationPortalPage() {
   if (loadState === "error") {
     return (
       <AdminErrorState
-        title="Organization portal unavailable"
-        description="Refresh the page or sign in again before opening the organization portal."
+        title="组织后台加载失败"
+        description="请刷新页面，或重新登录后再进入组织后台。"
       />
     );
   }
 
-  const visibleDestinations = hasAdvancedOrganizationAdminRole(adminRoles)
-    ? organizationPortalDestinations
-    : [];
+  const hasAdvancedAccess = hasAdvancedOrganizationAdminRole(adminRoles);
 
   return (
     <section className="space-y-6" data-testid="organization-portal-shell">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Organization Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">组织后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            Organization Portal
+            组织后台
           </h1>
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
-            Local entry point for organization training and aggregate analytics
-            surfaces that are already supported in this workspace.
+            管理员工、查看组织授权状态，并按版本进入高级组织能力。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
@@ -184,31 +199,73 @@ export function AdminOrganizationPortalPage() {
             </div>
             <div>
               <h2 className="text-text-primary text-base font-semibold">
-                Active organization scope
+                组织范围
               </h2>
               <p className="text-text-secondary text-sm">
-                {organizationPublicId ?? "Organization scope is not set"}
+                {organizationPublicId ?? "暂未绑定组织范围"}
               </p>
             </div>
           </div>
           <span className="bg-success/10 text-success rounded-md px-3 py-1 text-xs font-medium">
-            local shell
+            本地组织工作区
           </span>
         </div>
       </section>
 
-      <nav
-        aria-label="Organization portal destinations"
-        className="grid gap-4 lg:grid-cols-2"
-      >
-        {visibleDestinations.map((destination) => (
-          <PortalDestinationLink
-            destination={destination}
-            key={destination.href}
-          />
+      <section aria-label="组织后台摘要" className="grid gap-4 lg:grid-cols-2">
+        {organizationPortalSummaries.map((summary) => (
+          <PortalSummaryCard key={summary.testId} summary={summary} />
         ))}
-      </nav>
+      </section>
+
+      {hasAdvancedAccess ? (
+        <nav aria-label="组织后台入口" className="grid gap-4 lg:grid-cols-2">
+          {advancedOrganizationPortalDestinations.map((destination) => (
+            <PortalDestinationLink
+              destination={destination}
+              key={destination.href}
+            />
+          ))}
+        </nav>
+      ) : (
+        <section
+          className="bg-surface border-border rounded-md border p-4 shadow-sm"
+          data-testid="organization-portal-standard-unavailable"
+        >
+          <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
+            <ShieldCheck aria-hidden="true" className="size-4" />
+            <h2>高级版能力</h2>
+          </div>
+          <p className="text-text-secondary mt-3 text-sm leading-6">
+            标准版暂不可用。高级版训练、统计和智能草稿能力需要高级版组织授权。
+          </p>
+        </section>
+      )}
     </section>
+  );
+}
+
+function PortalSummaryCard({
+  summary,
+}: {
+  summary: OrganizationPortalSummary;
+}) {
+  return (
+    <article
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      data-testid={summary.testId}
+    >
+      <span className="text-text-primary flex items-center gap-2 text-base font-semibold">
+        {summary.icon}
+        {summary.label}
+      </span>
+      <span className="text-text-secondary text-sm leading-6">
+        {summary.description}
+      </span>
+      <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-3 py-1 text-xs font-medium">
+        {summary.stateLabel}
+      </span>
+    </article>
   );
 }
 

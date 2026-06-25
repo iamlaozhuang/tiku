@@ -211,8 +211,7 @@ export type OrganizationTrainingEmployeeAnswerResolver = (
 
 type OrganizationTrainingRuntimeAdminRole =
   | "super_admin"
-  | "ops_admin"
-  | "content_admin";
+  | "org_advanced_admin";
 
 type OrganizationTrainingRouteService = Pick<
   OrganizationTrainingService,
@@ -432,9 +431,7 @@ async function defaultEmployeeAnswerServiceResult() {
 function isOrganizationTrainingRuntimeAdminRole(
   role: string,
 ): role is OrganizationTrainingRuntimeAdminRole {
-  return (
-    role === "super_admin" || role === "ops_admin" || role === "content_admin"
-  );
+  return role === "super_admin" || role === "org_advanced_admin";
 }
 
 function normalizeVisibleOrganizationPublicIds(

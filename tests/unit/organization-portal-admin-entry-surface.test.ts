@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import AdminOrganizationPortalRoutePage from "@/app/(admin)/content/organization-portal/page";
+import AdminOrganizationPortalRoutePage from "@/app/(admin)/organization/portal/page";
 import { AdminOrganizationPortalPage } from "@/features/admin/organization-portal/AdminOrganizationPortalPage";
 
 const adminSessionPayload = {
@@ -12,7 +12,7 @@ const adminSessionPayload = {
     user: {
       publicId: "user-admin-organization-portal",
       phone: "13900000004",
-      name: "Organization Portal Admin",
+      name: "组织高级管理员",
       userType: null,
       status: "active",
       lockedUntilAt: null,
@@ -34,7 +34,7 @@ const standardAdminSessionPayload = {
     user: {
       publicId: "user-admin-organization-standard-portal",
       phone: "13900000005",
-      name: "Organization Standard Portal Admin",
+      name: "组织标准管理员",
       userType: null,
       status: "active",
       lockedUntilAt: null,
@@ -65,7 +65,7 @@ afterEach(() => {
 });
 
 describe("AdminOrganizationPortalPage", () => {
-  it("is wired as the admin content organization portal route page", () => {
+  it("is wired as the organization portal route page", () => {
     expect(AdminOrganizationPortalRoutePage()).toEqual(
       createElement(AdminOrganizationPortalPage),
     );
@@ -101,7 +101,7 @@ describe("AdminOrganizationPortalPage", () => {
     ]);
   });
 
-  it("renders only locally supported organization admin destinations for an admin session", async () => {
+  it("renders Chinese advanced organization admin destinations", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       if (String(url) === "/api/v1/sessions") {
@@ -119,7 +119,7 @@ describe("AdminOrganizationPortalPage", () => {
     render(createElement(AdminOrganizationPortalPage));
 
     expect(
-      await screen.findByRole("heading", { name: "Organization Portal" }),
+      await screen.findByRole("heading", { name: "组织后台" }),
     ).toBeInTheDocument();
 
     const portalShell = screen.getByTestId("organization-portal-shell");
@@ -133,11 +133,11 @@ describe("AdminOrganizationPortalPage", () => {
     expect(supportedDestinations).toEqual([
       {
         href: "/organization/organization-training",
-        name: expect.stringContaining("Organization Training"),
+        name: expect.stringContaining("企业训练"),
       },
       {
         href: "/organization/organization-analytics",
-        name: expect.stringContaining("Organization Analytics"),
+        name: expect.stringContaining("统计摘要"),
       },
       {
         href: "/organization/ai-question-generation",
@@ -148,9 +148,13 @@ describe("AdminOrganizationPortalPage", () => {
         name: expect.stringContaining("AI组卷"),
       },
     ]);
+    expect(portalShell).toHaveTextContent("员工管理");
+    expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("organization-portal-scope-001");
     expect(portalShell).not.toHaveTextContent("/ops/organizations");
-    expect(portalShell).not.toHaveTextContent("Export");
+    expect(portalShell).not.toHaveTextContent("Organization Portal");
+    expect(portalShell).not.toHaveTextContent("Organization Training");
+    expect(portalShell).not.toHaveTextContent("local shell");
     expect(portalShell).not.toHaveTextContent("Provider");
     expect(portalShell).not.toHaveTextContent("Payment");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
@@ -160,7 +164,7 @@ describe("AdminOrganizationPortalPage", () => {
     ]);
   });
 
-  it("keeps standard organization admins out of organization AI destinations", async () => {
+  it("keeps standard organization admins on scoped Chinese summaries without advanced links", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       if (String(url) === "/api/v1/sessions") {
@@ -178,13 +182,18 @@ describe("AdminOrganizationPortalPage", () => {
     render(createElement(AdminOrganizationPortalPage));
 
     expect(
-      await screen.findByRole("heading", { name: "Organization Portal" }),
+      await screen.findByRole("heading", { name: "组织后台" }),
     ).toBeInTheDocument();
 
     const portalShell = screen.getByTestId("organization-portal-shell");
     expect(portalShell).toHaveTextContent("organization-standard-scope-001");
+    expect(portalShell).toHaveTextContent("员工管理");
+    expect(portalShell).toHaveTextContent("授权状态");
+    expect(portalShell).toHaveTextContent("标准版暂不可用");
     expect(portalShell).not.toHaveTextContent("AI出题");
     expect(portalShell).not.toHaveTextContent("AI组卷");
+    expect(portalShell).not.toHaveTextContent("企业训练");
+    expect(portalShell).not.toHaveTextContent("统计摘要");
     expect(portalShell).not.toHaveTextContent("Organization Training");
     expect(within(portalShell).queryAllByRole("link")).toEqual([]);
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([

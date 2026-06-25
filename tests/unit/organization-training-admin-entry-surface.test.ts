@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import AdminOrganizationTrainingRoutePage from "@/app/(admin)/content/organization-training/page";
+import AdminOrganizationTrainingRoutePage from "@/app/(admin)/organization/organization-training/page";
 import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
 
 const adminSessionPayload = {
@@ -19,14 +19,36 @@ const adminSessionPayload = {
     user: {
       publicId: "user-admin-organization-training",
       phone: "13900000002",
-      name: "Organization Admin",
+      name: "组织高级管理员",
       userType: null,
       status: "active",
       lockedUntilAt: null,
       employeePublicId: null,
       organizationPublicId: "organization-admin-scope-001",
       adminPublicId: "admin-organization-public-001",
-      adminRoles: ["organization_admin"],
+      adminRoles: ["org_advanced_admin"],
+    },
+    session: {
+      expiresAt: "2026-06-30T04:00:00.000Z",
+    },
+  },
+};
+
+const standardAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-admin-organization-training-standard",
+      phone: "13900000005",
+      name: "组织标准管理员",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-admin-scope-001",
+      adminPublicId: "admin-organization-standard-public-001",
+      adminRoles: ["org_standard_admin"],
     },
     session: {
       expiresAt: "2026-06-30T04:00:00.000Z",
@@ -96,7 +118,7 @@ afterEach(() => {
 });
 
 describe("AdminOrganizationTrainingPage", () => {
-  it("is wired as the admin content organization training route page", () => {
+  it("is wired as the organization training route page", () => {
     expect(AdminOrganizationTrainingRoutePage()).toEqual(
       createElement(AdminOrganizationTrainingPage),
     );
@@ -126,6 +148,38 @@ describe("AdminOrganizationTrainingPage", () => {
       "data-admin-ux-state",
       "permission-denied",
     );
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+    ]);
+  });
+
+  it("shows a Chinese unavailable state for standard organization admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(standardAdminSessionPayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const unavailableState = await screen.findByRole("alert");
+    expect(unavailableState).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
+    );
+    expect(unavailableState).toHaveTextContent("标准版暂不可用");
+    expect(unavailableState).toHaveTextContent(
+      "标准版组织后台暂不开放企业训练",
+    );
+    expect(screen.queryByRole("form", { name: "组织培训草稿表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
     ]);

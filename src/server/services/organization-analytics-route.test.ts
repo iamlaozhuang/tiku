@@ -309,7 +309,9 @@ type FakeSelectCall = {
   where: ReturnType<typeof vi.fn>;
 };
 
-function createAdminAuthContext(): NonNullable<CurrentSessionResult["data"]> {
+function createAdminAuthContext(
+  overrides: Partial<NonNullable<CurrentSessionResult["data"]>["user"]> = {},
+): NonNullable<CurrentSessionResult["data"]> {
   return {
     user: {
       publicId: "organization_analytics_route_user_public_001",
@@ -321,7 +323,10 @@ function createAdminAuthContext(): NonNullable<CurrentSessionResult["data"]> {
       employeePublicId: null,
       organizationPublicId: null,
       adminPublicId: "organization_analytics_admin_public_001",
-      adminRoles: ["ops_admin"],
+      adminRoles: ["org_advanced_admin"] as unknown as NonNullable<
+        CurrentSessionResult["data"]
+      >["user"]["adminRoles"],
+      ...overrides,
     },
     session: {
       expiresAt: "2026-06-16T11:00:00.000Z",
@@ -768,6 +773,46 @@ describe("organization analytics dashboard summary route handlers", () => {
     expect(selectCalls[0]?.innerJoin).toHaveBeenCalledTimes(2);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
     expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
+  });
+
+  it("rejects standard organization admins before dashboard summary reads", async () => {
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(
+        createAdminAuthContext({
+          adminRoles: ["org_standard_admin"] as unknown as NonNullable<
+            CurrentSessionResult["data"]
+          >["user"]["adminRoles"],
+        }),
+      ),
+    );
+    const observedReads: Array<{
+      readName?: string;
+      adminPublicId?: string;
+      organizationPublicId?: string;
+      scopeOrganizationPublicIds?: readonly string[];
+      dateRange?: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const { dashboardSummary } =
+      createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers({
+        repository:
+          createRepositoryBackedDashboardSummaryRepository(observedReads),
+        sessionService,
+      });
+
+    const response = await dashboardSummary.GET(
+      createDashboardSummaryRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403186,
+      message:
+        "Organization analytics dashboard summary admin context is unavailable.",
+      data: null,
+    });
+    expect(sessionService.requests).toHaveLength(1);
+    expect(observedReads).toEqual([]);
   });
 
   it("exports a dashboard summary GET route from the App Router runtime entrypoint", () => {

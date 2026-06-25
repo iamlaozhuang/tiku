@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, FilePlus2, Link2, ShieldCheck } from "lucide-react";
+import { AlertCircle, Copy, FilePlus2, Link2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import type { Profession, Subject } from "@/server/models/paper";
 import {
   AdminErrorState,
   AdminLoadingState,
+  AdminSurfaceStatus,
   AdminUnauthorizedState,
   createAdminAuthHeaders,
   fetchAdminApi,
@@ -29,6 +30,7 @@ import {
 type AdminOrganizationTrainingLoadState =
   | "loading"
   | "ready"
+  | "standard-unavailable"
   | "unauthorized"
   | "error";
 
@@ -83,6 +85,31 @@ const defaultCopyFormValues: CopyFormValues = {
   newDraftTitle: "",
   sourceVersionPublicId: "",
 };
+
+const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
+const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
+
+function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
+  return expectedRoles.some((expectedRole) =>
+    adminRoles.includes(expectedRole),
+  );
+}
+
+function resolveOrganizationTrainingLoadState(
+  authContext: AuthContextDto,
+): AdminOrganizationTrainingLoadState {
+  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
+
+  if (hasAnyRole(adminRoles, ["super_admin", ORGANIZATION_ADVANCED_ROLE])) {
+    return "ready";
+  }
+
+  if (adminRoles.includes(ORGANIZATION_STANDARD_ROLE)) {
+    return "standard-unavailable";
+  }
+
+  return "unauthorized";
+}
 
 async function mutateAdminOrganizationTrainingApi<TData>(
   path: string,
@@ -209,7 +236,9 @@ export function AdminOrganizationTrainingPage() {
           return;
         }
 
-        setLoadState("ready");
+        setLoadState(
+          resolveOrganizationTrainingLoadState(sessionResponse.data),
+        );
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -230,6 +259,17 @@ export function AdminOrganizationTrainingPage() {
 
   if (loadState === "unauthorized") {
     return <AdminUnauthorizedState />;
+  }
+
+  if (loadState === "standard-unavailable") {
+    return (
+      <AdminSurfaceStatus
+        description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。"
+        icon={<AlertCircle aria-hidden="true" className="size-5" />}
+        state="permission-denied"
+        title="标准版暂不可用"
+      />
+    );
   }
 
   if (loadState === "error") {

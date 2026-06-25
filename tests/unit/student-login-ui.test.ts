@@ -118,6 +118,52 @@ const contentAdminLoginPayload = {
   },
 };
 
+const orgStandardAdminLoginPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
+    user: {
+      publicId: "admin-dev-org-standard-admin",
+      phone: "13900000005",
+      name: "Dev Org Standard Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-standard-public-001",
+      adminPublicId: "admin-dev-org-standard-admin",
+      adminRoles: ["org_standard_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
+const orgAdvancedAdminLoginPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
+    user: {
+      publicId: "admin-dev-org-advanced-admin",
+      phone: "13900000006",
+      name: "Dev Org Advanced Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-advanced-public-001",
+      adminPublicId: "admin-dev-org-advanced-admin",
+      adminRoles: ["org_advanced_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
 function mockSessionResponse(payload: unknown, status = 200) {
   const fetchMock = vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
@@ -336,6 +382,46 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
+
+    cleanup();
+    replaceMock.mockReset();
+    localStorage.clear();
+    mockSessionResponse(orgStandardAdminLoginPayload);
+
+    render(createElement(LoginPage));
+
+    fireEvent.change(screen.getByLabelText("手机号"), {
+      target: { value: "13900000005" },
+    });
+    fireEvent.change(screen.getByLabelText("密码"), {
+      target: { value: "TikuDevAdmin#2026" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    await waitFor(() =>
+      expect(replaceMock).toHaveBeenCalledWith("/organization/portal"),
+    );
+    expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
+
+    cleanup();
+    replaceMock.mockReset();
+    localStorage.clear();
+    mockSessionResponse(orgAdvancedAdminLoginPayload);
+
+    render(createElement(LoginPage));
+
+    fireEvent.change(screen.getByLabelText("手机号"), {
+      target: { value: "13900000006" },
+    });
+    fireEvent.change(screen.getByLabelText("密码"), {
+      target: { value: "TikuDevAdmin#2026" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    await waitFor(() =>
+      expect(replaceMock).toHaveBeenCalledWith("/organization/portal"),
+    );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 

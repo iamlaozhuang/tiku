@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import AdminOrganizationAnalyticsRoutePage from "@/app/(admin)/content/organization-analytics/page";
+import AdminOrganizationAnalyticsRoutePage from "@/app/(admin)/organization/organization-analytics/page";
 import { AdminOrganizationAnalyticsPage } from "@/features/admin/organization-analytics/AdminOrganizationAnalyticsPage";
 
 const adminSessionPayload = {
@@ -19,14 +19,36 @@ const adminSessionPayload = {
     user: {
       publicId: "user-admin-organization-analytics",
       phone: "13900000003",
-      name: "Organization Analytics Admin",
+      name: "组织高级统计管理员",
       userType: null,
       status: "active",
       lockedUntilAt: null,
       employeePublicId: null,
       organizationPublicId: "organization-analytics-scope-001",
       adminPublicId: "admin-organization-analytics-001",
-      adminRoles: ["organization_admin"],
+      adminRoles: ["org_advanced_admin"],
+    },
+    session: {
+      expiresAt: "2026-06-30T04:00:00.000Z",
+    },
+  },
+};
+
+const standardAdminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-admin-organization-analytics-standard",
+      phone: "13900000005",
+      name: "组织标准统计管理员",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: "organization-analytics-scope-001",
+      adminPublicId: "admin-organization-analytics-standard-001",
+      adminRoles: ["org_standard_admin"],
     },
     session: {
       expiresAt: "2026-06-30T04:00:00.000Z",
@@ -102,7 +124,7 @@ afterEach(() => {
 });
 
 describe("AdminOrganizationAnalyticsPage", () => {
-  it("is wired as the admin content organization analytics route page", () => {
+  it("is wired as the organization analytics route page", () => {
     expect(AdminOrganizationAnalyticsRoutePage()).toEqual(
       createElement(AdminOrganizationAnalyticsPage),
     );
@@ -137,6 +159,38 @@ describe("AdminOrganizationAnalyticsPage", () => {
     ]);
   });
 
+  it("shows a Chinese unavailable state for standard organization admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(standardAdminSessionPayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationAnalyticsPage));
+
+    const unavailableState = await screen.findByRole("alert");
+    expect(unavailableState).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
+    );
+    expect(unavailableState).toHaveTextContent("标准版暂不可用");
+    expect(unavailableState).toHaveTextContent(
+      "标准版组织后台暂不开放统计摘要",
+    );
+    expect(screen.queryByRole("form", { name: "组织统计摘要表单" })).toBeNull();
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+    ]);
+  });
+
   it("loads aggregate-only dashboard summary from the admin route without exposing hidden scope or internal ids", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
@@ -164,26 +218,24 @@ describe("AdminOrganizationAnalyticsPage", () => {
     render(createElement(AdminOrganizationAnalyticsPage));
 
     expect(
-      await screen.findByRole("heading", { name: "Organization Analytics" }),
+      await screen.findByRole("heading", { name: "统计摘要" }),
     ).toBeInTheDocument();
 
     const summaryForm = within(
       screen.getByRole("form", {
-        name: "Organization analytics summary form",
+        name: "组织统计摘要表单",
       }),
     );
-    fireEvent.change(summaryForm.getByLabelText("Organization publicId"), {
+    fireEvent.change(summaryForm.getByLabelText("组织业务标识"), {
       target: { value: "organization-analytics-scope-001" },
     });
-    fireEvent.change(summaryForm.getByLabelText("Start at"), {
+    fireEvent.change(summaryForm.getByLabelText("开始时间"), {
       target: { value: "2026-06-01T00:00:00.000Z" },
     });
-    fireEvent.change(summaryForm.getByLabelText("End at"), {
+    fireEvent.change(summaryForm.getByLabelText("结束时间"), {
       target: { value: "2026-06-16T00:00:00.000Z" },
     });
-    fireEvent.click(
-      summaryForm.getByRole("button", { name: "Load dashboard summary" }),
-    );
+    fireEvent.click(summaryForm.getByRole("button", { name: "加载统计摘要" }));
 
     const summaryCard = await screen.findByTestId(
       "organization-analytics-summary-organization-analytics-scope-001",
@@ -193,13 +245,16 @@ describe("AdminOrganizationAnalyticsPage", () => {
       "organization-analytics-scope-001",
     );
     expect(summaryCard).not.toHaveAttribute("data-id", expect.any(String));
-    expect(summaryCard).toHaveTextContent("12 eligible employees");
-    expect(summaryCard).toHaveTextContent("8 submitted employees");
-    expect(summaryCard).toHaveTextContent("67% completion");
-    expect(summaryCard).toHaveTextContent("82 average score");
-    expect(summaryCard).toHaveTextContent("7 formal practices");
-    expect(summaryCard).toHaveTextContent("823 quota remaining");
-    expect(summaryCard).toHaveTextContent("aggregate_only");
+    expect(summaryCard).toHaveTextContent("12 可参与员工");
+    expect(summaryCard).toHaveTextContent("8 已提交员工");
+    expect(summaryCard).toHaveTextContent("67% 完成率");
+    expect(summaryCard).toHaveTextContent("82 平均分");
+    expect(summaryCard).toHaveTextContent("7 次正式练习");
+    expect(summaryCard).toHaveTextContent("823 剩余额度");
+    expect(summaryCard).toHaveTextContent("聚合脱敏");
+    expect(summaryCard).not.toHaveTextContent("Dashboard summary");
+    expect(summaryCard).not.toHaveTextContent("eligible employees");
+    expect(summaryCard).not.toHaveTextContent("aggregate_only");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain(
       "organization-analytics-child-hidden-002",
