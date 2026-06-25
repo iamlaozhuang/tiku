@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
-updatedAt: "2026-06-25T04:01:51-07:00"
+currentPhase: organization-admin-runtime-session-hydration-repair-2026-06-24
+updatedAt: "2026-06-25T04:47:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,33 +501,35 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 63528dd3edc6880b5ae06a4dad1d817092eba493
-  lastKnownOriginMasterSha: 63528dd3edc6880b5ae06a4dad1d817092eba493
+  lastKnownMasterSha: d35503770883368f1ece54156a849a79aead399e
+  lastKnownOriginMasterSha: d35503770883368f1ece54156a849a79aead399e
 currentTask:
-  id: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
-  status: closed
-  result: pass_focused_root_cause_planning_no_final_pass
-  claimedAt: "2026-06-25T04:33:01-07:00"
-  plannedAt: "2026-06-25T04:33:01-07:00"
-  validatedAt: "2026-06-25T04:37:26-07:00"
-  reviewedAt: "2026-06-25T04:37:26-07:00"
-  closedAt: "2026-06-25T04:41:15-07:00"
+  id: organization-admin-runtime-session-hydration-repair-2026-06-24
+  status: reviewed
+  result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+  claimedAt: "2026-06-25T04:47:33-07:00"
+  plannedAt: "2026-06-25T04:47:33-07:00"
+  implementedAt: "2026-06-25T04:57:48-07:00"
+  validatedAt: "2026-06-25T04:57:48-07:00"
+  reviewedAt: "2026-06-25T04:57:48-07:00"
   sourceStory: successor-of-organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
-  approvalConsumed: current_user_request_focused_planning_task_2026_06_25
-  approvalSource: current_user_message_create_focused_runtime_session_hydration_planning_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+  approvalConsumed: current_user_execute_next_session_hydration_repair_2026_06_25
+  approvalSource: current_user_message_next_task_session_hydration_repair_red_tests_then_logout_hydration_fixture_alignment_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
   predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-role-repair.md
   predecessorSourceRepairTaskId: organization-admin-session-role-mapping-runtime-repair-2026-06-24
   predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  predecessorPlanningTaskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
   allowedScope:
     docsStateEvidenceAudit: true
     readOnlySourceDiagnosis: true
-    sourceRepair: false
-    focusedUnitTests: false
+    sourceRepair: true
+    focusedUnitTests: true
     e2eSpecChange: false
     databaseMigrationOrSeed: false
     localDatabaseAccess: false
@@ -536,31 +538,35 @@ currentTask:
     browserRuntimeExecution: false
     finalPassClaim: false
   validationSummary:
+    redTests: pass_expected_failure_3_files_4_failures
+    focusedUnitTests: pass_4_files_29_tests
+    lint: pass
+    typecheck: pass
     prettierCheck: pass
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass
-  nextRecommendedTask: organization-admin-runtime-session-hydration-repair-2026-06-24
-  nextRecommendedTaskReason: >-
-    Focused planning indicates the next repair must start with red tests for cookie-backed logout/session invalidation,
-    legacy account fixture drift, and seed/unit role mapping drift before another browser runtime rerun.
+  expectedNextTask: organization-admin-workspace-runtime-rerun-2026-06-24
+  expectedNextTaskReason: >-
+    After source and fixture repair, rerun owner-entered real browser validation for organization admin workspace,
+    unrelated route denial, logout, and Chinese UI.
   finalPassClaim: false
   closeoutPolicy:
     localCommit:
-      approved: true
-      approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      approved: false
+      approvalSource: fresh_closeout_approval_required_after_validation
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      approvalSource: fresh_closeout_approval_required_after_validation
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      approvalSource: fresh_closeout_approval_required_after_validation
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
-  branch: codex/org-admin-session-hydration-planning-20260625
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required_after_validation
+  branch: codex/org-admin-session-hydration-repair-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -606,6 +612,66 @@ organizationAdminRuntimeSessionHydrationRepairPlanning20260624:
     - account_creation_disable_password_reset_or_seed
     - database_read_write_or_migration
     - source_test_script_or_e2e_change
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+organizationAdminRuntimeSessionHydrationRepair20260624:
+  taskId: organization-admin-runtime-session-hydration-repair-2026-06-24
+  phase: organization-admin-runtime-session-hydration-repair-2026-06-24
+  recordedAt: "2026-06-25T04:47:33-07:00"
+  status: reviewed
+  result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+  claimedAt: "2026-06-25T04:47:33-07:00"
+  plannedAt: "2026-06-25T04:47:33-07:00"
+  implementedAt: "2026-06-25T04:57:48-07:00"
+  validatedAt: "2026-06-25T04:57:48-07:00"
+  reviewedAt: "2026-06-25T04:57:48-07:00"
+  branch: codex/org-admin-session-hydration-repair-20260625
+  entryMasterSha: d35503770883368f1ece54156a849a79aead399e
+  entryOriginMasterSha: d35503770883368f1ece54156a849a79aead399e
+  approvalSource: current_user_message_next_task_session_hydration_repair_red_tests_then_logout_hydration_fixture_alignment_2026_06_25
+  predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
+  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-role-repair.md
+  predecessorSourceRepairTaskId: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+  predecessorPlanningTaskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  plannedRepairScope:
+    logoutCookieInvalidation: true
+    focusedLogoutServiceRepository: true
+    adminShellLogoutFetch: true
+    routeExportDelete: true
+    fixtureSsotAlignment: true
+    browserRuntimeExecution: false
+    databaseMigrationOrSeed: false
+  validationSummary:
+    redTests: pass_expected_failure_3_files_4_failures
+    focusedUnitTests: pass_4_files_29_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+  nextRecommendedTask: organization-admin-workspace-runtime-rerun-2026-06-24
+  blockedWithoutFreshApproval:
+    - browser_runtime_execution
+    - dev_server_start
+    - credential_document_read_by_codex
+    - credential_entry_by_codex
+    - account_creation_disable_password_reset_or_seed
+    - database_read_write_or_migration
+    - schema_migration_or_drizzle_push
     - dependency_package_lockfile_change
     - env_secret_access_or_env_file_change
     - provider_model_call_or_provider_enablement

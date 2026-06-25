@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { createSessionRouteHandlers } from "./session-route";
+import type { ApiResponse } from "../contracts/api-response";
+import type { AuthRequestInput } from "../services/auth-service";
+import { createSessionLogoutService } from "../services/session-logout-service";
 import type { SessionService } from "../services/session-service";
 
 const sessionCredentialField = "token";
@@ -189,5 +192,75 @@ describe("session route handlers", () => {
       message: "ok",
       data: null,
     });
+  });
+
+  it("deletes the current server session and expires the session cookie on logout", async () => {
+    let observedAuthorization: string | null = null;
+    const sessionService = {
+      async login() {
+        throw new Error("login should not be called");
+      },
+      async getCurrentSession() {
+        throw new Error("current session should not be called");
+      },
+      async logout(input: AuthRequestInput): Promise<ApiResponse<null>> {
+        observedAuthorization = input.authorization ?? null;
+
+        return {
+          code: 0,
+          message: "ok",
+          data: null,
+        };
+      },
+    } satisfies SessionService & {
+      logout(input: AuthRequestInput): Promise<ApiResponse<null>>;
+    };
+    const { DELETE } = createSessionRouteHandlers(sessionService);
+
+    const response = await DELETE(
+      new Request("http://localhost/api/v1/sessions", {
+        method: "DELETE",
+        headers: {
+          cookie: "theme=light; tiku_session=session_token_123",
+        },
+      }),
+    );
+
+    expect(observedAuthorization).toBe("Bearer session_token_123");
+    await expect(response.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: null,
+    });
+
+    const expiredSessionCookie = response.headers.get("set-cookie");
+
+    expect(expiredSessionCookie).toContain("tiku_session=");
+    expect(expiredSessionCookie).toContain("HttpOnly");
+    expect(expiredSessionCookie).toContain("SameSite=Lax");
+    expect(expiredSessionCookie).toContain("Path=/");
+    expect(expiredSessionCookie).toContain(
+      "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    );
+  });
+
+  it("normalizes the logout authorization header before deleting the repository session", async () => {
+    let deletedSessionCredential: string | null = null;
+    const sessionLogoutService = createSessionLogoutService({
+      async deleteSessionByCredential(sessionCredential) {
+        deletedSessionCredential = sessionCredential;
+      },
+    });
+
+    await expect(
+      sessionLogoutService.logout({
+        authorization: "Bearer session_token_123",
+      }),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: null,
+    });
+    expect(deletedSessionCredential).toBe("session_token_123");
   });
 });

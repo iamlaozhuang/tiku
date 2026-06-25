@@ -5521,6 +5521,223 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-runtime-session-hydration-repair-2026-06-24
+    title: Repair organization admin runtime session hydration and logout boundary
+    phase: organization-admin-runtime-session-hydration-repair-2026-06-24
+    sourceStory: successor-of-organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+    dependencies:
+      - organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+      - organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_source_repair_tdd_no_browser_no_db_no_schema
+    evidenceMode: redacted_command_summary_no_secret_cookie_value_capture
+    validationPolicy: red_green_focused_unit_lint_typecheck_precommit
+    queueSelectionMode: current_user_next_task_request
+    targetClosureItem: Real logout clears cookie-backed server session and unit fixtures align with dev-seed organization admin role mapping
+    behaviorBoundary: auth_session::logout_cookie_invalidation_and_org_admin_fixture_ssot_alignment
+    requiredOutcome: >-
+      Start with red tests that prove logout/session invalidation and fixture mapping gaps, then implement the smallest
+      source repair for cookie-backed logout/session hydration and align organization admin unit fixtures to the dev seed
+      role/account mapping. Do not run browser runtime, dev server, database seed/write, schema/migration, Provider,
+      env/secret, staging/prod, payment, external service, PR, force-push, Cost Calibration Gate, or final Pass work.
+    status: reviewed
+    result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+    approvedAt: "2026-06-25T04:47:33-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: current_user_next_task_session_hydration_repair_2026_06_25
+      approvalSource: current_user_message_next_task_session_hydration_repair_red_tests_then_logout_hydration_fixture_alignment_2026_06_25
+    claimedAt: "2026-06-25T04:47:33-07:00"
+    plannedAt: "2026-06-25T04:47:33-07:00"
+    implementedAt: "2026-06-25T04:57:48-07:00"
+    validatedAt: "2026-06-25T04:57:48-07:00"
+    reviewedAt: "2026-06-25T04:57:48-07:00"
+    branch: codex/org-admin-session-hydration-repair-20260625
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      taskPlanEvidenceAuditCreation: approved
+      readOnlySourceDiagnosis: approved
+      e2eSpecChange: blocked
+      browserRuntimeExecution: blocked
+      devServerStart: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+      - src/server/auth/session-boundary.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/local-session-logout-route.ts
+      - src/server/repositories/session-logout-repository.ts
+      - src/server/services/session-logout-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/app/api/v1/sessions/route.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/server/auth/session-route.test.ts
+      - src/db/dev-seed.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+      - src/app/(auth)/login/page.tsx
+      - src/server/auth/auth-boundary.ts
+      - src/server/auth/session-boundary.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/local-session-logout-route.ts
+      - src/server/repositories/session-logout-repository.ts
+      - src/server/services/session-logout-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/server/services/auth-service.ts
+      - src/server/validators/auth-session.ts
+      - src/server/repositories/session-repository.ts
+      - src/server/repositories/auth-repository.ts
+      - src/server/mappers/auth-mapper.ts
+      - src/server/contracts/auth-contract.ts
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/student-login-ui.test.ts
+      - src/server/auth/session-route.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - browser_runtime_execution
+      - dev_server_start
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - owner_account_action
+      - account_creation_disable_password_reset_or_seed
+      - database_read_write_or_migration
+      - schema_migration_or_drizzle_push
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - session_hydration
+      - logout_cookie_invalidation
+      - role_mapping
+      - fixture_drift
+      - authorization_boundary
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommandLifecycle:
+      pre_edit:
+        - npx.cmd vitest run src/server/auth/session-route.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts --reporter=dot
+      post_edit:
+        - npx.cmd vitest run src/server/auth/session-route.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts src/db/dev-seed.test.ts --reporter=dot
+      closeout:
+        - npm.cmd run lint
+        - npm.cmd run typecheck
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md src/server/auth/session-boundary.ts src/server/auth/session-cookie.ts src/server/auth/session-route.ts src/server/auth/local-session-logout-route.ts src/server/auth/local-session-runtime.ts src/server/repositories/session-logout-repository.ts src/server/services/session-logout-service.ts src/server/services/session-service.ts src/app/api/v1/sessions/route.ts src/components/AdminDashboardLayout/AdminDashboardLayout.tsx src/server/auth/session-route.test.ts src/db/dev-seed.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-runtime-session-hydration-repair-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-runtime-session-hydration-repair-2026-06-24 -SkipRemoteAheadCheck
+    validationCommands:
+      - npx.cmd vitest run src/server/auth/session-route.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts --reporter=dot
+      - npx.cmd vitest run src/server/auth/session-route.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts src/db/dev-seed.test.ts --reporter=dot
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md src/server/auth/session-boundary.ts src/server/auth/session-cookie.ts src/server/auth/session-route.ts src/server/auth/local-session-logout-route.ts src/server/auth/local-session-runtime.ts src/server/repositories/session-logout-repository.ts src/server/services/session-logout-service.ts src/server/services/session-service.ts src/app/api/v1/sessions/route.ts src/components/AdminDashboardLayout/AdminDashboardLayout.tsx src/server/auth/session-route.test.ts src/db/dev-seed.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-runtime-session-hydration-repair-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-runtime-session-hydration-repair-2026-06-24 -SkipRemoteAheadCheck
+    redTestPlan:
+      - session_route_delete_clears_cookie_and_delegates_logout
+      - admin_layout_logout_calls_session_delete_before_redirect
+      - login_and_layout_org_admin_fixture_phones_match_dev_seed
+    validationSummary:
+      redTests: pass_expected_failure_3_files_4_failures
+      focusedUnitTests: pass_4_files_29_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
+    predecessorSourceRepairTaskId: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    predecessorPlanningTaskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_closeout_approval_required_after_validation
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required_after_validation
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required_after_validation
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required_after_validation
+    retryCount: 0
+    lastFailurePath: null
+
   - id: requirement-ssot-reading-governance-2026-06-24
     title: Enforce requirement SSOT reading governance in task gates
     phase: requirement-ssot-reading-governance-2026-06-24

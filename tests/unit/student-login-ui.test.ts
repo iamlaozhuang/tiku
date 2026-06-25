@@ -9,6 +9,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import LoginPage from "@/app/(auth)/login/page";
+import { buildDevSeedDataset, devSeedPublicIds } from "@/db/dev-seed";
 import {
   COOKIE_BACKED_SESSION_MARKER,
   STUDENT_SESSION_TOKEN_STORAGE_KEY,
@@ -102,7 +103,7 @@ const contentAdminLoginPayload = {
     [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-content-admin",
-      phone: "13900000004",
+      phone: "13900000006",
       name: "Dev Content Admin",
       userType: null,
       status: "active",
@@ -125,7 +126,7 @@ const orgStandardAdminLoginPayload = {
     [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-org-standard-admin",
-      phone: "13900000005",
+      phone: "13900000004",
       name: "Dev Org Standard Admin",
       userType: null,
       status: "active",
@@ -148,7 +149,7 @@ const orgAdvancedAdminLoginPayload = {
     [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-org-advanced-admin",
-      phone: "13900000006",
+      phone: "13900000005",
       name: "Dev Org Advanced Admin",
       userType: null,
       status: "active",
@@ -163,6 +164,15 @@ const orgAdvancedAdminLoginPayload = {
     },
   },
 };
+
+function buildUnitSeedDataset() {
+  return buildDevSeedDataset({
+    orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
+    orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
+    studentPasswordHash: "student-password-hash",
+    superAdminPasswordHash: "admin-password-hash",
+  });
+}
 
 function mockSessionResponse(payload: unknown, status = 200) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -392,7 +402,7 @@ describe("LoginPage", () => {
     render(createElement(LoginPage));
 
     fireEvent.change(screen.getByLabelText("手机号"), {
-      target: { value: "13900000005" },
+      target: { value: "13900000004" },
     });
     fireEvent.change(screen.getByLabelText("密码"), {
       target: { value: "TikuDevAdmin#2026" },
@@ -412,7 +422,7 @@ describe("LoginPage", () => {
     render(createElement(LoginPage));
 
     fireEvent.change(screen.getByLabelText("手机号"), {
-      target: { value: "13900000006" },
+      target: { value: "13900000005" },
     });
     fireEvent.change(screen.getByLabelText("密码"), {
       target: { value: "TikuDevAdmin#2026" },
@@ -425,13 +435,38 @@ describe("LoginPage", () => {
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 
+  it("keeps organization admin login fixtures aligned with the dev seed role mapping", () => {
+    const seedDataset = buildUnitSeedDataset();
+    const orgStandardAdmin = seedDataset.admins.find(
+      (adminAccount) =>
+        adminAccount.publicId === devSeedPublicIds.orgStandardAdmin,
+    );
+    const orgAdvancedAdmin = seedDataset.admins.find(
+      (adminAccount) =>
+        adminAccount.publicId === devSeedPublicIds.orgAdvancedAdmin,
+    );
+
+    expect(orgStandardAdminLoginPayload.data.user.phone).toBe(
+      orgStandardAdmin?.phone,
+    );
+    expect(orgStandardAdminLoginPayload.data.user.adminRoles).toEqual([
+      orgStandardAdmin?.adminRole,
+    ]);
+    expect(orgAdvancedAdminLoginPayload.data.user.phone).toBe(
+      orgAdvancedAdmin?.phone,
+    );
+    expect(orgAdvancedAdminLoginPayload.data.user.adminRoles).toEqual([
+      orgAdvancedAdmin?.adminRole,
+    ]);
+  });
+
   it("sends role-specific admins to their workspace landing after local session login", async () => {
     mockSessionResponse(contentAdminLoginPayload);
 
     render(createElement(LoginPage));
 
     fireEvent.change(screen.getByLabelText("手机号"), {
-      target: { value: "13900000004" },
+      target: { value: "13900000006" },
     });
     fireEvent.change(screen.getByLabelText("密码"), {
       target: { value: "TikuDevAdmin#2026" },

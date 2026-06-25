@@ -301,10 +301,17 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     };
   }, [router, workspace]);
 
-  function handleLogoutClick() {
-    localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
-    setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
-    router.replace("/login");
+  async function handleLogoutClick() {
+    try {
+      await fetch("/api/v1/sessions", {
+        credentials: "same-origin",
+        method: "DELETE",
+      });
+    } finally {
+      localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
+      setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
+      router.replace("/login");
+    }
   }
 
   if (status !== "authorized") {

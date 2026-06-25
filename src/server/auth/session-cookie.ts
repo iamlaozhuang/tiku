@@ -1,6 +1,7 @@
 export const SESSION_COOKIE_NAME = "tiku_session";
 export const COOKIE_BACKED_SESSION_AUTHORIZATION =
   "Bearer __cookie_backed_session__";
+const EXPIRED_SESSION_COOKIE_DATE = "Thu, 01 Jan 1970 00:00:00 GMT";
 
 function isSecureRequest(request: Request): boolean {
   return new URL(request.url).protocol === "https:";
@@ -20,6 +21,22 @@ export function createSessionCookieHeader(
     "HttpOnly",
     "SameSite=Lax",
     expiresAtAttribute,
+    secureAttribute,
+  ]
+    .filter((attribute): attribute is string => attribute !== null)
+    .join("; ");
+}
+
+export function createExpiredSessionCookieHeader(request: Request): string {
+  const secureAttribute = isSecureRequest(request) ? "Secure" : null;
+
+  return [
+    `${SESSION_COOKIE_NAME}=`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Expires=${EXPIRED_SESSION_COOKIE_DATE}`,
+    "Max-Age=0",
     secureAttribute,
   ]
     .filter((attribute): attribute is string => attribute !== null)

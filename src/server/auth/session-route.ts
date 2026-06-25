@@ -1,9 +1,12 @@
 import {
   createErrorResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import type { AuthRequestInput } from "../services/auth-service";
 import type { SessionService } from "../services/session-service";
 import {
+  createExpiredSessionCookieHeader,
   createSessionCookieHeader,
   getRequestAuthorization,
 } from "./session-cookie";
@@ -58,7 +61,13 @@ function getLoginSessionExpiresAt(
   return Number.isNaN(expiresAt.getTime()) ? null : expiresAt.toUTCString();
 }
 
-export function createSessionRouteHandlers(sessionService: SessionService) {
+type SessionLogoutCapableService = SessionService & {
+  logout?(input: AuthRequestInput): Promise<ApiResponse<null>>;
+};
+
+export function createSessionRouteHandlers(
+  sessionService: SessionLogoutCapableService,
+) {
   return {
     async POST(request: Request): Promise<Response> {
       const input = await readRequestJson(request);
@@ -87,6 +96,21 @@ export function createSessionRouteHandlers(sessionService: SessionService) {
         }),
       );
     },
+
+    async DELETE(request: Request): Promise<Response> {
+      const logoutResponse =
+        sessionService.logout === undefined
+          ? createSuccessResponse(null)
+          : await sessionService.logout({
+              authorization: getRequestAuthorization(request),
+            });
+
+      return createJsonResponse(logoutResponse, {
+        headers: {
+          "Set-Cookie": createExpiredSessionCookieHeader(request),
+        },
+      });
+    },
   };
 }
 
@@ -97,6 +121,9 @@ export function createUnavailableSessionRouteHandlers() {
     },
     async getCurrentSession() {
       return createErrorResponse(503001, "Session runtime is not configured.");
+    },
+    async logout() {
+      return createSuccessResponse(null);
     },
   });
 }

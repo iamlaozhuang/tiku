@@ -1,8 +1,15 @@
 import { createElement } from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminDashboardLayout } from "@/components/AdminDashboardLayout";
+import { buildDevSeedDataset, devSeedPublicIds } from "@/db/dev-seed";
 
 const replaceMock = vi.fn();
 let pathnameMock = "/ops/users";
@@ -64,7 +71,7 @@ const contentAdminSessionPayload = {
   data: {
     user: {
       publicId: "user-content-admin-public",
-      phone: "13900000004",
+      phone: "13900000006",
       name: "Content Admin",
       userType: null,
       status: "active",
@@ -86,7 +93,7 @@ const orgStandardAdminSessionPayload = {
   data: {
     user: {
       publicId: "user-org-standard-admin-public",
-      phone: "13900000005",
+      phone: "13900000004",
       name: "Org Standard Admin",
       userType: null,
       status: "active",
@@ -108,7 +115,7 @@ const orgAdvancedAdminSessionPayload = {
   data: {
     user: {
       publicId: "user-org-advanced-admin-public",
-      phone: "13900000006",
+      phone: "13900000005",
       name: "Org Advanced Admin",
       userType: null,
       status: "active",
@@ -123,6 +130,15 @@ const orgAdvancedAdminSessionPayload = {
     },
   },
 };
+
+function buildUnitSeedDataset() {
+  return buildDevSeedDataset({
+    orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
+    orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
+    studentPasswordHash: "student-password-hash",
+    superAdminPasswordHash: "admin-password-hash",
+  });
+}
 
 afterEach(() => {
   cleanup();
@@ -193,6 +209,80 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/content/ai-paper-generation",
     );
+  });
+
+  it("clears the server-backed session when the backend logout control is clicked", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "DELETE") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: null,
+            }),
+          };
+        }
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => contentAdminSessionPayload,
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "退出登录" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/sessions",
+        expect.objectContaining({
+          credentials: "same-origin",
+          method: "DELETE",
+        }),
+      ),
+    );
+    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
+    expect(replaceMock).toHaveBeenCalledWith("/login");
+  });
+
+  it("keeps organization admin navigation fixtures aligned with the dev seed role mapping", () => {
+    const seedDataset = buildUnitSeedDataset();
+    const orgStandardAdmin = seedDataset.admins.find(
+      (adminAccount) =>
+        adminAccount.publicId === devSeedPublicIds.orgStandardAdmin,
+    );
+    const orgAdvancedAdmin = seedDataset.admins.find(
+      (adminAccount) =>
+        adminAccount.publicId === devSeedPublicIds.orgAdvancedAdmin,
+    );
+
+    expect(orgStandardAdminSessionPayload.data.user.phone).toBe(
+      orgStandardAdmin?.phone,
+    );
+    expect(orgStandardAdminSessionPayload.data.user.adminRoles).toEqual([
+      orgStandardAdmin?.adminRole,
+    ]);
+    expect(orgAdvancedAdminSessionPayload.data.user.phone).toBe(
+      orgAdvancedAdmin?.phone,
+    );
+    expect(orgAdvancedAdminSessionPayload.data.user.adminRoles).toEqual([
+      orgAdvancedAdmin?.adminRole,
+    ]);
   });
 
   it("shows organization AI entries only for advanced organization admins", async () => {
