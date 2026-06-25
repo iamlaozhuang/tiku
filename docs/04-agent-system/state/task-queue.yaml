@@ -8762,6 +8762,187 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-workspace-runtime-regression-repair-2026-06-24
+    title: Repair organization admin workspace runtime regression
+    phase: organization-admin-workspace-runtime-regression-repair-2026-06-24
+    sourceStory: successor-of-organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+    dependencies:
+      - organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+    taskKind: implementation_diagnostic_red_test
+    moduleRunVersion: 2
+    executionProfile: red_test_first_real_session_account_mapping
+    evidenceMode: redacted_local_static
+    validationPolicy: focused_red_test_then_stop_if_schema_seed_required
+    queueSelectionMode: current_user_direct_next_task_2026_06_25
+    targetClosureItem: Real session/account mapping diagnosis for organization admin workspace regression
+    behaviorBoundary: implementation_diagnostic::red_test_first_no_schema_seed_without_fresh_approval
+    requiredOutcome: >-
+      Establish a focused red test proving whether the persisted admin role/session source can represent
+      org_standard_admin and org_advanced_admin. If the red test points to admin_role enum expansion, migration, dev
+      seed, database, or account mutation, stop source-only repair and request fresh schema/migration/seed approval.
+    capabilities:
+      focusedRedTestChange: approved_src_server_models_auth_test_only
+      docsEvidenceAudit: approved
+      productionSourceChange: blocked_until_red_test_decision
+      schemaMigration: blocked_without_fresh_approval
+      databaseSeedOrWrite: blocked_without_fresh_approval
+      accountAction: blocked
+      browserRuntimeObservation: blocked
+      devServerStart: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - src/server/models/auth.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
+      - src/server/models/auth.ts
+      - src/db/schema/auth.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/server/mappers/auth-mapper.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/repositories/auth-repository.ts
+      - src/server/repositories/session-repository.ts
+      - src/db/dev-seed.ts
+      - drizzle/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/db/dev-seed.ts
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - schema_migration_or_drizzle_snapshot_change
+      - seed_or_fixture_mutation
+      - database_read_write_or_migration_execution
+      - account_or_credential_mutation
+      - production_source_repair_after_red_test
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - red_test_diagnostic
+      - authorization_boundary
+      - role_mapping
+      - schema_migration_may_be_required
+      - seed_may_be_required
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/models/auth.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - git diff --check
+    validationCommandLifecycle:
+      post_edit_red:
+        - npm.cmd run test:unit -- src/server/models/auth.test.ts
+      closeout_blocked_or_green:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+        - git diff --check
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: blocked
+    result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
+    approvedAt: "2026-06-25T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_message_next_task_organization_admin_runtime_regression_repair_red_test_first_2026_06_25
+    claimedAt: "2026-06-25T00:00:00-07:00"
+    plannedAt: "2026-06-25T00:00:00-07:00"
+    validatedAt: "2026-06-25T02:23:47-07:00"
+    reviewedAt: "2026-06-25T02:23:47-07:00"
+    closedAt: null
+    blockedAt: "2026-06-25T02:23:47-07:00"
+    branch: codex/org-admin-runtime-regression-repair-20260625
+    diagnosisPlan:
+      firstStep: real_session_account_mapping_red_test
+      redTestFile: src/server/models/auth.test.ts
+      sourceOnlyRepairAllowedBeforeRedDecision: false
+      schemaMigrationApprovedByThisTask: false
+      seedMutationApprovedByThisTask: false
+      finalPassClaim: false
+    redTestResult:
+      command: npm.cmd run test:unit -- src/server/models/auth.test.ts
+      status: fail_expected
+      failedAssertion: adminRoleValues_missing_org_standard_admin_and_org_advanced_admin
+      tests: 1_failed_2_passed_3_total
+    repairPathDecision: upgrade_to_schema_migration_seed_approval_required
+    nextRecommendedTask: organization-admin-role-persistence-schema-seed-approval-2026-06-24
+    nextRecommendedTaskReason: >-
+      The real persisted admin_role source cannot represent org_standard_admin or org_advanced_admin, so source-only UI
+      or mapper repair would repeat the previous mocked-role failure.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+    redTestAssertionRetainedInMerge: false
+    redTestAssertionRetentionReason: avoid_intentionally_failing_master_unit_baseline_before_track_b_green_fix
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22

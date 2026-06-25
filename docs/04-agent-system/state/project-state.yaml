@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-workspace-runtime-rerun-2026-06-24
+currentPhase: organization-admin-workspace-runtime-regression-repair-2026-06-24
 updatedAt: "2026-06-25T00:00:00-07:00"
 architecture:
   status: complete
@@ -501,54 +501,95 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 96067515dd3838909186d6ed6a2503904b3afcfe
-  lastKnownOriginMasterSha: 96067515dd3838909186d6ed6a2503904b3afcfe
+  lastKnownMasterSha: 595912c397ddace1c328348aeb63484073b96151
+  lastKnownOriginMasterSha: 595912c397ddace1c328348aeb63484073b96151
 currentTask:
-  id: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
-  status: closed
-  result: pass_regression_repair_plan_prepared_no_source_no_runtime_no_final_pass
+  id: organization-admin-workspace-runtime-regression-repair-2026-06-24
+  status: blocked
+  result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
   claimedAt: "2026-06-25T00:00:00-07:00"
   plannedAt: "2026-06-25T00:00:00-07:00"
-  validatedAt: "2026-06-25T00:00:00-07:00"
-  reviewedAt: "2026-06-25T00:00:00-07:00"
-  closedAt: "2026-06-25T00:00:00-07:00"
-  blockedAt: null
-  sourceStory: successor-of-organization-admin-workspace-runtime-rerun-2026-06-24
-  approvalConsumed: current_user_request_low_risk_regression_repair_planning_2026_06_25
-  approvalSource: current_user_message_create_low_risk_planning_then_source_repair_after_deeper_diagnosis_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
+  validatedAt: "2026-06-25T02:23:47-07:00"
+  reviewedAt: "2026-06-25T02:23:47-07:00"
+  closedAt: null
+  blockedAt: "2026-06-25T02:23:47-07:00"
+  sourceStory: successor-of-organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+  approvalConsumed: current_user_request_start_regression_repair_with_real_session_account_mapping_red_test_2026_06_25
+  approvalSource: current_user_message_next_task_organization_admin_runtime_regression_repair_red_test_first_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  runtimeExecutedByThisTask: false
-  productSourceChangedByThisTask: false
-  finalPassClaim: false
+  predecessorPlanningTaskId: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+  predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair-planning.md
   predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-2026-06-24
   predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md
-  predecessorRuntimeAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
-  successorTaskId: organization-admin-workspace-runtime-regression-repair-2026-06-24
-  successorTaskStatus: recommended_requires_independent_task_plan_and_may_require_schema_migration_approval
+  runtimeExecutedByThisTask: false
+  productSourceChangedByThisTask: false
+  testSourceChangeScope: red_test_only_src_server_models_auth_test
+  redTestDecisionRule: >-
+    If the focused real session/account role source test proves adminRoleValues cannot represent org_standard_admin or
+    org_advanced_admin, stop source-only repair and request schema/migration/seed approval before changing production
+    code.
+  redTestResult: fail_expected_missing_org_admin_roles
+  repairPathDecision: upgrade_to_schema_migration_seed_approval_required
+  nextRecommendedTask: organization-admin-role-persistence-schema-seed-approval-2026-06-24
+  nextRecommendedTaskReason: admin_role_persisted_source_lacks_org_standard_admin_and_org_advanced_admin
+  finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_low_risk_regression_repair_planning_2026_06_25
+      approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_low_risk_regression_repair_planning_2026_06_25
+      approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_low_risk_regression_repair_planning_2026_06_25
+      approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_low_risk_regression_repair_planning_2026_06_25
-  branch: codex/org-admin-runtime-regression-planning-20260625
+      approvalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+  branch: codex/org-admin-runtime-regression-repair-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+organizationAdminWorkspaceRuntimeRegressionRepair20260624:
+  taskId: organization-admin-workspace-runtime-regression-repair-2026-06-24
+  phase: organization-admin-workspace-runtime-regression-repair-2026-06-24
+  recordedAt: "2026-06-25T00:00:00-07:00"
+  status: blocked
+  result: blocked_track_b_schema_migration_seed_approval_required_after_red_test
+  branch: codex/org-admin-runtime-regression-repair-20260625
+  entryMasterSha: 595912c397ddace1c328348aeb63484073b96151
+  entryOriginMasterSha: 595912c397ddace1c328348aeb63484073b96151
+  approvalSource: current_user_message_next_task_organization_admin_runtime_regression_repair_red_test_first_2026_06_25
+  predecessorPlanningTaskId: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+  predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-2026-06-24
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  initialAllowedCodeSurface:
+    - src/server/models/auth.test.ts
+  blockedUntilFreshApproval:
+    - src/db/schema/auth.ts
+    - drizzle/**
+    - src/db/dev-seed.ts
+    - database_read_write_or_migration_execution
+    - account_or_seed_mutation
+  decisionRule: red_test_before_source_or_schema_repair
+  redTestResult: fail_expected_missing_org_admin_roles
+  repairPathDecision: upgrade_to_schema_migration_seed_approval_required
+  nextRecommendedTask: organization-admin-role-persistence-schema-seed-approval-2026-06-24
+  closeoutApprovalSource: current_user_fresh_approval_2026_06_25_commit_merge_push_cleanup_blocked_diagnostic_then_track_b
+  redTestAssertionRetainedInMerge: false
+  redTestAssertionRetentionReason: avoid_intentionally_failing_master_unit_baseline_before_track_b_green_fix
+  productSourceChangedByThisTask: false
+  runtimeExecutedByThisTask: false
+  finalPassClaim: false
 organizationAdminWorkspaceRuntimeRegressionRepairPlanning20260624:
   taskId: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
   phase: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
