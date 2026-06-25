@@ -243,9 +243,8 @@ function getAdvancedBlockedReason(
 
 function createPersonalCapabilities(
   effectiveEdition: EffectiveAuthorizationEdition,
-  isProductionEnablementConfigured: boolean,
 ): EffectiveAuthorizationCapabilitiesDto {
-  if (effectiveEdition !== "advanced" || !isProductionEnablementConfigured) {
+  if (effectiveEdition !== "advanced") {
     return disabledCapabilities;
   }
 
@@ -258,14 +257,15 @@ function createPersonalCapabilities(
 
 function createOrgCapabilities(
   effectiveEdition: EffectiveAuthorizationEdition,
-  isProductionEnablementConfigured: boolean,
 ): EffectiveAuthorizationCapabilitiesDto {
-  if (effectiveEdition !== "advanced" || !isProductionEnablementConfigured) {
+  if (effectiveEdition !== "advanced") {
     return disabledCapabilities;
   }
 
   return {
     ...disabledCapabilities,
+    canGenerateAiQuestion: true,
+    canGenerateAiPaper: true,
     canCreateOrganizationTraining: true,
     canAnswerOrganizationTraining: true,
     canViewOrganizationTrainingSummary: true,
@@ -296,10 +296,7 @@ function mapPersonalAuthToAuthorizationContext(
     organizationPublicId: null,
     quotaOwnerType: "personal",
     quotaOwnerPublicId: userPublicId,
-    capabilities: createPersonalCapabilities(
-      effectiveEdition,
-      isProductionEnablementConfigured,
-    ),
+    capabilities: createPersonalCapabilities(effectiveEdition),
     blockedReason: getAdvancedBlockedReason(
       effectiveEdition,
       isProductionEnablementConfigured,
@@ -330,10 +327,7 @@ function mapOrgAuthToAuthorizationContext(
     organizationPublicId: orgAuth.organization_public_id,
     quotaOwnerType: "organization",
     quotaOwnerPublicId: orgAuth.organization_public_id,
-    capabilities: createOrgCapabilities(
-      effectiveEdition,
-      isProductionEnablementConfigured,
-    ),
+    capabilities: createOrgCapabilities(effectiveEdition),
     blockedReason: getAdvancedBlockedReason(
       effectiveEdition,
       isProductionEnablementConfigured,

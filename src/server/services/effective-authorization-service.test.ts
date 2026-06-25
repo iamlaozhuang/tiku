@@ -232,6 +232,8 @@ describe("effective authorization service", () => {
             quotaOwnerPublicId: "org_city_123",
             capabilities: {
               ...disabledCapabilities,
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
               canCreateOrganizationTraining: true,
               canAnswerOrganizationTraining: true,
               canViewOrganizationTrainingSummary: true,
@@ -368,7 +370,7 @@ describe("effective authorization service", () => {
     });
   });
 
-  it("keeps advanced capabilities blocked when production enablement is missing", async () => {
+  it("keeps personal advanced AI capabilities discoverable when production enablement is missing", async () => {
     const authorizationService = createEffectiveAuthorizationService(
       createRepository({
         async listPersonalAuthsByUserPublicId() {
@@ -395,7 +397,56 @@ describe("effective authorization service", () => {
         authorizationContexts: [
           {
             effectiveEdition: "advanced",
-            capabilities: disabledCapabilities,
+            authorizationSource: "personal_auth",
+            capabilities: {
+              ...disabledCapabilities,
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+            blockedReason: "production_enablement_blocked",
+          },
+        ],
+      },
+    });
+  });
+
+  it("exposes org advanced AI and organization training capabilities for learner home discovery", async () => {
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository({
+        async listPersonalAuthsByUserPublicId() {
+          return [];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [
+            createOrgAuth({
+              effective_edition: "advanced",
+            }),
+          ];
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      authorizationService.listEffectiveAuthorizations({
+        userPublicId: "employee_public_advanced",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        authorizationContexts: [
+          {
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            ownerType: "organization",
+            capabilities: {
+              ...disabledCapabilities,
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+              canCreateOrganizationTraining: true,
+              canAnswerOrganizationTraining: true,
+              canViewOrganizationTrainingSummary: true,
+            },
             blockedReason: "production_enablement_blocked",
           },
         ],
