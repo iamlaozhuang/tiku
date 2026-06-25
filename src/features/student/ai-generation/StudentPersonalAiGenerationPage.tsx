@@ -19,6 +19,10 @@ import {
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type {
+  EffectiveAuthorizationContextDto,
+  EffectiveAuthorizationListDto,
+} from "@/server/contracts/effective-authorization-contract";
 import type { PersonalAiGenerationLocalBrowserExperienceDto } from "@/server/contracts/personal-ai-generation-local-browser-experience-contract";
 import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
 import type {
@@ -48,6 +52,7 @@ type StudentPersonalAiGenerationResultDetailState =
   | StudentPersonalAiGenerationHistoryState;
 
 type StudentSessionRequestToken = string | null;
+type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
 
 type StudentPersonalAiGenerationRequestDraft = {
   userPublicId: string;
@@ -265,6 +270,50 @@ function readStudentSessionRequestToken(): StudentSessionRequestToken {
 
 function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
   return payload.code >= 403000 && payload.code < 404000;
+}
+
+function readAuthorizationContexts(
+  payload: StudentAuthorizationListPayload,
+): EffectiveAuthorizationContextDto[] {
+  return payload.authorizationContexts ?? [];
+}
+
+function canUsePersonalAiGeneration(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): boolean {
+  return authorizationContexts.some(
+    (authorizationContext) =>
+      authorizationContext.effectiveEdition === "advanced" &&
+      (authorizationContext.capabilities.canGenerateAiQuestion ||
+        authorizationContext.capabilities.canGenerateAiPaper),
+  );
+}
+
+async function fetchPersonalAiGenerationAuthorizationContexts(
+  studentSessionValue: StudentSessionRequestToken,
+): Promise<EffectiveAuthorizationContextDto[]> {
+  try {
+    const authorizationPayload =
+      await fetchStudentApi<StudentAuthorizationListPayload>(
+        "/api/v1/authorizations",
+        studentSessionValue,
+        {
+          method: "GET",
+        },
+      );
+
+    if (
+      isStudentUnauthorizedResponse(authorizationPayload) ||
+      authorizationPayload.code !== 0 ||
+      authorizationPayload.data === null
+    ) {
+      return [];
+    }
+
+    return readAuthorizationContexts(authorizationPayload.data);
+  } catch {
+    return [];
+  }
 }
 
 function createPersonalAiGenerationRequestBody(
@@ -970,6 +1019,24 @@ export function StudentPersonalAiGenerationPage() {
       }
     }
 
+    async function confirmPersonalAiGenerationAuthorization(): Promise<boolean> {
+      const authorizationContexts =
+        await fetchPersonalAiGenerationAuthorizationContexts(
+          sessionRequestToken,
+        );
+
+      if (isCancelled) {
+        return false;
+      }
+
+      if (!canUsePersonalAiGeneration(authorizationContexts)) {
+        markUnavailable();
+        return false;
+      }
+
+      return true;
+    }
+
     async function fetchInitialRequestHistory() {
       try {
         const historyResponse =
@@ -1051,6 +1118,13 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
+      const hasAiAuthorization =
+        await confirmPersonalAiGenerationAuthorization();
+
+      if (!hasAiAuthorization || isCancelled) {
+        return;
+      }
+
       void fetchInitialRequestHistory();
       void fetchInitialResultHistory();
     }
@@ -1122,6 +1196,16 @@ export function StudentPersonalAiGenerationPage() {
         sessionResponse.data.user.userType === "employee" &&
         sessionResponse.data.user.organizationPublicId === null
       ) {
+        markUnavailable();
+        return;
+      }
+
+      const authorizationContexts =
+        await fetchPersonalAiGenerationAuthorizationContexts(
+          sessionRequestToken,
+        );
+
+      if (!canUsePersonalAiGeneration(authorizationContexts)) {
         markUnavailable();
         return;
       }

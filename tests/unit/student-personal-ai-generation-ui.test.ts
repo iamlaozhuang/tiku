@@ -10,11 +10,17 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StudentPersonalAiGenerationPage } from "@/features/student/ai-generation/StudentPersonalAiGenerationPage";
 import { COOKIE_BACKED_SESSION_MARKER } from "@/features/student/studentRuntimeApi";
+import type {
+  EffectiveAuthorizationCapabilitiesDto,
+  EffectiveAuthorizationContextDto,
+} from "@/server/contracts/effective-authorization-contract";
 
 const pageTitle = "AI训练";
 const requestButtonLabel = "AI出题";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
+const unavailableTitle =
+  "\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e AI \u8bad\u7ec3";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
@@ -237,6 +243,74 @@ const employeeSessionResponse = {
   },
 };
 
+const baseAuthorizationCapabilities = {
+  canGenerateAiQuestion: false,
+  canGenerateAiPaper: false,
+  canCreateOrganizationTraining: false,
+  canAnswerOrganizationTraining: false,
+  canViewOrganizationTrainingSummary: false,
+  canManageAuthorizationQuota: false,
+} satisfies EffectiveAuthorizationCapabilitiesDto;
+
+type AuthorizationContextOverrides = Omit<
+  Partial<EffectiveAuthorizationContextDto>,
+  "capabilities"
+> & {
+  capabilities?: Partial<EffectiveAuthorizationCapabilitiesDto>;
+};
+
+function createAuthorizationContext(
+  overrides: AuthorizationContextOverrides = {},
+): EffectiveAuthorizationContextDto {
+  return {
+    profession: "monopoly",
+    level: 3,
+    contextDisplayStatus: "display_only",
+    edition: "advanced",
+    effectiveEdition: "advanced",
+    upgradeStatus: "none",
+    expiresAt: "2027-06-23T00:00:00.000Z",
+    displayStatus: "active",
+    authorizationSource: "personal_auth",
+    authorizationPublicId: "authorization-context-ui-001",
+    ownerType: "personal",
+    ownerPublicId: "student-public-ui-001",
+    organizationPublicId: null,
+    quotaOwnerType: "personal",
+    quotaOwnerPublicId: "student-public-ui-001",
+    blockedReason: null,
+    ...overrides,
+    capabilities: {
+      ...baseAuthorizationCapabilities,
+      canGenerateAiQuestion: true,
+      canGenerateAiPaper: true,
+      ...(overrides.capabilities ?? {}),
+    },
+  };
+}
+
+function createAdvancedAuthorizationListResponse(
+  overrides: AuthorizationContextOverrides = {},
+) {
+  return createAuthorizationListResponse([
+    createAuthorizationContext(overrides),
+  ]);
+}
+
+function createAuthorizationListResponse(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+) {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      authorizations: [],
+      effectiveAuthorizations: [],
+      authorizationContexts,
+    },
+  };
+}
+
 function createPersonalAiGenerationFetchMock(
   experienceResponse: unknown = localExperienceResponse,
   historyResponse: unknown = emptyServerHistoryResponse,
@@ -254,6 +328,19 @@ function createPersonalAiGenerationFetchMock(
         ok: true,
         status: 200,
         json: async () => localSessionResponse,
+      };
+    }
+
+    if (path === "/api/v1/authorizations") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => createAdvancedAuthorizationListResponse(),
       };
     }
 
@@ -315,6 +402,19 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
         ok: true,
         status: 200,
         json: async () => localSessionResponse,
+      };
+    }
+
+    if (path === "/api/v1/authorizations") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => createAdvancedAuthorizationListResponse(),
       };
     }
 
@@ -381,10 +481,116 @@ afterEach(() => {
 });
 
 describe("StudentPersonalAiGenerationPage", () => {
+  it.each([
+    {
+      roleName: "standard personal learner",
+      authorizationContext: createAuthorizationContext({
+        edition: "standard",
+        effectiveEdition: "standard",
+        authorizationSource: "personal_auth",
+        ownerType: "personal",
+        ownerPublicId: "student-public-ui-001",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "student-public-ui-001",
+        capabilities: {
+          canGenerateAiQuestion: false,
+          canGenerateAiPaper: false,
+        },
+      }),
+    },
+    {
+      roleName: "standard organization employee",
+      authorizationContext: createAuthorizationContext({
+        edition: "standard",
+        effectiveEdition: "standard",
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: "organization-public-ui-001",
+        organizationPublicId: "organization-public-ui-001",
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: "organization-public-ui-001",
+        capabilities: {
+          canGenerateAiQuestion: false,
+          canGenerateAiPaper: false,
+        },
+      }),
+    },
+  ])(
+    "renders unavailable state for direct AI route access by $roleName",
+    async ({ authorizationContext }) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+      const fetchMock = vi.fn(
+        async (url: RequestInfo | URL, init?: RequestInit) => {
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          if (String(url) === "/api/v1/authorizations") {
+            expect(init?.method).toBe("GET");
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () =>
+                createAuthorizationListResponse([authorizationContext]),
+            };
+          }
+
+          if (String(url) === "/api/v1/personal-ai-generation-requests") {
+            expect(init?.method).toBe("GET");
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          if (String(url) === "/api/v1/personal-ai-generation-results") {
+            expect(init?.method).toBe("GET");
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyResultHistoryResponse,
+            };
+          }
+
+          throw new Error(`Unexpected fetch path: ${String(url)}`);
+        },
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(StudentPersonalAiGenerationPage));
+
+      expect(await screen.findByText(unavailableTitle)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: requestButtonLabel }),
+      ).toBeDisabled();
+      expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
+        "/api/v1/authorizations",
+      ]);
+    },
+  );
+
   it("loads redacted request history from the server on initial render when a student session token exists", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
         if (String(url) === "/api/v1/personal-ai-generation-requests") {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
@@ -435,13 +641,26 @@ describe("StudentPersonalAiGenerationPage", () => {
       serverHistoryResponse.data[0].aiCallLogPublicId,
     ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
         if (String(url) === "/api/v1/personal-ai-generation-requests") {
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
@@ -521,31 +740,36 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("是否阻断正式入库")).toBeInTheDocument();
     expect(screen.getByText("是")).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
-    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
-    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
     expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-results",
+      "/api/v1/personal-ai-generation-requests",
     );
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[2]?.[0])).toBe("/api/v1/sessions");
-    expect(String(fetchMock.mock.calls[3]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
-    );
-    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("POST");
-    expect(String(fetchMock.mock.calls[4]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
-    );
-    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[5]?.[0])).toBe(
+    expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
       "/api/v1/personal-ai-generation-results",
     );
-    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("GET");
+    expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[3]?.[0])).toBe("/api/v1/sessions");
+    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[4]?.[0])).toBe("/api/v1/authorizations");
+    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[5]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
+    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("POST");
+    expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
+    expect(fetchMock.mock.calls[6]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[7]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-results",
+    );
+    expect(fetchMock.mock.calls[7]?.[1]?.method).toBe("GET");
 
     const requestBody = JSON.parse(
-      String(fetchMock.mock.calls[3]?.[1]?.body),
+      String(fetchMock.mock.calls[5]?.[1]?.body),
     ) as Record<string, unknown>;
 
     expect(requestBody).toEqual({
@@ -614,6 +838,24 @@ describe("StudentPersonalAiGenerationPage", () => {
         expect(init?.headers).toMatchObject({
           authorization: "Bearer unit-test-session-token",
         });
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                organizationPublicId: "organization-public-123",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-123",
+              }),
+          };
+        }
 
         if (String(url) === "/api/v1/personal-ai-generation-requests") {
           if (init?.method === "GET") {
@@ -693,6 +935,19 @@ describe("StudentPersonalAiGenerationPage", () => {
             ok: true,
             status: 200,
             json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
           };
         }
 
@@ -795,16 +1050,20 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
+      "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests",
       "/api/v1/personal-ai-generation-results",
       "/api/v1/sessions",
+      "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests",
       "/api/v1/personal-ai-generation-requests",
       "/api/v1/personal-ai-generation-results",
     ]);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -840,7 +1099,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(7));
   });
 
   it("renders a true unauthorized state after the cookie-backed session probe fails when no local token exists", async () => {
@@ -891,6 +1150,14 @@ describe("StudentPersonalAiGenerationPage", () => {
         });
         expect(init).not.toHaveProperty("headers");
 
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
         if (String(url) === "/api/v1/personal-ai-generation-requests") {
           return {
             ok: true,
@@ -921,7 +1188,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain(
       COOKIE_BACKED_SESSION_MARKER,
     );
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("renders the local contract blocked state without provider content", async () => {
@@ -952,6 +1219,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(await screen.findByText(blockedTitle)).toBeInTheDocument();
@@ -1026,6 +1294,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
@@ -1164,6 +1433,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
