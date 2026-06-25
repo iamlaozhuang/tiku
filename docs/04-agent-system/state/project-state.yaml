@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-advanced-employee-post-assignment-focused-browser-rerun-2026-06-25
-updatedAt: "2026-06-25T16:18:09-07:00"
+currentPhase: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
+updatedAt: "2026-06-25T16:42:42-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,37 +501,39 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 61c526dd52f4804d8a9ecc0162bc80df3b4f8436
-  lastKnownOriginMasterSha: 61c526dd52f4804d8a9ecc0162bc80df3b4f8436
+  lastKnownMasterSha: 6363a5e49b43a1f11ff385df470be3ee48b3a39a
+  lastKnownOriginMasterSha: 6363a5e49b43a1f11ff385df470be3ee48b3a39a
 currentTask:
-  id: organization-training-advanced-employee-post-assignment-focused-browser-rerun-2026-06-25
+  id: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
   status: closed
-  result: blocked_org_advanced_employee_visible_list_500_after_assignment_alignment_no_final_pass
-  claimedAt: "2026-06-25T16:05:37-07:00"
-  plannedAt: "2026-06-25T16:05:37-07:00"
-  validatedAt: "2026-06-25T16:18:09-07:00"
-  reviewedAt: "2026-06-25T16:18:09-07:00"
-  closedAt: "2026-06-25T16:18:09-07:00"
-  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_scope_blocker
-  approvalConsumed: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
-  approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+  result: pass_org_advanced_employee_visible_list_500_source_repaired_focused_browser_pass_no_final_pass
+  claimedAt: "2026-06-25T16:23:24-07:00"
+  plannedAt: "2026-06-25T16:23:24-07:00"
+  validatedAt: "2026-06-25T16:40:34-07:00"
+  reviewedAt: "2026-06-25T16:40:34-07:00"
+  closedAt: "2026-06-25T16:42:42-07:00"
+  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_list_500_blocker
+  approvalConsumed: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+  approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorAlignmentEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
   predecessorReadonlyInspectionEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+  predecessorFocusedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localSourceChange: false
-    focusedUnitTests: false
+    localRuntimeDiagnostic: true
+    localSourceChange: source_root_cause_only
+    focusedUnitTests: source_root_cause_only
     localBrowserRuntimeRerun: true
     credentialDocumentReadByCodex: true
     credentialEntryByCodex: true
     credentialMode: local_private_role_account_file_redacted
-    databaseRead: false
+    databaseRead: read_only_local_redacted_counts_status
     databaseWrite: false
-    seedReadOnlyInspection: false
+    seedReadOnlyInspection: true
     seedWrite: false
     accountMutation: false
     schemaMigration: false
@@ -542,19 +544,23 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  focusedBrowserRerunScope:
-    taskKind: local_real_browser_runtime_rerun
-    purpose: verify_standard_and_advanced_employee_organization_training_behavior_after_assignment_alignment
+  diagnosticAndRepairScope:
+    taskKind: local_runtime_diagnostic_first_repair
+    purpose: locate_and_repair_org_advanced_employee_visible_list_500_if_source_caused
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
       - redacted_role_label
+      - redacted_count
+      - redacted_status
       - landing_path
       - route_access_status
       - training_row_count
       - numeric_input_count
       - row_action_count
       - api_status_code
+      - unit_test_status
+      - lint_typecheck_status
       - conclusion_without_raw_rows
     blockedEvidenceFields:
       - credentials
@@ -571,19 +577,19 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
-  branch: codex/org-training-focused-rerun-20260625
+      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+  branch: codex/org-training-visible-list-500-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -592,19 +598,21 @@ currentTask:
     browserRuntimeExecuted: true
     credentialDocumentReadByCodex: true
     credentialEntryByCodex: true
-    databaseReadExecuted: false
+    databaseReadExecuted: true_read_only_counts_status
     databaseWriteExecuted: false
-    rowsExecuted: 2
-    passRows: 1
-    failRows: 1
+    sourceRepairExecuted: true
+    focusedUnitTests: pass_repository_test_21_tests
+    exactRepositoryDiagnosticAfterRepair: pass_one_visible_published_version
     orgStandardEmployeeTrainingWorkflowEntered: false
-    orgAdvancedEmployeeTrainingRowCount: 0
-    orgAdvancedEmployeeVisibleListHttpStatus: 500
-    orgAdvancedEmployeeVisibleListCode: 500001
+    orgStandardEmployeeVisibleListHttpStatus: 200
+    orgStandardEmployeeVisibleListCode: 409076
+    orgAdvancedEmployeeTrainingRowCount: 1
+    orgAdvancedEmployeeVisibleListHttpStatus: 200
+    orgAdvancedEmployeeVisibleListCode: 0
     schemaMigrationExecuted: false
     accountMutationExecuted: false
     finalPassClaim: false
-  nextRequiredTask: organization_training_advanced_employee_visible_list_500_runtime_repair_or_target_account_reconciliation
+  nextRequiredTask: full_8_row_role_separated_browser_rerun_scope_after_focused_visible_list_repair
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25

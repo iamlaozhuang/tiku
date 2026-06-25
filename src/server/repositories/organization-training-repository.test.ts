@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { sql } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
@@ -16,6 +18,7 @@ import type {
 } from "../contracts/organization-training-contract";
 import {
   createOrganizationTrainingRepository,
+  createOrganizationTrainingVisibleOrganizationPublicIdArraySql,
   type OrganizationTrainingEmployeeAnswerLookupInput,
   type OrganizationTrainingEmployeeVisibleVersionListInput,
   type OrganizationTrainingTrustedPersistenceLineage,
@@ -26,6 +29,29 @@ import {
   type OrganizationTrainingVersionRow,
   type OrganizationTrainingVisibleOrganizationScopeSource,
 } from "./organization-training-repository";
+
+describe("organization training visible organization SQL", () => {
+  it("binds visible organization public ids as a postgres text array", () => {
+    const dialect = new PgDialect();
+
+    const query = dialect.sqlToQuery(sql`
+      publish_scope_snapshot->'organizationPublicIds' ?| ${createOrganizationTrainingVisibleOrganizationPublicIdArraySql(
+        ["organization_public_123", "organization_branch_public_456"],
+      )}
+    `);
+
+    expect(query.sql).toContain(
+      "publish_scope_snapshot->'organizationPublicIds' ?| ARRAY[$1, $2]::text[]",
+    );
+    expect(query.params).toEqual([
+      "organization_public_123",
+      "organization_branch_public_456",
+    ]);
+    expect(query.params).not.toEqual([
+      ["organization_public_123", "organization_branch_public_456"],
+    ]);
+  });
+});
 
 type EmployeeAnswerRepositoryContract = {
   saveEmployeeAnswerDraft(

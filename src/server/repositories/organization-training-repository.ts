@@ -13,7 +13,7 @@ import {
   organizationTrainingSourceContext,
   organizationTrainingVersion,
 } from "@/db/schema";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql, type SQL } from "drizzle-orm";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
@@ -2005,12 +2005,23 @@ async function listPublishedVersionsForEmployeeOrganization(
         eq(employee.public_id, input.employeePublicId),
         eq(organization.public_id, input.organizationPublicId),
         eq(organizationTrainingVersion.version_status, "published"),
-        sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${visibleOrganizationPublicIds}`,
+        sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${createOrganizationTrainingVisibleOrganizationPublicIdArraySql(visibleOrganizationPublicIds)}`,
       ),
     )
     .orderBy(desc(organizationTrainingVersion.published_at));
 
   return rows as OrganizationTrainingVersionRow[];
+}
+
+export function createOrganizationTrainingVisibleOrganizationPublicIdArraySql(
+  visibleOrganizationPublicIds: readonly string[],
+): SQL {
+  return sql`ARRAY[${sql.join(
+    visibleOrganizationPublicIds.map(
+      (visibleOrganizationPublicId) => sql`${visibleOrganizationPublicId}`,
+    ),
+    sql`, `,
+  )}]::text[]`;
 }
 
 async function findPublishedVersionByPublicId(

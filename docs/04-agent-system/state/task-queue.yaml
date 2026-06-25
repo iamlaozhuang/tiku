@@ -44,6 +44,163 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
+    title: Diagnose and repair org advanced employee organization-training visible-list 500
+    phase: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
+    sourceStory: current_user_goal_full_8_row_role_separated_acceptance_after_visible_list_500_blocker
+    dependencies:
+      - organization-training-advanced-employee-post-assignment-focused-browser-rerun-2026-06-25
+    taskKind: diagnostic_first_source_repair
+    moduleRunVersion: 2
+    executionProfile: local_runtime_diagnostic_then_minimal_source_repair
+    evidenceMode: full_redacted
+    validationPolicy: read_only_diagnostic_focused_unit_lint_typecheck_browser_rerun_docs_gate
+    queueSelectionMode: current_user_directed_next_repair
+    requiredOutcome: >-
+      Diagnose the local `org_advanced_employee` organization-training visible-list HTTP 500 after the published
+      assignment alignment. Use local read-only runtime/account/assignment inspection first. If the root cause is proven
+      as a source defect, perform the smallest source repair and rerun focused unit and browser validation. Do not write
+      DB/seed, change schema/migration, mutate accounts, touch Provider/Cost/staging/prod/payment/external services, or
+      claim final MVP Pass.
+    capabilities:
+      localRuntimeDiagnostic: approved_by_current_user_2026_06_25
+      localReadOnlyDatabaseInspection: approved_by_current_user_2026_06_25
+      localSourceChange: approved_if_source_root_cause_proven_by_current_user_2026_06_25
+      focusedUnitTest: approved_if_source_root_cause_proven_by_current_user_2026_06_25
+      focusedBrowserRuntime: approved_by_current_user_2026_06_25
+      credentialDocumentRead: approved_by_current_user_2026_06_25
+      credentialEntry: approved_by_current_user_2026_06_25
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/app/api/v1/organization-trainings/visible-list/route.ts
+      - docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd playwright --version
+      - local read-only diagnostic commands with redacted count/status output
+      - npm.cmd run test:unit -- focused organization-training test file if source repair is executed
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_org_advanced_employee_visible_list_500_source_repaired_focused_browser_pass_no_final_pass
+    claimedAt: "2026-06-25T16:23:24-07:00"
+    plannedAt: "2026-06-25T16:23:24-07:00"
+    validationSummary:
+      diagnostic: pass_source_root_cause_identified_postgres_22p02_malformed_array_literal
+      sourceRepair: pass_repository_jsonb_text_array_binding
+      focusedUnit: pass_repository_test_21_tests
+      exactRepositoryDiagnosticAfterRepair: pass_one_visible_published_version
+      focusedBrowserRerun: pass_standard_denied_advanced_visible
+      browserRows:
+        org_standard_employee:
+          landingPath: /home
+          directRoute: /organization-training
+          trainingRows: 0
+          numericInputs: 0
+          rowActions: 0
+          apiStatusCode: "200/409076"
+        org_advanced_employee:
+          landingPath: /home
+          directRoute: /organization-training
+          trainingRows: 1
+          numericInputs: 3
+          rowActions: 3
+          apiStatusCode: "200/0"
+      finalPassClaim: false
+    validatedAt: "2026-06-25T16:42:42-07:00"
+    reviewedAt: "2026-06-25T16:42:42-07:00"
+    closedAt: "2026-06-25T16:42:42-07:00"
+    branch: codex/org-training-visible-list-500-20260625
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+    blockedWithoutFreshApproval:
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - env_secret_or_dotenv_read_write
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - dependency_package_lockfile_change
+      - payment_external_service
+      - pr_force_push
+      - full_8_row_browser_rerun
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: discovered-issue-closure-governance-seed
     title: Discovered issue closure governance seed
     phase: discovered-issue-closure-2026-06-21
