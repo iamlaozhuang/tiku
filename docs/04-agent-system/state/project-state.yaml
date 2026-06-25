@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
-updatedAt: "2026-06-25T05:18:37-07:00"
+currentPhase: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
+updatedAt: "2026-06-25T05:56:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,30 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b85503253326734076214ca7e696ebec449dc445
-  lastKnownOriginMasterSha: b85503253326734076214ca7e696ebec449dc445
+  lastKnownMasterSha: c5a418e59b853f187f48a0f8d12c1ccbc01c9940
+  lastKnownOriginMasterSha: c5a418e59b853f187f48a0f8d12c1ccbc01c9940
 currentTask:
-  id: organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
+  id: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
   status: closed
-  result: runtime_observation_completed_2_rows_strict_acceptance_fail_after_session_hydration_repair_no_final_pass
-  claimedAt: "2026-06-25T05:18:37-07:00"
-  plannedAt: "2026-06-25T05:18:37-07:00"
-  observedAt: "2026-06-25T05:26:35-07:00"
-  reviewedAt: "2026-06-25T05:26:35-07:00"
-  closedAt: "2026-06-25T05:34:05-07:00"
-  sourceStory: successor-of-organization-admin-runtime-session-hydration-repair-2026-06-24
-  approvalConsumed: current_user_enter_runtime_rerun_after_session_hydration_repair_2026_06_25
-  approvalSource: current_user_message_closeout_then_enter_org_admin_real_browser_rerun_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
+  result: closed_effective_role_source_diagnosis_no_final_pass
+  claimedAt: "2026-06-25T05:47:21-07:00"
+  plannedAt: "2026-06-25T05:47:21-07:00"
+  reviewedAt: "2026-06-25T05:51:12-07:00"
+  closedAt: "2026-06-25T05:56:36-07:00"
+  sourceStory: user-directed-successor-of-organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
+  approvalConsumed: current_user_low_risk_planning_diagnosis_request_2026_06_25
+  approvalSource: current_user_message_continue_effective_role_source_planning_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
-  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-role-repair.md
+  predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
+  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
   predecessorSourceRepairTaskId: organization-admin-runtime-session-hydration-repair-2026-06-24
   predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
   predecessorPlanningTaskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
   predecessorPlanningEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+  taskQueueEntryMaterializedByThisTask: true
+  queueDiagnosticAtEntry:
+    projectStatusDecision: idle_no_pending_task
+    nextExecutableTask: none
+    expectedNextTaskFromPreviousRuntime: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
   allowedScope:
     docsStateEvidenceAudit: true
     readOnlySourceDiagnosis: true
@@ -535,61 +539,121 @@ currentTask:
     localDatabaseAccess: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
-    ownerManualCredentialEntry: true
-    browserRuntimeExecution: true
+    ownerManualCredentialEntry: false
+    browserRuntimeExecution: false
     finalPassClaim: false
-  runtimeRows:
-    - org_standard_admin
-    - org_advanced_admin
-  runtimeSummary:
-    strictPassCount: 0
-    strictFailCount: 2
-    rows:
-      - role: org_standard_admin
-        result: fail
-        allowResult: fail
-        denyResult: fail
-        chineseUiResult: fail
-        logoutResult: pass
-        reason: landed_in_global_ops_organization_workspace_denied_ops_direct_accessible_after_session_hydration_repair
-      - role: org_advanced_admin
-        result: fail
-        allowResult: fail
-        denyResult: fail
-        chineseUiResult: fail
-        logoutResult: pass
-        reason: landed_in_global_ops_organization_advanced_routes_denied_ops_direct_accessible_after_session_hydration_repair
+  diagnosisSummary:
+    effectiveRoleSource: AuthContextDto.user.adminRoles
+    persistedRoleSource: admin.admin_role
+    loginLandingSource: login_response_user_adminRoles_via_session_boundary
+    workspaceGuardSource: current_session_user_adminRoles_via_admin_dashboard_layout
+    organizationBindingHydrationGap: true
+    actualPrivateRuntimeAccountRowsInspected: false
+    databaseReadApproved: false
+    finalPassClaim: false
+  rootCauseHypothesisState:
+    confirmed:
+      - landing_and_workspace_guards_trust_session_admin_roles
+      - local_session_runtime_maps_admin_roles_from_admin_admin_role
+      - correct_org_roles_would_land_in_organization_and_be_denied_from_ops
+      - admin_session_auth_context_does_not_hydrate_admin_organization_public_id
+    pending:
+      - owner_entered_runtime_accounts_may_still_have_ops_admin_persisted_role_or_private_account_source
+      - actual_runtime_database_may_not_match_updated_dev_seed_fixture_state
+      - org_api_write_paths_may_still_need_visible_organization_scope_after_role_source_repair
+    excluded:
+      - logout_session_invalidation_as_primary_cause
+      - effectiveEdition_as_direct_landing_or_workspace_guard_source
+      - ui_only_landing_function_bug_for_correct_org_admin_roles
   validationSummary:
+    focusedUnitTests: pass_2_files_11_tests
     prettierWrite: pass
     prettierCheck: pass
     diffCheck: pass
     preCommitHardening: pass
-    prePushReadiness: pass
-  expectedNextTask: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
+  expectedNextTask: organization-admin-runtime-effective-role-source-repair-2026-06-25
   expectedNextTaskReason: >-
-    Logout/session invalidation now works, but real browser sessions still resolve organization admin accounts into the
-    global ops workspace. The next task should identify the effective role source used by runtime guards and landing.
+    Add focused source repair for the effective admin role and organization binding source after diagnosis confirms the
+    landing and workspace guards already trust `AuthContextDto.user.adminRoles`.
   finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_25
+      approvalSource: current_user_fresh_commit_merge_push_cleanup_approval_2026_06_25
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_25
+      approvalSource: current_user_fresh_commit_merge_push_cleanup_approval_2026_06_25
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_25
+      approvalSource: current_user_fresh_commit_merge_push_cleanup_approval_2026_06_25
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_25
-  branch: codex/org-admin-workspace-rerun-after-session-hydration-20260625
+      approvalSource: current_user_fresh_commit_merge_push_cleanup_approval_2026_06_25
+  branch: codex/org-admin-effective-role-source-planning-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+organizationAdminRuntimeEffectiveRoleSourceRepairPlanning20260624:
+  taskId: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
+  phase: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
+  recordedAt: "2026-06-25T05:47:21-07:00"
+  status: closed
+  result: closed_effective_role_source_diagnosis_no_final_pass
+  reviewedAt: "2026-06-25T05:51:12-07:00"
+  closedAt: "2026-06-25T05:56:36-07:00"
+  branch: codex/org-admin-effective-role-source-planning-20260625
+  entryMasterSha: c5a418e59b853f187f48a0f8d12c1ccbc01c9940
+  entryOriginMasterSha: c5a418e59b853f187f48a0f8d12c1ccbc01c9940
+  approvalSource: current_user_message_continue_effective_role_source_planning_2026_06_25
+  predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-hydration-repair-2026-06-24
+  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-hydration-repair.md
+  predecessorSourceRepairTaskId: organization-admin-runtime-session-hydration-repair-2026-06-24
+  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-effective-role-source-repair-planning.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  queueDiagnosticAtEntry:
+    projectStatusDecision: idle_no_pending_task
+    nextExecutableTask: none
+    expectedNextTaskFromPreviousRuntime: organization-admin-runtime-effective-role-source-repair-planning-2026-06-24
+  diagnosisSummary:
+    effectiveRoleSource: AuthContextDto.user.adminRoles
+    persistedRoleSource: admin.admin_role
+    loginLandingSource: login_response_user_adminRoles_via_session_boundary
+    workspaceGuardSource: current_session_user_adminRoles_via_admin_dashboard_layout
+    organizationBindingHydrationGap: true
+    actualPrivateRuntimeAccountRowsInspected: false
+    databaseReadApproved: false
+    finalPassClaim: false
+  validationSummary:
+    focusedUnitTests: pass_2_files_11_tests
+    prettierWrite: pass
+    prettierCheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+  blockedWithoutFreshApproval:
+    - dev_server_start
+    - browser_runtime_execution
+    - credential_document_read_by_codex
+    - credential_entry_by_codex
+    - private_account_file_read
+    - account_creation_disable_password_reset_or_seed
+    - database_read_write_or_migration
+    - schema_migration_or_drizzle_push
+    - source_test_script_or_e2e_change
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 organizationAdminRuntimeSessionHydrationRepairPlanning20260624:
   taskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
   phase: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
