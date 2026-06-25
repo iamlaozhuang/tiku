@@ -8354,6 +8354,216 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-workspace-runtime-rerun-2026-06-24
+    title: Run organization admin workspace local runtime rerun
+    phase: organization-admin-workspace-runtime-rerun-2026-06-24
+    sourceStory: successor-of-organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+    dependencies:
+      - organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: acceptance_organization_admin_workspace_local_runtime_rerun
+    evidenceMode: redacted_local_runtime_observation
+    validationPolicy: local_browser_observation_docs_evidence_prettier_diff_hardening
+    queueSelectionMode: current_user_fresh_runtime_approval_after_scope_package
+    targetClosureItem: Fresh local runtime evidence for organization admin workspace rows
+    behaviorBoundary: acceptance_runtime::local_only_owner_entered_credentials_no_secret_capture_no_final_pass
+    requiredApprovalPackageId: ORGANIZATION_ADMIN_WORKSPACE_RUNTIME_RERUN_SCOPE_2026_06_24
+    requiredOutcome: >-
+      Execute the local-only organization admin runtime rerun for `org_standard_admin` and `org_advanced_admin` after
+      the owner approved the scope package. Evidence must remain redacted, must include Chinese UI checks, and must not
+      claim final Pass.
+    capabilities:
+      localBrowserRuntimeObservation: approved_by_current_user_2026_06_25_for_ORGANIZATION_ADMIN_WORKSPACE_RUNTIME_RERUN_SCOPE_2026_06_24
+      ownerCredentialEntry: approved_owner_manual_entry_only
+      credentialEntryByCodex: blocked
+      credentialDocumentReadByCodex: blocked
+      accountActionByCodex: blocked
+      sessionLogoutByCodex: blocked_unless_user_explicitly_requests_during_runtime
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      localCommit: approved_by_current_user_2026_06_25_runtime_rerun_closeout
+      mergeToMaster: approved_by_current_user_2026_06_25_runtime_rerun_closeout
+      pushOriginMaster: approved_by_current_user_2026_06_25_runtime_rerun_closeout
+      devServerStart: blocked
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      scriptChange: blocked
+      seedOrFixtureMutation: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedRuntimeTargets:
+      - http://127.0.0.1:3000
+      - http://localhost:3000
+    allowedRuntimeRows:
+      - org_standard_admin
+      - org_advanced_admin
+    allowedRuntimeRoutes:
+      - /login
+      - /organization/portal
+      - /organization/organization-training
+      - /organization/organization-analytics
+      - /organization/ai-question-generation
+      - /organization/ai-paper-generation
+      - /ops/users
+      - /ops/redeem-codes
+      - /content/papers
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-design-first-scope.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - dev_server_start
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - owner_account_action
+      - account_creation_disable_password_reset_or_seed
+      - database_read_write_or_migration
+      - source_test_script_or_e2e_change
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_browser_runtime
+      - role_mapping
+      - acceptance_mapping
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-workspace-runtime-rerun-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-workspace-runtime-rerun-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-workspace-runtime-rerun-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-workspace-runtime-rerun-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: runtime_observation_completed_2_rows_strict_acceptance_fail_gaps_recorded_no_final_pass
+    approvedAt: "2026-06-25T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: ORGANIZATION_ADMIN_WORKSPACE_RUNTIME_RERUN_SCOPE_2026_06_24
+      approvalSource: current_user_message_do_organization_admin_workspace_runtime_rerun_then_closeout_and_continue_2026_06_25
+    claimedAt: "2026-06-25T00:00:00-07:00"
+    plannedAt: "2026-06-25T00:00:00-07:00"
+    validatedAt: "2026-06-25T00:00:00-07:00"
+    reviewedAt: "2026-06-25T00:00:00-07:00"
+    closedAt: "2026-06-25T00:00:00-07:00"
+    blockedAt: null
+    branch: codex/org-admin-workspace-runtime-rerun-20260625
+    runtimeObservationSummary:
+      strictPassCount: 0
+      strictFailCount: 2
+      rows:
+        - role: org_standard_admin
+          result: fail
+          allowResult: fail
+          denyResult: fail
+          chineseUiResult: fail
+          reason: landed_or_accessed_global_ops_and_organization_workspace_denied
+        - role: org_advanced_admin
+          result: fail
+          allowResult: fail
+          denyResult: fail
+          chineseUiResult: fail
+          reason: landed_or_accessed_global_ops_and_organization_workspace_denied
+      browserWarnErrorCountAfterAdvancedRow: 0
+      finalPassClaim: false
+    nextRecommendedTask: organization-admin-workspace-runtime-regression-repair-planning-2026-06-24
+    nextRecommendedTaskReason: >-
+      Both organization admin runtime rows still fail layer-1 entry/workspace/permission acceptance. Repair planning
+      should run before entering layer-2 business closure validation.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_25_runtime_rerun_closeout
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_25_runtime_rerun_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_25_runtime_rerun_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_25_runtime_rerun_closeout
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
