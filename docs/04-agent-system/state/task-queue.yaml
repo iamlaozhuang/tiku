@@ -4378,6 +4378,181 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+    title: Execute full eight-row browser rerun after learner AI entry repair
+    phase: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+    sourceStory: current-user-approved-full-eight-row-rerun-after-ai-entry-repair
+    dependencies:
+      - role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: local_browser_runtime_walkthrough_redacted
+    evidenceMode: redacted_status_summary_only
+    validationPolicy: browser_runtime_redacted_docs_prettier_diff_check_precommit_prepush
+    queueSelectionMode: current_user_fresh_serial_approval_task_2_browser_execution
+    targetClosureItem: Full eight-role local browser runtime rerun after learner/org employee AI source repair
+    behaviorBoundary: local_browser_only_approved_private_credentials_no_db_no_source_no_final_pass
+    requiredOutcome: >-
+      Execute the approved full eight-row local real-browser rerun using package
+      ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25. Record only redacted row status and route
+      observations. The current user later approved credential input or credential reads for this task. Do not record
+      credential values or account identifiers, inspect browser storage, touch DB/seed/schema/source/tests/env/Provider/Cost,
+      staging/prod, payment, external services, PR, force push, or claim final MVP Pass.
+    status: closed
+    result: blocked_full_8_row_browser_rerun_1_pass_7_fail_no_final_pass
+    approvedAt: "2026-06-25T08:22:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+      approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+      credentialReadApprovalSource: current_user_message_allow_input_or_read_credentials_2026_06_25
+    claimedAt: "2026-06-25T08:22:00-07:00"
+    plannedAt: "2026-06-25T08:22:00-07:00"
+    validatedAt: "2026-06-25T08:37:24-07:00"
+    reviewedAt: "2026-06-25T08:37:24-07:00"
+    closedAt: "2026-06-25T08:37:24-07:00"
+    capabilities:
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      localBrowserRuntimeExecution: approved
+      routeMatrixObservation: approved
+      localDevServerReuseOrStart: approved_local_only_if_needed
+      ownerManualCredentialEntry: approved
+      credentialDocumentReadByCodex: approved_current_user_credentials_message
+      credentialEntryByCodex: approved_current_user_credentials_message
+      approvedLocalPrivateCredentialSourceRead: approved_redacted_role_account_source_only
+      browserStorageInspection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      sourceOrTestChange: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+      - docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - unapproved_credential_document_read_or_credential_entry
+      - token_cookie_local_storage_session_storage_or_authorization_header_capture
+      - database_seed_schema_or_account_mutation
+      - source_or_test_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - browser_runtime_observation
+      - credential_redaction
+      - role_route_matrix
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+    predecessorPostAiGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
+    packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+    branch: codex/full-8-row-post-ai-entry-rerun-20260625
+    runtimeScope:
+      rowsInScope: 8
+      browserExecutionInThisTask: true
+      evidenceRedaction: status_summary_only
+      credentialFileRead: approved_specific_local_private_role_account_source
+      credentialEntryByCodex: approved_current_user_credentials_message
+      browserStorageInspection: false
+      authenticatedRowsObserved: 8
+      strictPassRows: 1
+      failRows: 7
+      blockedRows: 0
+      strictEightRowRuntimeGate: blocked
+      passRoleRows:
+        - org_advanced_admin
+      failedRoleRows:
+        - personal_standard_student
+        - personal_advanced_student
+        - org_standard_employee
+        - org_advanced_employee
+        - org_standard_admin
+        - content_admin
+        - ops_admin
+      nextMinimalSourceRepairCandidate: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+      finalPassClaim: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
     title: Refresh role-separated blockers after learner and org employee AI entry repair
     phase: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
