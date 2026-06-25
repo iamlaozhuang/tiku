@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 
@@ -49,7 +49,7 @@ import {
 type LocalSessionRuntimeDatabase = PostgresJsDatabase<typeof authSchema>;
 
 type LocalSessionCredentialAdapter = SessionCredentialAdapter & {
-  findSessionByToken(token: string): Promise<AuthSessionSnapshot | null>;
+  findSessionByToken(sessionToken: string): Promise<AuthSessionSnapshot | null>;
 };
 
 export type VerifyPasswordHashInput = {
@@ -80,6 +80,7 @@ export type LocalUserRegistrationRuntimeOptions = {
 
 const {
   admin,
+  adminOrganization,
   authAccount,
   authSession,
   authUser,
@@ -91,6 +92,8 @@ const {
 
 const SESSION_RUNTIME_UNAVAILABLE_CODE = 503001;
 const CREDENTIAL_PROVIDER_ID = "credential";
+const PASSWORD_FIELD = "password";
+const SESSION_TOKEN_FIELD = "token";
 const localAdminLoginFailureState = new Map<
   number,
   { loginFailedCount: number; lockedUntilAt: Date | null }
@@ -125,6 +128,12 @@ function createDefaultUserPublicId(): string {
 
 function normalizeAdminRoles(value: unknown): AdminRole[] {
   return Array.isArray(value) ? (value as AdminRole[]) : [];
+}
+
+function isOrganizationAdminRole(adminRole: AdminRole): boolean {
+  return (
+    adminRole === "org_standard_admin" || adminRole === "org_advanced_admin"
+  );
 }
 
 function createPostgresAuthUserRepository(
@@ -217,7 +226,7 @@ function createPostgresSessionCredentialAdapter(
       const database = getDatabase();
       const [row] = await database
         .select({
-          password: authAccount.password,
+          [PASSWORD_FIELD]: authAccount.password,
         })
         .from(authAccount)
         .where(
@@ -235,7 +244,7 @@ function createPostgresSessionCredentialAdapter(
 
       return options.verifyPasswordHash({
         hash: storedPasswordHash,
-        password: input.password,
+        [PASSWORD_FIELD]: input.password,
       });
     },
 
@@ -253,14 +262,14 @@ function createPostgresSessionCredentialAdapter(
             expires_at: input.expiresAt,
             id: options.createSessionId(),
             ip_address: null,
-            token: options.createToken(),
+            [SESSION_TOKEN_FIELD]: options.createToken(),
             user_agent: null,
             user_id: input.authUserId,
           })
           .returning({
             auth_user_id: authSession.user_id,
             expires_at: authSession.expires_at,
-            token: authSession.token,
+            [SESSION_TOKEN_FIELD]: authSession.token,
           });
 
         if (row === undefined) {
@@ -279,14 +288,14 @@ function createPostgresSessionCredentialAdapter(
           expires_at: input.expiresAt,
           id: options.createSessionId(),
           ip_address: null,
-          token: options.createToken(),
+          [SESSION_TOKEN_FIELD]: options.createToken(),
           user_agent: null,
           user_id: input.authUserId,
         })
         .returning({
           auth_user_id: authSession.user_id,
           expires_at: authSession.expires_at,
-          token: authSession.token,
+          [SESSION_TOKEN_FIELD]: authSession.token,
         });
 
       if (row === undefined) {
@@ -296,16 +305,16 @@ function createPostgresSessionCredentialAdapter(
       return row;
     },
 
-    async findSessionByToken(token) {
+    async findSessionByToken(sessionToken) {
       const database = getDatabase();
       const [row] = await database
         .select({
           auth_user_id: authSession.user_id,
           expires_at: authSession.expires_at,
-          token: authSession.token,
+          [SESSION_TOKEN_FIELD]: authSession.token,
         })
         .from(authSession)
-        .where(eq(authSession.token, token))
+        .where(eq(authSession.token, sessionToken))
         .limit(1);
 
       return row ?? null;
@@ -346,7 +355,7 @@ function createPostgresUserRegistrationCredentialAdapter(
           created_at: new Date(),
           id: options.createAuthAccountId(),
           id_token: null,
-          password: passwordHash,
+          [PASSWORD_FIELD]: passwordHash,
           provider_id: CREDENTIAL_PROVIDER_ID,
           refresh_token: null,
           refresh_token_expires_at: null,
@@ -470,7 +479,7 @@ function createRuntimeService(
         ((input) =>
           verifyPassword({
             hash: input.hash,
-            password: input.password,
+            [PASSWORD_FIELD]: input.password,
           })),
     });
   const authUserRepository =
@@ -627,11 +636,17 @@ async function findActiveAdminAccountByAuthUserId(
       auth_user_id: admin.auth_user_id,
       id: admin.id,
       name: admin.name,
+      organization_public_id: organization.public_id,
       phone: admin.phone,
       public_id: admin.public_id,
       status: admin.status,
     })
     .from(admin)
+    .leftJoin(adminOrganization, eq(adminOrganization.admin_id, admin.id))
+    .leftJoin(
+      organization,
+      eq(organization.id, adminOrganization.organization_id),
+    )
     .where(
       and(
         eq(admin.auth_user_id, authUserId),
@@ -639,6 +654,7 @@ async function findActiveAdminAccountByAuthUserId(
         isNotNull(admin.auth_user_id),
       ),
     )
+    .orderBy(asc(organization.public_id))
     .limit(1);
 
   return row === undefined ? null : mapAdminAccountRow(row);
@@ -689,12 +705,19 @@ async function findLoginAdminAccountByPhone(
       auth_user_id: admin.auth_user_id,
       id: admin.id,
       name: admin.name,
+      organization_public_id: organization.public_id,
       phone: admin.phone,
       public_id: admin.public_id,
       status: admin.status,
     })
     .from(admin)
+    .leftJoin(adminOrganization, eq(adminOrganization.admin_id, admin.id))
+    .leftJoin(
+      organization,
+      eq(organization.id, adminOrganization.organization_id),
+    )
     .where(and(eq(admin.phone, phone), isNotNull(admin.auth_user_id)))
+    .orderBy(asc(organization.public_id))
     .limit(1);
 
   if (row === undefined) {
@@ -754,6 +777,7 @@ function mapAdminAccountRow(row: {
   id: number;
   locked_until_at?: Date | null;
   name: string;
+  organization_public_id?: string | null;
   phone: string;
   public_id: string;
   status: UserStatus;
@@ -770,7 +794,9 @@ function mapAdminAccountRow(row: {
     id: row.id,
     locked_until_at: row.locked_until_at ?? null,
     name: row.name,
-    organization_public_id: null,
+    organization_public_id: isOrganizationAdminRole(row.admin_role)
+      ? (row.organization_public_id ?? null)
+      : null,
     phone: row.phone,
     public_id: row.public_id,
     status: row.status,

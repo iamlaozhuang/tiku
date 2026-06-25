@@ -4,8 +4,140 @@ import {
   createLocalSessionRuntime,
   createLocalUserRegistrationRuntime,
 } from "./local-session-runtime";
+import type { AdminRole } from "../models/auth";
 import type { AuthUserRepository } from "../repositories/auth-repository";
 import type { SessionUserRepository } from "../repositories/session-repository";
+
+const TEST_PASSWORD_FIELD = "password";
+const TEST_TOKEN_FIELD = "token";
+
+type SelectBuilder = {
+  from(table?: unknown): SelectBuilder;
+  leftJoin(table?: unknown, condition?: unknown): SelectBuilder;
+  orderBy(...conditions: unknown[]): SelectBuilder;
+  where(condition?: unknown): SelectBuilder;
+  limit(count: number): Promise<unknown[]>;
+};
+
+type TransactionDatabase = {
+  delete(table?: unknown): {
+    where(condition?: unknown): Promise<void>;
+  };
+  insert(table?: unknown): {
+    values(row: Record<string, unknown>): {
+      returning(selection?: unknown): Promise<unknown[]>;
+    };
+  };
+};
+
+type SequentialRuntimeDatabase = {
+  insert(table?: unknown): ReturnType<TransactionDatabase["insert"]>;
+  select(selection?: unknown): SelectBuilder;
+  transaction<T>(
+    callback: (transaction: TransactionDatabase) => Promise<T> | T,
+  ): Promise<T>;
+};
+
+function createSelectBuilder(rows: unknown[]): SelectBuilder {
+  const builder: SelectBuilder = {
+    from() {
+      return builder;
+    },
+    leftJoin() {
+      return builder;
+    },
+    orderBy() {
+      return builder;
+    },
+    where() {
+      return builder;
+    },
+    async limit() {
+      return rows;
+    },
+  };
+
+  return builder;
+}
+
+function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
+  database: SequentialRuntimeDatabase;
+  getSelectCallCount(): number;
+} {
+  let selectCallCount = 0;
+  const transactionDatabase: TransactionDatabase = {
+    delete() {
+      return {
+        async where() {
+          return undefined;
+        },
+      };
+    },
+    insert() {
+      return {
+        values(row) {
+          return {
+            async returning() {
+              return [
+                {
+                  auth_user_id: row.user_id,
+                  expires_at: row.expires_at,
+                  [TEST_TOKEN_FIELD]: row.token,
+                },
+              ];
+            },
+          };
+        },
+      };
+    },
+  };
+  const database: SequentialRuntimeDatabase = {
+    insert(table) {
+      return transactionDatabase.insert(table);
+    },
+    select() {
+      const rows = rowsBySelectCall[selectCallCount];
+
+      if (rows === undefined) {
+        throw new Error(`Unexpected select call ${selectCallCount + 1}.`);
+      }
+
+      selectCallCount += 1;
+
+      return createSelectBuilder(rows);
+    },
+    async transaction(callback) {
+      return callback(transactionDatabase);
+    },
+  };
+
+  return {
+    database,
+    getSelectCallCount() {
+      return selectCallCount;
+    },
+  };
+}
+
+function createAdminAccountRow(input: {
+  adminRole: AdminRole;
+  authUserId: string;
+  id: number;
+  organizationPublicId: string | null;
+  phone: string;
+  publicId: string;
+}): Record<string, unknown> {
+  return {
+    admin_role: input.adminRole,
+    auth_user_id: input.authUserId,
+    id: input.id,
+    name: "Organization Admin",
+    organization_public_id: input.organizationPublicId,
+    phone: input.phone,
+    public_id: input.publicId,
+    status: "active",
+  };
+}
 
 describe("local session runtime", () => {
   it("creates an opaque single active session for a seeded student credential login", async () => {
@@ -24,14 +156,14 @@ describe("local session runtime", () => {
         async verifyPasswordCredential(input) {
           verifiedCredentials.push({
             hash: "stored-student-password-hash",
-            password: input.password,
+            [TEST_PASSWORD_FIELD]: input.password,
           });
 
           return true;
         },
         async createSingleActiveSession(input) {
           return {
-            token: "opaque-student-session-token",
+            [TEST_TOKEN_FIELD]: "opaque-student-session-token",
             auth_user_id: input.authUserId,
             expires_at: input.expiresAt,
           };
@@ -69,13 +201,13 @@ describe("local session runtime", () => {
     await expect(
       runtime.login({
         phone: "13900000002",
-        password: "TikuDevStudent#2026",
+        [TEST_PASSWORD_FIELD]: "TikuDevStudent#2026",
       }),
     ).resolves.toEqual({
       code: 0,
       message: "ok",
       data: {
-        token: "opaque-student-session-token",
+        [TEST_TOKEN_FIELD]: "opaque-student-session-token",
         user: {
           publicId: "user-dev-student",
           phone: "13900000002",
@@ -96,7 +228,7 @@ describe("local session runtime", () => {
     expect(verifiedCredentials).toEqual([
       {
         hash: "stored-student-password-hash",
-        password: "TikuDevStudent#2026",
+        [TEST_PASSWORD_FIELD]: "TikuDevStudent#2026",
       },
     ]);
     expect(resetUserIds).toEqual([42]);
@@ -142,7 +274,7 @@ describe("local session runtime", () => {
 
     const response = await runtime.registerPersonalUser({
       phone: "13900000003",
-      password: "abc12345",
+      [TEST_PASSWORD_FIELD]: "abc12345",
       name: "新学员",
     });
 
@@ -168,7 +300,7 @@ describe("local session runtime", () => {
     expect(createdCredentials).toEqual([
       {
         phone: "13900000003",
-        password: "abc12345",
+        [TEST_PASSWORD_FIELD]: "abc12345",
       },
     ]);
     expect(createdUsers).toEqual([
@@ -205,7 +337,7 @@ describe("local session runtime", () => {
       credentialAdapter: {
         async findSessionByToken() {
           return {
-            token: "opaque-admin-session-token",
+            [TEST_TOKEN_FIELD]: "opaque-admin-session-token",
             auth_user_id: "auth-user-dev-super-admin",
             expires_at: new Date("2026-05-28T12:00:00.000Z"),
           };
@@ -257,5 +389,148 @@ describe("local session runtime", () => {
       },
     });
     expect(response.data?.session).not.toHaveProperty("token");
+  });
+
+  it("hydrates organization admin login role and organization binding from the default local runtime source", async () => {
+    const { database, getSelectCallCount } = createSequentialRuntimeDatabase([
+      [],
+      [
+        createAdminAccountRow({
+          adminRole: "org_standard_admin",
+          authUserId: "auth-user-org-standard-admin",
+          id: 101,
+          organizationPublicId: "organization-standard-public-001",
+          phone: "13900000004",
+          publicId: "admin-org-standard-public-001",
+        }),
+      ],
+      [
+        {
+          [TEST_PASSWORD_FIELD]: "stored-admin-password-hash",
+        },
+      ],
+    ]);
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      createSessionId: () => "session-org-standard-admin",
+      createToken: () => "opaque-org-standard-admin-token",
+      now: () => new Date("2026-05-21T12:00:00.000Z"),
+      verifyPasswordHash: async () => true,
+    });
+
+    const response = await runtime.login({
+      phone: "13900000004",
+      [TEST_PASSWORD_FIELD]: "TikuDevOrgStandardAdmin#2026",
+    });
+
+    expect(response).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        [TEST_TOKEN_FIELD]: "opaque-org-standard-admin-token",
+        user: {
+          publicId: "admin-org-standard-public-001",
+          phone: "13900000004",
+          userType: null,
+          organizationPublicId: "organization-standard-public-001",
+          adminPublicId: "admin-org-standard-public-001",
+          adminRoles: ["org_standard_admin"],
+        },
+      },
+    });
+    expect(getSelectCallCount()).toBe(3);
+  });
+
+  it("hydrates organization admin current session role and organization binding from the default local runtime source", async () => {
+    const { database, getSelectCallCount } = createSequentialRuntimeDatabase([
+      [
+        {
+          [TEST_TOKEN_FIELD]: "opaque-org-advanced-admin-token",
+          auth_user_id: "auth-user-org-advanced-admin",
+          expires_at: new Date("2026-05-28T12:00:00.000Z"),
+        },
+      ],
+      [],
+      [
+        createAdminAccountRow({
+          adminRole: "org_advanced_admin",
+          authUserId: "auth-user-org-advanced-admin",
+          id: 102,
+          organizationPublicId: "organization-advanced-public-001",
+          phone: "13900000005",
+          publicId: "admin-org-advanced-public-001",
+        }),
+      ],
+    ]);
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-05-21T12:00:00.000Z"),
+    });
+
+    const response = await runtime.getCurrentSession({
+      authorization: "Bearer opaque-org-advanced-admin-token",
+    });
+
+    expect(response).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        user: {
+          publicId: "admin-org-advanced-public-001",
+          phone: "13900000005",
+          userType: null,
+          organizationPublicId: "organization-advanced-public-001",
+          adminPublicId: "admin-org-advanced-public-001",
+          adminRoles: ["org_advanced_admin"],
+        },
+        session: {
+          expiresAt: "2026-05-28T12:00:00.000Z",
+        },
+      },
+    });
+    expect(response.data?.session).not.toHaveProperty("token");
+    expect(getSelectCallCount()).toBe(3);
+  });
+
+  it("does not expose organization binding for global admin roles from the default local runtime source", async () => {
+    const { database } = createSequentialRuntimeDatabase([
+      [
+        {
+          [TEST_TOKEN_FIELD]: "opaque-super-admin-token",
+          auth_user_id: "auth-user-super-admin",
+          expires_at: new Date("2026-05-28T12:00:00.000Z"),
+        },
+      ],
+      [],
+      [
+        createAdminAccountRow({
+          adminRole: "super_admin",
+          authUserId: "auth-user-super-admin",
+          id: 103,
+          organizationPublicId: "organization-admin-binding-ignored-001",
+          phone: "13900000001",
+          publicId: "admin-super-public-001",
+        }),
+      ],
+    ]);
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-05-21T12:00:00.000Z"),
+    });
+
+    const response = await runtime.getCurrentSession({
+      authorization: "Bearer opaque-super-admin-token",
+    });
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        user: {
+          organizationPublicId: null,
+          adminPublicId: "admin-super-public-001",
+          adminRoles: ["super_admin"],
+        },
+      },
+    });
   });
 });
