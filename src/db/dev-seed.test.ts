@@ -27,17 +27,29 @@ function collectStringValues(value: unknown): string[] {
 describe("dev seed dataset", () => {
   it("defines the Phase 7 MVP vertical slice seed records", () => {
     const seedDataset = buildDevSeedDataset({
+      orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
+      orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
       studentPasswordHash: "student-password-hash",
       superAdminPasswordHash: "admin-password-hash",
     });
 
-    expect(seedDataset.authUsers).toHaveLength(2);
+    expect(seedDataset.authUsers).toHaveLength(4);
     expect(seedDataset.authAccounts).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           [authAccountCredentialField]: "admin-password-hash",
           providerId: "credential",
           userId: devSeedPublicIds.superAdminAuthUser,
+        }),
+        expect.objectContaining({
+          [authAccountCredentialField]: "org-standard-admin-password-hash",
+          providerId: "credential",
+          userId: devSeedPublicIds.orgStandardAdminAuthUser,
+        }),
+        expect.objectContaining({
+          [authAccountCredentialField]: "org-advanced-admin-password-hash",
+          providerId: "credential",
+          userId: devSeedPublicIds.orgAdvancedAdminAuthUser,
         }),
         expect.objectContaining({
           [authAccountCredentialField]: "student-password-hash",
@@ -52,6 +64,27 @@ describe("dev seed dataset", () => {
       publicId: devSeedPublicIds.superAdmin,
       status: "active",
     });
+    expect(seedDataset.admins).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          adminRole: "super_admin",
+          name: "本地超级管理员",
+          publicId: devSeedPublicIds.superAdmin,
+        }),
+        expect.objectContaining({
+          adminRole: "org_standard_admin",
+          authUserId: devSeedPublicIds.orgStandardAdminAuthUser,
+          name: "本地标准版企业管理员",
+          publicId: devSeedPublicIds.orgStandardAdmin,
+        }),
+        expect.objectContaining({
+          adminRole: "org_advanced_admin",
+          authUserId: devSeedPublicIds.orgAdvancedAdminAuthUser,
+          name: "本地高级版企业管理员",
+          publicId: devSeedPublicIds.orgAdvancedAdmin,
+        }),
+      ]),
+    );
     expect(seedDataset.studentUser).toMatchObject({
       authUserId: devSeedPublicIds.studentAuthUser,
       publicId: devSeedPublicIds.studentUser,
@@ -69,6 +102,18 @@ describe("dev seed dataset", () => {
         adminPublicId: devSeedPublicIds.superAdmin,
         organizationPublicId: devSeedPublicIds.organization,
       }),
+    );
+    expect(seedDataset.adminOrganizations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          adminPublicId: devSeedPublicIds.orgStandardAdmin,
+          organizationPublicId: devSeedPublicIds.organization,
+        }),
+        expect.objectContaining({
+          adminPublicId: devSeedPublicIds.orgAdvancedAdmin,
+          organizationPublicId: devSeedPublicIds.organization,
+        }),
+      ]),
     );
     expect(seedDataset).toHaveProperty(
       "orgAuth",
@@ -171,14 +216,20 @@ describe("dev seed dataset", () => {
 
   it("keeps public identifiers deterministic and avoids empty-string seed values", () => {
     const seedDataset = buildDevSeedDataset({
+      orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
+      orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
       studentPasswordHash: "student-password-hash",
       superAdminPasswordHash: "admin-password-hash",
     });
 
     expect(Object.values(devSeedPublicIds)).toEqual([
       "auth-user-dev-super-admin",
+      "auth-user-dev-org-standard-admin",
+      "auth-user-dev-org-advanced-admin",
       "auth-user-dev-student",
       "admin-dev-super-admin",
+      "admin-dev-org-standard",
+      "admin-dev-org-advanced",
       "user-dev-student",
       "org-dev-province",
       "org-auth-dev-analytics",
@@ -206,6 +257,10 @@ describe("dev seed dataset", () => {
       studentPassword: "TikuDevStudent#2026",
       superAdminEmail: "admin.dev@tiku.local",
       superAdminPassword: "TikuDevAdmin#2026",
+      orgStandardAdminEmail: "org.standard.admin.dev@tiku.local",
+      orgStandardAdminPassword: "TikuDevOrgStandardAdmin#2026",
+      orgAdvancedAdminEmail: "org.advanced.admin.dev@tiku.local",
+      orgAdvancedAdminPassword: "TikuDevOrgAdvancedAdmin#2026",
     });
   });
 });

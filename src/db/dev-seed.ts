@@ -8,6 +8,8 @@ type SeedRow = Record<string, unknown>;
 type SeedPasswordHashes = {
   studentPasswordHash: string;
   superAdminPasswordHash: string;
+  orgStandardAdminPasswordHash: string;
+  orgAdvancedAdminPasswordHash: string;
 };
 
 export type DevSeedDataset = ReturnType<typeof buildDevSeedDataset>;
@@ -27,8 +29,12 @@ type IdRow = {
 
 export const devSeedPublicIds = {
   superAdminAuthUser: "auth-user-dev-super-admin",
+  orgStandardAdminAuthUser: "auth-user-dev-org-standard-admin",
+  orgAdvancedAdminAuthUser: "auth-user-dev-org-advanced-admin",
   studentAuthUser: "auth-user-dev-student",
   superAdmin: "admin-dev-super-admin",
+  orgStandardAdmin: "admin-dev-org-standard",
+  orgAdvancedAdmin: "admin-dev-org-advanced",
   studentUser: "user-dev-student",
   organization: "org-dev-province",
   orgAuth: "org-auth-dev-analytics",
@@ -53,6 +59,10 @@ export const devSeedCredentials = {
   studentPassword: "TikuDevStudent#2026",
   superAdminEmail: "admin.dev@tiku.local",
   superAdminPassword: "TikuDevAdmin#2026",
+  orgStandardAdminEmail: "org.standard.admin.dev@tiku.local",
+  orgStandardAdminPassword: "TikuDevOrgStandardAdmin#2026",
+  orgAdvancedAdminEmail: "org.advanced.admin.dev@tiku.local",
+  orgAdvancedAdminPassword: "TikuDevOrgAdvancedAdmin#2026",
 } as const;
 
 const devSeedPasswordHashes = {
@@ -60,6 +70,10 @@ const devSeedPasswordHashes = {
     "00ee76bdc3220f6f52ad3737eabe79f2:0716e1b6ca069451699ca1fd40bd8ec5b2e9fbe72f40e0673dda59e22430747c78c459b259f1397410941d74b0efa84caf4f1f3fd80f4e35f89acb7c8acfa816",
   superAdminPasswordHash:
     "7293e2104c268de73b3fd015d3725ce0:97c9a48e79ce2cbb2a6d03edb4e6d16f88d4eaa2fe13e97d79b6bd27aaef5b4f3c30d3663469aa4606cf377ca98618318945490b5ffe276ac6bd6ad2796edf95",
+  orgStandardAdminPasswordHash:
+    "975c216c6cb707e87347f043509cef85:2edd24594376d46135225dfc47b907a9cc05c66f791fc2d28b9d27f255456b8b00386cffb2bd0ccb3900f3f7aa1b4a567156ae7191a3ba16ff2beac7cc96a9d0",
+  orgAdvancedAdminPasswordHash:
+    "2b4b59adde3251f00fe8678edbab769d:bc94580cabd14998d92c8ebfad2daa16c98b3af2303459c9f8293e162c0ab748acc68474b9c2295c1c4fac078f1344730e47f0586e8be1bb35e6fb5b92b0a9ee",
 } as const satisfies SeedPasswordHashes;
 
 const baseIssuedAt = "2026-05-21T00:00:00.000Z";
@@ -108,6 +122,37 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
     standardAnswer: ["A"],
     stemRichText: "烟草专卖管理的核心目标是什么？",
   };
+  const adminAccounts = [
+    {
+      adminRole: "super_admin",
+      authUserId: devSeedPublicIds.superAdminAuthUser,
+      name: "本地超级管理员",
+      phone: "13900000001",
+      publicId: devSeedPublicIds.superAdmin,
+      status: "active",
+    },
+    {
+      adminRole: "org_standard_admin",
+      authUserId: devSeedPublicIds.orgStandardAdminAuthUser,
+      name: "本地标准版企业管理员",
+      phone: "13900000004",
+      publicId: devSeedPublicIds.orgStandardAdmin,
+      status: "active",
+    },
+    {
+      adminRole: "org_advanced_admin",
+      authUserId: devSeedPublicIds.orgAdvancedAdminAuthUser,
+      name: "本地高级版企业管理员",
+      phone: "13900000005",
+      publicId: devSeedPublicIds.orgAdvancedAdmin,
+      status: "active",
+    },
+  ] as const;
+  const adminOrganizationAssignments = adminAccounts.map((adminAccount) => ({
+    adminPublicId: adminAccount.publicId,
+    createdAt: baseIssuedAt,
+    organizationPublicId: devSeedPublicIds.organization,
+  }));
 
   return {
     admin: {
@@ -123,6 +168,8 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       createdAt: baseIssuedAt,
       organizationPublicId: devSeedPublicIds.organization,
     },
+    adminOrganizations: adminOrganizationAssignments,
+    admins: adminAccounts,
     employee: {
       createdAt: baseIssuedAt,
       organizationPublicId: devSeedPublicIds.organization,
@@ -146,6 +193,22 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
         userId: devSeedPublicIds.superAdminAuthUser,
       },
       {
+        accountId: devSeedPublicIds.orgStandardAdminAuthUser,
+        [authAccountCredentialField]:
+          passwordHashes.orgStandardAdminPasswordHash,
+        id: "auth-account-dev-org-standard-admin",
+        providerId: "credential",
+        userId: devSeedPublicIds.orgStandardAdminAuthUser,
+      },
+      {
+        accountId: devSeedPublicIds.orgAdvancedAdminAuthUser,
+        [authAccountCredentialField]:
+          passwordHashes.orgAdvancedAdminPasswordHash,
+        id: "auth-account-dev-org-advanced-admin",
+        providerId: "credential",
+        userId: devSeedPublicIds.orgAdvancedAdminAuthUser,
+      },
+      {
         accountId: devSeedPublicIds.studentAuthUser,
         [authAccountCredentialField]: passwordHashes.studentPasswordHash,
         id: "auth-account-dev-student",
@@ -158,6 +221,16 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
         email: devSeedCredentials.superAdminEmail,
         id: devSeedPublicIds.superAdminAuthUser,
         name: "本地超级管理员",
+      },
+      {
+        email: devSeedCredentials.orgStandardAdminEmail,
+        id: devSeedPublicIds.orgStandardAdminAuthUser,
+        name: "本地标准版企业管理员",
+      },
+      {
+        email: devSeedCredentials.orgAdvancedAdminEmail,
+        id: devSeedPublicIds.orgAdvancedAdminAuthUser,
+        name: "本地高级版企业管理员",
       },
       {
         email: devSeedCredentials.studentEmail,
@@ -443,30 +516,42 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       `;
     }
 
-    const adminId = await getRequiredId(
-      sql`
-        insert into admin (public_id, auth_user_id, phone, name, admin_role, status, created_at, updated_at)
-        values (
-          ${seedDataset.admin.publicId},
-          ${seedDataset.admin.authUserId},
-          ${seedDataset.admin.phone},
-          ${seedDataset.admin.name},
-          ${seedDataset.admin.adminRole},
-          ${seedDataset.admin.status},
-          ${baseIssuedAt},
-          ${baseIssuedAt}
-        )
-        on conflict (public_id) do update set
-          auth_user_id = excluded.auth_user_id,
-          phone = excluded.phone,
-          name = excluded.name,
-          admin_role = excluded.admin_role,
-          status = excluded.status,
-          updated_at = excluded.updated_at
-        returning id::text as id
-      `,
-      "admin",
-    );
+    const adminIdsByPublicId = new Map<string, string>();
+
+    for (const seedAdmin of seedDataset.admins) {
+      const seedAdminId = await getRequiredId(
+        sql`
+          insert into admin (public_id, auth_user_id, phone, name, admin_role, status, created_at, updated_at)
+          values (
+            ${seedAdmin.publicId},
+            ${seedAdmin.authUserId},
+            ${seedAdmin.phone},
+            ${seedAdmin.name},
+            ${seedAdmin.adminRole},
+            ${seedAdmin.status},
+            ${baseIssuedAt},
+            ${baseIssuedAt}
+          )
+          on conflict (public_id) do update set
+            auth_user_id = excluded.auth_user_id,
+            phone = excluded.phone,
+            name = excluded.name,
+            admin_role = excluded.admin_role,
+            status = excluded.status,
+            updated_at = excluded.updated_at
+          returning id::text as id
+        `,
+        `admin ${seedAdmin.publicId}`,
+      );
+
+      adminIdsByPublicId.set(seedAdmin.publicId, seedAdminId);
+    }
+
+    const adminId = adminIdsByPublicId.get(devSeedPublicIds.superAdmin);
+
+    if (adminId === undefined) {
+      throw new Error("Missing seeded row: super admin");
+    }
 
     const studentUserId = await getRequiredId(
       sql`
@@ -565,15 +650,27 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       "organization",
     );
 
-    await sql`
-      insert into admin_organization (admin_id, organization_id, created_at)
-      values (
-        ${adminId},
-        ${organizationId},
-        ${seedDataset.adminOrganization.createdAt}
-      )
-      on conflict (admin_id, organization_id) do nothing
-    `;
+    for (const adminOrganizationAssignment of seedDataset.adminOrganizations) {
+      const assignedAdminId = adminIdsByPublicId.get(
+        adminOrganizationAssignment.adminPublicId,
+      );
+
+      if (assignedAdminId === undefined) {
+        throw new Error(
+          `Missing seeded row: admin ${adminOrganizationAssignment.adminPublicId}`,
+        );
+      }
+
+      await sql`
+        insert into admin_organization (admin_id, organization_id, created_at)
+        values (
+          ${assignedAdminId},
+          ${organizationId},
+          ${adminOrganizationAssignment.createdAt}
+        )
+        on conflict (admin_id, organization_id) do nothing
+      `;
+    }
 
     const employeeId = await getRequiredId(
       sql`
@@ -1353,9 +1450,9 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
 
     const [summary] = await sql`
       select
-        (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.studentAuthUser})) as auth_user_count,
-        (select count(*)::int from admin where public_id = ${devSeedPublicIds.superAdmin}) as admin_count,
-        (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id = ${devSeedPublicIds.superAdmin} and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
+        (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.orgStandardAdminAuthUser}, ${devSeedPublicIds.orgAdvancedAdminAuthUser}, ${devSeedPublicIds.studentAuthUser})) as auth_user_count,
+        (select count(*)::int from admin where public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin})) as admin_count,
+        (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}) and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.studentUser}) as student_user_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.employeeUser}) as employee_user_count,
         (select count(*)::int from organization where public_id = ${devSeedPublicIds.organization}) as organization_count,

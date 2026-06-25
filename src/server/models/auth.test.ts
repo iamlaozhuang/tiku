@@ -21,6 +21,8 @@ describe("auth domain models", () => {
       "super_admin",
       "ops_admin",
       "content_admin",
+      "org_standard_admin",
+      "org_advanced_admin",
     ]);
     expect(orgTierValues).toEqual(["province", "city", "district", "station"]);
     expect(authScopeTypeValues).toEqual([

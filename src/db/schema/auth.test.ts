@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   admin,
   adminOrganization,
+  adminRoleValues,
   authAccount,
   authSession,
   authUpgrade,
@@ -196,5 +197,15 @@ describe("auth schema baseline", () => {
         "idx_admin_organization_organization_id",
       ]),
     );
+  });
+
+  it("defines organization admin roles in the persisted admin_role enum", () => {
+    expect(adminRoleValues).toEqual([
+      "super_admin",
+      "ops_admin",
+      "content_admin",
+      "org_standard_admin",
+      "org_advanced_admin",
+    ]);
   });
 });

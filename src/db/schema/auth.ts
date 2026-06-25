@@ -29,6 +29,8 @@ export const adminRoleValues = [
   "super_admin",
   "ops_admin",
   "content_admin",
+  "org_standard_admin",
+  "org_advanced_admin",
 ] as const;
 export const orgTierValues = [
   "province",
