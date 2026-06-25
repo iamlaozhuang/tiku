@@ -9,6 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StudentPersonalAiGenerationPage } from "@/features/student/ai-generation/StudentPersonalAiGenerationPage";
+import { COOKIE_BACKED_SESSION_MARKER } from "@/features/student/studentRuntimeApi";
 
 const pageTitle = "AI训练";
 const requestButtonLabel = "AI出题";
@@ -743,17 +744,85 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
   });
 
-  it("renders a permission blocked state when no student session token exists", () => {
-    const fetchMock = vi.fn();
+  it("renders a true unauthorized state after the cookie-backed session probe fails when no local token exists", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/sessions");
+        expect(init).toMatchObject({
+          credentials: "same-origin",
+          method: "GET",
+        });
+        expect(init).not.toHaveProperty("headers");
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 401001,
+            message: "User session is required.",
+            data: null,
+          }),
+        };
+      },
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(StudentPersonalAiGenerationPage));
 
-    expect(screen.getByText(unauthorizedTitle)).toBeInTheDocument();
+    expect(
+      screen.getByText("\u6b63\u5728\u6821\u9a8c\u5b66\u5458\u4f1a\u8bdd"),
+    ).toBeInTheDocument();
+    expect(await screen.findByText(unauthorizedTitle)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: requestButtonLabel }),
     ).toBeDisabled();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads histories through the cookie-backed session marker without a bearer header", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init).toMatchObject({
+          credentials: "same-origin",
+          method: "GET",
+        });
+        expect(init).not.toHaveProperty("headers");
+
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyServerHistoryResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(
+      await screen.findByText("\u6682\u65e0\u5386\u53f2\u7ed3\u679c"),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("renders the local contract blocked state without provider content", async () => {

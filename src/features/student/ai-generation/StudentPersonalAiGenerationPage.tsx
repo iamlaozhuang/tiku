@@ -12,8 +12,8 @@ import {
 import { useEffect, useState } from "react";
 
 import {
+  COOKIE_BACKED_SESSION_MARKER,
   fetchCurrentStudentSession,
-  fetchPersonalAiGenerationRequestHistory,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -27,11 +27,13 @@ import type {
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
+  | "checking"
   | "empty"
   | "loading"
   | "ready"
   | "error"
-  | "unauthorized";
+  | "unauthorized"
+  | "unavailable";
 
 type StudentPersonalAiGenerationHistoryState =
   | "empty"
@@ -43,6 +45,8 @@ type StudentPersonalAiGenerationHistoryState =
 type StudentPersonalAiGenerationResultDetailState =
   | "idle"
   | StudentPersonalAiGenerationHistoryState;
+
+type StudentSessionRequestToken = string | null;
 
 type StudentPersonalAiGenerationRequestDraft = {
   userPublicId: string;
@@ -96,6 +100,11 @@ const copy = {
   unauthorizedTitle: "\u8bf7\u5148\u767b\u5f55",
   unauthorizedDescription:
     "\u4e2a\u4eba AI \u5b66\u4e60\u9700\u8981\u6709\u6548\u7684\u5b66\u5458\u4f1a\u8bdd\u3002",
+  checkingTitle: "\u6b63\u5728\u6821\u9a8c\u5b66\u5458\u4f1a\u8bdd",
+  unavailableTitle:
+    "\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e AI \u8bad\u7ec3",
+  unavailableDescription:
+    "\u8bf7\u786e\u8ba4\u5df2\u9009\u62e9\u6709\u6548\u7684\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\uff1b\u672c\u9875\u4e0d\u4f1a\u6267\u884c\u771f\u5b9e\u6a21\u578b\u8c03\u7528\u3002",
   blockedTitle: "\u8bf7\u6c42\u5df2\u963b\u65ad",
   contractTitle: "\u672c\u5730\u5408\u7ea6\u6458\u8981",
   historyTitle: "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2",
@@ -236,6 +245,18 @@ function readHasStudentSessionToken(): boolean {
   return getStoredStudentSessionToken() !== null;
 }
 
+function readStudentSessionRequestToken(): StudentSessionRequestToken {
+  const storedSessionValue = getStoredStudentSessionToken();
+
+  return storedSessionValue === COOKIE_BACKED_SESSION_MARKER
+    ? null
+    : storedSessionValue;
+}
+
+function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
+  return payload.code >= 403000 && payload.code < 404000;
+}
+
 function createPersonalAiGenerationRequestBody(
   draft: StudentPersonalAiGenerationRequestDraft,
   userPublicId: string,
@@ -252,7 +273,7 @@ function createPersonalAiGenerationRequestBody(
 }
 
 async function fetchPersonalAiGenerationResultHistory(
-  studentSessionValue: string,
+  studentSessionValue: StudentSessionRequestToken,
 ): Promise<{
   code: number;
   message: string;
@@ -268,7 +289,7 @@ async function fetchPersonalAiGenerationResultHistory(
 }
 
 async function fetchPersonalAiGenerationResultDetail(
-  studentSessionValue: string,
+  studentSessionValue: StudentSessionRequestToken,
   resultPublicId: string,
 ): Promise<{
   code: number;
@@ -279,6 +300,22 @@ async function fetchPersonalAiGenerationResultDetail(
     `/api/v1/personal-ai-generation-results/${encodeURIComponent(
       resultPublicId,
     )}`,
+    studentSessionValue,
+    {
+      method: "GET",
+    },
+  );
+}
+
+async function fetchPersonalAiGenerationRequestHistoryForSession(
+  studentSessionValue: StudentSessionRequestToken,
+): Promise<{
+  code: number;
+  message: string;
+  data: PersonalAiGenerationRequestHistoryDto | null;
+}> {
+  return fetchStudentApi<PersonalAiGenerationRequestHistoryDto>(
+    "/api/v1/personal-ai-generation-requests",
     studentSessionValue,
     {
       method: "GET",
@@ -765,19 +802,19 @@ export function StudentPersonalAiGenerationPage() {
   );
   const [pageState, setPageState] =
     useState<StudentPersonalAiGenerationPageState>(
-      hasSessionToken ? "empty" : "unauthorized",
+      hasSessionToken ? "empty" : "checking",
     );
   const [experience, setExperience] =
     useState<PersonalAiGenerationLocalBrowserExperienceDto | null>(null);
   const [historyState, setHistoryState] =
     useState<StudentPersonalAiGenerationHistoryState>(
-      hasSessionToken ? "loading" : "unauthorized",
+      hasSessionToken ? "loading" : "loading",
     );
   const [requestHistory, setRequestHistory] =
     useState<PersonalAiGenerationRequestHistoryDto>([]);
   const [resultHistoryState, setResultHistoryState] =
     useState<StudentPersonalAiGenerationHistoryState>(
-      hasSessionToken ? "loading" : "unauthorized",
+      hasSessionToken ? "loading" : "loading",
     );
   const [resultHistory, setResultHistory] =
     useState<PersonalAiGenerationResultHistoryDto | null>(null);
@@ -790,34 +827,114 @@ export function StudentPersonalAiGenerationPage() {
   >(null);
 
   useEffect(() => {
-    const storedSessionValue = getStoredStudentSessionToken();
+    const sessionRequestToken = readStudentSessionRequestToken();
+    let isCancelled = false;
 
-    if (storedSessionValue === null) {
-      return;
+    function markUnauthorized() {
+      setHasSessionToken(false);
+      setPageState("unauthorized");
+      setHistoryState("unauthorized");
+      setRequestHistory([]);
+      setResultHistoryState("unauthorized");
+      setResultHistory(null);
+      setResultDetailState("unauthorized");
+      setResultDetail(null);
+      setSelectedResultPublicId(null);
     }
 
-    const storedSessionToken = storedSessionValue;
-    let isCancelled = false;
+    function markUnavailable() {
+      setHasSessionToken(false);
+      setPageState("unavailable");
+      setHistoryState("unauthorized");
+      setRequestHistory([]);
+      setResultHistoryState("unauthorized");
+      setResultHistory(null);
+      setResultDetailState("idle");
+      setResultDetail(null);
+      setSelectedResultPublicId(null);
+    }
+
+    async function markUnauthorizedOrUnavailable() {
+      try {
+        const sessionResponse =
+          await fetchCurrentStudentSession(sessionRequestToken);
+
+        if (
+          sessionResponse.code === 0 &&
+          sessionResponse.data !== null &&
+          sessionResponse.data.user.userType !== null
+        ) {
+          markUnavailable();
+          return;
+        }
+      } catch {
+        // Keep the direct route conservative when the session check is unavailable.
+      }
+
+      markUnauthorized();
+    }
+
+    async function confirmCookieBackedSessionWhenNeeded(): Promise<boolean> {
+      if (getStoredStudentSessionToken() !== null) {
+        return true;
+      }
+
+      try {
+        const sessionResponse =
+          await fetchCurrentStudentSession(sessionRequestToken);
+
+        if (isCancelled) {
+          return false;
+        }
+
+        if (isStudentUnauthorizedResponse(sessionResponse)) {
+          markUnauthorized();
+          return false;
+        }
+
+        if (
+          sessionResponse.code !== 0 ||
+          sessionResponse.data === null ||
+          sessionResponse.data.user.userType === null
+        ) {
+          setPageState("error");
+          setHistoryState("error");
+          setResultHistoryState("error");
+          return false;
+        }
+
+        setHasSessionToken(true);
+        setPageState("empty");
+        return true;
+      } catch {
+        if (!isCancelled) {
+          setPageState("error");
+          setHistoryState("error");
+          setResultHistoryState("error");
+        }
+
+        return false;
+      }
+    }
 
     async function fetchInitialRequestHistory() {
       try {
         const historyResponse =
-          await fetchPersonalAiGenerationRequestHistory(storedSessionToken);
+          await fetchPersonalAiGenerationRequestHistoryForSession(
+            sessionRequestToken,
+          );
 
         if (isCancelled) {
           return;
         }
 
         if (isStudentUnauthorizedResponse(historyResponse)) {
-          setHasSessionToken(false);
-          setPageState("unauthorized");
-          setHistoryState("unauthorized");
-          setRequestHistory([]);
-          setResultHistoryState("unauthorized");
-          setResultHistory(null);
-          setResultDetailState("unauthorized");
-          setResultDetail(null);
-          setSelectedResultPublicId(null);
+          await markUnauthorizedOrUnavailable();
+          return;
+        }
+
+        if (isStudentAccessDeniedResponse(historyResponse)) {
+          markUnavailable();
           return;
         }
 
@@ -840,22 +957,19 @@ export function StudentPersonalAiGenerationPage() {
     async function fetchInitialResultHistory() {
       try {
         const historyResponse =
-          await fetchPersonalAiGenerationResultHistory(storedSessionToken);
+          await fetchPersonalAiGenerationResultHistory(sessionRequestToken);
 
         if (isCancelled) {
           return;
         }
 
         if (isStudentUnauthorizedResponse(historyResponse)) {
-          setHasSessionToken(false);
-          setPageState("unauthorized");
-          setHistoryState("unauthorized");
-          setRequestHistory([]);
-          setResultHistoryState("unauthorized");
-          setResultHistory(null);
-          setResultDetailState("unauthorized");
-          setResultDetail(null);
-          setSelectedResultPublicId(null);
+          await markUnauthorizedOrUnavailable();
+          return;
+        }
+
+        if (isStudentAccessDeniedResponse(historyResponse)) {
+          markUnavailable();
           return;
         }
 
@@ -877,8 +991,18 @@ export function StudentPersonalAiGenerationPage() {
       }
     }
 
-    void fetchInitialRequestHistory();
-    void fetchInitialResultHistory();
+    async function loadInitialData() {
+      const hasConfirmedSession = await confirmCookieBackedSessionWhenNeeded();
+
+      if (!hasConfirmedSession || isCancelled) {
+        return;
+      }
+
+      void fetchInitialRequestHistory();
+      void fetchInitialResultHistory();
+    }
+
+    void loadInitialData();
 
     return () => {
       isCancelled = true;
@@ -886,9 +1010,9 @@ export function StudentPersonalAiGenerationPage() {
   }, []);
 
   async function handleSubmitPersonalAiGenerationRequest() {
-    const storedSessionValue = getStoredStudentSessionToken();
+    const sessionRequestToken = readStudentSessionRequestToken();
 
-    if (storedSessionValue === null) {
+    function markUnauthorized() {
       setHasSessionToken(false);
       setPageState("unauthorized");
       setHistoryState("unauthorized");
@@ -898,7 +1022,18 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
-      return;
+    }
+
+    function markUnavailable() {
+      setHasSessionToken(false);
+      setPageState("unavailable");
+      setHistoryState("unauthorized");
+      setRequestHistory([]);
+      setResultHistoryState("unauthorized");
+      setResultHistory(null);
+      setResultDetailState("idle");
+      setResultDetail(null);
+      setSelectedResultPublicId(null);
     }
 
     setHasSessionToken(true);
@@ -906,18 +1041,10 @@ export function StudentPersonalAiGenerationPage() {
 
     try {
       const sessionResponse =
-        await fetchCurrentStudentSession(storedSessionValue);
+        await fetchCurrentStudentSession(sessionRequestToken);
 
       if (isStudentUnauthorizedResponse(sessionResponse)) {
-        setHasSessionToken(false);
-        setPageState("unauthorized");
-        setHistoryState("unauthorized");
-        setRequestHistory([]);
-        setResultHistoryState("unauthorized");
-        setResultHistory(null);
-        setResultDetailState("unauthorized");
-        setResultDetail(null);
-        setSelectedResultPublicId(null);
+        markUnauthorized();
         return;
       }
 
@@ -934,21 +1061,14 @@ export function StudentPersonalAiGenerationPage() {
       }
 
       if (sessionResponse.data.user.userType === null) {
-        setPageState("unauthorized");
-        setHistoryState("unauthorized");
-        setRequestHistory([]);
-        setResultHistoryState("unauthorized");
-        setResultHistory(null);
-        setResultDetailState("unauthorized");
-        setResultDetail(null);
-        setSelectedResultPublicId(null);
+        markUnauthorized();
         return;
       }
 
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
           "/api/v1/personal-ai-generation-requests",
-          storedSessionValue,
+          sessionRequestToken,
           {
             method: "POST",
             headers: {
@@ -964,15 +1084,12 @@ export function StudentPersonalAiGenerationPage() {
         );
 
       if (isStudentUnauthorizedResponse(response)) {
-        setHasSessionToken(false);
-        setPageState("unauthorized");
-        setHistoryState("unauthorized");
-        setRequestHistory([]);
-        setResultHistoryState("unauthorized");
-        setResultHistory(null);
-        setResultDetailState("unauthorized");
-        setResultDetail(null);
-        setSelectedResultPublicId(null);
+        markUnavailable();
+        return;
+      }
+
+      if (isStudentAccessDeniedResponse(response)) {
+        markUnavailable();
         return;
       }
 
@@ -998,18 +1115,17 @@ export function StudentPersonalAiGenerationPage() {
 
       try {
         const historyResponse =
-          await fetchPersonalAiGenerationRequestHistory(storedSessionValue);
+          await fetchPersonalAiGenerationRequestHistoryForSession(
+            sessionRequestToken,
+          );
 
         if (isStudentUnauthorizedResponse(historyResponse)) {
-          setHasSessionToken(false);
-          setPageState("unauthorized");
-          setHistoryState("unauthorized");
-          setRequestHistory([]);
-          setResultHistoryState("unauthorized");
-          setResultHistory(null);
-          setResultDetailState("unauthorized");
-          setResultDetail(null);
-          setSelectedResultPublicId(null);
+          markUnavailable();
+          return;
+        }
+
+        if (isStudentAccessDeniedResponse(historyResponse)) {
+          markUnavailable();
           return;
         }
 
@@ -1028,15 +1144,15 @@ export function StudentPersonalAiGenerationPage() {
 
       try {
         const resultHistoryResponse =
-          await fetchPersonalAiGenerationResultHistory(storedSessionValue);
+          await fetchPersonalAiGenerationResultHistory(sessionRequestToken);
 
         if (isStudentUnauthorizedResponse(resultHistoryResponse)) {
-          setHasSessionToken(false);
-          setPageState("unauthorized");
-          setHistoryState("unauthorized");
-          setRequestHistory([]);
-          setResultHistoryState("unauthorized");
-          setResultHistory(null);
+          markUnavailable();
+          return;
+        }
+
+        if (isStudentAccessDeniedResponse(resultHistoryResponse)) {
+          markUnavailable();
           return;
         }
 
@@ -1072,9 +1188,9 @@ export function StudentPersonalAiGenerationPage() {
   async function handleOpenPersonalAiGenerationResultDetail(
     resultPublicId: string,
   ) {
-    const storedSessionValue = getStoredStudentSessionToken();
+    const sessionRequestToken = readStudentSessionRequestToken();
 
-    if (storedSessionValue === null) {
+    function markUnauthorized() {
       setHasSessionToken(false);
       setPageState("unauthorized");
       setHistoryState("unauthorized");
@@ -1084,7 +1200,18 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
-      return;
+    }
+
+    function markUnavailable() {
+      setHasSessionToken(false);
+      setPageState("unavailable");
+      setHistoryState("unauthorized");
+      setRequestHistory([]);
+      setResultHistoryState("unauthorized");
+      setResultHistory(null);
+      setResultDetailState("idle");
+      setResultDetail(null);
+      setSelectedResultPublicId(null);
     }
 
     setHasSessionToken(true);
@@ -1094,20 +1221,17 @@ export function StudentPersonalAiGenerationPage() {
 
     try {
       const detailResponse = await fetchPersonalAiGenerationResultDetail(
-        storedSessionValue,
+        sessionRequestToken,
         resultPublicId,
       );
 
       if (isStudentUnauthorizedResponse(detailResponse)) {
-        setHasSessionToken(false);
-        setPageState("unauthorized");
-        setHistoryState("unauthorized");
-        setRequestHistory([]);
-        setResultHistoryState("unauthorized");
-        setResultHistory(null);
-        setResultDetailState("unauthorized");
-        setResultDetail(null);
-        setSelectedResultPublicId(null);
+        markUnauthorized();
+        return;
+      }
+
+      if (isStudentAccessDeniedResponse(detailResponse)) {
+        markUnavailable();
         return;
       }
 
@@ -1147,11 +1271,16 @@ export function StudentPersonalAiGenerationPage() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <button
           type="button"
-          disabled={!hasSessionToken || pageState === "loading"}
+          disabled={
+            !hasSessionToken ||
+            pageState === "checking" ||
+            pageState === "loading" ||
+            pageState === "unavailable"
+          }
           onClick={() => void handleSubmitPersonalAiGenerationRequest()}
           className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pageState === "loading" ? (
+          {pageState === "checking" || pageState === "loading" ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
             <Sparkles className="size-4" aria-hidden="true" />
@@ -1185,6 +1314,13 @@ export function StudentPersonalAiGenerationPage() {
         </section>
       ) : null}
 
+      {pageState === "checking" ? (
+        <StudentPersonalAiGenerationStateMessage
+          title={copy.checkingTitle}
+          description={copy.unauthorizedDescription}
+        />
+      ) : null}
+
       {pageState === "empty" ? (
         <StudentPersonalAiGenerationStateMessage
           title={copy.emptyTitle}
@@ -1196,6 +1332,14 @@ export function StudentPersonalAiGenerationPage() {
         <StudentPersonalAiGenerationStateMessage
           title={copy.unauthorizedTitle}
           description={copy.unauthorizedDescription}
+          tone="warning"
+        />
+      ) : null}
+
+      {pageState === "unavailable" ? (
+        <StudentPersonalAiGenerationStateMessage
+          title={copy.unavailableTitle}
+          description={copy.unavailableDescription}
           tone="warning"
         />
       ) : null}

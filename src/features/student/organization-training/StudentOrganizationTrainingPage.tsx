@@ -5,6 +5,7 @@ import { AlertCircle, ClipboardCheck, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
+  COOKIE_BACKED_SESSION_MARKER,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -19,7 +20,10 @@ type StudentOrganizationTrainingLoadState =
   | "ready"
   | "empty"
   | "unauthorized"
+  | "unavailable"
   | "error";
+
+type StudentSessionRequestToken = string | null;
 
 type VisibleListPayload = {
   versions: OrganizationTrainingPublishedVersionDto[];
@@ -46,6 +50,20 @@ const defaultAnswerValues: AnswerFormValues = {
   score: "0",
   totalScore: "0",
 };
+
+function readStudentSessionRequestToken(): StudentSessionRequestToken {
+  const storedSessionValue = getStoredStudentSessionToken();
+
+  return storedSessionValue === COOKIE_BACKED_SESSION_MARKER
+    ? null
+    : storedSessionValue;
+}
+
+function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
+  return (
+    (payload.code >= 403000 && payload.code < 404000) || payload.code === 409076
+  );
+}
 
 function createInitialAnswerState(): AnswerUiState {
   return {
@@ -136,12 +154,7 @@ export function StudentOrganizationTrainingPage() {
     let isActive = true;
 
     async function loadVisibleTrainings() {
-      const sessionValue = getStoredStudentSessionToken();
-
-      if (sessionValue === null) {
-        setLoadState("unauthorized");
-        return;
-      }
+      const sessionValue = readStudentSessionRequestToken();
 
       try {
         const response = await fetchStudentApi<VisibleListPayload>(
@@ -158,6 +171,11 @@ export function StudentOrganizationTrainingPage() {
 
         if (isStudentUnauthorizedResponse(response)) {
           setLoadState("unauthorized");
+          return;
+        }
+
+        if (isStudentAccessDeniedResponse(response)) {
+          setLoadState("unavailable");
           return;
         }
 
@@ -220,6 +238,15 @@ export function StudentOrganizationTrainingPage() {
     );
   }
 
+  if (loadState === "unavailable") {
+    return (
+      <StudentOrganizationTrainingStatusMessage
+        title="\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e\u4f01\u4e1a\u8bad\u7ec3"
+        description="\u8bf7\u786e\u8ba4\u5458\u5de5\u8d26\u53f7\u5df2\u7ed1\u5b9a\u6709\u6548\u7684\u7ec4\u7ec7\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\uff1b\u672c\u9875\u4ec5\u663e\u793a\u5df2\u53d1\u5e03\u4e14\u5bf9\u5f53\u524d\u5458\u5de5\u53ef\u89c1\u7684\u57f9\u8bad\u3002"
+      />
+    );
+  }
+
   if (loadState === "empty") {
     return (
       <StudentOrganizationTrainingStatusMessage
@@ -242,12 +269,7 @@ export function StudentOrganizationTrainingPage() {
   }
 
   async function handleSaveDraft(trainingVersionPublicId: string) {
-    const sessionValue = getStoredStudentSessionToken();
-
-    if (sessionValue === null) {
-      setLoadState("unauthorized");
-      return;
-    }
+    const sessionValue = readStudentSessionRequestToken();
 
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
@@ -265,6 +287,16 @@ export function StudentOrganizationTrainingPage() {
         ),
       },
     );
+
+    if (isStudentUnauthorizedResponse(response)) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (isStudentAccessDeniedResponse(response)) {
+      setLoadState("unavailable");
+      return;
+    }
 
     if (response.code !== 0 || response.data === null) {
       updateAnswerState(trainingVersionPublicId, (state) => ({
@@ -284,12 +316,7 @@ export function StudentOrganizationTrainingPage() {
   }
 
   async function handleSubmit(trainingVersionPublicId: string) {
-    const sessionValue = getStoredStudentSessionToken();
-
-    if (sessionValue === null) {
-      setLoadState("unauthorized");
-      return;
-    }
+    const sessionValue = readStudentSessionRequestToken();
 
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
@@ -307,6 +334,16 @@ export function StudentOrganizationTrainingPage() {
         ),
       },
     );
+
+    if (isStudentUnauthorizedResponse(response)) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (isStudentAccessDeniedResponse(response)) {
+      setLoadState("unavailable");
+      return;
+    }
 
     if (response.code !== 0 || response.data === null) {
       updateAnswerState(trainingVersionPublicId, (state) => ({
@@ -326,12 +363,7 @@ export function StudentOrganizationTrainingPage() {
   }
 
   async function handleLoadReadonlySummary(trainingVersionPublicId: string) {
-    const sessionValue = getStoredStudentSessionToken();
-
-    if (sessionValue === null) {
-      setLoadState("unauthorized");
-      return;
-    }
+    const sessionValue = readStudentSessionRequestToken();
 
     const response = await fetchStudentApi<AnswerPayload>(
       `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/readonly-summary`,
@@ -340,6 +372,16 @@ export function StudentOrganizationTrainingPage() {
         method: "GET",
       },
     );
+
+    if (isStudentUnauthorizedResponse(response)) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (isStudentAccessDeniedResponse(response)) {
+      setLoadState("unavailable");
+      return;
+    }
 
     if (response.code !== 0 || response.data === null) {
       updateAnswerState(trainingVersionPublicId, (state) => ({

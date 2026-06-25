@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import StudentOrganizationTrainingRoutePage from "@/app/(student)/organization-training/page";
 import { StudentOrganizationTrainingPage } from "@/features/student/organization-training/StudentOrganizationTrainingPage";
+import { COOKIE_BACKED_SESSION_MARKER } from "@/features/student/studentRuntimeApi";
 
 const visibleVersion = {
   publicId: "organization-training-version-ui-001",
@@ -92,16 +93,68 @@ describe("StudentOrganizationTrainingPage", () => {
     );
   });
 
-  it("renders authorization state without calling protected APIs when the student token is missing", async () => {
-    const fetchMock = vi.fn(async () =>
-      createJsonResponse({ code: 404001, message: "missing", data: null }),
+  it("renders authorization state after the cookie-backed session probe fails when the student token is missing", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/organization-trainings/visible-list");
+        expect(init).toMatchObject({
+          credentials: "same-origin",
+          method: "GET",
+        });
+        expect(init).not.toHaveProperty("headers");
+
+        return createJsonResponse({
+          code: 401001,
+          message: "User session is required.",
+          data: null,
+        });
+      },
     );
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(StudentOrganizationTrainingPage));
 
     expect(await screen.findByText("请先登录")).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads visible trainings through the cookie-backed session marker without a bearer header", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/organization-trainings/visible-list");
+        expect(init).toMatchObject({
+          credentials: "same-origin",
+          method: "GET",
+        });
+        expect(init).not.toHaveProperty("headers");
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { versions: [visibleVersion] },
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentOrganizationTrainingPage));
+
+    expect(
+      await screen.findByRole("heading", { name: "组织培训作答" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        "organization-training-row-organization-training-version-ui-001",
+      ),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("loads visible trainings and runs draft-save, submit, and readonly-summary through session runtime", async () => {
