@@ -5073,6 +5073,167 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25
+    title: Inspect advanced organization employee assignment data read-only
+    phase: organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25
+    sourceStory: goal-full-8-row-role-separated-browser-acceptance-after-organization-training-employee-visible-scope-blocker
+    dependencies:
+      - organization-training-advanced-employee-assignment-readonly-inspection-approval-package-2026-06-25
+    taskKind: readonly_diagnostic
+    moduleRunVersion: 2
+    executionProfile: local_readonly_database_seed_account_inspection
+    evidenceMode: redacted_counts_status_only
+    validationPolicy: readonly_db_inspection_docs_prettier_diff_check_module_run_v2
+    queueSelectionMode: current_user_fresh_approval_after_approval_package
+    approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+    requiredOutcome: >-
+      Execute the approved local read-only DB/seed/account assignment inspection for the
+      `org_advanced_employee` organization-training blocker. Evidence may record only redacted counts/status and
+      high-level conclusions. Do not write DB/seed/account data, alter schema/migration, edit source/tests, read `.env*`,
+      run browser/runtime reruns, call Provider, touch Cost, staging/prod, payment, external services, packages,
+      lockfiles, or claim final MVP Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_25
+      localReadOnlyDatabaseInspection: approved_by_current_user_2026_06_25
+      localReadOnlySeedInspection: approved_by_current_user_2026_06_25
+      localReadOnlyAccountInspection: approved_by_current_user_2026_06_25
+      databaseWrite: blocked
+      seedWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked_for_this_task_unless_shell_env_or_compose_defaults_suffice
+      credentialEntry: blocked_for_this_task
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - compose.yaml
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - src/db/dev-seed.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/organization-training.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/services/effective-authorization-service.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-service.ts
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: readonly_inspection_found_one_active_advanced_employee_without_published_training_current_org_no_final_pass
+    claimedAt: "2026-06-25T15:30:54-07:00"
+    plannedAt: "2026-06-25T15:30:54-07:00"
+    validatedAt: "2026-06-25T15:52:00-07:00"
+    reviewedAt: "2026-06-25T15:52:00-07:00"
+    closedAt: "2026-06-25T15:52:00-07:00"
+    branch: codex/org-training-assignment-inspect-20260625
+    validationSummary:
+      databaseReadExecuted: true
+      databaseReadMode: docker_compose_psql_readonly_transaction
+      seedReadExecuted: true
+      accountDataInspectionExecuted: true
+      defaultTikuTrainingTablesPresent: false
+      currentSchemaDbTrainingTablesPresent: true
+      currentSchemaActiveAdvancedSessionEmployeesWithoutVisibleTraining: 1
+      missingPublishedTrainingCurrentOrgCount: 1
+      rawRowsInEvidence: false
+      browserRuntimeExecuted: false
+      finalPassClaim: false
+    nextRequiredTask: requires_separate_approval_local_seed_or_assignment_repair_for_missing_published_training
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+    blockedWithoutFreshApproval:
+      - actual_database_write
+      - seed_write_or_seed_repair
+      - account_creation_disable_password_reset_authorization_or_assignment_mutation
+      - schema_migration_or_drizzle_change
+      - raw_database_rows_or_raw_account_identifiers_in_evidence
+      - credential_secret_env_or_private_account_file_access
+      - browser_runtime_or_playwright_runtime_rerun
+      - source_or_test_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
     title: Execute full eight-row browser rerun after learner AI entry repair
     phase: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
