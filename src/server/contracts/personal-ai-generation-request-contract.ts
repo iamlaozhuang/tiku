@@ -3,14 +3,21 @@ import type {
   PersonalAiGenerationRequestContextSelection,
   PersonalAiGenerationRuntimeStatus,
 } from "../models/personal-ai-generation-request";
+import type {
+  AiGenerationTaskRequestAuthorizationSource,
+  AiGenerationTaskRequestOwnerType,
+} from "../models/ai-generation-task-request";
 
 export type PersonalAiGenerationRequestContextDto = {
   userPublicId: string;
   authorizationBoundary: {
-    authorizationSource: "personal_auth";
+    authorizationSource: AiGenerationTaskRequestAuthorizationSource;
     authorizationPublicId: string;
-    ownerType: "personal";
-    quotaOwnerType: "personal";
+    ownerType: AiGenerationTaskRequestOwnerType;
+    ownerPublicId: string;
+    organizationPublicId: string | null;
+    quotaOwnerType: AiGenerationTaskRequestOwnerType;
+    quotaOwnerPublicId: string;
   };
   aiFuncType: PersonalAiGenerationFuncType;
   runtimeStatus: PersonalAiGenerationRuntimeStatus;

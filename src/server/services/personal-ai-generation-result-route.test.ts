@@ -10,7 +10,9 @@ import type { SessionService } from "./session-service";
 
 const userContext = {
   userPublicId: "result_route_user_public_123",
-};
+  userType: "personal",
+  organizationPublicId: null,
+} as const;
 
 function createGetRequest(query = ""): Request {
   return new Request(
@@ -158,6 +160,8 @@ describe("personal AI generation result route handlers", () => {
 
     expect(resolvedUserContext).toEqual({
       userPublicId: "session_result_user_public_123",
+      userType: "personal",
+      organizationPublicId: null,
     });
     expect(observedAuthorizationValues).toEqual([
       "Bearer synthetic-local-session-token",
@@ -165,6 +169,46 @@ describe("personal AI generation result route handlers", () => {
     expect(JSON.stringify(resolvedUserContext)).not.toContain(
       "synthetic-local-session-token",
     );
+  });
+
+  it("resolves employee user public id from the local session runtime", async () => {
+    const sessionService: Pick<SessionService, "getCurrentSession"> = {
+      async getCurrentSession() {
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              publicId: "employee_result_user_public_123",
+              phone: "13900000000",
+              name: "企业员工",
+              userType: "employee",
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: "employee_public_123",
+              organizationPublicId: "organization_public_123",
+              adminPublicId: null,
+              adminRoles: [],
+            },
+            session: {
+              expiresAt: "2026-06-19T12:00:00.000Z",
+            },
+          },
+        };
+      },
+    };
+    const resolveUserContext =
+      createPersonalAiGenerationResultUserResolver(sessionService);
+
+    const resolvedUserContext = await resolveUserContext(
+      new Request("http://localhost/api/v1/personal-ai-generation-results"),
+    );
+
+    expect(resolvedUserContext).toEqual({
+      userPublicId: "employee_result_user_public_123",
+      userType: "employee",
+      organizationPublicId: "organization_public_123",
+    });
   });
 
   it("rejects non-personal sessions from the personal result history path", async () => {

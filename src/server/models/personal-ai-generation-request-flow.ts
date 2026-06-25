@@ -37,13 +37,14 @@ export function isPersonalAiGenerationRequestFlowBoundary(
   return (
     isPersonalAiGenerationResultReferenceTaskType(taskRequestInput.taskType) &&
     taskRequestInput.actorPublicId === requestInput.userPublicId &&
-    taskRequestInput.authorizationSource === "personal_auth" &&
+    taskRequestInput.authorizationSource === requestInput.authorizationSource &&
     taskRequestInput.authorizationPublicId ===
       requestInput.authorizationPublicId &&
-    taskRequestInput.ownerType === "personal" &&
-    taskRequestInput.ownerPublicId === requestInput.userPublicId &&
-    taskRequestInput.organizationPublicId === null &&
-    taskRequestInput.quotaOwnerType === "personal" &&
-    taskRequestInput.quotaOwnerPublicId === requestInput.userPublicId
+    taskRequestInput.ownerType === requestInput.ownerType &&
+    taskRequestInput.ownerPublicId === requestInput.ownerPublicId &&
+    taskRequestInput.organizationPublicId ===
+      requestInput.organizationPublicId &&
+    taskRequestInput.quotaOwnerType === requestInput.quotaOwnerType &&
+    taskRequestInput.quotaOwnerPublicId === requestInput.quotaOwnerPublicId
   );
 }

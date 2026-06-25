@@ -215,6 +215,28 @@ const localSessionResponse = {
   },
 };
 
+const employeeSessionResponse = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "employee-session-user-public-123",
+      phone: "13900000003",
+      name: "Organization Employee",
+      userType: "employee",
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: "employee-public-123",
+      organizationPublicId: "organization-public-123",
+      adminPublicId: null,
+      adminRoles: [],
+    },
+    session: {
+      expiresAt: "2026-06-19T12:00:00.000Z",
+    },
+  },
+};
+
 function createPersonalAiGenerationFetchMock(
   experienceResponse: unknown = localExperienceResponse,
   historyResponse: unknown = emptyServerHistoryResponse,
@@ -582,6 +604,83 @@ describe("StudentPersonalAiGenerationPage", () => {
       String(requestBody.userPublicId),
     ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("posts an organization-context local route contract payload for employee sessions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+          submittedBodies.push(
+            JSON.parse(String(init?.body)) as Record<string, unknown>,
+          );
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      userPublicId: "employee-session-user-public-123",
+      actorPublicId: "employee-session-user-public-123",
+      authorizationSource: "org_auth",
+      ownerType: "organization",
+      ownerPublicId: "organization-public-123",
+      organizationPublicId: "organization-public-123",
+      quotaOwnerType: "organization",
+      quotaOwnerPublicId: "organization-public-123",
+    });
+    expect(JSON.stringify(submittedBodies[0])).not.toContain(
+      "unit-test-session-token",
+    );
   });
 
   it("generates unique request identifiers for consecutive personal AI generation submits", async () => {

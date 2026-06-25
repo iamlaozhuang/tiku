@@ -13,7 +13,9 @@ import type { SessionService } from "./session-service";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
-};
+  userType: "personal",
+  organizationPublicId: null,
+} as const;
 
 function createBaseBody() {
   const omittedTextA = ["OMITTED", "A"].join("-");
@@ -202,6 +204,8 @@ describe("personal AI generation request route handlers", () => {
 
     expect(resolvedUserContext).toEqual({
       userPublicId: "session_user_public_123",
+      userType: "personal",
+      organizationPublicId: null,
     });
     expect(observedAuthorizationValues).toEqual([
       "Bearer synthetic-local-session-token",
@@ -211,7 +215,7 @@ describe("personal AI generation request route handlers", () => {
     );
   });
 
-  it("rejects employee sessions from the personal AI generation request path", async () => {
+  it("resolves employee sessions as organization-context local AI requests instead of unauthenticated", async () => {
     const sessionService: Pick<SessionService, "getCurrentSession"> = {
       async getCurrentSession() {
         return {
@@ -242,12 +246,47 @@ describe("personal AI generation request route handlers", () => {
     const { collection } =
       createPersonalAiGenerationRequestRouteHandlers(resolveUserContext);
 
-    const response = await collection.POST(createPostRequest(createBaseBody()));
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_public_123",
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_123",
+        organizationPublicId: "organization_public_123",
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: "organization_public_123",
+      }),
+    );
 
     await expect(response.json()).resolves.toEqual({
-      code: 401001,
-      message: "User session is required.",
-      data: null,
+      code: 0,
+      message: "ok",
+      data: expect.objectContaining({
+        requestFlow: expect.objectContaining({
+          contextSelection: expect.objectContaining({
+            userPublicId: "employee_session_user_public_123",
+            authorizationBoundary: {
+              authorizationSource: "org_auth",
+              authorizationPublicId: "org_auth_public_123",
+              ownerType: "organization",
+              ownerPublicId: "organization_public_123",
+              organizationPublicId: "organization_public_123",
+              quotaOwnerType: "organization",
+              quotaOwnerPublicId: "organization_public_123",
+            },
+          }),
+          taskRequest: expect.objectContaining({
+            authorizationSource: "org_auth",
+            actorPublicId: "employee_session_user_public_123",
+            ownerType: "organization",
+            ownerPublicId: "organization_public_123",
+            organizationPublicId: "organization_public_123",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "organization_public_123",
+          }),
+        }),
+      }),
     });
   });
 

@@ -165,10 +165,25 @@ function matchesTaskAuthorizationBoundary(
     );
   }
 
+  return matchesLearnerAiGenerationAuthorizationBoundary(input);
+}
+
+function matchesLearnerAiGenerationAuthorizationBoundary(
+  input: AiGenerationTaskRequestPolicyInput,
+): boolean {
+  if (input.authorizationSource === "personal_auth") {
+    return (
+      input.ownerType === "personal" &&
+      input.quotaOwnerType === "personal" &&
+      input.organizationPublicId === null
+    );
+  }
+
   return (
-    input.authorizationSource === "personal_auth" &&
-    input.ownerType === "personal" &&
-    input.quotaOwnerType === "personal" &&
-    input.organizationPublicId === null
+    input.ownerType === "organization" &&
+    input.quotaOwnerType === "organization" &&
+    input.organizationPublicId !== null &&
+    input.ownerPublicId === input.organizationPublicId &&
+    input.quotaOwnerPublicId === input.organizationPublicId
   );
 }

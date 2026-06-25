@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+currentPhase: learner-org-employee-ai-entry-session-repair-2026-06-25
 updatedAt: "2026-06-25T07:46:38-07:00"
 architecture:
   status: complete
@@ -501,27 +501,28 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
-  lastKnownOriginMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
+  lastKnownMasterSha: b646bd79d4ec400603c6e44fa6a7396de76b6100
+  lastKnownOriginMasterSha: b646bd79d4ec400603c6e44fa6a7396de76b6100
 currentTask:
-  id: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+  id: learner-org-employee-ai-entry-session-repair-2026-06-25
   status: closed
-  result: pass_scope_package_prepared_no_browser_no_credentials_no_final_pass
-  claimedAt: "2026-06-25T07:43:48-07:00"
-  plannedAt: "2026-06-25T07:43:48-07:00"
-  validatedAt: "2026-06-25T07:46:38-07:00"
-  reviewedAt: "2026-06-25T07:46:38-07:00"
-  closedAt: "2026-06-25T07:46:38-07:00"
-  sourceStory: current-user-directed-serial-task-2-full-8-row-rerun-scope-package
-  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
+  result: pass_employee_ai_local_contract_session_classification_focused_validation_no_browser
+  claimedAt: "2026-06-25T07:53:41-07:00"
+  plannedAt: "2026-06-25T07:53:41-07:00"
+  validatedAt: "2026-06-25T08:03:12-07:00"
+  reviewedAt: "2026-06-25T08:03:12-07:00"
+  closedAt: "2026-06-25T08:03:12-07:00"
+  sourceStory: current-user-directed-serial-task-3-minimal-source-repair
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
   approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
-  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-entry-session-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorGapRefreshTaskId: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
   predecessorGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  predecessorRerunScopePackageTaskId: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+  predecessorRerunScopePackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
   predecessorEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
   predecessorEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
   predecessorOrgAdminPostRepairTaskId: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
@@ -529,59 +530,61 @@ currentTask:
   predecessorOrgAdminPostRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    approvalPackageCreation: true
-    fullEightRowRerunScopeDefinition: true
-    gapRefreshOnly: false
+    localSourceChange: true
+    focusedUnitTests: true
+    learnerAiEntryRepair: true
+    employeeSessionClassificationRepair: true
     localBrowserRuntimeRerun: false
     ownerManualCredentialEntry: false
     sessionSummaryObservationWithoutTokenCapture: false
     routeMatrixObservation: false
     localDefaultTikuDatabaseSchemaAlignment: false
     localDefaultTikuDatabaseSeedAlignment: false
-    sourceChange: false
     databaseWrite: false
     privateAccountFileRead: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
     envSecretAccess: false
     destructiveDatabaseOperation: false
-    focusedUnitTests: false
+    schemaMigration: false
+    dependencyIntroduction: false
+    providerCall: false
+    e2eRuntime: false
     e2eSpecChange: false
     finalPassClaim: false
-  packageResult:
-    packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
-    packageStatus: prepared_not_executed
-    rowsInScope: 8
-    ownerManualCredentialEntry: required_for_future_execution
+  selectedRepair:
+    candidate: learner_org_employee_ai_entry_and_login_state_misclassification
+    source: predecessor_gap_refresh_and_rerun_scope_package
     browserExecutionInThisTask: false
-    credentialFileReadInThisTask: false
-    allowedEvidenceFieldsDefined: true
-    redactionPolicyDefined: true
-    routeWorkflowMatrixDefined: true
-    blockedScopesDefined: true
-    nextMinimalSourceRepairCandidate: learner_org_employee_ai_entry_and_login_state_misclassification
+    databaseOrSchemaChange: false
+    focusedUnitTests: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2Hardening: pass
+    prePushReadiness: pass
+    finalPassClaim: false
   finalPassClaim: false
   runtimeEvidence:
     browserExecutedInThisTask: false
     databaseExecutedInThisTask: false
-    sourceChangeExecuted: false
+    sourceChangeExecuted: true
     finalMvpPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
-  branch: codex/full-8-row-rerun-scope-package-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+  branch: codex/learner-org-ai-entry-session-repair-20260625
   commitSha: null
   prUrl: null
   retryCount: 0

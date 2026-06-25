@@ -1,4 +1,8 @@
 import type { AiFuncType } from "./ai-rag";
+import type {
+  AiGenerationTaskRequestAuthorizationSource,
+  AiGenerationTaskRequestOwnerType,
+} from "./ai-generation-task-request";
 
 export type PersonalAiGenerationFuncType = Exclude<AiFuncType, "scoring">;
 
@@ -16,7 +20,13 @@ export type PersonalAiGenerationRequestContextSelection = {
 
 export type PersonalAiGenerationRequestInput = {
   userPublicId: string;
+  authorizationSource: AiGenerationTaskRequestAuthorizationSource;
   authorizationPublicId: string;
+  ownerType: AiGenerationTaskRequestOwnerType;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+  quotaOwnerType: AiGenerationTaskRequestOwnerType;
+  quotaOwnerPublicId: string;
   aiFuncType: PersonalAiGenerationFuncType;
   questionPublicId: string;
   answerRecordPublicId: string | null;

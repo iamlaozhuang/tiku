@@ -13,6 +13,8 @@ import {
 
 export type PersonalAiGenerationResultUserContext = {
   userPublicId: string;
+  userType: "personal" | "employee";
+  organizationPublicId: string | null;
 };
 
 export type PersonalAiGenerationResultUserResolver = (
@@ -114,12 +116,25 @@ export function createPersonalAiGenerationResultUserResolver(
       return null;
     }
 
-    if (sessionResponse.data.user.userType !== "personal") {
+    if (sessionResponse.data.user.userType === "personal") {
+      return {
+        userPublicId: sessionResponse.data.user.publicId,
+        userType: "personal",
+        organizationPublicId: null,
+      };
+    }
+
+    if (
+      sessionResponse.data.user.userType !== "employee" ||
+      sessionResponse.data.user.organizationPublicId === null
+    ) {
       return null;
     }
 
     return {
       userPublicId: sessionResponse.data.user.publicId,
+      userType: "employee",
+      organizationPublicId: sessionResponse.data.user.organizationPublicId,
     };
   };
 }

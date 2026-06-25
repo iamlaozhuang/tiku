@@ -24,7 +24,13 @@ describe("personal AI generation request validator", () => {
       success: true,
       value: {
         userPublicId: "user_public_123",
+        authorizationSource: "personal_auth",
         authorizationPublicId: "personal_auth_public_123",
+        ownerType: "personal",
+        ownerPublicId: "user_public_123",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "user_public_123",
         aiFuncType: "hint",
         questionPublicId: "question_public_123",
         answerRecordPublicId: "answer_record_public_123",

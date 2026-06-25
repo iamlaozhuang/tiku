@@ -19,6 +19,8 @@ import type { SessionService } from "./session-service";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
+  userType: "personal" | "employee";
+  organizationPublicId: string | null;
 };
 
 export type PersonalAiGenerationRequestUserResolver = (
@@ -145,12 +147,31 @@ function createRequestInputWithUserContext(
   input: unknown,
   userContext: PersonalAiGenerationRequestUserContext,
 ): Record<string, unknown> {
+  const authorizationContext =
+    userContext.userType === "employee" &&
+    userContext.organizationPublicId !== null
+      ? {
+          authorizationSource: "org_auth",
+          ownerType: "organization",
+          ownerPublicId: userContext.organizationPublicId,
+          organizationPublicId: userContext.organizationPublicId,
+          quotaOwnerType: "organization",
+          quotaOwnerPublicId: userContext.organizationPublicId,
+        }
+      : {
+          authorizationSource: "personal_auth",
+          ownerType: "personal",
+          ownerPublicId: userContext.userPublicId,
+          organizationPublicId: null,
+          quotaOwnerType: "personal",
+          quotaOwnerPublicId: userContext.userPublicId,
+        };
+
   return {
     ...(isRecord(input) ? input : {}),
     userPublicId: userContext.userPublicId,
     actorPublicId: userContext.userPublicId,
-    ownerPublicId: userContext.userPublicId,
-    quotaOwnerPublicId: userContext.userPublicId,
+    ...authorizationContext,
   };
 }
 
@@ -159,10 +180,6 @@ function createServerOwnedLocalBrowserRequestInput(
 ): Record<string, unknown> {
   return {
     ...input,
-    authorizationSource: "personal_auth",
-    ownerType: "personal",
-    organizationPublicId: null,
-    quotaOwnerType: "personal",
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
@@ -190,7 +207,13 @@ function createPersistentRequestInput(
     input.authorizationPublicId,
   );
   const actorPublicId = normalizeRequiredText(input.actorPublicId);
+  const authorizationSource = normalizeRequiredText(input.authorizationSource);
+  const ownerType = normalizeRequiredText(input.ownerType);
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const organizationPublicId = normalizeOptionalText(
+    input.organizationPublicId,
+  );
+  const quotaOwnerType = normalizeRequiredText(input.quotaOwnerType);
   const quotaOwnerPublicId = normalizeRequiredText(input.quotaOwnerPublicId);
   const effectiveEdition = normalizeRequiredText(input.effectiveEdition);
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
@@ -209,7 +232,10 @@ function createPersistentRequestInput(
     !isPersonalAiGenerationFuncType(aiFuncType) ||
     authorizationPublicId === null ||
     actorPublicId === null ||
+    authorizationSource === null ||
+    ownerType === null ||
     ownerPublicId === null ||
+    quotaOwnerType === null ||
     quotaOwnerPublicId === null ||
     effectiveEdition === null ||
     questionPublicId === null ||
@@ -224,6 +250,15 @@ function createPersistentRequestInput(
     return null;
   }
 
+  if (
+    authorizationSource !== "personal_auth" ||
+    ownerType !== "personal" ||
+    organizationPublicId !== null ||
+    quotaOwnerType !== "personal"
+  ) {
+    return null;
+  }
+
   return {
     requestPublicId,
     taskPublicId,
@@ -232,7 +267,7 @@ function createPersistentRequestInput(
     authorizationPublicId,
     actorPublicId,
     ownerPublicId,
-    organizationPublicId: normalizeOptionalText(input.organizationPublicId),
+    organizationPublicId,
     quotaOwnerPublicId,
     effectiveEdition,
     questionPublicId,
@@ -308,12 +343,25 @@ export function createPersonalAiGenerationRequestUserResolver(
       return null;
     }
 
-    if (sessionResponse.data.user.userType !== "personal") {
+    if (sessionResponse.data.user.userType === "personal") {
+      return {
+        userPublicId: sessionResponse.data.user.publicId,
+        userType: "personal",
+        organizationPublicId: null,
+      };
+    }
+
+    if (
+      sessionResponse.data.user.userType !== "employee" ||
+      sessionResponse.data.user.organizationPublicId === null
+    ) {
       return null;
     }
 
     return {
       userPublicId: sessionResponse.data.user.publicId,
+      userType: "employee",
+      organizationPublicId: sessionResponse.data.user.organizationPublicId,
     };
   };
 }

@@ -18,6 +18,7 @@ import {
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
+import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { PersonalAiGenerationLocalBrowserExperienceDto } from "@/server/contracts/personal-ai-generation-local-browser-experience-contract";
 import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
 import type {
@@ -63,11 +64,11 @@ type StudentPersonalAiGenerationRequestDraft = {
   taskPublicId: string;
   taskType: "ai_question_generation";
   actorPublicId: string;
-  authorizationSource: "personal_auth";
-  ownerType: "personal";
+  authorizationSource: "personal_auth" | "org_auth";
+  ownerType: "personal" | "organization";
   ownerPublicId: string;
-  organizationPublicId: null;
-  quotaOwnerType: "personal";
+  organizationPublicId: string | null;
+  quotaOwnerType: "personal" | "organization";
   quotaOwnerPublicId: string;
   effectiveEdition: "advanced";
   isAuthorizationActive: boolean;
@@ -83,6 +84,8 @@ type StudentPersonalAiGenerationRequestDraft = {
 };
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
+const ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID =
+  "org-auth-public-local-contract";
 
 const copy = {
   title: "AI训练",
@@ -143,6 +146,9 @@ const contractFieldLabelMap: Record<string, string> = {
   formalAdoptionStatus: "正式入库状态",
   formalAdoptionWriteStatus: "正式入库写入状态",
   isFormalAdoptionBlocked: "是否阻断正式入库",
+  authorizationSource: "授权来源",
+  ownerType: "使用上下文",
+  quotaOwnerType: "额度上下文",
   persistedAt: "持久化时间",
   redactionStatus: "脱敏状态",
   referenceRedactionStatus: "引用脱敏状态",
@@ -163,7 +169,11 @@ const contractValueLabelMap: Record<string, string> = {
   local_contract_only: "仅本地合约",
   metadata_only: "仅元数据",
   none: "无证据",
+  org_auth: "组织授权",
+  organization: "组织上下文",
   pending: "处理中",
+  personal: "个人上下文",
+  personal_auth: "个人授权",
   quota_insufficient: "额度不足",
   ready: "就绪",
   redacted: "已脱敏",
@@ -259,16 +269,38 @@ function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
 
 function createPersonalAiGenerationRequestBody(
   draft: StudentPersonalAiGenerationRequestDraft,
-  userPublicId: string,
+  sessionUser: AuthContextDto["user"],
 ) {
+  const userPublicId = sessionUser.publicId;
+  const authorizationContext =
+    sessionUser.userType === "employee" &&
+    sessionUser.organizationPublicId !== null
+      ? {
+          authorizationPublicId: ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID,
+          authorizationSource: "org_auth" as const,
+          ownerType: "organization" as const,
+          ownerPublicId: sessionUser.organizationPublicId,
+          organizationPublicId: sessionUser.organizationPublicId,
+          quotaOwnerType: "organization" as const,
+          quotaOwnerPublicId: sessionUser.organizationPublicId,
+        }
+      : {
+          authorizationPublicId: draft.authorizationPublicId,
+          authorizationSource: "personal_auth" as const,
+          ownerType: "personal" as const,
+          ownerPublicId: userPublicId,
+          organizationPublicId: null,
+          quotaOwnerType: "personal" as const,
+          quotaOwnerPublicId: userPublicId,
+        };
+
   return {
     responseMode: "local_browser_experience",
     ...draft,
     ...createPersonalAiGenerationRequestIdentifiers(),
+    ...authorizationContext,
     userPublicId,
     actorPublicId: userPublicId,
-    ownerPublicId: userPublicId,
-    quotaOwnerPublicId: userPublicId,
   };
 }
 
@@ -402,6 +434,27 @@ function StudentPersonalAiGenerationContractSummary({
           value={experience.experienceSurface}
         />
         <ContractField label="flowStatus" value={experience.flowStatus} />
+        <ContractField
+          label="authorizationSource"
+          value={
+            experience.requestFlow.contextSelection.authorizationBoundary
+              .authorizationSource
+          }
+        />
+        <ContractField
+          label="ownerType"
+          value={
+            experience.requestFlow.contextSelection.authorizationBoundary
+              .ownerType
+          }
+        />
+        <ContractField
+          label="quotaOwnerType"
+          value={
+            experience.requestFlow.contextSelection.authorizationBoundary
+              .quotaOwnerType
+          }
+        />
         <ContractField
           label="resultStatus"
           value={experience.resultState.status}
@@ -1065,6 +1118,14 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
+      if (
+        sessionResponse.data.user.userType === "employee" &&
+        sessionResponse.data.user.organizationPublicId === null
+      ) {
+        markUnavailable();
+        return;
+      }
+
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
           "/api/v1/personal-ai-generation-requests",
@@ -1077,7 +1138,7 @@ export function StudentPersonalAiGenerationPage() {
             body: JSON.stringify(
               createPersonalAiGenerationRequestBody(
                 personalAiGenerationRequestDraft,
-                sessionResponse.data.user.publicId,
+                sessionResponse.data.user,
               ),
             ),
           },

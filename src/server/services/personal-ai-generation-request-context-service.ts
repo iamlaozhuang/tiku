@@ -27,10 +27,13 @@ export function buildPersonalAiGenerationRequestContextReadModel(
   return createSuccessResponse({
     userPublicId: requestInput.userPublicId,
     authorizationBoundary: {
-      authorizationSource: "personal_auth",
+      authorizationSource: requestInput.authorizationSource,
       authorizationPublicId: requestInput.authorizationPublicId,
-      ownerType: "personal",
-      quotaOwnerType: "personal",
+      ownerType: requestInput.ownerType,
+      ownerPublicId: requestInput.ownerPublicId,
+      organizationPublicId: requestInput.organizationPublicId,
+      quotaOwnerType: requestInput.quotaOwnerType,
+      quotaOwnerPublicId: requestInput.quotaOwnerPublicId,
     },
     aiFuncType: requestInput.aiFuncType,
     runtimeStatus: "local_contract_only",
