@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-post-repair-runtime-rerun-2026-06-24
-updatedAt: "2026-06-24T16:48:43-07:00"
+currentPhase: post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+updatedAt: "2026-06-24T21:44:24-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,43 +501,42 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1a046d13b90e35b3a0bd5ad2c5350e7db0231c9f
-  lastKnownOriginMasterSha: 1a046d13b90e35b3a0bd5ad2c5350e7db0231c9f
+  lastKnownMasterSha: 67d66b63cdf2374e6e384a032deb30e8153d437b
+  lastKnownOriginMasterSha: 67d66b63cdf2374e6e384a032deb30e8153d437b
 currentTask:
-  id: role-separated-post-repair-runtime-rerun-2026-06-24
-  status: ready_for_closeout
-  result: runtime_observation_completed_8_rows_strict_acceptance_fail_gaps_recorded
-  claimedAt: "2026-06-24T15:55:45-07:00"
-  plannedAt: "2026-06-24T15:55:45-07:00"
-  validatedAt: "2026-06-24T16:46:08-07:00"
-  reviewedAt: "2026-06-24T16:46:08-07:00"
-  closedAt: null
+  id: post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+  status: closed
+  result: pass_post_repair_runtime_rerun_closeout_state_reconciled_no_final_pass
+  claimedAt: "2026-06-24T21:41:02-07:00"
+  plannedAt: "2026-06-24T21:41:02-07:00"
+  validatedAt: "2026-06-24T21:44:24-07:00"
+  reviewedAt: "2026-06-24T21:44:24-07:00"
+  closedAt: "2026-06-24T21:44:24-07:00"
   blockedAt: null
-  sourceStory: successor-of-role-separated-post-repair-runtime-rerun-scope-approval-2026-06-24
-  approvalConsumed: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
-  approvalSource: current_user_fresh_approval_2026_06_24_package_id
-  planPath: docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+  sourceStory: post-closeout-state-reconciliation-after-role-separated-post-repair-runtime-rerun
+  approvalConsumed: current_user_serial_advancement_approval_2026_06_24
+  approvalSource: current_user_chat_approval_serial_state_then_next_task_2026_06_24
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
   acceptanceGapPath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-mvp-post-repair-gap-analysis.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_24
+      approvalSource: current_user_serial_advancement_approval_2026_06_24
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_24
+      approvalSource: current_user_serial_advancement_approval_2026_06_24
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_24
+      approvalSource: current_user_serial_advancement_approval_2026_06_24
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_24
-  branch: codex/post-repair-runtime-rerun-20260624
+      approvalSource: current_user_serial_advancement_approval_2026_06_24
+  branch: codex/post-runtime-closeout-reconcile-20260624
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -556,7 +555,7 @@ roleSeparatedPostRepairRuntimeRerunScopeApproval20260624:
   approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
   scope: docs_runtime_scope_approval_package_no_runtime_no_final_pass
   successorTaskId: role-separated-post-repair-runtime-rerun-2026-06-24
-  successorTaskStatus: approved_planned_pending_local_target_check
+  successorTaskStatus: closed
   runtimeExecutedByThisTask: false
   finalPassClaim: false
   blockedWithoutFreshApproval:
@@ -581,9 +580,23 @@ roleSeparatedPostRepairRuntimeRerun20260624:
   recordedAt: "2026-06-24T15:55:45-07:00"
   sourceRequirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
-  status: ready_for_closeout
+  status: closed
   result: runtime_observation_completed_8_rows_strict_acceptance_fail_gaps_recorded
+  closedAt: "2026-06-24T21:41:02-07:00"
   branch: codex/post-repair-runtime-rerun-20260624
+  implementationCommitSha: 67d66b63cdf2374e6e384a032deb30e8153d437b
+  implementationCommitCommittedAt: "2026-06-24T16:49:26-07:00"
+  finalMasterSha: 67d66b63cdf2374e6e384a032deb30e8153d437b
+  finalOriginMasterSha: 67d66b63cdf2374e6e384a032deb30e8153d437b
+  closeoutRecordedBy: post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+  closeoutReality:
+    localCommit: true
+    fastForwardMergedToMaster: true
+    pushedToOriginMaster: true
+    localShortBranchPresent: false
+    remoteShortBranchPresent: false
+    masterOriginAligned: true
+    recordedAt: "2026-06-24T21:41:02-07:00"
   approvalConsumed:
     packageId: ROLE_SEPARATED_POST_REPAIR_RUNTIME_RERUN_SCOPE_2026_06_24
     approvedAt: "2026-06-24T15:55:45-07:00"
@@ -608,6 +621,55 @@ roleSeparatedPostRepairRuntimeRerun20260624:
     - account_creation_disable_password_reset_or_seed
     - database_read_write_or_migration
     - source_test_script_or_e2e_change
+    - dependency_package_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+postRepairRuntimeRerunCloseoutStateReconciliation20260624:
+  taskId: post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+  phase: post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+  recordedAt: "2026-06-24T21:41:02-07:00"
+  status: closed
+  result: pass_post_repair_runtime_rerun_closeout_state_reconciled_no_final_pass
+  closedAt: "2026-06-24T21:44:24-07:00"
+  branch: codex/post-runtime-closeout-reconcile-20260624
+  sourceRuntimeTaskId: role-separated-post-repair-runtime-rerun-2026-06-24
+  sourceRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  sourceRuntimeAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-post-repair-runtime-rerun-closeout-state-reconciliation.md
+  stateActions:
+    - update_repository_master_and_origin_master_sha_to_67d66b63cdf2374e6e384a032deb30e8153d437b
+    - mark_role_separated_post_repair_runtime_rerun_closed_with_commit_merge_push_cleanup_facts
+    - register_next_executable_task_candidates_without_claiming_final_pass
+  archiveCandidates:
+    sourceDiagnosticArchiveCandidateCount: 56
+    immediateCandidates:
+      - role-separated-post-repair-runtime-rerun-2026-06-24
+      - post-repair-runtime-rerun-closeout-state-reconciliation-2026-06-24
+  nextExecutableTaskCandidates:
+    - id: content-admin-ai-draft-workflow-runtime-validation-2026-06-24
+      status: pending_separate_task_plan
+      reason: Validate content_admin AI 出题 and AI 组卷 draft workflow usability after the entry points were observed.
+      requiredBoundary: >-
+        Must create an independent task plan, SSOT Read List, allowed file range, and redacted evidence before any
+        browser/runtime action. No real Provider call, env/secret access, raw prompt, raw generated content, formal
+        content write, database mutation, package change, external service, Cost Calibration, or final Pass claim is
+        approved by this state-only task.
+    - id: post-repair-gap-list-refresh-no-final-pass-2026-06-24
+      status: pending_after_content_admin_ai_validation
+      reason: Refresh the no-final-Pass gap list after the state closeout and targeted content_admin AI workflow check.
+  blockedWithoutFreshApproval:
+    - product_source_or_test_change
+    - browser_or_playwright_runtime
+    - owner_credential_entry_or_account_action
+    - database_read_write_or_migration
     - dependency_package_lockfile_change
     - env_secret_access_or_env_file_change
     - provider_model_call_or_provider_enablement
