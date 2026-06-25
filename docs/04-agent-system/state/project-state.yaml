@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
-updatedAt: "2026-06-25T07:23:07-07:00"
+currentPhase: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
+updatedAt: "2026-06-25T07:40:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,34 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
-  lastKnownOriginMasterSha: 027932e1f4b11036ac22dbea29b12367f43e3a8a
+  lastKnownMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
+  lastKnownOriginMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
 currentTask:
-  id: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
+  id: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
   status: closed
-  result: closed_private_org_admin_post_repair_browser_rerun_pass
-  claimedAt: "2026-06-25T07:23:07-07:00"
-  plannedAt: "2026-06-25T07:23:07-07:00"
-  validatedAt: "2026-06-25T07:26:56-07:00"
-  reviewedAt: "2026-06-25T07:26:56-07:00"
-  closedAt: "2026-06-25T07:26:56-07:00"
-  sourceStory: post-repair-verification-after-private-org-admin-account-reconciliation
-  approvalConsumed: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
-  approvalSource: current_user_message_private_org_admin_post_repair_browser_rerun_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+  result: pass_docs_state_gap_refresh_org_admin_subblockers_closed_total_gate_blocked_no_final_pass
+  claimedAt: "2026-06-25T07:37:05-07:00"
+  plannedAt: "2026-06-25T07:37:05-07:00"
+  validatedAt: "2026-06-25T07:40:26-07:00"
+  reviewedAt: "2026-06-25T07:40:26-07:00"
+  closedAt: "2026-06-25T07:40:26-07:00"
+  sourceStory: current-user-directed-serial-task-1-post-org-admin-repair-gap-refresh
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+  approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorPrivateAccountTaskId: organization-admin-private-account-state-reconciliation-2026-06-25
-  predecessorPrivateAccountEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-state-reconciliation.md
-  predecessorDefaultDbTaskId: default-tiku-db-organization-admin-schema-seed-alignment-2026-06-25
-  predecessorDefaultDbEvidencePath: docs/05-execution-logs/evidence/2026-06-25-default-tiku-db-organization-admin-schema-seed-alignment.md
+  predecessorEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  predecessorEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  predecessorOrgAdminPostRepairTaskId: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
+  predecessorOrgAdminPostRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+  predecessorOrgAdminPostRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localBrowserRuntimeRerun: true
-    ownerManualCredentialEntry: required
-    sessionSummaryObservationWithoutTokenCapture: true
-    routeMatrixObservation: true
+    gapRefreshOnly: true
+    localBrowserRuntimeRerun: false
+    ownerManualCredentialEntry: false
+    sessionSummaryObservationWithoutTokenCapture: false
+    routeMatrixObservation: false
     localDefaultTikuDatabaseSchemaAlignment: false
     localDefaultTikuDatabaseSeedAlignment: false
     sourceChange: false
@@ -541,57 +543,94 @@ currentTask:
     focusedUnitTests: false
     e2eSpecChange: false
     finalPassClaim: false
-  repairScope:
-    effectiveRoleSource: AuthContextDto.user.adminRoles
-    persistedRoleSource: admin.admin_role
-    organizationBindingSource: admin_organization_to_organization_public_id
-    schemaMigration: blocked
-    devSeed: blocked
-    destructiveDatabaseOperation: blocked
-    browserRerun: approved_current_task_local_only_owner_enters_credentials
-    finalPassClaim: false
-  rootCauseHypothesisState:
-    confirmed:
-      - private_org_admin_accounts_were_repaired_in_previous_task
-      - private_standard_admin_post_repair_browser_matrix_pass
-      - private_advanced_admin_post_repair_browser_matrix_pass
-    pending:
-      - none
-    excluded:
-      - source_db_seed_schema_change_in_this_task
+  gapRefreshResult:
+    strictEightRowRuntimeGate: blocked
+    refreshedStrictPassRows: 0
+    refreshedReleaseBlockedRows: 8
+    orgStandardAdminClosedSubBlockers:
+      - wrong_ops_landing_closed_for_private_account
+      - organization_binding_missing_closed_for_private_account
+      - organization_portal_no_access_closed_for_private_account
+      - sampled_ops_content_denial_closed_for_private_account
+      - logout_closed_for_private_account
+    orgStandardAdminRemainingBlockers:
+      - standard_vs_advanced_organization_route_boundary_not_closed
+      - chinese_ui_technical_label_cleanup_not_rechecked
+      - full_eight_row_rerun_not_executed
+    orgAdvancedAdminClosedSubBlockers:
+      - wrong_ops_landing_closed_for_private_account
+      - organization_binding_missing_closed_for_private_account
+      - organization_portal_training_ai_no_access_closed_for_private_account
+      - sampled_ops_content_denial_closed_for_private_account
+      - logout_closed_for_private_account
+    orgAdvancedAdminRemainingBlockers:
+      - organization_ai_workflow_content_and_ui_copy_not_rechecked
+      - chinese_ui_technical_label_cleanup_not_rechecked
+      - full_eight_row_rerun_not_executed
+    nextMinimalSourceRepairCandidate: learner_org_employee_ai_entry_and_login_state_misclassification
   finalPassClaim: false
   runtimeEvidence:
-    privateStandardLogin: organization_portal_role_org_standard_admin_binding_present
-    privateStandardOrganizationRoutes: allowed_all_five_checked_routes
-    privateStandardUnrelatedRoutes: denied_ops_users_ops_redeem_codes_content_papers
-    privateStandardLogout: pass_login_session_unauthenticated
-    privateAdvancedLogin: organization_portal_role_org_advanced_admin_binding_present
-    privateAdvancedOrganizationRoutes: allowed_all_five_checked_routes
-    privateAdvancedUnrelatedRoutes: denied_ops_users_ops_redeem_codes_content_papers
-    privateAdvancedLogout: pass_login_session_unauthenticated
-    dbWriteOrSchemaExecuted: false
+    browserExecutedInThisTask: false
+    databaseExecutedInThisTask: false
     sourceChangeExecuted: false
     finalMvpPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_25_private_org_admin_post_repair_browser_rerun
-  branch: codex/org-admin-post-repair-rerun-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+  branch: codex/role-separated-gap-refresh-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+roleSeparatedPostOrgAdminRepairGapRefreshNoFinalPass20260625:
+  taskId: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
+  phase: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
+  recordedAt: "2026-06-25T07:37:05-07:00"
+  status: closed
+  result: pass_docs_state_gap_refresh_org_admin_subblockers_closed_total_gate_blocked_no_final_pass
+  validatedAt: "2026-06-25T07:40:26-07:00"
+  reviewedAt: "2026-06-25T07:40:26-07:00"
+  closedAt: "2026-06-25T07:40:26-07:00"
+  branch: codex/role-separated-gap-refresh-20260625
+  entryMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
+  entryOriginMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
+  approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  sourceRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+  sourceOrgAdminPostRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
+  refreshedGate:
+    strictEightRowRuntimeGate: blocked
+    strictPassRows: 0
+    releaseBlockedRows: 8
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - browser_runtime_or_e2e_execution
+    - database_seed_schema_or_account_mutation
+    - source_or_test_change
+    - env_secret_access_or_env_file_change
+    - credential_document_read_by_codex_or_credential_entry_by_codex
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 organizationAdminPrivateAccountPostRepairBrowserRerun20260625:
   taskId: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
   phase: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
