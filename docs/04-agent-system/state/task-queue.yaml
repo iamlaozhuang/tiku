@@ -8175,6 +8175,185 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+    title: Materialize organization admin workspace runtime rerun scope approval package
+    phase: organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+    sourceStory: user-request-2026-06-25-materialize-missing-org-admin-rerun-scope-approval
+    dependencies:
+      - organization-admin-workspace-runtime-repair-2026-06-24
+    taskKind: runtime_scope_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_runtime_scope_approval_no_runtime
+    evidenceMode: redacted_local_scope_package
+    validationPolicy: docs_acceptance_prettier_diff_precommit_prepush
+    queueSelectionMode: current_user_requested_missing_next_recommended_task_materialization
+    targetClosureItem: Organization admin workspace post-repair runtime rerun scope package
+    behaviorBoundary: runtime_scope_approval::docs_state_only_org_admin_no_runtime_no_credentials_no_final_pass
+    productClosureContribution: none_mechanism_queue_status_convergence_only
+    requiredOutcome: >-
+      Materialize the missing `organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24` queue entry and
+      prepare a local-only scope package for later `org_standard_admin` and `org_advanced_admin` runtime rerun after the
+      organization admin workspace repair. Do not run browser/runtime/e2e, read or type credentials, modify
+      source/tests/schema/env, call Provider, or claim final Pass.
+    capabilities:
+      docsStateUpdate: approved_by_current_user_2026_06_25_missing_queue_entry_materialization
+      runtimeScopePackage: approved_by_current_user_2026_06_25_missing_queue_entry_materialization
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_25_missing_queue_entry_materialization
+      successorTaskProposal: approved_blocked_successor_only
+      localCommit: approved_by_standing_docs_state_fast_lane_after_task_closeout_policy
+      mergeToMaster: approved_by_standing_docs_state_fast_lane_after_task_closeout_policy
+      pushOriginMaster: approved_by_standing_docs_state_fast_lane_after_task_closeout_policy
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      ownerCredentialEntry: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      seedOrFixtureMutation: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-design-first-scope.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-24-role-separated-post-repair-runtime-rerun-scope-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - owner_credential_entry_or_account_action
+      - credential_document_read_by_codex
+      - account_creation_disable_password_reset_or_seed
+      - database_read_write_or_migration
+      - source_test_script_or_e2e_change
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - runtime_scope_approval
+      - organization_admin_role_mapping
+      - acceptance_mapping
+      - evidence_redaction
+      - no_runtime_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-workspace-runtime-rerun-scope-approval-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-24-organization-admin-workspace-runtime-rerun-scope-approval-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    sourceRepairTaskId: organization-admin-workspace-runtime-repair-2026-06-24
+    sourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-repair.md
+    sourceRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-repair.md
+    approvalPackageId: ORGANIZATION_ADMIN_WORKSPACE_RUNTIME_RERUN_SCOPE_2026_06_24
+    successorTaskId: organization-admin-workspace-runtime-rerun-2026-06-24
+    successorTaskStatus: blocked_pending_fresh_runtime_approval
+    status: closed
+    result: pass_organization_admin_workspace_runtime_rerun_scope_package_materialized_no_runtime_no_final_pass
+    claimedAt: "2026-06-25T00:00:00-07:00"
+    plannedAt: "2026-06-25T00:00:00-07:00"
+    validatedAt: "2026-06-25T00:00:00-07:00"
+    reviewedAt: "2026-06-25T00:00:00-07:00"
+    closedAt: "2026-06-25T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_materialize_missing_scope_approval_2026_06_25
+    approvalSource: current_user_message_do_low_risk_docs_state_task_materialize_missing_queue_entry_2026_06_25
+    branch: codex/org-admin-rerun-scope-approval-20260625
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_plus_current_user_materialization_request_2026_06_25
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_plus_current_user_materialization_request_2026_06_25
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_plus_current_user_materialization_request_2026_06_25
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_plus_current_user_materialization_request_2026_06_25
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
