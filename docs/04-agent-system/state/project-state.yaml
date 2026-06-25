@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
-updatedAt: "2026-06-25T07:40:26-07:00"
+currentPhase: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+updatedAt: "2026-06-25T07:46:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,24 +501,27 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
-  lastKnownOriginMasterSha: 653795663af96869bfedc8a7243a5d79ed021eea
+  lastKnownMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
+  lastKnownOriginMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
 currentTask:
-  id: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
+  id: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
   status: closed
-  result: pass_docs_state_gap_refresh_org_admin_subblockers_closed_total_gate_blocked_no_final_pass
-  claimedAt: "2026-06-25T07:37:05-07:00"
-  plannedAt: "2026-06-25T07:37:05-07:00"
-  validatedAt: "2026-06-25T07:40:26-07:00"
-  reviewedAt: "2026-06-25T07:40:26-07:00"
-  closedAt: "2026-06-25T07:40:26-07:00"
-  sourceStory: current-user-directed-serial-task-1-post-org-admin-repair-gap-refresh
-  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+  result: pass_scope_package_prepared_no_browser_no_credentials_no_final_pass
+  claimedAt: "2026-06-25T07:43:48-07:00"
+  plannedAt: "2026-06-25T07:43:48-07:00"
+  validatedAt: "2026-06-25T07:46:38-07:00"
+  reviewedAt: "2026-06-25T07:46:38-07:00"
+  closedAt: "2026-06-25T07:46:38-07:00"
+  sourceStory: current-user-directed-serial-task-2-full-8-row-rerun-scope-package
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
   approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  predecessorGapRefreshTaskId: role-separated-post-org-admin-repair-gap-refresh-no-final-pass-2026-06-25
+  predecessorGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
   predecessorEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
   predecessorEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
   predecessorOrgAdminPostRepairTaskId: organization-admin-private-account-post-repair-browser-rerun-2026-06-25
@@ -526,7 +529,9 @@ currentTask:
   predecessorOrgAdminPostRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-admin-private-account-post-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    gapRefreshOnly: true
+    approvalPackageCreation: true
+    fullEightRowRerunScopeDefinition: true
+    gapRefreshOnly: false
     localBrowserRuntimeRerun: false
     ownerManualCredentialEntry: false
     sessionSummaryObservationWithoutTokenCapture: false
@@ -543,30 +548,17 @@ currentTask:
     focusedUnitTests: false
     e2eSpecChange: false
     finalPassClaim: false
-  gapRefreshResult:
-    strictEightRowRuntimeGate: blocked
-    refreshedStrictPassRows: 0
-    refreshedReleaseBlockedRows: 8
-    orgStandardAdminClosedSubBlockers:
-      - wrong_ops_landing_closed_for_private_account
-      - organization_binding_missing_closed_for_private_account
-      - organization_portal_no_access_closed_for_private_account
-      - sampled_ops_content_denial_closed_for_private_account
-      - logout_closed_for_private_account
-    orgStandardAdminRemainingBlockers:
-      - standard_vs_advanced_organization_route_boundary_not_closed
-      - chinese_ui_technical_label_cleanup_not_rechecked
-      - full_eight_row_rerun_not_executed
-    orgAdvancedAdminClosedSubBlockers:
-      - wrong_ops_landing_closed_for_private_account
-      - organization_binding_missing_closed_for_private_account
-      - organization_portal_training_ai_no_access_closed_for_private_account
-      - sampled_ops_content_denial_closed_for_private_account
-      - logout_closed_for_private_account
-    orgAdvancedAdminRemainingBlockers:
-      - organization_ai_workflow_content_and_ui_copy_not_rechecked
-      - chinese_ui_technical_label_cleanup_not_rechecked
-      - full_eight_row_rerun_not_executed
+  packageResult:
+    packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+    packageStatus: prepared_not_executed
+    rowsInScope: 8
+    ownerManualCredentialEntry: required_for_future_execution
+    browserExecutionInThisTask: false
+    credentialFileReadInThisTask: false
+    allowedEvidenceFieldsDefined: true
+    redactionPolicyDefined: true
+    routeWorkflowMatrixDefined: true
+    blockedScopesDefined: true
     nextMinimalSourceRepairCandidate: learner_org_employee_ai_entry_and_login_state_misclassification
   finalPassClaim: false
   runtimeEvidence:
@@ -577,19 +569,19 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_1_gap_refresh
-  branch: codex/role-separated-gap-refresh-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_2_scope_package
+  branch: codex/full-8-row-rerun-scope-package-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -623,6 +615,45 @@ roleSeparatedPostOrgAdminRepairGapRefreshNoFinalPass20260625:
     - source_or_test_change
     - env_secret_access_or_env_file_change
     - credential_document_read_by_codex_or_credential_entry_by_codex
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
+roleSeparatedFull8RowPostOrgAdminRepairRerunScopePackage20260625:
+  taskId: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+  phase: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
+  recordedAt: "2026-06-25T07:43:48-07:00"
+  status: closed
+  result: pass_scope_package_prepared_no_browser_no_credentials_no_final_pass
+  validatedAt: "2026-06-25T07:46:38-07:00"
+  reviewedAt: "2026-06-25T07:46:38-07:00"
+  closedAt: "2026-06-25T07:46:38-07:00"
+  branch: codex/full-8-row-rerun-scope-package-20260625
+  entryMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
+  entryOriginMasterSha: 8918fae6ae46e93488ddd6c483f5de679b4febd3
+  approvalSource: current_user_message_continue_tiku_serial_3_tasks_2026_06_25
+  packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
+  predecessorGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-org-admin-repair-gap-refresh-no-final-pass.md
+  packageScope:
+    futureBrowserRuntimeRerunPrepared: true
+    browserExecutionInThisTask: false
+    credentialDocumentReadByCodex: false
+    databaseOrSourceChange: false
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - actual_browser_runtime_execution
+    - credential_document_read_by_codex_or_credential_entry_by_codex
+    - database_seed_schema_or_account_mutation
+    - source_or_test_change
+    - env_secret_access_or_env_file_change
     - provider_model_call_or_provider_enablement
     - provider_cost_quota_pricing_measurement
     - staging_prod_cloud_deploy
