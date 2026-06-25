@@ -62,5 +62,9 @@
 
 ## Closeout Decision
 
-- Source repair is ready for closeout review.
-- Fresh closeout approval is required before local commit, merge to `master`, push to `origin/master`, or deleting the short branch.
+- Fresh closeout approval was provided by the owner on 2026-06-25.
+- Source repair commit was created and fast-forward merged to local `master`.
+- A docs/state-only closeout handoff repair was required after the first post-merge pre-push readiness run found the task
+  still recorded as `reviewed`; the task is now recorded as `done` for the accepted-ancestor checkpoint policy.
+- Push to `origin/master` and deletion of `codex/org-admin-session-hydration-repair-20260625` remain authorized by the same
+  owner closeout approval.

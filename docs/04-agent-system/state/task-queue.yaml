@@ -5541,8 +5541,8 @@ tasks:
       source repair for cookie-backed logout/session hydration and align organization admin unit fixtures to the dev seed
       role/account mapping. Do not run browser runtime, dev server, database seed/write, schema/migration, Provider,
       env/secret, staging/prod, payment, external service, PR, force-push, Cost Calibration Gate, or final Pass work.
-    status: reviewed
-    result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+    status: done
+    result: pass_source_repair_committed_merged_ready_for_push_no_final_pass
     approvedAt: "2026-06-25T04:47:33-07:00"
     approvedBy: laozhuang
     approvalConsumed:
@@ -5553,6 +5553,7 @@ tasks:
     implementedAt: "2026-06-25T04:57:48-07:00"
     validatedAt: "2026-06-25T04:57:48-07:00"
     reviewedAt: "2026-06-25T04:57:48-07:00"
+    closedAt: "2026-06-25T05:14:47-07:00"
     branch: codex/org-admin-session-hydration-repair-20260625
     capabilities:
       localSourceChange: approved
@@ -5713,6 +5714,7 @@ tasks:
       diffCheck: pass
       preCommitHardening: pass
       prePushReadiness: pass
+      postMergeStateHandoffRepair: recorded_after_pre_push_sha_drift
     planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair.md
@@ -5722,19 +5724,19 @@ tasks:
     predecessorPlanningTaskId: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalSource: fresh_closeout_approval_required_after_validation
+        approved: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_25
       mergeToMaster:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required_after_validation
+        approvalSource: current_user_fresh_closeout_approval_2026_06_25
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required_after_validation
+        approvalSource: current_user_fresh_closeout_approval_2026_06_25
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required_after_validation
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_25
     retryCount: 0
     lastFailurePath: null
 

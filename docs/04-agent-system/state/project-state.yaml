@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: organization-admin-runtime-session-hydration-repair-2026-06-24
-updatedAt: "2026-06-25T04:47:33-07:00"
+updatedAt: "2026-06-25T05:14:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -505,13 +505,14 @@ repository:
   lastKnownOriginMasterSha: d35503770883368f1ece54156a849a79aead399e
 currentTask:
   id: organization-admin-runtime-session-hydration-repair-2026-06-24
-  status: reviewed
-  result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+  status: done
+  result: pass_source_repair_committed_merged_ready_for_push_no_final_pass
   claimedAt: "2026-06-25T04:47:33-07:00"
   plannedAt: "2026-06-25T04:47:33-07:00"
   implementedAt: "2026-06-25T04:57:48-07:00"
   validatedAt: "2026-06-25T04:57:48-07:00"
   reviewedAt: "2026-06-25T04:57:48-07:00"
+  closedAt: "2026-06-25T05:14:47-07:00"
   sourceStory: successor-of-organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
   approvalConsumed: current_user_execute_next_session_hydration_repair_2026_06_25
   approvalSource: current_user_message_next_task_session_hydration_repair_red_tests_then_logout_hydration_fixture_alignment_2026_06_25
@@ -625,13 +626,14 @@ organizationAdminRuntimeSessionHydrationRepair20260624:
   taskId: organization-admin-runtime-session-hydration-repair-2026-06-24
   phase: organization-admin-runtime-session-hydration-repair-2026-06-24
   recordedAt: "2026-06-25T04:47:33-07:00"
-  status: reviewed
-  result: pass_source_repair_validated_awaiting_closeout_approval_no_final_pass
+  status: done
+  result: pass_source_repair_committed_merged_ready_for_push_no_final_pass
   claimedAt: "2026-06-25T04:47:33-07:00"
   plannedAt: "2026-06-25T04:47:33-07:00"
   implementedAt: "2026-06-25T04:57:48-07:00"
   validatedAt: "2026-06-25T04:57:48-07:00"
   reviewedAt: "2026-06-25T04:57:48-07:00"
+  closedAt: "2026-06-25T05:14:47-07:00"
   branch: codex/org-admin-session-hydration-repair-20260625
   entryMasterSha: d35503770883368f1ece54156a849a79aead399e
   entryOriginMasterSha: d35503770883368f1ece54156a849a79aead399e

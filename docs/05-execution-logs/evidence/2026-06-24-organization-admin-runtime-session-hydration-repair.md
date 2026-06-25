@@ -110,9 +110,16 @@
 
 ## Closeout Boundary
 
-- This task has not been committed, merged, pushed, or branch-cleaned.
-- Fresh closeout approval is required before local commit, merge to `master`, push to `origin/master`, or deleting this short branch.
+- Fresh closeout approval was provided by the owner on 2026-06-25 for local commit, fast-forward merge to `master`, push to
+  `origin/master`, and deletion of `codex/org-admin-session-hydration-repair-20260625`.
+- Source repair commit created: `9412c698f fix(auth): repair org admin session hydration logout`.
+- `master` fast-forward merge completed locally.
+- First post-merge pre-push readiness run blocked on repository SHA handoff because the task was still recorded as
+  `reviewed`; this evidence/state-only closeout repair records the task as `done` so the Module Run v2 accepted-ancestor
+  checkpoint policy can evaluate the merged task correctly.
+- Push and branch cleanup are authorized next; delivery notes will record the remote push result.
 
 ## Next Step
 
-- Run final formatting/diff/mechanism gates, then request closeout approval or stop with reviewed local changes.
+- Rerun pre-push readiness, push `master` to `origin/master`, delete the short branch, then start the organization admin
+  browser runtime rerun task.
