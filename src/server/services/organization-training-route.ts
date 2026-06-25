@@ -3,7 +3,10 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import type {
+  EffectiveAuthorizationContextDto,
+  EffectiveAuthorizationListDto,
+} from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingPublishedVersionDto,
@@ -20,6 +23,7 @@ import {
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
+import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "../repositories/student-authorization-redeem-runtime-repository";
 import {
   invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
   invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
@@ -54,6 +58,10 @@ import {
   type OrganizationTrainingStore,
 } from "./organization-training-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
+import {
+  createEffectiveAuthorizationService,
+  type EffectiveAuthorizationService,
+} from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
 
 export type OrganizationTrainingPublishRouteContext = {
@@ -147,6 +155,10 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "resolveVersionOrganizationPublicId"
   | "resolveVersionQuestionTypeSummary"
 > & {
+  effectiveAuthorizationService?: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >;
   resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -505,33 +517,6 @@ function createSessionBackedOrganizationAdminContextResolver(
   };
 }
 
-function createEmployeeAnswerAuthorizationContext(
-  organizationPublicId: string,
-): EffectiveAuthorizationContextDto {
-  return {
-    profession: "logistics",
-    level: 4,
-    contextDisplayStatus: "display_only",
-    effectiveEdition: "advanced",
-    authorizationSource: "org_auth",
-    authorizationPublicId: "organization_training_employee_answer_runtime",
-    ownerType: "organization",
-    ownerPublicId: organizationPublicId,
-    organizationPublicId,
-    quotaOwnerType: "organization",
-    quotaOwnerPublicId: organizationPublicId,
-    capabilities: {
-      canGenerateAiQuestion: false,
-      canGenerateAiPaper: false,
-      canCreateOrganizationTraining: false,
-      canAnswerOrganizationTraining: true,
-      canViewOrganizationTrainingSummary: false,
-      canManageAuthorizationQuota: false,
-    },
-    blockedReason: null,
-  };
-}
-
 function createOrganizationTrainingAdminAuthorizationContext(input: {
   organizationPublicId: string;
   authorizationPublicId: string;
@@ -568,8 +553,72 @@ function createOrganizationTrainingAdminAuthorizationContext(input: {
   };
 }
 
+function isOrganizationEmployeeAuthContext(
+  authorizationContext: EffectiveAuthorizationContextDto,
+  organizationPublicId: string,
+): boolean {
+  return (
+    authorizationContext.authorizationSource === "org_auth" &&
+    authorizationContext.ownerType === "organization" &&
+    authorizationContext.quotaOwnerType === "organization" &&
+    authorizationContext.organizationPublicId === organizationPublicId
+  );
+}
+
+function isAdvancedOrganizationTrainingAnswerContext(
+  authorizationContext: EffectiveAuthorizationContextDto,
+): boolean {
+  return (
+    authorizationContext.effectiveEdition === "advanced" &&
+    authorizationContext.capabilities.canAnswerOrganizationTraining === true
+  );
+}
+
+function canUseEmployeeOrganizationTrainingAnswerContext(
+  authorizationContext: EffectiveAuthorizationContextDto,
+): boolean {
+  return (
+    isAdvancedOrganizationTrainingAnswerContext(authorizationContext) &&
+    authorizationContext.authorizationSource === "org_auth" &&
+    authorizationContext.ownerType === "organization" &&
+    authorizationContext.organizationPublicId !== null &&
+    authorizationContext.quotaOwnerType === "organization"
+  );
+}
+
+function selectEmployeeOrganizationTrainingAuthorizationContext(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+  organizationPublicId: string,
+): EffectiveAuthorizationContextDto | null {
+  const organizationAuthContexts = authorizationContexts.filter(
+    (authorizationContext) =>
+      isOrganizationEmployeeAuthContext(
+        authorizationContext,
+        organizationPublicId,
+      ),
+  );
+
+  return (
+    organizationAuthContexts.find(
+      isAdvancedOrganizationTrainingAnswerContext,
+    ) ??
+    organizationAuthContexts[0] ??
+    null
+  );
+}
+
+function readAuthorizationContexts(
+  payload: EffectiveAuthorizationListDto | null,
+): EffectiveAuthorizationContextDto[] {
+  return payload?.authorizationContexts ?? [];
+}
+
 function createSessionBackedOrganizationTrainingEmployeeContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
+  effectiveAuthorizationService: Pick<
+    EffectiveAuthorizationService,
+    "listEffectiveAuthorizations"
+  >,
 ): OrganizationTrainingEmployeeContextResolver {
   return async ({ request }) => {
     const sessionResponse = await sessionService.getCurrentSession({
@@ -600,12 +649,30 @@ function createSessionBackedOrganizationTrainingEmployeeContextResolver(
       return null;
     }
 
+    const authorizationResponse =
+      await effectiveAuthorizationService.listEffectiveAuthorizations({
+        userPublicId: sessionResponse.data.user.publicId,
+      });
+
+    if (authorizationResponse.code !== 0) {
+      return null;
+    }
+
+    const authorizationContext =
+      selectEmployeeOrganizationTrainingAuthorizationContext(
+        readAuthorizationContexts(authorizationResponse.data),
+        organizationPublicId,
+      );
+
+    if (authorizationContext === null) {
+      return null;
+    }
+
     return {
       employeePublicId,
       currentOrganizationPublicId: organizationPublicId,
       visibleOrganizationPublicIds: [organizationPublicId],
-      authorizationContext:
-        createEmployeeAnswerAuthorizationContext(organizationPublicId),
+      authorizationContext,
     };
   };
 }
@@ -1147,6 +1214,14 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        if (
+          !canUseEmployeeOrganizationTrainingAnswerContext(
+            employeeContext.authorizationContext,
+          )
+        ) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
         const result = await listEmployeeVisibleVersionsService({
           employeeContext,
           sourceVersions: await listEmployeeVisibleVersions({
@@ -1483,6 +1558,14 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        if (
+          !canUseEmployeeOrganizationTrainingAnswerContext(
+            employeeContext.authorizationContext,
+          )
+        ) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
         const version = await resolvePublishedVersion({
           request,
           trainingVersionPublicId: input.value.trainingVersionPublicId,
@@ -1551,6 +1634,14 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        if (
+          !canUseEmployeeOrganizationTrainingAnswerContext(
+            employeeContext.authorizationContext,
+          )
+        ) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
         const version = await resolvePublishedVersion({
           request,
           trainingVersionPublicId: input.value.trainingVersionPublicId,
@@ -1602,6 +1693,14 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        if (
+          !canUseEmployeeOrganizationTrainingAnswerContext(
+            employeeContext.authorizationContext,
+          )
+        ) {
+          return createJsonResponse(createEmployeeAnswerBlockedResponse());
+        }
+
         const version = await resolvePublishedVersion({
           request,
           trainingVersionPublicId: pathPublicId,
@@ -1643,6 +1742,12 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
 ) {
   const repository = createPostgresOrganizationTrainingRepository();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const effectiveAuthorizationService =
+    options.effectiveAuthorizationService ??
+    createEffectiveAuthorizationService(
+      createPostgresStudentAuthorizationRedeemRuntimeRepositories()
+        .effectiveAuthorizationRepository,
+    );
   const resolveVisibleOrganizationScope =
     options.resolveVisibleOrganizationScope ??
     createRepositoryBackedVisibleOrganizationScopeResolver(repository);
@@ -1659,6 +1764,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
     options.resolveEmployeeContext ??
     createSessionBackedOrganizationTrainingEmployeeContextResolver(
       sessionService,
+      effectiveAuthorizationService,
     );
   const listEmployeeVisibleVersions =
     options.listEmployeeVisibleVersions ??

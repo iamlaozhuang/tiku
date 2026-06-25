@@ -12,6 +12,10 @@ import { GET as visibleListRouteGet } from "@/app/api/v1/organization-trainings/
 
 import type { AuthContextDto } from "../contracts/auth-contract";
 import type {
+  EffectiveAuthorizationCapabilitiesDto,
+  EffectiveAuthorizationContextDto,
+} from "../contracts/effective-authorization-contract";
+import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -25,6 +29,7 @@ import type {
 } from "../models/organization-training";
 import type { SessionService } from "./session-service";
 import {
+  organizationTrainingEmployeeAnswerBlockedMessage,
   organizationTrainingPublishBlockedMessage,
   organizationTrainingTakedownBlockedMessage,
   type OrganizationTrainingAdminContext,
@@ -179,6 +184,16 @@ const trustedAdminContext: OrganizationTrainingAdminContext = {
   adminPublicId: "organization_admin_route_public_401",
   visibleOrganizationPublicIds: ["organization_route_public_401"],
 };
+
+const disabledEffectiveAuthorizationCapabilities: EffectiveAuthorizationCapabilitiesDto =
+  {
+    canGenerateAiQuestion: false,
+    canGenerateAiPaper: false,
+    canCreateOrganizationTraining: false,
+    canAnswerOrganizationTraining: false,
+    canViewOrganizationTrainingSummary: false,
+    canManageAuthorizationQuota: false,
+  };
 
 const publishPathPublicId = "organization_training_draft_route_401";
 const takeDownPathPublicId = "organization_training_version_route_401";
@@ -409,6 +424,66 @@ function createEmployeeAuthContext(
     },
     session: {
       expiresAt: "2026-06-16T11:00:00.000Z",
+    },
+  };
+}
+
+function createOrgEffectiveAuthorizationContext(
+  overrides: Partial<EffectiveAuthorizationContextDto> & {
+    capabilities?: Partial<EffectiveAuthorizationCapabilitiesDto>;
+  } = {},
+): EffectiveAuthorizationContextDto {
+  const capabilities = {
+    ...disabledEffectiveAuthorizationCapabilities,
+    canGenerateAiQuestion: true,
+    canGenerateAiPaper: true,
+    canCreateOrganizationTraining: true,
+    canAnswerOrganizationTraining: true,
+    canViewOrganizationTrainingSummary: true,
+    ...(overrides.capabilities ?? {}),
+  };
+
+  return {
+    profession: "marketing",
+    level: 2,
+    contextDisplayStatus: "display_only",
+    edition: "advanced",
+    effectiveEdition: "advanced",
+    upgradeStatus: "none",
+    expiresAt: "2026-07-18T04:00:00.000Z",
+    displayStatus: "active",
+    authorizationSource: "org_auth",
+    authorizationPublicId: "org_auth_effective_route_401",
+    ownerType: "organization",
+    ownerPublicId: "organization_route_public_401",
+    organizationPublicId: "organization_route_public_401",
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: "organization_route_public_401",
+    blockedReason: null,
+    ...overrides,
+    capabilities,
+  };
+}
+
+function createRouteEffectiveAuthorizationService(
+  authorizationContexts: EffectiveAuthorizationContextDto[] = [
+    createOrgEffectiveAuthorizationContext({
+      profession: "logistics",
+      level: 4,
+    }),
+  ],
+) {
+  return {
+    async listEffectiveAuthorizations() {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          authorizations: [],
+          effectiveAuthorizations: [],
+          authorizationContexts,
+        },
+      };
     },
   };
 }
@@ -701,6 +776,7 @@ describe("organization training draft source-context route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.manualDraft.POST(
@@ -760,6 +836,7 @@ describe("organization training draft source-context route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.copyToNewDraft.POST(
@@ -817,6 +894,7 @@ describe("organization training draft source-context route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.sourceContextAttach.POST(
@@ -1096,6 +1174,7 @@ describe("organization training publish route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.publish.POST(
@@ -1134,6 +1213,7 @@ describe("organization training publish route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.publish.POST(
@@ -1177,6 +1257,7 @@ describe("organization training publish route handlers", () => {
     );
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.publish.POST(
@@ -1640,6 +1721,7 @@ describe("organization training employee answer route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.employeeVisibleList.GET(
@@ -1670,6 +1752,107 @@ describe("organization training employee answer route handlers", () => {
     });
   });
 
+  it("blocks standard organization employees before repository visible-list access", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const effectiveAuthorizationService = {
+      async listEffectiveAuthorizations(userContext: { userPublicId: string }) {
+        expect(userContext).toEqual({
+          userPublicId: "employee_user_route_public_401",
+        });
+
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            authorizations: [],
+            effectiveAuthorizations: [],
+            authorizationContexts: [
+              createOrgEffectiveAuthorizationContext({
+                edition: "standard",
+                effectiveEdition: "standard",
+                capabilities: disabledEffectiveAuthorizationCapabilities,
+              }),
+            ],
+          },
+        };
+      },
+    };
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService,
+    });
+
+    const response = await handlers.employeeVisibleList.GET(
+      createVisibleListRequest({
+        headers: {
+          authorization: "Bearer organization_training_employee_session_401",
+        },
+      }),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 409076,
+      message: organizationTrainingEmployeeAnswerBlockedMessage,
+      data: null,
+    });
+    expect(
+      runtimeRepositoryMock.listEmployeeVisibleVersions,
+    ).not.toHaveBeenCalled();
+  });
+
+  it("filters advanced employee visible-list with the real effective org authorization scope", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createEmployeeAuthContext(),
+    });
+    const matchingMarketingVersion = createEmployeeVisibleVersion({
+      publicId: "organization_training_version_marketing_401",
+      profession: "marketing",
+      level: 2,
+    });
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockResolvedValueOnce([
+      matchingMarketingVersion,
+    ]);
+    const effectiveAuthorizationService = {
+      async listEffectiveAuthorizations() {
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            authorizations: [],
+            effectiveAuthorizations: [],
+            authorizationContexts: [createOrgEffectiveAuthorizationContext()],
+          },
+        };
+      },
+    };
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService,
+    });
+
+    const response = await handlers.employeeVisibleList.GET(
+      createVisibleListRequest({
+        headers: {
+          authorization: "Bearer organization_training_employee_session_401",
+        },
+      }),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        versions: [matchingMarketingVersion],
+      },
+    });
+  });
+
   it("saves an employee answer draft through the runtime route without persisting raw answer content", async () => {
     const sessionService = createCurrentSessionService({
       code: 0,
@@ -1678,6 +1861,7 @@ describe("organization training employee answer route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.employeeAnswerDraftSave.POST(
@@ -1741,6 +1925,7 @@ describe("organization training employee answer route handlers", () => {
     });
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.employeeAnswerSubmit.POST(
@@ -1811,6 +1996,7 @@ describe("organization training employee answer route handlers", () => {
     );
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
     });
 
     const response = await handlers.employeeAnswerReadonlySummary.GET(
