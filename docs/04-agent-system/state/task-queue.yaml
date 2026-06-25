@@ -5322,6 +5322,205 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+    title: Focused planning for organization admin runtime session hydration repair
+    phase: organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+    sourceStory: successor-of-organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
+    dependencies:
+      - organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
+      - organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    executionProfile: docs_state_only_focused_runtime_session_hydration_root_cause_planning
+    evidenceMode: redacted_source_orientation_no_runtime_no_secret_capture
+    validationPolicy: docs_prettier_diff_check_precommit_prepush
+    queueSelectionMode: current_user_focused_planning_request
+    targetClosureItem: Root-cause plan for organization admin runtime session hydration still resolving into global ops
+    behaviorBoundary: docs_state_only::read_only_source_diagnosis_no_source_no_runtime_no_db_no_final_pass
+    requiredOutcome: >-
+      Create focused planning evidence for why real browser organization admin sessions still hydrate as global ops after
+      role-boundary source repairs. The task must identify root cause candidates, define the next red tests and repair
+      design, and keep all product source, runtime, database, account, credential, Provider, staging/prod, payment, and
+      final Pass work blocked.
+    status: closed
+    result: pass_focused_root_cause_planning_no_final_pass
+    approvedAt: "2026-06-25T04:33:01-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: current_user_focused_planning_request_2026_06_25
+      approvalSource: current_user_message_create_focused_runtime_session_hydration_planning_2026_06_25
+    claimedAt: "2026-06-25T04:33:01-07:00"
+    plannedAt: "2026-06-25T04:33:01-07:00"
+    validatedAt: "2026-06-25T04:37:26-07:00"
+    reviewedAt: "2026-06-25T04:37:26-07:00"
+    closedAt: "2026-06-25T04:41:15-07:00"
+    capabilities:
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      readOnlySourceDiagnosis: approved
+      productSourceChange: blocked
+      testChange: blocked
+      e2eSpecChange: blocked
+      scriptChange: blocked
+      seedOrFixtureMutation: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      browserRuntimeExecution: blocked
+      devServerStart: blocked
+      credentialEntryByCodex: blocked
+      credentialDocumentReadByCodex: blocked
+      accountActionByCodex: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+      localCommit: approved_by_current_user_closeout_2026_06_25
+      mergeToMaster: approved_by_current_user_closeout_2026_06_25
+      pushOriginMaster: approved_by_current_user_closeout_2026_06_25
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
+      - docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-session-role-mapping-runtime-repair.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-role-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-rerun-after-session-role-repair.md
+      - src/app/(auth)/login/page.tsx
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/app/api/v1/sessions/route.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/services/session-service.ts
+      - src/server/services/auth-service.ts
+      - src/server/repositories/session-repository.ts
+      - src/server/repositories/auth-repository.ts
+      - src/server/mappers/auth-mapper.ts
+      - src/server/contracts/auth-contract.ts
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - tests/unit/student-login-ui.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - src/server/auth/session-route.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - dev_server_start
+      - browser_runtime_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - owner_account_action
+      - account_creation_disable_password_reset_or_seed
+      - database_read_write_or_migration
+      - source_test_script_or_e2e_change
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - session_hydration
+      - logout_cookie_invalidation
+      - role_mapping
+      - fixture_drift
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-runtime-session-hydration-repair-planning-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-runtime-session-hydration-repair-planning-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-runtime-session-hydration-repair-planning.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    predecessorRuntimeTaskId: organization-admin-workspace-runtime-rerun-after-session-role-repair-2026-06-24
+    predecessorSourceRepairTaskId: organization-admin-session-role-mapping-runtime-repair-2026-06-24
+    branch: codex/org-admin-session-hydration-planning-20260625
+    rootCauseSummary:
+      logoutCookieInvalidationGap: true
+      legacyAcceptanceAccountOpsAdminDrift: true
+      devSeedUnitFixtureMappingDrift: true
+      pureBoundaryFunctionAlreadyGreen: true
+      browserRuntimeStillFailing: true
+    validationSummary:
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+    nextRecommendedTask: organization-admin-runtime-session-hydration-repair-2026-06-24
+    nextRecommendedTaskReason: >-
+      Implement red-test-first repair for cookie-backed logout/session invalidation and align real role fixture mapping
+      before any further browser runtime rerun.
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_message_execute_closeout_then_next_session_hydration_repair_2026_06_25
+    retryCount: 0
+    lastFailurePath: null
+
   - id: requirement-ssot-reading-governance-2026-06-24
     title: Enforce requirement SSOT reading governance in task gates
     phase: requirement-ssot-reading-governance-2026-06-24
