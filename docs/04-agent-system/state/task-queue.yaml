@@ -7017,6 +7017,289 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    title: Plan visible Chinese UI technical label cleanup
+    phase: visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    sourceStory: successor-of-post-repair-gap-list-refresh-no-final-pass-2026-06-24
+    dependencies:
+      - post-repair-gap-list-refresh-no-final-pass-2026-06-24
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    executionProfile: ui_cleanup_scope_planning_no_source_change
+    evidenceMode: redacted_docs_only
+    validationPolicy: scoped_docs_requirement_alignment_validation
+    queueSelectionMode: user_directed_next_task_visible_chinese_ui_cleanup
+    targetClosureItem: Implementation scope plan for visible Chinese UI technical label cleanup
+    behaviorBoundary: docs_acceptance::visible_ui_cleanup_planning_no_source_no_runtime_no_final_pass
+    requiredOutcome: >-
+      Produce a scoped implementation plan for user-visible Chinese UI cleanup, including SSOT Read List, source scan
+      inventory, allowed implementation candidate files, non-replacement rules, validation commands, and blocked
+      Provider/env/runtime/final Pass boundaries.
+    capabilities:
+      docsRequirementAlignment: approved
+      stateQueueDocumentation: approved
+      readOnlySourceScan: approved
+      productSourceChange: blocked
+      browserRuntimeObservation: blocked
+      devServerStart: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-post-repair-gap-list-refresh-no-final-pass.md
+      - docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-content-admin-ai-draft-workflow-runtime-validation.md
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/features/admin/contact-config/AdminContactConfigPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/components/admin/UserOrgAuthOps/AdminUserOrgAuthOpsBaseline.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/components/admin/PaperManagement/AdminPaperManagement.tsx
+      - src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    planningOutputPath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_visible_chinese_ui_cleanup_scope_planned_no_source_change
+    approvalConsumed: current_user_direct_next_task_selection_2026_06_24
+    approvedAt: "2026-06-24T22:38:12-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-24T22:38:12-07:00"
+    plannedAt: "2026-06-24T22:38:12-07:00"
+    validatedAt: "2026-06-24T22:45:26-07:00"
+    reviewedAt: "2026-06-24T22:45:26-07:00"
+    closedAt: "2026-06-24T22:45:26-07:00"
+    blockedAt: null
+    branch: codex/visible-chinese-ui-cleanup-planning-20260624
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_direct_next_task_selection_2026_06_24
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_direct_next_task_selection_2026_06_24
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_direct_next_task_selection_2026_06_24
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_direct_next_task_selection_2026_06_24
+    nextRecommendedTask: visible-chinese-ui-technical-label-cleanup-2026-06-24
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: visible-chinese-ui-technical-label-cleanup-2026-06-24
+    title: Clean visible Chinese UI technical labels
+    phase: visible-chinese-ui-technical-label-cleanup-2026-06-24
+    sourceStory: successor-of-visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    dependencies:
+      - visible-chinese-ui-technical-label-cleanup-planning-2026-06-24
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionProfile: low_risk_visible_ui_copy_cleanup_no_runtime
+    evidenceMode: redacted_local_static
+    validationPolicy: focused_unit_lint_typecheck_diff_hardening
+    queueSelectionMode: pending_user_or_standing_local_implementation_approval
+    targetClosureItem: Visible Chinese UI technical label cleanup
+    behaviorBoundary: implementation::visible_copy_only_no_provider_no_runtime_no_final_pass
+    requiredOutcome: >-
+      Replace visible English technical labels and helper copy in the planned learner, content, operations, and
+      organization backend surfaces with Chinese UI copy while preserving registered identifiers, API contracts,
+      redaction boundaries, and authorization behavior.
+    capabilities:
+      productSourceChange: approved_scope_visible_copy_only
+      focusedTestChange: approved_scope_visible_copy_assertions_only
+      docsEvidenceAudit: approved
+      browserRuntimeObservation: blocked
+      devServerStart: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      accountAction: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/features/admin/contact-config/AdminContactConfigPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+      - src/components/admin/UserOrgAuthOps/AdminUserOrgAuthOpsBaseline.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/components/admin/PaperManagement/AdminPaperManagement.tsx
+      - src/features/admin/paper-management/AdminPaperManagementClient.test.tsx
+      - src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/protected-route-guard-ui.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts
+      - tests/unit/phase-11-audit-log-coverage-hardening.test.ts
+      - tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts
+      - tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+      - tests/unit/admin-model-config-management-ui.test.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/admin-shell-common-interaction.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - owner_credential_entry_or_account_action
+      - database_read_write_or_migration
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/protected-route-guard-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts tests/unit/phase-11-audit-log-coverage-hardening.test.ts tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts tests/unit/admin-model-config-management-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts src/features/admin/paper-management/AdminPaperManagementClient.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-shell-common-interaction.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId visible-chinese-ui-technical-label-cleanup-2026-06-24
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-visible-chinese-ui-technical-label-cleanup.md
+    planningSourcePath: docs/05-execution-logs/acceptance/2026-06-24-visible-chinese-ui-technical-label-cleanup-planning.md
+    status: pending
+    result: null
+    approvalRequiredBeforeClaim: user_or_standing_local_implementation_approval
+    approvedAt: null
+    approvedBy: null
+    claimedAt: null
+    plannedAt: null
+    validatedAt: null
+    reviewedAt: null
+    closedAt: null
+    blockedAt: null
+    branch: null
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-l0-l2-static-gates-2026-06-22
     title: Acceptance L0 through L2 static gates
     phase: standard-advanced-mvp-acceptance-serial-batch-2026-06-22
