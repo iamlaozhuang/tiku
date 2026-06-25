@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-employee-visible-scope-post-repair-browser-rerun-2026-06-25
-updatedAt: "2026-06-25T10:37:01-07:00"
+currentPhase: organization-training-advanced-employee-assignment-readonly-inspection-approval-package-2026-06-25
+updatedAt: "2026-06-25T10:46:25-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,36 +501,37 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 259c1a0a8c4b4d5420319542169a8a9d1868dac8
-  lastKnownOriginMasterSha: 259c1a0a8c4b4d5420319542169a8a9d1868dac8
+  lastKnownMasterSha: 5debde0416126212d547950a116673583ec0dd8b
+  lastKnownOriginMasterSha: 5debde0416126212d547950a116673583ec0dd8b
 currentTask:
-  id: organization-training-employee-visible-scope-post-repair-browser-rerun-2026-06-25
+  id: organization-training-advanced-employee-assignment-readonly-inspection-approval-package-2026-06-25
   status: closed
-  result: blocked_org_advanced_employee_training_workflow_not_proven_after_visible_scope_repair_no_full_eight_row_no_final_pass
-  claimedAt: "2026-06-25T10:37:01-07:00"
-  plannedAt: "2026-06-25T10:37:01-07:00"
-  validatedAt: "2026-06-25T10:40:00-07:00"
-  reviewedAt: "2026-06-25T10:40:00-07:00"
-  closedAt: "2026-06-25T10:40:00-07:00"
-  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_employee_visible_scope_repair
+  result: approval_package_prepared_for_readonly_assignment_inspection_fresh_approval_required_no_db_touched_no_final_pass
+  claimedAt: "2026-06-25T10:46:25-07:00"
+  plannedAt: "2026-06-25T10:46:25-07:00"
+  validatedAt: "2026-06-25T10:46:25-07:00"
+  reviewedAt: "2026-06-25T10:46:25-07:00"
+  closedAt: "2026-06-25T10:46:25-07:00"
+  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_scope_blocker
   approvalConsumed: current_user_goal_create_full_8_row_acceptance_2026_06_25
   approvalSource: current_user_goal_create_full_8_row_acceptance_2026_06_25
-  credentialReadApprovalSource: current_user_goal_create_full_8_row_acceptance_2026_06_25
-  credentialEntryApprovalSource: current_user_goal_create_full_8_row_acceptance_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
+  requestedFreshApprovalForNextTask: readonly_local_db_seed_account_assignment_inspection_redacted_counts_only
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorSourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-empty-state-source-diagnosis-repair.md
-  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-employee-effective-context-post-repair-browser-rerun.md
+  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
     localSourceChange: false
     focusedUnitTests: false
-    localBrowserRuntimeRerun: true
-    credentialDocumentReadByCodex: true
-    credentialEntryByCodex: true
+    localBrowserRuntimeRerun: false
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
+    databaseRead: false
     databaseWrite: false
+    seedReadOrWrite: false
+    accountMutation: false
     schemaMigration: false
     dependencyIntroduction: false
     envSecretAccess: false
@@ -539,14 +540,30 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  expectedRerun:
-    surface: organization_training_employee_runtime_context
-    rows:
-      - org_standard_employee
-      - org_advanced_employee
-    standardEmployeeExpected: direct_organization_training_not_answer_workflow
-    advancedEmployeeExpected: organization_training_assigned_answer_workflow_available
-    browserRuntimeInThisTask: true
+  requestedNextTaskScope:
+    taskKind: readonly_diagnostic
+    purpose: determine_whether_org_advanced_employee_has_published_organization_training_assignment_after_source_repairs
+    allowedEvidenceFields:
+      - command_name
+      - pass_fail_status
+      - redacted_role_label
+      - redacted_organization_public_id_presence
+      - redacted_assignment_count
+      - redacted_publication_status_count
+      - redacted_scope_match_status
+      - conclusion_without_raw_rows
+    blockedEvidenceFields:
+      - credentials
+      - tokens
+      - cookies
+      - env_values
+      - raw_db_rows
+      - raw_account_identifiers
+      - employee_personal_data
+      - paper_or_question_content
+      - storage_or_session_contents
+      - provider_payloads
+      - screenshots_or_traces
   closeoutPolicy:
     localCommit:
       approved: true
@@ -562,19 +579,19 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_goal_create_full_8_row_acceptance_2026_06_25
-  branch: codex/org-training-visible-scope-rerun-20260625
+  branch: codex/org-training-assignment-approval-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    browserRuntimeExecuted: true
-    orgStandardEmployee: pass_training_no_answer_workflow
-    orgAdvancedEmployee: fail_no_training_row_no_input_no_actions
-    browserWarnErrorCount: 0
-    fullEightRowRerunExecuted: false
+    approvalPackageOnly: true
+    databaseReadExecuted: false
+    seedReadExecuted: false
+    accountDataInspectionExecuted: false
+    browserRuntimeExecuted: false
     finalPassClaim: false
-  nextRequiredTask: requires_separate_approval_db_seed_account_assignment_inspection
+  nextRequiredTask: pending_human_approval_readonly_assignment_inspection
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
