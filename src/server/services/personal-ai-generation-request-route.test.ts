@@ -4,6 +4,7 @@ import {
   createPersonalAiGenerationRequestRouteHandlers,
   createPersonalAiGenerationRequestUserResolver,
 } from "./personal-ai-generation-request-route";
+import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import type {
   CreatePersonalAiGenerationRequestInput,
   PersonalAiGenerationRequestPersistenceResult,
@@ -212,6 +213,59 @@ describe("personal AI generation request route handlers", () => {
     ]);
     expect(JSON.stringify(resolvedUserContext)).not.toContain(
       "synthetic-local-session-token",
+    );
+  });
+
+  it("resolves cookie-backed personal sessions without requiring an authorization header", async () => {
+    const observedAuthorizationValues: Array<string | null | undefined> = [];
+    const sessionService: Pick<SessionService, "getCurrentSession"> = {
+      async getCurrentSession(input) {
+        observedAuthorizationValues.push(input.authorization);
+
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              publicId: "cookie_session_user_public_123",
+              phone: "13800000000",
+              name: "cookie learner",
+              userType: "personal",
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: null,
+              organizationPublicId: null,
+              adminPublicId: null,
+              adminRoles: [],
+            },
+            session: {
+              expiresAt: "2026-06-19T12:00:00.000Z",
+            },
+          },
+        };
+      },
+    };
+    const resolveUserContext =
+      createPersonalAiGenerationRequestUserResolver(sessionService);
+
+    const resolvedUserContext = await resolveUserContext(
+      new Request("http://localhost/api/v1/personal-ai-generation-requests", {
+        headers: {
+          cookie: `${SESSION_COOKIE_NAME}=synthetic-cookie-session-token`,
+        },
+      }),
+    );
+
+    expect(resolvedUserContext).toEqual({
+      userPublicId: "cookie_session_user_public_123",
+      userType: "personal",
+      organizationPublicId: null,
+    });
+    expect(observedAuthorizationValues).toEqual([
+      "Bearer synthetic-cookie-session-token",
+    ]);
+    expect(JSON.stringify(resolvedUserContext)).not.toContain(
+      "synthetic-cookie-session-token",
     );
   });
 

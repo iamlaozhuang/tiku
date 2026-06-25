@@ -4553,6 +4553,171 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+    title: Repair cookie-backed personal AI route session resolution
+    phase: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+    sourceStory: current-user-directed-serial-task-3-after-full-eight-row-rerun
+    dependencies:
+      - role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_scoped_repair
+    evidenceMode: full_redacted
+    validationPolicy: focused_unit_lint_typecheck_docs_gate_no_browser
+    queueSelectionMode: current_user_fresh_serial_approval_task_3
+    targetClosureItem: Authenticated learner and organization employee direct personal AI route login-prompt residual
+    behaviorBoundary: local_source_and_focused_unit_only_no_browser_no_credentials_no_db_no_provider_no_final_pass
+    requiredOutcome: >-
+      Repair the first minimal source residual selected from the post-browser-rerun evidence: direct personal AI generation
+      request/result routes must resolve cookie-backed authenticated personal learner and organization employee sessions
+      instead of showing the login prompt. Do not execute browser/e2e, read credentials or .env*, touch DB/seed/schema/migration,
+      call Provider, change dependencies, touch staging/prod/payment/external services, or claim final MVP Pass.
+    status: closed
+    result: pass_cookie_backed_personal_ai_route_session_resolution_focused_validation_no_browser
+    approvedAt: "2026-06-25T08:41:59-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      packageId: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+    claimedAt: "2026-06-25T08:41:59-07:00"
+    plannedAt: "2026-06-25T08:41:59-07:00"
+    validatedAt: "2026-06-25T08:47:29-07:00"
+    reviewedAt: "2026-06-25T08:47:29-07:00"
+    closedAt: "2026-06-25T08:47:29-07:00"
+    capabilities:
+      docsStateUpdate: approved
+      taskPlanEvidenceAuditCreation: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      localBrowserRuntimeExecution: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      browserStorageInspection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+      - docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex_or_credential_entry_by_codex
+      - account_creation_disable_password_reset_seed_or_fixture_mutation
+      - database_seed_schema_or_account_mutation
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - production_or_staging_data_access
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - cookie_backed_session_resolution
+      - route_authentication_boundary
+      - evidence_redaction
+      - no_browser_runtime
+      - no_schema_change
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.ts src/server/services/personal-ai-generation-result-route.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.ts src/server/services/personal-ai-generation-result-route.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+    branch: codex/ai-runtime-login-prompt-20260625
+    selectedRepair:
+      sourceTaskIds:
+        - role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+      scope: cookie_backed_personal_ai_route_session_resolution
+      sourceFailureRows:
+        - personal_standard_student
+        - personal_advanced_student
+        - org_standard_employee
+        - org_advanced_employee
+      browserRerunInThisTask: false
+      credentialReadInThisTask: false
+      focusedUnitTests: pass
+      lint: pass
+      typecheck: pass
+      prettier: pass
+      diffCheck: pass
+      moduleRunV2Hardening: pass
+      prePushReadiness: pass
+      noDbSchemaMigration: true
+      noFinalPassClaim: true
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
     title: Refresh role-separated blockers after learner and org employee AI entry repair
     phase: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25

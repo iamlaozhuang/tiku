@@ -3,6 +3,7 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
 import type {
   CreatePersonalAiGenerationRequestInput,
@@ -336,7 +337,7 @@ export function createPersonalAiGenerationRequestUserResolver(
 ): PersonalAiGenerationRequestUserResolver {
   return async (request) => {
     const sessionResponse = await sessionService.getCurrentSession({
-      authorization: request.headers.get("authorization"),
+      authorization: getRequestAuthorization(request),
     });
 
     if (!isSuccessfulSessionResponse(sessionResponse)) {

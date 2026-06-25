@@ -2,6 +2,7 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import type { AuthContextDto } from "../contracts/auth-contract";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { SessionService } from "./session-service";
@@ -109,7 +110,7 @@ export function createPersonalAiGenerationResultUserResolver(
 ): PersonalAiGenerationResultUserResolver {
   return async (request) => {
     const sessionResponse = await sessionService.getCurrentSession({
-      authorization: request.headers.get("authorization"),
+      authorization: getRequestAuthorization(request),
     });
 
     if (!isSuccessfulSessionResponse(sessionResponse)) {

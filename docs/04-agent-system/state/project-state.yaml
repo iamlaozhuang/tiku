@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
-updatedAt: "2026-06-25T08:37:24-07:00"
+currentPhase: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+updatedAt: "2026-06-25T08:47:29-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,116 +501,135 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 591d329f159f81c0eeaf4d8ae5790e471e044394
-  lastKnownOriginMasterSha: 591d329f159f81c0eeaf4d8ae5790e471e044394
+  lastKnownMasterSha: 24d4994faa6b076f8bff68ce39e68c1992cd4aad
+  lastKnownOriginMasterSha: 24d4994faa6b076f8bff68ce39e68c1992cd4aad
 currentTask:
-  id: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+  id: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
   status: closed
-  result: blocked_full_8_row_browser_rerun_1_pass_7_fail_no_final_pass
-  claimedAt: "2026-06-25T08:22:00-07:00"
-  plannedAt: "2026-06-25T08:22:00-07:00"
-  validatedAt: "2026-06-25T08:37:24-07:00"
-  reviewedAt: "2026-06-25T08:37:24-07:00"
-  closedAt: "2026-06-25T08:37:24-07:00"
-  sourceStory: current-user-approved-full-eight-row-rerun-after-ai-entry-repair
-  approvalConsumed: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
+  result: pass_cookie_backed_personal_ai_route_session_resolution_focused_validation_no_browser
+  claimedAt: "2026-06-25T08:41:59-07:00"
+  plannedAt: "2026-06-25T08:41:59-07:00"
+  validatedAt: "2026-06-25T08:47:29-07:00"
+  reviewedAt: "2026-06-25T08:47:29-07:00"
+  closedAt: "2026-06-25T08:47:29-07:00"
+  sourceStory: current-user-approved-serial-task-3-after-full-eight-row-rerun
+  approvalConsumed: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
   approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
-  credentialReadApprovalSource: current_user_message_allow_input_or_read_credentials_2026_06_25
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorPostAiGapRefreshTaskId: role-separated-post-ai-entry-repair-gap-refresh-no-final-pass-2026-06-25
-  predecessorPostAiGapRefreshEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-post-ai-entry-repair-gap-refresh-no-final-pass.md
-  predecessorRerunScopePackageTaskId: role-separated-full-8-row-post-org-admin-repair-rerun-scope-package-2026-06-25
-  predecessorRerunScopePackagePath: docs/05-execution-logs/acceptance/2026-06-25-role-separated-full-8-row-post-org-admin-repair-rerun-scope-package.md
-  predecessorEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  predecessorEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-role-separated-post-repair-runtime-rerun.md
-  predecessorLearnerAiRepairTaskId: learner-org-employee-ai-entry-session-repair-2026-06-25
-  predecessorLearnerAiRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-entry-session-repair.md
-  predecessorLearnerAiRepairAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-entry-session-repair.md
+  predecessorFullEightRowRerunTaskId: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
+  predecessorFullEightRowRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+  predecessorFullEightRowRerunAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localBrowserRuntimeRerun: true
-    routeMatrixObservation: true
-    sanitizedSessionSummaryObservation: true
-    gapRefresh: false
-    localSourceChange: false
-    focusedUnitTests: false
-    learnerAiEntryRepair: false
-    employeeSessionClassificationRepair: false
-    ownerManualCredentialEntry: approved
-    credentialEntryByCodex: approved_current_user_credentials_message
-    sessionSummaryObservationWithoutTokenCapture: true
-    localDefaultTikuDatabaseSchemaAlignment: false
-    localDefaultTikuDatabaseSeedAlignment: false
+    localSourceChange: true
+    focusedUnitTests: true
+    localBrowserRuntimeRerun: false
+    e2eRuntime: false
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
     databaseWrite: false
-    privateAccountFileRead: approved_specific_local_private_role_account_source
-    credentialDocumentReadByCodex: approved_current_user_credentials_message
-    envSecretAccess: false
-    destructiveDatabaseOperation: false
     schemaMigration: false
     dependencyIntroduction: false
+    envSecretAccess: false
     providerCall: false
-    e2eRuntime: false
-    e2eSpecChange: false
+    stagingProdDeploy: false
+    paymentExternalService: false
+    costCalibrationGate: false
     finalPassClaim: false
-  executionPackage:
-    packageId: ROLE_SEPARATED_FULL_8_ROW_POST_ORG_ADMIN_REPAIR_RERUN_SCOPE_2026_06_25
-    rowsInScope: 8
-    browserVisibility: background
-    evidenceMode: redacted_status_summary_only
-    credentialBoundary: approved_private_role_account_source_no_values_recorded_no_storage_no_password_capture
-  runtimeResult:
-    status: blocked_full_8_row_browser_rerun_1_pass_7_fail
-    strictEightRowRuntimeGate: blocked
-    rowsInScope: 8
-    authenticatedRowsObserved: 8
-    strictPassRows: 1
-    failRows: 7
-    blockedRows: 0
-    finalPassClaim: false
-  finalPassClaim: false
-  runtimeEvidence:
-    browserExecutedInThisTask: true
-    localLoginPageReady: true
-    approvedCredentialReadExecuted: true
-    credentialValuesRecorded: false
-    credentialBoundaryBlockedRows: 0
-    passRoleRows:
-      - org_advanced_admin
-    failedRoleRows:
+  selectedRepair:
+    sourceFailureRows:
       - personal_standard_student
       - personal_advanced_student
       - org_standard_employee
       - org_advanced_employee
-      - org_standard_admin
-      - content_admin
-      - ops_admin
-    nextMinimalRepairCandidate: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
-    databaseExecutedInThisTask: false
-    sourceChangeExecuted: false
-    finalMvpPassClaim: false
+    observedResidual: authenticated_direct_personal_ai_routes_show_login_prompt
+    sourceGap: personal_ai_generation_request_and_result_resolvers_read_authorization_header_only
+    repairSurface:
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+    testSurface:
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+    focusedUnitTests: pass
+    lint: pass
+    typecheck: pass
+    prettier: pass
+    diffCheck: pass
+    moduleRunV2Hardening: pass
+    prePushReadiness: pass
+    browserRerunInThisTask: false
+    credentialReadInThisTask: false
+    noDbSchemaMigration: true
+    finalPassClaim: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_approval_2026_06_25_full_8_row_browser_rerun
-  branch: codex/full-8-row-post-ai-entry-rerun-20260625
+      approvalSource: current_user_fresh_serial_approval_2026_06_25_task_3_low_risk_source_focused_unit
+  branch: codex/ai-runtime-login-prompt-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
+learnerOrgEmployeeAiRuntimeLoginPromptResidualRepair20260625:
+  taskId: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+  phase: learner-org-employee-ai-runtime-login-prompt-residual-repair-2026-06-25
+  recordedAt: "2026-06-25T08:41:59-07:00"
+  status: closed
+  result: pass_cookie_backed_personal_ai_route_session_resolution_focused_validation_no_browser
+  validatedAt: "2026-06-25T08:47:29-07:00"
+  reviewedAt: "2026-06-25T08:47:29-07:00"
+  closedAt: "2026-06-25T08:47:29-07:00"
+  branch: codex/ai-runtime-login-prompt-20260625
+  entryMasterSha: 24d4994faa6b076f8bff68ce39e68c1992cd4aad
+  entryOriginMasterSha: 24d4994faa6b076f8bff68ce39e68c1992cd4aad
+  approvalSource: current_user_message_can_execute_serial_1_2_3_and_task2_preapproval_2026_06_25
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-runtime-login-prompt-residual-repair.md
+  sourceBrowserRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-ai-entry-repair-browser-rerun.md
+  selectedRepair:
+    sourceFailureRows:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    observedResidual: authenticated_direct_personal_ai_routes_show_login_prompt
+    sourceGap: personal_ai_generation_request_and_result_resolvers_read_authorization_header_only
+    focusedUnitTests: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2Hardening: pass
+    prePushReadiness: pass
+    browserRerunInThisTask: false
+    credentialReadInThisTask: false
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - browser_runtime_or_e2e_execution
+    - credential_document_read_by_codex_or_credential_entry_by_codex
+    - database_seed_schema_or_account_mutation
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - production_or_staging_data_access
+    - pr_force_push
+    - cost_calibration_gate
+    - final_acceptance_pass
 roleSeparatedFull8RowPostAiEntryRepairBrowserRerun20260625:
   taskId: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
   phase: role-separated-full-8-row-post-ai-entry-repair-browser-rerun-2026-06-25
