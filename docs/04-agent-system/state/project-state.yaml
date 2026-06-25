@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25
-updatedAt: "2026-06-25T15:30:54-07:00"
+currentPhase: organization-training-advanced-employee-published-assignment-local-alignment-2026-06-25
+updatedAt: "2026-06-25T15:59:29-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,26 +501,25 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b43af073f97dd7498e39e47bae2619aa7db53832
-  lastKnownOriginMasterSha: b43af073f97dd7498e39e47bae2619aa7db53832
+  lastKnownMasterSha: 8fc743f5e2abf6cf8494080e6f6c8480508a7edc
+  lastKnownOriginMasterSha: 8fc743f5e2abf6cf8494080e6f6c8480508a7edc
 currentTask:
-  id: organization-training-advanced-employee-assignment-readonly-inspection-2026-06-25
+  id: organization-training-advanced-employee-published-assignment-local-alignment-2026-06-25
   status: closed
-  result: readonly_inspection_found_one_active_advanced_employee_without_published_training_current_org_no_final_pass
-  claimedAt: "2026-06-25T15:30:54-07:00"
-  plannedAt: "2026-06-25T15:30:54-07:00"
-  validatedAt: "2026-06-25T15:52:00-07:00"
-  reviewedAt: "2026-06-25T15:52:00-07:00"
-  closedAt: "2026-06-25T15:52:00-07:00"
+  result: local_published_assignment_aligned_for_unmatched_advanced_employee_no_final_pass
+  claimedAt: "2026-06-25T15:52:14-07:00"
+  plannedAt: "2026-06-25T15:52:14-07:00"
+  validatedAt: "2026-06-25T15:59:29-07:00"
+  reviewedAt: "2026-06-25T15:59:29-07:00"
+  closedAt: "2026-06-25T15:59:29-07:00"
   sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_scope_blocker
-  approvalConsumed: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
-  approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
+  approvalConsumed: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+  approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorApprovalPackageEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection-approval-package.md
-  predecessorRuntimeEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-employee-visible-scope-post-repair-browser-rerun.md
+  predecessorReadonlyInspectionEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
   allowedScope:
     docsStateEvidenceAudit: true
     localSourceChange: false
@@ -529,10 +528,12 @@ currentTask:
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
     databaseRead: true
-    databaseReadMode: local_readonly_redacted_counts_status_only
-    databaseWrite: false
+    databaseReadMode: local_redacted_pre_post_aggregate_only
+    databaseWrite: true
+    databaseWriteMode: local_current_schema_published_organization_training_assignment_only
     seedReadOnlyInspection: true
-    seedWrite: false
+    seedWrite: true
+    seedWriteMode: targeted_local_assignment_alignment_only
     accountMutation: false
     schemaMigration: false
     dependencyIntroduction: false
@@ -542,15 +543,15 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  readonlyInspectionScope:
-    taskKind: readonly_diagnostic
-    purpose: determine_whether_org_advanced_employee_has_published_organization_training_assignment_after_source_repairs
+  localAssignmentAlignmentScope:
+    taskKind: local_data_repair
+    purpose: create_or_align_published_organization_training_for_unmatched_advanced_employee_current_org
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
       - redacted_role_label
-      - redacted_organization_public_id_presence
-      - redacted_assignment_count
+      - redacted_pre_count
+      - redacted_post_count
       - redacted_publication_status_count
       - redacted_scope_match_status
       - conclusion_without_raw_rows
@@ -569,36 +570,37 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
+      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_25_readonly_assignment_inspection
-  branch: codex/org-training-assignment-inspect-20260625
+      approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
+  branch: codex/org-training-assignment-align-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    approvalPackageOnly: false
-    databaseReadExecuted: true
-    databaseReadMode: docker_compose_psql_readonly_transaction
-    seedReadExecuted: true
-    accountDataInspectionExecuted: true
-    defaultTikuTrainingTablesPresent: false
-    currentSchemaDbTrainingTablesPresent: true
-    currentSchemaActiveAdvancedSessionEmployeesWithoutVisibleTraining: 1
-    missingPublishedTrainingCurrentOrgCount: 1
+    localAssignmentAlignmentExecuted: true
+    databaseWriteExecuted: true
+    insertedPublishedOrganizationTrainingVersionCount: 1
+    preActiveSessionAdvancedEmployeeCount: 11
+    preMatchedAdvancedEmployeeCount: 10
+    preUnmatchedAdvancedEmployeeCount: 1
+    postMatchedAdvancedEmployeeCount: 11
+    postUnmatchedAdvancedEmployeeCount: 0
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
     browserRuntimeExecuted: false
     finalPassClaim: false
-  nextRequiredTask: requires_separate_approval_local_seed_or_assignment_repair_for_missing_published_training
+  nextRequiredTask: organization_training_advanced_employee_assignment_post_alignment_focused_browser_rerun
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
