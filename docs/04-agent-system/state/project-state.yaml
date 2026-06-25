@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-advanced-employee-published-assignment-local-alignment-2026-06-25
-updatedAt: "2026-06-25T15:59:29-07:00"
+currentPhase: organization-training-advanced-employee-post-assignment-focused-browser-rerun-2026-06-25
+updatedAt: "2026-06-25T16:18:09-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,39 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8fc743f5e2abf6cf8494080e6f6c8480508a7edc
-  lastKnownOriginMasterSha: 8fc743f5e2abf6cf8494080e6f6c8480508a7edc
+  lastKnownMasterSha: 61c526dd52f4804d8a9ecc0162bc80df3b4f8436
+  lastKnownOriginMasterSha: 61c526dd52f4804d8a9ecc0162bc80df3b4f8436
 currentTask:
-  id: organization-training-advanced-employee-published-assignment-local-alignment-2026-06-25
+  id: organization-training-advanced-employee-post-assignment-focused-browser-rerun-2026-06-25
   status: closed
-  result: local_published_assignment_aligned_for_unmatched_advanced_employee_no_final_pass
-  claimedAt: "2026-06-25T15:52:14-07:00"
-  plannedAt: "2026-06-25T15:52:14-07:00"
-  validatedAt: "2026-06-25T15:59:29-07:00"
-  reviewedAt: "2026-06-25T15:59:29-07:00"
-  closedAt: "2026-06-25T15:59:29-07:00"
+  result: blocked_org_advanced_employee_visible_list_500_after_assignment_alignment_no_final_pass
+  claimedAt: "2026-06-25T16:05:37-07:00"
+  plannedAt: "2026-06-25T16:05:37-07:00"
+  validatedAt: "2026-06-25T16:18:09-07:00"
+  reviewedAt: "2026-06-25T16:18:09-07:00"
+  closedAt: "2026-06-25T16:18:09-07:00"
   sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_scope_blocker
   approvalConsumed: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
   approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+  predecessorAlignmentEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
   predecessorReadonlyInspectionEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
   allowedScope:
     docsStateEvidenceAudit: true
     localSourceChange: false
     focusedUnitTests: false
-    localBrowserRuntimeRerun: false
-    credentialDocumentReadByCodex: false
-    credentialEntryByCodex: false
-    databaseRead: true
-    databaseReadMode: local_redacted_pre_post_aggregate_only
-    databaseWrite: true
-    databaseWriteMode: local_current_schema_published_organization_training_assignment_only
-    seedReadOnlyInspection: true
-    seedWrite: true
-    seedWriteMode: targeted_local_assignment_alignment_only
+    localBrowserRuntimeRerun: true
+    credentialDocumentReadByCodex: true
+    credentialEntryByCodex: true
+    credentialMode: local_private_role_account_file_redacted
+    databaseRead: false
+    databaseWrite: false
+    seedReadOnlyInspection: false
+    seedWrite: false
     accountMutation: false
     schemaMigration: false
     dependencyIntroduction: false
@@ -543,17 +542,19 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  localAssignmentAlignmentScope:
-    taskKind: local_data_repair
-    purpose: create_or_align_published_organization_training_for_unmatched_advanced_employee_current_org
+  focusedBrowserRerunScope:
+    taskKind: local_real_browser_runtime_rerun
+    purpose: verify_standard_and_advanced_employee_organization_training_behavior_after_assignment_alignment
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
       - redacted_role_label
-      - redacted_pre_count
-      - redacted_post_count
-      - redacted_publication_status_count
-      - redacted_scope_match_status
+      - landing_path
+      - route_access_status
+      - training_row_count
+      - numeric_input_count
+      - row_action_count
+      - api_status_code
       - conclusion_without_raw_rows
     blockedEvidenceFields:
       - credentials
@@ -582,25 +583,28 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_fresh_approval_2026_06_25_assignment_alignment_then_focused_browser_rerun
-  branch: codex/org-training-assignment-align-20260625
+  branch: codex/org-training-focused-rerun-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    localAssignmentAlignmentExecuted: true
-    databaseWriteExecuted: true
-    insertedPublishedOrganizationTrainingVersionCount: 1
-    preActiveSessionAdvancedEmployeeCount: 11
-    preMatchedAdvancedEmployeeCount: 10
-    preUnmatchedAdvancedEmployeeCount: 1
-    postMatchedAdvancedEmployeeCount: 11
-    postUnmatchedAdvancedEmployeeCount: 0
+    browserRuntimeExecuted: true
+    credentialDocumentReadByCodex: true
+    credentialEntryByCodex: true
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    rowsExecuted: 2
+    passRows: 1
+    failRows: 1
+    orgStandardEmployeeTrainingWorkflowEntered: false
+    orgAdvancedEmployeeTrainingRowCount: 0
+    orgAdvancedEmployeeVisibleListHttpStatus: 500
+    orgAdvancedEmployeeVisibleListCode: 500001
     schemaMigrationExecuted: false
     accountMutationExecuted: false
-    browserRuntimeExecuted: false
     finalPassClaim: false
-  nextRequiredTask: organization_training_advanced_employee_assignment_post_alignment_focused_browser_rerun
+  nextRequiredTask: organization_training_advanced_employee_visible_list_500_runtime_repair_or_target_account_reconciliation
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
