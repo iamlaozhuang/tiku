@@ -182,3 +182,10 @@ If the owner wants default `tiku` DB aligned:
 - No package or dependency changes were made.
 - Evidence is redacted and avoids secrets, raw DB rows, credentials, tokens, cookies, localStorage, screenshots, traces, provider payloads, and database URLs.
 - No final Standard/Advanced MVP Pass is claimed.
+
+## Closeout Approval
+
+- Fresh closeout approval: user message on 2026-06-25 approving serial task 1 closeout, then task 2 and task 3 execution.
+- Local implementation commit before closeout metadata update: `071d7a4dbaec8b2afb7d359d21596f19997a18b8`.
+- Approved closeout actions for this task: fast-forward merge to `master`, push `origin/master`, and delete merged short branch.
+- Still not approved or claimed: final Standard/Advanced MVP Pass, PR, force push, staging/prod, Provider, payment, external service, `.env*`, private credential capture, schema/migration for this task.
