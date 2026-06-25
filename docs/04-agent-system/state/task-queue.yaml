@@ -4579,6 +4579,214 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
+    title: Apply local org admin DB migration, seed fixtures, and rerun runtime acceptance
+    phase: organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
+    sourceStory: successor-of-organization-admin-role-persistence-schema-seed-approval-2026-06-24
+    dependencies:
+      - organization-admin-role-persistence-schema-seed-approval-2026-06-24
+    taskKind: local_db_migration_seed_runtime_acceptance
+    moduleRunVersion: 2
+    executionProfile: local_full_flow
+    evidenceMode: full_redacted
+    validationPolicy: local_full_flow
+    localFullFlowGate: approved_localhost_only
+    queueSelectionMode: current_user_next_task_approval_2026_06_25
+    targetClosureItem: Local DB apply plus organization admin runtime rerun after Track B role persistence
+    behaviorBoundary: local_dev_only_existing_migration_and_seed_runtime_observation_no_source_edit_no_final_pass
+    requiredOutcome: >-
+      Apply the already-reviewed local Drizzle migration and existing dev seed to the local development database, then
+      rerun organization-admin runtime acceptance for org_standard_admin and org_advanced_admin on localhost with
+      owner-entered credentials and visible Chinese UI checks. Do not edit source, migrations, seed source, env files,
+      dependencies, Provider, Cost Calibration, staging/prod, payment, external services, or claim final MVP Pass.
+    capabilities:
+      schemaMigration: approved_migration_plan
+      localDatabaseConnection: approved_local_dev_only
+      databaseMigrationExecution: approved_existing_reviewed_local_migration_only
+      databaseSeedExecution: approved_existing_local_dev_seed_only
+      localFullFlowGate: approved_localhost_only
+      browserRuntimeObservation: approved_localhost_only_owner_entered_credentials
+      visibleChineseUiCheck: required
+      docsStateEvidenceUpdate: approved
+      localCommit: approved_by_current_user_next_task_closeout_2026_06_25
+      mergeToMaster: approved_by_current_user_next_task_closeout_2026_06_25
+      pushOriginMaster: approved_by_current_user_next_task_closeout_2026_06_25
+      sourceOrMigrationFileEdit: blocked
+      destructiveDatabaseOperation: blocked
+      drizzleKitPush: blocked
+      envSecretAccessOrEnvFileChange: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-role-persistence-schema-seed-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-role-persistence-schema-seed-approval.md
+      - docs/05-execution-logs/evidence/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-workspace-runtime-regression-repair.md
+      - drizzle/20260625030100_add_organization_admin_roles.sql
+      - drizzle/meta/20260625030100_snapshot.json
+      - drizzle.config.ts
+      - src/db/dev-seed.ts
+      - scripts/db/Seed-DevDatabase.ps1
+      - scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - source_or_migration_file_edit
+      - drizzle_kit_push
+      - destructive_database_operation
+      - env_secret_access_or_env_file_change
+      - env_value_print_or_evidence_capture
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - dependency_package_lockfile_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_schema_migration_execution
+      - local_dev_seed_write
+      - role_mapping
+      - authorization_boundary
+      - browser_runtime_observation
+      - visible_chinese_ui_check
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -Capability schemaMigration -Intent use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -Capability localFullFlowGate -Intent use_capability
+      - npx.cmd drizzle-kit migrate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - localhost browser observation for org_standard_admin at http://127.0.0.1:3000/organization/portal
+      - localhost browser observation for org_advanced_admin at http://127.0.0.1:3000/organization/portal
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      pre_runtime_gates:
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -Capability schemaMigration -Intent use_capability
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -Capability localFullFlowGate -Intent use_capability
+      local_db_apply:
+        - npx.cmd drizzle-kit migrate
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      runtime_acceptance:
+        - localhost browser observation for org_standard_admin at http://127.0.0.1:3000/organization/portal
+        - localhost browser observation for org_advanced_admin at http://127.0.0.1:3000/organization/portal
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-admin-local-db-migration-seed-and-runtime-rerun-approval-2026-06-24 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-24-organization-admin-local-db-migration-seed-and-runtime-rerun-approval.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: blocked_org_standard_admin_runtime_still_ops_workspace_after_local_db_apply_no_final_pass
+    approvedAt: "2026-06-25T02:58:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_message_approved_next_task_with_closeout_2026_06_25
+      scope:
+        - existing_reviewed_local_drizzle_migration_execution
+        - existing_local_dev_seed_execution
+        - localhost_org_admin_runtime_rerun
+        - visible_chinese_ui_check
+        - closeout_commit_merge_push_cleanup
+    claimedAt: "2026-06-25T02:58:35-07:00"
+    plannedAt: "2026-06-25T02:58:35-07:00"
+    validatedAt: "2026-06-25T03:10:22-07:00"
+    reviewedAt: "2026-06-25T03:10:22-07:00"
+    closedAt: "2026-06-25T03:10:22-07:00"
+    runtimeExecutedByThisTask: true
+    databaseMigrationExecutedByThisTask: true
+    databaseSeedExecutedByThisTask: true
+    finalPassClaim: false
+    validationSummary:
+      schemaMigrationCapabilityGate: pass
+      localFullFlowCapabilityGate: pass
+      localMigration: pass
+      localSeed: pass
+      orgStandardAdminRuntime: fail_ops_workspace_allowed_organization_workspace_denied
+      orgAdvancedAdminRuntime: not_executed_due_stop_condition_after_standard_failure
+      chineseUiVisibleCheck: partial_denial_text_chinese_expected_workspace_unavailable
+      closeoutGates: pass_prettier_diff_check_precommit_hardening_prepush_readiness
+    nextRecommendedTask: organization-admin-session-role-mapping-runtime-repair-planning-2026-06-24
+    nextRecommendedTaskReason: >-
+      Local migration and seed completed, but org_standard_admin strict runtime acceptance still failed. Convert the
+      remaining defect into a separate source repair planning task with red test, SSOT Read List, allowed code scope, and
+      acceptance standards before testing org_advanced_admin or layer-2 business closure.
+    branch: codex/org-admin-local-db-runtime-rerun-20260625
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_message_approved_next_task_with_closeout_2026_06_25
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_message_approved_next_task_with_closeout_2026_06_25
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_message_approved_next_task_with_closeout_2026_06_25
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_message_approved_next_task_with_closeout_2026_06_25
+    retryCount: 0
+    lastFailurePath: null
+
   - id: requirement-ssot-reading-governance-2026-06-24
     title: Enforce requirement SSOT reading governance in task gates
     phase: requirement-ssot-reading-governance-2026-06-24
