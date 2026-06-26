@@ -44,6 +44,118 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: formal-question-paper-adoption-approval-package-2026-06-26
+    title: Formal question paper adoption approval package
+    phase: formal-question-paper-adoption-approval-package-2026-06-26
+    sourceStory: user_requested_provider_cost_route_integrated_batch_2026_06_26
+    dependencies:
+      - provider-cost-gate-closeout-review-2026-06-26
+    taskKind: docs_only_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_only
+    evidenceMode: redacted_source_evidence_and_decision_summary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_batch_step_4
+    requiredOutcome: >-
+      Prepare a separate approval package for formal question/paper write/adoption after Provider/Cost gate closeout.
+      Do not implement adoption, mutate DB, change schema/source/tests/package/lockfile/env files, call Provider, or
+      claim staging/prod/release final Pass. Unless separately approved, backend admin AI remains generated-result/
+      history isolated with formal writes blocked.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      realProviderCall: blocked
+      providerCredentialRead: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      formalQuestionPaperWrite: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-formal-question-paper-adoption-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-formal-question-paper-adoption-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-question-paper-adoption-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-question-paper-adoption-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/acceptance/2026-06-26-provider-cost-gate-closeout-review.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-question-paper-adoption-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-formal-question-paper-adoption-approval-package.md docs/05-execution-logs/evidence/2026-06-26-formal-question-paper-adoption-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-question-paper-adoption-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId formal-question-paper-adoption-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId formal-question-paper-adoption-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-question-paper-adoption-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-question-paper-adoption-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-question-paper-adoption-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-question-paper-adoption-approval-package.md
+    status: closed
+    result: pass_formal_question_paper_adoption_approval_package_prepared_no_formal_write_executed
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/formal-content-adoption-approval-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+    validationSummary:
+      approvalPackagePrepared: pass
+      executionApprovalStatus: not_approved_requires_fresh_human_decision
+      formalQuestionPaperWriteExecuted: false
+      databaseConnectionExecuted: false
+      schemaMigrationExecuted: false
+      providerCallExecuted: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      stagingProdReleaseFinalPassClaimed: false
+
   - id: provider-cost-gate-closeout-review-2026-06-26
     title: Provider Cost gate closeout review
     phase: provider-cost-gate-closeout-review-2026-06-26
