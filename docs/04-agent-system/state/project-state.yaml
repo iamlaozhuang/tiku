@@ -557,7 +557,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: user_request_next_minimal_source_task_2026_06_26
   branch: codex/content-org-ai-local-loop-20260626
-  commitSha: null
+  commitSha: 5c73c67040cd75dd7c40da61487b322bc7e312a3
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -595,6 +595,7 @@ contentOrganizationAiGenerationAdminLocalContractLoopSourceRepair20260626:
   reviewedAt: "2026-06-26T05:30:00-07:00"
   closedAt: "2026-06-26T05:30:00-07:00"
   branch: codex/content-org-ai-local-loop-20260626
+  commitSha: 5c73c67040cd75dd7c40da61487b322bc7e312a3
   entryMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
   entryOriginMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
   approvalSource: user_request_next_minimal_source_task_2026_06_26
