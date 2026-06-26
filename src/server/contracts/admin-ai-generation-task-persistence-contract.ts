@@ -81,6 +81,7 @@ export type AdminAiGenerationTaskPersistenceRow = {
   quota_owner_public_id: string;
   idempotency_key_hash: string;
   result_public_id: string | null;
+  content_visibility: AiGenerationTaskResultContentVisibility;
   evidence_status: EvidenceStatus;
   citation_count: number;
   ai_call_log_public_id: string | null;

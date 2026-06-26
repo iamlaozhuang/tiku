@@ -1162,6 +1162,219 @@ tasks:
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     nextRecommendedTask: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26_requires_fresh_schema_migration_approval
 
+  - id: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
+    title: Admin AI generation task persistence DB schema and adapter TDD
+    phase: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
+    sourceStory: successor_of_admin_ai_generation_task_persistence_db_schema_mapping_approval_package
+    dependencies:
+      - admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionProfile: local_schema_migration_and_db_adapter_tdd
+    evidenceMode: redacted_schema_adapter_tdd_summary_only
+    validationPolicy: focused_red_green_schema_adapter_lint_typecheck_hardening
+    queueSelectionMode: direct_user_request_2026_06_26_schema_and_adapter_tdd
+    requiredOutcome: >-
+      Implement the approved local schema/migration and DB adapter TDD packet for admin AI generation task persistence.
+      Make the narrow shared ai_generation_task compatibility migration, add admin_ai_generation_task_metadata as a
+      companion table, and add a DB adapter for the existing repository port. Do not execute DB migrations, connect to
+      staging/prod, read env/secrets, call Provider services, run Cost Calibration, write formal question/paper rows,
+      mutate accounts/seeds, or claim release/final Pass.
+    capabilities:
+      sourceSchemaChange: approved_by_current_user_2026_06_26
+      drizzleMigrationFileChange: approved_by_current_user_2026_06_26
+      realDbAdapter: approved_by_current_user_2026_06_26
+      focusedUnitTest: approved
+      schemaMigration: approved_migration_plan
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      databaseMigrationExecution: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      destructiveDatabaseOperation: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts
+      - drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql
+      - drizzle/meta/_journal.json
+      - drizzle/meta/20260626134500_snapshot.json
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - tsconfig.json
+      - drizzle.config.ts
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/repositories/runtime-database.ts
+      - drizzle/20260613072703_add_ai_generation_task.sql
+      - drizzle/20260613074823_add_personal_ai_generation_result.sql
+      - drizzle/meta/20260625030100_snapshot.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - database_migration_execution
+      - drizzle_kit_push
+      - destructive_database_operation
+      - database_seed_execution
+      - account_mutation
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - formal_question_or_paper_write
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - schema_migration_file
+      - db_adapter_transaction_mapping
+      - admin_metadata_boundary
+      - provider_disabled_boundary
+      - formal_content_write_boundary
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26 -Capability schemaMigration -Intent use_capability
+      - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql drizzle/meta/_journal.json drizzle/meta/20260626134500_snapshot.json
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      post_edit_red:
+        - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts
+        - npm.cmd run test:unit -- src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts
+      post_edit_green:
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26 -Capability schemaMigration -Intent use_capability
+        - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      closeout:
+        - npm.cmd run lint
+        - npm.cmd run typecheck
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql drizzle/meta/_journal.json drizzle/meta/20260626134500_snapshot.json
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+    status: closed
+    result: pass_local_schema_companion_metadata_and_db_adapter_tdd_no_db_execution_no_final_pass
+    approvedAt: "2026-06-26T13:45:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+    claimedAt: "2026-06-26T13:45:00-07:00"
+    plannedAt: "2026-06-26T13:45:00-07:00"
+    validatedAt: "2026-06-26T14:05:00-07:00"
+    reviewedAt: "2026-06-26T14:05:00-07:00"
+    closedAt: "2026-06-26T14:05:00-07:00"
+    branch: codex/admin-ai-db-schema-adapter-tdd-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      tddRedObserved: pass_schema_nullability_and_missing_adapter_module
+      schemaMigrationCapabilityGate: pass
+      focusedUnitTest: pass_3_files_33_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      migrationFileCreated: true
+      drizzleSnapshotUpdated: true
+      localDbMigrationExecuted: false
+      databaseConnectionExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      finalPassClaimed: false
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

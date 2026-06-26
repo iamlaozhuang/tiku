@@ -346,7 +346,7 @@ export const aiGenerationTask = pgTable(
     public_id: text("public_id").notNull(),
     request_public_id: text("request_public_id").notNull(),
     task_type: aiGenerationTaskTypeEnum("task_type").notNull(),
-    ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
+    ai_func_type: aiFuncTypeEnum("ai_func_type"),
     authorization_public_id: text("authorization_public_id").notNull(),
     actor_public_id: text("actor_public_id").notNull(),
     owner_type: text("owner_type").notNull(),
@@ -355,7 +355,7 @@ export const aiGenerationTask = pgTable(
     quota_owner_type: text("quota_owner_type").notNull(),
     quota_owner_public_id: text("quota_owner_public_id").notNull(),
     effective_edition: text("effective_edition").notNull(),
-    question_public_id: text("question_public_id").notNull(),
+    question_public_id: text("question_public_id"),
     answer_record_public_id: text("answer_record_public_id"),
     paper_public_id: text("paper_public_id"),
     mock_exam_public_id: text("mock_exam_public_id"),
@@ -405,6 +405,71 @@ export const aiGenerationTask = pgTable(
       table.task_status,
     ),
     index("idx_ai_generation_task_ai_call_log_id").on(table.ai_call_log_id),
+  ],
+);
+
+export const adminAiGenerationTaskMetadata = pgTable(
+  "admin_ai_generation_task_metadata",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    ai_generation_task_id: bigint("ai_generation_task_id", {
+      mode: "number",
+    }).notNull(),
+    task_public_id: text("task_public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    workspace: text("workspace").notNull(),
+    generation_kind: text("generation_kind").notNull(),
+    authorization_source: text("authorization_source").notNull(),
+    result_kind: text("result_kind").notNull(),
+    content_visibility: text("content_visibility").notNull(),
+    runtime_status: text("runtime_status").notNull(),
+    runtime_bridge_status: text("runtime_bridge_status").notNull(),
+    provider_call_executed: boolean("provider_call_executed")
+      .default(false)
+      .notNull(),
+    env_secret_accessed: boolean("env_secret_accessed")
+      .default(false)
+      .notNull(),
+    provider_configuration_read: boolean("provider_configuration_read")
+      .default(false)
+      .notNull(),
+    cost_calibration_executed: boolean("cost_calibration_executed")
+      .default(false)
+      .notNull(),
+    question_write_status: text("question_write_status").notNull(),
+    paper_write_status: text("paper_write_status").notNull(),
+    source_question_public_id: text("source_question_public_id"),
+    source_paper_public_id: text("source_paper_public_id"),
+    redaction_status: text("redaction_status").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.ai_generation_task_id],
+      foreignColumns: [aiGenerationTask.id],
+      name: "fk_admin_ai_generation_task_metadata_task",
+    }).onDelete("restrict"),
+    uniqueIndex("udx_admin_ai_generation_task_metadata_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex(
+      "udx_admin_ai_generation_task_metadata_ai_generation_task_id",
+    ).on(table.ai_generation_task_id),
+    uniqueIndex("udx_admin_ai_generation_task_metadata_task_public_id").on(
+      table.task_public_id,
+    ),
+    index("idx_admin_ai_generation_task_metadata_workspace_generation_kind").on(
+      table.workspace,
+      table.generation_kind,
+    ),
+    index("idx_admin_ai_generation_task_metadata_runtime_bridge_status").on(
+      table.runtime_bridge_status,
+    ),
+    index("idx_admin_ai_generation_task_metadata_request_public_id").on(
+      table.request_public_id,
+    ),
   ],
 );
 

@@ -148,7 +148,7 @@ export function mapAdminAiGenerationTaskPersistenceRowToDto(
     },
     sourceQuestionPublicId: row.source_question_public_id,
     sourcePaperPublicId: row.source_paper_public_id,
-    contentVisibility: "summary_only",
+    contentVisibility: row.content_visibility,
     redactionStatus: row.redaction_status,
   };
 }

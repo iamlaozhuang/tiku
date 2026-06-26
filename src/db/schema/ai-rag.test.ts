@@ -26,6 +26,15 @@ function getColumnNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   return getTableConfig(table).columns.map((column) => column.name);
 }
 
+function getColumnConfig(
+  table: Parameters<typeof getTableConfig>[0],
+  columnName: string,
+) {
+  return getTableConfig(table).columns.find(
+    (column) => column.name === columnName,
+  );
+}
+
 function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   return getTableConfig(table).indexes.flatMap((schemaIndex) =>
     schemaIndex.config.name ? [schemaIndex.config.name] : [],
@@ -508,6 +517,92 @@ describe("personal learning AI task persistence schema", () => {
     expect(schemaExports.aiGenerationTaskStatusValues).not.toEqual(
       aiScoringAttemptStatusValues,
     );
+  });
+});
+
+describe("admin AI generation task persistence schema", () => {
+  const schemaExports = aiRagSchema as Record<string, unknown>;
+  const aiGenerationTask = schemaExports.aiGenerationTask as Parameters<
+    typeof getTableConfig
+  >[0];
+  const adminAiGenerationTaskMetadata =
+    schemaExports.adminAiGenerationTaskMetadata as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
+
+  it("keeps shared lifecycle fields nullable for non-lossy admin AI generation tasks", () => {
+    expect(getColumnConfig(aiGenerationTask, "ai_func_type")?.notNull).toBe(
+      false,
+    );
+    expect(
+      getColumnConfig(aiGenerationTask, "question_public_id")?.notNull,
+    ).toBe(false);
+  });
+
+  it("defines an admin metadata companion table linked to ai_generation_task", () => {
+    expect(adminAiGenerationTaskMetadata).toBeDefined();
+
+    if (adminAiGenerationTaskMetadata === undefined) {
+      return;
+    }
+
+    expect(getTableName(adminAiGenerationTaskMetadata)).toBe(
+      "admin_ai_generation_task_metadata",
+    );
+    expect(getColumnNames(adminAiGenerationTaskMetadata)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "ai_generation_task_id",
+        "task_public_id",
+        "request_public_id",
+        "workspace",
+        "generation_kind",
+        "authorization_source",
+        "result_kind",
+        "content_visibility",
+        "runtime_status",
+        "runtime_bridge_status",
+        "provider_call_executed",
+        "env_secret_accessed",
+        "provider_configuration_read",
+        "cost_calibration_executed",
+        "question_write_status",
+        "paper_write_status",
+        "source_question_public_id",
+        "source_paper_public_id",
+        "redaction_status",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getForeignKeyNames(adminAiGenerationTaskMetadata)).toEqual(
+      expect.arrayContaining(["fk_admin_ai_generation_task_metadata_task"]),
+    );
+  });
+
+  it("indexes admin metadata by task, route, runtime bridge, and request references", () => {
+    expect(adminAiGenerationTaskMetadata).toBeDefined();
+
+    if (adminAiGenerationTaskMetadata === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(adminAiGenerationTaskMetadata)).toEqual(
+      expect.arrayContaining([
+        "udx_admin_ai_generation_task_metadata_public_id",
+        "udx_admin_ai_generation_task_metadata_ai_generation_task_id",
+        "udx_admin_ai_generation_task_metadata_task_public_id",
+        "idx_admin_ai_generation_task_metadata_workspace_generation_kind",
+        "idx_admin_ai_generation_task_metadata_runtime_bridge_status",
+        "idx_admin_ai_generation_task_metadata_request_public_id",
+      ]),
+    );
+    expect(
+      getIndexNames(adminAiGenerationTaskMetadata).every(
+        (indexName) => indexName.length <= 63,
+      ),
+    ).toBe(true);
   });
 });
 
