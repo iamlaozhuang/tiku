@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+currentPhase: provider-cost-gate-closeout-review-2026-06-26
 updatedAt: "2026-06-26T23:59:59-07:00"
 architecture:
   status: complete
@@ -501,12 +501,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
-  lastKnownOriginMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
+  lastKnownMasterSha: f9731a6657151a3772488c87d617b5fc1db3a4f5
+  lastKnownOriginMasterSha: f9731a6657151a3772488c87d617b5fc1db3a4f5
 currentTask:
-  id: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+  id: provider-cost-gate-closeout-review-2026-06-26
   status: closed
-  result: pass_local_real_provider_route_integrated_smoke_4_calls_no_db_no_formal_write_no_final_pass
+  result: pass_local_provider_cost_gate_closeout_route_smoke_and_token_boundary_no_staging_prod_release_final_pass
   claimedAt: "2026-06-26T23:59:59-07:00"
   plannedAt: "2026-06-26T23:59:59-07:00"
   validatedAt: "2026-06-26T23:59:59-07:00"
@@ -514,11 +514,13 @@ currentTask:
   closedAt: "2026-06-26T23:59:59-07:00"
   sourceStory: user_requested_provider_cost_route_integrated_batch_2026_06_26
   approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-provider-cost-gate-closeout-review.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-gate-closeout-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-gate-closeout-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-gate-closeout-review.md
   sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
   sourceFakeProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+  sourceRealProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
   scope:
     docsStateEvidenceAudit: true
     localSourceChange: false
@@ -531,8 +533,8 @@ currentTask:
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialOrEnvRead: true
-    providerCall: true
+    credentialOrEnvRead: false
+    providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
@@ -556,7 +558,7 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
-    branch: codex/admin-ai-real-provider-route-smoke-20260626
+    branch: codex/provider-cost-gate-closeout-review-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -567,16 +569,17 @@ currentTask:
     auditReviewCreated: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    smokeRunnerPrepared: pass
+    closeoutReviewPrepared: pass
     focusedUnitTests: not_applicable_docs_runtime_smoke_only
     lint: not_applicable_docs_runtime_smoke_only
     typecheck: not_applicable_docs_runtime_smoke_only
     providerCostSmokeExecuted: false
-    providerCallCount: 4
-    providerSmokeResult: pass
+    providerCallCount: 0
+    providerSmokeResult: pass_from_source_evidence
     providerModel: alibaba-qwen/qwen3.7-max
-    workflowCount: 4
-    retries: 0
+    workflowCount: 4_from_source_evidence
+    retries: 0_from_source_evidence
+    providerCostGate: pass_local_route_smoke_and_token_boundary
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -586,8 +589,8 @@ currentTask:
     schemaMigrationExecuted: false
     routeSmokeExecuted: false
     accountMutationExecuted: false
-    providerCallExecuted: true
-    credentialReadExecuted: true
+    providerCallExecuted: false
+    credentialReadExecuted: false
     costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
@@ -595,7 +598,39 @@ currentTask:
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: provider-cost-gate-closeout-review-2026-06-26
+  nextRecommendedTask: formal-question-paper-adoption-approval-package-2026-06-26
+providerCostGateCloseoutReview20260626:
+  taskId: provider-cost-gate-closeout-review-2026-06-26
+  phase: provider-cost-gate-closeout-review-2026-06-26
+  recordedAt: "2026-06-26T23:59:59-07:00"
+  status: closed
+  result: pass_local_provider_cost_gate_closeout_route_smoke_and_token_boundary_no_staging_prod_release_final_pass
+  branch: codex/provider-cost-gate-closeout-review-20260626
+  entryMasterSha: f9731a6657151a3772488c87d617b5fc1db3a4f5
+  entryOriginMasterSha: f9731a6657151a3772488c87d617b5fc1db3a4f5
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-gate-closeout-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-gate-closeout-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-gate-closeout-review.md
+  sourceFakeProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+  sourceRealProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  decision:
+    providerCostGate: pass_local_route_smoke_and_token_boundary
+    modelConnectivity: pass
+    routeIntegratedWorkflows: pass_four_of_four
+    maxCallsObserved: 4
+    retriesObserved: 0
+    tokenSummaryRecorded: true
+    monetaryCostEstimated: false
+    monetaryCostReason: pricing_table_not_in_scope
+    stagingProdReleaseFinalPass: not_claimed
+    formalQuestionPaperWrite: not_approved
+  validationSummary:
+    docsCloseoutReview: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: formal-question-paper-adoption-approval-package-2026-06-26
 aiGenerationProviderRouteIntegratedSmokeExecution20260626:
   taskId: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
   phase: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
