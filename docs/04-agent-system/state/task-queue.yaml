@@ -4478,6 +4478,139 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
+  - id: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+    title: Admin AI generation runtime bridge diagnostic or integration plan
+    phase: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+    sourceStory: current_user_request_admin_ai_generation_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+    dependencies:
+      - admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+      - ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+    taskKind: docs_only_admin_ai_runtime_bridge_direction_decision
+    moduleRunVersion: 2
+    executionProfile: docs_state_decision_plan_only
+    evidenceMode: redacted_static_source_decision_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_admin_runtime_bridge_diagnostic
+    requiredOutcome: >-
+      Decide whether content/org admin AI generation routes should connect directly to the existing personal Provider
+      bridge or use a shared admin runtime bridge path. Do not approve Provider calls, credential reads, source changes,
+      tests, DB/schema/migration/seed/package/lockfile/env changes, formal question/paper writes, staging/prod,
+      payment, deployment, or release readiness.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_request_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      formalQuestionPaperWrite: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+    decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+    status: closed
+    result: pass_docs_only_admin_ai_runtime_bridge_direction_shared_admin_bridge_no_provider_no_source_no_final_pass
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/admin-ai-runtime-bridge-diagnostic-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+    validationSummary:
+      runtimeBridgeDecisionPackagePrepared: pass
+      decision: shared_provider_execution_core_plus_admin_runtime_bridge_adapter
+      directPersonalProviderBridgeReuse: rejected
+      providerCallExecuted: false
+      credentialReadExecuted: false
+      sourceTestPackageLockfileChanged: false
+      databaseSchemaMigrationAccountMutationExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
+
   - id: mvp-final-pass-decision-review-2026-06-26
     title: MVP final Pass decision review for local product scope
     phase: mvp-final-pass-decision-review-2026-06-26

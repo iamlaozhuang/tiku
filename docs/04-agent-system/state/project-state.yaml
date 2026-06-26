@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
-updatedAt: "2026-06-26T23:59:30-07:00"
+currentPhase: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+updatedAt: "2026-06-26T23:59:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,29 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d9f69bba162c75cd3fd5f5027f4f91891b7d1697
-  lastKnownOriginMasterSha: d9f69bba162c75cd3fd5f5027f4f91891b7d1697
+  lastKnownMasterSha: 4213312ad7016409c588a10188573ef9328263d2
+  lastKnownOriginMasterSha: 4213312ad7016409c588a10188573ef9328263d2
 currentTask:
-  id: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+  id: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
   status: closed
-  result: partial_refreshed_local_real_provider_smoke_pass_product_bridge_blocked_no_final_pass
-  claimedAt: "2026-06-26T23:59:30-07:00"
-  plannedAt: "2026-06-26T23:59:30-07:00"
+  result: pass_docs_only_admin_ai_runtime_bridge_direction_shared_admin_bridge_no_provider_no_source_no_final_pass
+  claimedAt: "2026-06-26T23:59:59-07:00"
+  plannedAt: "2026-06-26T23:59:59-07:00"
   validatedAt: "2026-06-26T23:59:59-07:00"
   reviewedAt: "2026-06-26T23:59:59-07:00"
   closedAt: "2026-06-26T23:59:59-07:00"
-  sourceStory: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
-  approvalSource: refreshed_gate_package_and_current_user_request_execute_real_provider_smoke_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
-  sourceProviderCostBoundaryEvidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
-  sourceGeneratedResultHistoryUiEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+  sourceStory: current_user_request_admin_ai_generation_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+  approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  sourceRuntimeBridgePersistenceDecisionPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+  sourceProviderCostSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
   scope:
     docsStateEvidenceAudit: true
     staticSourceRead: true
-    providerCostSmokeOrCalibration: approved_by_refreshed_gate_package
-    providerCredentialRead: approved_local_provider_key_only
-    providerCredentialSourceKind: local_dotenv
-    credentialValueRecorded: false
+    runtimeBridgeDecisionOnly: true
     localSourceChange: false
     focusedUnitTest: false
     drizzleMetadataChanged: false
@@ -536,82 +533,81 @@ currentTask:
     databaseWriteExecuted: false
     directSqlOrRawDbRows: false
     routeSmokeExecuted: false
-    generatedResultHistoryReadUi: read_only_basis_only
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialDocumentRead: read_only_local_provider_key_source
-    credentialOrEnvRead: provider_key_only_value_not_recorded
-    providerCall: true
-    providerCallCount: 4
+    credentialDocumentRead: false
+    credentialOrEnvRead: false
+    providerCall: false
+    providerCallCount: 0
     providerRetryCount: 0
-    costCalibration: token_usage_summary_only_no_monetary_estimate
+    costCalibration: false
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
   requirementMapping:
-    providerCostBoundary: consumed_refreshed_gate_package
-    providerCapability: local_real_model_smoke_passed_4_calls
-    adminAiGeneration: product_routes_remain_provider_call_blocked
-    aiGenerationTask: task_identity_and_redacted_generated_result_history_remain_available
-    generatedResultStorage: read_only_basis_only
+    adminAiGeneration: content_org_admin_routes_need_admin_specific_runtime_bridge
+    providerBridge: reuse_shared_provider_execution_core_not_personal_route_bridge
+    aiGenerationTask: admin_task_and_generated_result_persistence_remain_admin_specific
+    generatedResultStorage: no_change_to_draft_result_storage
     formalContentBoundary: generated_result_readback_is_not_formal_question_or_paper_adoption
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
-  executionBoundary:
-    executionMode: local_provider_smoke_under_refreshed_gate
-    providerProfile: openai_compatible_alibaba_qwen_qwen3_7_max
-    maxProviderCalls: 4
-    actualProviderCalls: 4
-    retryCount: 0
-    allowedWorkflows:
-      - content_ai_question
-      - content_ai_paper
-      - organization_ai_question
-      - organization_ai_paper
-    providerCapabilityResult: pass_local_real_model_smoke_4_calls
-    productChainStatus: provider_call_blocked
-    adminRouteIntegratedProviderPass: false
-    routeIntegratedProviderPassAllowedOnlyIf: approved_route_path_returns_providerCallExecuted_true
-    minimalRouteSmokeAllowed: false
-    maxRouteRequests: 0
-    evidenceMode: redacted_provider_status_usage_cost_summary_and_local_contract_summary_only
-    formalQuestionPaperWriteAllowed: false
+  decision:
+    directPersonalProviderBridgeReuse: rejected
+    selectedPath: shared_provider_execution_core_plus_admin_runtime_bridge_adapter
+    adminRouteDefault: provider_call_blocked
+    providerCallAllowedNow: false
+    credentialReadAllowedNow: false
+    formalQuestionPaperWriteAllowedNow: false
+    reusablePersonalProviderPieces:
+      - provider_model_metadata_shape
+      - provider_call_cap_and_retry_discipline
+      - redacted_execution_summary
+      - latency_token_cost_summary
+      - failure_category_normalization
+      - provider_disabled_blocked_outcome_pattern
+    rejectedDirectReuseReasons:
+      - personal_route_persistence_is_personal_auth_owner_only
+      - personal_runtime_bridge_uses_personal_request_flow_dto
+      - admin_content_owner_is_platform_content_review_pool
+      - admin_organization_owner_uses_org_auth_and_organization_context
+      - admin_generated_result_draft_and_formal_adoption_boundaries_are_separate
+    nextImplementationTask: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
-  branch: codex/ai-provider-cost-smoke-refresh-20260626
+      approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+  branch: codex/admin-ai-runtime-bridge-diagnostic-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    refreshedGatePackageConsumed: pass
-    generatedResultHistoryUiBasisIncorporated: pass
+    acceptanceDecisionPackageCreated: pass
     evidenceCreated: pass
     auditReviewCreated: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    providerCostSmokeExecuted: pass
-    providerCallCount: pass_4_of_4_max
-    providerSmokeResult: pass_local_real_model_4_calls
-    localContractSummaryStatus: blocked_product_routes_remain_provider_call_blocked
-    routeIntegratedProviderPassAllowed: false_current_routes_provider_call_blocked
-    monetaryCostEstimated: false
+    runtimeBridgeDecision: pass_shared_provider_execution_core_plus_admin_bridge_adapter
+    directPersonalProviderBridgeReuse: rejected
+    providerCostSmokeExecuted: false
+    providerCallCount: 0
+    providerSmokeResult: not_executed
+    adminRouteIntegratedProviderPassAllowed: false_requires_later_source_task_and_provider_approval
     focusedUnitTest: not_applicable_docs_only
     typecheck: not_applicable_docs_only
     lint: not_applicable_docs_only
@@ -627,15 +623,59 @@ currentTask:
     migrationGenerationExecuted: false
     routeSmokeExecuted: false
     accountMutationExecuted: false
-    providerCallExecuted: true
-    costCalibrationExecuted: token_usage_summary_only
+    providerCallExecuted: false
+    credentialReadExecuted: false
+    costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: provider_cost_boundary_or_smoke_after_generated_result_history_ui_closure
+  nextRecommendedTask: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
+adminAiGenerationRuntimeBridgeDiagnosticOrIntegrationPlan20260626:
+  taskId: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+  phase: admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+  recordedAt: "2026-06-26T23:59:59-07:00"
+  status: closed
+  result: pass_docs_only_admin_ai_runtime_bridge_direction_shared_admin_bridge_no_provider_no_source_no_final_pass
+  validatedAt: "2026-06-26T23:59:59-07:00"
+  reviewedAt: "2026-06-26T23:59:59-07:00"
+  closedAt: "2026-06-26T23:59:59-07:00"
+  branch: codex/admin-ai-runtime-bridge-diagnostic-20260626
+  entryMasterSha: 4213312ad7016409c588a10188573ef9328263d2
+  entryOriginMasterSha: 4213312ad7016409c588a10188573ef9328263d2
+  approvalSource: current_user_request_open_admin_ai_runtime_bridge_diagnostic_or_integration_plan_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+  decision:
+    directPersonalProviderBridgeReuse: rejected
+    selectedPath: shared_provider_execution_core_plus_admin_runtime_bridge_adapter
+    adminRouteDefault: provider_call_blocked
+    providerCallAllowed: false
+    credentialReadAllowed: false
+    formalQuestionPaperWriteAllowed: false
+  validationSummary:
+    taskPlanCreated: pass
+    acceptanceDecisionPackageCreated: pass
+    evidenceCreated: pass
+    auditReviewCreated: pass
+    taskQueuePacketCreated: pass
+    projectStateUpdated: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceTestPackageLockfileChanged: false
+    databaseSchemaMigrationAccountMutationExecuted: false
+    providerCallExecuted: false
+    credentialReadExecuted: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+  nextRecommendedTask: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
 adminAiGenerationGeneratedResultStorageApprovalPackage20260626:
   taskId: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
   phase: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
