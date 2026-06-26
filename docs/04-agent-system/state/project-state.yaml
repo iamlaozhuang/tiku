@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
-updatedAt: "2026-06-26T11:55:00-07:00"
+currentPhase: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+updatedAt: "2026-06-26T12:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,30 +501,31 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
-  lastKnownOriginMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
+  lastKnownMasterSha: 87c45b0ab4d31a0d47849022685c04cab455d1ca
+  lastKnownOriginMasterSha: 87c45b0ab4d31a0d47849022685c04cab455d1ca
 currentTask:
-  id: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+  id: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
   status: closed
-  result: pass_admin_ai_generation_task_persistence_contract_repository_port_focused_unit_tests
-  claimedAt: "2026-06-26T11:55:00-07:00"
-  plannedAt: "2026-06-26T11:55:00-07:00"
-  validatedAt: "2026-06-26T12:15:00-07:00"
-  reviewedAt: "2026-06-26T12:15:00-07:00"
-  closedAt: "2026-06-26T12:15:00-07:00"
-  sourceStory: user_requested_admin_ai_generation_task_persistence_contract_first
-  approvalConsumed: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
-  approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  result: pass_docs_only_decision_prioritize_db_adapter_schema_mapping_before_route_fake_persistence
+  claimedAt: "2026-06-26T12:40:00-07:00"
+  plannedAt: "2026-06-26T12:40:00-07:00"
+  validatedAt: "2026-06-26T12:55:00-07:00"
+  reviewedAt: "2026-06-26T12:55:00-07:00"
+  closedAt: "2026-06-26T12:55:00-07:00"
+  sourceStory: user_requested_admin_ai_generation_persistence_route_or_db_adapter_decision
+  approvalConsumed: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
+  approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
   sourceRuntimeBridgePlanPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
   scope:
     docsStateEvidenceAudit: true
-    decisionPlanOnly: false
-    localSourceChange: true
-    focusedUnitTest: true
-    repositoryPortContract: true
+    decisionPlanOnly: true
+    localSourceChange: false
+    focusedUnitTest: false
+    repositoryPortContract: false
     realDbAdapter: false
     browserRuntime: false
     credentialDocumentRead: false
@@ -538,38 +539,38 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: task_persistence_contract_repository_port_platform_and_organization_owner
-    aiGenerationTask: pending_task_metadata_only_fake_gateway_no_db_adapter
+    adminAiGeneration: route_fake_persistence_rejected_for_product_path
+    aiGenerationTask: db_adapter_schema_mapping_approval_required_before_route_persistence
     formalContentBoundary: question_paper_write_blocked_without_follow_up_task
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
-  branch: codex/admin-ai-persistence-contract-20260626
+      approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
+  branch: codex/admin-ai-persistence-decision-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    tddRedObserved: pass_failed_before_implementation_missing_repository_module
-    focusedUnitTest: pass_4_tests
+    decisionPackagePrepared: pass
+    focusedUnitTest: not_applicable_docs_only
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialOrEnvReadExecuted: false
-    lint: pass
-    typecheck: pass
+    lint: not_applicable_docs_only
+    typecheck: not_applicable_docs_only
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -583,11 +584,43 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    sourceChanged: true
-    testChanged: true
+    sourceChanged: false
+    testChanged: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+  nextRecommendedTask: admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
+adminAiGenerationTaskPersistenceRouteIntegrationPlanOrDbAdapterDecision20260626:
+  taskId: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+  phase: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+  recordedAt: "2026-06-26T12:55:00-07:00"
+  status: closed
+  result: pass_docs_only_decision_prioritize_db_adapter_schema_mapping_before_route_fake_persistence
+  branch: codex/admin-ai-persistence-decision-20260626
+  entryMasterSha: 87c45b0ab4d31a0d47849022685c04cab455d1ca
+  entryOriginMasterSha: 87c45b0ab4d31a0d47849022685c04cab455d1ca
+  approvalSource: user_request_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+  validationSummary:
+    decisionPackagePrepared: pass
+    sourceChanged: false
+    testChanged: false
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    providerCallExecuted: false
+    credentialOrEnvReadExecuted: false
+    formalQuestionOrPaperWriteExecuted: false
+    packageLockfileChanged: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
 organizationAnalyticsDashboardUxSummaryEmployeeTabsTdd20260626:
   taskId: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
   phase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
