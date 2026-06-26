@@ -418,7 +418,14 @@ tasks:
       eligible sources exist. The route may create local formal question/paper drafts and update adoption metadata for
       those calls only. Do not seed data, execute migrations, call Provider, publish formal content, or claim
       staging/prod/release final Pass.
-    status: pending
+    status: closed
+    claimedAt: "2026-06-26T10:08:30-07:00"
+    plannedAt: "2026-06-26T10:08:30-07:00"
+    executedAt: "2026-06-26T10:15:40-07:00"
+    validatedAt: "2026-06-26T10:15:40-07:00"
+    reviewedAt: "2026-06-26T10:15:40-07:00"
+    closedAt: "2026-06-26T10:15:40-07:00"
+    result: blocked_route_smoke_executed_question_500014_no_retry
     approvedAt: "2026-06-26T09:45:55-07:00"
     approvedBy: laozhuang
     approvalConsumed:
@@ -523,7 +530,8 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
-    nextRecommendedTask: admin-ai-generation-formal-draft-product-closeout-review-or-paper-composition-plan-2026-06-26
+    branch: codex/admin-ai-formal-draft-local-db-smoke-20260626
+    nextRecommendedTask: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
     closeoutPolicy:
       localCommit:
         approved: true
@@ -539,6 +547,151 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    validationSummary:
+      routeSmoke: blocked_route_response_question_500014
+      eligibleSourceLookupCount: 1
+      routePostCallCount: 1
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      attemptedWorkflows:
+        - content_question_formal_draft_adoption
+      unattemptedWorkflows:
+        - content_paper_formal_draft_adoption
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: true
+      formalQuestionPaperWriteAgainstLiveDbExecuted: not_confirmed_route_returned_500014
+      providerCallExecuted: false
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+    title: Admin AI generation formal draft writer mutation context repair TDD
+    phase: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_source_service_adapter_tdd_no_live_db_no_provider
+    evidenceMode: redacted_unit_test_contract_summary_only
+    validationPolicy: red_green_focused_unit_lint_typecheck_prettier_diff_module_run_v2_gates
+    queueSelectionMode: seeded_by_formal_draft_local_db_route_smoke_blocked_diagnostic_2026_06_26
+    requiredOutcome: >-
+      Repair the formal draft writer boundary so content admin formal adoption passes the reviewer/admin actor as content
+      mutation context into existing question and paper draft writer services. Prove with focused unit tests. Do not run
+      live DB route smoke, execute migrations, seed data, call Provider, publish formal content, or claim final Pass.
+    status: pending
+    approvedAt: "2026-06-26T10:15:40-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      scope: focused_source_tdd_formal_draft_writer_mutation_context_no_live_db_no_provider
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      sourceTestChange: approved
+      focusedUnitTest: approved
+      liveDatabaseConnection: blocked
+      localRouteSmoke: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.test.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+      - src/server/services/question-service.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/repositories/question-repository.ts
+      - src/server/repositories/paper-draft-repository.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - live_db_connection_or_route_smoke
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - formal_publish_or_paper_question_composition
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_adoption_boundary
+      - existing_formal_writer_reuse
+      - content_mutation_actor_context
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/services/admin-ai-generation-formal-draft-adapter.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+    branch: codex/admin-ai-formal-draft-writer-context-repair-20260626
+    nextRecommendedTask: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
     retryCount: 0
     lastFailurePath: null
 
