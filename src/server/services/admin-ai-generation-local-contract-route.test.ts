@@ -4,8 +4,20 @@ import {
   createAdminAiGenerationLocalContractRouteHandlers,
   type AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract-route";
+import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
 import type { AdminRole } from "../models/auth";
 import type { SessionService } from "./session-service";
+
+const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto =
+  {
+    requestCount: 0,
+    resultStatus: "blocked",
+    failureCategory: "provider_call_blocked",
+    durationMs: 0,
+    usageSummary: null,
+    providerErrorSummary: null,
+    redactionStatus: "redacted",
+  };
 
 function createAdminSessionService(input: {
   adminPublicId?: string | null;
@@ -61,15 +73,25 @@ async function postLocalContractRequest(input: {
   adminRoles: AdminRole[];
   organizationPublicId?: string | null;
   body: Record<string, unknown>;
+  runtimeBridgeControl?: {
+    createProviderDisabledOutcome: () => {
+      blockedReasons: string[];
+      executionSummary: typeof providerDisabledExecutionSummary;
+    };
+  };
 }) {
+  const routeOptions = {
+    sessionService: createAdminSessionService({
+      adminRoles: input.adminRoles,
+      organizationPublicId: input.organizationPublicId,
+    }),
+    ...(input.runtimeBridgeControl
+      ? { runtimeBridgeControl: input.runtimeBridgeControl }
+      : {}),
+  };
   const { collection } = createAdminAiGenerationLocalContractRouteHandlers(
     input.workspace,
-    {
-      sessionService: createAdminSessionService({
-        adminRoles: input.adminRoles,
-        organizationPublicId: input.organizationPublicId,
-      }),
-    },
+    routeOptions,
   );
 
   return collection.POST(createPostRequest(input.workspace, input.body));
@@ -82,6 +104,7 @@ describe("admin AI generation local contract route handlers", () => {
       adminRoles: ["content_admin"],
       body: {
         generationKind: "question",
+        requestedRuntimeMode: "route_integrated_provider",
         clientOnlyFixtureA: "OMITTED_FIXTURE_A",
         clientOnlyFixtureB: "OMITTED_FIXTURE_B",
         clientOnlyFixtureC: "OMITTED_FIXTURE_C",
@@ -117,10 +140,12 @@ describe("admin AI generation local contract route handlers", () => {
           },
         },
         runtimeBridge: {
+          bridgeStatus: "provider_call_blocked",
           providerCallExecuted: false,
           envSecretAccessed: false,
           providerConfigurationRead: false,
           costCalibrationExecuted: false,
+          executionSummary: providerDisabledExecutionSummary,
         },
         formalContentBoundary: {
           questionWriteStatus: "blocked_without_follow_up_task",
@@ -128,6 +153,7 @@ describe("admin AI generation local contract route handlers", () => {
         },
       },
     });
+    expect(serializedPayload).not.toContain("route_integrated_provider");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_A");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_B");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_C");
@@ -173,9 +199,64 @@ describe("admin AI generation local contract route handlers", () => {
           contentVisibility: "summary_only",
           redactionStatus: "redacted",
         },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_blocked",
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+          executionSummary: providerDisabledExecutionSummary,
+        },
       },
     });
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_D");
+  });
+
+  it("allows injected provider-disabled diagnostics without enabling provider execution", async () => {
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      body: {
+        generationKind: "paper",
+      },
+      runtimeBridgeControl: {
+        createProviderDisabledOutcome: () => ({
+          blockedReasons: [
+            "provider_call_blocked",
+            "admin_runtime_bridge_control_injected",
+          ],
+          executionSummary: {
+            ...providerDisabledExecutionSummary,
+            durationMs: 12,
+          },
+        }),
+      },
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        runtimeBridge: {
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+          blockedReasons: [
+            "provider_call_blocked",
+            "admin_runtime_bridge_control_injected",
+          ],
+          executionSummary: {
+            ...providerDisabledExecutionSummary,
+            durationMs: 12,
+          },
+        },
+        formalContentBoundary: {
+          questionWriteStatus: "blocked_without_follow_up_task",
+          paperWriteStatus: "blocked_without_follow_up_task",
+        },
+      },
+    });
   });
 
   it("denies organization standard admin direct POST without creating a task contract", async () => {

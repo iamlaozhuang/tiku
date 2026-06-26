@@ -8,11 +8,14 @@ import {
 import type {
   AdminAiGenerationKind,
   AdminAiGenerationLocalContractDto,
+  AdminAiGenerationLocalContractRuntimeBridgeDto,
+  AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
 import type { AdminRole } from "../models/auth";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
+import { createDefaultBlockedRouteIntegratedProviderExecutionOutcome } from "./personal-ai-generation-route-integrated-provider-execution-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import type { SessionService } from "./session-service";
 
@@ -20,12 +23,33 @@ export type { AdminAiGenerationWorkspace };
 
 export type AdminAiGenerationLocalContractRouteOptions = {
   sessionService?: Pick<SessionService, "getCurrentSession">;
+  runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
 };
 
 type AdminAiGenerationActor = {
   publicId: string;
   roles: AdminRole[];
   organizationPublicId: string | null;
+};
+
+type AdminAiGenerationRuntimeBridgeControlInput = {
+  actorPublicId: string;
+  organizationPublicId: string | null;
+  generationKind: AdminAiGenerationKind;
+  workspace: AdminAiGenerationWorkspace;
+};
+
+type AdminAiGenerationProviderDisabledRuntimeBridgeOutcome = {
+  blockedReasons?: string[];
+  executionSummary?: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
+};
+
+export type AdminAiGenerationRuntimeBridgeControl = {
+  createProviderDisabledOutcome?: (
+    input: AdminAiGenerationRuntimeBridgeControlInput,
+  ) =>
+    | AdminAiGenerationProviderDisabledRuntimeBridgeOutcome
+    | Promise<AdminAiGenerationProviderDisabledRuntimeBridgeOutcome>;
 };
 
 const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
@@ -172,11 +196,85 @@ function createAdminAiGenerationPolicyInput(input: {
   };
 }
 
-function buildAdminAiGenerationLocalContract(input: {
+function createDefaultAdminAiGenerationRuntimeBridge(): AdminAiGenerationLocalContractRuntimeBridgeDto {
+  const providerDisabledOutcome =
+    createDefaultBlockedRouteIntegratedProviderExecutionOutcome();
+
+  return {
+    bridgeStatus: "provider_call_blocked",
+    providerCallExecuted: false,
+    envSecretAccessed: false,
+    providerConfigurationRead: false,
+    costCalibrationExecuted: false,
+    executionSummary: providerDisabledOutcome.executionSummary,
+    redactionStatus: "redacted",
+    blockedReasons: [
+      "provider_call_blocked",
+      "env_secret_access_blocked",
+      "cost_calibration_gate_blocked",
+      "real_provider_execution_requires_follow_up_task",
+    ],
+  };
+}
+
+function ensureProviderDisabledExecutionSummary(
+  executionSummary:
+    | AdminAiGenerationRuntimeBridgeExecutionSummaryDto
+    | undefined,
+): AdminAiGenerationRuntimeBridgeExecutionSummaryDto {
+  const defaultSummary =
+    createDefaultBlockedRouteIntegratedProviderExecutionOutcome()
+      .executionSummary;
+
+  if (!executionSummary) {
+    return defaultSummary;
+  }
+
+  const isProviderDisabled =
+    executionSummary.requestCount === 0 &&
+    executionSummary.resultStatus === "blocked" &&
+    executionSummary.failureCategory === "provider_call_blocked" &&
+    executionSummary.redactionStatus === "redacted";
+
+  return isProviderDisabled ? executionSummary : defaultSummary;
+}
+
+async function resolveAdminAiGenerationRuntimeBridge(input: {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
+  runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   workspace: AdminAiGenerationWorkspace;
-}): ApiResponse<AdminAiGenerationLocalContractDto | null> {
+}): Promise<AdminAiGenerationLocalContractRuntimeBridgeDto> {
+  const defaultRuntimeBridge = createDefaultAdminAiGenerationRuntimeBridge();
+  const providerDisabledOutcome =
+    await input.runtimeBridgeControl?.createProviderDisabledOutcome?.({
+      actorPublicId: input.actor.publicId,
+      organizationPublicId: input.actor.organizationPublicId,
+      generationKind: input.generationKind,
+      workspace: input.workspace,
+    });
+
+  if (!providerDisabledOutcome) {
+    return defaultRuntimeBridge;
+  }
+
+  return {
+    ...defaultRuntimeBridge,
+    executionSummary: ensureProviderDisabledExecutionSummary(
+      providerDisabledOutcome.executionSummary,
+    ),
+    blockedReasons:
+      providerDisabledOutcome.blockedReasons ??
+      defaultRuntimeBridge.blockedReasons,
+  };
+}
+
+async function buildAdminAiGenerationLocalContract(input: {
+  actor: AdminAiGenerationActor;
+  generationKind: AdminAiGenerationKind;
+  runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
+  workspace: AdminAiGenerationWorkspace;
+}): Promise<ApiResponse<AdminAiGenerationLocalContractDto | null>> {
   const taskRequestResponse = buildAiGenerationTaskRequestPolicyReadModel(
     createAdminAiGenerationPolicyInput(input),
   );
@@ -186,6 +284,7 @@ function buildAdminAiGenerationLocalContract(input: {
   }
 
   const taskRequest = taskRequestResponse.data;
+  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge(input);
 
   return createSuccessResponse({
     runtimeStatus: "local_contract_only",
@@ -203,20 +302,7 @@ function buildAdminAiGenerationLocalContract(input: {
       citationCount: taskRequest.resultReference.citationCount,
       redactionStatus: "redacted",
     },
-    runtimeBridge: {
-      bridgeStatus: "provider_call_blocked",
-      providerCallExecuted: false,
-      envSecretAccessed: false,
-      providerConfigurationRead: false,
-      costCalibrationExecuted: false,
-      redactionStatus: "redacted",
-      blockedReasons: [
-        "provider_call_blocked",
-        "env_secret_access_blocked",
-        "cost_calibration_gate_blocked",
-        "real_provider_execution_requires_follow_up_task",
-      ],
-    },
+    runtimeBridge,
     formalContentBoundary: {
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
@@ -282,9 +368,10 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
         }
 
         return createJsonResponse(
-          buildAdminAiGenerationLocalContract({
+          await buildAdminAiGenerationLocalContract({
             actor,
             generationKind,
+            runtimeBridgeControl: options.runtimeBridgeControl,
             workspace,
           }),
         );

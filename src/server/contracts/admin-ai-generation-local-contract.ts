@@ -21,12 +21,46 @@ export type AdminAiGenerationLocalContractResultStateDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationRuntimeBridgeUsageSummaryDto = Record<
+  string,
+  number
+> | null;
+
+export type AdminAiGenerationRuntimeBridgeErrorSummaryDto = {
+  httpStatus: number | null;
+  providerErrorCode: string | null;
+} | null;
+
+export type AdminAiGenerationRuntimeBridgeFailureCategoryDto =
+  | "provider_call_blocked"
+  | "missing_provider_credential"
+  | "provider_error"
+  | "timeout"
+  | "redaction_violation"
+  | null;
+
+export type AdminAiGenerationRuntimeBridgeResultStatusDto =
+  | "pass"
+  | "fail"
+  | "blocked";
+
+export type AdminAiGenerationRuntimeBridgeExecutionSummaryDto = {
+  requestCount: 0 | 1;
+  resultStatus: AdminAiGenerationRuntimeBridgeResultStatusDto;
+  failureCategory: AdminAiGenerationRuntimeBridgeFailureCategoryDto;
+  durationMs: number;
+  usageSummary: AdminAiGenerationRuntimeBridgeUsageSummaryDto;
+  providerErrorSummary: AdminAiGenerationRuntimeBridgeErrorSummaryDto;
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationLocalContractRuntimeBridgeDto = {
   bridgeStatus: "provider_call_blocked";
   providerCallExecuted: false;
   envSecretAccessed: false;
   providerConfigurationRead: false;
   costCalibrationExecuted: false;
+  executionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
   redactionStatus: "redacted";
   blockedReasons: string[];
 };
