@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-closed-2026-06-25
-updatedAt: "2026-06-25T17:44:54-07:00"
+currentPhase: role-separated-full-8-row-post-visible-label-repair-browser-rerun-blocked-2026-06-25
+updatedAt: "2026-06-25T17:56:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,35 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
-  lastKnownOriginMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
+  lastKnownMasterSha: da367198f5cccbb89fd9271586ea5a4137f9f41b
+  lastKnownOriginMasterSha: da367198f5cccbb89fd9271586ea5a4137f9f41b
 currentTask:
-  id: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
+  id: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
   status: closed
-  result: source_unit_pass_super_admin_display_smoke_pass_role_specific_browser_blocked_credentials_no_final_pass
-  claimedAt: "2026-06-25T17:35:00-07:00"
-  plannedAt: "2026-06-25T17:35:00-07:00"
-  validatedAt: "2026-06-25T17:44:54-07:00"
-  reviewedAt: "2026-06-25T17:44:54-07:00"
-  closedAt: "2026-06-25T17:44:54-07:00"
-  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_full_8_row_rerun
-  approvalConsumed: active_goal_next_smallest_local_source_repair
-  approvalSource: active_goal_next_smallest_local_source_repair
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  result: blocked_missing_complete_role_credential_set_no_browser_matrix_no_final_pass
+  claimedAt: "2026-06-25T17:52:00-07:00"
+  plannedAt: "2026-06-25T17:52:00-07:00"
+  validatedAt: "2026-06-25T17:56:06-07:00"
+  reviewedAt: "2026-06-25T17:56:06-07:00"
+  closedAt: "2026-06-25T17:56:06-07:00"
+  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_visible_label_repair
+  approvalConsumed: active_goal_credential_read_browser_rerun
+  approvalSource: active_goal_credential_read_browser_rerun
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorFullEightRowRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
   predecessorAiActionRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
+  predecessorVisibleLabelRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
   allowedScope:
     docsStateEvidenceAudit: true
     localRuntimeDiagnostic: false
-    localSourceChange: true
-    focusedUnitTests: true
-    localBrowserRuntimeRerun: partial_display_smoke_only
+    localSourceChange: false
+    focusedUnitTests: false
+    localBrowserRuntimeRerun: blocked_before_matrix
     credentialDocumentReadByCodex: true
-    credentialEntryByCodex: true
-    credentialMode: local_private_role_account_file_redacted_env_not_read
+    credentialEntryByCodex: false
+    credentialMode: local_private_role_account_file_or_targeted_env_key_scan_redacted
     databaseRead: false
     databaseWrite: false
     seedReadOnlyInspection: false
@@ -543,9 +544,9 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  visibleLabelRepairScope:
-    taskKind: focused_local_source_repair
-    purpose: remove_user_visible_technical_labels_from_content_and_ops_runtime_surfaces
+  browserRerunScope:
+    taskKind: local_real_browser_runtime_rerun
+    purpose: execute_full_eight_row_matrix_after_visible_label_repair
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
@@ -553,8 +554,8 @@ currentTask:
       - route_access_status
       - token_presence_boolean
       - console_error_count
-      - unit_test_status
-      - lint_typecheck_status
+      - credential_source_presence_status
+      - tooling_status
       - conclusion_without_raw_rows
     blockedEvidenceFields:
       - credentials
@@ -571,44 +572,84 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: active_goal_next_smallest_local_source_repair
+      approvalSource: active_goal_credential_read_browser_rerun
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: active_goal_next_smallest_local_source_repair
+      approvalSource: active_goal_credential_read_browser_rerun
     push:
       approved: true
       target: origin/master
-      approvalSource: active_goal_next_smallest_local_source_repair
+      approvalSource: active_goal_credential_read_browser_rerun
     cleanup:
       deleteShortBranch: true
-      approvalSource: active_goal_next_smallest_local_source_repair
-  branch: codex/visible-label-runtime-repair-20260625
+      approvalSource: active_goal_credential_read_browser_rerun
+  branch: codex/full-8-row-post-visible-label-rerun-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    browserRuntimeExecuted: true
+    browserRuntimeExecuted: false
     credentialDocumentReadByCodex: true
-    credentialEntryByCodex: true
+    credentialEntryByCodex: false
     databaseReadExecuted: false
     databaseWriteExecuted: false
-    focusedUnitTests: pass_10_tests
-    lint: pass
-    typecheck: pass
-    formatCheck: pass
-    diffCheck: pass
-    roleSpecificContentOpsBrowser: blocked_non_env_credentials_unavailable
-    superAdminDisplaySmoke: pass_ops_users_and_content_papers
+    localTargetReachability: pass_login_http_200
+    playwrightVersion: pass_1_60_0
+    credentialDiscovery: blocked_complete_eight_role_set_unavailable
     rowsExecuted: 0
     passRows: 0
     failRows: 0
-    blockedRows: 2
+    blockedRows: 8
     schemaMigrationExecuted: false
     accountMutationExecuted: false
     finalPassClaim: false
-  nextRequiredTask: role_separated_full_8_row_post_visible_label_repair_browser_rerun_with_approved_role_credentials
+  nextRequiredTask: role_separated_local_role_credential_alignment_or_owner_provided_credential_set
+roleSeparatedFull8RowPostVisibleLabelRepairBrowserRerun20260625:
+  taskId: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+  phase: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+  recordedAt: "2026-06-25T17:56:06-07:00"
+  status: closed
+  result: blocked_missing_complete_role_credential_set_no_browser_matrix_no_final_pass
+  validatedAt: "2026-06-25T17:56:06-07:00"
+  reviewedAt: "2026-06-25T17:56:06-07:00"
+  closedAt: "2026-06-25T17:56:06-07:00"
+  branch: codex/full-8-row-post-visible-label-rerun-20260625
+  entryMasterSha: da367198f5cccbb89fd9271586ea5a4137f9f41b
+  entryOriginMasterSha: da367198f5cccbb89fd9271586ea5a4137f9f41b
+  approvalSource: active_goal_credential_read_browser_rerun
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+  predecessorVisibleLabelRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  validationSummary:
+    localTargetReachability: pass_login_http_200
+    playwrightVersion: pass_1_60_0
+    credentialDiscovery: blocked_complete_eight_role_set_unavailable
+    browserMatrixExecuted: false
+    rowsExecuted: 0
+    passRows: 0
+    failRows: 0
+    blockedRows: 8
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    providerOrCostTouched: false
+    finalPassClaim: false
+    nextRequiredTask: role_separated_local_role_credential_alignment_or_owner_provided_credential_set
+  blockedWithoutFreshApproval:
+    - account_user_employee_authorization_mutation
+    - database_seed_or_write
+    - schema_migration_or_drizzle_schema_change
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - dependency_or_package_lock_change
+    - pr_force_push
+    - final_acceptance_pass
 visibleChineseUiTechnicalLabelRuntimeCleanupResidualRepair20260625:
   taskId: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
   phase: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25

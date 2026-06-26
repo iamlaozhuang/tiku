@@ -44,6 +44,137 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+    title: Full eight-row role-separated browser rerun after visible-label repair
+    phase: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+    sourceStory: active_goal_full_8_row_role_separated_browser_acceptance
+    dependencies:
+      - visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
+    taskKind: local_real_browser_runtime_rerun
+    moduleRunVersion: 2
+    executionProfile: browser_only_role_separated_runtime_rerun
+    evidenceMode: full_redacted
+    validationPolicy: credential_discovery_browser_runtime_docs_gate
+    queueSelectionMode: active_goal_continuation_after_visible_label_repair
+    requiredOutcome: >-
+      Execute a strict full eight-row role-separated local browser rerun after the visible-label repair. If a complete
+      eight-role local credential set is unavailable, close as blocked with redacted credential-source evidence. Do not
+      change source/tests/package/lockfiles, write DB/seed, change schema/migration, mutate accounts, touch
+      Provider/Cost/staging/prod/payment/external services, or claim final MVP Pass.
+    capabilities:
+      browserRuntime: approved_by_active_goal_2026_06_25
+      credentialDocumentRead: approved_by_active_goal_2026_06_25
+      credentialEntry: approved_by_active_goal_2026_06_25
+      targetedEnvCredentialKeyScan: approved_by_active_goal_2026_06_25_redacted
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
+      - docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+      - .agent/l6-owner-preview-test-accounts.md
+      - .env.example
+      - .env.local
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - local credential discovery with redacted filename/key-name-only output
+      - local real-browser full 8 row rerun if complete role credential set is available
+      - npx.cmd playwright --version
+      - local target reachability check for http://127.0.0.1:3000/login
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: blocked_missing_complete_role_credential_set_no_browser_matrix_no_final_pass
+    claimedAt: "2026-06-25T17:52:00-07:00"
+    plannedAt: "2026-06-25T17:52:00-07:00"
+    validatedAt: "2026-06-25T17:56:06-07:00"
+    reviewedAt: "2026-06-25T17:56:06-07:00"
+    closedAt: "2026-06-25T17:56:06-07:00"
+    validationSummary:
+      localTargetReachability: pass_login_http_200
+      playwrightVersion: pass_1_60_0
+      credentialDiscovery: blocked_complete_eight_role_set_unavailable
+      browserMatrixExecuted: false
+      rowsExecuted: 0
+      passRows: 0
+      failRows: 0
+      blockedRows: 8
+      finalPassClaim: false
+      nextRequiredTask: role_separated_local_role_credential_alignment_or_owner_provided_credential_set
+    branch: codex/full-8-row-post-visible-label-rerun-20260625
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_goal_credential_read_browser_rerun
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: active_goal_credential_read_browser_rerun
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_goal_credential_read_browser_rerun
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_goal_credential_read_browser_rerun
+    blockedWithoutFreshApproval:
+      - account_user_employee_authorization_mutation
+      - database_seed_or_write
+      - schema_migration_or_drizzle_schema_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_or_package_lock_change
+      - pr_force_push
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: missing_complete_role_credential_set
+
   - id: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
     title: Clean up residual visible Chinese UI technical labels on content and ops runtime screens
     phase: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
