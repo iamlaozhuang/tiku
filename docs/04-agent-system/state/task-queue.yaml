@@ -44,6 +44,150 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+    title: Admin AI generation provider-enabled route runtime bridge fake provider TDD
+    phase: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+    sourceStory: user_requested_provider_cost_route_integrated_batch_2026_06_26
+    dependencies:
+      - admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_source_focused_tdd_no_real_provider
+    evidenceMode: redacted_unit_test_and_static_scope_summary_only
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_batch_step_1
+    requiredOutcome: >-
+      Add disabled-by-default provider-enabled admin route runtime bridge runner/control and prove content/organization
+      admin question/paper workflows can traverse a fake Provider execution path. Do not read credentials, execute real
+      Provider calls, run DB/schema/migration/seed, write formal question/paper content, touch package/lock/env files,
+      or claim staging/prod/release final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localSourceChange: approved
+      focusedUnitTest: approved
+      fakeProviderExecution: approved
+      realProviderCall: blocked
+      envSecretAccess: blocked
+      providerCredentialRead: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      formalQuestionPaperWrite: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd vitest run src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+    status: closed
+    result: pass_provider_enabled_route_runtime_bridge_fake_provider_tdd_no_real_provider_no_db_no_formal_write_no_final_pass
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/admin-ai-provider-enabled-route-fake-tdd-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+    expectedVerification:
+      defaultProviderDisabled: pass
+      fakeProviderContentQuestion: pass
+      fakeProviderContentPaper: pass
+      fakeProviderOrganizationQuestion: pass
+      fakeProviderOrganizationPaper: pass
+      realProviderCallExecuted: false
+      envSecretAccessed: false
+      formalQuestionPaperWriteExecuted: false
+      finalPassClaimed: false
+    validationSummary:
+      redFocusedTests: pass_expected_failure_6_failed_16_passed
+      focusedUnitTests: pass_22_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      fakeProviderWorkflows: pass_content_question_content_paper_org_question_org_paper
+      realProviderCallExecuted: false
+      credentialReadExecuted: false
+      databaseConnectionExecuted: false
+      schemaMigrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+
   - id: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
     title: AI generation and organization analytics implementation inventory
     phase: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26

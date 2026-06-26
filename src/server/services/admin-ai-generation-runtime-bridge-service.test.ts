@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildAdminAiGenerationRuntimeBridgeReadModelForRoute,
   buildAdminAiGenerationRuntimeBridgeReadModel,
   createAdminAiGenerationRouteIntegratedProviderRequestContext,
 } from "./admin-ai-generation-runtime-bridge-service";
+import type { AdminAiGenerationRouteIntegratedProviderExecutionInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 
 describe("admin AI generation runtime bridge service", () => {
   it("defaults content admin workflow to a provider-disabled redacted bridge", () => {
@@ -91,6 +93,169 @@ describe("admin AI generation runtime bridge service", () => {
       ownerType: "organization",
       ownerPublicId: "organization_public_runtime_bridge_101",
       organizationPublicId: "organization_public_runtime_bridge_101",
+    });
+  });
+
+  it("executes an explicit controlled runner fake Provider request with redacted admin context", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const bridge = await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
+      {
+        actorPublicId: "admin_public_runtime_bridge_102",
+        workspace: "content",
+        generationKind: "paper",
+        requestPublicId: "admin_ai_generation_request_runtime_bridge_102",
+        taskPublicId: "admin_ai_generation_task_runtime_bridge_102",
+        resultPublicId: "admin_ai_generation_result_runtime_bridge_102",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+      },
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 8,
+            timeoutMs: 30000,
+            readProviderCredential: () => "synthetic-admin-provider-credential",
+            executeProviderRequest: async (providerInput) => {
+              providerInputs.push(providerInput);
+
+              return {
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 13,
+                usageSummary: {
+                  promptTokens: 3,
+                  completionTokens: 1,
+                  totalTokens: 4,
+                },
+                providerErrorSummary: null,
+              };
+            },
+          },
+        },
+      },
+    );
+    const serializedBridge = JSON.stringify(bridge);
+
+    expect(providerInputs).toHaveLength(1);
+    expect(providerInputs[0]).toMatchObject({
+      providerMetadata: {
+        providerName: "alibaba-qwen",
+        modelName: "qwen3.7-max",
+      },
+      limits: {
+        maxRequests: 1,
+        maxRetries: 0,
+        maxOutputTokens: 8,
+        timeoutMs: 30000,
+      },
+      requestContext: {
+        routeWorkflow: "content_ai_paper_generation",
+        workspace: "content",
+        generationKind: "paper",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+      },
+    });
+    expect(bridge).toMatchObject({
+      bridgeStatus: "provider_call_succeeded",
+      bridgeMode: "controlled_runner",
+      runnerMode: "route_integrated_provider_runner",
+      realProviderExecutionApproved: true,
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      providerRetryAttempted: false,
+      providerStreamingEnabled: false,
+      costCalibrationExecuted: false,
+      redactionStatus: "redacted",
+      providerExecutionSummary: {
+        requestCount: 1,
+        resultStatus: "pass",
+        failureCategory: null,
+        durationMs: 13,
+        usageSummary: {
+          promptTokens: 3,
+          completionTokens: 1,
+          totalTokens: 4,
+        },
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
+      blockedReasons: [],
+    });
+    expect(serializedBridge).not.toContain(
+      "synthetic-admin-provider-credential",
+    );
+    expect(serializedBridge).not.toContain("rawPrompt");
+    expect(serializedBridge).not.toContain("rawOutput");
+    expect(serializedBridge).not.toContain("providerPayload");
+    expect(serializedBridge).not.toContain("Authorization");
+  });
+
+  it("blocks an explicit controlled runner when the local Provider credential is unavailable", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const bridge = await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
+      {
+        actorPublicId: "org_admin_public_runtime_bridge_103",
+        workspace: "organization",
+        generationKind: "question",
+        requestPublicId: "admin_ai_generation_request_runtime_bridge_103",
+        taskPublicId: "admin_ai_generation_task_runtime_bridge_103",
+        resultPublicId: "admin_ai_generation_result_runtime_bridge_103",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_runtime_bridge_103",
+        organizationPublicId: "organization_public_runtime_bridge_103",
+      },
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 8,
+            timeoutMs: 30000,
+            readProviderCredential: () => null,
+            executeProviderRequest: async (providerInput) => {
+              providerInputs.push(providerInput);
+              throw new Error("unexpected provider execution");
+            },
+          },
+        },
+      },
+    );
+
+    expect(providerInputs).toEqual([]);
+    expect(bridge).toMatchObject({
+      bridgeStatus: "provider_call_blocked",
+      bridgeMode: "controlled_runner",
+      runnerMode: "route_integrated_provider_runner",
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      costCalibrationExecuted: false,
+      providerExecutionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "missing_provider_credential",
+        usageSummary: null,
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
     });
   });
 });

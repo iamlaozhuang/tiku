@@ -105,7 +105,7 @@ export function createAdminAiGenerationTaskPersistenceInput(
     citationCount: 0,
     aiCallLogPublicId: null,
     runtimeStatus: input.localContract.runtimeStatus,
-    runtimeBridgeStatus: input.localContract.runtimeBridge.bridgeStatus,
+    runtimeBridgeStatus: "provider_call_blocked",
     providerCallExecuted: false,
     envSecretAccessed: false,
     providerConfigurationRead: false,

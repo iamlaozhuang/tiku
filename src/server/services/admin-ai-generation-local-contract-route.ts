@@ -27,7 +27,11 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
-import type { AdminAiGenerationRuntimeBridgeInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
+import type {
+  AdminAiGenerationRouteIntegratedProviderExecutionControl,
+  AdminAiGenerationRuntimeBridgeDto,
+  AdminAiGenerationRuntimeBridgeInput,
+} from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
@@ -39,7 +43,10 @@ import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
-import { buildAdminAiGenerationRuntimeBridgeReadModel } from "./admin-ai-generation-runtime-bridge-service";
+import {
+  buildAdminAiGenerationRuntimeBridgeReadModel,
+  buildAdminAiGenerationRuntimeBridgeReadModelForRoute,
+} from "./admin-ai-generation-runtime-bridge-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import type { SessionService } from "./session-service";
 
@@ -78,6 +85,9 @@ type AdminAiGenerationProviderDisabledRuntimeBridgeOutcome = {
 };
 
 export type AdminAiGenerationRuntimeBridgeControl = {
+  bridgeMode?: "controlled_runner";
+  explicitLocalSwitchPresent?: true;
+  providerExecution?: AdminAiGenerationRouteIntegratedProviderExecutionControl;
   createProviderDisabledOutcome?: (
     input: AdminAiGenerationRuntimeBridgeControlInput,
   ) =>
@@ -272,8 +282,16 @@ function createDefaultAdminAiGenerationRuntimeBridge(
 ): AdminAiGenerationLocalContractRuntimeBridgeDto {
   const runtimeBridge = buildAdminAiGenerationRuntimeBridgeReadModel(input);
 
+  return mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
+    runtimeBridge,
+  );
+}
+
+function mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
+  runtimeBridge: AdminAiGenerationRuntimeBridgeDto,
+): AdminAiGenerationLocalContractRuntimeBridgeDto {
   return {
-    bridgeStatus: "provider_call_blocked",
+    bridgeStatus: runtimeBridge.bridgeStatus,
     providerCallExecuted: runtimeBridge.providerCallExecuted,
     envSecretAccessed: runtimeBridge.envSecretAccessed,
     providerConfigurationRead: runtimeBridge.providerConfigurationRead,
@@ -307,6 +325,25 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   runtimeBridgeInput: AdminAiGenerationRuntimeBridgeInput;
 }): Promise<AdminAiGenerationLocalContractRuntimeBridgeDto> {
+  if (
+    input.runtimeBridgeControl?.bridgeMode === "controlled_runner" &&
+    input.runtimeBridgeControl.explicitLocalSwitchPresent === true &&
+    input.runtimeBridgeControl.providerExecution !== undefined
+  ) {
+    return mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
+      await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
+        input.runtimeBridgeInput,
+        {
+          runtimeBridgeControl: {
+            bridgeMode: "controlled_runner",
+            explicitLocalSwitchPresent: true,
+            providerExecution: input.runtimeBridgeControl.providerExecution,
+          },
+        },
+      ),
+    );
+  }
+
   const defaultRuntimeBridge = createDefaultAdminAiGenerationRuntimeBridge(
     input.runtimeBridgeInput,
   );
@@ -569,7 +606,7 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(
     taskType: localContract.taskRequest.taskType,
     resultKind: localContract.taskRequest.resultReference.resultKind,
     contentVisibility: localContract.resultState.contentVisibility,
-    providerCallExecuted: false,
+    providerCallExecuted: localContract.runtimeBridge.providerCallExecuted,
     runtimeBridgeStatus: localContract.runtimeBridge.bridgeStatus,
     formalQuestionWriteStatus:
       localContract.formalContentBoundary.questionWriteStatus,

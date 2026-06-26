@@ -62,11 +62,16 @@ export type AdminAiGenerationRuntimeBridgeExecutionSummaryDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationRuntimeBridgeStatusDto =
+  | "provider_call_blocked"
+  | "provider_call_succeeded"
+  | "provider_call_failed";
+
 export type AdminAiGenerationLocalContractRuntimeBridgeDto = {
-  bridgeStatus: "provider_call_blocked";
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  bridgeStatus: AdminAiGenerationRuntimeBridgeStatusDto;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   executionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
   redactionStatus: "redacted";
@@ -145,10 +150,10 @@ export type AdminAiGenerationTaskHistoryItemDto = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
-  runtimeBridgeStatus: "provider_call_blocked";
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  runtimeBridgeStatus: AdminAiGenerationRuntimeBridgeStatusDto;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto | null;

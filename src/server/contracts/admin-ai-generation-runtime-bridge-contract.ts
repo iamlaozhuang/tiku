@@ -1,4 +1,9 @@
 import type {
+  AiGenerationRouteIntegratedProviderExecutionControl,
+  AiGenerationRouteIntegratedProviderExecutionInput,
+  AiGenerationRouteIntegratedProviderExecutionOutcome,
+  AiGenerationRouteIntegratedProviderExecutionResult,
+  AiGenerationRouteIntegratedProviderExecutor,
   AiGenerationRouteIntegratedProviderExecutionSummary,
   AiGenerationRouteIntegratedProviderMetadata,
 } from "./route-integrated-provider-execution-contract";
@@ -12,10 +17,13 @@ export type AdminAiGenerationRuntimeBridgeStatus =
   | "provider_call_succeeded"
   | "provider_call_failed";
 
-export type AdminAiGenerationRuntimeBridgeMode = "default_blocked";
+export type AdminAiGenerationRuntimeBridgeMode =
+  | "default_blocked"
+  | "controlled_runner";
 
 export type AdminAiGenerationRuntimeBridgeRunnerMode =
-  "provider_call_blocked_runner";
+  | "provider_call_blocked_runner"
+  | "route_integrated_provider_runner";
 
 export type AdminAiGenerationRuntimeBridgeOwnerType =
   | "platform"
@@ -26,7 +34,11 @@ export type AdminAiGenerationRuntimeBridgeBlockedReason =
   | "env_secret_access_blocked"
   | "provider_configuration_read_blocked"
   | "cost_calibration_gate_blocked"
-  | "real_provider_execution_requires_follow_up_task";
+  | "real_provider_execution_requires_follow_up_task"
+  | "missing_provider_credential"
+  | "provider_error"
+  | "timeout"
+  | "redaction_violation";
 
 export type AdminAiGenerationRuntimeBridgeInput = {
   actorPublicId: string;
@@ -58,6 +70,31 @@ export type AdminAiGenerationRouteIntegratedProviderRequestContext = {
   organizationPublicId: string | null;
 };
 
+export type AdminAiGenerationRouteIntegratedProviderExecutionInput =
+  AiGenerationRouteIntegratedProviderExecutionInput<AdminAiGenerationRouteIntegratedProviderRequestContext>;
+
+export type AdminAiGenerationRouteIntegratedProviderExecutionResult =
+  AiGenerationRouteIntegratedProviderExecutionResult;
+
+export type AdminAiGenerationRouteIntegratedProviderExecutor =
+  AiGenerationRouteIntegratedProviderExecutor<AdminAiGenerationRouteIntegratedProviderRequestContext>;
+
+export type AdminAiGenerationRouteIntegratedProviderExecutionControl =
+  AiGenerationRouteIntegratedProviderExecutionControl<AdminAiGenerationRouteIntegratedProviderRequestContext>;
+
+export type AdminAiGenerationRouteIntegratedProviderExecutionOutcome =
+  AiGenerationRouteIntegratedProviderExecutionOutcome;
+
+export type AdminAiGenerationRuntimeBridgeControlledRunnerControl = {
+  bridgeMode: "controlled_runner";
+  explicitLocalSwitchPresent: true;
+  providerExecution: AdminAiGenerationRouteIntegratedProviderExecutionControl;
+};
+
+export type AdminAiGenerationRuntimeBridgeReadModelOptions = {
+  runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControlledRunnerControl;
+};
+
 export type AdminAiGenerationRuntimeBridgeDto = {
   bridgeStatus: AdminAiGenerationRuntimeBridgeStatus;
   bridgeMode: AdminAiGenerationRuntimeBridgeMode;
@@ -70,10 +107,10 @@ export type AdminAiGenerationRuntimeBridgeDto = {
   ownerType: AdminAiGenerationRuntimeBridgeOwnerType;
   ownerPublicId: string;
   organizationPublicId: string | null;
-  realProviderExecutionApproved: false;
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  realProviderExecutionApproved: boolean;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   providerRetryAttempted: false;
   providerStreamingEnabled: false;
   costCalibrationExecuted: false;
