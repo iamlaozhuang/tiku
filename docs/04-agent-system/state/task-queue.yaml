@@ -283,7 +283,14 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
     gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
-    status: pending
+    status: closed
+    result: partial_local_real_provider_smoke_pass_product_bridge_blocked_no_final_pass
+    claimedAt: "2026-06-26T08:35:00-07:00"
+    plannedAt: "2026-06-26T08:35:00-07:00"
+    validatedAt: "2026-06-26T08:55:00-07:00"
+    reviewedAt: "2026-06-26T08:55:00-07:00"
+    closedAt: "2026-06-26T08:55:00-07:00"
+    branch: codex/ai-provider-cost-final-pass-smoke-20260626
     closeoutPolicy:
       localCommit:
         approved: true
@@ -309,6 +316,19 @@ tasks:
       - staging_prod_cloud_deploy
       - payment_external_service
       - release_readiness_or_final_pass_claim
+    validationSummary:
+      providerCostSmokeExecuted: pass
+      providerCallCount: pass_4_of_4_max
+      providerSmokeResult: pass_local_real_model_4_calls
+      localContractSummaryStatus: blocked_product_routes_remain_local_contract_only
+      sourceTestPackageLockfileChanged: false
+      databaseSchemaMigrationAccountMutationExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
   - id: mvp-final-pass-decision-review-2026-06-26
     title: MVP final Pass decision review for local product scope
