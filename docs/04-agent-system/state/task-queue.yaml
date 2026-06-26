@@ -44,6 +44,156 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+    title: Content and organization admin AI generation local contract loop focused browser rerun
+    phase: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+    sourceStory: owner_selected_focused_browser_rerun_after_admin_local_contract_source_repair
+    dependencies:
+      - content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: local_real_browser_focused_rerun
+    evidenceMode: redacted_route_status_counts_and_summary_only
+    validationPolicy: real_browser_focused_three_role_runtime_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_focused_browser_rerun
+    requiredOutcome: >-
+      Use a real local browser against http://127.0.0.1:3000 to verify content_admin,
+      org_advanced_admin, and org_standard_admin AI generation surfaces after the local contract
+      source repair. Validate visible entries, route access, submit behavior, redacted summary
+      rendering, and denied or unavailable paths. Use the approved local private role-account
+      credential file only for local authentication and keep evidence fully redacted. Do not change
+      source, tests, e2e, package or lockfiles, DB, seed, schema, migration, accounts, env files,
+      Provider/Cost configuration, staging/prod, payment, external services, PRs, force push, or
+      claim MVP final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localBrowserRuntime: approved_by_user_request_2026_06_26
+      localDevServerProbe: approved_by_user_request_2026_06_26
+      credentialDocumentRead: approved_by_user_goal_and_current_focused_browser_rerun_request_2026_06_26
+      credentialEntry: approved_by_user_goal_and_current_focused_browser_rerun_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      e2eRuntime: blocked_existing_specs_not_needed_for_this_walkthrough
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - e2e/admin-audit-navigation.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd playwright --version
+      - powershell.exe -NoProfile -Command "Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000/login -TimeoutSec 8 | Select-Object -ExpandProperty StatusCode"
+      - local real-browser focused rerun for content_admin, org_advanced_admin, and org_standard_admin with redacted summary only
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+    status: closed
+    result: pass_focused_browser_three_admin_ai_local_contract_loop_no_final_pass
+    claimedAt: "2026-06-26T06:00:00-07:00"
+    plannedAt: "2026-06-26T06:00:00-07:00"
+    validatedAt: "2026-06-26T06:20:00-07:00"
+    reviewedAt: "2026-06-26T06:20:00-07:00"
+    closedAt: "2026-06-26T06:20:00-07:00"
+    branch: codex/content-org-ai-browser-rerun-20260626
+    validationSummary:
+      playwrightVersion: pass_1_60_0
+      localTargetProbe: pass_200
+      credentialStructureCheck: pass_three_rows_redacted
+      realBrowserFocusedRerun: pass_3_rows_0_fail
+      contentAdminEntrySubmitSummary: pass
+      orgAdvancedAdminEntrySubmitSummary: pass
+      orgStandardAdminDeniedOrUnavailable: pass
+      browserConsoleIssues: "0_each_row"
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass_after_docs_heading_repair
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceTestPackageLockfileChanged: false
+      dbSeedSchemaMigrationAccountMutationExecuted: false
+      providerCostStagingProdPaymentExternalExecuted: false
+      finalAcceptancePass: false
+    nextRecommendedTask: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_focused_browser_rerun_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_focused_browser_rerun_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_focused_browser_rerun_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_focused_browser_rerun_2026_06_26
+
   - id: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
     title: Content and organization admin AI generation local contract loop source repair
     phase: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
