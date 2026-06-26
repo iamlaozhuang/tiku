@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
-updatedAt: "2026-06-26T01:00:00-07:00"
+currentPhase: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+updatedAt: "2026-06-26T01:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,33 +501,33 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e65812c9e9233b60dd2fad35410d6ca65c8e5391
-  lastKnownOriginMasterSha: e65812c9e9233b60dd2fad35410d6ca65c8e5391
+  lastKnownMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
+  lastKnownOriginMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
 currentTask:
-  id: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
+  id: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
   status: closed
-  result: pass_full_8_row_role_separated_browser_validation_no_final_pass
-  claimedAt: "2026-06-26T01:00:00-07:00"
-  plannedAt: "2026-06-26T01:00:00-07:00"
-  validatedAt: "2026-06-26T01:15:00-07:00"
-  reviewedAt: "2026-06-26T01:15:00-07:00"
-  closedAt: "2026-06-26T01:15:00-07:00"
-  sourceStory: active_goal_full_8_row_role_separated_browser_acceptance
-  approvalConsumed: active_goal_private_credential_browser_rerun_2026_06_26
-  approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  result: pass_docs_only_owner_acceptance_decision_package_prepared_no_final_pass
+  claimedAt: "2026-06-26T01:30:00-07:00"
+  plannedAt: "2026-06-26T01:30:00-07:00"
+  validatedAt: "2026-06-26T01:45:00-07:00"
+  reviewedAt: "2026-06-26T01:45:00-07:00"
+  closedAt: "2026-06-26T01:45:00-07:00"
+  sourceStory: owner_acceptance_after_full_8_row_local_browser_pass
+  approvalConsumed: user_request_docs_only_owner_acceptance_decision_package_2026_06_26
+  approvalSource: user_request_docs_only_owner_acceptance_decision_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorFullEightRowRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
-  predecessorOpsVisibleLabelRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localBrowserRuntimeRerun: true
-    focusedBrowserRuntime: false
-    credentialDocumentReadByCodex: true
-    credentialEntryByCodex: true
-    credentialMode: local_private_role_account_file_redacted
+    ownerDecisionPackage: true
+    localBrowserRuntimeRerun: false
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
     localRuntimeDiagnostic: false
     localSourceChange: false
     focusedUnitTests: false
@@ -539,25 +539,29 @@ currentTask:
     dependencyIntroduction: false
     envSecretAccess: false
     providerCall: false
+    providerConfiguration: false
     stagingProdDeploy: false
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  browserRerunScope:
-    taskKind: local_real_browser_runtime_rerun
-    purpose: execute_full_eight_row_matrix_after_ops_visible_label_repair_with_approved_private_credentials
-    localTarget: http://127.0.0.1:3000
+  ownerDecisionScope:
+    purpose: separate_local_browser_pass_from_unapproved_external_release_gates
+    completedEvidenceTrack:
+      localFullEightRowBrowserPass: pass_8_of_8
+      sourceEvidence: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+    stillUnapprovedTrack:
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - final_acceptance_pass
     allowedEvidenceFields:
-      - redacted_role_label
-      - landing_route
-      - allowed_route_status
-      - denied_route_status
-      - visible_entry_counts
-      - button_enabled_counts
-      - api_status_code_summary
-      - browser_issue_count
-      - pass_fail_or_blocked
-      - next_smallest_repair
+      - committed_evidence_path
+      - role_label
+      - aggregate_pass_fail_blocked_count
+      - route_category
+      - gate_status
+      - decision_option
     blockedEvidenceFields:
       - credentials
       - account_identifiers
@@ -575,42 +579,98 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
-  branch: codex/full-8-post-ops-visible-rerun-20260626
+      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+  branch: codex/owner-acceptance-decision-package-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    browserRuntimeExecuted: true
-    credentialDocumentReadByCodex: true
-    credentialEntryByCodex: true
-    privateCredentialStructure: pass_8_of_8_role_labels_with_login_and_password_fields
-    localTargetReachability: pass_login_http_200
-    playwrightVersion: pass_1_60_0
-    rowsExecuted: 8
-    passRows: 8
-    failRows: 0
-    blockedRows: 0
-    standardAdminReclassification: pass_standard_unavailable_routes_not_advanced_exposure
+    docsOnlyPackagePrepared: true
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
     sourceChanged: false
+    testsChanged: false
     databaseReadExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
+    providerOrCostTouched: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRequiredTask: null
+  nextRequiredTask: owner_decision_select_enter_final_pass_review_or_request_additional_gate_packages
+ownerAcceptanceDecisionPackageAfterFull8RowLocalBrowserPass20260626:
+  taskId: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+  phase: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+  recordedAt: "2026-06-26T01:30:00-07:00"
+  status: closed
+  result: pass_docs_only_owner_acceptance_decision_package_prepared_no_final_pass
+  validatedAt: "2026-06-26T01:45:00-07:00"
+  reviewedAt: "2026-06-26T01:45:00-07:00"
+  closedAt: "2026-06-26T01:45:00-07:00"
+  branch: codex/owner-acceptance-decision-package-20260626
+  entryMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
+  entryOriginMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
+  approvalSource: user_request_docs_only_owner_acceptance_decision_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  packageDecisionQuestion: >-
+    Should the owner enter an MVP final Pass decision process now that the full eight-row local browser
+    role-separated matrix has passed, while Provider, Cost Calibration, staging, prod, payment, and external-service
+    gates remain unapproved and unexecuted?
+  validationSummary:
+    docsOnlyPackagePrepared: true
+    sourceFullEightRowLocalBrowserPass: pass_8_of_8
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    providerOrCostTouched: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - browser_or_playwright_runtime
+    - credential_read_or_entry
+    - source_test_package_lockfile_change
+    - database_seed_or_write
+    - account_user_employee_authorization_mutation
+    - schema_migration_or_drizzle_schema_change
+    - env_secret_or_dotenv_read_write
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - final_acceptance_pass
 roleSeparatedFull8RowPostOpsVisibleLabelRepairBrowserRerun20260626:
   taskId: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
   phase: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26

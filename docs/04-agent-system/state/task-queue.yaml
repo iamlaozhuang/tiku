@@ -44,6 +44,149 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+    title: Owner acceptance decision package after full eight-row local browser pass
+    phase: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+    sourceStory: owner_acceptance_after_full_8_row_local_browser_pass
+    dependencies:
+      - role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
+    taskKind: docs_only_owner_acceptance_decision_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_acceptance_package_only
+    evidenceMode: redacted_committed_evidence_summary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_after_full_8_row_local_browser_pass
+    requiredOutcome: >-
+      Prepare a docs-only owner acceptance decision package that separates the completed full eight-row local browser
+      role-separated pass from the still-unapproved Provider, Cost Calibration, staging, prod, payment, and
+      external-service gates. Do not run browser, read credentials, inspect or mutate DB/account state, change
+      source/tests/package/lockfiles/env/schema/migration/scripts, touch Provider/Cost/staging/prod/payment/external
+      services, or claim final MVP Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      ownerDecisionPackage: approved_by_user_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      credentialEntry: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+      - docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+      - docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+    decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+    sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+    sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+    status: closed
+    result: pass_docs_only_owner_acceptance_decision_package_prepared_no_final_pass
+    claimedAt: "2026-06-26T01:30:00-07:00"
+    plannedAt: "2026-06-26T01:30:00-07:00"
+    validatedAt: "2026-06-26T01:45:00-07:00"
+    reviewedAt: "2026-06-26T01:45:00-07:00"
+    closedAt: "2026-06-26T01:45:00-07:00"
+    validationSummary:
+      docsOnlyPackagePrepared: true
+      sourceFullEightRowLocalBrowserPass: pass_8_of_8
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      browserRuntimeExecuted: false
+      credentialDocumentReadByCodex: false
+      databaseReadExecuted: false
+      databaseWriteExecuted: false
+      sourceTestPackageLockfileChanged: false
+      providerOrCostTouched: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      finalPassClaim: false
+    branch: codex/owner-acceptance-decision-package-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - credential_read_or_entry
+      - source_test_package_lockfile_change
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - env_secret_or_dotenv_read_write
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
     title: Full eight-row role-separated browser rerun after ops visible-label repair
     phase: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
