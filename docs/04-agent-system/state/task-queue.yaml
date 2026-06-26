@@ -422,9 +422,12 @@ tasks:
       route may create at most 3 companion question drafts and at most 3 paper questions through the approved
       route/service path. Do not execute migration, seed data, call Provider, publish formal content, touch staging/prod,
       or claim final Pass.
-    status: pending
+    status: closed
+    result: pass_formal_paper_draft_composition_route_smoke_no_provider_no_publish
     approvedAt: "2026-06-26T11:35:00-07:00"
     approvedBy: laozhuang
+    claimedAt: "2026-06-26T12:01:10-07:00"
+    plannedAt: "2026-06-26T12:01:10-07:00"
     approvalConsumed:
       approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
       scope: capped_local_route_smoke_after_tdd_existing_or_route_created_content_paper_source_no_provider_no_publish
@@ -551,6 +554,29 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    implementedAt: "2026-06-26T12:05:56-07:00"
+    validatedAt: "2026-06-26T12:07:48-07:00"
+    reviewedAt: "2026-06-26T12:07:48-07:00"
+    closedAt: "2026-06-26T12:07:48-07:00"
+    validationSummary:
+      focusedUnit: pass_2_files_12_tests
+      localRouteSmoke: pass_composed_paper_draft_1_section_1_question
+      contentPaperSetupPostCount: 1
+      formalAdoptionPostCount: 1
+      companionQuestionDraftCount: 1
+      paperSectionCount: 1
+      paperQuestionCount: 1
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: true_route_only
+      routeSmokeExecuted: true
+      providerCallExecuted: false
+      formalPublishExecuted: false
+      finalPassClaimed: false
+      prettierScoped: pass_after_write
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_repair
     retryCount: 0
     lastFailurePath: null
 
