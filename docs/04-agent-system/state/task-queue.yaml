@@ -2792,6 +2792,206 @@ tasks:
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     nextRecommendedTask: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
 
+  - id: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+    title: Admin AI generation generated result storage approval package
+    phase: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+    sourceStory: current-user-request-after-local-db-read-history-route-smoke-open-generated-result-storage-approval-package
+    dependencies:
+      - admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+      - admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+    taskKind: docs_only_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_generated_result_storage_approval_only
+    evidenceMode: redacted_schema_contract_status_and_fixture_boundary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_after_read_history_smoke
+    requiredOutcome: >-
+      Create a docs/state-only approval package that decides the backend admin AI generation generated result storage
+      boundary after local DB read history route smoke. Do not implement storage, change schema, run migration, connect
+      to DB, execute routes, call Provider, write formal content, or claim final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      generatedResultStorageApprovalPackage: approved_by_current_user_2026_06_26
+      futureSchemaContractAdapterTddApproval: approved_fake_fixtures_only
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: blocked_current_task
+      focusedUnitTest: blocked_current_task
+      databaseConnection: blocked_current_task
+      databaseSeedOrWrite: blocked_current_task
+      directSqlOrRawDbRows: blocked
+      schemaMigration: blocked_current_task
+      migrationExecution: blocked
+      routeSmoke: blocked_current_task
+      generatedResultStorageExecution: blocked_current_task
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - drizzle/20260613074823_add_personal_ai_generation_result.sql
+      - drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+    blockedWithoutFreshApproval:
+      - current_task_source_schema_migration_or_test_change
+      - generated_result_storage_implementation
+      - generated_result_storage_execution
+      - migration_execution
+      - local_db_route_smoke
+      - db_write_seed_direct_sql_or_raw_row_dump
+      - account_mutation
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - formal_question_or_paper_write
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - release_readiness_decision
+      - final_acceptance_pass
+    riskTypes:
+      - generated_result_storage_boundary
+      - formal_content_write_boundary
+      - provider_cost_gate_boundary
+      - evidence_redaction
+      - schema_migration_execution_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    status: closed
+    result: pass_docs_only_generated_result_storage_approval_package_prepared_no_source_db_provider_or_formal_write_no_final_pass
+    approvedAt: "2026-06-26T19:05:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+    claimedAt: "2026-06-26T19:20:00-07:00"
+    plannedAt: "2026-06-26T19:20:00-07:00"
+    validatedAt: "2026-06-26T19:35:00-07:00"
+    reviewedAt: "2026-06-26T19:35:00-07:00"
+    closedAt: "2026-06-26T19:35:00-07:00"
+    branch: codex/admin-ai-generated-result-storage-approval-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    decision:
+      futureTaskId: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+      storageTable: admin_ai_generation_result
+      storagePattern: isolated_companion_table_linked_to_ai_generation_task
+      metadataTablePolicy: keep_admin_ai_generation_task_metadata_metadata_only
+      aiGenerationTaskPolicy: task_identity_status_result_public_id_anchor_only
+      fakeFixturesOnly: true
+      providerCallAllowed: false
+      migrationExecutionAllowed: false
+      liveDbRouteSmokeAllowed: false
+      formalQuestionPaperWriteAllowed: false
+      evidenceMode: redacted_schema_contract_status_and_fixture_summary_only
+    validationSummary:
+      taskPlanCreated: pass
+      acceptanceDecisionPackageCreated: pass
+      evidenceCreated: pass
+      auditReviewCreated: pass
+      taskQueuePacketCreated: pass
+      projectStateUpdated: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceSchemaMigrationAdapterChanged: false
+      databaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      providerCallExecuted: false
+      generatedResultStorageExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      finalPassClaimed: false
+    nextRecommendedTask: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
