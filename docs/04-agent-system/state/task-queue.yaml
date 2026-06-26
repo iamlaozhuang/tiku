@@ -239,7 +239,14 @@ tasks:
       update support after a draft is created. Prove content question and content paper workflows through focused unit
       tests using fake or injected writer/repository boundaries. Do not connect live DB, run route smoke, execute
       migration, seed data, call Provider, or claim staging/prod/release final Pass.
-    status: pending
+    status: closed
+    claimedAt: "2026-06-26T09:53:53-07:00"
+    plannedAt: "2026-06-26T09:53:53-07:00"
+    implementedAt: "2026-06-26T10:03:55-07:00"
+    validatedAt: "2026-06-26T10:03:55-07:00"
+    reviewedAt: "2026-06-26T10:03:55-07:00"
+    closedAt: "2026-06-26T10:03:55-07:00"
+    result: pass_formal_draft_route_integration_and_metadata_tdd_no_live_db
     approvedAt: "2026-06-26T09:45:55-07:00"
     approvedBy: laozhuang
     approvalConsumed:
@@ -357,6 +364,7 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+    branch: codex/admin-ai-formal-draft-route-integration-tdd-20260626
     nextRecommendedTask: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
     closeoutPolicy:
       localCommit:
@@ -373,6 +381,22 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    validationSummary:
+      tddRed: pass_expected_failure_observed
+      tddGreen: pass
+      focusedUnit: pass_4_files_19_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: true
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      formalQuestionPaperWriteAgainstLiveDbExecuted: false
+      providerCallExecuted: false
     retryCount: 0
     lastFailurePath: null
 

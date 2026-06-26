@@ -13,11 +13,19 @@ import type {
   AdminAiGenerationFormalAdoptionAdminRole,
 } from "../models/admin-ai-generation-formal-adoption";
 import { createPostgresAdminAiGenerationFormalAdoptionRepository } from "../repositories/admin-ai-generation-formal-adoption-db-adapter";
+import { createPostgresPaperDraftRepository } from "../repositories/paper-draft-repository";
+import { createPostgresQuestionRepository } from "../repositories/question-repository";
 import {
   ADMIN_AI_GENERATION_FORMAL_ADOPTION_ERROR_CODES,
   ADMIN_AI_GENERATION_FORMAL_ADOPTION_PERMISSION_DENIED_MESSAGE,
   createAdminAiGenerationFormalAdoptionService,
 } from "./admin-ai-generation-formal-adoption-service";
+import {
+  createAdminAiGenerationFormalDraftAdapterService,
+  type AdminAiGenerationFormalDraftAdapterService,
+} from "./admin-ai-generation-formal-draft-adapter";
+import { createPaperDraftService } from "./paper-draft-service";
+import { createQuestionService } from "./question-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import type { SessionService } from "./session-service";
 
@@ -34,6 +42,7 @@ export type AdminAiGenerationFormalAdoptionRuntimeOptions = {
     resultPublicId: string;
   }) => string;
   requestClock?: () => Date;
+  formalDraftAdapter?: AdminAiGenerationFormalDraftAdapterService;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
 
@@ -73,6 +82,24 @@ async function readRequestJson(request: Request): Promise<unknown> {
 
 function createDefaultAdoptionPublicId(): string {
   return `admin_ai_formal_adoption_${randomUUID().replaceAll("-", "")}`;
+}
+
+function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterService {
+  const questionService = createQuestionService(
+    createPostgresQuestionRepository(),
+  );
+  const paperService = createPaperDraftService(
+    createPostgresPaperDraftRepository(),
+  );
+
+  return createAdminAiGenerationFormalDraftAdapterService({
+    paperWriter: {
+      createPaper: (input) => paperService.createPaper(input),
+    },
+    questionWriter: {
+      createQuestion: (input) => questionService.createQuestion(input),
+    },
+  });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -128,6 +155,8 @@ export function createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers(
   const createAdoptionPublicId =
     options.createAdoptionPublicId ?? createDefaultAdoptionPublicId;
   const requestClock = options.requestClock ?? (() => new Date());
+  const formalDraftAdapter =
+    options.formalDraftAdapter ?? createDefaultFormalDraftAdapter();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
 
   return createRouteHandlersWithErrorEnvelope({
@@ -152,6 +181,7 @@ export function createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers(
         const requestBody = await readRequestJson(request);
         const service = createAdminAiGenerationFormalAdoptionService({
           adoptionRepository,
+          formalDraftAdapter,
         });
 
         return createJsonResponse(

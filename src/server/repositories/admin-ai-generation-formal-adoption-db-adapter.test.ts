@@ -6,6 +6,7 @@ import type {
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
 import type { AdminAiGenerationFormalAdoptionSourceResult } from "../models/admin-ai-generation-formal-adoption";
 import {
+  createAdminAiGenerationFormalDraftMetadataUpdateValue,
   createAdminAiGenerationFormalAdoptionInsertValue,
   mapAdminAiGenerationFormalAdoptionDbRowToRow,
   mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult,
@@ -254,12 +255,44 @@ describe("admin AI generation formal adoption DB adapter", () => {
     expect(JSON.stringify(row)).not.toMatch(/"id":/u);
   });
 
-  it("rejects DB rows that already point to formal question or paper drafts", () => {
+  it("maps draft-created question rows only when the matching formal question id is present", () => {
+    const row = mapAdminAiGenerationFormalAdoptionDbRowToRow(
+      createAdoptionDbRow({
+        formal_question_public_id: "question_formal_draft_901",
+        formal_target_write_status: "draft_created",
+      }),
+    );
+
+    expect(row).toMatchObject({
+      target_type: "question",
+      formal_target_write_status: "draft_created",
+      formal_question_public_id: "question_formal_draft_901",
+      formal_paper_public_id: null,
+    });
+  });
+
+  it("builds draft-created metadata update values for one matching formal draft id", () => {
+    expect(
+      createAdminAiGenerationFormalDraftMetadataUpdateValue({
+        adoptionPublicId: "admin_ai_formal_adoption_public_901",
+        formalPaperPublicId: null,
+        formalQuestionPublicId: "question_formal_draft_901",
+        targetType: "question",
+      }),
+    ).toEqual({
+      formal_target_write_status: "draft_created",
+      formal_question_public_id: "question_formal_draft_901",
+      formal_paper_public_id: null,
+    });
+  });
+
+  it("rejects DB rows that point to mismatched formal question or paper drafts", () => {
     expect(() =>
       mapAdminAiGenerationFormalAdoptionDbRowToRow(
         createAdoptionDbRow({
           formal_target_write_status: "draft_created",
           formal_question_public_id: "question_public_unsafe",
+          formal_paper_public_id: "paper_public_unsafe",
         }),
       ),
     ).toThrow("admin AI generation formal target write is not approved");

@@ -49,6 +49,13 @@ export type InsertAdminAiGenerationFormalAdoptionInput = {
   createdAt: Date;
 };
 
+export type MarkAdminAiGenerationFormalDraftCreatedInput = {
+  adoptionPublicId: string;
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+  formalQuestionPublicId: string | null;
+  formalPaperPublicId: string | null;
+};
+
 export type AdminAiGenerationFormalAdoptionRow = {
   adoption_public_id: string;
   source_result_public_id: string;
@@ -132,10 +139,16 @@ export type AdminAiGenerationFormalAdoptionGateway = {
   insertAdoptionRecord(
     input: InsertAdminAiGenerationFormalAdoptionInput,
   ): Promise<AdminAiGenerationFormalAdoptionRow | null>;
+  updateFormalDraftMetadata(
+    input: MarkAdminAiGenerationFormalDraftCreatedInput,
+  ): Promise<AdminAiGenerationFormalAdoptionRow | null>;
 };
 
 export type AdminAiGenerationFormalAdoptionRepository = {
   createOrReuseFormalAdoption(
     input: CreateAdminAiGenerationFormalAdoptionInput,
+  ): Promise<AdminAiGenerationFormalAdoptionResult>;
+  markFormalDraftCreated(
+    input: MarkAdminAiGenerationFormalDraftCreatedInput,
   ): Promise<AdminAiGenerationFormalAdoptionResult>;
 };

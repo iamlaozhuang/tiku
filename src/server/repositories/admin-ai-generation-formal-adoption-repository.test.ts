@@ -66,6 +66,7 @@ function createGateway(options: {
   sourceResult?: AdminAiGenerationFormalAdoptionSourceResult | null;
   existingRow?: AdminAiGenerationFormalAdoptionRow | null;
   insertedRow?: AdminAiGenerationFormalAdoptionRow | null;
+  updatedRow?: AdminAiGenerationFormalAdoptionRow | null;
 }) {
   const findAdoptionBySourceResult = vi.fn(
     async () => options.existingRow ?? null,
@@ -76,11 +77,20 @@ function createGateway(options: {
   const insertAdoptionRecord = vi.fn(
     async () => options.insertedRow ?? createAdoptionRow(),
   );
+  const updateFormalDraftMetadata = vi.fn(
+    async () =>
+      options.updatedRow ??
+      createAdoptionRow({
+        formal_question_public_id: "question_formal_draft_177",
+        formal_target_write_status: "draft_created",
+      }),
+  );
 
   const gateway: AdminAiGenerationFormalAdoptionGateway = {
     findAdoptionBySourceResult,
     findSourceResultForAdoption,
     insertAdoptionRecord,
+    updateFormalDraftMetadata,
   };
 
   return {
@@ -88,6 +98,7 @@ function createGateway(options: {
     findAdoptionBySourceResult,
     findSourceResultForAdoption,
     insertAdoptionRecord,
+    updateFormalDraftMetadata,
   };
 }
 
@@ -224,6 +235,39 @@ describe("admin AI generation formal adoption repository", () => {
       "admin_ai_formal_adoption_public_existing",
     );
     expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("marks a reviewed content question adoption as a formal draft without exposing full content", async () => {
+    const { gateway, updateFormalDraftMetadata } = createGateway({});
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    const result = await repository.markFormalDraftCreated({
+      adoptionPublicId: "admin_ai_formal_adoption_public_177",
+      formalPaperPublicId: null,
+      formalQuestionPublicId: "question_formal_draft_177",
+      targetType: "question",
+    });
+
+    expect(updateFormalDraftMetadata).toHaveBeenCalledWith({
+      adoptionPublicId: "admin_ai_formal_adoption_public_177",
+      formalPaperPublicId: null,
+      formalQuestionPublicId: "question_formal_draft_177",
+      targetType: "question",
+    });
+    expect(result).toMatchObject({
+      persistenceStatus: "reused",
+      adoption: {
+        adoptionPublicId: "admin_ai_formal_adoption_public_177",
+        targetReference: {
+          targetType: "question",
+          formalTargetWriteStatus: "draft_created",
+          formalQuestionPublicId: "question_formal_draft_177",
+          formalPaperPublicId: null,
+        },
+        redactionStatus: "redacted",
+      },
+    });
+    expect(JSON.stringify(result)).not.toMatch(/"id":/u);
   });
 
   it("rejects organization generated results from platform formal adoption", async () => {

@@ -7,6 +7,7 @@ import type {
   CreateAdminAiGenerationFormalAdoptionInput,
   FindAdminAiGenerationFormalAdoptionQuery,
   InsertAdminAiGenerationFormalAdoptionInput,
+  MarkAdminAiGenerationFormalDraftCreatedInput,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
 import {
   canAdoptAdminAiGenerationPlatformFormalContent,
@@ -58,6 +59,19 @@ export function createAdminAiGenerationFormalAdoptionRepository(
         insertedRow === null ? "reused" : "created",
         resolvedRow,
       );
+    },
+    async markFormalDraftCreated(input) {
+      assertFormalDraftCreatedInput(input);
+
+      const updatedRow = await gateway.updateFormalDraftMetadata(input);
+
+      if (updatedRow === null) {
+        throw new Error(
+          "admin AI generation formal adoption draft metadata update failed",
+        );
+      }
+
+      return createFormalAdoptionResponse("reused", updatedRow);
     },
   };
 }
@@ -156,6 +170,26 @@ function createInsertAdoptionRecordInput(
   };
 }
 
+function assertFormalDraftCreatedInput(
+  input: MarkAdminAiGenerationFormalDraftCreatedInput,
+): void {
+  if (
+    input.targetType === "question" &&
+    (input.formalQuestionPublicId === null ||
+      input.formalPaperPublicId !== null)
+  ) {
+    throw new Error("admin AI generation formal question draft id required");
+  }
+
+  if (
+    input.targetType === "paper" &&
+    (input.formalPaperPublicId === null ||
+      input.formalQuestionPublicId !== null)
+  ) {
+    throw new Error("admin AI generation formal paper draft id required");
+  }
+}
+
 function createFormalAdoptionResponse(
   persistenceStatus: AdminAiGenerationFormalAdoptionResult["persistenceStatus"],
   row: AdminAiGenerationFormalAdoptionRow,
@@ -169,7 +203,7 @@ function createFormalAdoptionResponse(
 function mapAdminAiGenerationFormalAdoptionRowToDto(
   row: AdminAiGenerationFormalAdoptionRow,
 ): AdminAiGenerationFormalAdoptionDto {
-  assertFormalTargetWriteStillBlocked(row);
+  assertFormalTargetWriteSafe(row);
 
   return {
     adoptionPublicId: row.adoption_public_id,
@@ -214,14 +248,34 @@ function mapAdminAiGenerationFormalAdoptionRowToDto(
   };
 }
 
-function assertFormalTargetWriteStillBlocked(
+function assertFormalTargetWriteSafe(
   row: AdminAiGenerationFormalAdoptionRow,
 ): void {
   if (
-    row.formal_target_write_status !== formalTargetWriteStatus ||
-    row.formal_question_public_id !== null ||
+    row.formal_target_write_status === formalTargetWriteStatus &&
+    row.formal_question_public_id === null &&
+    row.formal_paper_public_id === null
+  ) {
+    return;
+  }
+
+  if (
+    row.formal_target_write_status === "draft_created" &&
+    row.target_type === "question" &&
+    row.formal_question_public_id !== null &&
+    row.formal_paper_public_id === null
+  ) {
+    return;
+  }
+
+  if (
+    row.formal_target_write_status === "draft_created" &&
+    row.target_type === "paper" &&
+    row.formal_question_public_id === null &&
     row.formal_paper_public_id !== null
   ) {
-    throw new Error("admin AI generation formal target write is not approved");
+    return;
   }
+
+  throw new Error("admin AI generation formal target write is not approved");
 }

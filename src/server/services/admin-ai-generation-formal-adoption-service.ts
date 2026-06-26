@@ -7,6 +7,7 @@ import type {
   AdminAiGenerationFormalAdoptionResult,
   AdminAiGenerationFormalAdoptionRepository,
 } from "../contracts/admin-ai-generation-formal-adoption-contract";
+import type { AdminAiGenerationFormalDraftAdapterService } from "./admin-ai-generation-formal-draft-adapter";
 import { canAdoptAdminAiGenerationPlatformFormalContent } from "../models/admin-ai-generation-formal-adoption";
 import {
   ADMIN_AI_GENERATION_FORMAL_ADOPTION_CONFIRMATION_REQUIRED_MESSAGE,
@@ -22,6 +23,7 @@ export type AdminAiGenerationFormalAdoptionService = {
 
 export type AdminAiGenerationFormalAdoptionServiceRepositories = {
   adoptionRepository: AdminAiGenerationFormalAdoptionRepository;
+  formalDraftAdapter?: AdminAiGenerationFormalDraftAdapterService;
 };
 
 export const ADMIN_AI_GENERATION_FORMAL_ADOPTION_ERROR_CODES = {
@@ -69,16 +71,47 @@ export function createAdminAiGenerationFormalAdoptionService(
       }
 
       try {
-        return createSuccessResponse(
+        const adoptionResult =
           await repositories.adoptionRepository.createOrReuseFormalAdoption(
             normalizedInput.value,
-          ),
+          );
+
+        if (
+          repositories.formalDraftAdapter === undefined ||
+          adoptionResult.adoption.targetReference.formalTargetWriteStatus ===
+            "draft_created"
+        ) {
+          return createSuccessResponse(adoptionResult);
+        }
+
+        const draftResponse =
+          await repositories.formalDraftAdapter.createFormalDraft({
+            adoption: adoptionResult.adoption,
+            reviewedDraft: isRecord(input) ? input.reviewedDraft : undefined,
+            targetType: normalizedInput.value.targetType,
+          });
+
+        if (draftResponse.code !== 0 || draftResponse.data === null) {
+          return createErrorResponse(draftResponse.code, draftResponse.message);
+        }
+
+        return createSuccessResponse(
+          await repositories.adoptionRepository.markFormalDraftCreated({
+            adoptionPublicId: adoptionResult.adoption.adoptionPublicId,
+            formalPaperPublicId: draftResponse.data.formalPaperPublicId,
+            formalQuestionPublicId: draftResponse.data.formalQuestionPublicId,
+            targetType: draftResponse.data.targetType,
+          }),
         );
       } catch (error) {
         return mapFormalAdoptionRepositoryError(error);
       }
     },
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function mapFormalAdoptionRepositoryError(error: unknown): ApiResponse<null> {
