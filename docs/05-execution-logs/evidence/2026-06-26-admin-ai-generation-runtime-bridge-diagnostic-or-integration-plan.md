@@ -81,4 +81,10 @@ All validation commands passed:
 
 ## Closeout Evidence
 
-Pending commit, fast-forward merge, push, and short branch cleanup after validation.
+- Decision commit on task branch: `f622a92263f0cb8e4876195f19f9d325ed2d6a27`.
+- Fast-forward merge to `master`: pass, `master` advanced from `4213312ad7016409c588a10188573ef9328263d2` to `f622a92263f0cb8e4876195f19f9d325ed2d6a27`.
+- Post-merge `master` validation:
+  - `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md` -> pass.
+  - `git diff --check` -> pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26 -SkipRemoteAheadCheck` -> pass on `master`; state SHA accepted as ancestor checkpoint.
+- Push and short-branch cleanup to be performed after this closeout evidence update.
