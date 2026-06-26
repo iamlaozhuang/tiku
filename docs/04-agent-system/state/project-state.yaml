@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
-updatedAt: "2026-06-26T19:20:00-07:00"
+currentPhase: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+updatedAt: "2026-06-26T20:55:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,40 +501,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6ee0b6940e30531745eb1100e4143f1d25fcdec1
-  lastKnownOriginMasterSha: 6ee0b6940e30531745eb1100e4143f1d25fcdec1
+  lastKnownMasterSha: 9f53d98eddc81256ab9e0f6ee41645b32816453d
+  lastKnownOriginMasterSha: 9f53d98eddc81256ab9e0f6ee41645b32816453d
 currentTask:
-  id: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+  id: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
   status: closed
-  result: pass_docs_only_generated_result_storage_approval_package_prepared_no_source_db_provider_or_formal_write_no_final_pass
-  claimedAt: "2026-06-26T19:20:00-07:00"
-  plannedAt: "2026-06-26T19:20:00-07:00"
-  validatedAt: "2026-06-26T19:35:00-07:00"
-  reviewedAt: "2026-06-26T19:35:00-07:00"
-  closedAt: "2026-06-26T19:35:00-07:00"
-  sourceStory: current_user_request_after_local_db_read_history_route_smoke_open_generated_result_storage_approval_package
-  approvalConsumed: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
-  approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+  result: pass_generated_result_storage_schema_contract_adapter_tdd_no_migration_execution_no_live_db_no_provider_no_formal_write_no_final_pass
+  claimedAt: "2026-06-26T20:35:00-07:00"
+  plannedAt: "2026-06-26T20:35:00-07:00"
+  implementedAt: "2026-06-26T20:45:00-07:00"
+  validatedAt: "2026-06-26T20:55:00-07:00"
+  reviewedAt: "2026-06-26T20:55:00-07:00"
+  closedAt: "2026-06-26T20:55:00-07:00"
+  sourceStory: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_after_approval_package
+  approvalConsumed: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+  approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
   sourceReadHistorySmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
   sourceHistoryUiEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
-  sourceRouteIntegrationEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
-  sourceProductClosureDecisionPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
   scope:
     docsStateEvidenceAudit: true
-    approvalPackageOnly: true
-    generatedResultStorageApprovalPackage: true
-    futureGeneratedResultStorageTddApproval: approved_fake_fixtures_only
-    localDbReadHistoryRouteSmoke: not_run_in_this_task_previous_task_passed
+    localSourceChange: true
+    schemaMigrationFileCreated: true
+    focusedUnitTest: true
+    dbAdapterContractTdd: true
+    fakeNormalizedGeneratedResultFixturesOnly: true
     staticSourceRead: true
-    localSourceChange: false
-    focusedUnitTest: false
-    routeDbAdapterIntegration: false
-    repositoryPortContract: false
-    currentTaskRouteSmokeExecuted: false
+    migrationExecution: false
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    directSqlOrRawDbRows: false
+    routeSmokeExecuted: false
+    generatedResultRouteIntegration: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
@@ -542,69 +543,54 @@ currentTask:
     credentialOrEnvRead: false
     providerCall: false
     costCalibration: false
-    databaseConnectionOrWrite: false
-    directSqlOrRawDbRows: false
-    schemaMigration: false
-    migrationExecution: false
-    generatedResultStorage: approved_future_tdd_boundary_only
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
+    releaseReadinessClaim: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: generated_result_storage_requires_isolated_draft_companion_table
+    adminAiGeneration: generated_result_storage_implemented_as_isolated_draft_companion_table
     aiGenerationTask: remains_task_identity_status_and_result_public_id_anchor
     adminAiGenerationTaskMetadata: remains_metadata_only_no_generated_content_columns
-    generatedResultStorage: approve_future_schema_contract_adapter_tdd_fake_fixtures_only
+    generatedResultStorage: redacted_snapshot_digest_masked_preview_citation_summary_only
     formalContentBoundary: generated_result_storage_is_not_formal_question_or_paper_adoption
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
-  approvalPackageDecision:
-    futureTaskId: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+  implementationSummary:
     storageTable: admin_ai_generation_result
-    storagePattern: isolated_companion_table_linked_to_ai_generation_task
-    fakeFixturesOnly: true
+    migrationFile: drizzle/20260626203000_add_admin_ai_generation_result.sql
+    schemaEnum: admin_ai_generation_result_status
+    repositoryPattern: fake_gateway_create_or_reuse_draft_result
+    adapterPattern: summary_only_task_update_lazy_database_gateway
     providerCallAllowed: false
     migrationExecutionAllowed: false
     liveDbRouteSmokeAllowed: false
     formalQuestionPaperWriteAllowed: false
-    evidenceMode: redacted_schema_contract_status_and_fixture_summary_only
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
+      approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_open_generated_result_storage_approval_package_after_read_history_smoke_2026_06_26
-  branch: codex/admin-ai-generated-result-storage-approval-20260626
+      approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+  branch: codex/admin-ai-result-storage-tdd-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    approvalPackageCreated: pass
-    acceptanceDecisionPackageCreated: pass
-    taskQueuePacketCreated: pass
-    projectStateUpdated: pass
-    readHistoryRouteSmoke: not_run_in_this_task_previous_task_passed
-    generatedResultStorageDecision: approve_future_schema_contract_adapter_tdd_fake_fixtures_only
-    localCapabilityGate: not_required_docs_only_approval_package
-    migrationExecution: not_run_blocked
-    routeSmoke: not_run_blocked
-    focusedUnitTest: not_applicable_docs_only
-    browserRuntimeExecuted: false
-    credentialDocumentReadByCodex: false
-    credentialOrEnvReadExecuted: false
-    lint: not_applicable_docs_only
-    typecheck: not_applicable_docs_only
+    redPhaseExpectedFailure: pass
+    focusedUnitTest: pass_3_files_38_tests
+    typecheck: pass
+    lint: pass
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -612,21 +598,20 @@ currentTask:
     databaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
-    migrationFileCreated: false
+    migrationFileCreated: true
     drizzleSnapshotUpdated: false
     migrationGenerationExecuted: false
-    generatedResultStorageApproved: future_tdd_boundary_only
+    routeSmokeExecuted: false
     accountMutationExecuted: false
     providerCallExecuted: false
     costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    sourceChanged: false
-    testChanged: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+    finalPassClaimed: false
+  nextRecommendedTask: admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package-2026-06-26
 adminAiGenerationGeneratedResultStorageApprovalPackage20260626:
   taskId: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
   phase: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
@@ -674,6 +659,50 @@ adminAiGenerationGeneratedResultStorageApprovalPackage20260626:
     formalQuestionOrPaperWriteExecuted: false
     finalPassClaimed: false
   nextRecommendedTask: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+adminAiGenerationGeneratedResultStorageSchemaContractAdapterTdd20260626:
+  taskId: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+  phase: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+  recordedAt: "2026-06-26T20:35:00-07:00"
+  status: closed
+  result: pass_generated_result_storage_schema_contract_adapter_tdd_no_migration_execution_no_live_db_no_provider_no_formal_write_no_final_pass
+  validatedAt: "2026-06-26T20:55:00-07:00"
+  reviewedAt: "2026-06-26T20:55:00-07:00"
+  closedAt: "2026-06-26T20:55:00-07:00"
+  branch: codex/admin-ai-result-storage-tdd-20260626
+  entryMasterSha: 9f53d98eddc81256ab9e0f6ee41645b32816453d
+  entryOriginMasterSha: 9f53d98eddc81256ab9e0f6ee41645b32816453d
+  approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+  approvalConsumed: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+  implementationSummary:
+    storageTable: admin_ai_generation_result
+    migrationFile: drizzle/20260626203000_add_admin_ai_generation_result.sql
+    schemaContractAdapterTdd: true
+    fakeFixturesOnly: true
+    providerCallAllowed: false
+    migrationExecutionAllowed: false
+    liveDbRouteSmokeAllowed: false
+    formalQuestionPaperWriteAllowed: false
+  validationSummary:
+    redPhaseExpectedFailure: pass
+    focusedUnitTest: pass_3_files_38_tests
+    typecheck: pass
+    lint: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    migrationExecution: not_run_blocked
+    liveDatabaseConnectionExecuted: false
+    routeSmokeExecuted: false
+    providerCallExecuted: false
+    credentialOrEnvReadExecuted: false
+    formalQuestionOrPaperWriteExecuted: false
+    finalPassClaimed: false
+  nextRecommendedTask: admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package-2026-06-26
 adminAiGenerationLocalDbReadHistoryRouteSmokeExecution20260626:
   taskId: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
   phase: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26

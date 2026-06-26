@@ -2992,6 +2992,203 @@ tasks:
       finalPassClaimed: false
     nextRecommendedTask: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
 
+  - id: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+    title: Admin AI generation generated result storage schema contract adapter TDD
+    phase: admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+    sourceStory: current-user-request-open-generated-result-storage-schema-contract-adapter-tdd-after-approval-package
+    dependencies:
+      - admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+    taskKind: implementation_tdd_schema_contract_adapter
+    moduleRunVersion: 2
+    executionProfile: local_schema_contract_adapter_tdd_no_live_db_no_provider
+    evidenceMode: redacted_schema_contract_status_and_fixture_summary_only
+    validationPolicy: focused_unit_lint_typecheck_format_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_generated_result_storage_tdd
+    requiredOutcome: >-
+      Implement the approved local-only backend admin AI generation generated result storage schema, local migration
+      file, redacted contract, DB adapter, fake-gateway repository, and focused unit tests. Do not execute migration,
+      connect to live DB, run route smoke, call Provider, read credentials/env, write formal question/paper records, or
+      claim staging/prod/release/final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      localSourceChange: approved_by_current_user_2026_06_26
+      schemaMigrationFile: approved_by_generated_result_storage_approval_package_2026_06_26
+      focusedUnitTest: approved_by_current_user_2026_06_26
+      dbAdapterContractTdd: approved_by_generated_result_storage_approval_package_2026_06_26
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      sourceStaticRead: approved
+      migrationExecution: blocked
+      liveDatabaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      directSqlOrRawDbRows: blocked
+      routeSmoke: blocked
+      generatedResultRouteIntegration: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - drizzle/20260626203000_add_admin_ai_generation_result.sql
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - src/server/models/admin-ai-generation-result.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+      - drizzle/20260613074823_add_personal_ai_generation_result.sql
+      - drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/mappers/personal-ai-generation-result-mapper.ts
+      - src/server/models/personal-ai-generation-result.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - migration_execution
+      - drizzle_kit_push
+      - live_database_connection_or_route_smoke
+      - db_seed_direct_sql_or_raw_row_dump
+      - account_mutation
+      - generated_result_route_integration
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - formal_question_or_paper_write
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - release_readiness_decision
+      - final_acceptance_pass
+    riskTypes:
+      - generated_result_storage_boundary
+      - schema_migration_execution_boundary
+      - adapter_summary_only_task_update
+      - formal_content_write_boundary
+      - provider_cost_gate_boundary
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md drizzle/20260626203000_add_admin_ai_generation_result.sql src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts src/server/models/admin-ai-generation-result.ts src/server/contracts/admin-ai-generation-result-persistence-contract.ts src/server/repositories/admin-ai-generation-result-persistence-repository.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md drizzle/20260626203000_add_admin_ai_generation_result.sql src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts src/server/models/admin-ai-generation-result.ts src/server/contracts/admin-ai-generation-result-persistence-contract.ts src/server/repositories/admin-ai-generation-result-persistence-repository.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+    status: closed
+    result: pass_generated_result_storage_schema_contract_adapter_tdd_no_migration_execution_no_live_db_no_provider_no_formal_write_no_final_pass
+    approvedAt: "2026-06-26T20:35:00-07:00"
+    approvedBy: laozhuang
+    approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+    approvalConsumed: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+    claimedAt: "2026-06-26T20:35:00-07:00"
+    plannedAt: "2026-06-26T20:35:00-07:00"
+    implementedAt: "2026-06-26T20:45:00-07:00"
+    validatedAt: "2026-06-26T20:55:00-07:00"
+    reviewedAt: "2026-06-26T20:55:00-07:00"
+    closedAt: "2026-06-26T20:55:00-07:00"
+    branch: codex/admin-ai-result-storage-tdd-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_generated_result_storage_schema_contract_adapter_tdd_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      redPhaseExpectedFailure: pass
+      focusedUnitTest: pass_3_files_38_tests
+      typecheck: pass
+      lint: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      migrationFileCreated: true
+      migrationExecution: not_run_blocked
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      providerCallExecuted: false
+      credentialOrEnvReadExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      finalPassClaimed: false
+    nextRecommendedTask: admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package-2026-06-26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

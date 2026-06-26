@@ -709,3 +709,108 @@ describe("personal learning AI generated content result schema", () => {
     ).toBe(true);
   });
 });
+
+describe("admin AI generated content result schema", () => {
+  const schemaExports = aiRagSchema as Record<string, unknown>;
+  const adminAiGenerationResult = schemaExports.adminAiGenerationResult as
+    | Parameters<typeof getTableConfig>[0]
+    | undefined;
+
+  it("registers backend admin draft-only result status values", () => {
+    expect(schemaExports.adminAiGenerationResultStatusValues).toEqual([
+      "draft",
+      "discarded",
+    ]);
+  });
+
+  it("defines a separate backend admin generated result companion table", () => {
+    expect(adminAiGenerationResult).toBeDefined();
+
+    if (adminAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getTableName(adminAiGenerationResult)).toBe(
+      "admin_ai_generation_result",
+    );
+    expect(getColumnNames(adminAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "ai_generation_task_id",
+        "task_public_id",
+        "request_public_id",
+        "workspace",
+        "generation_kind",
+        "owner_type",
+        "owner_public_id",
+        "organization_public_id",
+        "task_type",
+        "result_status",
+        "content_redacted_snapshot",
+        "content_digest",
+        "content_preview_masked",
+        "citation_redacted_snapshot",
+        "evidence_status",
+        "citation_count",
+        "ai_call_log_public_id",
+        "source_question_public_id",
+        "source_paper_public_id",
+        "is_formal_adoption_blocked",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+  });
+
+  it("keeps backend admin result storage away from raw provider and formal-domain columns", () => {
+    expect(adminAiGenerationResult).toBeDefined();
+
+    if (adminAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(adminAiGenerationResult)).not.toEqual(
+      expect.arrayContaining([
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_generated_content",
+        "generated_content",
+        "question_id",
+        "paper_id",
+        "adopted_question_id",
+        "adopted_paper_id",
+      ]),
+    );
+  });
+
+  it("adds scoped indexes and a task foreign key for backend admin result lookup", () => {
+    expect(adminAiGenerationResult).toBeDefined();
+
+    if (adminAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(adminAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "udx_admin_ai_generation_result_public_id",
+        "udx_admin_ai_generation_result_ai_generation_task_id",
+        "idx_admin_ai_generation_result_workspace_owner_created_at",
+        "idx_admin_ai_generation_result_task_public_id",
+        "idx_admin_ai_generation_result_result_status",
+        "idx_admin_ai_generation_result_organization_public_id",
+      ]),
+    );
+    const foreignKeyNames = getForeignKeyNames(adminAiGenerationResult);
+
+    expect(foreignKeyNames).toEqual(
+      expect.arrayContaining(["fk_admin_ai_generation_result_task"]),
+    );
+    expect(
+      [...getIndexNames(adminAiGenerationResult), ...foreignKeyNames].every(
+        (databaseObjectName) => databaseObjectName.length <= 63,
+      ),
+    ).toBe(true);
+  });
+});

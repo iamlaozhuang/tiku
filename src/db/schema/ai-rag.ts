@@ -95,6 +95,16 @@ export const personalAiGenerationResultStatusEnum = pgEnum(
   personalAiGenerationResultStatusValues,
 );
 
+export const adminAiGenerationResultStatusValues = [
+  "draft",
+  "discarded",
+] as const;
+
+export const adminAiGenerationResultStatusEnum = pgEnum(
+  "admin_ai_generation_result_status",
+  adminAiGenerationResultStatusValues,
+);
+
 export const aiGenerationTaskFailureCategoryValues = [
   "system_error",
   "provider_temporary_error",
@@ -469,6 +479,70 @@ export const adminAiGenerationTaskMetadata = pgTable(
     ),
     index("idx_admin_ai_generation_task_metadata_request_public_id").on(
       table.request_public_id,
+    ),
+  ],
+);
+
+export const adminAiGenerationResult = pgTable(
+  "admin_ai_generation_result",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    ai_generation_task_id: bigint("ai_generation_task_id", {
+      mode: "number",
+    }).notNull(),
+    task_public_id: text("task_public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    workspace: text("workspace").notNull(),
+    generation_kind: text("generation_kind").notNull(),
+    owner_type: text("owner_type").notNull(),
+    owner_public_id: text("owner_public_id").notNull(),
+    organization_public_id: text("organization_public_id"),
+    task_type: aiGenerationTaskTypeEnum("task_type").notNull(),
+    result_status: adminAiGenerationResultStatusEnum("result_status")
+      .default("draft")
+      .notNull(),
+    content_redacted_snapshot: jsonb("content_redacted_snapshot").notNull(),
+    content_digest: text("content_digest").notNull(),
+    content_preview_masked: text("content_preview_masked").notNull(),
+    citation_redacted_snapshot: jsonb("citation_redacted_snapshot"),
+    evidence_status: evidenceStatusEnum("evidence_status")
+      .default("none")
+      .notNull(),
+    citation_count: integer("citation_count").default(0).notNull(),
+    ai_call_log_public_id: text("ai_call_log_public_id"),
+    source_question_public_id: text("source_question_public_id"),
+    source_paper_public_id: text("source_paper_public_id"),
+    is_formal_adoption_blocked: boolean("is_formal_adoption_blocked")
+      .default(true)
+      .notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.ai_generation_task_id],
+      foreignColumns: [aiGenerationTask.id],
+      name: "fk_admin_ai_generation_result_task",
+    }).onDelete("restrict"),
+    uniqueIndex("udx_admin_ai_generation_result_public_id").on(table.public_id),
+    uniqueIndex("udx_admin_ai_generation_result_ai_generation_task_id").on(
+      table.ai_generation_task_id,
+    ),
+    index("idx_admin_ai_generation_result_workspace_owner_created_at").on(
+      table.workspace,
+      table.owner_type,
+      table.owner_public_id,
+      table.created_at,
+    ),
+    index("idx_admin_ai_generation_result_task_public_id").on(
+      table.task_public_id,
+    ),
+    index("idx_admin_ai_generation_result_result_status").on(
+      table.result_status,
+    ),
+    index("idx_admin_ai_generation_result_organization_public_id").on(
+      table.organization_public_id,
     ),
   ],
 );
