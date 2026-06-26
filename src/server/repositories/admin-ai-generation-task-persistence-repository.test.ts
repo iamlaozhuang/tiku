@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type {
+  AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceGateway,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceResult,
@@ -158,6 +159,9 @@ function createLocalContractRouteTaskPersistenceRepository(): AdminAiGenerationT
     async createOrReuseTask(input) {
       return createLocalContractRouteTaskPersistenceResult(input);
     },
+    async listTaskHistory() {
+      return [];
+    },
   };
 }
 
@@ -211,6 +215,7 @@ function createGateway(
     taskTypes: readonly string[];
   }>;
   insertInputs: CreateAdminAiGenerationTaskPersistenceInput[];
+  historyQueries: AdminAiGenerationTaskHistoryQuery[];
 } {
   const idempotencyQueries: Array<{
     ownerType: string;
@@ -219,10 +224,12 @@ function createGateway(
     taskTypes: readonly string[];
   }> = [];
   const insertInputs: CreateAdminAiGenerationTaskPersistenceInput[] = [];
+  const historyQueries: AdminAiGenerationTaskHistoryQuery[] = [];
 
   return {
     idempotencyQueries,
     insertInputs,
+    historyQueries,
     async findTaskByIdempotencyKey(query) {
       idempotencyQueries.push(query);
 
@@ -276,6 +283,23 @@ function createGateway(
       rows.push(row);
 
       return row;
+    },
+    async listTaskHistory(query) {
+      historyQueries.push(query);
+
+      return rows
+        .filter(
+          (row) =>
+            row.workspace === query.workspace &&
+            row.owner_type === query.ownerType &&
+            row.owner_public_id === query.ownerPublicId &&
+            ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES.includes(row.task_type),
+        )
+        .sort(
+          (leftRow, rightRow) =>
+            rightRow.requested_at.getTime() - leftRow.requested_at.getTime(),
+        )
+        .slice(0, query.limit);
     },
   };
 }
@@ -481,5 +505,83 @@ describe("admin AI generation task persistence repository", () => {
       }),
     ).rejects.toThrow("unsafe admin AI generation task persistence boundary");
     expect(gateway.insertInputs).toEqual([]);
+  });
+
+  it("lists metadata-only admin AI generation task history by workspace and owner", async () => {
+    const gateway = createGateway([
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_old_content_901",
+        request_public_id: "admin_ai_generation_request_old_content_901",
+        requested_at: new Date("2026-06-26T19:00:00.000Z"),
+      }),
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_new_content_901",
+        request_public_id: "admin_ai_generation_request_new_content_901",
+        generation_kind: "paper",
+        task_type: "ai_paper_generation",
+        requested_at: new Date("2026-06-26T19:30:00.000Z"),
+      }),
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_other_org_901",
+        request_public_id: "admin_ai_generation_request_other_org_901",
+        workspace: "organization",
+        owner_type: "organization",
+        owner_public_id: "organization_public_901",
+        organization_public_id: "organization_public_901",
+        quota_owner_type: "organization",
+        quota_owner_public_id: "organization_public_901",
+        requested_at: new Date("2026-06-26T19:45:00.000Z"),
+      }),
+    ]);
+    const repository =
+      createAdminAiGenerationTaskPersistenceRepository(gateway);
+    const listTaskHistory = (
+      repository as AdminAiGenerationTaskPersistenceRepository & {
+        listTaskHistory: (
+          query: AdminAiGenerationTaskHistoryQuery,
+        ) => Promise<AdminAiGenerationTaskPersistenceResult["task"][]>;
+      }
+    ).listTaskHistory;
+
+    const result = await listTaskHistory({
+      workspace: "content",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      limit: 2,
+    });
+
+    expect(gateway.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        limit: 2,
+      },
+    ]);
+    expect(result).toMatchObject([
+      {
+        taskPublicId: "admin_ai_generation_task_new_content_901",
+        requestPublicId: "admin_ai_generation_request_new_content_901",
+        generationKind: "paper",
+        status: "pending",
+        resultPublicId: null,
+        contentVisibility: "summary_only",
+        evidenceStatus: "none",
+        citationCount: 0,
+        runtimeStatus: "local_contract_only",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+        formalContentBoundary: {
+          questionWriteStatus: "blocked_without_follow_up_task",
+          paperWriteStatus: "blocked_without_follow_up_task",
+        },
+      },
+      {
+        taskPublicId: "admin_ai_generation_task_old_content_901",
+      },
+    ]);
+    expect(JSON.stringify(result)).not.toMatch(/"id":/);
   });
 });

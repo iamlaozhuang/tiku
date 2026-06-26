@@ -1,5 +1,5 @@
 import { adminAiGenerationTaskMetadata, aiGenerationTask } from "@/db/schema";
-import { and, eq, inArray, type SQL } from "drizzle-orm";
+import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import type {
   AdminAiGenerationPersistenceTaskType,
@@ -7,6 +7,7 @@ import type {
   AdminAiGenerationTaskPersistenceGateway,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceRow,
+  AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRuntimeBridgeStatus,
   CreateAdminAiGenerationTaskPersistenceInput,
   FindAdminAiGenerationTaskByIdempotencyKeyQuery,
@@ -255,6 +256,16 @@ export function createPostgresAdminAiGenerationTaskPersistenceGateway(
         ? null
         : mapAdminAiGenerationTaskPersistenceDbRowToRow(row);
     },
+    async listTaskHistory(query) {
+      const rows = await selectAdminAiGenerationTaskHistoryRows(
+        getDatabase(),
+        query,
+      );
+
+      return rows.map((row) =>
+        mapAdminAiGenerationTaskPersistenceDbRowToRow(row),
+      );
+    },
   };
 }
 
@@ -282,6 +293,37 @@ async function selectAdminAiGenerationTaskPersistenceRows(
     )
     .where(condition)
     .limit(1);
+
+  return rows.map((row) => normalizeAdminAiGenerationTaskPersistenceDbRow(row));
+}
+
+async function selectAdminAiGenerationTaskHistoryRows(
+  database: Pick<RuntimeDatabase, "select">,
+  query: AdminAiGenerationTaskHistoryQuery,
+): Promise<AdminAiGenerationTaskPersistenceDbRow[]> {
+  const rows = await database
+    .select(adminAiGenerationTaskPersistenceDbSelection)
+    .from(aiGenerationTask)
+    .innerJoin(
+      adminAiGenerationTaskMetadata,
+      eq(
+        adminAiGenerationTaskMetadata.ai_generation_task_id,
+        aiGenerationTask.id,
+      ),
+    )
+    .where(
+      and(
+        eq(adminAiGenerationTaskMetadata.workspace, query.workspace),
+        eq(aiGenerationTask.owner_type, query.ownerType),
+        eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
+        inArray(
+          aiGenerationTask.task_type,
+          ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
+        ),
+      ),
+    )
+    .orderBy(desc(aiGenerationTask.requested_at))
+    .limit(query.limit);
 
   return rows.map((row) => normalizeAdminAiGenerationTaskPersistenceDbRow(row));
 }

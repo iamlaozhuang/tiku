@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
-updatedAt: "2026-06-26T17:05:00-07:00"
+currentPhase: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+updatedAt: "2026-06-26T17:50:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,38 +501,39 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
-  lastKnownOriginMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
+  lastKnownMasterSha: 000fdb386b17fa1b54910924785227167e2dfcff
+  lastKnownOriginMasterSha: 000fdb386b17fa1b54910924785227167e2dfcff
 currentTask:
-  id: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+  id: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
   status: closed
-  result: pass_provider_disabled_product_closure_decision_metadata_only_history_first_no_generated_result_storage_no_final_pass
-  claimedAt: "2026-06-26T17:05:00-07:00"
-  plannedAt: "2026-06-26T17:05:00-07:00"
-  validatedAt: "2026-06-26T17:20:00-07:00"
-  reviewedAt: "2026-06-26T17:20:00-07:00"
-  closedAt: "2026-06-26T17:20:00-07:00"
-  sourceStory: successor_of_admin_ai_generation_local_db_migration_execution_and_route_smoke
-  approvalConsumed: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
-  approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  result: pass_provider_disabled_metadata_task_history_status_ui_tdd_no_provider_no_generated_result_storage_no_final_pass
+  claimedAt: "2026-06-26T17:30:00-07:00"
+  plannedAt: "2026-06-26T17:30:00-07:00"
+  implementedAt: "2026-06-26T17:45:00-07:00"
+  validatedAt: "2026-06-26T17:50:00-07:00"
+  reviewedAt: "2026-06-26T17:50:00-07:00"
+  closedAt: "2026-06-26T17:50:00-07:00"
+  sourceStory: successor_of_admin_ai_generation_provider_disabled_product_closure_decision
+  approvalConsumed: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+  approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
   sourceRuntimeBridgePlanPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
   sourceProviderDisabledBridgeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
   sourceRouteIntegrationEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
   sourceLocalDbRouteSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+  sourceProviderDisabledClosureDecisionPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
   scope:
     docsStateEvidenceAudit: true
-    acceptanceDecisionPackage: true
+    acceptanceDecisionPackage: false
     approvalPackageOnly: false
     staticSchemaRead: true
-    localSourceChange: false
-    focusedUnitTest: false
+    localSourceChange: true
+    focusedUnitTest: true
     routeDbAdapterIntegration: false
-    repositoryPortContract: false
-    realDbAdapterDefaultWiring: false
+    repositoryPortContract: true
+    realDbAdapterDefaultWiring: read_model_only_no_live_db_execution
     browserRuntime: false
     credentialDocumentRead: false
     credentialOrEnvRead: false
@@ -547,58 +548,59 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: provider_disabled_metadata_only_task_status_history_closure_first
+    adminAiGeneration: provider_disabled_metadata_only_task_status_history_ui_closure
     aiGenerationTask: reuse_existing_task_and_admin_metadata_for_pending_status_history
-    generatedResultStorage: defer_to_separate_schema_or_storage_approval_after_real_result_source_decision
+    generatedResultStorage: blocked_deferred_to_separate_approval
     formalContentBoundary: provider_disabled_history_must_not_write_formal_question_or_paper
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
-  branch: codex/admin-ai-provider-disabled-closure-decision-20260626
+      approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+  branch: codex/admin-ai-provider-disabled-history-ui-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    acceptanceDecisionPackageCreated: pass
+    taskQueuePacketCreated: pass
     providerDisabledClosureDecision: pass_metadata_only_task_history_first
-    generatedResultStorageDecision: deferred_requires_separate_approval
-    localCapabilityGate: not_applicable_docs_only
+    providerDisabledHistoryStatusUi: pass
+    generatedResultStorageDecision: blocked_deferred_requires_separate_approval
+    localCapabilityGate: not_required_no_db_provider_env_browser_capability_executed
     migrationExecution: not_run_blocked
     routeSmoke: not_run_blocked
-    routeDbAdapterIntegration: not_changed
-    tddRedObserved: not_applicable_docs_only
-    focusedUnitTest: not_applicable_docs_only
+    routeDbAdapterIntegration: read_model_only_no_live_db_smoke
+    tddRedObserved: pass_expected_failure_before_implementation
+    focusedUnitTest: pass_3_files_22_tests
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialOrEnvReadExecuted: false
-    lint: not_run_docs_only
-    typecheck: not_run_docs_only
+    lint: pass
+    typecheck: pass
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     databaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     migrationFileCreated: false
     drizzleSnapshotUpdated: false
     migrationGenerationExecuted: false
-    realDbAdapterDefaultWiring: not_changed
+    realDbAdapterDefaultWiring: read_model_method_added_no_live_db_execution
     generatedResultStorageApproved: false
     accountMutationExecuted: false
     providerCallExecuted: false
@@ -606,11 +608,46 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    sourceChanged: false
-    testChanged: false
+    sourceChanged: true
+    testChanged: true
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+  nextRecommendedTask: null
+adminAiGenerationProviderDisabledTaskHistoryAndStatusUiTdd20260626:
+  taskId: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+  phase: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+  recordedAt: "2026-06-26T17:30:00-07:00"
+  status: closed
+  result: pass_provider_disabled_metadata_task_history_status_ui_tdd_no_provider_no_generated_result_storage_no_final_pass
+  branch: codex/admin-ai-provider-disabled-history-ui-20260626
+  entryMasterSha: 000fdb386b17fa1b54910924785227167e2dfcff
+  entryOriginMasterSha: 000fdb386b17fa1b54910924785227167e2dfcff
+  approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+  sourceDecisionPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  boundary:
+    providerDisabledHistoryStatusUi: approved
+    generatedResultStorage: blocked
+    providerCall: blocked
+    credentialOrEnvRead: blocked
+    formalQuestionPaperWrite: blocked
+    schemaMigrationOrDbExecution: blocked
+    browserDevServerE2E: blocked
+    stagingProdPaymentExternalReleaseFinalPass: blocked
+  validationSummary:
+    taskPlanCreated: pass
+    taskQueuePacketCreated: pass
+    providerDisabledHistoryStatusUi: pass
+    tddRedObserved: pass_expected_failure_before_implementation
+    focusedUnitTest: pass_3_files_22_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 adminAiGenerationProviderDisabledProductClosureOrGeneratedResultStorageDecision20260626:
   taskId: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
   phase: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26

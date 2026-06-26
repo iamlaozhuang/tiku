@@ -60,6 +60,13 @@ export function createAdminAiGenerationTaskPersistenceRepository(
         task: mapAdminAiGenerationTaskPersistenceRowToDto(resolvedRow),
       };
     },
+    async listTaskHistory(query) {
+      const rows = await gateway.listTaskHistory(query);
+
+      return rows.map((row) =>
+        mapAdminAiGenerationTaskPersistenceRowToDto(row),
+      );
+    },
   };
 }
 

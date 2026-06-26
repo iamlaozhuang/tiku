@@ -1,5 +1,8 @@
 import type { AiGenerationTaskRequestPolicyDto } from "./ai-generation-task-request-contract";
-import type { AiGenerationTaskStatus } from "../models/ai-generation-task";
+import type {
+  AiGenerationTaskStatus,
+  AiGenerationTaskType,
+} from "../models/ai-generation-task";
 import type { AiGenerationTaskResultContentVisibility } from "../models/ai-generation-task-request";
 import type { EvidenceStatus } from "../models/ai-rag";
 
@@ -98,3 +101,34 @@ export type AdminAiGenerationLocalContractDto =
   AdminAiGenerationLocalContractBaseDto & {
     taskPersistence: AdminAiGenerationLocalContractTaskPersistenceDto;
   };
+
+export type AdminAiGenerationTaskHistoryItemDto = {
+  requestPublicId: string;
+  taskPublicId: string;
+  taskType: Extract<
+    AiGenerationTaskType,
+    "ai_question_generation" | "ai_paper_generation"
+  >;
+  generationKind: AdminAiGenerationKind;
+  status: AiGenerationTaskStatus;
+  requestedAt: string;
+  resultPublicId: string | null;
+  contentVisibility: AiGenerationTaskResultContentVisibility;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
+  runtimeBridgeStatus: "provider_call_blocked";
+  providerCallExecuted: false;
+  envSecretAccessed: false;
+  providerConfigurationRead: false;
+  costCalibrationExecuted: false;
+  formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationTaskHistoryDto = {
+  workspace: AdminAiGenerationWorkspace;
+  latestTask: AdminAiGenerationTaskHistoryItemDto | null;
+  items: AdminAiGenerationTaskHistoryItemDto[];
+  redactionStatus: "redacted";
+};

@@ -120,6 +120,100 @@ function createLocalContractResponse(input: {
         questionWriteStatus: "blocked_without_follow_up_task",
         paperWriteStatus: "blocked_without_follow_up_task",
       },
+      taskPersistence: {
+        persistenceStatus: "created",
+        requestPublicId: `admin_ai_generation_request_${input.workspace}_${input.generationKind}`,
+        taskPublicId: `admin_ai_generation_task_${input.workspace}_${input.generationKind}`,
+        status: "pending",
+        resultPublicId: null,
+        contentVisibility: "summary_only",
+        evidenceStatus: "none",
+        citationCount: 0,
+        redactionStatus: "redacted",
+      },
+    },
+  };
+}
+
+function createTaskHistoryResponse(input: {
+  workspace: "content" | "organization";
+  generationKind: "question" | "paper";
+  taskPublicId?: string;
+}) {
+  const isQuestion = input.generationKind === "question";
+  const taskPublicId =
+    input.taskPublicId ??
+    `admin_ai_generation_task_${input.workspace}_${input.generationKind}_history`;
+
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      workspace: input.workspace,
+      latestTask: {
+        taskPublicId,
+        requestPublicId: `${taskPublicId}_request`,
+        generationKind: input.generationKind,
+        taskType: isQuestion ? "ai_question_generation" : "ai_paper_generation",
+        status: "pending",
+        requestedAt: "2026-06-26T20:30:00.000Z",
+        resultPublicId: null,
+        contentVisibility: "summary_only",
+        evidenceStatus: "none",
+        citationCount: 0,
+        runtimeStatus: "local_contract_only",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        envSecretAccessed: false,
+        providerConfigurationRead: false,
+        costCalibrationExecuted: false,
+        formalContentBoundary: {
+          questionWriteStatus: "blocked_without_follow_up_task",
+          paperWriteStatus: "blocked_without_follow_up_task",
+        },
+        redactionStatus: "redacted",
+      },
+      items: [
+        {
+          taskPublicId,
+          requestPublicId: `${taskPublicId}_request`,
+          generationKind: input.generationKind,
+          taskType: isQuestion
+            ? "ai_question_generation"
+            : "ai_paper_generation",
+          status: "pending",
+          requestedAt: "2026-06-26T20:30:00.000Z",
+          resultPublicId: null,
+          contentVisibility: "summary_only",
+          evidenceStatus: "none",
+          citationCount: 0,
+          runtimeStatus: "local_contract_only",
+          runtimeBridgeStatus: "provider_call_blocked",
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+          formalContentBoundary: {
+            questionWriteStatus: "blocked_without_follow_up_task",
+            paperWriteStatus: "blocked_without_follow_up_task",
+          },
+          redactionStatus: "redacted",
+        },
+      ],
+      redactionStatus: "redacted",
+    },
+  };
+}
+
+function createEmptyTaskHistoryResponse(workspace: "content" | "organization") {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      workspace,
+      latestTask: null,
+      items: [],
+      redactionStatus: "redacted",
     },
   };
 }
@@ -214,13 +308,25 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        String(url) === "/api/v1/content-ai-generation-requests" &&
+        init?.method === "POST"
+      ) {
         expect(init).toMatchObject({
           method: "POST",
         });
 
         return Response.json(
           createLocalContractResponse({
+            workspace: "content",
+            generationKind: "question",
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
             workspace: "content",
             generationKind: "question",
           }),
@@ -244,9 +350,11 @@ describe("admin AI generation entry surfaces", () => {
       expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
         "/api/v1/sessions",
         "/api/v1/content-ai-generation-requests",
+        "/api/v1/content-ai-generation-requests",
+        "/api/v1/content-ai-generation-requests",
       ]);
     });
-    const requestInit = fetchMock.mock.calls[1]?.[1] as RequestInit;
+    const requestInit = fetchMock.mock.calls[2]?.[1] as RequestInit;
 
     expect(JSON.parse(String(requestInit.body))).toEqual({
       generationKind: "question",
@@ -257,13 +365,19 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-local-contract-summary"),
     ).toHaveTextContent("summary_only");
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("Provider 已阻断");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain(
+      "admin_ai_generation_task_content_question_history",
+    );
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_A");
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_B");
   });
 
   it("submits organization advanced admin local contract requests to the organization API", async () => {
-    const fetchMock = vi.fn(async (url: string | URL) => {
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
       if (String(url) === "/api/v1/sessions") {
         return Response.json(
           createSessionResponse({
@@ -273,9 +387,21 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+      if (
+        String(url) === "/api/v1/organization-ai-generation-requests" &&
+        init?.method === "POST"
+      ) {
         return Response.json(
           createLocalContractResponse({
+            workspace: "organization",
+            generationKind: "paper",
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
             workspace: "organization",
             generationKind: "paper",
           }),
@@ -299,11 +425,16 @@ describe("admin AI generation entry surfaces", () => {
       expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
         "/api/v1/sessions",
         "/api/v1/organization-ai-generation-requests",
+        "/api/v1/organization-ai-generation-requests",
+        "/api/v1/organization-ai-generation-requests",
       ]);
     });
     expect(
       await screen.findByTestId("admin-ai-generation-local-contract-summary"),
-    ).toHaveTextContent("ai_generated_paper_draft");
+    ).toHaveTextContent("暂无生成结果");
+    expect(
+      screen.getByTestId("admin-ai-generation-local-contract-summary"),
+    ).toHaveTextContent("summary_only");
   });
 
   it("does not render a submit action for organization standard admins", async () => {
@@ -337,5 +468,112 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.queryByTestId("admin-ai-generation-local-contract-summary"),
     ).toBeNull();
+  });
+
+  it("loads recent provider-disabled task history for content admin without showing public id lists", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "paper",
+            taskPublicId: "admin_ai_generation_task_content_paper_secret_123",
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "paper",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("最近任务");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("AI组卷");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("Provider 已阻断");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("正式写入已阻断");
+    expect(document.body.textContent).not.toContain(
+      "admin_ai_generation_task_content_paper_secret_123",
+    );
+  });
+
+  it("shows an empty history state before any provider-disabled task exists", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("暂无任务记录");
+  });
+
+  it("shows a redacted history error state when metadata history loading fails", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json({
+          code: 500001,
+          message: "synthetic failure",
+          data: null,
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history-error"),
+    ).toHaveTextContent("任务历史暂不可用");
+    expect(document.body.textContent).not.toContain("synthetic failure");
   });
 });

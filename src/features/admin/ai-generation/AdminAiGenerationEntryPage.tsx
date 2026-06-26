@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, FileText, ShieldCheck, WandSparkles } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  AlertCircle,
+  FileText,
+  LoaderCircle,
+  ShieldCheck,
+  WandSparkles,
+} from "lucide-react";
 
-import type { AdminAiGenerationLocalContractDto } from "@/server/contracts/admin-ai-generation-local-contract";
+import type {
+  AdminAiGenerationLocalContractDto,
+  AdminAiGenerationTaskHistoryDto,
+  AdminAiGenerationTaskHistoryItemDto,
+} from "@/server/contracts/admin-ai-generation-local-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 
 import {
@@ -29,6 +39,7 @@ type AdminAiGenerationRequestState =
   | "submitting"
   | "accepted"
   | "error";
+type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
 
 const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
 const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
@@ -97,6 +108,148 @@ function getAdminAiGenerationRequestPath(
     : "/api/v1/organization-ai-generation-requests";
 }
 
+function getGenerationKindLabel(generationKind: AdminAiGenerationKind): string {
+  return generationKind === "question" ? "AI出题" : "AI组卷";
+}
+
+function getTaskStatusLabel(
+  status: AdminAiGenerationTaskHistoryItemDto["status"],
+): string {
+  const labels = {
+    pending: "等待生成",
+    running: "生成中",
+    succeeded: "已完成",
+    failed: "失败",
+    cancelled: "已取消",
+  } satisfies Record<AdminAiGenerationTaskHistoryItemDto["status"], string>;
+
+  return labels[status];
+}
+
+function getVisibilityLabel(
+  visibility: AdminAiGenerationTaskHistoryItemDto["contentVisibility"],
+): string {
+  return visibility === "summary_only" ? "仅摘要" : visibility;
+}
+
+function formatRequestedAt(requestedAt: string): string {
+  return requestedAt.slice(0, 16).replace("T", " ");
+}
+
+function AdminAiGenerationTaskHistoryPanel({
+  state,
+  taskHistory,
+}: {
+  state: AdminAiGenerationHistoryState;
+  taskHistory: AdminAiGenerationTaskHistoryDto | null;
+}) {
+  const items = taskHistory?.items ?? [];
+
+  return (
+    <section
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="admin-ai-generation-task-history"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">
+            Provider-disabled 状态
+          </p>
+          <h2 className="text-text-primary mt-1 text-base font-semibold">
+            最近任务
+          </h2>
+        </div>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          元数据历史
+        </span>
+      </div>
+
+      {state === "loading" ? (
+        <div
+          className="text-text-secondary mt-4 flex items-center gap-2 text-sm"
+          role="status"
+        >
+          <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+          正在加载任务历史
+        </div>
+      ) : null}
+
+      {state === "error" ? (
+        <div
+          className="border-destructive/40 bg-destructive/5 mt-4 rounded-md border p-3"
+          data-testid="admin-ai-generation-task-history-error"
+          role="alert"
+        >
+          <h3 className="text-text-primary text-sm font-semibold">
+            任务历史暂不可用
+          </h3>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            当前仅显示入口状态。历史接口失败不会启用
+            Provider，也不会写入正式题目或试卷。
+          </p>
+        </div>
+      ) : null}
+
+      {state === "empty" ? (
+        <div
+          className="bg-muted text-text-secondary mt-4 rounded-md p-3 text-sm leading-6"
+          role="status"
+        >
+          暂无任务记录。提交后将显示等待生成、Provider 阻断和正式写入阻断状态。
+        </div>
+      ) : null}
+
+      {state === "ready" ? (
+        <div className="mt-4 space-y-3">
+          {items.map((taskItem) => (
+            <article
+              className="border-border bg-background rounded-md border p-3"
+              key={taskItem.taskPublicId}
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h3 className="text-text-primary text-sm font-semibold">
+                    {getGenerationKindLabel(taskItem.generationKind)}
+                  </h3>
+                  <p className="text-text-secondary mt-1 text-xs">
+                    {formatRequestedAt(taskItem.requestedAt)}
+                  </p>
+                </div>
+                <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+                  {getTaskStatusLabel(taskItem.status)}
+                </span>
+              </div>
+
+              <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <dt className="text-text-secondary">内容可见性</dt>
+                  <dd className="text-text-primary mt-1">
+                    {getVisibilityLabel(taskItem.contentVisibility)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">Provider</dt>
+                  <dd className="text-text-primary mt-1">Provider 已阻断</dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">成本校准</dt>
+                  <dd className="text-text-primary mt-1">
+                    Cost Calibration 已阻断
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">正式内容</dt>
+                  <dd className="text-text-primary mt-1">正式写入已阻断</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function AdminAiGenerationEntryPage({
   generationKind,
   workspace,
@@ -108,9 +261,43 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationEntryLoadState>("loading");
   const [requestState, setRequestState] =
     useState<AdminAiGenerationRequestState>("idle");
+  const [historyState, setHistoryState] =
+    useState<AdminAiGenerationHistoryState>("loading");
   const [localContractSummary, setLocalContractSummary] =
     useState<AdminAiGenerationLocalContractDto | null>(null);
+  const [taskHistory, setTaskHistory] =
+    useState<AdminAiGenerationTaskHistoryDto | null>(null);
   const pageCopy = getPageCopy(workspace, generationKind);
+
+  const refreshTaskHistory = useCallback(
+    async (sessionToken: string | null) => {
+      setHistoryState("loading");
+
+      const historyResponse =
+        await fetchAdminApi<AdminAiGenerationTaskHistoryDto>(
+          getAdminAiGenerationRequestPath(workspace),
+          sessionToken,
+        );
+
+      if (isUnauthorizedResponse(historyResponse)) {
+        setLoadState("unauthorized");
+        return "unauthorized";
+      }
+
+      if (historyResponse.code !== 0 || historyResponse.data === null) {
+        setTaskHistory(null);
+        setHistoryState("error");
+        return "ready";
+      }
+
+      setTaskHistory(historyResponse.data);
+      setHistoryState(
+        historyResponse.data.items.length === 0 ? "empty" : "ready",
+      );
+      return "ready";
+    },
+    [workspace],
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -138,7 +325,18 @@ export function AdminAiGenerationEntryPage({
           return;
         }
 
-        setLoadState(resolveLoadState(sessionResponse.data, workspace));
+        const nextLoadState = resolveLoadState(sessionResponse.data, workspace);
+
+        if (nextLoadState !== "ready") {
+          setLoadState(nextLoadState);
+          return;
+        }
+
+        const historyLoadState = await refreshTaskHistory(sessionToken);
+
+        if (isActive && historyLoadState === "ready") {
+          setLoadState("ready");
+        }
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -151,7 +349,7 @@ export function AdminAiGenerationEntryPage({
     return () => {
       isActive = false;
     };
-  }, [workspace]);
+  }, [refreshTaskHistory, workspace]);
 
   async function handleSubmitLocalContractRequest() {
     const sessionToken = getStoredSessionToken();
@@ -185,6 +383,7 @@ export function AdminAiGenerationEntryPage({
 
       setLocalContractSummary(requestResponse.data);
       setRequestState("accepted");
+      await refreshTaskHistory(sessionToken);
     } catch {
       setRequestState("error");
     }
@@ -280,6 +479,11 @@ export function AdminAiGenerationEntryPage({
         </section>
       </div>
 
+      <AdminAiGenerationTaskHistoryPanel
+        state={historyState}
+        taskHistory={taskHistory}
+      />
+
       {requestState === "error" ? (
         <section
           className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
@@ -317,32 +521,31 @@ export function AdminAiGenerationEntryPage({
 
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <dt className="text-text-secondary">Task</dt>
-              <dd className="text-text-primary mt-1 font-mono text-xs">
-                {localContractSummary.taskRequest.taskPublicId}
+              <dt className="text-text-secondary">任务状态</dt>
+              <dd className="text-text-primary mt-1">
+                {localContractSummary.resultState.status}
               </dd>
             </div>
             <div>
-              <dt className="text-text-secondary">Result</dt>
+              <dt className="text-text-secondary">结果内容</dt>
               <dd className="text-text-primary mt-1">
-                {localContractSummary.taskRequest.resultReference.resultKind}
+                {localContractSummary.resultState.resultPublicId === null
+                  ? "暂无生成结果"
+                  : "已产生结果引用"}
               </dd>
             </div>
             <div>
-              <dt className="text-text-secondary">Visibility</dt>
+              <dt className="text-text-secondary">可见性</dt>
               <dd className="text-text-primary mt-1">
-                {
-                  localContractSummary.taskRequest.resultReference
-                    .contentVisibility
-                }
+                {localContractSummary.resultState.contentVisibility}
               </dd>
             </div>
             <div>
               <dt className="text-text-secondary">Provider</dt>
               <dd className="text-text-primary mt-1">
                 {localContractSummary.runtimeBridge.providerCallExecuted
-                  ? "executed"
-                  : "blocked"}
+                  ? "已执行"
+                  : "已阻断"}
               </dd>
             </div>
           </dl>

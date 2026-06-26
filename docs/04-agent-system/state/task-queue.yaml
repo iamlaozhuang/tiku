@@ -2154,6 +2154,211 @@ tasks:
       moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
     nextRecommendedTask: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
 
+  - id: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+    title: Admin AI generation provider-disabled task history and status UI TDD
+    phase: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+    sourceStory: successor_of_admin_ai_generation_provider_disabled_product_closure_decision
+    dependencies:
+      - admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_provider_disabled_metadata_ui_tdd
+    evidenceMode: redacted_metadata_status_history_only
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_next_task_selection
+    requiredOutcome: >-
+      Implement a Provider-disabled, metadata-only pending/status/history loop for content and organization admin AI
+      generation. Add redacted task-history read models, GET routes, focused fake repository/route tests, and backend
+      UI loading/empty/error/latest/history states. Do not run Provider calls, read credentials, write generated result
+      storage, write formal question/paper records, execute DB migration or live DB smoke, run browser/dev-server/e2e,
+      or claim staging/prod/release/final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      localSourceChange: approved_by_current_user_2026_06_26
+      focusedUnitTest: approved_by_current_user_2026_06_26
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      sourceStaticRead: approved
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      migrationExecution: blocked
+      generatedResultStorage: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - src/server/contracts/api-response.ts
+      - src/features/admin/content-admin-runtime.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - generated_result_storage_implementation
+      - generated_content_persistence
+      - db_connection_or_write
+      - schema_or_migration_file_change
+      - migration_execution
+      - drizzle_kit_push
+      - destructive_database_operation
+      - database_seed_execution
+      - account_mutation
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - cost_calibration_gate
+      - formal_question_or_paper_write
+      - final_acceptance_pass
+    riskTypes:
+      - provider_disabled_metadata_history_ui
+      - route_scope_authorization_boundary
+      - evidence_redaction
+      - formal_content_write_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts src/app/api/v1/content-ai-generation-requests/route.ts src/app/api/v1/organization-ai-generation-requests/route.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts src/app/api/v1/content-ai-generation-requests/route.ts src/app/api/v1/organization-ai-generation-requests/route.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
+    status: closed
+    result: pass_provider_disabled_metadata_task_history_status_ui_tdd_no_provider_no_generated_result_storage_no_final_pass
+    approvedAt: "2026-06-26T17:30:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+    claimedAt: "2026-06-26T17:30:00-07:00"
+    plannedAt: "2026-06-26T17:30:00-07:00"
+    implementedAt: "2026-06-26T17:45:00-07:00"
+    validatedAt: "2026-06-26T17:50:00-07:00"
+    reviewedAt: "2026-06-26T17:50:00-07:00"
+    closedAt: "2026-06-26T17:50:00-07:00"
+    branch: codex/admin-ai-provider-disabled-history-ui-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_next_task_admin_ai_generation_provider_disabled_history_ui_tdd_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      taskPlanCreated: pass
+      taskQueuePacketCreated: pass
+      providerDisabledHistoryStatusUi: pass
+      tddRedObserved: pass_expected_failure_before_implementation
+      focusedUnitTest: pass_3_files_22_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      databaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      migrationExecution: false
+      generatedResultStorageImplemented: false
+      accountMutationExecuted: false
+      browserRuntimeExecuted: false
+      devServerStarted: false
+      e2eRuntimeExecuted: false
+      credentialOrEnvReadExecuted: false
+      providerCallExecuted: false
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      packageLockfileChanged: false
+      finalPassClaimed: false
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

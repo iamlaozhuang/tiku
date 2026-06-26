@@ -13,10 +13,14 @@ import type {
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
   AdminAiGenerationLocalContractTaskPersistenceDto,
+  AdminAiGenerationTaskHistoryDto,
+  AdminAiGenerationTaskHistoryItemDto,
   AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationTaskHistoryQuery,
+  AdminAiGenerationTaskPersistenceDto,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceResult,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
@@ -75,6 +79,7 @@ export type AdminAiGenerationRuntimeBridgeControl = {
 
 const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
 const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
+const ADMIN_AI_GENERATION_HISTORY_LIMIT = 10;
 
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
@@ -226,6 +231,31 @@ function createAdminAiGenerationPolicyInput(input: {
     citationCount: 0,
     auditLogPublicId: null,
     aiCallLogPublicId: null,
+  };
+}
+
+function resolveAdminAiGenerationTaskHistoryQuery(input: {
+  actor: AdminAiGenerationActor;
+  workspace: AdminAiGenerationWorkspace;
+}): AdminAiGenerationTaskHistoryQuery | null {
+  if (input.workspace === "content") {
+    return {
+      workspace: "content",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      limit: ADMIN_AI_GENERATION_HISTORY_LIMIT,
+    };
+  }
+
+  if (input.actor.organizationPublicId === null) {
+    return null;
+  }
+
+  return {
+    workspace: "organization",
+    ownerType: "organization",
+    ownerPublicId: input.actor.organizationPublicId,
+    limit: ADMIN_AI_GENERATION_HISTORY_LIMIT,
   };
 }
 
@@ -384,6 +414,57 @@ function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(
   };
 }
 
+function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
+  task: AdminAiGenerationTaskPersistenceDto,
+): AdminAiGenerationTaskHistoryItemDto {
+  return {
+    requestPublicId: task.requestPublicId,
+    taskPublicId: task.taskPublicId,
+    taskType: task.taskType,
+    generationKind: task.generationKind,
+    status: task.status,
+    requestedAt: task.requestedAt,
+    resultPublicId: task.resultPublicId,
+    contentVisibility: task.contentVisibility,
+    evidenceStatus: task.evidenceStatus,
+    citationCount: task.citationCount,
+    runtimeStatus: task.runtimeStatus,
+    runtimeBridgeStatus: task.runtimeBridgeStatus,
+    providerCallExecuted: task.providerCallExecuted,
+    envSecretAccessed: task.envSecretAccessed,
+    providerConfigurationRead: task.providerConfigurationRead,
+    costCalibrationExecuted: task.costCalibrationExecuted,
+    formalContentBoundary: task.formalContentBoundary,
+    redactionStatus: task.redactionStatus,
+  };
+}
+
+async function listAdminAiGenerationTaskHistory(input: {
+  actor: AdminAiGenerationActor;
+  taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
+  workspace: AdminAiGenerationWorkspace;
+}): Promise<ApiResponse<AdminAiGenerationTaskHistoryDto | null>> {
+  const historyQuery = resolveAdminAiGenerationTaskHistoryQuery({
+    actor: input.actor,
+    workspace: input.workspace,
+  });
+
+  if (historyQuery === null) {
+    return adminAiGenerationPermissionDeniedResponse;
+  }
+
+  const historyItems = (
+    await input.taskPersistenceRepository.listTaskHistory(historyQuery)
+  ).map((task) => mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(task));
+
+  return createSuccessResponse({
+    workspace: input.workspace,
+    latestTask: historyItems[0] ?? null,
+    items: historyItems,
+    redactionStatus: "redacted",
+  });
+}
+
 async function resolveAdminAiGenerationActor(
   request: Request,
   sessionService: Pick<SessionService, "getCurrentSession">,
@@ -424,6 +505,28 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
+      GET: async (request: Request): Promise<Response> => {
+        const actor = await resolveAdminAiGenerationActor(
+          request,
+          sessionService,
+        );
+
+        if (actor === null) {
+          return createJsonResponse(adminSessionRequiredResponse);
+        }
+
+        if (!canUseAdminAiGeneration(workspace, actor)) {
+          return createJsonResponse(adminAiGenerationPermissionDeniedResponse);
+        }
+
+        return createJsonResponse(
+          await listAdminAiGenerationTaskHistory({
+            actor,
+            taskPersistenceRepository,
+            workspace,
+          }),
+        );
+      },
       POST: async (request: Request): Promise<Response> => {
         const actor = await resolveAdminAiGenerationActor(
           request,

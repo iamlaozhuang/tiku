@@ -3,5 +3,6 @@ import { createAdminAiGenerationLocalContractRouteHandlers } from "@/server/serv
 const organizationAiGenerationRequestRouteHandlers =
   createAdminAiGenerationLocalContractRouteHandlers("organization");
 
+export const GET = organizationAiGenerationRequestRouteHandlers.collection.GET;
 export const POST =
   organizationAiGenerationRequestRouteHandlers.collection.POST;

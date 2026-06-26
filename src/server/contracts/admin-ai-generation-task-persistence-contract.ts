@@ -105,6 +105,13 @@ export type FindAdminAiGenerationTaskByIdempotencyKeyQuery = {
   taskTypes: readonly AdminAiGenerationPersistenceTaskType[];
 };
 
+export type AdminAiGenerationTaskHistoryQuery = {
+  workspace: AdminAiGenerationWorkspace;
+  ownerType: AiGenerationTaskRequestOwnerType;
+  ownerPublicId: string;
+  limit: number;
+};
+
 export type AdminAiGenerationTaskPersistenceGateway = {
   findTaskByIdempotencyKey(
     query: FindAdminAiGenerationTaskByIdempotencyKeyQuery,
@@ -112,6 +119,9 @@ export type AdminAiGenerationTaskPersistenceGateway = {
   insertPendingTask(
     input: CreateAdminAiGenerationTaskPersistenceInput,
   ): Promise<AdminAiGenerationTaskPersistenceRow | null>;
+  listTaskHistory(
+    query: AdminAiGenerationTaskHistoryQuery,
+  ): Promise<AdminAiGenerationTaskPersistenceRow[]>;
 };
 
 export type AdminAiGenerationTaskPersistenceDto = {
@@ -162,4 +172,7 @@ export type AdminAiGenerationTaskPersistenceRepository = {
   createOrReuseTask(
     input: CreateOrReuseAdminAiGenerationTaskInput,
   ): Promise<AdminAiGenerationTaskPersistenceResult>;
+  listTaskHistory(
+    query: AdminAiGenerationTaskHistoryQuery,
+  ): Promise<AdminAiGenerationTaskPersistenceDto[]>;
 };

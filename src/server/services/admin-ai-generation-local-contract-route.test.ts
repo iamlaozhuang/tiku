@@ -6,8 +6,10 @@ import {
 } from "./admin-ai-generation-local-contract-route";
 import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceResult,
+  AdminAiGenerationTaskPersistenceDto,
   CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
@@ -73,6 +75,18 @@ function createPostRequest(
   );
 }
 
+function createGetRequest(workspace: AdminAiGenerationWorkspace): Request {
+  return new Request(
+    `http://localhost/api/v1/${workspace}-ai-generation-requests`,
+    {
+      headers: {
+        authorization: "Bearer synthetic-admin-session",
+      },
+      method: "GET",
+    },
+  );
+}
+
 async function postLocalContractRequest(input: {
   workspace: AdminAiGenerationWorkspace;
   adminRoles: AdminRole[];
@@ -113,6 +127,35 @@ async function postLocalContractRequest(input: {
   );
 
   return collection.POST(createPostRequest(input.workspace, input.body));
+}
+
+async function getLocalContractHistory(input: {
+  workspace: AdminAiGenerationWorkspace;
+  adminRoles: AdminRole[];
+  organizationPublicId?: string | null;
+  taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
+}) {
+  const taskPersistence =
+    input.taskPersistenceRepository ??
+    createTaskPersistenceRecorder().repository;
+  const { collection } = createAdminAiGenerationLocalContractRouteHandlers(
+    input.workspace,
+    {
+      sessionService: createAdminSessionService({
+        adminRoles: input.adminRoles,
+        organizationPublicId: input.organizationPublicId,
+      }),
+      taskPersistenceRepository: taskPersistence,
+    },
+  );
+
+  const getHandler = (
+    collection as {
+      GET: (request: Request) => Promise<Response>;
+    }
+  ).GET;
+
+  return getHandler(createGetRequest(input.workspace));
 }
 
 function createTaskPersistenceResult(
@@ -164,18 +207,75 @@ function createTaskPersistenceResult(
   };
 }
 
+function createTaskHistoryItem(input: {
+  generationKind: "question" | "paper";
+  requestedAt: string;
+  taskPublicId: string;
+  workspace: AdminAiGenerationWorkspace;
+}): AdminAiGenerationTaskPersistenceDto {
+  const isContent = input.workspace === "content";
+  const ownerPublicId = isContent
+    ? "platform_content_review_pool"
+    : "organization_public_123";
+
+  return {
+    requestPublicId: `${input.taskPublicId}_request`,
+    taskPublicId: input.taskPublicId,
+    taskType:
+      input.generationKind === "question"
+        ? "ai_question_generation"
+        : "ai_paper_generation",
+    workspace: input.workspace,
+    generationKind: input.generationKind,
+    status: "pending",
+    requestedAt: input.requestedAt,
+    authorizationSource: isContent ? "admin_role" : "org_auth",
+    authorizationPublicId: isContent
+      ? "admin_role_content_ai_generation"
+      : "org_auth_local_contract_organization_public_123",
+    actorPublicId: "admin_public_123",
+    ownerType: isContent ? "platform" : "organization",
+    ownerPublicId,
+    organizationPublicId: isContent ? null : "organization_public_123",
+    quotaOwnerType: isContent ? "platform" : "organization",
+    quotaOwnerPublicId: ownerPublicId,
+    resultPublicId: null,
+    evidenceStatus: "none",
+    citationCount: 0,
+    aiCallLogPublicId: null,
+    runtimeStatus: "local_contract_only",
+    runtimeBridgeStatus: "provider_call_blocked",
+    providerCallExecuted: false,
+    envSecretAccessed: false,
+    providerConfigurationRead: false,
+    costCalibrationExecuted: false,
+    formalContentBoundary: {
+      questionWriteStatus: "blocked_without_follow_up_task",
+      paperWriteStatus: "blocked_without_follow_up_task",
+    },
+    sourceQuestionPublicId: null,
+    sourcePaperPublicId: null,
+    contentVisibility: "summary_only",
+    redactionStatus: "redacted",
+  };
+}
+
 function createTaskPersistenceRecorder(
   input: {
     persistenceStatus?: AdminAiGenerationTaskPersistenceResult["persistenceStatus"];
+    taskHistoryItems?: AdminAiGenerationTaskPersistenceDto[];
   } = {},
 ): {
   calls: CreateOrReuseAdminAiGenerationTaskInput[];
+  historyQueries: AdminAiGenerationTaskHistoryQuery[];
   repository: AdminAiGenerationTaskPersistenceRepository;
 } {
   const calls: CreateOrReuseAdminAiGenerationTaskInput[] = [];
+  const historyQueries: AdminAiGenerationTaskHistoryQuery[] = [];
 
   return {
     calls,
+    historyQueries,
     repository: {
       async createOrReuseTask(createInput) {
         calls.push(createInput);
@@ -184,6 +284,11 @@ function createTaskPersistenceRecorder(
           createInput,
           input.persistenceStatus ?? "created",
         );
+      },
+      async listTaskHistory(query) {
+        historyQueries.push(query);
+
+        return input.taskHistoryItems ?? [];
       },
     },
   };
@@ -515,5 +620,88 @@ describe("admin AI generation local contract route handlers", () => {
     });
     expect(taskPersistenceRecorder.calls).toEqual([]);
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_H");
+  });
+
+  it("returns content admin metadata-only task history scoped to the content review workspace", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "content",
+          generationKind: "paper",
+          taskPublicId: "admin_ai_generation_task_content_paper_history_123",
+          requestedAt: "2026-06-26T20:30:00.000Z",
+        }),
+      ],
+    });
+    const response = await getLocalContractHistory({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(taskPersistenceRecorder.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        limit: 10,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        workspace: "content",
+        latestTask: {
+          taskPublicId: "admin_ai_generation_task_content_paper_history_123",
+          generationKind: "paper",
+          status: "pending",
+          resultPublicId: null,
+          contentVisibility: "summary_only",
+          evidenceStatus: "none",
+          citationCount: 0,
+          runtimeStatus: "local_contract_only",
+          runtimeBridgeStatus: "provider_call_blocked",
+          providerCallExecuted: false,
+          costCalibrationExecuted: false,
+          redactionStatus: "redacted",
+          formalContentBoundary: {
+            questionWriteStatus: "blocked_without_follow_up_task",
+            paperWriteStatus: "blocked_without_follow_up_task",
+          },
+        },
+        items: [
+          {
+            taskPublicId: "admin_ai_generation_task_content_paper_history_123",
+            runtimeBridgeStatus: "provider_call_blocked",
+          },
+        ],
+        redactionStatus: "redacted",
+      },
+    });
+    expect(serializedPayload).not.toMatch(/"id":/);
+    expect(serializedPayload).not.toContain("prompt");
+    expect(serializedPayload).not.toContain("providerPayload");
+    expect(serializedPayload).not.toContain("Authorization");
+  });
+
+  it("denies organization standard admin direct GET without listing task history", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await getLocalContractHistory({
+      workspace: "organization",
+      adminRoles: ["org_standard_admin"],
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 403011,
+      message: "Admin AI generation is not available for this role.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.historyQueries).toEqual([]);
   });
 });
