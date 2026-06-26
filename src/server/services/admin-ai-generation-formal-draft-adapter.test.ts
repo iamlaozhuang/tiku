@@ -250,6 +250,42 @@ describe("admin AI generation formal draft adapter service", () => {
     );
   });
 
+  it("uses the current route writer context when reused adoption metadata has a stale reviewer", async () => {
+    const questionWriter = createQuestionWriter();
+    const paperWriter = createPaperWriter();
+    const service = createAdminAiGenerationFormalDraftAdapterService({
+      paperWriter,
+      questionWriter,
+    });
+    const draftPayload = createQuestionDraftPayload();
+    const adoption = createAdoption({
+      review: {
+        ...createAdoption().review,
+        reviewerPublicId: "admin_content_public_stale_377",
+      },
+    });
+
+    const response = await service.createFormalDraft({
+      adoption,
+      reviewedDraft: draftPayload,
+      targetType: "question",
+      writerContext: {
+        actorPublicId: "admin_content_public_current_route_377",
+      },
+    });
+
+    expect(response.code).toBe(0);
+    expect(questionWriter.createQuestion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        stemRichText: "Reviewed formal question stem",
+      }),
+      {
+        actorPublicId: "admin_content_public_current_route_377",
+      },
+    );
+    expect(paperWriter.createPaper).not.toHaveBeenCalled();
+  });
+
   it("rejects unsafe or target-mismatched adoption metadata before calling formal draft writers", async () => {
     const questionWriter = createQuestionWriter();
     const paperWriter = createPaperWriter();

@@ -281,6 +281,14 @@ function createWriterContext(adoption: AdminAiGenerationFormalAdoptionDto): {
   };
 }
 
+function resolveWriterContext(
+  input: AdminAiGenerationFormalDraftAdapterInput,
+): {
+  actorPublicId: string;
+} {
+  return input.writerContext ?? createWriterContext(input.adoption);
+}
+
 export function createAdminAiGenerationFormalDraftAdapterService(
   writers: AdminAiGenerationFormalDraftAdapterWriters,
 ): AdminAiGenerationFormalDraftAdapterService {
@@ -297,7 +305,7 @@ export function createAdminAiGenerationFormalDraftAdapterService(
 
         const writerResponse = await writers.questionWriter.createQuestion(
           sanitizeQuestionDraftPayload(input.reviewedDraft),
-          createWriterContext(input.adoption),
+          resolveWriterContext(input),
         );
         const questionPublicId = writerResponse.data?.question.publicId ?? null;
 
@@ -322,7 +330,7 @@ export function createAdminAiGenerationFormalDraftAdapterService(
 
       const writerResponse = await writers.paperWriter.createPaper(
         sanitizePaperDraftPayload(input.reviewedDraft),
-        createWriterContext(input.adoption),
+        resolveWriterContext(input),
       );
       const paperPublicId = writerResponse.data?.paper.publicId ?? null;
 

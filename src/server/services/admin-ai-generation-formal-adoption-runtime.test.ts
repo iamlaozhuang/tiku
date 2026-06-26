@@ -57,6 +57,7 @@ function createAdoptionResult(
       | "blocked_without_follow_up_task"
       | "draft_created";
     generationKind?: "question" | "paper";
+    reviewerPublicId?: string;
     resultPublicId?: string;
     targetType?: "question" | "paper";
   } = {},
@@ -92,7 +93,8 @@ function createAdoptionResult(
       review: {
         reviewStatus: "approved_for_formal_adoption",
         reviewDecision: "approved",
-        reviewerPublicId: "admin_content_public_177",
+        reviewerPublicId:
+          overrides.reviewerPublicId ?? "admin_content_public_177",
         reviewedAt: "2026-06-26T20:00:00.000Z",
       },
       sourceSummary: {
@@ -114,9 +116,11 @@ function createAdoptionResult(
   };
 }
 
-function createAdoptionRepository(): AdoptionRepositoryWithDraftUpdate {
+function createAdoptionRepository(
+  overrides: Parameters<typeof createAdoptionResult>[0] = {},
+): AdoptionRepositoryWithDraftUpdate {
   const adoptionResult = {
-    ...createAdoptionResult(),
+    ...createAdoptionResult(overrides),
   } satisfies AdminAiGenerationFormalAdoptionResult;
 
   return {
@@ -250,7 +254,9 @@ async function readJsonResponse(response: Response): Promise<unknown> {
 
 describe("admin AI generation formal adoption runtime route", () => {
   it("allows content admin to adopt a generated question into a formal question draft and updates redacted metadata", async () => {
-    const adoptionRepository = createAdoptionRepository();
+    const adoptionRepository = createAdoptionRepository({
+      reviewerPublicId: "admin_content_public_stale_177",
+    });
     const formalDraftAdapter = createFormalDraftAdapter();
     const reviewedDraft = createReviewedQuestionDraft();
     const protectedFixtureA = "OMITTED_FORMAL_ADOPTION_FIXTURE_A";
@@ -331,9 +337,14 @@ describe("admin AI generation formal adoption runtime route", () => {
       },
     );
     expect(formalDraftAdapter.createFormalDraft).toHaveBeenCalledWith({
-      adoption: createAdoptionResult().adoption,
+      adoption: createAdoptionResult({
+        reviewerPublicId: "admin_content_public_stale_177",
+      }).adoption,
       reviewedDraft,
       targetType: "question",
+      writerContext: {
+        actorPublicId: "admin_content_public_177",
+      },
     });
     expect(adoptionRepository.markFormalDraftCreated).toHaveBeenCalledWith({
       adoptionPublicId: "admin_ai_formal_adoption_public_route_177",
@@ -413,6 +424,9 @@ describe("admin AI generation formal adoption runtime route", () => {
       }).adoption,
       reviewedDraft,
       targetType: "paper",
+      writerContext: {
+        actorPublicId: "admin_content_public_177",
+      },
     });
     expect(adoptionRepository.markFormalDraftCreated).toHaveBeenCalledWith({
       adoptionPublicId: "admin_ai_formal_adoption_public_route_177",

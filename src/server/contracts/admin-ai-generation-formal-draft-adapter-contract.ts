@@ -56,6 +56,7 @@ export type AdminAiGenerationFormalDraftAdapterInput = {
   adoption: AdminAiGenerationFormalAdoptionDto;
   targetType: "question" | "paper";
   reviewedDraft: unknown;
+  writerContext?: AdminAiGenerationFormalDraftWriterContext;
 };
 
 export type AdminAiGenerationFormalDraftAdapterResultDto = {

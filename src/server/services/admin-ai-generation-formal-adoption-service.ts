@@ -89,6 +89,9 @@ export function createAdminAiGenerationFormalAdoptionService(
             adoption: adoptionResult.adoption,
             reviewedDraft: isRecord(input) ? input.reviewedDraft : undefined,
             targetType: normalizedInput.value.targetType,
+            writerContext: {
+              actorPublicId: normalizedInput.value.actor.publicId,
+            },
           });
 
         if (draftResponse.code !== 0 || draftResponse.data === null) {
