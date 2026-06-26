@@ -4611,6 +4611,148 @@ tasks:
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     nextRecommendedTask: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
 
+  - id: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
+    title: Admin AI generation shared runtime bridge contract TDD
+    phase: admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
+    sourceStory: current_user_request_open_admin_ai_generation_shared_runtime_bridge_contract_tdd_2026_06_26
+    dependencies:
+      - admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan-2026-06-26
+    taskKind: low_risk_local_code_tdd
+    moduleRunVersion: 2
+    executionProfile: local_unit_contract_adapter_tdd_provider_disabled_only
+    evidenceMode: redacted_tdd_command_summary_no_provider_payloads_no_generated_content
+    validationPolicy: focused_unit_typecheck_lint_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_admin_runtime_bridge_contract_tdd
+    requiredOutcome: >-
+      Add shared Provider execution primitives and an admin runtime bridge contract/adapter with focused TDD. The admin
+      runtime bridge must default to provider-disabled and must not perform real Provider calls, credential reads,
+      formal question/paper writes, route smoke, live DB work, staging/prod, payment, external-service, deployment, or
+      release readiness work.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_request_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: approved_scoped_contract_service_test_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked_except_static_redacted_metadata_constants
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      formalQuestionPaperWrite: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-diagnostic-or-integration-plan.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd vitest run src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npm run typecheck
+      - npm run lint
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-shared-runtime-bridge-contract-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-shared-runtime-bridge-contract-tdd.md
+    status: closed
+    result: pass_shared_runtime_bridge_contract_adapter_tdd_provider_disabled_no_provider_no_formal_write_no_final_pass
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    implementedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/admin-ai-shared-runtime-bridge-tdd-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_admin_ai_generation_shared_runtime_bridge_contract_tdd_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_admin_ai_generation_shared_runtime_bridge_contract_tdd_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_admin_ai_generation_shared_runtime_bridge_contract_tdd_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_admin_ai_generation_shared_runtime_bridge_contract_tdd_2026_06_26
+    validationSummary:
+      redTestObserved: pass_missing_target_modules_before_implementation
+      sharedProviderExecutionPrimitiveTests: pass_3
+      adminRuntimeBridgeAdapterTests: pass_2
+      personalProviderCompatibilityTests: pass_3
+      personalRuntimeBridgeAndAdminRouteRegressionTests: pass_16
+      focusedUnitTest: pass_24
+      typecheck: pass
+      lint: pass
+      providerCallExecuted: false
+      credentialReadExecuted: false
+      databaseSchemaMigrationAccountMutationExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-route-runtime-bridge-provider-disabled-integration-tdd-2026-06-26
+
   - id: mvp-final-pass-decision-review-2026-06-26
     title: MVP final Pass decision review for local product scope
     phase: mvp-final-pass-decision-review-2026-06-26
