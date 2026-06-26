@@ -397,7 +397,7 @@ tasks:
       - src/server/services/organization-analytics-service.ts
       - src/server/repositories/organization-analytics-repository.ts
       - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
-      - src/app/(admin)/organization/analytics/page.tsx
+      - src/app/(admin)/organization/organization-analytics/page.tsx
     blockedFiles:
       - .env.local
       - .env.example
@@ -425,8 +425,241 @@ tasks:
     decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
-    status: pending
+    status: closed
+    result: pass_docs_only_organization_analytics_dashboard_ux_plan_source_tasks_seeded_no_runtime_change
+    claimedAt: "2026-06-26T10:05:00-07:00"
+    plannedAt: "2026-06-26T10:10:00-07:00"
+    validatedAt: "2026-06-26T10:25:00-07:00"
+    reviewedAt: "2026-06-26T10:25:00-07:00"
+    closedAt: "2026-06-26T10:25:00-07:00"
     branch: codex/org-analytics-ux-plan-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+    validationSummary:
+      organizationAnalyticsUxPlanPrepared: pass
+      readOnlyAllowedPathCorrection: pass
+      implementationTasksSeeded: pass
+      sourceTestPackageLockfileChanged: false
+      databaseSchemaMigrationAccountMutationExecuted: false
+      providerCostExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+
+  - id: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+    title: Admin AI generation provider-disabled runtime bridge contract TDD
+    phase: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+    sourceStory: admin_ai_runtime_bridge_plan_provider_disabled_source_task
+    dependencies:
+      - admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+      - organization-analytics-dashboard-ux-completion-plan-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: low_risk_local_code
+    evidenceMode: redacted_unit_test_and_contract_summary_only
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gate
+    queueSelectionMode: serial_batch_source_task_after_docs_plans
+    requiredOutcome: >-
+      Implement the provider-disabled admin AI runtime bridge contract decided by the runtime bridge plan. Add focused
+      tests proving content and organization admin local contract routes still default to Provider-disabled, no env/secret
+      access, no Cost Calibration, and no formal question/paper writes. Do not execute real Provider calls, read
+      credentials, add DB persistence, mutate DB/account state, change schema/migration, modify package/lockfile/env
+      files, or run browser/e2e.
+    capabilities:
+      localSourceChange: approved_by_user_request_2026_06_26_low_risk
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      providerCall: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/contracts/ai-generation-task-request-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+    status: pending
+    branch: codex/admin-ai-provider-disabled-bridge-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+
+  - id: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+    title: Organization analytics dashboard summary and employee tabs TDD
+    phase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+    sourceStory: organization_analytics_dashboard_ux_plan_source_task
+    dependencies:
+      - organization-analytics-dashboard-ux-completion-plan-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: low_risk_local_code
+    evidenceMode: redacted_unit_test_and_ui_summary_only
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gate
+    queueSelectionMode: serial_batch_source_task_after_docs_plans
+    requiredOutcome: >-
+      Improve the organization analytics dashboard UX using existing routes only: remove manual publicId-first workflow
+      for scoped organization admins, expose summary and employee statistics tabs/sections, render submitted trend and
+      empty/error/loading states, and keep export readiness disabled unless a future route exists. Do not add
+      dependencies, DB/schema/migration/seed, Provider, env, browser/e2e, or external service work.
+    capabilities:
+      localSourceChange: approved_by_user_request_2026_06_26_low_risk
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - src/app/(admin)/organization/organization-analytics/page.tsx
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/app/api/v1/organization-analytics/employee-statistics/route.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/services/organization-analytics-route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+    status: pending
+    branch: codex/org-analytics-summary-employee-tabs-20260626
     closeoutPolicy:
       localCommit:
         approved: true
