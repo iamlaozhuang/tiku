@@ -683,7 +683,7 @@ export function AdminPaperManagement() {
             : paper,
         ),
       );
-      setActionMessage(`附件 ${paperAsset.publicId} metadata 已登记`);
+      setActionMessage(`附件 ${paperAsset.publicId} 元数据已登记`);
       setActiveForm(null);
     } catch {
       setActionError("附件绑定失败，请刷新后重试。");
@@ -813,15 +813,13 @@ export function AdminPaperManagement() {
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Content Admin
-          </p>
+          <p className="text-brand-primary text-sm font-medium">内容后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             试卷管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
             管理草稿组卷、发布校验、下架复制、原始文件与模拟考试记录概览；页面只展示
-            publicId 与契约字段。
+            业务标识与契约字段。
           </p>
         </div>
         <ActionBar
@@ -1050,7 +1048,7 @@ function PaperConfirmationDialog({
         </h2>
         <p className="text-text-secondary text-sm">
           将提交 {action.publicId} 的{isArchive ? "下架" : "发布"}
-          操作；操作只使用 publicId。
+          操作；操作只使用业务标识。
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -1084,8 +1082,7 @@ function ActionBar({ onCreate }: { onCreate: () => void }) {
         id="paper-action-unavailable"
         role="status"
       >
-        草稿新建已接入本地运行时；组卷、发布、下架、复制和附件 metadata
-        登记请在对应试卷行内操作。
+        草稿新建已接入本地运行时；组卷、发布、下架、复制和附件元数据登记请在对应试卷行内操作。
       </p>
     </div>
   );
@@ -1266,9 +1263,9 @@ function PaperQuestionWriteForm({
     >
       <h2 className="text-text-primary text-base font-semibold">组卷</h2>
       <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">题目 publicId</span>
+        <span className="text-text-secondary">题目业务标识</span>
         <Input
-          aria-label="题目 publicId"
+          aria-label="题目业务标识"
           value={formValues.questionPublicId}
           onChange={(event) =>
             setFormValues({
@@ -1347,9 +1344,9 @@ function PaperQuestionWriteForm({
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">材料 publicId</span>
+          <span className="text-text-secondary">材料业务标识</span>
           <Input
-            aria-label="材料 publicId"
+            aria-label="材料业务标识"
             value={formValues.materialPublicId}
             onChange={(event) =>
               setFormValues({
@@ -1423,10 +1420,10 @@ function PaperAssetWriteForm({
       }}
     >
       <h2 className="text-text-primary text-base font-semibold">
-        登记原始文件 metadata
+        登记原始文件元数据
       </h2>
       <p className="text-text-secondary text-sm">
-        本地会把文件写入 ignored runtime 目录；不会创建 COS、OCR 或公开 URL。
+        本地会把文件写入忽略目录；不会创建对象存储、公网识别或公开链接。
       </p>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">本地文件</span>
@@ -1498,7 +1495,7 @@ function FilterPanel({
             <Input
               aria-label="关键词"
               className="pl-8"
-              placeholder="试卷名称、publicId、校验结果或文件名"
+              placeholder="试卷名称、业务标识、校验结果或文件名"
               value={keyword}
               onChange={(event) => onKeywordChange(event.target.value)}
             />

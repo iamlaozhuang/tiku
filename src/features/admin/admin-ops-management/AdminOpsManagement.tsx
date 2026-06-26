@@ -140,6 +140,60 @@ const redeemCodeStatusLabels = {
   used: "已使用",
 } satisfies Record<RedeemCodeStatus, string>;
 
+const adminRoleLabels = {
+  content_admin: "内容管理员",
+  ops_admin: "运营管理员",
+  org_advanced_admin: "高级版组织管理员",
+  org_standard_admin: "标准版组织管理员",
+  super_admin: "超级管理员",
+} satisfies Record<string, string>;
+
+const orgTierLabels = {
+  city: "市级组织",
+  district: "区县级组织",
+  province: "省级组织",
+} satisfies Record<string, string>;
+
+const authorizationTypeLabels = {
+  org_auth: "组织授权",
+  personal_auth: "个人授权",
+} satisfies Record<string, string>;
+
+const auditActionTypeLabels = {
+  "user.disable": "停用用户",
+  "user.enable": "启用用户",
+  "user.reset_password": "重置用户密码",
+} satisfies Record<string, string>;
+
+const auditTargetResourceTypeLabels = {
+  ai_call_log: "AI 调用日志",
+  audit_log: "审计日志",
+  org_auth: "组织授权",
+  organization: "组织",
+  redeem_code: "卡密",
+  user: "用户",
+} satisfies Record<string, string>;
+
+const auditResultStatusLabels = {
+  failed: "操作失败",
+  success: "操作成功",
+} satisfies Record<string, string>;
+
+const aiFuncTypeLabels = {
+  ai_explanation: "AI 讲解",
+  ai_hint: "AI 提示",
+  ai_paper_generation: "AI 组卷",
+  ai_question_generation: "AI 出题",
+  ai_scoring: "AI 评分",
+  kn_recommendation: "知识点推荐",
+} satisfies Record<string, string>;
+
+const aiCallStatusLabels = {
+  failed: "调用失败",
+  pending: "等待处理",
+  success: "调用成功",
+} satisfies Record<string, string>;
+
 const adminSecurityPolicies = [
   ["后台会话", "8 小时"],
   ["多设备登录", "允许"],
@@ -148,9 +202,9 @@ const adminSecurityPolicies = [
 ] as const;
 
 const adminRolePolicies = [
-  ["super_admin", "后台账号与角色管理"],
-  ["ops_admin", "用户、企业、授权、卡密运营"],
-  ["content_admin", "题库、试卷、知识点内容维护"],
+  ["super_admin", "超级管理员", "后台账号与角色管理"],
+  ["ops_admin", "运营管理员", "用户、企业、授权、卡密运营"],
+  ["content_admin", "内容管理员", "题库、试卷、知识点内容维护"],
 ] as const;
 
 const emptyAdminOpsData: AdminOpsData = {
@@ -208,6 +262,26 @@ function hasAdminOpsData(data: AdminOpsData): boolean {
     data.aiCallLogs.length > 0 ||
     data.dailySummaries.length > 0
   );
+}
+
+function formatMappedLabel(
+  labels: Record<string, string>,
+  value: string,
+  fallback: string,
+): string {
+  return labels[value] ?? fallback;
+}
+
+function formatRedactedSummary(value: string | null | undefined): string {
+  if (value === null || value === undefined || value.trim().length === 0) {
+    return "暂无摘要";
+  }
+
+  if (/credential|metadata|prompt|redacted|snapshot/i.test(value)) {
+    return "已脱敏摘要";
+  }
+
+  return value;
 }
 
 async function postAdminApi<TData>(
@@ -758,8 +832,13 @@ export function AdminOpsManagement() {
                   {organization.name}
                 </p>
                 <p className="text-text-muted text-xs">
-                  {organization.orgTier} / {organization.employeeCount} 名员工 /{" "}
-                  {organization.authSummary ?? "暂无授权摘要"}
+                  {formatMappedLabel(
+                    orgTierLabels,
+                    organization.orgTier,
+                    "其他组织层级",
+                  )}{" "}
+                  / {organization.employeeCount} 名员工 /{" "}
+                  {formatRedactedSummary(organization.authSummary)}
                 </p>
               </div>
             </AdminRow>
@@ -771,7 +850,7 @@ export function AdminOpsManagement() {
                   {employee.name} / {employee.phone}
                 </p>
                 <p className="text-text-muted text-xs">
-                  用户 {employee.userPublicId} / 企业{" "}
+                  用户业务标识 {employee.userPublicId} / 企业业务标识{" "}
                   {employee.organizationPublicId}
                 </p>
               </div>
@@ -818,11 +897,31 @@ export function AdminOpsManagement() {
             <AdminRow key={auditLog.publicId} publicId={auditLog.publicId}>
               <div className="min-w-0 space-y-1">
                 <p className="text-text-primary text-sm font-medium">
-                  {auditLog.actionType}
+                  {formatMappedLabel(
+                    auditActionTypeLabels,
+                    auditLog.actionType,
+                    "其他审计操作",
+                  )}
                 </p>
                 <p className="text-text-muted text-xs">
-                  {auditLog.actorRole} / {auditLog.targetResourceType} /{" "}
-                  {auditLog.resultStatus} / {auditLog.metadataSummary}
+                  {formatMappedLabel(
+                    adminRoleLabels,
+                    auditLog.actorRole,
+                    "其他管理员",
+                  )}{" "}
+                  /{" "}
+                  {formatMappedLabel(
+                    auditTargetResourceTypeLabels,
+                    auditLog.targetResourceType,
+                    "其他资源",
+                  )}{" "}
+                  /{" "}
+                  {formatMappedLabel(
+                    auditResultStatusLabels,
+                    auditLog.resultStatus,
+                    "其他结果",
+                  )}{" "}
+                  / {formatRedactedSummary(auditLog.metadataSummary)}
                 </p>
               </div>
             </AdminRow>
@@ -835,12 +934,22 @@ export function AdminOpsManagement() {
             <AdminRow key={aiCallLog.publicId} publicId={aiCallLog.publicId}>
               <div className="min-w-0 space-y-1">
                 <p className="text-text-primary text-sm font-medium">
-                  {aiCallLog.aiFuncType} / {aiCallLog.callStatus}
+                  {formatMappedLabel(
+                    aiFuncTypeLabels,
+                    aiCallLog.aiFuncType,
+                    "其他 AI 功能",
+                  )}{" "}
+                  /{" "}
+                  {formatMappedLabel(
+                    aiCallStatusLabels,
+                    aiCallLog.callStatus,
+                    "其他调用状态",
+                  )}
                 </p>
                 <p className="text-text-muted text-xs">
                   {aiCallLog.providerDisplayName} / {aiCallLog.modelAlias} /{" "}
                   Token 数 {aiCallLog.totalTokenCount ?? 0} /{" "}
-                  {aiCallLog.promptSummary ?? "已脱敏"}
+                  {formatRedactedSummary(aiCallLog.promptSummary)}
                 </p>
               </div>
             </AdminRow>
@@ -852,7 +961,12 @@ export function AdminOpsManagement() {
             >
               <div className="min-w-0 space-y-1">
                 <p className="text-text-primary text-sm font-medium">
-                  {summary.bucket} / {summary.aiFuncType}
+                  {summary.bucket} /{" "}
+                  {formatMappedLabel(
+                    aiFuncTypeLabels,
+                    summary.aiFuncType,
+                    "其他 AI 功能",
+                  )}
                 </p>
                 <p className="text-text-muted text-xs">
                   调用次数 {summary.callCount} 次 / 预估成本{" "}
@@ -924,10 +1038,10 @@ function AdminAccountSecurityPolicyPanel() {
         </div>
       </div>
       <div className="border-border mt-4 grid gap-3 border-t pt-4 xl:grid-cols-3">
-        {adminRolePolicies.map(([role, scope]) => (
+        {adminRolePolicies.map(([role, roleLabel, scope]) => (
           <article key={role} className="min-w-0">
-            <p className="text-text-primary font-mono text-sm font-semibold">
-              {role}
+            <p className="text-text-primary text-sm font-semibold">
+              {roleLabel}
             </p>
             <p className="text-text-muted mt-1 text-xs">{scope}</p>
           </article>
@@ -1035,7 +1149,11 @@ function AdminUserDetailPanel({
             <div className="mt-2 space-y-2">
               <p className="text-text-primary text-sm">
                 {detail.enterpriseBinding.organizationName} /{" "}
-                {detail.enterpriseBinding.orgTier}
+                {formatMappedLabel(
+                  orgTierLabels,
+                  detail.enterpriseBinding.orgTier,
+                  "其他组织层级",
+                )}
               </p>
               <div className="flex flex-wrap gap-2">
                 <PublicId value={detail.enterpriseBinding.employeePublicId} />
@@ -1059,7 +1177,11 @@ function AdminUserDetailPanel({
                   className="border-border border-t pt-3 first:border-t-0 first:pt-0"
                 >
                   <p className="text-text-primary text-sm font-medium">
-                    {authorization.authorizationType}
+                    {formatMappedLabel(
+                      authorizationTypeLabels,
+                      authorization.authorizationType,
+                      "其他授权",
+                    )}
                   </p>
                   <p className="text-text-muted text-xs">
                     {formatProfessionLevel(authorization)} /{" "}

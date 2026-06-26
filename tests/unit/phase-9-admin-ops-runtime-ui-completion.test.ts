@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -183,6 +184,42 @@ function mockAdminOpsFetch() {
 
     if (url.startsWith("/api/v1/users/user-public-001/reset-password")) {
       return Response.json(createOkPayload(null));
+    }
+
+    if (url === "/api/v1/users/user-public-001") {
+      return Response.json(
+        createOkPayload({
+          user: {
+            publicId: "user-public-001",
+            phone: "13900000002",
+            name: "学员甲",
+            registeredAt: now,
+            status: "active",
+            userType: "employee",
+            organizationPublicId: "organization-public-001",
+            organizationName: "杭州烟草",
+            authStatus: "active",
+          },
+          enterpriseBinding: {
+            employeePublicId: "employee-public-001",
+            organizationPublicId: "organization-public-001",
+            organizationName: "杭州烟草",
+            orgTier: "city",
+            status: "active",
+          },
+          authorizations: [
+            {
+              publicId: "org-auth-public-001",
+              authorizationType: "org_auth",
+              profession: "monopoly",
+              level: 3,
+              status: "active",
+              purchaserName: "杭州烟草",
+              organizationPublicIds: ["organization-public-001"],
+            },
+          ],
+        }),
+      );
     }
 
     if (url.startsWith("/api/v1/users")) {
@@ -510,6 +547,20 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(screen.queryByText("raw prompt")).toBeNull();
     expect(screen.queryByText("sk-real-secret")).toBeNull();
     expect(screen.queryByText("admin-session-token")).toBeNull();
+    expect(screen.getByText("AI 评分 / 调用成功")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    expect(await screen.findByText("组织授权")).toBeInTheDocument();
+
+    const visibleText = document.body.textContent ?? "";
+    expect(visibleText).not.toContain("super_admin");
+    expect(visibleText).not.toContain("ops_admin");
+    expect(visibleText).not.toContain("content_admin");
+    expect(visibleText).not.toContain("org_auth");
+    expect(visibleText).not.toContain("ai_scoring");
+    expect(visibleText).not.toContain("user.reset_password");
+    expect(visibleText).not.toContain("success");
+    expect(visibleText).not.toContain("metadata");
 
     fireEvent.change(screen.getByLabelText("用户状态"), {
       target: { value: "active" },
@@ -533,7 +584,12 @@ describe("phase 9 admin ops runtime ui completion", () => {
       ).toBe(true);
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "重置密码" }));
+    fireEvent.click(
+      within(screen.getByTestId("admin-user-row-user-public-001")).getByRole(
+        "button",
+        { name: "重置密码" },
+      ),
+    );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认重置用户密码？",
     );

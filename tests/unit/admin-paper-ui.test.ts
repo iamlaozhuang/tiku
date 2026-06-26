@@ -647,7 +647,8 @@ describe("AdminPaperManagement", () => {
       }),
     );
     const composeForm = within(screen.getByRole("form", { name: "组卷表单" }));
-    fireEvent.change(composeForm.getByLabelText("题目 publicId"), {
+    expect(composeForm.queryByText(/publicId/)).toBeNull();
+    fireEvent.change(composeForm.getByLabelText("题目业务标识"), {
       target: { value: "question-marketing-001" },
     });
     fireEvent.change(composeForm.getByLabelText("题目分值"), {
@@ -665,7 +666,7 @@ describe("AdminPaperManagement", () => {
     fireEvent.change(composeForm.getByLabelText("大题顺序"), {
       target: { value: "3" },
     });
-    fireEvent.change(composeForm.getByLabelText("材料 publicId"), {
+    fireEvent.change(composeForm.getByLabelText("材料业务标识"), {
       target: { value: "material-marketing-001" },
     });
     fireEvent.change(composeForm.getByLabelText("题组名称"), {
@@ -749,9 +750,10 @@ describe("AdminPaperManagement", () => {
     );
     expect(
       screen.getByText(
-        "本地会把文件写入 ignored runtime 目录；不会创建 COS、OCR 或公开 URL。",
+        "本地会把文件写入忽略目录；不会创建对象存储、公网识别或公开链接。",
       ),
     ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("metadata");
     expect(document.querySelector('input[type="file"]')).not.toBeNull();
     fireEvent.change(screen.getByLabelText("本地文件"), {
       target: {
@@ -765,7 +767,7 @@ describe("AdminPaperManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存附件" }));
 
     expect(
-      await screen.findByText("附件 paper-asset-created-001 metadata 已登记"),
+      await screen.findByText("附件 paper-asset-created-001 元数据已登记"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/paper-assets",

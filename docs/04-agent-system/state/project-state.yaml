@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-employee-ai-paper-action-enabled-state-repair-closed-2026-06-25
-updatedAt: "2026-06-25T17:25:55-07:00"
+currentPhase: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-closed-2026-06-25
+updatedAt: "2026-06-25T17:44:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,34 +501,35 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6b1349d8904eceda6e22b016a52aceebcd1156c9
-  lastKnownOriginMasterSha: 6b1349d8904eceda6e22b016a52aceebcd1156c9
+  lastKnownMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
+  lastKnownOriginMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
 currentTask:
-  id: learner-employee-ai-paper-action-enabled-state-repair-2026-06-25
+  id: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
   status: closed
-  result: pass_ai_paper_action_enabled_state_repaired_no_final_pass
-  claimedAt: "2026-06-25T17:20:07-07:00"
-  plannedAt: "2026-06-25T17:20:07-07:00"
-  validatedAt: "2026-06-25T17:25:55-07:00"
-  reviewedAt: "2026-06-25T17:25:55-07:00"
-  closedAt: "2026-06-25T17:25:55-07:00"
+  result: source_unit_pass_super_admin_display_smoke_pass_role_specific_browser_blocked_credentials_no_final_pass
+  claimedAt: "2026-06-25T17:35:00-07:00"
+  plannedAt: "2026-06-25T17:35:00-07:00"
+  validatedAt: "2026-06-25T17:44:54-07:00"
+  reviewedAt: "2026-06-25T17:44:54-07:00"
+  closedAt: "2026-06-25T17:44:54-07:00"
   sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_full_8_row_rerun
   approvalConsumed: active_goal_next_smallest_local_source_repair
   approvalSource: active_goal_next_smallest_local_source_repair
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   predecessorFullEightRowRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+  predecessorAiActionRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
   allowedScope:
     docsStateEvidenceAudit: true
     localRuntimeDiagnostic: false
     localSourceChange: true
     focusedUnitTests: true
-    localBrowserRuntimeRerun: true
+    localBrowserRuntimeRerun: partial_display_smoke_only
     credentialDocumentReadByCodex: true
     credentialEntryByCodex: true
-    credentialMode: local_private_role_account_file_redacted
+    credentialMode: local_private_role_account_file_redacted_env_not_read
     databaseRead: false
     databaseWrite: false
     seedReadOnlyInspection: false
@@ -542,18 +543,16 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  aiPaperActionRepairScope:
+  visibleLabelRepairScope:
     taskKind: focused_local_source_repair
-    purpose: enable_advanced_learner_employee_ai_paper_local_contract_entry
+    purpose: remove_user_visible_technical_labels_from_content_and_ops_runtime_surfaces
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
       - redacted_role_label
-      - landing_path
       - route_access_status
-      - ai_question_button_state
-      - ai_paper_button_state
-      - api_status_code
+      - token_presence_boolean
+      - console_error_count
       - unit_test_status
       - lint_typecheck_status
       - conclusion_without_raw_rows
@@ -584,7 +583,7 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: active_goal_next_smallest_local_source_repair
-  branch: codex/ai-route-paper-state-20260625
+  branch: codex/visible-label-runtime-repair-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -595,14 +594,67 @@ currentTask:
     credentialEntryByCodex: true
     databaseReadExecuted: false
     databaseWriteExecuted: false
-    rowsExecuted: 4
-    passRows: 4
+    focusedUnitTests: pass_10_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    diffCheck: pass
+    roleSpecificContentOpsBrowser: blocked_non_env_credentials_unavailable
+    superAdminDisplaySmoke: pass_ops_users_and_content_papers
+    rowsExecuted: 0
+    passRows: 0
     failRows: 0
-    blockedRows: 0
+    blockedRows: 2
     schemaMigrationExecuted: false
     accountMutationExecuted: false
     finalPassClaim: false
-  nextRequiredTask: visible_chinese_ui_technical_label_runtime_cleanup_residual_repair
+  nextRequiredTask: role_separated_full_8_row_post_visible_label_repair_browser_rerun_with_approved_role_credentials
+visibleChineseUiTechnicalLabelRuntimeCleanupResidualRepair20260625:
+  taskId: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
+  phase: visible-chinese-ui-technical-label-runtime-cleanup-residual-repair-2026-06-25
+  recordedAt: "2026-06-25T17:44:54-07:00"
+  status: closed
+  result: source_unit_pass_super_admin_display_smoke_pass_role_specific_browser_blocked_credentials_no_final_pass
+  validatedAt: "2026-06-25T17:44:54-07:00"
+  reviewedAt: "2026-06-25T17:44:54-07:00"
+  closedAt: "2026-06-25T17:44:54-07:00"
+  branch: codex/visible-label-runtime-repair-20260625
+  entryMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
+  entryOriginMasterSha: b60733083eb62a639ba5c7689823ce0bb2f0b003
+  approvalSource: active_goal_next_smallest_local_source_repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+  predecessorFullEightRowRerunEvidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+  predecessorAiActionRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
+  validationSummary:
+    focusedUnitTests: pass_10_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    diffCheck: pass
+    roleSpecificContentOpsBrowser: blocked_non_env_credentials_unavailable
+    superAdminDisplaySmoke: pass_ops_users_and_content_papers
+    targetTechnicalTokensAbsentInSmoke: true
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    providerOrCostTouched: false
+    finalPassClaim: false
+    nextRequiredTask: role_separated_full_8_row_post_visible_label_repair_browser_rerun_with_approved_role_credentials
+  blockedWithoutFreshApproval:
+    - database_seed_or_write
+    - account_user_employee_authorization_mutation
+    - schema_migration_or_drizzle_schema_change
+    - env_secret_or_dotenv_read_write
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - dependency_or_package_lock_change
+    - pr_force_push
+    - final_acceptance_pass
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
