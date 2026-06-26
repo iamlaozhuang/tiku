@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+currentPhase: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
 updatedAt: "2026-06-26T23:59:59-07:00"
 architecture:
   status: complete
@@ -501,12 +501,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 343e7b57b3f91ca224dc0db06fffbb01bf5ceb88
-  lastKnownOriginMasterSha: 343e7b57b3f91ca224dc0db06fffbb01bf5ceb88
+  lastKnownMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
+  lastKnownOriginMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
 currentTask:
-  id: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+  id: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
   status: closed
-  result: pass_provider_enabled_route_runtime_bridge_fake_provider_tdd_no_real_provider_no_db_no_formal_write_no_final_pass
+  result: pass_local_real_provider_route_integrated_smoke_4_calls_no_db_no_formal_write_no_final_pass
   claimedAt: "2026-06-26T23:59:59-07:00"
   plannedAt: "2026-06-26T23:59:59-07:00"
   validatedAt: "2026-06-26T23:59:59-07:00"
@@ -514,15 +514,16 @@ currentTask:
   closedAt: "2026-06-26T23:59:59-07:00"
   sourceStory: user_requested_provider_cost_route_integrated_batch_2026_06_26
   approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
   sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  sourceFakeProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
   scope:
     docsStateEvidenceAudit: true
-    localSourceChange: true
-    focusedUnitTest: true
-    fakeProviderExecution: true
+    localSourceChange: false
+    focusedUnitTest: false
+    fakeProviderExecution: false
     routeSmokeExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -530,8 +531,8 @@ currentTask:
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialOrEnvRead: false
-    providerCall: false
+    credentialOrEnvRead: true
+    providerCall: true
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
@@ -555,7 +556,7 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
-  branch: codex/admin-ai-provider-enabled-route-fake-tdd-20260626
+    branch: codex/admin-ai-real-provider-route-smoke-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -566,14 +567,16 @@ currentTask:
     auditReviewCreated: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    redFocusedTests: pass_expected_failure_6_failed_16_passed
-    focusedUnitTests: pass_22_tests
-    lint: pass
-    typecheck: pass
+    smokeRunnerPrepared: pass
+    focusedUnitTests: not_applicable_docs_runtime_smoke_only
+    lint: not_applicable_docs_runtime_smoke_only
+    typecheck: not_applicable_docs_runtime_smoke_only
     providerCostSmokeExecuted: false
-    providerCallCount: 0
-    fakeProviderWorkflows: pass_content_question_content_paper_org_question_org_paper
-    defaultProviderDisabled: pass
+    providerCallCount: 4
+    providerSmokeResult: pass
+    providerModel: alibaba-qwen/qwen3.7-max
+    workflowCount: 4
+    retries: 0
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -583,8 +586,8 @@ currentTask:
     schemaMigrationExecuted: false
     routeSmokeExecuted: false
     accountMutationExecuted: false
-    providerCallExecuted: false
-    credentialReadExecuted: false
+    providerCallExecuted: true
+    credentialReadExecuted: true
     costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
@@ -592,7 +595,47 @@ currentTask:
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+  nextRecommendedTask: provider-cost-gate-closeout-review-2026-06-26
+aiGenerationProviderRouteIntegratedSmokeExecution20260626:
+  taskId: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+  phase: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+  recordedAt: "2026-06-26T23:59:59-07:00"
+  status: closed
+  result: pass_local_real_provider_route_integrated_smoke_4_calls_no_db_no_formal_write_no_final_pass
+  branch: codex/admin-ai-real-provider-route-smoke-20260626
+  entryMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
+  entryOriginMasterSha: 5f348fd028f8b57ff9cd69efe87694e3b09899a8
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  sourceFakeProviderEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+  providerSmokeSummary:
+    providerName: alibaba-qwen
+    modelName: qwen3.7-max
+    callCount: 4
+    retryCount: 0
+    status: pass
+    credentialSource: local_private_env_file_ALIBABA_API_KEY_presence_only
+    workflows:
+      - content_ai_question_generation
+      - content_ai_paper_generation
+      - organization_ai_question_generation
+      - organization_ai_paper_generation
+    localContractSummaryHit: true
+    formalQuestionPaperWriteExecuted: false
+    databaseConnectionExecuted: false
+    rawPromptRawOutputProviderPayloadRecorded: false
+    apiKeyTokenCookieAuthorizationRecorded: false
+    finalPassClaimed: false
+  validationSummary:
+    smokeRunner: pass_4_calls_4_workflows
+    providerRouteSmoke: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: provider-cost-gate-closeout-review-2026-06-26
 adminAiGenerationProviderEnabledRouteRuntimeBridgeFakeProviderTdd20260626:
   taskId: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
   phase: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26

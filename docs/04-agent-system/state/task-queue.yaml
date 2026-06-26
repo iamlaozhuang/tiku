@@ -44,6 +44,151 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+    title: AI generation Provider route-integrated smoke execution
+    phase: ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+    sourceStory: user_requested_provider_cost_route_integrated_batch_2026_06_26
+    dependencies:
+      - admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+      - admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
+    taskKind: local_runtime_smoke
+    moduleRunVersion: 2
+    executionProfile: local_real_provider_route_smoke_redacted
+    evidenceMode: redacted_provider_route_smoke_summary_only
+    validationPolicy: max_four_real_provider_calls_redacted_docs_gates
+    queueSelectionMode: direct_user_request_2026_06_26_batch_step_2
+    requiredOutcome: >-
+      Consume the approved Provider route-integrated smoke boundary and execute at most four real Provider calls across
+      content/org admin question/paper workflows. Record only redacted provider/model, workflow, status, latency,
+      token/cost summary, error category, and route/local contract summary. Do not modify source, tests, DB/schema/
+      migration/seed/package/lockfile/env files, write formal question/paper content, touch staging/prod/payment/
+      external service/deployment/release readiness, or claim final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localProviderCredentialRead: approved_local_private_source_redacted
+      realProviderCall: approved_max_4
+      providerConfigurationRead: approved_existing_route_integrated_provider_metadata_only
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      formalQuestionPaperWrite: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: approved_summary_only_no_unbounded_retry
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd.md
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd tsx --eval <redacted_admin_ai_generation_provider_route_smoke_runner>
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-provider-route-integrated-smoke-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-provider-route-integrated-smoke-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+    status: closed
+    result: pass_local_real_provider_route_integrated_smoke_4_calls_no_db_no_formal_write_no_final_pass
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/admin-ai-real-provider-route-smoke-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_batch_serial_provider_cost_route_tasks_2026_06_26
+    expectedVerification:
+      maxProviderCallCount: 4
+      contentQuestionWorkflow: pass_or_redacted_failure
+      contentPaperWorkflow: pass_or_redacted_failure
+      organizationQuestionWorkflow: pass_or_redacted_failure
+      organizationPaperWorkflow: pass_or_redacted_failure
+      rawPromptRawOutputProviderPayloadRecorded: false
+      apiKeyTokenCookieAuthorizationRecorded: false
+      databaseConnectionExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      finalPassClaimed: false
+    validationSummary:
+      smokeRunner: pass_4_calls_4_workflows
+      providerModel: alibaba-qwen/qwen3.7-max
+      providerCallCount: 4
+      retryCount: 0
+      contentQuestionWorkflow: pass
+      contentPaperWorkflow: pass
+      organizationQuestionWorkflow: pass
+      organizationPaperWorkflow: pass
+      localContractSummaryHit: pass
+      tokenSummaryRecorded: pass_redacted
+      costSummaryRecorded: pass_pricing_table_not_in_scope
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      rawPromptRawOutputProviderPayloadRecorded: false
+      apiKeyTokenCookieAuthorizationRecorded: false
+      databaseConnectionExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+
   - id: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
     title: Admin AI generation provider-enabled route runtime bridge fake provider TDD
     phase: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
