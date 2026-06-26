@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
-updatedAt: "2026-06-26T10:55:00-07:00"
+currentPhase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+updatedAt: "2026-06-26T11:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,24 +501,24 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 786edc8bf7bcc2f76bfcecc3e352726d56fde212
-  lastKnownOriginMasterSha: 786edc8bf7bcc2f76bfcecc3e352726d56fde212
+  lastKnownMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
+  lastKnownOriginMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
 currentTask:
-  id: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+  id: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
   status: closed
-  result: pass_provider_disabled_admin_runtime_bridge_contract_focused_unit_tests
-  claimedAt: "2026-06-26T10:35:00-07:00"
-  plannedAt: "2026-06-26T10:35:00-07:00"
-  validatedAt: "2026-06-26T10:55:00-07:00"
-  reviewedAt: "2026-06-26T10:55:00-07:00"
-  closedAt: "2026-06-26T10:55:00-07:00"
-  sourceStory: admin_ai_runtime_bridge_plan_provider_disabled_source_task
+  result: pass_dashboard_summary_employee_statistics_scoped_ux_focused_unit_tests
+  claimedAt: "2026-06-26T11:05:00-07:00"
+  plannedAt: "2026-06-26T11:05:00-07:00"
+  validatedAt: "2026-06-26T11:25:00-07:00"
+  reviewedAt: "2026-06-26T11:25:00-07:00"
+  closedAt: "2026-06-26T11:25:00-07:00"
+  sourceStory: organization_analytics_dashboard_ux_plan_source_task
   approvalConsumed: user_request_execute_serial_batch_if_suitable_2026_06_26
   approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
-  sourceAdminAiPlanPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  sourceAnalyticsPlanPath: docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
   scope:
     docsStateEvidenceAudit: true
     decisionPlanOnly: false
@@ -536,9 +536,9 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    contentAdmin: provider_disabled_runtime_bridge_summary_only_no_provider_call
-    organizationAdvancedAdmin: provider_disabled_runtime_bridge_summary_only_no_provider_call
-    formalContentBoundary: no_question_or_paper_write
+    organizationAnalytics: dashboard_summary_employee_statistics_tabs_existing_routes_only
+    employeeStatistics: summary_only_no_subjective_answer_text
+    exportReadiness: disabled_deferred_no_external_delivery
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
@@ -555,13 +555,13 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
-  branch: codex/admin-ai-provider-disabled-bridge-20260626
+  branch: codex/org-analytics-summary-employee-tabs-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    tddRedObserved: pass_failed_before_implementation_missing_execution_summary_and_control
+    tddRedObserved: pass_failed_before_implementation_missing_scope_context_employee_statistics
     focusedUnitTest: pass_4_tests
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
@@ -584,7 +584,37 @@ currentTask:
     testChanged: true
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+  nextRecommendedTask: provider_cost_smoke_deferred_until_owner_reapproves_after_product_bridge
+organizationAnalyticsDashboardUxSummaryEmployeeTabsTdd20260626:
+  taskId: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+  phase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+  recordedAt: "2026-06-26T11:25:00-07:00"
+  status: closed
+  result: pass_dashboard_summary_employee_statistics_scoped_ux_focused_unit_tests
+  branch: codex/org-analytics-summary-employee-tabs-20260626
+  entryMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
+  entryOriginMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
+  approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
+  validationSummary:
+    tddRedObserved: pass_failed_before_implementation_missing_scope_context_employee_statistics
+    focusedUnitTest: pass_4_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    databaseSchemaMigrationAccountMutationExecuted: false
+    providerCostExecuted: false
+    exportExternalDeliveryExecuted: false
+    packageLockfileChanged: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+  nextRecommendedTask: provider_cost_smoke_deferred_until_owner_reapproves_after_product_bridge
 adminAiGenerationProviderDisabledRuntimeBridgeContractTdd20260626:
   taskId: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
   phase: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26

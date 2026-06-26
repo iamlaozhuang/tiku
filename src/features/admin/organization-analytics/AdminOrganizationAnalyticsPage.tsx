@@ -1,12 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, BarChart3, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  BarChart3,
+  Download,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import type { OrganizationAnalyticsDashboardRouteDto } from "@/server/contracts/organization-analytics-contract";
+import type {
+  OrganizationAnalyticsDashboardRouteDto,
+  OrganizationAnalyticsEmployeeStatisticsRouteDto,
+} from "@/server/contracts/organization-analytics-contract";
 
 import {
   AdminErrorState,
@@ -46,6 +57,16 @@ function createDashboardSummaryPath(values: DashboardSummaryFormValues) {
   });
 
   return `/api/v1/organization-analytics/dashboard-summary?${searchParams.toString()}`;
+}
+
+function createEmployeeStatisticsPath(values: DashboardSummaryFormValues) {
+  const searchParams = new URLSearchParams({
+    organizationPublicId: values.organizationPublicId.trim(),
+    startAt: values.startAt.trim(),
+    endAt: values.endAt.trim(),
+  });
+
+  return `/api/v1/organization-analytics/employee-statistics?${searchParams.toString()}`;
 }
 
 function formatPercent(value: number) {
@@ -101,6 +122,8 @@ export function AdminOrganizationAnalyticsPage() {
   );
   const [summary, setSummary] =
     useState<OrganizationAnalyticsDashboardRouteDto | null>(null);
+  const [employeeStatistics, setEmployeeStatistics] =
+    useState<OrganizationAnalyticsEmployeeStatisticsRouteDto | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,29 +218,50 @@ export function AdminOrganizationAnalyticsPage() {
     setIsSubmitting(true);
     setErrorMessage(null);
     setMessage(null);
+    setEmployeeStatistics(null);
 
     try {
-      const response =
-        await fetchAdminApi<OrganizationAnalyticsDashboardRouteDto>(
+      const [summaryResponse, employeeStatisticsResponse] = await Promise.all([
+        fetchAdminApi<OrganizationAnalyticsDashboardRouteDto>(
           createDashboardSummaryPath(values),
           sessionToken,
-        );
+        ),
+        fetchAdminApi<OrganizationAnalyticsEmployeeStatisticsRouteDto>(
+          createEmployeeStatisticsPath(values),
+          sessionToken,
+        ),
+      ]);
 
-      if (isUnauthorizedResponse(response)) {
+      if (
+        isUnauthorizedResponse(summaryResponse) ||
+        isUnauthorizedResponse(employeeStatisticsResponse)
+      ) {
         setLoadState("unauthorized");
         return;
       }
 
-      if (response.code !== 0 || response.data === null) {
+      if (summaryResponse.code !== 0 || summaryResponse.data === null) {
         setSummary(null);
         setErrorMessage("统计摘要加载失败。");
         return;
       }
 
-      setSummary(response.data);
+      if (
+        employeeStatisticsResponse.code !== 0 ||
+        employeeStatisticsResponse.data === null
+      ) {
+        setSummary(summaryResponse.data);
+        setEmployeeStatistics(null);
+        setErrorMessage("员工统计加载失败。");
+        return;
+      }
+
+      setSummary(summaryResponse.data);
+      setEmployeeStatistics(employeeStatisticsResponse.data);
       setMessage("统计摘要已加载。");
     } catch {
       setSummary(null);
+      setEmployeeStatistics(null);
       setErrorMessage("统计摘要加载失败。");
     } finally {
       setIsSubmitting(false);
@@ -259,7 +303,21 @@ export function AdminOrganizationAnalyticsPage() {
         onSubmit={handleLoadDashboardSummary}
       />
 
+      <Button
+        className="w-fit"
+        data-testid="organization-analytics-export-readiness"
+        disabled
+        type="button"
+      >
+        <Download aria-hidden="true" className="size-4" />
+        导出暂缓
+      </Button>
+
       {summary === null ? null : <DashboardSummaryCard summary={summary} />}
+      <EmployeeStatisticsCard
+        employeeStatistics={employeeStatistics}
+        isLoading={isSubmitting}
+      />
     </section>
   );
 }
@@ -275,6 +333,8 @@ function DashboardSummaryForm({
   onChange: (values: DashboardSummaryFormValues) => void;
   onSubmit: (values: DashboardSummaryFormValues) => void;
 }) {
+  const hasScopedOrganization = values.organizationPublicId.trim().length > 0;
+
   return (
     <form
       aria-label="组织统计摘要表单"
@@ -284,13 +344,25 @@ function DashboardSummaryForm({
         onSubmit(values);
       }}
     >
-      <TextField
-        label="组织业务标识"
-        value={values.organizationPublicId}
-        onChange={(value) =>
-          onChange({ ...values, organizationPublicId: value })
-        }
-      />
+      {hasScopedOrganization ? (
+        <div
+          className="bg-muted grid gap-2 rounded-md px-3 py-2 text-sm"
+          data-testid="organization-analytics-scope-context"
+        >
+          <span className="text-text-secondary font-medium">组织范围</span>
+          <span className="text-text-primary font-semibold">
+            {values.organizationPublicId}
+          </span>
+        </div>
+      ) : (
+        <TextField
+          label="组织业务标识"
+          value={values.organizationPublicId}
+          onChange={(value) =>
+            onChange({ ...values, organizationPublicId: value })
+          }
+        />
+      )}
       <TextField
         label="开始时间"
         value={values.startAt}
@@ -399,7 +471,129 @@ function DashboardSummaryCard({
           </dl>
         </section>
       </div>
+
+      <section
+        className="border-border rounded-md border p-3"
+        data-testid="organization-analytics-submitted-trend"
+      >
+        <h3 className="text-text-primary flex items-center gap-2 text-sm font-semibold">
+          <TrendingUp aria-hidden="true" className="size-4" />
+          提交趋势
+        </h3>
+        {summary.trainingSummary.submittedTrend.length === 0 ? (
+          <p className="text-text-secondary mt-3 text-sm">暂无提交趋势</p>
+        ) : (
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {summary.trainingSummary.submittedTrend.map((trendPoint) => (
+              <div
+                className="bg-muted flex items-center justify-between rounded-md px-3 py-2 text-sm"
+                key={trendPoint.date}
+              >
+                <span className="text-text-secondary">{trendPoint.date}</span>
+                <span className="text-text-primary font-semibold">
+                  {trendPoint.submittedCount}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </article>
+  );
+}
+
+function EmployeeStatisticsCard({
+  employeeStatistics,
+  isLoading,
+}: {
+  employeeStatistics: OrganizationAnalyticsEmployeeStatisticsRouteDto | null;
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+        <p className="text-text-secondary text-sm">正在加载员工统计</p>
+      </section>
+    );
+  }
+
+  if (employeeStatistics === null) {
+    return (
+      <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+        <p className="text-text-secondary text-sm">加载后显示员工统计</p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      data-testid="organization-analytics-employee-statistics"
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-text-primary flex items-center gap-2 text-base font-semibold">
+            <Users aria-hidden="true" className="size-4" />
+            员工统计
+          </h2>
+          <p className="text-text-secondary text-sm">
+            {employeeStatistics.employeeCount} 名员工
+          </p>
+        </div>
+        <span className="bg-success/10 text-success rounded-md px-3 py-1 text-xs font-medium">
+          {formatRedactionStatus(employeeStatistics.redactionStatus)}
+        </span>
+      </div>
+
+      {employeeStatistics.employees.length === 0 ? (
+        <p className="text-text-secondary rounded-md border border-dashed p-4 text-sm">
+          暂无员工统计
+        </p>
+      ) : (
+        <div className="grid gap-3">
+          {employeeStatistics.employees.map((employee) => (
+            <article
+              className="border-border grid gap-3 rounded-md border p-3 md:grid-cols-[1.2fr_1fr_1fr_1fr]"
+              key={employee.employeePublicId}
+            >
+              <div>
+                <h3 className="text-text-primary text-sm font-semibold">
+                  {employee.employeeDisplayName}
+                </h3>
+                <p className="text-text-secondary text-xs">
+                  {employee.organizationName}
+                </p>
+              </div>
+              <MetricInline
+                label="提交"
+                value={`${employee.submittedTrainingCount} / ${employee.visibleTrainingCount}`}
+              />
+              <MetricInline
+                label="完成率"
+                value={formatPercent(employee.trainingCompletionRate)}
+              />
+              <MetricInline
+                label="平均分"
+                value={formatNullableNumber(employee.trainingAverageScore)}
+              />
+              <div className="text-text-secondary text-xs md:col-span-4">
+                最近提交：
+                {employee.latestTrainingSubmittedAt ?? "暂无"}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MetricInline({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-muted rounded-md px-3 py-2 text-sm">
+      <span className="text-text-secondary">{label}</span>
+      <span className="text-text-primary ml-2 font-semibold">{value}</span>
+    </div>
   );
 }
 

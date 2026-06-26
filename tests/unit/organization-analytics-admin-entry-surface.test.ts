@@ -108,6 +108,62 @@ const dashboardSummaryPayload = {
   },
 };
 
+const employeeStatisticsPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    organizationPublicId: "organization-analytics-scope-001",
+    scopeOrganizationPublicIds: [
+      "organization-analytics-scope-001",
+      "organization-analytics-child-hidden-003",
+    ],
+    dateRange: {
+      startAt: "2026-06-01T00:00:00.000Z",
+      endAt: "2026-06-16T00:00:00.000Z",
+    },
+    employeeCount: 2,
+    employees: [
+      {
+        employeePublicId: "employee-analytics-001",
+        employeeDisplayName: "员工甲",
+        organizationPublicId: "organization-analytics-scope-001",
+        organizationName: "组织统计范围",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization-analytics-scope-001",
+          organizationName: "组织统计范围",
+          capturedAt: "2026-06-01T00:00:00.000Z",
+        },
+        visibleTrainingCount: 5,
+        submittedTrainingCount: 4,
+        unfinishedTrainingCount: 1,
+        trainingCompletionRate: 0.8,
+        trainingAverageScore: 88,
+        latestTrainingSubmittedAt: "2026-06-15T07:00:00.000Z",
+        redactionStatus: "summary_only",
+        rawAnswerText: "hidden employee subjective answer",
+        id: 66123,
+      },
+      {
+        employeePublicId: "employee-analytics-002",
+        employeeDisplayName: "员工乙",
+        organizationPublicId: "organization-analytics-scope-001",
+        organizationName: "组织统计范围",
+        answerOrganizationSnapshot: null,
+        visibleTrainingCount: 2,
+        submittedTrainingCount: 0,
+        unfinishedTrainingCount: 2,
+        trainingCompletionRate: 0,
+        trainingAverageScore: null,
+        latestTrainingSubmittedAt: null,
+        redactionStatus: "summary_only",
+      },
+    ],
+    redactionStatus: "summary_only",
+    updatedAt: "2026-06-16T08:00:00.000Z",
+    id: 77124,
+  },
+};
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -191,7 +247,7 @@ describe("AdminOrganizationAnalyticsPage", () => {
     ]);
   });
 
-  it("loads aggregate-only dashboard summary from the admin route without exposing hidden scope or internal ids", async () => {
+  it("loads scoped summary and employee statistics without manual organization id entry or hidden details", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const path = String(url);
@@ -205,6 +261,13 @@ describe("AdminOrganizationAnalyticsPage", () => {
         "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
       ) {
         return createJsonResponse(dashboardSummaryPayload);
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
+      ) {
+        return createJsonResponse(employeeStatisticsPayload);
       }
 
       return createJsonResponse({
@@ -221,14 +284,19 @@ describe("AdminOrganizationAnalyticsPage", () => {
       await screen.findByRole("heading", { name: "统计摘要" }),
     ).toBeInTheDocument();
 
+    const scopeContext = await screen.findByTestId(
+      "organization-analytics-scope-context",
+    );
+    expect(scopeContext).toHaveTextContent("organization-analytics-scope-001");
+    expect(
+      screen.queryByDisplayValue("organization-analytics-scope-001"),
+    ).toBeNull();
+
     const summaryForm = within(
       screen.getByRole("form", {
         name: "组织统计摘要表单",
       }),
     );
-    fireEvent.change(summaryForm.getByLabelText("组织业务标识"), {
-      target: { value: "organization-analytics-scope-001" },
-    });
     fireEvent.change(summaryForm.getByLabelText("开始时间"), {
       target: { value: "2026-06-01T00:00:00.000Z" },
     });
@@ -252,6 +320,26 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(summaryCard).toHaveTextContent("7 次正式练习");
     expect(summaryCard).toHaveTextContent("823 剩余额度");
     expect(summaryCard).toHaveTextContent("聚合脱敏");
+    expect(
+      within(summaryCard).getByTestId("organization-analytics-submitted-trend"),
+    ).toHaveTextContent("2026-06-01");
+    expect(
+      within(summaryCard).getByTestId("organization-analytics-submitted-trend"),
+    ).toHaveTextContent("3");
+
+    const employeeStatistics = await screen.findByTestId(
+      "organization-analytics-employee-statistics",
+    );
+    expect(employeeStatistics).toHaveTextContent("员工甲");
+    expect(employeeStatistics).toHaveTextContent("4 / 5");
+    expect(employeeStatistics).toHaveTextContent("80%");
+    expect(employeeStatistics).toHaveTextContent("88");
+    expect(employeeStatistics).toHaveTextContent("员工乙");
+    expect(employeeStatistics).toHaveTextContent("0 / 2");
+    expect(employeeStatistics).toHaveTextContent("暂无");
+    expect(
+      screen.getByTestId("organization-analytics-export-readiness"),
+    ).toBeDisabled();
     expect(summaryCard).not.toHaveTextContent("Dashboard summary");
     expect(summaryCard).not.toHaveTextContent("eligible employees");
     expect(summaryCard).not.toHaveTextContent("aggregate_only");
@@ -259,10 +347,16 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(document.body.textContent).not.toContain(
       "organization-analytics-child-hidden-002",
     );
+    expect(document.body.textContent).not.toContain(
+      "organization-analytics-child-hidden-003",
+    );
     expect(document.body.textContent).not.toContain("99123");
     expect(document.body.textContent).not.toContain("77123");
+    expect(document.body.textContent).not.toContain("77124");
+    expect(document.body.textContent).not.toContain("66123");
     expect(document.body.textContent).not.toContain("hidden formal");
+    expect(document.body.textContent).not.toContain("hidden employee");
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
   });
 });
