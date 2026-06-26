@@ -53,10 +53,20 @@ export function createAdminAuthHeaders(
 export async function fetchAdminApi<TData>(
   path: string,
   sessionToken: string | null,
+  init: RequestInit = {},
 ): Promise<ApiResponse<TData | null>> {
+  const headers = new Headers(init.headers);
+
+  for (const [headerName, headerValue] of Object.entries(
+    createAdminAuthHeaders(sessionToken),
+  )) {
+    headers.set(headerName, headerValue);
+  }
+
   const response = await fetch(path, {
-    credentials: "same-origin",
-    headers: createAdminAuthHeaders(sessionToken),
+    ...init,
+    credentials: init.credentials ?? "same-origin",
+    headers,
   });
 
   return (await response.json()) as ApiResponse<TData | null>;

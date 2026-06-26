@@ -231,4 +231,41 @@ describe("AI generation task request policy service", () => {
       },
     });
   });
+
+  it("accepts content admin platform-owned AI generation requests without learner authorization", () => {
+    const response = buildAiGenerationTaskRequestPolicyReadModel({
+      ...createBaseInput(),
+      actorPublicId: "content_admin_public_123",
+      authorizationSource: "admin_role",
+      authorizationPublicId: "admin_role_content_ai_generation",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      organizationPublicId: null,
+      quotaOwnerType: "platform",
+      quotaOwnerPublicId: "platform_content_review_pool",
+      idempotencyKeyHash: "sha256:content_admin_local_contract_123",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        decision: "create_pending_task",
+        authorizationSource: "admin_role",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        quotaOwnerType: "platform",
+        quotaOwnerPublicId: "platform_content_review_pool",
+        resultReference: {
+          resultKind: "ai_generated_question_set",
+          contentVisibility: "summary_only",
+          redactionStatus: "redacted",
+        },
+      },
+    });
+    expect(serializedResponse).not.toMatch(/"id":/);
+    expect(serializedResponse).not.toContain("provider payload");
+    expect(serializedResponse).not.toContain("raw prompt");
+    expect(serializedResponse).not.toContain("raw generated output");
+  });
 });

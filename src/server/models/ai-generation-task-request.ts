@@ -14,7 +14,8 @@ export type AiGenerationTaskRequestDecision =
 
 export type AiGenerationTaskRequestAuthorizationSource =
   | "personal_auth"
-  | "org_auth";
+  | "org_auth"
+  | "admin_role";
 
 export type AiGenerationTaskRequestOwnerType =
   | "personal"
@@ -171,6 +172,15 @@ function matchesTaskAuthorizationBoundary(
 function matchesLearnerAiGenerationAuthorizationBoundary(
   input: AiGenerationTaskRequestPolicyInput,
 ): boolean {
+  if (input.authorizationSource === "admin_role") {
+    return (
+      input.ownerType === "platform" &&
+      input.quotaOwnerType === "platform" &&
+      input.organizationPublicId === null &&
+      input.ownerPublicId === input.quotaOwnerPublicId
+    );
+  }
+
   if (input.authorizationSource === "personal_auth") {
     return (
       input.ownerType === "personal" &&

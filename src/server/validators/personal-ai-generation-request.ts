@@ -20,7 +20,15 @@ export type PersonalAiGenerationRequestValidationResult =
 
 const INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE =
   "Invalid personal AI generation request input.";
-const authorizationSourceValues = ["personal_auth", "org_auth"] as const;
+type PersonalAiGenerationAuthorizationSource = Extract<
+  AiGenerationTaskRequestAuthorizationSource,
+  "personal_auth" | "org_auth"
+>;
+
+const authorizationSourceValues = [
+  "personal_auth",
+  "org_auth",
+] as const satisfies readonly PersonalAiGenerationAuthorizationSource[];
 const ownerTypeValues = ["personal", "organization", "platform"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -57,14 +65,14 @@ function normalizePersonalAiGenerationFuncType(
 
 function normalizeAuthorizationSource(
   value: unknown,
-): AiGenerationTaskRequestAuthorizationSource | null {
+): PersonalAiGenerationAuthorizationSource | null {
   const text = normalizeRequiredText(value);
 
   return text !== null &&
     authorizationSourceValues.includes(
-      text as AiGenerationTaskRequestAuthorizationSource,
+      text as PersonalAiGenerationAuthorizationSource,
     )
-    ? (text as AiGenerationTaskRequestAuthorizationSource)
+    ? (text as PersonalAiGenerationAuthorizationSource)
     : null;
 }
 
@@ -81,7 +89,7 @@ function normalizeOwnerType(
 
 function resolveAuthorizationSource(
   value: unknown,
-): AiGenerationTaskRequestAuthorizationSource | null {
+): PersonalAiGenerationAuthorizationSource | null {
   if (value === null || value === undefined) {
     return "personal_auth";
   }

@@ -44,6 +44,193 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+    title: Content and organization admin AI generation local contract loop source repair
+    phase: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+    sourceStory: owner_selected_next_minimal_source_task_after_product_loop_plan
+    dependencies:
+      - content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionProfile: low_risk_local_code
+    evidenceMode: redacted_contract_status_and_test_summary_only
+    validationPolicy: focused_unit_lint_typecheck_docs_format_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_next_minimal_source_task
+    requiredOutcome: >-
+      Move content admin and organization admin AI question/paper generation pages from entry-only to a local contract
+      request loop. Add server-owned redacted local contract APIs, UI submit controls, request/result summaries, and
+      focused unit tests. Content admin and organization advanced admin can submit local contract requests; organization
+      standard admin remains denied or unavailable. Do not read credentials or `.env*`, call Provider/model services,
+      execute Cost Calibration, run browser/e2e, connect to or mutate DB, change seed/schema/migration/package/lockfile,
+      write formal `question` or `paper`, touch staging/prod/payment/external services, create PR, force push, or claim
+      MVP final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localSourceChange: approved_by_user_request_2026_06_26
+      focusedUnitTest: approved_by_user_request_2026_06_26
+      browserRuntime: blocked
+      e2eRuntime: blocked
+      credentialDocumentRead: blocked
+      credentialEntry: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - src/features/admin/content-admin-runtime.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/server/contracts/ai-generation-task-request-contract.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/models/ai-generation-task-request.ts
+      - src/server/validators/ai-generation-task-request.ts
+      - src/server/validators/personal-ai-generation-request.ts
+      - src/server/services/ai-generation-task-request-service.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - src/app/(admin)/organization/ai-question-generation/page.tsx
+      - src/app/(admin)/organization/ai-paper-generation/page.tsx
+      - src/server/contracts/api-response.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/models/ai-generation-task.ts
+      - src/server/models/ai-rag.ts
+      - src/server/services/ai-generation-task-request-service.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/session-service.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/local-session-runtime.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/ai-generation-task-request-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md src/features/admin/content-admin-runtime.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/server/contracts/ai-generation-task-request-contract.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/models/ai-generation-task-request.ts src/server/validators/ai-generation-task-request.ts src/server/validators/personal-ai-generation-request.ts src/server/services/ai-generation-task-request-service.test.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/app/api/v1/content-ai-generation-requests/route.ts src/app/api/v1/organization-ai-generation-requests/route.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md src/features/admin/content-admin-runtime.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/server/contracts/ai-generation-task-request-contract.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/models/ai-generation-task-request.ts src/server/validators/ai-generation-task-request.ts src/server/validators/personal-ai-generation-request.ts src/server/services/ai-generation-task-request-service.test.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/app/api/v1/content-ai-generation-requests/route.ts src/app/api/v1/organization-ai-generation-requests/route.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+    status: closed
+    result: pass_local_contract_loop_source_repair_no_final_pass
+    claimedAt: "2026-06-26T05:15:00-07:00"
+    plannedAt: "2026-06-26T05:15:00-07:00"
+    validatedAt: "2026-06-26T05:30:00-07:00"
+    reviewedAt: "2026-06-26T05:30:00-07:00"
+    closedAt: "2026-06-26T05:30:00-07:00"
+    branch: codex/content-org-ai-local-loop-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_next_minimal_source_task_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_next_minimal_source_task_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_next_minimal_source_task_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_next_minimal_source_task_2026_06_26
+    blockedInThisTask:
+      - credential_or_env_secret_read_write
+      - provider_call_or_provider_configuration
+      - cost_calibration_gate_execution
+      - browser_or_playwright_runtime
+      - e2e_runtime
+      - database_connection_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - formal_question_or_paper_write
+      - package_lockfile_dependency_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    validationSummary:
+      redGreenFocusedUnitTests: pass_3_files_14_tests
+      lint: pass
+      typecheck: pass
+      prettierWrite: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_after_checkpoint_handoff_repair
+      browserRuntimeExecuted: false
+      e2eRuntimeExecuted: false
+      credentialDocumentReadByCodex: false
+      envSecretAccessExecuted: false
+      databaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      accountMutationExecuted: false
+      packageLockfileChanged: false
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      costCalibrationExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      formalQuestionOrPaperWriteExecuted: false
+      finalAcceptancePass: false
+    nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
     title: Content and organization AI generation product loop implementation plan
     phase: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26

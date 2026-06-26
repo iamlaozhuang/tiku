@@ -25,7 +25,11 @@ export type AiGenerationTaskRequestValidationResult =
 const INVALID_AI_GENERATION_TASK_REQUEST_INPUT_MESSAGE =
   "Invalid AI generation task request input.";
 
-const authorizationSourceValues = ["personal_auth", "org_auth"] as const;
+const authorizationSourceValues = [
+  "personal_auth",
+  "org_auth",
+  "admin_role",
+] as const;
 
 const ownerTypeValues = ["personal", "organization", "platform"] as const;
 

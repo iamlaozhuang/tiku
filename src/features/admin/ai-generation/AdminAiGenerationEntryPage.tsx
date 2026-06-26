@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, FileText, ShieldCheck, WandSparkles } from "lucide-react";
 
+import type { AdminAiGenerationLocalContractDto } from "@/server/contracts/admin-ai-generation-local-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 
 import {
@@ -23,6 +24,11 @@ type AdminAiGenerationEntryLoadState =
   | "error";
 type AdminAiGenerationWorkspace = "content" | "organization";
 type AdminAiGenerationKind = "question" | "paper";
+type AdminAiGenerationRequestState =
+  | "idle"
+  | "submitting"
+  | "accepted"
+  | "error";
 
 const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
 const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
@@ -83,6 +89,14 @@ function getPageCopy(
   };
 }
 
+function getAdminAiGenerationRequestPath(
+  workspace: AdminAiGenerationWorkspace,
+): string {
+  return workspace === "content"
+    ? "/api/v1/content-ai-generation-requests"
+    : "/api/v1/organization-ai-generation-requests";
+}
+
 export function AdminAiGenerationEntryPage({
   generationKind,
   workspace,
@@ -92,6 +106,10 @@ export function AdminAiGenerationEntryPage({
 }) {
   const [loadState, setLoadState] =
     useState<AdminAiGenerationEntryLoadState>("loading");
+  const [requestState, setRequestState] =
+    useState<AdminAiGenerationRequestState>("idle");
+  const [localContractSummary, setLocalContractSummary] =
+    useState<AdminAiGenerationLocalContractDto | null>(null);
   const pageCopy = getPageCopy(workspace, generationKind);
 
   useEffect(() => {
@@ -134,6 +152,43 @@ export function AdminAiGenerationEntryPage({
       isActive = false;
     };
   }, [workspace]);
+
+  async function handleSubmitLocalContractRequest() {
+    const sessionToken = getStoredSessionToken();
+
+    setRequestState("submitting");
+    setLocalContractSummary(null);
+
+    try {
+      const requestResponse =
+        await fetchAdminApi<AdminAiGenerationLocalContractDto>(
+          getAdminAiGenerationRequestPath(workspace),
+          sessionToken,
+          {
+            body: JSON.stringify({ generationKind }),
+            headers: {
+              "content-type": "application/json",
+            },
+            method: "POST",
+          },
+        );
+
+      if (isUnauthorizedResponse(requestResponse)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (requestResponse.code !== 0 || requestResponse.data === null) {
+        setRequestState("error");
+        return;
+      }
+
+      setLocalContractSummary(requestResponse.data);
+      setRequestState("accepted");
+    } catch {
+      setRequestState("error");
+    }
+  }
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载 AI 入口" />;
@@ -193,6 +248,15 @@ export function AdminAiGenerationEntryPage({
           <p className="text-text-secondary mt-3 text-sm leading-6">
             本地入口已就绪，模型服务执行仍由后续任务审批。
           </p>
+          <button
+            className="bg-primary text-primary-foreground mt-4 inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            data-testid="admin-ai-generation-submit"
+            disabled={requestState === "submitting"}
+            type="button"
+            onClick={handleSubmitLocalContractRequest}
+          >
+            {requestState === "submitting" ? "提交中" : pageCopy.actionLabel}
+          </button>
         </section>
 
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
@@ -215,6 +279,75 @@ export function AdminAiGenerationEntryPage({
           </p>
         </section>
       </div>
+
+      {requestState === "error" ? (
+        <section
+          className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
+          data-testid="admin-ai-generation-local-contract-error"
+          role="alert"
+        >
+          <h2 className="text-text-primary text-sm font-semibold">
+            本地合约请求暂不可用
+          </h2>
+          <p className="text-text-secondary mt-2 text-sm leading-6">
+            请求未执行
+            Provider，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。
+          </p>
+        </section>
+      ) : null}
+
+      {localContractSummary !== null ? (
+        <section
+          className="bg-surface border-border rounded-md border p-4 shadow-sm"
+          data-testid="admin-ai-generation-local-contract-summary"
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-brand-primary text-xs font-medium">
+                本地合约摘要
+              </p>
+              <h2 className="text-text-primary mt-1 text-base font-semibold">
+                {localContractSummary.flowStatus}
+              </h2>
+            </div>
+            <code className="bg-muted text-text-secondary rounded-md px-2 py-1 font-mono text-xs">
+              {localContractSummary.runtimeStatus}
+            </code>
+          </div>
+
+          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <dt className="text-text-secondary">Task</dt>
+              <dd className="text-text-primary mt-1 font-mono text-xs">
+                {localContractSummary.taskRequest.taskPublicId}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-secondary">Result</dt>
+              <dd className="text-text-primary mt-1">
+                {localContractSummary.taskRequest.resultReference.resultKind}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-secondary">Visibility</dt>
+              <dd className="text-text-primary mt-1">
+                {
+                  localContractSummary.taskRequest.resultReference
+                    .contentVisibility
+                }
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-secondary">Provider</dt>
+              <dd className="text-text-primary mt-1">
+                {localContractSummary.runtimeBridge.providerCallExecuted
+                  ? "executed"
+                  : "blocked"}
+              </dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
     </section>
   );
 }

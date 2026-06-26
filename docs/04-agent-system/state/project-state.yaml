@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
-updatedAt: "2026-06-26T04:45:00-07:00"
+currentPhase: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+updatedAt: "2026-06-26T05:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,108 +501,152 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
-  lastKnownOriginMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
+  lastKnownMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
+  lastKnownOriginMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
 currentTask:
-  id: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+  id: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
   status: closed
-  result: pass_docs_only_content_organization_ai_product_loop_implementation_plan_prepared_no_final_pass
-  claimedAt: "2026-06-26T04:45:00-07:00"
-  plannedAt: "2026-06-26T04:45:00-07:00"
-  validatedAt: "2026-06-26T05:00:00-07:00"
-  reviewedAt: "2026-06-26T05:00:00-07:00"
-  closedAt: "2026-06-26T05:00:00-07:00"
-  sourceStory: owner_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass
-  approvalConsumed: user_request_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass_2026_06_26
-  approvalSource: user_request_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
-  implementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  result: pass_local_contract_loop_source_repair_no_final_pass
+  claimedAt: "2026-06-26T05:15:00-07:00"
+  plannedAt: "2026-06-26T05:15:00-07:00"
+  validatedAt: "2026-06-26T05:30:00-07:00"
+  reviewedAt: "2026-06-26T05:30:00-07:00"
+  closedAt: "2026-06-26T05:30:00-07:00"
+  sourceStory: owner_selected_next_minimal_source_task_after_product_loop_plan
+  approvalConsumed: user_request_next_minimal_source_task_2026_06_26
+  approvalSource: user_request_next_minimal_source_task_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  sourceImplementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
   sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
-  sourceProviderSmokeAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
-  sourceScopeInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  allowedScope:
-    docsStateEvidenceAudit: true
-    implementationPlanPackage: true
-    sourceStaticReadOnlyInspection: true
-    providerCostGatePackage: false
-    providerSmokeExecutionPlanning: false
-    costCalibrationDecision: false
-    localBrowserRuntimeRerun: false
-    credentialDocumentReadByCodex: false
-    credentialEntryByCodex: false
-    localRuntimeDiagnostic: false
-    localSourceChange: false
-    focusedUnitTests: false
-    databaseRead: false
-    databaseWrite: false
-    seedWrite: false
-    accountMutation: false
-    schemaMigration: false
-    dependencyIntroduction: false
-    envSecretAccess: false
+  scope:
+    localSourceChange: true
+    focusedUnitTest: true
+    browserRuntime: false
+    credentialOrEnvRead: false
     providerCall: false
-    providerConfiguration: false
+    costCalibration: false
+    databaseConnectionOrWrite: false
+    schemaMigration: false
+    formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
-    costCalibrationGate: false
     finalPassClaim: false
-  implementationPlanDecision:
-    providerSmokePrecondition: pass_local_dev_one_call_redacted
-    currentContentOrgAiState: entry_only_no_submit_api_no_task_loop_no_draft_queue
-    firstRecommendedSourceTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
-    fullProductCompletionRequires:
-      - durable_task_and_result_persistence_decision
-      - draft_review_queue_implementation
-      - formal_adoption_gate_if_needed
-      - later_cost_calibration_gate_before_quota_pricing_claims
+  requirementMapping:
+    contentAdminAiGeneration: local_contract_loop
+    organizationAdvancedAdminAiGeneration: local_contract_loop
+    organizationStandardAdmin: denied_or_unavailable
+    editionAwareAuthorization: server_derived_role_scoped_no_client_authority_change
+    roleExperienceMatrix: content_admin_and_org_advanced_admin_ai_generation_local_loop_repaired
+    formalContentBoundary: summary_only_no_question_or_paper_write
+    providerBoundary: blocked_in_this_task
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
+      approvalSource: user_request_next_minimal_source_task_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
+      approvalSource: user_request_next_minimal_source_task_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
+      approvalSource: user_request_next_minimal_source_task_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
-  branch: codex/content-org-ai-loop-plan-20260626
+      approvalSource: user_request_next_minimal_source_task_2026_06_26
+  branch: codex/content-org-ai-local-loop-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    implementationPlanPackagePrepared: true
-    providerSmokePrecondition: pass
+    redGreenFocusedUnitTests: pass_3_files_14_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_after_checkpoint_handoff_repair
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
-    credentialEntryByCodex: false
-    sourceChanged: false
-    testsChanged: false
+    envSecretAccessExecuted: false
+    databaseConnectionExecuted: false
     databaseReadExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
-    providerOrCostTouched: false
+    packageLockfileChanged: false
+    providerCallExecuted: false
     costCalibrationExecuted: false
-    costEstimateRecorded: false
-    prettierWrite: pass
-    prettierCheck: pass
-    gitDiffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     stagingProdTouched: false
     paymentExternalServiceTouched: false
+    formalQuestionOrPaperWriteExecuted: false
     finalPassClaim: false
-  nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+  nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+contentOrganizationAiGenerationAdminLocalContractLoopSourceRepair20260626:
+  taskId: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+  phase: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+  recordedAt: "2026-06-26T05:15:00-07:00"
+  status: closed
+  result: pass_local_contract_loop_source_repair_no_final_pass
+  validatedAt: "2026-06-26T05:30:00-07:00"
+  reviewedAt: "2026-06-26T05:30:00-07:00"
+  closedAt: "2026-06-26T05:30:00-07:00"
+  branch: codex/content-org-ai-local-loop-20260626
+  entryMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
+  entryOriginMasterSha: a853a2416dce7d4ea9fd56178bc692b8044f63c8
+  approvalSource: user_request_next_minimal_source_task_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  sourceImplementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  scope:
+    localSourceChange: true
+    focusedUnitTest: true
+    browserRuntime: false
+    credentialOrEnvRead: false
+    providerCall: false
+    costCalibration: false
+    databaseConnectionOrWrite: false
+    schemaMigration: false
+    formalQuestionOrPaperWrite: false
+    stagingProdDeploy: false
+    paymentExternalService: false
+    finalPassClaim: false
+  requirementMapping:
+    contentAdminAiGeneration: local_contract_loop
+    organizationAdvancedAdminAiGeneration: local_contract_loop
+    organizationStandardAdmin: denied_or_unavailable
+    editionAwareAuthorization: server_derived_role_scoped_no_client_authority_change
+    roleExperienceMatrix: content_admin_and_org_advanced_admin_ai_generation_local_loop_repaired
+    formalContentBoundary: summary_only_no_question_or_paper_write
+    providerBoundary: blocked_in_this_task
+  validationSummary:
+    redGreenFocusedUnitTests: pass_3_files_14_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_after_checkpoint_handoff_repair
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    envSecretAccessExecuted: false
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    packageLockfileChanged: false
+    providerCallExecuted: false
+    costCalibrationExecuted: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    formalQuestionOrPaperWriteExecuted: false
+    finalAcceptancePass: false
+  nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
 contentOrganizationAiGenerationProductLoopImplementationPlan20260626:
   taskId: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
   phase: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
