@@ -44,6 +44,164 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+    title: Role-separated full 8 row post admin AI local contract loop browser rerun
+    phase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+    sourceStory: owner_requested_full_8_row_rerun_after_admin_ai_local_contract_focused_pass
+    dependencies:
+      - content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    executionProfile: local_real_browser_full_8_row_rerun
+    evidenceMode: redacted_route_status_counts_api_summary_only
+    validationPolicy: real_browser_full_8_row_runtime_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_full_8_browser_rerun
+    requiredOutcome: >-
+      Use a real local browser against http://127.0.0.1:3000 to expand the prior
+      content/org/admin AI local contract focused pass to the full eight role-separated
+      rows. Validate learner, organization employee, organization admin, content admin,
+      and ops admin entries, denied or unavailable boundaries, local-contract AI submit
+      summaries where applicable, and visible technical-token cleanup. Use approved local
+      private role-account credentials only for local authentication and keep evidence
+      fully redacted. Do not change source, tests, e2e, package or lockfiles, DB, seed,
+      schema, migration, accounts, env files, Provider/Cost configuration, staging/prod,
+      payment, external services, PRs, force push, or claim MVP final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localBrowserRuntime: approved_by_user_request_2026_06_26
+      localDevServerProbe: approved_by_user_request_2026_06_26
+      credentialDocumentRead: approved_by_user_goal_and_current_full_8_browser_rerun_request_2026_06_26
+      credentialEntry: approved_by_user_goal_and_current_full_8_browser_rerun_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      e2eRuntime: blocked_existing_specs_not_needed_for_this_walkthrough
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+      - src/features/student/home/StudentHomePage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd playwright --version
+      - powershell.exe -NoProfile -Command "Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000/login -TimeoutSec 8 | Select-Object -ExpandProperty StatusCode"
+      - local real-browser full 8 row rerun with redacted route, count, and summary-only evidence
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    status: closed
+    result: pass_full_8_row_post_admin_ai_local_contract_loop_browser_rerun_no_final_pass
+    claimedAt: "2026-06-26T06:40:00-07:00"
+    plannedAt: "2026-06-26T06:40:00-07:00"
+    validatedAt: "2026-06-26T07:05:00-07:00"
+    reviewedAt: "2026-06-26T07:05:00-07:00"
+    closedAt: "2026-06-26T07:05:00-07:00"
+    branch: codex/full-8-admin-ai-loop-rerun-20260626
+    validationSummary:
+      playwrightVersion: pass_1_60_0
+      localTargetProbe: pass_200
+      credentialStructureCheck: pass_all_8_rows_redacted
+      initialRunnerTimeout: observed_no_secret_or_raw_artifact_output
+      intermediateCheckerFalseFail: observed_4_pass_4_fail_due_cross_workspace_denial_classifier
+      realBrowserFull8Rerun: pass_8_rows_0_fail_0_blocked_after_classifier_repair
+      personalStandardStudent: pass
+      personalAdvancedStudent: pass
+      orgStandardEmployee: pass
+      orgAdvancedEmployee: pass
+      orgStandardAdmin: pass_hidden_or_denied_advanced_ai_training_and_direct_post_403011
+      orgAdvancedAdmin: pass_entries_submit_redacted_summary_and_denied_boundaries
+      contentAdmin: pass_entries_submit_redacted_summary_and_denied_boundaries
+      opsAdmin: pass_ops_entries_denied_boundaries_and_visible_token_counts_zero
+      browserConsoleIssues: "0_each_row"
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceTestPackageLockfileChanged: false
+      dbSeedSchemaMigrationAccountMutationExecuted: false
+      providerCostStagingProdPaymentExternalExecuted: false
+      finalAcceptancePass: false
+    nextRecommendedTask: mvp-final-pass-decision-review-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_full_8_browser_rerun_2026_06_26
+
   - id: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
     title: Content and organization admin AI generation local contract loop focused browser rerun
     phase: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26

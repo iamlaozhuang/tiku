@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
-updatedAt: "2026-06-26T06:20:00-07:00"
+currentPhase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+updatedAt: "2026-06-26T07:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,26 +501,28 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 06580fcd3f0f0d887a552bf3eeb6e2795a4c26ef
-  lastKnownOriginMasterSha: 06580fcd3f0f0d887a552bf3eeb6e2795a4c26ef
+  lastKnownMasterSha: 19766dece093fcbc604123af8653d33fda07979b
+  lastKnownOriginMasterSha: 19766dece093fcbc604123af8653d33fda07979b
 currentTask:
-  id: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
+  id: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
   status: closed
-  result: pass_focused_browser_three_admin_ai_local_contract_loop_no_final_pass
-  claimedAt: "2026-06-26T06:00:00-07:00"
-  plannedAt: "2026-06-26T06:00:00-07:00"
-  validatedAt: "2026-06-26T06:20:00-07:00"
-  reviewedAt: "2026-06-26T06:20:00-07:00"
-  closedAt: "2026-06-26T06:20:00-07:00"
-  sourceStory: owner_selected_focused_browser_rerun_after_admin_local_contract_source_repair
-  approvalConsumed: user_request_focused_browser_rerun_2026_06_26
-  approvalSource: user_request_focused_browser_rerun_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+  result: pass_full_8_row_post_admin_ai_local_contract_loop_browser_rerun_no_final_pass
+  claimedAt: "2026-06-26T06:40:00-07:00"
+  plannedAt: "2026-06-26T06:40:00-07:00"
+  validatedAt: "2026-06-26T07:05:00-07:00"
+  reviewedAt: "2026-06-26T07:05:00-07:00"
+  closedAt: "2026-06-26T07:05:00-07:00"
+  sourceStory: owner_requested_full_8_row_rerun_after_admin_ai_local_contract_focused_pass
+  approvalConsumed: user_request_full_8_browser_rerun_2026_06_26
+  approvalSource: user_request_full_8_browser_rerun_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
   sourceImplementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
   sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
   sourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+  sourceFocusedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+  sourceFull8BaselineEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
   scope:
     localSourceChange: false
     focusedUnitTest: false
@@ -536,29 +538,34 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    contentAdminAiGeneration: verify_real_browser_entry_submit_redacted_summary
-    organizationAdvancedAdminAiGeneration: verify_real_browser_entry_submit_redacted_summary
-    organizationStandardAdmin: verify_real_browser_denied_or_unavailable
+    personalStandardStudent: verify_no_advanced_ai_or_backend_access
+    personalAdvancedStudent: verify_ai_generation_entry_and_no_backend_access
+    organizationStandardEmployee: verify_no_advanced_ai_or_training_or_backend_access
+    organizationAdvancedEmployee: verify_ai_and_training_entries_and_no_backend_access
+    organizationStandardAdmin: verify_no_advanced_admin_ai_or_training_and_denied_or_unavailable_direct_paths
+    organizationAdvancedAdmin: verify_admin_ai_training_entries_submit_redacted_summary_and_denied_boundaries
+    contentAdmin: verify_content_ai_entries_submit_redacted_summary_and_denied_boundaries
+    opsAdmin: verify_ops_entries_and_denied_content_organization_boundaries
     editionAwareAuthorization: server_derived_role_scoped_no_client_authority_change
-    roleExperienceMatrix: focused_three_admin_role_runtime_evidence
+    roleExperienceMatrix: full_eight_row_runtime_evidence
     formalContentBoundary: summary_only_no_question_or_paper_write
     providerBoundary: blocked_in_this_task
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_focused_browser_rerun_2026_06_26
+      approvalSource: user_request_full_8_browser_rerun_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_focused_browser_rerun_2026_06_26
+      approvalSource: user_request_full_8_browser_rerun_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_focused_browser_rerun_2026_06_26
+      approvalSource: user_request_full_8_browser_rerun_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_focused_browser_rerun_2026_06_26
-  branch: codex/content-org-ai-browser-rerun-20260626
+      approvalSource: user_request_full_8_browser_rerun_2026_06_26
+  branch: codex/full-8-admin-ai-loop-rerun-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -566,18 +573,18 @@ currentTask:
   validationSummary:
     playwrightVersion: pass_1_60_0
     localTargetProbe: pass_200
-    credentialStructureCheck: pass_three_rows_redacted
-    realBrowserFocusedRerun: pass_3_rows_0_fail
-    contentAdminEntrySubmitSummary: pass
-    orgAdvancedAdminEntrySubmitSummary: pass
-    orgStandardAdminDeniedOrUnavailable: pass
+    credentialStructureCheck: pass_all_8_rows_redacted
+    initialRunnerTimeout: observed_no_secret_or_raw_artifact_output
+    intermediateCheckerFalseFail: observed_4_pass_4_fail_due_cross_workspace_denial_classifier
+    realBrowserFull8Rerun: pass_8_rows_0_fail_0_blocked_after_classifier_repair
+    adminAiLocalContractSubmitSummary: pass_content_and_org_advanced_summary_only
     browserConsoleIssues: "0_each_row"
     browserRuntimeExecuted: true
     credentialDocumentReadByCodex: true_redacted
     credentialValuesPrintedOrRecorded: false
     prettierScoped: pass
     gitDiffCheck: pass
-    moduleRunV2PreCommitHardening: pass_after_docs_heading_repair
+    moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     envSecretAccessExecuted: false
     databaseConnectionExecuted: false
@@ -592,7 +599,68 @@ currentTask:
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
     finalPassClaim: false
-  nextRecommendedTask: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+  nextRecommendedTask: mvp-final-pass-decision-review-2026-06-26
+roleSeparatedFull8RowPostAdminAiLocalContractLoopBrowserRerun20260626:
+  taskId: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+  phase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+  recordedAt: "2026-06-26T06:40:00-07:00"
+  status: closed
+  result: pass_full_8_row_post_admin_ai_local_contract_loop_browser_rerun_no_final_pass
+  validatedAt: "2026-06-26T07:05:00-07:00"
+  reviewedAt: "2026-06-26T07:05:00-07:00"
+  closedAt: "2026-06-26T07:05:00-07:00"
+  branch: codex/full-8-admin-ai-loop-rerun-20260626
+  entryMasterSha: 19766dece093fcbc604123af8653d33fda07979b
+  entryOriginMasterSha: 19766dece093fcbc604123af8653d33fda07979b
+  approvalSource: user_request_full_8_browser_rerun_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  sourceFocusedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+  sourceFull8BaselineEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  privateCredentialSourceKind: approved_local_private_role_account_file
+  scope:
+    localSourceChange: false
+    focusedUnitTest: false
+    browserRuntime: true
+    credentialDocumentRead: true
+    envSecretAccess: false
+    providerCall: false
+    costCalibration: false
+    databaseConnectionOrWrite: false
+    schemaMigration: false
+    accountMutation: false
+    formalQuestionOrPaperWrite: false
+    stagingProdDeploy: false
+    paymentExternalService: false
+    finalPassClaim: false
+  runtimeMatrix:
+    personalStandardStudent: pass_no_advanced_ai_or_backend_access
+    personalAdvancedStudent: pass_ai_entry_and_backend_denied
+    orgStandardEmployee: pass_no_advanced_ai_training_or_backend_access
+    orgAdvancedEmployee: pass_ai_and_training_entries_backend_denied
+    orgStandardAdmin: pass_advanced_entries_hidden_direct_routes_denied_direct_post_403011
+    orgAdvancedAdmin: pass_entries_submit_redacted_summary_and_denied_boundaries
+    contentAdmin: pass_entries_submit_redacted_summary_and_denied_boundaries
+    opsAdmin: pass_ops_entries_denied_boundaries_and_visible_token_counts_zero
+  validationSummary:
+    playwrightVersion: pass_1_60_0
+    localTargetProbe: pass_200
+    credentialStructureCheck: pass_all_8_rows_redacted
+    initialRunnerTimeout: observed_no_secret_or_raw_artifact_output
+    intermediateCheckerFalseFail: observed_4_pass_4_fail_due_cross_workspace_denial_classifier
+    realBrowserFull8Rerun: pass_8_rows_0_fail_0_blocked_after_classifier_repair
+    browserConsoleIssues: "0_each_row"
+    credentialValuesPrintedOrRecorded: false
+    sourceTestPackageLockfileChanged: false
+    dbSeedSchemaMigrationAccountMutationExecuted: false
+    providerCostStagingProdPaymentExternalExecuted: false
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    finalAcceptancePass: false
+  nextRecommendedTask: mvp-final-pass-decision-review-2026-06-26
 contentOrganizationAiGenerationAdminLocalContractLoopFocusedBrowserRerun20260626:
   taskId: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
   phase: content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun-2026-06-26
