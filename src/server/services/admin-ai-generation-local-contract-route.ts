@@ -27,6 +27,7 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
+import type { AdminAiGenerationRuntimeBridgeInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
@@ -38,7 +39,7 @@ import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
-import { createDefaultBlockedRouteIntegratedProviderExecutionOutcome } from "./personal-ai-generation-route-integrated-provider-execution-service";
+import { buildAdminAiGenerationRuntimeBridgeReadModel } from "./admin-ai-generation-runtime-bridge-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import type { SessionService } from "./session-service";
 
@@ -61,12 +62,8 @@ type AdminAiGenerationActor = {
   organizationPublicId: string | null;
 };
 
-type AdminAiGenerationRuntimeBridgeControlInput = {
-  actorPublicId: string;
-  organizationPublicId: string | null;
-  generationKind: AdminAiGenerationKind;
-  workspace: AdminAiGenerationWorkspace;
-};
+type AdminAiGenerationRuntimeBridgeControlInput =
+  AdminAiGenerationRuntimeBridgeInput;
 
 type AdminAiGenerationRequestPublicIdInput = {
   actorPublicId: string;
@@ -270,24 +267,20 @@ function resolveAdminAiGenerationTaskHistoryQuery(input: {
   };
 }
 
-function createDefaultAdminAiGenerationRuntimeBridge(): AdminAiGenerationLocalContractRuntimeBridgeDto {
-  const providerDisabledOutcome =
-    createDefaultBlockedRouteIntegratedProviderExecutionOutcome();
+function createDefaultAdminAiGenerationRuntimeBridge(
+  input: AdminAiGenerationRuntimeBridgeInput,
+): AdminAiGenerationLocalContractRuntimeBridgeDto {
+  const runtimeBridge = buildAdminAiGenerationRuntimeBridgeReadModel(input);
 
   return {
     bridgeStatus: "provider_call_blocked",
-    providerCallExecuted: false,
-    envSecretAccessed: false,
-    providerConfigurationRead: false,
-    costCalibrationExecuted: false,
-    executionSummary: providerDisabledOutcome.executionSummary,
-    redactionStatus: "redacted",
-    blockedReasons: [
-      "provider_call_blocked",
-      "env_secret_access_blocked",
-      "cost_calibration_gate_blocked",
-      "real_provider_execution_requires_follow_up_task",
-    ],
+    providerCallExecuted: runtimeBridge.providerCallExecuted,
+    envSecretAccessed: runtimeBridge.envSecretAccessed,
+    providerConfigurationRead: runtimeBridge.providerConfigurationRead,
+    costCalibrationExecuted: runtimeBridge.costCalibrationExecuted,
+    executionSummary: runtimeBridge.providerExecutionSummary,
+    redactionStatus: runtimeBridge.redactionStatus,
+    blockedReasons: runtimeBridge.blockedReasons,
   };
 }
 
@@ -295,11 +288,8 @@ function ensureProviderDisabledExecutionSummary(
   executionSummary:
     | AdminAiGenerationRuntimeBridgeExecutionSummaryDto
     | undefined,
+  defaultSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
 ): AdminAiGenerationRuntimeBridgeExecutionSummaryDto {
-  const defaultSummary =
-    createDefaultBlockedRouteIntegratedProviderExecutionOutcome()
-      .executionSummary;
-
   if (!executionSummary) {
     return defaultSummary;
   }
@@ -314,19 +304,16 @@ function ensureProviderDisabledExecutionSummary(
 }
 
 async function resolveAdminAiGenerationRuntimeBridge(input: {
-  actor: AdminAiGenerationActor;
-  generationKind: AdminAiGenerationKind;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
-  workspace: AdminAiGenerationWorkspace;
+  runtimeBridgeInput: AdminAiGenerationRuntimeBridgeInput;
 }): Promise<AdminAiGenerationLocalContractRuntimeBridgeDto> {
-  const defaultRuntimeBridge = createDefaultAdminAiGenerationRuntimeBridge();
+  const defaultRuntimeBridge = createDefaultAdminAiGenerationRuntimeBridge(
+    input.runtimeBridgeInput,
+  );
   const providerDisabledOutcome =
-    await input.runtimeBridgeControl?.createProviderDisabledOutcome?.({
-      actorPublicId: input.actor.publicId,
-      organizationPublicId: input.actor.organizationPublicId,
-      generationKind: input.generationKind,
-      workspace: input.workspace,
-    });
+    await input.runtimeBridgeControl?.createProviderDisabledOutcome?.(
+      input.runtimeBridgeInput,
+    );
 
   if (!providerDisabledOutcome) {
     return defaultRuntimeBridge;
@@ -336,10 +323,35 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
     ...defaultRuntimeBridge,
     executionSummary: ensureProviderDisabledExecutionSummary(
       providerDisabledOutcome.executionSummary,
+      defaultRuntimeBridge.executionSummary,
     ),
     blockedReasons:
       providerDisabledOutcome.blockedReasons ??
       defaultRuntimeBridge.blockedReasons,
+  };
+}
+
+function createAdminAiGenerationRuntimeBridgeInput(input: {
+  actor: AdminAiGenerationActor;
+  generationKind: AdminAiGenerationKind;
+  requestPublicId: string;
+  resultPublicId: string;
+  taskRequest: AdminAiGenerationLocalContractBaseDto["taskRequest"];
+  workspace: AdminAiGenerationWorkspace;
+}): AdminAiGenerationRuntimeBridgeInput {
+  return {
+    actorPublicId: input.actor.publicId,
+    workspace: input.workspace,
+    generationKind: input.generationKind,
+    requestPublicId: input.requestPublicId,
+    taskPublicId: input.taskRequest.taskPublicId,
+    resultPublicId: input.resultPublicId,
+    ownerType:
+      input.taskRequest.ownerType === "organization"
+        ? "organization"
+        : "platform",
+    ownerPublicId: input.taskRequest.ownerPublicId,
+    organizationPublicId: input.taskRequest.organizationPublicId,
   };
 }
 
@@ -364,8 +376,27 @@ async function buildAdminAiGenerationLocalContract(input: {
   }
 
   const taskRequest = taskRequestResponse.data;
-  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge(input);
   const requestedAt = input.requestClock();
+  const requestPublicId = input.createRequestPublicId({
+    actorPublicId: input.actor.publicId,
+    generationKind: input.generationKind,
+    taskPublicId: taskRequest.taskPublicId,
+    workspace: input.workspace,
+  });
+  const resultPublicId = createAdminAiGenerationResultPublicId(
+    taskRequest.taskPublicId,
+  );
+  const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge({
+    runtimeBridgeControl: input.runtimeBridgeControl,
+    runtimeBridgeInput: createAdminAiGenerationRuntimeBridgeInput({
+      actor: input.actor,
+      generationKind: input.generationKind,
+      requestPublicId,
+      resultPublicId,
+      taskRequest,
+      workspace: input.workspace,
+    }),
+  });
 
   const localContract = {
     runtimeStatus: "local_contract_only",
@@ -393,12 +424,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   const taskPersistence =
     await input.taskPersistenceRepository.createOrReuseTask({
       localContract,
-      requestPublicId: input.createRequestPublicId({
-        actorPublicId: input.actor.publicId,
-        generationKind: input.generationKind,
-        taskPublicId: taskRequest.taskPublicId,
-        workspace: input.workspace,
-      }),
+      requestPublicId,
       requestedAt,
     });
   const generatedResult =

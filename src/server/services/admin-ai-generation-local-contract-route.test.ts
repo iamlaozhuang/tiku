@@ -12,6 +12,7 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
+import type { AdminAiGenerationRuntimeBridgeInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
@@ -102,10 +103,17 @@ async function postLocalContractRequest(input: {
   requestPublicId?: string;
   requestedAt?: Date;
   runtimeBridgeControl?: {
-    createProviderDisabledOutcome: () => {
-      blockedReasons: string[];
-      executionSummary: typeof providerDisabledExecutionSummary;
-    };
+    createProviderDisabledOutcome: (
+      input: AdminAiGenerationRuntimeBridgeInput,
+    ) =>
+      | {
+          blockedReasons: string[];
+          executionSummary: typeof providerDisabledExecutionSummary;
+        }
+      | Promise<{
+          blockedReasons: string[];
+          executionSummary: typeof providerDisabledExecutionSummary;
+        }>;
   };
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
@@ -489,6 +497,13 @@ describe("admin AI generation local contract route handlers", () => {
           providerConfigurationRead: false,
           costCalibrationExecuted: false,
           executionSummary: providerDisabledExecutionSummary,
+          blockedReasons: [
+            "provider_call_blocked",
+            "env_secret_access_blocked",
+            "provider_configuration_read_blocked",
+            "cost_calibration_gate_blocked",
+            "real_provider_execution_requires_follow_up_task",
+          ],
         },
         formalContentBoundary: {
           questionWriteStatus: "blocked_without_follow_up_task",
@@ -843,6 +858,59 @@ describe("admin AI generation local contract route handlers", () => {
       },
     });
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_D");
+  });
+
+  it("passes admin runtime bridge context into provider-disabled diagnostics", async () => {
+    const runtimeBridgeInputs: AdminAiGenerationRuntimeBridgeInput[] = [];
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      body: {
+        generationKind: "paper",
+      },
+      runtimeBridgeControl: {
+        createProviderDisabledOutcome: (input) => {
+          runtimeBridgeInputs.push(input);
+
+          return {
+            blockedReasons: [
+              "provider_call_blocked",
+              "real_provider_execution_requires_follow_up_task",
+            ],
+            executionSummary: providerDisabledExecutionSummary,
+          };
+        },
+      },
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        runtimeBridge: {
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+        },
+      },
+    });
+    expect(runtimeBridgeInputs).toEqual([
+      {
+        actorPublicId: "admin_public_123",
+        workspace: "organization",
+        generationKind: "paper",
+        requestPublicId: "admin_ai_generation_request_public_route_test",
+        taskPublicId:
+          "admin_ai_generation_task_organization_paper_admin_public_123",
+        resultPublicId:
+          "admin_ai_generation_result_organization_paper_admin_public_123",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_123",
+        organizationPublicId: "organization_public_123",
+      },
+    ]);
   });
 
   it("allows injected provider-disabled diagnostics without enabling provider execution", async () => {
