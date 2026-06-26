@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
-updatedAt: "2026-06-26T02:45:00-07:00"
+currentPhase: ai-generation-provider-cost-gate-package-2026-06-26
+updatedAt: "2026-06-26T03:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,36 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
-  lastKnownOriginMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
+  lastKnownMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
+  lastKnownOriginMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
 currentTask:
-  id: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
+  id: ai-generation-provider-cost-gate-package-2026-06-26
   status: closed
-  result: pass_docs_only_ai_generation_scope_inventory_package_prepared_no_final_pass
-  claimedAt: "2026-06-26T02:45:00-07:00"
-  plannedAt: "2026-06-26T02:45:00-07:00"
-  validatedAt: "2026-06-26T03:00:00-07:00"
-  reviewedAt: "2026-06-26T03:05:00-07:00"
-  closedAt: "2026-06-26T03:05:00-07:00"
-  sourceStory: owner_question_after_mvp_final_pass_criteria_about_ai_generation_completion_state
-  approvalConsumed: user_request_ai_generation_scope_inventory_package_2026_06_26
-  approvalSource: user_request_ai_generation_scope_inventory_package_2026_06_26
+  result: pass_docs_only_provider_cost_gate_package_prepared_no_final_pass
+  claimedAt: "2026-06-26T03:30:00-07:00"
+  plannedAt: "2026-06-26T03:30:00-07:00"
+  validatedAt: "2026-06-26T03:45:00-07:00"
+  reviewedAt: "2026-06-26T03:45:00-07:00"
+  closedAt: "2026-06-26T03:45:00-07:00"
+  sourceStory: owner_execute_provider_cost_gate_package_after_ai_scope_inventory
+  approvalConsumed: user_request_ai_generation_provider_cost_gate_package_2026_06_26
+  approvalSource: user_request_ai_generation_provider_cost_gate_package_2026_06_26
   ownerProviderCostRealModelCallAuthorization:
-    status: recorded_for_separate_task_scoped_gate
-    recordedAt: "2026-06-26T02:45:00-07:00"
+    status: materialized_as_gate_package
+    recordedAt: "2026-06-26T03:30:00-07:00"
     consumedByThisTask: false
-    statement: owner_added_authorization_allowing_provider_cost_and_real_model_calls
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
-  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+    statement: owner_approved_provider_cost_and_real_model_call_work_but_this_task_only_prepares_the_gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md
+  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+  sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   allowedScope:
     docsStateEvidenceAudit: true
-    aiScopeInventoryPackage: true
-    sourceStaticReadOnlyInspection: true
-    providerCostGatePlanning: true
+    providerCostGatePackage: true
+    providerSmokeExecutionPlanning: true
+    costCalibrationDecision: true
     localBrowserRuntimeRerun: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
@@ -550,13 +550,21 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  inventoryScope:
-    personalAdvancedLearnerAi: local_contract_scaffold_not_real_provider_completion
-    organizationAdvancedEmployeeAi: partial_local_contract_scaffold_persistence_lifecycle_incomplete
-    contentAdminAi: entry_only_no_generation_api_or_draft_review_workflow
-    organizationAdminAi: entry_only_no_generation_api_or_org_owned_result_lifecycle
-    providerBridge: gated_code_exists_public_route_does_not_execute
-    formalAdoption: review_or_follow_up_boundary_formal_target_write_blocked
+  gateDecision:
+    nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+    providerSmoke:
+      modelProvider: openai_compatible
+      providerName: alibaba-qwen
+      modelName: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      secretAlias: ALIBABA_API_KEY
+      maxRequests: 1
+      maxRetries: 0
+      maxOutputTokens: 8
+      timeoutMs: 30000
+    costCalibration:
+      executeInNextSmoke: false
+      decision: defer_full_cost_calibration_to_separate_gate
   closeoutPolicy:
     localCommit:
       approved: true
@@ -572,17 +580,18 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
-  branch: codex/ai-generation-scope-inventory-20260626
+  branch: codex/ai-provider-cost-gate-package-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    docsOnlyAiScopeInventoryPackagePrepared: true
+    docsOnlyProviderCostGatePackagePrepared: true
+    prettierWrite: pass
     prettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_alignment
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
@@ -596,7 +605,71 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRecommendedTask: ai-generation-provider-cost-gate-package-2026-06-26
+  nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+aiGenerationProviderCostGatePackage20260626:
+  taskId: ai-generation-provider-cost-gate-package-2026-06-26
+  phase: ai-generation-provider-cost-gate-package-2026-06-26
+  recordedAt: "2026-06-26T03:30:00-07:00"
+  status: closed
+  result: pass_docs_only_provider_cost_gate_package_prepared_no_final_pass
+  validatedAt: "2026-06-26T03:45:00-07:00"
+  reviewedAt: "2026-06-26T03:45:00-07:00"
+  closedAt: "2026-06-26T03:45:00-07:00"
+  branch: codex/ai-provider-cost-gate-package-20260626
+  entryMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
+  entryOriginMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
+  approvalSource: user_request_ai_generation_provider_cost_gate_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md
+  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+  sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  ownerProviderCostRealModelCallAuthorization:
+    status: materialized_as_gate_package
+    consumedByThisTask: false
+  gateDecision:
+    nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+    providerSmoke:
+      modelProvider: openai_compatible
+      providerName: alibaba-qwen
+      modelName: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      secretAlias: ALIBABA_API_KEY
+      maxRequests: 1
+      maxRetries: 0
+      maxOutputTokens: 8
+      timeoutMs: 30000
+      streaming: blocked
+      fallbackProvider: blocked
+      rawOutputEvidence: blocked
+    credentialReadMethod:
+      preferred: owner_supplied_ephemeral_process_env
+      fallback: local_dotenv_read_only_if_future_smoke_task_explicitly_permits
+      evidenceSecretValueRecorded: false
+    costCalibration:
+      executeInNextSmoke: false
+      decision: defer_full_cost_calibration_to_separate_gate
+  validationSummary:
+    docsOnlyProviderCostGatePackagePrepared: true
+    prettierWrite: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    credentialEntryByCodex: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    providerCallExecuted: false
+    costCalibrationExecuted: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
 aiGenerationScopeInventoryAndMvpDecisionPackage20260626:
   taskId: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
   phase: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26

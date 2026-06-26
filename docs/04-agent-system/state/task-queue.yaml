@@ -44,6 +44,166 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ai-generation-provider-cost-gate-package-2026-06-26
+    title: AI generation Provider and Cost gate package
+    phase: ai-generation-provider-cost-gate-package-2026-06-26
+    sourceStory: owner_execute_provider_cost_gate_package_after_ai_scope_inventory
+    dependencies:
+      - ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
+    taskKind: docs_only_provider_cost_gate_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_acceptance_package_only
+    evidenceMode: redacted_gate_policy_and_committed_summary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_after_ai_scope_inventory
+    requiredOutcome: >-
+      Prepare a docs-only Provider/Cost gate package that materializes the owner's Provider/Cost and real model call
+      authorization into exact execution boundaries: model/provider, credential read method, max call limits, redacted
+      evidence fields, failure handling, and Cost Calibration decision. Do not execute Provider/model calls, read
+      credentials or `.env*`, run Cost Calibration, change source/tests/package/lockfiles/env/schema/migration/scripts,
+      run browser/e2e, inspect or mutate DB/account state, touch staging/prod/payment/external services, or claim final
+      MVP Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      providerCostGatePackage: approved_by_user_request_2026_06_26
+      providerCostRealModelCallAuthorizationMaterialization: approved_by_user_request_2026_06_26
+      providerSmokeExecutionPlanning: approved_by_user_request_2026_06_26
+      costCalibrationDecision: approved_by_user_request_2026_06_26
+      sourceStaticReadOnlyInspection: approved_by_user_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked_in_this_task_deferred_to_smoke_execution
+      credentialEntry: blocked_in_this_task_deferred_to_smoke_execution
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked_in_this_task_deferred_to_smoke_execution
+      providerConfiguration: blocked_in_this_task_deferred_to_smoke_execution
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked_in_this_task_deferred_to_separate_gate
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/ai-generation-task-provider-adapter-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-provider-cost-gate-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-provider-cost-gate-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md
+    gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+    sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_docs_only_provider_cost_gate_package_prepared_no_final_pass
+    claimedAt: "2026-06-26T03:30:00-07:00"
+    plannedAt: "2026-06-26T03:30:00-07:00"
+    validatedAt: "2026-06-26T03:45:00-07:00"
+    reviewedAt: "2026-06-26T03:45:00-07:00"
+    closedAt: "2026-06-26T03:45:00-07:00"
+    branch: codex/ai-provider-cost-gate-package-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_2026_06_26_execute_provider_cost_gate_package
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_2026_06_26_execute_provider_cost_gate_package
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_2026_06_26_execute_provider_cost_gate_package
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_2026_06_26_execute_provider_cost_gate_package
+    blockedInThisTask:
+      - provider_model_call_execution
+      - provider_configuration_or_env_secret_read_write
+      - credential_read_or_entry
+      - cost_calibration_gate_execution
+      - raw_prompt_provider_payload_or_raw_model_output_evidence
+      - source_test_package_lockfile_change
+      - browser_or_playwright_runtime
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    validationSummary:
+      docsOnlyProviderCostGatePackagePrepared: true
+      prettierWrite: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      browserRuntimeExecuted: false
+      credentialDocumentReadByCodex: false
+      credentialEntryByCodex: false
+      databaseReadExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      accountMutationExecuted: false
+      sourceTestPackageLockfileChanged: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePass: false
+    nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
     title: AI generation scope inventory and MVP decision package
     phase: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
