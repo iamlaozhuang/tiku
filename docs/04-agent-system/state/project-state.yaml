@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
-updatedAt: "2026-06-26T21:20:00-07:00"
+currentPhase: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+updatedAt: "2026-06-26T22:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,39 +504,37 @@ repository:
   lastKnownMasterSha: 264d301334469ec376a3436707222d3e20112519
   lastKnownOriginMasterSha: 264d301334469ec376a3436707222d3e20112519
 currentTask:
-  id: admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+  id: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
   status: closed
-  result: blocked_local_migration_journal_missing_route_smoke_post_500_source_changes_reverted
-  claimedAt: "2026-06-26T21:20:00-07:00"
-  plannedAt: "2026-06-26T21:20:00-07:00"
-  blockedAt: "2026-06-26T21:55:00-07:00"
-  closedAt: "2026-06-26T22:05:00-07:00"
-  sourceStory: current_user_request_open_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
-  approvalConsumed: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
-  approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
-  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+  result: pass_docs_only_approval_package_prepared_no_drizzle_metadata_edit_no_migration_no_route_smoke
+  claimedAt: "2026-06-26T22:15:00-07:00"
+  plannedAt: "2026-06-26T22:15:00-07:00"
+  validatedAt: "2026-06-26T22:20:00-07:00"
+  reviewedAt: "2026-06-26T22:20:00-07:00"
+  closedAt: "2026-06-26T22:20:00-07:00"
+  sourceStory: current_user_request_open_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+  approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+  sourceBlockedRouteSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+  sourceBlockedRouteSmokeAuditPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
   sourceGeneratedResultStorageTddEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
-  sourceGeneratedResultStorageTddAuditPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
-  sourceReadHistorySmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
   scope:
     docsStateEvidenceAudit: true
-    implementationTdd: true
-    localMigrationExecution: approved_local_dev_only
-    routeIntegration: approved
-    minimalRouteSmoke: approved_local_only_capped
+    approvalPackage: true
     staticSourceRead: true
-    localSourceChange: true
-    focusedUnitTest: true
+    localSourceChange: false
+    focusedUnitTest: false
+    drizzleMetadataChanged: false
     schemaMigrationFileCreated: false
-    migrationExecution: command_executed_target_migration_not_applied_journal_missing
-    liveDatabaseConnectionExecuted: true_local_drizzle_migrate_and_direct_route_handler
-    databaseWriteExecuted: true_capped_route_post_created_pending_tasks_before_result_persistence_failure
+    migrationExecution: not_executed_current_task
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     directSqlOrRawDbRows: false
-    routeSmokeExecuted: failed_capped_four_requests_consumed
-    generatedResultRouteIntegration: blocked_source_changes_reverted_after_failed_smoke
+    routeSmokeExecuted: false
+    generatedResultRouteIntegration: deferred_to_next_task
     browserRuntime: false
     devServer: false
     e2eRuntime: false
@@ -550,71 +548,71 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: local_route_integration_for_redacted_generated_result_storage
+    adminAiGeneration: approval_for_local_generated_result_storage_retry_path
     aiGenerationTask: remains_task_identity_status_and_result_public_id_anchor
     adminAiGenerationTaskMetadata: remains_metadata_only_no_generated_content_columns
-    generatedResultStorage: persist_redacted_draft_summary_only
+    generatedResultStorage: future_retry_requires_redacted_draft_summary_only
     formalContentBoundary: generated_result_storage_is_not_formal_question_or_paper_adoption
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   executionBoundary:
     storageTable: admin_ai_generation_result
     migrationFile: drizzle/20260626203000_add_admin_ai_generation_result.sql
-    applyExistingMigrationAllowed: true
-    routeIntegrationAllowed: true
-    minimalRouteSmokeAllowed: true
-    maxRouteRequests: 4
-    evidenceMode: redacted_route_status_and_result_summary_presence_only
+    currentTaskDrizzleMetadataEditAllowed: false
+    currentTaskMigrationExecutionAllowed: false
+    currentTaskRouteSmokeAllowed: false
+    futureMetadataAlignmentAllowedFiles:
+      - drizzle/meta/_journal.json
+      - drizzle/meta/20260626203000_snapshot.json
+    futureApplyExistingMigrationAllowed: true_local_dev_only
+    futureRouteIntegrationAllowed: true
+    futureMinimalRouteSmokeAllowed: true
+    futureMaxRouteRequests: 4
+    evidenceMode: redacted_boundary_and_future_task_rules_only
     providerCallAllowed: false
     formalQuestionPaperWriteAllowed: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
-  branch: codex/admin-ai-result-storage-route-smoke-20260626
+      approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+  branch: codex/admin-ai-result-storage-journal-approval-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+  lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    sourceApprovalPackageConsumed: pass
+    approvalPackageCreated: pass
     evidenceCreated: pass
     auditReviewCreated: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    capabilityGateSchemaMigration: pass
-    capabilityGateLocalDockerDatabase: pass
-    tddRed: pass_expected_failure_before_implementation
-    tddGreenAttempt: pass_unit_tests_before_route_smoke
-    targetMigrationJournalPresence: fail_20260626203000_missing_from_drizzle_meta_journal
-    drizzleMigrateCommand: pass_command_exit_target_migration_not_registered
-    routeSmoke: fail_four_requests_consumed_content_and_organization_post_500_get_pending_no_result
-    sourceChangesFinalState: reverted_no_runtime_code_change_committed
-    focusedUnitTest: pass_4_files_47_tests_after_revert
-    typecheck: pass
-    lint: pass
+    futureTaskApproved: pass
+    futureTaskId: admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry-2026-06-26
+    focusedUnitTest: not_applicable_docs_only
+    typecheck: not_applicable_docs_only
+    lint: not_applicable_docs_only
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    databaseConnectionExecuted: true_local_only_no_url_recorded
-    databaseWriteExecuted: true_route_smoke_only_redacted
-    schemaMigrationExecuted: command_executed_no_target_apply_due_missing_journal
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
     migrationFileCreated: false
     drizzleSnapshotUpdated: false
     migrationGenerationExecuted: false
-    routeSmokeExecuted: fail_capped_four_requests_no_retry_remaining
+    routeSmokeExecuted: false
     accountMutationExecuted: false
     providerCallExecuted: false
     costCalibrationExecuted: false
@@ -624,7 +622,7 @@ currentTask:
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+  nextRecommendedTask: admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry-2026-06-26
 adminAiGenerationGeneratedResultStorageApprovalPackage20260626:
   taskId: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
   phase: admin-ai-generation-generated-result-storage-approval-package-2026-06-26

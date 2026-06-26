@@ -3603,6 +3603,193 @@ tasks:
       integration changes were reverted before closeout to avoid merging a route POST regression.
     nextRecommendedTask: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
 
+  - id: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+    title: Admin AI generation generated result storage migration journal alignment and route smoke retry approval package
+    phase: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+    sourceStory: current-user-request-open-generated-result-storage-migration-journal-alignment-route-smoke-retry-approval-package
+    dependencies:
+      - admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+    taskKind: docs_only_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_only
+    evidenceMode: redacted_boundary_and_future_task_rules_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_open_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package
+    requiredOutcome: >-
+      Create a docs/state approval package that decides whether the next local execution task may align Drizzle
+      metadata/journal for the already reviewed generated-result SQL migration, rerun local migrate, and retry a
+      strictly capped content/org admin route smoke. Do not edit Drizzle metadata, run migration, connect to DB, run
+      route smoke, modify source, call Provider, or write formal question/paper in this task.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_26
+      approvalPackage: approved_by_current_user_2026_06_26
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      localDockerDatabase: blocked_current_task
+      schemaMigration: blocked_current_task
+      localMigrationExecution: blocked_current_task
+      drizzleMetadataEdit: blocked_current_task
+      routeSmoke: blocked_current_task
+      newMigrationGeneration: blocked
+      drizzlePush: blocked
+      directSqlOrRawDbRows: blocked
+      databaseSeedOrAccountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    futureTaskApproval:
+      approvedTaskId: admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry-2026-06-26
+      decision: APPROVE_NEXT_LOCAL_MIGRATION_METADATA_ALIGNMENT_ROUTE_INTEGRATION_TDD_SMOKE_RETRY_WITH_STRICT_BOUNDARIES
+      approvedOnlyAfterNewTaskOpen: true
+      allowedDrizzleMetadataFiles:
+        - drizzle/meta/_journal.json
+        - drizzle/meta/20260626203000_snapshot.json
+      existingReviewedSqlMigration: drizzle/20260626203000_add_admin_ai_generation_result.sql
+      localMigrateCommandAllowed: npx.cmd drizzle-kit migrate
+      maxRouteRequests: 4
+      routeWorkflows:
+        - content_admin_ai_generation_local_contract_post_optional_get
+        - organization_admin_ai_generation_local_contract_post_optional_get
+      providerCall: blocked
+      formalQuestionOrPaperWrite: blocked
+      stagingProdCloudDeploy: blocked
+      paymentExternalService: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - drizzle.config.ts
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - drizzle/20260626203000_add_admin_ai_generation_result.sql
+      - drizzle/meta/_journal.json
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - current_task_drizzle_metadata_edit
+      - current_task_schema_migration_execution
+      - current_task_route_smoke
+      - source_or_test_change
+      - new_migration_generation_or_drizzle_push
+      - direct_sql_or_raw_db_row_dump
+      - destructive_database_operation
+      - database_seed_or_account_mutation
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - formal_question_or_paper_write
+      - browser_runtime_or_e2e_execution
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - release_readiness_decision
+      - final_acceptance_pass
+    riskTypes:
+      - migration_metadata_journal_alignment_approval
+      - local_migration_retry_approval
+      - capped_route_smoke_retry_approval
+      - evidence_redaction
+      - no_provider_no_formal_write_no_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      post_edit:
+        - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+      closeout:
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package.md
+    status: closed
+    result: pass_docs_only_approval_package_prepared_no_drizzle_metadata_edit_no_migration_no_route_smoke
+    approvedAt: "2026-06-26T22:15:00-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-26T22:15:00-07:00"
+    plannedAt: "2026-06-26T22:15:00-07:00"
+    validatedAt: "2026-06-26T22:20:00-07:00"
+    reviewedAt: "2026-06-26T22:20:00-07:00"
+    closedAt: "2026-06-26T22:20:00-07:00"
+    branch: codex/admin-ai-result-storage-journal-approval-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_migration_journal_alignment_route_smoke_retry_approval_package_2026_06_26
+    retryCount: 0
+    nextRecommendedTask: admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry-2026-06-26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
