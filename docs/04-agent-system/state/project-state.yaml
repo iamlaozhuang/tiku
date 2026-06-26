@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: formal-paper-draft-composition-adoption-approval-package-2026-06-26
-updatedAt: "2026-06-26T11:35:00-07:00"
+currentPhase: formal-paper-draft-composition-adapter-tdd-2026-06-26
+updatedAt: "2026-06-26T11:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,27 +504,26 @@ repository:
   lastKnownMasterSha: 21bf14a18f7355701d855e521e8510e98df47ec5
   lastKnownOriginMasterSha: 21bf14a18f7355701d855e521e8510e98df47ec5
 currentTask:
-  id: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  id: formal-paper-draft-composition-adapter-tdd-2026-06-26
   status: closed
-  result: approved_formal_paper_draft_composition_tdd_and_capped_local_route_smoke
-  claimedAt: "2026-06-26T11:35:00-07:00"
-  plannedAt: "2026-06-26T11:35:00-07:00"
-  implementedAt: "2026-06-26T11:35:00-07:00"
-  validatedAt: "2026-06-26T11:35:00-07:00"
-  reviewedAt: "2026-06-26T11:35:00-07:00"
-  closedAt: "2026-06-26T11:35:00-07:00"
-  sourceStory: current-user-five-step-formal-paper-draft-composition-goal-2026-06-26
-  approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
-  branch: codex/formal-paper-draft-composition-adoption-approval-20260626
+  result: pass_formal_paper_draft_composition_adapter_tdd_no_live_db
+  claimedAt: "2026-06-26T11:45:00-07:00"
+  plannedAt: "2026-06-26T11:45:00-07:00"
+  implementedAt: "2026-06-26T11:52:30-07:00"
+  validatedAt: "2026-06-26T11:52:30-07:00"
+  reviewedAt: "2026-06-26T11:52:30-07:00"
+  closedAt: "2026-06-26T11:52:30-07:00"
+  sourceStory: successor-of-formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  branch: codex/formal-paper-draft-composition-adapter-tdd-20260626
   scope:
     docsStateEvidenceAudit: true
-    approvalDecisionPackage: true
-    localSourceChange: false
-    focusedUnitTest: false
+    approvalDecisionPackage: false
+    localSourceChange: true
+    focusedUnitTest: true
     schemaMigrationFileChange: false
     drizzleMetadataJournalAlignment: false
     localMigrationExecutionApprovedForThisTask: false
@@ -548,13 +547,12 @@ currentTask:
   decision:
     paperSectionQuestionCompositionApprovedForLaterTasks: true
     questionSourceStrategy: mixed_existing_or_companion_question_draft_via_adapter
-    approvedNextImplementationTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    approvedCurrentImplementationTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
     approvedLaterLocalRouteSmokeTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
     adapterContractExtensionApproved: true
     repositoryContractExtensionApprovedByDefault: false
-    localRouteSmokeApprovedOnlyAfterTdd: true
+    localRouteSmokeApprovedForThisTask: false
     localDbConnectionApprovedForThisTask: false
-    localDbConnectionApprovedForNextTdd: false
     localDbConnectionApprovedForLaterSmoke: true
     routeSmokeMaxContentPaperSetupPostCalls: 1
     routeSmokeMaxFormalAdoptionPostCalls: 1
@@ -588,9 +586,13 @@ currentTask:
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    approvalPackagePrepared: true
-    docsOnly: true
-    sourceOrTestChanged: false
+    taskPlanPrepared: true
+    tddRed: pass_expected_failure_observed
+    tddGreen: pass
+    focusedUnit: pass_2_files_12_tests
+    lint: pass
+    typecheck: pass
+    sourceOrTestChanged: true
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     routeSmokeExecuted: false
@@ -601,7 +603,59 @@ currentTask:
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  nextRecommendedTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+  nextRecommendedTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+formalPaperDraftCompositionAdapterTdd20260626:
+  taskId: formal-paper-draft-composition-adapter-tdd-2026-06-26
+  phase: formal-paper-draft-composition-adapter-tdd-2026-06-26
+  recordedAt: "2026-06-26T11:45:00-07:00"
+  status: closed
+  result: pass_formal_paper_draft_composition_adapter_tdd_no_live_db
+  branch: codex/formal-paper-draft-composition-adapter-tdd-20260626
+  sourceStory: successor-of-formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  predecessorEvidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+  decision:
+    paperSectionQuestionCompositionAdapterTddPassed: true
+    existingQuestionReferenceCompositionSupported: true
+    companionQuestionDraftCompositionSupported: true
+    routeSmokeApprovedNext: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    liveDbConnectionExecuted: false
+    providerCallExecuted: false
+    formalPublishExecuted: false
+  validationSummary:
+    tddRed: pass_expected_failure_observed
+    tddGreen: pass
+    focusedUnit: pass_2_files_12_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass_after_write
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: true
+    schemaMigrationExecuted: false
+    liveDatabaseConnectionExecuted: false
+    routeSmokeExecuted: false
+    providerCallExecuted: false
+    formalPublishExecuted: false
+    finalPassClaimed: false
+  blockedWithoutFreshApproval:
+    - live_db_connection_or_route_smoke_in_this_task
+    - schema_migration_or_drizzle_push
+    - direct_db_seed_fixture_or_data_repair
+    - direct_raw_db_mutation_or_cleanup_delete
+    - formal_publish_or_student_visible_content
+    - organization_scoped_adoption
+    - provider_model_call_or_provider_enablement
+    - provider_credential_or_env_secret_access
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+    - final_acceptance_pass
+  nextRecommendedTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
 formalPaperDraftCompositionAdoptionApprovalPackage20260626:
   taskId: formal-paper-draft-composition-adoption-approval-package-2026-06-26
   phase: formal-paper-draft-composition-adoption-approval-package-2026-06-26

@@ -1,6 +1,9 @@
 import type { ApiResponse } from "./api-response";
 import type { AdminAiGenerationFormalAdoptionDto } from "./admin-ai-generation-formal-adoption-contract";
-import type { PaperDraftResultDto } from "./paper-draft-contract";
+import type {
+  PaperDraftResultDto,
+  PaperQuestionResultDto,
+} from "./paper-draft-contract";
 import type { QuestionResultDto } from "./question-contract";
 import type {
   MultiChoiceRule,
@@ -50,6 +53,28 @@ export type AdminAiGenerationFormalPaperDraftPayload = {
   source: string | null;
   durationMinute: number | null;
   totalScore: string | null;
+  paperSections?: AdminAiGenerationFormalPaperSectionDraftPayload[];
+};
+
+export type AdminAiGenerationFormalPaperSectionDraftPayload = {
+  title: string;
+  description: string | null;
+  sortOrder: number;
+  paperQuestions: AdminAiGenerationFormalPaperQuestionDraftPayload[];
+};
+
+export type AdminAiGenerationFormalQuestionGroupDraftPayload = {
+  title: string;
+  materialPublicId: string;
+  sortOrder: number;
+};
+
+export type AdminAiGenerationFormalPaperQuestionDraftPayload = {
+  questionPublicId: string | null;
+  companionQuestionDraft: AdminAiGenerationFormalQuestionDraftPayload | null;
+  score: string;
+  sortOrder: number;
+  questionGroup: AdminAiGenerationFormalQuestionGroupDraftPayload | null;
 };
 
 export type AdminAiGenerationFormalDraftAdapterInput = {
@@ -66,6 +91,10 @@ export type AdminAiGenerationFormalDraftAdapterResultDto = {
   formalTargetWriteStatus: "draft_created";
   formalQuestionPublicId: string | null;
   formalPaperPublicId: string | null;
+  paperCompositionStatus?: "metadata_only" | "composed";
+  paperSectionCount?: number;
+  paperQuestionCount?: number;
+  companionQuestionDraftCount?: number;
   redactionStatus: "redacted";
 };
 
@@ -85,4 +114,18 @@ export type AdminAiGenerationFormalDraftPaperWriter = {
     input: AdminAiGenerationFormalPaperDraftPayload,
     context: AdminAiGenerationFormalDraftWriterContext,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
+  addQuestionToDraftPaper?(
+    paperPublicId: string,
+    input: {
+      questionPublicId: string;
+      score: string;
+      sortOrder: number;
+      paperSection: {
+        title: string;
+        description: string | null;
+        sortOrder: number;
+      };
+      questionGroup: AdminAiGenerationFormalQuestionGroupDraftPayload | null;
+    },
+  ): Promise<ApiResponse<PaperQuestionResultDto | null>>;
 };

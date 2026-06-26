@@ -249,12 +249,19 @@ tasks:
       editable formal paper draft with `paper_section` and `paper_question` composition. Support existing formal
       question references and adapter-created companion question drafts, verified with focused TDD only. Do not connect
       live DB, run route smoke, execute migration, seed data, call Provider, publish formal content, or claim final Pass.
-    status: pending
+    status: closed
     approvedAt: "2026-06-26T11:35:00-07:00"
     approvedBy: laozhuang
     approvalConsumed:
       approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
       scope: source_tdd_adapter_composition_no_live_db_no_provider_no_publish
+    claimedAt: "2026-06-26T11:45:00-07:00"
+    plannedAt: "2026-06-26T11:45:00-07:00"
+    implementedAt: "2026-06-26T11:52:30-07:00"
+    validatedAt: "2026-06-26T11:52:30-07:00"
+    reviewedAt: "2026-06-26T11:52:30-07:00"
+    closedAt: "2026-06-26T11:52:30-07:00"
+    result: pass_formal_paper_draft_composition_adapter_tdd_no_live_db
     capabilities:
       docsStateEvidenceAudit: approved
       localSourceChange: approved
@@ -377,6 +384,23 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    validationSummary:
+      tddRed: pass_expected_failure_observed
+      tddGreen: pass
+      focusedUnit: pass_2_files_12_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass_after_write
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: true
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      providerCallExecuted: false
+      formalPublishExecuted: false
+      finalPassClaimed: false
     retryCount: 0
     lastFailurePath: null
 

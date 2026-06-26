@@ -94,6 +94,11 @@ function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterS
         createPaperDraftService(paperRepository, {
           mutationContext: context,
         }).createPaper(input),
+      addQuestionToDraftPaper: (paperPublicId, input) =>
+        createPaperDraftService(paperRepository).addQuestionToDraftPaper(
+          paperPublicId,
+          input,
+        ),
     },
     questionWriter: {
       createQuestion: (input, context) =>

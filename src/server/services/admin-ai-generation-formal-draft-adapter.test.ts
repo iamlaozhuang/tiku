@@ -5,7 +5,10 @@ import type {
   AdminAiGenerationFormalDraftPaperWriter,
   AdminAiGenerationFormalDraftQuestionWriter,
 } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
-import type { PaperDraftResultDto } from "../contracts/paper-draft-contract";
+import type {
+  PaperDraftResultDto,
+  PaperQuestionResultDto,
+} from "../contracts/paper-draft-contract";
 import type { QuestionResultDto } from "../contracts/question-contract";
 import { createAdminAiGenerationFormalDraftAdapterService } from "./admin-ai-generation-formal-draft-adapter";
 
@@ -105,6 +108,51 @@ function createPaperDraftPayload() {
   };
 }
 
+function createComposedPaperDraftPayload() {
+  return {
+    ...createPaperDraftPayload(),
+    paperSections: [
+      {
+        title: "Reviewed paper_section A",
+        description: null,
+        sortOrder: 1,
+        paperQuestions: [
+          {
+            questionPublicId: "question_formal_existing_377",
+            companionQuestionDraft: null,
+            score: "5.0",
+            sortOrder: 1,
+            questionGroup: null,
+            rawGeneratedContent: "RAW PAPER QUESTION CONTENT MUST NOT RETURN",
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function createComposedPaperDraftPayloadWithCompanionQuestion() {
+  return {
+    ...createPaperDraftPayload(),
+    paperSections: [
+      {
+        title: "Reviewed companion paper_section",
+        description: "Reviewed section description",
+        sortOrder: 1,
+        paperQuestions: [
+          {
+            questionPublicId: null,
+            companionQuestionDraft: createQuestionDraftPayload(),
+            score: "10.0",
+            sortOrder: 1,
+            questionGroup: null,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createQuestionWriter(): AdminAiGenerationFormalDraftQuestionWriter {
   return {
     createQuestion: vi.fn(async () => ({
@@ -131,6 +179,16 @@ function createPaperWriter(): AdminAiGenerationFormalDraftPaperWriter {
           name: "FULL FORMAL PAPER CONTENT MUST NOT RETURN",
         },
       } as PaperDraftResultDto,
+    })),
+    addQuestionToDraftPaper: vi.fn(async () => ({
+      code: 0,
+      message: "ok",
+      data: {
+        paperQuestion: {
+          publicId: "paper_question_formal_draft_377",
+          sourceQuestionPublicId: "question_formal_existing_377",
+        },
+      } as PaperQuestionResultDto,
     })),
   };
 }
@@ -248,6 +306,196 @@ describe("admin AI generation formal draft adapter service", () => {
     expect(serializedResponse).not.toContain(
       "FULL FORMAL PAPER CONTENT MUST NOT RETURN",
     );
+  });
+
+  it("composes a formal paper draft with paper_section and paper_question entries from existing formal question references", async () => {
+    const questionWriter = createQuestionWriter();
+    const paperWriter = createPaperWriter();
+    const service = createAdminAiGenerationFormalDraftAdapterService({
+      paperWriter,
+      questionWriter,
+    });
+    const reviewedDraft = createComposedPaperDraftPayload();
+
+    const response = await service.createFormalDraft({
+      adoption: createAdoption({
+        sourceReference: {
+          ...createAdoption().sourceReference,
+          generationKind: "paper",
+        },
+        targetReference: {
+          ...createAdoption().targetReference,
+          targetType: "paper",
+        },
+      }),
+      reviewedDraft,
+      targetType: "paper",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(paperWriter.createPaper).toHaveBeenCalledWith(
+      {
+        name: "Reviewed formal paper draft",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        paperType: "mock_paper",
+        year: 2026,
+        source: "AI reviewed adoption",
+        durationMinute: 120,
+        totalScore: "100.0",
+      },
+      {
+        actorPublicId: "admin_content_public_377",
+      },
+    );
+    expect(questionWriter.createQuestion).not.toHaveBeenCalled();
+    expect(paperWriter.addQuestionToDraftPaper).toHaveBeenCalledWith(
+      "paper_formal_draft_377",
+      {
+        questionPublicId: "question_formal_existing_377",
+        score: "5.0",
+        sortOrder: 1,
+        paperSection: {
+          title: "Reviewed paper_section A",
+          description: null,
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      },
+    );
+    expect(response.data).toMatchObject({
+      targetType: "paper",
+      formalTargetWriteStatus: "draft_created",
+      formalPaperPublicId: "paper_formal_draft_377",
+      paperCompositionStatus: "composed",
+      paperSectionCount: 1,
+      paperQuestionCount: 1,
+      companionQuestionDraftCount: 0,
+      redactionStatus: "redacted",
+    });
+    expect(serializedResponse).not.toContain(
+      "RAW PAPER QUESTION CONTENT MUST NOT RETURN",
+    );
+  });
+
+  it("creates companion formal question drafts before attaching them to the composed formal paper draft", async () => {
+    const questionWriter = createQuestionWriter();
+    const paperWriter = createPaperWriter();
+    vi.mocked(paperWriter.addQuestionToDraftPaper!).mockResolvedValueOnce({
+      code: 0,
+      message: "ok",
+      data: {
+        paperQuestion: {
+          publicId: "paper_question_companion_377",
+          sourceQuestionPublicId: "question_formal_draft_377",
+        },
+      } as PaperQuestionResultDto,
+    });
+    const service = createAdminAiGenerationFormalDraftAdapterService({
+      paperWriter,
+      questionWriter,
+    });
+    const reviewedDraft =
+      createComposedPaperDraftPayloadWithCompanionQuestion();
+
+    const response = await service.createFormalDraft({
+      adoption: createAdoption({
+        sourceReference: {
+          ...createAdoption().sourceReference,
+          generationKind: "paper",
+        },
+        targetReference: {
+          ...createAdoption().targetReference,
+          targetType: "paper",
+        },
+      }),
+      reviewedDraft,
+      targetType: "paper",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(questionWriter.createQuestion).toHaveBeenCalledWith(
+      {
+        questionType: "single_choice",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        stemRichText: "Reviewed formal question stem",
+        analysisRichText: "Reviewed formal analysis",
+        standardAnswerRichText: "A",
+        multiChoiceRule: "all_correct_only",
+        scoringMethod: "auto_match",
+        materialPublicId: null,
+        questionOptions:
+          reviewedDraft.paperSections[0]?.paperQuestions[0]
+            ?.companionQuestionDraft?.questionOptions,
+        scoringPoints: [],
+        fillBlankAnswers: [],
+        knowledgeNodePublicIds: [],
+        tagPublicIds: [],
+      },
+      {
+        actorPublicId: "admin_content_public_377",
+      },
+    );
+    expect(paperWriter.addQuestionToDraftPaper).toHaveBeenCalledWith(
+      "paper_formal_draft_377",
+      {
+        questionPublicId: "question_formal_draft_377",
+        score: "10.0",
+        sortOrder: 1,
+        paperSection: {
+          title: "Reviewed companion paper_section",
+          description: "Reviewed section description",
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      },
+    );
+    expect(response.data).toMatchObject({
+      paperCompositionStatus: "composed",
+      paperSectionCount: 1,
+      paperQuestionCount: 1,
+      companionQuestionDraftCount: 1,
+    });
+    expect(serializedResponse).not.toContain(
+      "RAW GENERATED CONTENT MUST NOT REACH WRITER",
+    );
+  });
+
+  it("does not claim paper draft creation when paper_question composition fails", async () => {
+    const paperWriter = createPaperWriter();
+    vi.mocked(paperWriter.addQuestionToDraftPaper!).mockResolvedValueOnce({
+      code: 422203,
+      message: "Invalid paper input.",
+      data: null,
+    });
+    const service = createAdminAiGenerationFormalDraftAdapterService({
+      paperWriter,
+      questionWriter: createQuestionWriter(),
+    });
+
+    const response = await service.createFormalDraft({
+      adoption: createAdoption({
+        sourceReference: {
+          ...createAdoption().sourceReference,
+          generationKind: "paper",
+        },
+        targetReference: {
+          ...createAdoption().targetReference,
+          targetType: "paper",
+        },
+      }),
+      reviewedDraft: createComposedPaperDraftPayload(),
+      targetType: "paper",
+    });
+
+    expect(response).toEqual({
+      code: 502016,
+      message: "Formal draft writer failed.",
+      data: null,
+    });
   });
 
   it("uses the current route writer context when reused adoption metadata has a stale reviewer", async () => {

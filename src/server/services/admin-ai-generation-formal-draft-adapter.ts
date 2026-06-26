@@ -11,7 +11,10 @@ import {
   type AdminAiGenerationFormalDraftPaperWriter,
   type AdminAiGenerationFormalDraftQuestionWriter,
   type AdminAiGenerationFormalPaperDraftPayload,
+  type AdminAiGenerationFormalPaperQuestionDraftPayload,
+  type AdminAiGenerationFormalPaperSectionDraftPayload,
   type AdminAiGenerationFormalQuestionDraftPayload,
+  type AdminAiGenerationFormalQuestionGroupDraftPayload,
 } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type { QuestionOptionDto } from "../contracts/question-contract";
 import {
@@ -87,6 +90,10 @@ function isOptionalString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
 }
 
+function isRequiredString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 function isOptionalNumber(value: unknown): value is number | null {
   return value === null || typeof value === "number";
 }
@@ -147,6 +154,21 @@ function isPaperTypeValue(
   );
 }
 
+function isQuestionGroupDraftPayload(
+  value: unknown,
+): value is AdminAiGenerationFormalQuestionGroupDraftPayload | null {
+  if (value === null) {
+    return true;
+  }
+
+  return (
+    isRecord(value) &&
+    isRequiredString(value.title) &&
+    isRequiredString(value.materialPublicId) &&
+    typeof value.sortOrder === "number"
+  );
+}
+
 function isQuestionDraftPayload(
   value: unknown,
 ): value is AdminAiGenerationFormalQuestionDraftPayload {
@@ -173,6 +195,57 @@ function isQuestionDraftPayload(
   );
 }
 
+function isPaperQuestionDraftPayload(
+  value: unknown,
+): value is AdminAiGenerationFormalPaperQuestionDraftPayload {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const hasExistingQuestionReference = isRequiredString(value.questionPublicId);
+  const hasCompanionQuestionDraft = isQuestionDraftPayload(
+    value.companionQuestionDraft,
+  );
+
+  return (
+    (hasExistingQuestionReference !== hasCompanionQuestionDraft ||
+      (value.questionPublicId === null && hasCompanionQuestionDraft)) &&
+    (typeof value.questionPublicId === "string" ||
+      value.questionPublicId === null) &&
+    (value.companionQuestionDraft === null || hasCompanionQuestionDraft) &&
+    isRequiredString(value.score) &&
+    typeof value.sortOrder === "number" &&
+    isQuestionGroupDraftPayload(value.questionGroup)
+  );
+}
+
+function isPaperQuestionDraftPayloadArray(
+  value: unknown,
+): value is AdminAiGenerationFormalPaperQuestionDraftPayload[] {
+  return Array.isArray(value) && value.every(isPaperQuestionDraftPayload);
+}
+
+function isPaperSectionDraftPayload(
+  value: unknown,
+): value is AdminAiGenerationFormalPaperSectionDraftPayload {
+  return (
+    isRecord(value) &&
+    isRequiredString(value.title) &&
+    isOptionalString(value.description) &&
+    typeof value.sortOrder === "number" &&
+    isPaperQuestionDraftPayloadArray(value.paperQuestions)
+  );
+}
+
+function isOptionalPaperSectionDraftPayloadArray(
+  value: unknown,
+): value is AdminAiGenerationFormalPaperSectionDraftPayload[] | undefined {
+  return (
+    value === undefined ||
+    (Array.isArray(value) && value.every(isPaperSectionDraftPayload))
+  );
+}
+
 function isPaperDraftPayload(
   value: unknown,
 ): value is AdminAiGenerationFormalPaperDraftPayload {
@@ -189,7 +262,8 @@ function isPaperDraftPayload(
     isOptionalNumber(value.year) &&
     isOptionalString(value.source) &&
     isOptionalNumber(value.durationMinute) &&
-    isOptionalString(value.totalScore)
+    isOptionalString(value.totalScore) &&
+    isOptionalPaperSectionDraftPayloadArray(value.paperSections)
   );
 }
 
@@ -228,6 +302,20 @@ function sanitizePaperDraftPayload(
     source: payload.source,
     durationMinute: payload.durationMinute,
     totalScore: payload.totalScore,
+  };
+}
+
+function sanitizeQuestionGroupDraftPayload(
+  payload: AdminAiGenerationFormalQuestionGroupDraftPayload | null,
+): AdminAiGenerationFormalQuestionGroupDraftPayload | null {
+  if (payload === null) {
+    return null;
+  }
+
+  return {
+    title: payload.title,
+    materialPublicId: payload.materialPublicId,
+    sortOrder: payload.sortOrder,
   };
 }
 
@@ -289,6 +377,132 @@ function resolveWriterContext(
   return input.writerContext ?? createWriterContext(input.adoption);
 }
 
+async function createFormalPaperQuestionReference(input: {
+  paperQuestion: AdminAiGenerationFormalPaperQuestionDraftPayload;
+  questionWriter: AdminAiGenerationFormalDraftQuestionWriter;
+  writerContext: { actorPublicId: string };
+}): Promise<
+  | {
+      status: "ok";
+      questionPublicId: string;
+      companionQuestionDraftCreated: boolean;
+    }
+  | {
+      status: "failed";
+    }
+> {
+  if (input.paperQuestion.questionPublicId !== null) {
+    return {
+      status: "ok",
+      questionPublicId: input.paperQuestion.questionPublicId,
+      companionQuestionDraftCreated: false,
+    };
+  }
+
+  if (input.paperQuestion.companionQuestionDraft === null) {
+    return { status: "failed" };
+  }
+
+  const questionResponse = await input.questionWriter.createQuestion(
+    sanitizeQuestionDraftPayload(input.paperQuestion.companionQuestionDraft),
+    input.writerContext,
+  );
+  const questionPublicId = questionResponse.data?.question.publicId ?? null;
+
+  if (questionResponse.code !== 0 || questionPublicId === null) {
+    return { status: "failed" };
+  }
+
+  return {
+    status: "ok",
+    questionPublicId,
+    companionQuestionDraftCreated: true,
+  };
+}
+
+async function composePaperQuestions(input: {
+  paperPublicId: string;
+  paperPayload: AdminAiGenerationFormalPaperDraftPayload;
+  paperWriter: AdminAiGenerationFormalDraftPaperWriter;
+  questionWriter: AdminAiGenerationFormalDraftQuestionWriter;
+  writerContext: { actorPublicId: string };
+}): Promise<
+  | {
+      status: "ok";
+      paperSectionCount: number;
+      paperQuestionCount: number;
+      companionQuestionDraftCount: number;
+    }
+  | {
+      status: "failed";
+    }
+> {
+  const paperSections = input.paperPayload.paperSections ?? [];
+
+  if (paperSections.length === 0) {
+    return {
+      status: "ok",
+      paperSectionCount: 0,
+      paperQuestionCount: 0,
+      companionQuestionDraftCount: 0,
+    };
+  }
+
+  if (input.paperWriter.addQuestionToDraftPaper === undefined) {
+    return { status: "failed" };
+  }
+
+  let paperQuestionCount = 0;
+  let companionQuestionDraftCount = 0;
+
+  for (const paperSection of paperSections) {
+    for (const paperQuestion of paperSection.paperQuestions) {
+      const questionReference = await createFormalPaperQuestionReference({
+        paperQuestion,
+        questionWriter: input.questionWriter,
+        writerContext: input.writerContext,
+      });
+
+      if (questionReference.status === "failed") {
+        return { status: "failed" };
+      }
+
+      const paperQuestionResponse =
+        await input.paperWriter.addQuestionToDraftPaper(input.paperPublicId, {
+          questionPublicId: questionReference.questionPublicId,
+          score: paperQuestion.score,
+          sortOrder: paperQuestion.sortOrder,
+          paperSection: {
+            title: paperSection.title,
+            description: paperSection.description,
+            sortOrder: paperSection.sortOrder,
+          },
+          questionGroup: sanitizeQuestionGroupDraftPayload(
+            paperQuestion.questionGroup,
+          ),
+        });
+
+      if (
+        paperQuestionResponse.code !== 0 ||
+        paperQuestionResponse.data?.paperQuestion.publicId === undefined
+      ) {
+        return { status: "failed" };
+      }
+
+      paperQuestionCount += 1;
+      companionQuestionDraftCount +=
+        questionReference.companionQuestionDraftCreated ? 1 : 0;
+    }
+  }
+
+  return {
+    status: "ok",
+    paperSectionCount: paperSections.length,
+    paperQuestionCount,
+    companionQuestionDraftCount,
+  };
+}
+
 export function createAdminAiGenerationFormalDraftAdapterService(
   writers: AdminAiGenerationFormalDraftAdapterWriters,
 ): AdminAiGenerationFormalDraftAdapterService {
@@ -338,6 +552,19 @@ export function createAdminAiGenerationFormalDraftAdapterService(
         return createWriterFailedResponse();
       }
 
+      const writerContext = resolveWriterContext(input);
+      const compositionResult = await composePaperQuestions({
+        paperPublicId,
+        paperPayload: input.reviewedDraft,
+        paperWriter: writers.paperWriter,
+        questionWriter: writers.questionWriter,
+        writerContext,
+      });
+
+      if (compositionResult.status === "failed") {
+        return createWriterFailedResponse();
+      }
+
       return createSuccessResponse({
         adoptionPublicId: input.adoption.adoptionPublicId,
         sourceResultPublicId: input.adoption.sourceReference.resultPublicId,
@@ -345,6 +572,14 @@ export function createAdminAiGenerationFormalDraftAdapterService(
         formalTargetWriteStatus: "draft_created",
         formalQuestionPublicId: null,
         formalPaperPublicId: paperPublicId,
+        paperCompositionStatus:
+          compositionResult.paperQuestionCount === 0
+            ? "metadata_only"
+            : "composed",
+        paperSectionCount: compositionResult.paperSectionCount,
+        paperQuestionCount: compositionResult.paperQuestionCount,
+        companionQuestionDraftCount:
+          compositionResult.companionQuestionDraftCount,
         redactionStatus: "redacted",
       });
     },
