@@ -4192,18 +4192,22 @@ tasks:
     executionProfile: docs_state_provider_cost_boundary_package_only
     evidenceMode: redacted_gate_boundary_and_next_task_rules_only
     validationPolicy: docs_format_scope_and_module_run_v2_gate
-    queueSelectionMode: direct_user_request_2026_06_26_provider_cost_boundary_then_smoke
+    queueSelectionMode: direct_user_request_2026_06_26_return_to_provider_cost_boundary_then_smoke
     requiredOutcome: >-
-      Prepare a docs/state-only Provider/Cost final Pass boundary and Cost Calibration decision package. Define whether
-      real model calls may enter a later final Pass boundary; use the existing provider/model convention; limit the
-      follow-up task to content admin and organization advanced admin AI question/paper local contract workflows; cap
-      calls at four; define credential, cost-summary, evidence redaction, and failure-branch rules. Do not execute real
-      Provider calls, read credentials, modify source/tests/DB/schema/migration/seed/package/lockfile/env files, touch
-      staging/prod/payment/external services, or claim release readiness.
+      Refresh the docs/state-only Provider/Cost final Pass boundary and Cost Calibration decision package after admin
+      generated-result history/read UI closure. Define whether real model calls may enter a later final Pass boundary;
+      use the existing provider/model convention; limit the follow-up task to content admin and organization advanced
+      admin AI question/paper local contract workflows; cap calls at four; define credential, cost-summary, evidence
+      redaction, product-chain classification, and failure-branch rules. Distinguish Provider/model capability smoke from
+      admin route-integrated Provider execution. Do not execute real Provider calls, read credentials, modify
+      source/tests/DB/schema/migration/seed/package/lockfile/env files, touch staging/prod/payment/external services, or
+      claim release readiness.
     capabilities:
       docsStateEvidenceAudit: approved_by_user_request_2026_06_26
       providerCostBoundaryPackage: approved_by_user_request_2026_06_26
       task2ProviderCostSmokeAuthorizationMaterialization: approved_by_user_request_2026_06_26
+      generatedResultHistoryUiBasis: approved_read_only_basis_by_user_request_2026_06_26
+      routeIntegratedProviderPassClassification: approved_boundary_rule_only
       localSourceChange: blocked
       focusedUnitTest: blocked
       browserRuntime: blocked
@@ -4252,6 +4256,8 @@ tasks:
       - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
       - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
       - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
       - scripts/ai/run-personal-ai-provider-smoke.mjs
       - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
       - src/server/services/ai-generation-task-provider-adapter-service.ts
@@ -4286,31 +4292,33 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
     status: closed
-    result: pass_docs_only_provider_cost_final_pass_boundary_package_task2_allowed_no_provider_call
-    claimedAt: "2026-06-26T08:05:00-07:00"
-    plannedAt: "2026-06-26T08:05:00-07:00"
-    validatedAt: "2026-06-26T08:20:00-07:00"
-    reviewedAt: "2026-06-26T08:20:00-07:00"
-    closedAt: "2026-06-26T08:20:00-07:00"
-    branch: codex/provider-cost-final-pass-boundary-20260626
+    result: pass_docs_only_provider_cost_boundary_refresh_task2_bounded_capability_smoke_allowed_no_provider_call
+    claimedAt: "2026-06-26T23:55:00-07:00"
+    plannedAt: "2026-06-26T23:55:00-07:00"
+    validatedAt: "2026-06-26T23:59:00-07:00"
+    reviewedAt: "2026-06-26T23:59:00-07:00"
+    closedAt: "2026-06-26T23:59:00-07:00"
+    branch: codex/provider-cost-boundary-refresh-20260626
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_return_to_provider_cost_boundary_before_real_smoke_2026_06_26
       mergeToMaster:
         approved: true
         targetBranch: master
-        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_return_to_provider_cost_boundary_before_real_smoke_2026_06_26
       push:
         approved: true
         target: origin/master
-        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_return_to_provider_cost_boundary_before_real_smoke_2026_06_26
       cleanup:
         deleteShortBranch: true
-        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_return_to_provider_cost_boundary_before_real_smoke_2026_06_26
     validationSummary:
       providerCostBoundaryPackagePrepared: pass
-      task2AllowedByGatePackage: pass
+      generatedResultHistoryUiBasisIncorporated: pass
+      task2AllowedByGatePackage: bounded_provider_capability_smoke_only
+      routeIntegratedProviderPassAllowed: only_if_providerCallExecuted_true
       providerCallExecuted: false
       credentialReadExecuted: false
       costCalibrationExecuted: false

@@ -2,13 +2,13 @@
 
 ## Review Scope
 
-Audit the docs/state-only Provider/Cost final Pass boundary and cost calibration decision package.
+Audit the docs/state-only Provider/Cost final Pass boundary and cost calibration decision package refresh.
 
 ## Acceptance Mapping Result
 
-The package maps Provider/Cost only to the content admin and organization advanced admin AI local contract loops. It does
-not include staging/prod, payment, external services, deployment, release readiness, DB/schema work, source changes, or
-formal content writes.
+The refreshed package maps Provider/Cost only to the content admin and organization advanced admin AI local contract
+workflows. It does not include staging/prod, payment, external services, deployment, release readiness, DB/schema work,
+source changes, or formal content writes.
 
 ## Findings
 
@@ -18,10 +18,13 @@ formal content writes.
 3. Resolved: maximum Provider call count is capped at `4`, with no automatic retry.
 4. Resolved: evidence redaction blocks raw prompts, raw outputs, provider payloads, credentials, tokens, cookies,
    Authorization headers, raw DOM, screenshots, traces, and full content.
-5. Accepted: monetary cost is not calibrated unless the follow-up task has an approved local pricing source; token/call
+5. Resolved: the generated-result history/read UI closure is included as current-state basis.
+6. Boundary: current admin routes still default to `local_contract_only`, `provider_call_blocked`, and
+   `providerCallExecuted: false`.
+7. Boundary: task 2 may record Provider/model capability smoke plus product-chain diagnostic, but it must not claim
+   admin route-integrated Provider Pass unless an approved route path returns `providerCallExecuted: true`.
+8. Accepted: monetary cost is not calibrated unless the follow-up task has an approved local pricing source; token/call
    usage can be recorded without declaring Cost Calibration Gate Pass.
-6. Boundary: if product routes remain provider-disabled, the next result must be recorded as a product-chain gate finding,
-   not silently treated as Provider/Cost final Pass.
 
 ## Scope Audit
 
@@ -35,15 +38,15 @@ formal content writes.
 
 ## Redaction Audit
 
-The package permits only provider/model identifiers, workflow labels, call counts, status, latency, token/cost summary,
-error category, and local contract summary status.
+The package permits only provider/model identifiers, workflow labels, product-chain status, call counts, status, latency,
+token/cost summary, error category, and local contract summary status.
 
 It blocks secret values, raw prompts, raw provider payloads, raw outputs, raw DOM, screenshots, traces, browser storage,
 Authorization headers, DB rows, and full content evidence.
 
 ## Review Decision
 
-Approved for docs/state-only closeout after validation passes.
+Approved for docs/state-only closeout.
 
-Task 2 may proceed only under this package. Provider/Cost still cannot be included in staging/prod/release final Pass
-without separate evidence and approval.
+Task 2 may proceed only under this refreshed package. Provider/Cost still cannot be included in staging/prod/release
+final Pass without separate evidence and approval.

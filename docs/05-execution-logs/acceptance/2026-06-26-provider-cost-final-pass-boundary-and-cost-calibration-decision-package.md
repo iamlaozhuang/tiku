@@ -7,22 +7,49 @@ Task id: `provider-cost-final-pass-boundary-and-cost-calibration-decision-packag
 This package is docs/state-only. It does not execute Provider calls, read credentials, calibrate cost, modify source,
 touch DB/schema/migration/seed/package/env files, or claim release readiness.
 
+## Current-State Refresh
+
+This package is refreshed after admin generated-result storage, route integration, and history/read UI closure.
+
+Current state:
+
+- content and organization admin local routes can create task records and persist redacted generated-result draft
+  summaries;
+- content and organization admin GET history can read the persisted summaries;
+- admin history UI can display the redacted summaries;
+- admin runtime still defaults to `local_contract_only`, `provider_call_blocked`, and `providerCallExecuted: false`;
+- no admin route-integrated real Provider bridge is approved by this package.
+
 ## Decision Summary
 
-Provider/Cost is allowed to enter a follow-up local dev smoke/calibration task for the content and organization admin AI
-local contract loops.
+Task 2 is allowed to run a bounded local Provider smoke/cost-summary calibration, but the result must be classified
+narrowly.
 
-This does not change the already-recorded local-product MVP final Pass decision. It only defines what evidence is needed
-before Provider/Cost can be considered in any later final Pass boundary.
+Allowed classification:
+
+- local Provider/model capability smoke mapped to the approved admin workflow labels;
+- redacted token/call/cost-summary evidence;
+- product-chain status showing whether the admin workflow remained `local_contract_only`/`provider_call_blocked` or
+  reached an approved `provider_call_executed` path.
+
+Not allowed classification:
+
+- admin route-integrated Provider Pass when the route still reports `provider_call_blocked`;
+- Provider/Cost final Pass for staging, prod, release readiness, payment, deployment, or external services;
+- formal `question` or `paper` write readiness.
 
 ## Provider/Cost Inclusion Rule
 
-Provider/model calls may be included in a later final Pass decision only after a separate task records redacted local
-Provider/Cost smoke or calibration evidence for the approved admin AI workflows.
+Provider/model calls may be considered in a later final Pass boundary only after a separate task records bounded redacted
+local evidence for the approved admin AI workflows.
 
 The next approved task is:
 
 `ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26`
+
+That task may mark Provider/Cost as locally smoke-passed only for Provider/model capability and cost-summary boundaries
+unless it proves an already-approved admin route path returned `providerCallExecuted: true`. If the admin route remains
+provider-disabled, the result is a provider-disabled product-chain diagnostic, not a route-integrated Provider Pass.
 
 ## Provider And Model Selection
 
@@ -51,26 +78,32 @@ approval package.
 
 The follow-up task may execute real Provider calls only for these route/workflow labels:
 
-| Workflow label             | Product surface                                   | Call limit |
-| -------------------------- | ------------------------------------------------- | ---------- |
-| `content_ai_question`      | content admin `AI出题` local contract loop        | 1          |
-| `content_ai_paper`         | content admin `AI组卷` local contract loop        | 1          |
-| `organization_ai_question` | `org_advanced_admin` `AI出题` local contract loop | 1          |
-| `organization_ai_paper`    | `org_advanced_admin` `AI组卷` local contract loop | 1          |
+| Workflow label             | Product surface                                       | Call limit |
+| -------------------------- | ----------------------------------------------------- | ---------- |
+| `content_ai_question`      | content admin local-contract question workflow        | 1          |
+| `content_ai_paper`         | content admin local-contract paper workflow           | 1          |
+| `organization_ai_question` | `org_advanced_admin` local-contract question workflow | 1          |
+| `organization_ai_paper`    | `org_advanced_admin` local-contract paper workflow    | 1          |
 
 Maximum total Provider calls: `4`.
 
-No automatic retry is allowed. If a call fails, the follow-up task records the sanitized failure category and stops or
-continues only while staying within the `4` call cap and without retrying the failed workflow.
+No automatic retry is allowed. The call cap must not be used to compensate for a missing route bridge. If a call fails,
+the follow-up task records the sanitized failure category and stops or continues only while staying within the `4` call
+cap and without retrying the failed workflow.
 
 ## Local Contract Bridge Rule
 
-Current admin AI routes are proven as local contract loops with `providerCallExecuted: false`. The follow-up task must
-record whether each workflow still hits only a local contract summary or has an approved route-integrated Provider
-bridge.
+Current admin AI routes are proven as local contract loops with generated-result draft persistence and history/read UI.
+They are still Provider-disabled unless a later approved task changes or proves the route execution path.
 
-If the product route remains provider-disabled, the result is not a source-code defect in this task. It is a gate
-finding: create a focused diagnostic or provider-disabled product loop implementation plan instead of widening scope.
+The follow-up task must record each workflow under exactly one product-chain status:
+
+- `local_contract_only`;
+- `provider_call_blocked`;
+- `provider_call_executed`.
+
+If the product route remains provider-disabled, the result is not a source-code defect in task 2. It is a gate finding:
+create a focused diagnostic or admin runtime bridge implementation plan instead of widening scope.
 
 ## Credential Read Rule
 
@@ -97,6 +130,7 @@ Allowed evidence fields:
 - task id, branch, command identity, and local-only target statement;
 - provider/model identifiers and base URL host;
 - route/workflow label;
+- product-chain status;
 - call count, retry count, status, failure category, redaction status;
 - latency/duration;
 - token usage counters returned by the SDK;
@@ -134,11 +168,11 @@ and the evidence must state that pricing lookup was not performed.
 
 ## Decision Outcome
 
-Task 2 is allowed to proceed under this package.
+Task 2 is allowed to proceed under this refreshed package.
 
-Provider/Cost may be marked as locally smoke-passed only if task 2 records bounded redacted evidence and no product-chain
-or redaction failure. Even then, `staging`, `prod`, deployment, payment, external service, and release readiness remain
-unapproved.
+Provider/Cost may be marked as locally smoke-passed only for bounded Provider/model capability and redacted cost-summary
+evidence unless task 2 also proves `providerCallExecuted: true` through an already-approved admin route path. Even then,
+`staging`, `prod`, deployment, payment, external service, and release readiness remain unapproved.
 
 ## Non-Decision Statement
 
