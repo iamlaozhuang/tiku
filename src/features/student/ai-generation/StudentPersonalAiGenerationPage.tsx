@@ -53,6 +53,9 @@ type StudentPersonalAiGenerationResultDetailState =
 
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
+type StudentPersonalAiGenerationTaskType =
+  | "ai_question_generation"
+  | "ai_paper_generation";
 
 type StudentPersonalAiGenerationRequestDraft = {
   userPublicId: string;
@@ -67,7 +70,7 @@ type StudentPersonalAiGenerationRequestDraft = {
   auditLogPublicId: string | null;
   aiCallLogPublicId: string | null;
   taskPublicId: string;
-  taskType: "ai_question_generation";
+  taskType: StudentPersonalAiGenerationTaskType;
   actorPublicId: string;
   authorizationSource: "personal_auth" | "org_auth";
   ownerType: "personal" | "organization";
@@ -166,6 +169,7 @@ const contractFieldLabelMap: Record<string, string> = {
 
 const contractValueLabelMap: Record<string, string> = {
   accepted: "已受理",
+  ai_paper_generation: "AI组卷",
   ai_question_generation: "AI出题",
   blocked: "已阻断",
   blocked_without_follow_up_task: "待后续任务审批",
@@ -228,6 +232,15 @@ const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft 
   };
 
 let personalAiGenerationRequestSequence = 0;
+
+function createPersonalAiGenerationDraftForTask(
+  taskType: StudentPersonalAiGenerationTaskType,
+): StudentPersonalAiGenerationRequestDraft {
+  return {
+    ...personalAiGenerationRequestDraft,
+    taskType,
+  };
+}
 
 function createPersonalAiGenerationRequestUniqueSuffix(): string {
   personalAiGenerationRequestSequence += 1;
@@ -1136,7 +1149,9 @@ export function StudentPersonalAiGenerationPage() {
     };
   }, []);
 
-  async function handleSubmitPersonalAiGenerationRequest() {
+  async function handleSubmitPersonalAiGenerationRequest(
+    taskType: StudentPersonalAiGenerationTaskType,
+  ) {
     const sessionRequestToken = readStudentSessionRequestToken();
 
     function markUnauthorized() {
@@ -1221,7 +1236,7 @@ export function StudentPersonalAiGenerationPage() {
             },
             body: JSON.stringify(
               createPersonalAiGenerationRequestBody(
-                personalAiGenerationRequestDraft,
+                createPersonalAiGenerationDraftForTask(taskType),
                 sessionResponse.data.user,
               ),
             ),
@@ -1403,6 +1418,12 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
+  const isAiGenerationActionDisabled =
+    !hasSessionToken ||
+    pageState === "checking" ||
+    pageState === "loading" ||
+    pageState === "unavailable";
+
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
       <div className="space-y-2">
@@ -1416,13 +1437,12 @@ export function StudentPersonalAiGenerationPage() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <button
           type="button"
-          disabled={
-            !hasSessionToken ||
-            pageState === "checking" ||
-            pageState === "loading" ||
-            pageState === "unavailable"
+          disabled={isAiGenerationActionDisabled}
+          onClick={() =>
+            void handleSubmitPersonalAiGenerationRequest(
+              "ai_question_generation",
+            )
           }
-          onClick={() => void handleSubmitPersonalAiGenerationRequest()}
           className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pageState === "checking" || pageState === "loading" ? (
@@ -1434,7 +1454,10 @@ export function StudentPersonalAiGenerationPage() {
         </button>
         <button
           type="button"
-          disabled
+          disabled={isAiGenerationActionDisabled}
+          onClick={() =>
+            void handleSubmitPersonalAiGenerationRequest("ai_paper_generation")
+          }
           className="border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ClipboardList className="size-4" aria-hidden="true" />

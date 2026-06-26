@@ -17,6 +17,7 @@ import type {
 
 const pageTitle = "AI训练";
 const requestButtonLabel = "AI出题";
+const paperButtonLabel = "AI组卷";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const unavailableTitle =
@@ -568,6 +569,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(
         screen.getByRole("button", { name: requestButtonLabel }),
       ).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: paperButtonLabel }),
+      ).toBeDisabled();
       expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
         "/api/v1/authorizations",
       ]);
@@ -919,6 +923,107 @@ describe("StudentPersonalAiGenerationPage", () => {
       organizationPublicId: "organization-public-123",
       quotaOwnerType: "organization",
       quotaOwnerPublicId: "organization-public-123",
+    });
+    expect(JSON.stringify(submittedBodies[0])).not.toContain(
+      "unit-test-session-token",
+    );
+  });
+
+  it("posts an AI paper generation local route contract payload from the paper action", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+          submittedBodies.push(
+            JSON.parse(String(init?.body)) as Record<string, unknown>,
+          );
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    const paperButton = screen.getByRole("button", {
+      name: paperButtonLabel,
+    });
+    expect(paperButton).toBeEnabled();
+
+    fireEvent.click(paperButton);
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      taskType: "ai_paper_generation",
+      aiFuncType: "explanation",
+      responseMode: "local_browser_experience",
+      effectiveEdition: "advanced",
+      isAuthorizationActive: true,
+      isScopeAllowed: true,
+      isQuotaAvailable: true,
+      isRuntimeConfigReady: true,
     });
     expect(JSON.stringify(submittedBodies[0])).not.toContain(
       "unit-test-session-token",
