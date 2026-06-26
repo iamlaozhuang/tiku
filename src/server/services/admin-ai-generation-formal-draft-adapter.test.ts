@@ -152,23 +152,28 @@ describe("admin AI generation formal draft adapter service", () => {
     });
     const serializedResponse = JSON.stringify(response);
 
-    expect(questionWriter.createQuestion).toHaveBeenCalledWith({
-      questionType: "single_choice",
-      profession: "monopoly",
-      level: 3,
-      subject: "theory",
-      stemRichText: "Reviewed formal question stem",
-      analysisRichText: "Reviewed formal analysis",
-      standardAnswerRichText: "A",
-      multiChoiceRule: "all_correct_only",
-      scoringMethod: "auto_match",
-      materialPublicId: null,
-      questionOptions: draftPayload.questionOptions,
-      scoringPoints: [],
-      fillBlankAnswers: [],
-      knowledgeNodePublicIds: [],
-      tagPublicIds: [],
-    });
+    expect(questionWriter.createQuestion).toHaveBeenCalledWith(
+      {
+        questionType: "single_choice",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        stemRichText: "Reviewed formal question stem",
+        analysisRichText: "Reviewed formal analysis",
+        standardAnswerRichText: "A",
+        multiChoiceRule: "all_correct_only",
+        scoringMethod: "auto_match",
+        materialPublicId: null,
+        questionOptions: draftPayload.questionOptions,
+        scoringPoints: [],
+        fillBlankAnswers: [],
+        knowledgeNodePublicIds: [],
+        tagPublicIds: [],
+      },
+      {
+        actorPublicId: "admin_content_public_377",
+      },
+    );
     expect(paperWriter.createPaper).not.toHaveBeenCalled();
     expect(response).toEqual({
       code: 0,
@@ -214,17 +219,22 @@ describe("admin AI generation formal draft adapter service", () => {
     const serializedResponse = JSON.stringify(response);
 
     expect(questionWriter.createQuestion).not.toHaveBeenCalled();
-    expect(paperWriter.createPaper).toHaveBeenCalledWith({
-      name: "Reviewed formal paper draft",
-      profession: "monopoly",
-      level: 3,
-      subject: "theory",
-      paperType: "mock_paper",
-      year: 2026,
-      source: "AI reviewed adoption",
-      durationMinute: 120,
-      totalScore: "100.0",
-    });
+    expect(paperWriter.createPaper).toHaveBeenCalledWith(
+      {
+        name: "Reviewed formal paper draft",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        paperType: "mock_paper",
+        year: 2026,
+        source: "AI reviewed adoption",
+        durationMinute: 120,
+        totalScore: "100.0",
+      },
+      {
+        actorPublicId: "admin_content_public_377",
+      },
+    );
     expect(response.data).toMatchObject({
       targetType: "paper",
       formalTargetWriteStatus: "draft_created",

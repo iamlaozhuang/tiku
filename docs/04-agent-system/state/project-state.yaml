@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
-updatedAt: "2026-06-26T10:15:40-07:00"
+currentPhase: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
+updatedAt: "2026-06-26T10:22:37-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,33 +504,33 @@ repository:
   lastKnownMasterSha: 5e95d40cac28ead8d3e67fb2c6f662f16f961b73
   lastKnownOriginMasterSha: 5e95d40cac28ead8d3e67fb2c6f662f16f961b73
 currentTask:
-  id: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+  id: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
   status: closed
-  result: blocked_route_smoke_executed_question_500014_no_retry
-  claimedAt: "2026-06-26T10:08:30-07:00"
-  plannedAt: "2026-06-26T10:08:30-07:00"
-  implementedAt: "2026-06-26T10:15:40-07:00"
-  validatedAt: "2026-06-26T10:15:40-07:00"
-  reviewedAt: "2026-06-26T10:15:40-07:00"
-  closedAt: "2026-06-26T10:15:40-07:00"
-  sourceStory: successor-of-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
-  approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+  result: pass_formal_draft_writer_mutation_context_repair_tdd_no_live_db
+  claimedAt: "2026-06-26T10:19:36-07:00"
+  plannedAt: "2026-06-26T10:19:36-07:00"
+  implementedAt: "2026-06-26T10:22:37-07:00"
+  validatedAt: "2026-06-26T10:22:37-07:00"
+  reviewedAt: "2026-06-26T10:22:37-07:00"
+  closedAt: "2026-06-26T10:22:37-07:00"
+  sourceStory: successor-of-admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+  approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
   acceptancePath: null
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
-  branch: codex/admin-ai-formal-draft-local-db-smoke-20260626
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+  branch: codex/admin-ai-formal-draft-writer-context-repair-20260626
   scope:
     docsStateEvidenceAudit: true
     approvalDecisionPackage: false
-    localSourceChange: false
-    focusedUnitTest: false
+    localSourceChange: true
+    focusedUnitTest: true
     schemaMigrationFileChange: false
     drizzleMetadataJournalAlignment: false
     localMigrationExecutionApprovedForThisTask: false
-    routeIntegrationExecuted: true
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: not_confirmed_route_returned_500014
+    routeIntegrationExecuted: false
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
@@ -540,21 +540,17 @@ currentTask:
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    formalQuestionOrPaperWrite: not_confirmed_route_returned_500014
+    formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    approvalPackage: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
-    routeSmokeApprovedForThisTask: true
-    routeSmokeMaxPostCalls: 2
-    sanitizedEligibleSourceLookupMaxQueries: 2
-    localFormalDraftWriteApprovedForRouteCallsOnly: true
-    adoptionMetadataUpdateApprovedForRouteCallsOnly: true
+    repairFormalDraftWriterMutationContext: true
+    sourceTddApproved: true
     localMigrationExecutionApprovedForThisTask: false
-    liveDatabaseConnectionApproved: true
-    formalQuestionOrPaperWriteApproved: route_calls_only_max_2
+    liveDatabaseConnectionApproved: false
+    formalQuestionOrPaperWriteApproved: false
     providerCallApproved: false
   closeoutPolicy:
     localCommit:
@@ -576,15 +572,15 @@ currentTask:
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    routeSmoke: blocked_route_response_question_500014
-    eligibleSourceLookupCount: 1
-    routePostCallCount: 1
+    tddRed: pass_expected_failure_observed
+    tddGreen: pass
+    focusedUnit: pass_2_files_8_tests
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    databaseConnectionExecuted: true
-    databaseWriteExecuted: not_confirmed_route_returned_500014
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
     schemaMigrationFileChanged: false
     schemaMigrationExecuted: false
     providerCallExecuted: false
@@ -592,11 +588,11 @@ currentTask:
     costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
-    formalQuestionOrPaperWriteExecuted: not_confirmed_route_returned_500014
+    formalQuestionOrPaperWriteExecuted: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+  nextRecommendedTask: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
 adminAiGenerationFormalDraftAdapterRouteIntegrationAndMetadataTdd20260626:
   taskId: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
   phase: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
@@ -705,8 +701,8 @@ adminAiGenerationFormalDraftWriterMutationContextRepairTdd20260626:
   taskId: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
   phase: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
   recordedAt: "2026-06-26T10:15:40-07:00"
-  status: pending
-  result: pending_source_tdd_repair
+  status: closed
+  result: pass_formal_draft_writer_mutation_context_repair_tdd_no_live_db
   branch: codex/admin-ai-formal-draft-writer-context-repair-20260626
   sourceStory: successor-of-admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
   approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
@@ -718,15 +714,15 @@ adminAiGenerationFormalDraftWriterMutationContextRepairTdd20260626:
     schemaMigrationApproved: false
     providerCallApproved: false
   validationSummary:
-    tddRed: pending
-    tddGreen: pending
-    focusedUnit: pending
-    lint: pending
-    typecheck: pending
-    prettierScoped: pending
-    gitDiffCheck: pending
-    moduleRunV2PreCommitHardening: pending
-    moduleRunV2PrePushReadiness: pending
+    tddRed: pass_expected_failure_observed
+    tddGreen: pass
+    focusedUnit: pass_2_files_8_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sourceOrTestChanged: true
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false

@@ -68,14 +68,20 @@ export type AdminAiGenerationFormalDraftAdapterResultDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationFormalDraftWriterContext = {
+  actorPublicId: string;
+};
+
 export type AdminAiGenerationFormalDraftQuestionWriter = {
   createQuestion(
     input: AdminAiGenerationFormalQuestionDraftPayload,
+    context: AdminAiGenerationFormalDraftWriterContext,
   ): Promise<ApiResponse<QuestionResultDto | null>>;
 };
 
 export type AdminAiGenerationFormalDraftPaperWriter = {
   createPaper(
     input: AdminAiGenerationFormalPaperDraftPayload,
+    context: AdminAiGenerationFormalDraftWriterContext,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
 };

@@ -85,19 +85,21 @@ function createDefaultAdoptionPublicId(): string {
 }
 
 function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterService {
-  const questionService = createQuestionService(
-    createPostgresQuestionRepository(),
-  );
-  const paperService = createPaperDraftService(
-    createPostgresPaperDraftRepository(),
-  );
+  const questionRepository = createPostgresQuestionRepository();
+  const paperRepository = createPostgresPaperDraftRepository();
 
   return createAdminAiGenerationFormalDraftAdapterService({
     paperWriter: {
-      createPaper: (input) => paperService.createPaper(input),
+      createPaper: (input, context) =>
+        createPaperDraftService(paperRepository, {
+          mutationContext: context,
+        }).createPaper(input),
     },
     questionWriter: {
-      createQuestion: (input) => questionService.createQuestion(input),
+      createQuestion: (input, context) =>
+        createQuestionService(questionRepository, {
+          mutationContext: context,
+        }).createQuestion(input),
     },
   });
 }
