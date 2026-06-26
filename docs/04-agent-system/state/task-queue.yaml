@@ -3268,6 +3268,7 @@ tasks:
       - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
       - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
       - drizzle/20260626203000_add_admin_ai_generation_result.sql
+      - drizzle/meta/_journal.json
       - src/app/api/v1/content-ai-generation-requests/route.ts
       - src/app/api/v1/organization-ai-generation-requests/route.ts
       - src/server/services/admin-ai-generation-local-contract-route.ts
@@ -3393,6 +3394,214 @@ tasks:
       formalQuestionOrPaperWriteExecuted: false
       finalPassClaimed: false
     nextRecommendedTask: admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+
+  - id: admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+    title: Admin AI generation generated result storage local migration route integration TDD smoke
+    phase: admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+    sourceStory: current-user-request-open-generated-result-storage-local-migration-route-integration-tdd-smoke
+    dependencies:
+      - admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package-2026-06-26
+    taskKind: implementation_tdd_local_migration_route_smoke
+    moduleRunVersion: 2
+    executionProfile: local_migration_route_integration_tdd_smoke
+    evidenceMode: redacted_route_status_and_result_summary_presence_only
+    validationPolicy: local_schema_migration_focused_unit_and_capped_direct_route_smoke
+    queueSelectionMode: direct_user_request_2026_06_26_open_generated_result_storage_local_migration_route_integration_tdd_smoke
+    localDockerDatabase: approved_local_dev_only
+    schemaMigration: approved_migration_plan
+    requiredOutcome: >-
+      Apply only `drizzle/20260626203000_add_admin_ai_generation_result.sql` to local dev, wire content and
+      organization admin AI generation local contract POST flows to `AdminAiGenerationResultPersistenceRepository`, run
+      focused unit tests, and run a capped direct local route smoke with at most four route requests. Keep Provider
+      disabled, keep formal question/paper writes blocked, keep evidence redacted, and do not claim final Pass.
+    capabilities:
+      localSourceChange: approved_by_current_user_2026_06_26
+      focusedUnitTest: approved_by_current_user_2026_06_26
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      taskPlanEvidenceAuditCreation: approved_by_current_user_2026_06_26
+      localDockerDatabase: approved_local_dev_only
+      schemaMigration: approved_migration_plan
+      localMigrationExecution: approved_existing_migration_local_dev_only
+      routeSmoke: approved_local_direct_handler_capped
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      newMigrationGeneration: blocked
+      drizzlePush: blocked
+      directSqlOrRawDbRows: blocked
+      databaseSeedOrAccountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - drizzle.config.ts
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-schema-contract-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - drizzle/20260626203000_add_admin_ai_generation_result.sql
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/models/admin-ai-generation-result.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/runtime-database.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - src/db/schema/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - new_migration_generation_or_drizzle_push
+      - direct_sql_or_raw_db_row_dump
+      - destructive_database_operation
+      - database_seed_or_account_mutation
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - formal_question_or_paper_write
+      - browser_runtime_or_e2e_execution
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - release_readiness_decision
+      - final_acceptance_pass
+    riskTypes:
+      - local_migration_execution
+      - local_route_smoke_db_write
+      - route_integration_boundary
+      - generated_result_storage_boundary
+      - evidence_redaction
+      - no_provider_no_formal_write_no_final_pass
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -Capability schemaMigration -Intent use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -Capability localDockerDatabase -Intent use_capability
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/db/schema/ai-rag.test.ts
+      - npx.cmd drizzle-kit migrate
+      - node_modules\.bin\tsx.cmd - < redacted inline direct route smoke harness
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      pre_edit:
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -Capability schemaMigration -Intent use_capability
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -Capability localDockerDatabase -Intent use_capability
+      post_edit:
+        - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/db/schema/ai-rag.test.ts
+        - npx.cmd drizzle-kit migrate
+        - node_modules\.bin\tsx.cmd - < redacted inline direct route smoke harness
+        - npm.cmd run lint
+        - npm.cmd run typecheck
+      closeout:
+        - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+    sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+    status: closed
+    result: blocked_local_migration_journal_missing_route_smoke_post_500_source_changes_reverted
+    approvedAt: "2026-06-26T21:20:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-and-route-integration-approval-package.md
+    claimedAt: "2026-06-26T21:20:00-07:00"
+    plannedAt: "2026-06-26T21:20:00-07:00"
+    blockedAt: "2026-06-26T21:55:00-07:00"
+    closedAt: "2026-06-26T22:05:00-07:00"
+    branch: codex/admin-ai-result-storage-route-smoke-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_admin_ai_generation_generated_result_storage_local_migration_route_integration_tdd_smoke_2026_06_26
+    retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-local-migration-route-integration-tdd-smoke.md
+    blockingReason: >-
+      The approved reviewed Drizzle migrate path could not apply the target generated result migration because
+      `drizzle/20260626203000_add_admin_ai_generation_result.sql` is not registered in `drizzle/meta/_journal.json`.
+      The capped direct route smoke consumed all four approved route requests and POST returned HTTP 500 for both
+      content and organization workflows while GET showed pending tasks without generated result summaries. Source
+      integration changes were reverted before closeout to avoid merging a route POST regression.
+    nextRecommendedTask: admin-ai-generation-generated-result-storage-migration-journal-alignment-and-route-smoke-retry-approval-package-2026-06-26
 
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
