@@ -4035,6 +4035,152 @@ tasks:
     retryCount: 0
     nextRecommendedTask: provider_cost_or_generated_result_history_ui_follow_up_after_smoke_result
 
+  - id: admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26
+    title: Admin AI generated result history/read UI closure TDD
+    phase: admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26
+    sourceStory: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+    dependencies:
+      - admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_source_unit_test_only
+    evidenceMode: redacted_unit_test_result_summary_presence_only
+    validationPolicy: focused_unit_typecheck_lint_prettier_module_run_v2
+    queueSelectionMode: direct_user_request_2026_06_26_generated_result_history_ui_before_provider_cost
+    requiredOutcome: >-
+      Content and organization advanced admin AI generation history/read surfaces show persisted redacted
+      generated-result summaries from the existing admin generated-result repository port, while Provider/Cost,
+      live DB, schema/migration, browser/e2e, and formal question/paper writes remain blocked.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - src/db/schema/**
+      - src/app/**
+      - src/server/repositories/runtime-database.ts
+      - tests/e2e/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - provider_model_call_or_provider_enablement
+      - provider_configuration_or_env_secret_access
+      - provider_cost_quota_pricing_measurement
+      - raw_prompt_output_or_provider_payload_evidence
+      - schema_migration_or_drizzle_metadata_change
+      - live_database_connection_or_route_smoke
+      - direct_sql_or_raw_db_row_dump
+      - destructive_database_operation
+      - database_seed_or_account_mutation
+      - formal_question_or_paper_write
+      - browser_runtime_or_e2e_execution
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - release_readiness_decision
+      - final_acceptance_pass
+    riskTypes:
+      - generated_result_readback_contract
+      - admin_history_redaction_boundary
+      - frontend_history_summary_rendering
+      - no_provider_no_db_no_formal_write_no_final_pass
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26 -SkipRemoteAheadCheck
+    validationCommandLifecycle:
+      tdd_red:
+        - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      post_edit:
+        - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+        - npm.cmd run typecheck
+        - npm.cmd run lint
+      closeout:
+        - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+        - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+        - git diff --check
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-generated-result-history-read-ui-closure-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
+    sourceGeneratedResultStorageSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-migration-journal-alignment-route-integration-tdd-smoke-retry.md
+    status: closed
+    result: pass_generated_result_history_read_ui_closure_no_provider_no_db_no_formal_write_no_final_pass
+    approvedAt: "2026-06-26T23:20:00-07:00"
+    approvedBy: laozhuang
+    approvalSource: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+    claimedAt: "2026-06-26T23:20:00-07:00"
+    plannedAt: "2026-06-26T23:20:00-07:00"
+    branch: codex/admin-ai-generated-result-history-ui-20260626
+    validationSummary:
+      tddRed: pass_expected_failure_4_failed_19_passed
+      tddGreen: pass_2_files_23_tests
+      focusedUnitTest: pass_2_files_23_tests
+      typecheck: pass_after_owner_type_narrowing
+      lint: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      databaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      migrationFileCreated: false
+      drizzleMetadataChanged: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      browserRuntimeExecuted: false
+      e2eExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_generated_result_history_read_ui_closure_before_provider_cost_2026_06_26
+    retryCount: 0
+    nextRecommendedTask: provider_cost_boundary_or_smoke_after_generated_result_history_ui_closure
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

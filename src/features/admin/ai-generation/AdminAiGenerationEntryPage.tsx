@@ -242,6 +242,46 @@ function AdminAiGenerationTaskHistoryPanel({
                   <dd className="text-text-primary mt-1">正式写入已阻断</dd>
                 </div>
               </dl>
+
+              {taskItem.generatedResult !== null ? (
+                <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
+                  <p className="text-brand-primary text-xs font-medium">
+                    已持久化脱敏生成摘要
+                  </p>
+                  <p className="text-text-primary mt-2 text-sm leading-6">
+                    {taskItem.generatedResult.contentPreviewMasked}
+                  </p>
+                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                      <dt className="text-text-secondary">结果可见性</dt>
+                      <dd className="text-text-primary mt-1">
+                        {taskItem.generatedResult.contentVisibility}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-text-secondary">证据状态</dt>
+                      <dd className="text-text-primary mt-1">
+                        {taskItem.generatedResult.evidenceStatus}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-text-secondary">引用数量</dt>
+                      <dd className="text-text-primary mt-1">
+                        {taskItem.generatedResult.citationCount}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-text-secondary">正式采用</dt>
+                      <dd className="text-text-primary mt-1">
+                        {taskItem.generatedResult.formalAdoptionStatus ===
+                        "blocked"
+                          ? "已阻断"
+                          : taskItem.generatedResult.formalAdoptionStatus}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              ) : null}
             </article>
           ))}
         </div>

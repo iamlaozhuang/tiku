@@ -138,12 +138,33 @@ function createLocalContractResponse(input: {
 function createTaskHistoryResponse(input: {
   workspace: "content" | "organization";
   generationKind: "question" | "paper";
+  generatedResult?: {
+    contentPreviewMasked: string;
+    contentVisibility?: "redacted_snapshot";
+    resultPublicId: string;
+  } | null;
   taskPublicId?: string;
 }) {
   const isQuestion = input.generationKind === "question";
   const taskPublicId =
     input.taskPublicId ??
     `admin_ai_generation_task_${input.workspace}_${input.generationKind}_history`;
+  const resultPublicId = input.generatedResult?.resultPublicId ?? null;
+  const generatedResult =
+    input.generatedResult === undefined || input.generatedResult === null
+      ? null
+      : {
+          resultPublicId,
+          persistedAt: "2026-06-26T20:31:00.000Z",
+          status: "draft",
+          contentPreviewMasked: input.generatedResult.contentPreviewMasked,
+          contentVisibility:
+            input.generatedResult.contentVisibility ?? "redacted_snapshot",
+          evidenceStatus: "none",
+          citationCount: 0,
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        };
 
   return {
     code: 0,
@@ -155,9 +176,9 @@ function createTaskHistoryResponse(input: {
         requestPublicId: `${taskPublicId}_request`,
         generationKind: input.generationKind,
         taskType: isQuestion ? "ai_question_generation" : "ai_paper_generation",
-        status: "pending",
+        status: generatedResult === null ? "pending" : "succeeded",
         requestedAt: "2026-06-26T20:30:00.000Z",
-        resultPublicId: null,
+        resultPublicId,
         contentVisibility: "summary_only",
         evidenceStatus: "none",
         citationCount: 0,
@@ -171,6 +192,7 @@ function createTaskHistoryResponse(input: {
           questionWriteStatus: "blocked_without_follow_up_task",
           paperWriteStatus: "blocked_without_follow_up_task",
         },
+        generatedResult,
         redactionStatus: "redacted",
       },
       items: [
@@ -181,9 +203,9 @@ function createTaskHistoryResponse(input: {
           taskType: isQuestion
             ? "ai_question_generation"
             : "ai_paper_generation",
-          status: "pending",
+          status: generatedResult === null ? "pending" : "succeeded",
           requestedAt: "2026-06-26T20:30:00.000Z",
-          resultPublicId: null,
+          resultPublicId,
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
@@ -197,6 +219,7 @@ function createTaskHistoryResponse(input: {
             questionWriteStatus: "blocked_without_follow_up_task",
             paperWriteStatus: "blocked_without_follow_up_task",
           },
+          generatedResult,
           redactionStatus: "redacted",
         },
       ],
@@ -514,6 +537,112 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain(
       "admin_ai_generation_task_content_paper_secret_123",
     );
+  });
+
+  it("shows persisted redacted generated result summaries for content admin history", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_history_hidden_456";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_history_hidden_456";
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for content history",
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent(
+      "redacted generated result summary for content history",
+    );
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("redacted_snapshot");
+    expect(document.body.textContent).not.toContain(taskPublicId);
+    expect(document.body.textContent).not.toContain(resultPublicId);
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("rawOutput");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("shows persisted redacted generated result summaries for organization advanced admin history", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_organization_paper_history_hidden_789";
+    const resultPublicId =
+      "admin_ai_generation_result_organization_paper_history_hidden_789";
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "paper",
+            taskPublicId,
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for organization history",
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "paper",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent(
+      "redacted generated result summary for organization history",
+    );
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("redacted_snapshot");
+    expect(document.body.textContent).not.toContain(taskPublicId);
+    expect(document.body.textContent).not.toContain(resultPublicId);
   });
 
   it("shows an empty history state before any provider-disabled task exists", async () => {

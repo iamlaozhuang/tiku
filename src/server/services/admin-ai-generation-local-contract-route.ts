@@ -15,11 +15,14 @@ import type {
   AdminAiGenerationLocalContractRuntimeBridgeDto,
   AdminAiGenerationLocalContractTaskPersistenceDto,
   AdminAiGenerationTaskHistoryDto,
+  AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationTaskHistoryItemDto,
   AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationResultDto,
+  AdminAiGenerationResultHistoryQuery,
   AdminAiGenerationResultPersistenceRepository,
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
@@ -557,8 +560,25 @@ function createAdminAiGenerationContentDigest(
     .digest("hex")}`;
 }
 
+function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
+  result: AdminAiGenerationResultDto,
+): AdminAiGenerationTaskHistoryGeneratedResultDto {
+  return {
+    resultPublicId: result.resultPublicId,
+    persistedAt: result.persistedAt,
+    status: result.status,
+    contentPreviewMasked: result.contentReference.contentPreviewMasked,
+    contentVisibility: result.contentReference.contentVisibility,
+    evidenceStatus: result.evidenceReference.evidenceStatus,
+    citationCount: result.evidenceReference.citationCount,
+    formalAdoptionStatus: result.formalAdoption.status,
+    redactionStatus: result.contentReference.redactionStatus,
+  };
+}
+
 function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
   task: AdminAiGenerationTaskPersistenceDto,
+  generatedResult: AdminAiGenerationResultDto | null,
 ): AdminAiGenerationTaskHistoryItemDto {
   return {
     requestPublicId: task.requestPublicId,
@@ -578,12 +598,37 @@ function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
     providerConfigurationRead: task.providerConfigurationRead,
     costCalibrationExecuted: task.costCalibrationExecuted,
     formalContentBoundary: task.formalContentBoundary,
+    generatedResult:
+      generatedResult === null
+        ? null
+        : mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
+            generatedResult,
+          ),
     redactionStatus: task.redactionStatus,
+  };
+}
+
+function resolveAdminAiGenerationResultHistoryQuery(
+  historyQuery: AdminAiGenerationTaskHistoryQuery,
+): AdminAiGenerationResultHistoryQuery | null {
+  if (
+    historyQuery.ownerType !== "platform" &&
+    historyQuery.ownerType !== "organization"
+  ) {
+    return null;
+  }
+
+  return {
+    workspace: historyQuery.workspace,
+    ownerType: historyQuery.ownerType,
+    ownerPublicId: historyQuery.ownerPublicId,
+    limit: historyQuery.limit,
   };
 }
 
 async function listAdminAiGenerationTaskHistory(input: {
   actor: AdminAiGenerationActor;
+  resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationTaskHistoryDto | null>> {
@@ -596,9 +641,28 @@ async function listAdminAiGenerationTaskHistory(input: {
     return adminAiGenerationPermissionDeniedResponse;
   }
 
-  const historyItems = (
-    await input.taskPersistenceRepository.listTaskHistory(historyQuery)
-  ).map((task) => mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(task));
+  const generatedResultHistoryQuery =
+    resolveAdminAiGenerationResultHistoryQuery(historyQuery);
+
+  if (generatedResultHistoryQuery === null) {
+    return adminAiGenerationPermissionDeniedResponse;
+  }
+
+  const [taskHistoryItems, generatedResults] = await Promise.all([
+    input.taskPersistenceRepository.listTaskHistory(historyQuery),
+    input.resultPersistenceRepository.listDraftResults(
+      generatedResultHistoryQuery,
+    ),
+  ]);
+  const generatedResultsByTaskPublicId = new Map(
+    generatedResults.map((result) => [result.taskPublicId, result]),
+  );
+  const historyItems = taskHistoryItems.map((task) =>
+    mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
+      task,
+      generatedResultsByTaskPublicId.get(task.taskPublicId) ?? null,
+    ),
+  );
 
   return createSuccessResponse({
     workspace: input.workspace,
@@ -668,6 +732,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
         return createJsonResponse(
           await listAdminAiGenerationTaskHistory({
             actor,
+            resultPersistenceRepository,
             taskPersistenceRepository,
             workspace,
           }),

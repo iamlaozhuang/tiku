@@ -6,6 +6,8 @@ import {
 } from "./admin-ai-generation-local-contract-route";
 import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationResultDto,
+  AdminAiGenerationResultHistoryQuery,
   AdminAiGenerationResultPersistenceRepository,
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
@@ -143,11 +145,15 @@ async function getLocalContractHistory(input: {
   workspace: AdminAiGenerationWorkspace;
   adminRoles: AdminRole[];
   organizationPublicId?: string | null;
+  resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 }) {
   const taskPersistence =
     input.taskPersistenceRepository ??
     createTaskPersistenceRecorder().repository;
+  const resultPersistence =
+    input.resultPersistenceRepository ??
+    createGeneratedResultPersistenceRecorder().repository;
   const { collection } = createAdminAiGenerationLocalContractRouteHandlers(
     input.workspace,
     {
@@ -155,6 +161,7 @@ async function getLocalContractHistory(input: {
         adminRoles: input.adminRoles,
         organizationPublicId: input.organizationPublicId,
       }),
+      resultPersistenceRepository: resultPersistence,
       taskPersistenceRepository: taskPersistence,
     },
   );
@@ -220,6 +227,8 @@ function createTaskPersistenceResult(
 function createTaskHistoryItem(input: {
   generationKind: "question" | "paper";
   requestedAt: string;
+  resultPublicId?: string | null;
+  status?: AdminAiGenerationTaskPersistenceDto["status"];
   taskPublicId: string;
   workspace: AdminAiGenerationWorkspace;
 }): AdminAiGenerationTaskPersistenceDto {
@@ -237,7 +246,7 @@ function createTaskHistoryItem(input: {
         : "ai_paper_generation",
     workspace: input.workspace,
     generationKind: input.generationKind,
-    status: "pending",
+    status: input.status ?? "pending",
     requestedAt: input.requestedAt,
     authorizationSource: isContent ? "admin_role" : "org_auth",
     authorizationPublicId: isContent
@@ -249,7 +258,7 @@ function createTaskHistoryItem(input: {
     organizationPublicId: isContent ? null : "organization_public_123",
     quotaOwnerType: isContent ? "platform" : "organization",
     quotaOwnerPublicId: ownerPublicId,
-    resultPublicId: null,
+    resultPublicId: input.resultPublicId ?? null,
     evidenceStatus: "none",
     citationCount: 0,
     aiCallLogPublicId: null,
@@ -267,6 +276,56 @@ function createTaskHistoryItem(input: {
     sourcePaperPublicId: null,
     contentVisibility: "summary_only",
     redactionStatus: "redacted",
+  };
+}
+
+function createGeneratedResultHistoryItem(input: {
+  generationKind: "question" | "paper";
+  persistedAt: string;
+  resultPublicId: string;
+  taskPublicId: string;
+  workspace: AdminAiGenerationWorkspace;
+}): AdminAiGenerationResultDto {
+  const isContent = input.workspace === "content";
+  const ownerPublicId = isContent
+    ? "platform_content_review_pool"
+    : "organization_public_123";
+
+  return {
+    resultPublicId: input.resultPublicId,
+    taskPublicId: input.taskPublicId,
+    requestPublicId: `${input.taskPublicId}_request`,
+    workspace: input.workspace,
+    generationKind: input.generationKind,
+    ownerType: isContent ? "platform" : "organization",
+    ownerPublicId,
+    organizationPublicId: isContent ? null : "organization_public_123",
+    taskType:
+      input.generationKind === "question"
+        ? "ai_question_generation"
+        : "ai_paper_generation",
+    status: "draft",
+    persistedAt: input.persistedAt,
+    contentReference: {
+      contentDigest: "sha256:omitted-from-history-response",
+      contentPreviewMasked: `redacted generated result summary for ${input.workspace} ${input.generationKind}`,
+      contentVisibility: "redacted_snapshot",
+      redactionStatus: "redacted",
+    },
+    evidenceReference: {
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: "ai_call_log_public_omitted_from_history_response",
+      redactionStatus: "redacted",
+    },
+    sourceReference: {
+      sourceQuestionPublicId: null,
+      sourcePaperPublicId: null,
+    },
+    formalAdoption: {
+      isBlocked: true,
+      status: "blocked",
+    },
   };
 }
 
@@ -348,19 +407,25 @@ function createGeneratedResultPersistenceResult(
 
 function createGeneratedResultPersistenceRecorder(
   input: {
+    draftResults?: AdminAiGenerationResultDto[];
     persistenceStatus?: AdminAiGenerationResultPersistenceResult["persistenceStatus"];
   } = {},
 ): {
   calls: CreateAdminAiGenerationResultInput[];
+  historyQueries: AdminAiGenerationResultHistoryQuery[];
   repository: AdminAiGenerationResultPersistenceRepository;
 } {
   const calls: CreateAdminAiGenerationResultInput[] = [];
+  const historyQueries: AdminAiGenerationResultHistoryQuery[] = [];
 
   return {
     calls,
+    historyQueries,
     repository: {
-      async listDraftResults() {
-        return [];
+      async listDraftResults(query) {
+        historyQueries.push(query);
+
+        return input.draftResults ?? [];
       },
       async createOrReuseDraftResult(createInput) {
         calls.push(createInput);
@@ -937,6 +1002,164 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("prompt");
     expect(serializedPayload).not.toContain("providerPayload");
     expect(serializedPayload).not.toContain("Authorization");
+  });
+
+  it("returns content admin generated result history summaries without raw result payloads", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_history_456";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_history_456";
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "content",
+          generationKind: "question",
+          taskPublicId,
+          resultPublicId,
+          status: "succeeded",
+          requestedAt: "2026-06-26T20:40:00.000Z",
+        }),
+      ],
+    });
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        draftResults: [
+          createGeneratedResultHistoryItem({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            resultPublicId,
+            persistedAt: "2026-06-26T20:41:00.000Z",
+          }),
+        ],
+      });
+    const response = await getLocalContractHistory({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        limit: 10,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        latestTask: {
+          taskPublicId,
+          resultPublicId,
+          generatedResult: {
+            resultPublicId,
+            persistedAt: "2026-06-26T20:41:00.000Z",
+            status: "draft",
+            contentPreviewMasked:
+              "redacted generated result summary for content question",
+            contentVisibility: "redacted_snapshot",
+            evidenceStatus: "none",
+            citationCount: 0,
+            formalAdoptionStatus: "blocked",
+            redactionStatus: "redacted",
+          },
+        },
+        items: [
+          {
+            taskPublicId,
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for content question",
+              formalAdoptionStatus: "blocked",
+            },
+          },
+        ],
+      },
+    });
+    expect(serializedPayload).not.toContain("contentDigest");
+    expect(serializedPayload).not.toContain("contentRedactedSnapshot");
+    expect(serializedPayload).not.toContain("aiCallLogPublicId");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
+    expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("returns organization advanced admin generated result history scoped to the current organization", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_organization_paper_history_789";
+    const resultPublicId =
+      "admin_ai_generation_result_organization_paper_history_789";
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "organization",
+          generationKind: "paper",
+          taskPublicId,
+          resultPublicId,
+          status: "succeeded",
+          requestedAt: "2026-06-26T20:50:00.000Z",
+        }),
+      ],
+    });
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        draftResults: [
+          createGeneratedResultHistoryItem({
+            workspace: "organization",
+            generationKind: "paper",
+            taskPublicId,
+            resultPublicId,
+            persistedAt: "2026-06-26T20:51:00.000Z",
+          }),
+        ],
+      });
+    const response = await getLocalContractHistory({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
+      {
+        workspace: "organization",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_123",
+        limit: 10,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        workspace: "organization",
+        latestTask: {
+          taskPublicId,
+          generatedResult: {
+            resultPublicId,
+            contentPreviewMasked:
+              "redacted generated result summary for organization paper",
+            contentVisibility: "redacted_snapshot",
+            formalAdoptionStatus: "blocked",
+            redactionStatus: "redacted",
+          },
+        },
+      },
+    });
+    expect(serializedPayload).not.toContain("contentDigest");
+    expect(serializedPayload).not.toContain("ai_call_log_public_omitted");
+    expect(serializedPayload).not.toContain("providerPayload");
   });
 
   it("denies organization standard admin direct GET without listing task history", async () => {

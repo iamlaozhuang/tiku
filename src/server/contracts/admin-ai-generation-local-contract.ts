@@ -4,6 +4,11 @@ import type {
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
 import type { AiGenerationTaskResultContentVisibility } from "../models/ai-generation-task-request";
+import type {
+  AdminAiGenerationResultContentVisibility,
+  AdminAiGenerationResultFormalAdoptionStatus,
+  AdminAiGenerationResultStatus,
+} from "../models/admin-ai-generation-result";
 import type { EvidenceStatus } from "../models/ai-rag";
 
 export type AdminAiGenerationWorkspace = "content" | "organization";
@@ -113,6 +118,18 @@ export type AdminAiGenerationLocalContractDto =
     generatedResult: AdminAiGenerationLocalContractGeneratedResultDto;
   };
 
+export type AdminAiGenerationTaskHistoryGeneratedResultDto = {
+  resultPublicId: string;
+  persistedAt: string;
+  status: AdminAiGenerationResultStatus;
+  contentPreviewMasked: string;
+  contentVisibility: AdminAiGenerationResultContentVisibility;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  formalAdoptionStatus: AdminAiGenerationResultFormalAdoptionStatus;
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationTaskHistoryItemDto = {
   requestPublicId: string;
   taskPublicId: string;
@@ -134,6 +151,7 @@ export type AdminAiGenerationTaskHistoryItemDto = {
   providerConfigurationRead: false;
   costCalibrationExecuted: false;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto | null;
   redactionStatus: "redacted";
 };
 
