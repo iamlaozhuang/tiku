@@ -6,6 +6,11 @@ import {
 } from "./admin-ai-generation-local-contract-route";
 import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationResultPersistenceRepository,
+  AdminAiGenerationResultPersistenceResult,
+  CreateAdminAiGenerationResultInput,
+} from "../contracts/admin-ai-generation-result-persistence-contract";
+import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceResult,
@@ -100,17 +105,22 @@ async function postLocalContractRequest(input: {
       executionSummary: typeof providerDisabledExecutionSummary;
     };
   };
+  resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 }) {
   const taskPersistence =
     input.taskPersistenceRepository ??
     createTaskPersistenceRecorder().repository;
+  const resultPersistence =
+    input.resultPersistenceRepository ??
+    createGeneratedResultPersistenceRecorder().repository;
   const routeOptions = {
     sessionService: createAdminSessionService({
       adminRoles: input.adminRoles,
       organizationPublicId: input.organizationPublicId,
     }),
     taskPersistenceRepository: taskPersistence,
+    resultPersistenceRepository: resultPersistence,
     createRequestPublicId: () =>
       input.requestPublicId ?? "admin_ai_generation_request_public_route_test",
     requestClock: () =>
@@ -294,6 +304,76 @@ function createTaskPersistenceRecorder(
   };
 }
 
+function createGeneratedResultPersistenceResult(
+  input: CreateAdminAiGenerationResultInput,
+  persistenceStatus: AdminAiGenerationResultPersistenceResult["persistenceStatus"],
+): AdminAiGenerationResultPersistenceResult {
+  return {
+    persistenceStatus,
+    result: {
+      resultPublicId: input.resultPublicId,
+      taskPublicId: input.taskPublicId,
+      requestPublicId: `${input.taskPublicId}_request`,
+      workspace: input.workspace,
+      generationKind: input.generationKind,
+      ownerType: input.ownerType,
+      ownerPublicId: input.ownerPublicId,
+      organizationPublicId: input.organizationPublicId,
+      taskType: input.taskType,
+      status: "draft",
+      persistedAt: input.createdAt.toISOString(),
+      contentReference: {
+        contentDigest: input.contentDigest,
+        contentPreviewMasked: input.contentPreviewMasked,
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+      },
+      evidenceReference: {
+        evidenceStatus: input.evidenceStatus,
+        citationCount: input.citationCount,
+        aiCallLogPublicId: input.aiCallLogPublicId,
+        redactionStatus: "redacted",
+      },
+      sourceReference: {
+        sourceQuestionPublicId: input.sourceQuestionPublicId,
+        sourcePaperPublicId: input.sourcePaperPublicId,
+      },
+      formalAdoption: {
+        isBlocked: true,
+        status: "blocked",
+      },
+    },
+  };
+}
+
+function createGeneratedResultPersistenceRecorder(
+  input: {
+    persistenceStatus?: AdminAiGenerationResultPersistenceResult["persistenceStatus"];
+  } = {},
+): {
+  calls: CreateAdminAiGenerationResultInput[];
+  repository: AdminAiGenerationResultPersistenceRepository;
+} {
+  const calls: CreateAdminAiGenerationResultInput[] = [];
+
+  return {
+    calls,
+    repository: {
+      async listDraftResults() {
+        return [];
+      },
+      async createOrReuseDraftResult(createInput) {
+        calls.push(createInput);
+
+        return createGeneratedResultPersistenceResult(
+          createInput,
+          input.persistenceStatus ?? "created",
+        );
+      },
+    },
+  };
+}
+
 describe("admin AI generation local contract route handlers", () => {
   it("accepts content admin AI question requests as platform-owned local contracts", async () => {
     const response = await postLocalContractRequest({
@@ -329,7 +409,8 @@ describe("admin AI generation local contract route handlers", () => {
           quotaOwnerPublicId: "platform_content_review_pool",
           resultReference: {
             resultKind: "ai_generated_question_set",
-            resultPublicId: null,
+            resultPublicId:
+              "admin_ai_generation_result_content_question_admin_public_123",
             contentVisibility: "summary_only",
             redactionStatus: "redacted",
             evidenceStatus: "none",
@@ -353,11 +434,22 @@ describe("admin AI generation local contract route handlers", () => {
           requestPublicId: "admin_ai_generation_request_public_route_test",
           taskPublicId:
             "admin_ai_generation_task_content_question_admin_public_123",
-          status: "pending",
-          resultPublicId: null,
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
+          redactionStatus: "redacted",
+        },
+        generatedResult: {
+          persistenceStatus: "created",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
+          contentVisibility: "redacted_snapshot",
+          evidenceStatus: "none",
+          citationCount: 0,
+          formalAdoptionStatus: "blocked",
           redactionStatus: "redacted",
         },
       },
@@ -415,8 +507,9 @@ describe("admin AI generation local contract route handlers", () => {
             "admin_ai_generation_request_public_content_route_123",
           taskPublicId:
             "admin_ai_generation_task_content_question_admin_public_123",
-          status: "pending",
-          resultPublicId: null,
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
@@ -425,6 +518,95 @@ describe("admin AI generation local contract route handlers", () => {
       },
     });
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_F");
+    expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("persists content admin provider-disabled generated result summaries after task persistence", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestPublicId: "admin_ai_generation_request_public_content_route_123",
+      requestedAt: new Date("2026-06-26T20:10:00.000Z"),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        clientOnlyFixtureI: "OMITTED_FIXTURE_I",
+      },
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(taskPersistenceRecorder.calls).toHaveLength(1);
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
+    expect(generatedResultPersistenceRecorder.calls[0]).toMatchObject({
+      resultPublicId:
+        "admin_ai_generation_result_content_question_admin_public_123",
+      taskPublicId:
+        "admin_ai_generation_task_content_question_admin_public_123",
+      workspace: "content",
+      generationKind: "question",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      organizationPublicId: null,
+      taskType: "ai_question_generation",
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: null,
+      sourceQuestionPublicId: null,
+      sourcePaperPublicId: null,
+    });
+    expect(generatedResultPersistenceRecorder.calls[0].contentDigest).toMatch(
+      /^sha256:/u,
+    );
+    expect(
+      generatedResultPersistenceRecorder.calls[0].contentPreviewMasked,
+    ).toBe("redacted admin AI generation local contract summary");
+    expect(
+      JSON.stringify(
+        generatedResultPersistenceRecorder.calls[0].contentRedactedSnapshot,
+      ),
+    ).not.toContain("OMITTED_FIXTURE_I");
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        resultState: {
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
+          contentVisibility: "summary_only",
+          evidenceStatus: "none",
+          citationCount: 0,
+          redactionStatus: "redacted",
+        },
+        taskPersistence: {
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
+          evidenceStatus: "none",
+          citationCount: 0,
+          redactionStatus: "redacted",
+        },
+        generatedResult: {
+          persistenceStatus: "created",
+          resultPublicId:
+            "admin_ai_generation_result_content_question_admin_public_123",
+          contentVisibility: "redacted_snapshot",
+          evidenceStatus: "none",
+          citationCount: 0,
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        },
+      },
+    });
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_I");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
     expect(serializedPayload).not.toMatch(/"id":/);
   });
 
@@ -468,12 +650,79 @@ describe("admin AI generation local contract route handlers", () => {
           requestPublicId: "admin_ai_generation_request_public_org_route_123",
           taskPublicId:
             "admin_ai_generation_task_organization_paper_admin_public_123",
-          status: "pending",
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_organization_paper_admin_public_123",
           redactionStatus: "redacted",
         },
       },
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_G");
+  });
+
+  it("persists organization advanced admin provider-disabled generated result summaries", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        persistenceStatus: "reused",
+      });
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      requestPublicId: "admin_ai_generation_request_public_org_route_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      body: {
+        generationKind: "paper",
+        clientOnlyFixtureJ: "OMITTED_FIXTURE_J",
+      },
+    });
+    const payload = await response.json();
+
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
+    expect(generatedResultPersistenceRecorder.calls[0]).toMatchObject({
+      resultPublicId:
+        "admin_ai_generation_result_organization_paper_admin_public_123",
+      taskPublicId:
+        "admin_ai_generation_task_organization_paper_admin_public_123",
+      workspace: "organization",
+      generationKind: "paper",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_123",
+      organizationPublicId: "organization_public_123",
+      taskType: "ai_paper_generation",
+      sourceQuestionPublicId: null,
+      sourcePaperPublicId: null,
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        resultState: {
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_organization_paper_admin_public_123",
+        },
+        generatedResult: {
+          persistenceStatus: "reused",
+          resultPublicId:
+            "admin_ai_generation_result_organization_paper_admin_public_123",
+          formalAdoptionStatus: "blocked",
+        },
+        runtimeBridge: {
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+        },
+        formalContentBoundary: {
+          questionWriteStatus: "blocked_without_follow_up_task",
+          paperWriteStatus: "blocked_without_follow_up_task",
+        },
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_J");
   });
 
   it("accepts organization advanced admin AI paper requests as organization-owned local contracts", async () => {
@@ -506,12 +755,15 @@ describe("admin AI generation local contract route handlers", () => {
           quotaOwnerPublicId: "organization_public_123",
           resultReference: {
             resultKind: "ai_generated_paper_draft",
+            resultPublicId:
+              "admin_ai_generation_result_organization_paper_admin_public_123",
             contentVisibility: "summary_only",
           },
         },
         resultState: {
-          status: "pending",
-          resultPublicId: null,
+          status: "succeeded",
+          resultPublicId:
+            "admin_ai_generation_result_organization_paper_admin_public_123",
           contentVisibility: "summary_only",
           redactionStatus: "redacted",
         },

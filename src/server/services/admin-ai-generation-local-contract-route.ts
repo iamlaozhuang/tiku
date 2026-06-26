@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
@@ -9,6 +9,7 @@ import {
 } from "../contracts/api-response";
 import type {
   AdminAiGenerationKind,
+  AdminAiGenerationLocalContractGeneratedResultDto,
   AdminAiGenerationLocalContractBaseDto,
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
@@ -19,6 +20,11 @@ import type {
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
 import type {
+  AdminAiGenerationResultPersistenceRepository,
+  AdminAiGenerationResultPersistenceResult,
+  CreateAdminAiGenerationResultInput,
+} from "../contracts/admin-ai-generation-result-persistence-contract";
+import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
   AdminAiGenerationTaskPersistenceRepository,
@@ -27,6 +33,7 @@ import type {
 import type { AdminRole } from "../models/auth";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
+import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
 import { createDefaultBlockedRouteIntegratedProviderExecutionOutcome } from "./personal-ai-generation-route-integrated-provider-execution-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -41,6 +48,7 @@ export type AdminAiGenerationLocalContractRouteOptions = {
   requestClock?: () => Date;
   sessionService?: Pick<SessionService, "getCurrentSession">;
   runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
+  resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 };
 
@@ -341,6 +349,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
+  resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationLocalContractDto | null>> {
   const taskRequestResponse = buildAiGenerationTaskRequestPolicyReadModel(
@@ -353,6 +362,7 @@ async function buildAdminAiGenerationLocalContract(input: {
 
   const taskRequest = taskRequestResponse.data;
   const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge(input);
+  const requestedAt = input.requestClock();
 
   const localContract = {
     runtimeStatus: "local_contract_only",
@@ -386,32 +396,165 @@ async function buildAdminAiGenerationLocalContract(input: {
         taskPublicId: taskRequest.taskPublicId,
         workspace: input.workspace,
       }),
-      requestedAt: input.requestClock(),
+      requestedAt,
     });
+  const generatedResult =
+    await input.resultPersistenceRepository.createOrReuseDraftResult(
+      createAdminAiGenerationLocalContractResultInput({
+        localContract,
+        taskPersistence,
+        createdAt: requestedAt,
+      }),
+    );
 
   return createSuccessResponse({
-    ...localContract,
+    ...createAdminAiGenerationResolvedLocalContract({
+      generatedResult,
+      localContract,
+    }),
     taskPersistence:
-      mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(
+      mapAdminAiGenerationTaskPersistenceResultToLocalContractDto({
+        generatedResult,
         taskPersistence,
+      }),
+    generatedResult:
+      mapAdminAiGenerationResultPersistenceResultToLocalContractDto(
+        generatedResult,
       ),
   });
 }
 
-function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(
-  result: AdminAiGenerationTaskPersistenceResult,
-): AdminAiGenerationLocalContractTaskPersistenceDto {
+function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(input: {
+  generatedResult: AdminAiGenerationResultPersistenceResult;
+  taskPersistence: AdminAiGenerationTaskPersistenceResult;
+}): AdminAiGenerationLocalContractTaskPersistenceDto {
+  const result = input.taskPersistence;
+
   return {
     persistenceStatus: result.persistenceStatus,
     requestPublicId: result.task.requestPublicId,
     taskPublicId: result.task.taskPublicId,
-    status: result.task.status,
-    resultPublicId: result.task.resultPublicId,
+    status: "succeeded",
+    resultPublicId: input.generatedResult.result.resultPublicId,
     contentVisibility: result.task.contentVisibility,
-    evidenceStatus: result.task.evidenceStatus,
-    citationCount: result.task.citationCount,
+    evidenceStatus:
+      input.generatedResult.result.evidenceReference.evidenceStatus,
+    citationCount: input.generatedResult.result.evidenceReference.citationCount,
     redactionStatus: result.task.redactionStatus,
   };
+}
+
+function mapAdminAiGenerationResultPersistenceResultToLocalContractDto(
+  result: AdminAiGenerationResultPersistenceResult,
+): AdminAiGenerationLocalContractGeneratedResultDto {
+  return {
+    persistenceStatus: result.persistenceStatus,
+    resultPublicId: result.result.resultPublicId,
+    contentVisibility: result.result.contentReference.contentVisibility,
+    evidenceStatus: result.result.evidenceReference.evidenceStatus,
+    citationCount: result.result.evidenceReference.citationCount,
+    formalAdoptionStatus: result.result.formalAdoption.status,
+    redactionStatus: result.result.contentReference.redactionStatus,
+  };
+}
+
+function createAdminAiGenerationResolvedLocalContract(input: {
+  generatedResult: AdminAiGenerationResultPersistenceResult;
+  localContract: AdminAiGenerationLocalContractBaseDto;
+}): AdminAiGenerationLocalContractBaseDto {
+  return {
+    ...input.localContract,
+    resultState: {
+      ...input.localContract.resultState,
+      status: "succeeded",
+      resultPublicId: input.generatedResult.result.resultPublicId,
+      evidenceStatus:
+        input.generatedResult.result.evidenceReference.evidenceStatus,
+      citationCount:
+        input.generatedResult.result.evidenceReference.citationCount,
+    },
+    taskRequest: {
+      ...input.localContract.taskRequest,
+      resultReference: {
+        ...input.localContract.taskRequest.resultReference,
+        resultPublicId: input.generatedResult.result.resultPublicId,
+        evidenceStatus:
+          input.generatedResult.result.evidenceReference.evidenceStatus,
+        citationCount:
+          input.generatedResult.result.evidenceReference.citationCount,
+      },
+    },
+  };
+}
+
+function createAdminAiGenerationLocalContractResultInput(input: {
+  localContract: AdminAiGenerationLocalContractBaseDto;
+  taskPersistence: AdminAiGenerationTaskPersistenceResult;
+  createdAt: Date;
+}): CreateAdminAiGenerationResultInput {
+  const task = input.taskPersistence.task;
+  const contentRedactedSnapshot =
+    createAdminAiGenerationLocalContractRedactedSnapshot(input.localContract);
+
+  return {
+    resultPublicId: createAdminAiGenerationResultPublicId(task.taskPublicId),
+    taskPublicId: task.taskPublicId,
+    workspace: task.workspace,
+    generationKind: task.generationKind,
+    ownerType: task.ownerType === "organization" ? "organization" : "platform",
+    ownerPublicId: task.ownerPublicId,
+    organizationPublicId: task.organizationPublicId,
+    taskType: task.taskType,
+    contentRedactedSnapshot,
+    contentDigest: createAdminAiGenerationContentDigest(
+      contentRedactedSnapshot,
+    ),
+    contentPreviewMasked: "redacted admin AI generation local contract summary",
+    citationRedactedSnapshot: null,
+    evidenceStatus: "none",
+    citationCount: 0,
+    aiCallLogPublicId: null,
+    sourceQuestionPublicId: null,
+    sourcePaperPublicId: null,
+    createdAt: input.createdAt,
+  };
+}
+
+function createAdminAiGenerationResultPublicId(taskPublicId: string): string {
+  const taskPrefix = "admin_ai_generation_task_";
+
+  return taskPublicId.startsWith(taskPrefix)
+    ? `admin_ai_generation_result_${taskPublicId.slice(taskPrefix.length)}`
+    : `${taskPublicId}_result`;
+}
+
+function createAdminAiGenerationLocalContractRedactedSnapshot(
+  localContract: AdminAiGenerationLocalContractBaseDto,
+) {
+  return {
+    redactionStatus: "redacted",
+    summaryKind: "admin_ai_generation_local_contract",
+    runtimeStatus: localContract.runtimeStatus,
+    workspace: localContract.workspace,
+    generationKind: localContract.generationKind,
+    taskType: localContract.taskRequest.taskType,
+    resultKind: localContract.taskRequest.resultReference.resultKind,
+    contentVisibility: localContract.resultState.contentVisibility,
+    providerCallExecuted: false,
+    runtimeBridgeStatus: localContract.runtimeBridge.bridgeStatus,
+    formalQuestionWriteStatus:
+      localContract.formalContentBoundary.questionWriteStatus,
+    formalPaperWriteStatus:
+      localContract.formalContentBoundary.paperWriteStatus,
+  };
+}
+
+function createAdminAiGenerationContentDigest(
+  redactedSnapshot: Record<string, unknown>,
+): string {
+  return `sha256:${createHash("sha256")
+    .update(JSON.stringify(redactedSnapshot))
+    .digest("hex")}`;
 }
 
 function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
@@ -502,6 +645,9 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
   const taskPersistenceRepository =
     options.taskPersistenceRepository ??
     createPostgresAdminAiGenerationTaskPersistenceRepository();
+  const resultPersistenceRepository =
+    options.resultPersistenceRepository ??
+    createPostgresAdminAiGenerationResultPersistenceRepository();
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -556,6 +702,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             createRequestPublicId,
             generationKind,
             requestClock,
+            resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,
             taskPersistenceRepository,
             workspace,

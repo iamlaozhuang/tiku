@@ -97,9 +97,20 @@ export type AdminAiGenerationLocalContractTaskPersistenceDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationLocalContractGeneratedResultDto = {
+  persistenceStatus: "created" | "reused";
+  resultPublicId: string;
+  contentVisibility: "redacted_snapshot";
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  formalAdoptionStatus: "blocked";
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationLocalContractDto =
   AdminAiGenerationLocalContractBaseDto & {
     taskPersistence: AdminAiGenerationLocalContractTaskPersistenceDto;
+    generatedResult: AdminAiGenerationLocalContractGeneratedResultDto;
   };
 
 export type AdminAiGenerationTaskHistoryItemDto = {
