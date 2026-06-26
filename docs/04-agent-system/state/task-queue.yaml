@@ -44,6 +44,141 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: mvp-final-pass-decision-review-2026-06-26
+    title: MVP final Pass decision review for local product scope
+    phase: mvp-final-pass-decision-review-2026-06-26
+    sourceStory: owner_approved_local_product_final_pass_decision_review_after_full_8_row_browser_pass
+    dependencies:
+      - role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+      - mvp-final-pass-decision-criteria-package-2026-06-26
+    taskKind: docs_only_acceptance_decision_review
+    moduleRunVersion: 2
+    executionProfile: docs_state_acceptance_decision_only
+    evidenceMode: redacted_committed_evidence_review_and_gate_separation_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_enter_local_product_final_pass_decision_review
+    requiredOutcome: >-
+      Evaluate the local-product MVP final Pass decision using the committed criteria package and the latest full
+      eight-row local browser evidence. The review may decide only the local product acceptance scope. Provider/Cost,
+      staging/prod, payment, external-service, env/secret, DB/schema/migration/account mutation, dependency/package,
+      PR, force-push, deployment, and release-readiness gates remain excluded and require separate fresh approval.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      localProductFinalPassDecisionReview: approved_by_user_request_2026_06_26
+      localBrowserEvidenceReview: approved_read_only_committed_evidence_only
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      credentialEntry: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked_excluded_from_this_decision
+      providerConfiguration: blocked_excluded_from_this_decision
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked_excluded_from_this_decision
+      paymentExternalService: blocked_excluded_from_this_decision
+      costCalibrationGate: blocked_excluded_from_this_decision
+      releaseReadinessDecision: blocked_excluded_from_this_decision
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mvp-final-pass-decision-review-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId mvp-final-pass-decision-review-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md
+    decisionReviewPath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+    criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+    sourceFull8EvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+    status: closed
+    result: pass_local_product_mvp_final_pass_decision_review_provider_cost_release_gates_excluded
+    claimedAt: "2026-06-26T07:20:00-07:00"
+    plannedAt: "2026-06-26T07:20:00-07:00"
+    validatedAt: "2026-06-26T07:35:00-07:00"
+    reviewedAt: "2026-06-26T07:35:00-07:00"
+    closedAt: "2026-06-26T07:35:00-07:00"
+    branch: codex/mvp-final-pass-decision-review-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+    validationSummary:
+      decisionReviewPrepared: pass
+      localProductEntryCriteria: pass
+      localProductFinalPassDecision: pass_local_product_only
+      providerCostReleaseGatesExcluded: pass_excluded_blocked
+      staleEvidenceCheck: pass_no_product_runtime_change_since_full_8_evidence
+      browserRuntimeExecuted: false
+      credentialDocumentReadByCodex: false
+      sourceTestPackageLockfileChanged: false
+      dbSeedSchemaMigrationAccountMutationExecuted: false
+      providerCostStagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+
   - id: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
     title: Role-separated full 8 row post admin AI local contract loop browser rerun
     phase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26

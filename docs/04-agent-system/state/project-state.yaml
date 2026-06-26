@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
-updatedAt: "2026-06-26T07:05:00-07:00"
+currentPhase: mvp-final-pass-decision-review-2026-06-26
+updatedAt: "2026-06-26T07:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,34 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 19766dece093fcbc604123af8653d33fda07979b
-  lastKnownOriginMasterSha: 19766dece093fcbc604123af8653d33fda07979b
+  lastKnownMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
+  lastKnownOriginMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
 currentTask:
-  id: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
+  id: mvp-final-pass-decision-review-2026-06-26
   status: closed
-  result: pass_full_8_row_post_admin_ai_local_contract_loop_browser_rerun_no_final_pass
-  claimedAt: "2026-06-26T06:40:00-07:00"
-  plannedAt: "2026-06-26T06:40:00-07:00"
-  validatedAt: "2026-06-26T07:05:00-07:00"
-  reviewedAt: "2026-06-26T07:05:00-07:00"
-  closedAt: "2026-06-26T07:05:00-07:00"
-  sourceStory: owner_requested_full_8_row_rerun_after_admin_ai_local_contract_focused_pass
-  approvalConsumed: user_request_full_8_browser_rerun_2026_06_26
-  approvalSource: user_request_full_8_browser_rerun_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
-  sourceImplementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
-  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
-  sourceRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
-  sourceFocusedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
-  sourceFull8BaselineEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  result: pass_local_product_mvp_final_pass_decision_review_provider_cost_release_gates_excluded
+  claimedAt: "2026-06-26T07:20:00-07:00"
+  plannedAt: "2026-06-26T07:20:00-07:00"
+  validatedAt: "2026-06-26T07:35:00-07:00"
+  reviewedAt: "2026-06-26T07:35:00-07:00"
+  closedAt: "2026-06-26T07:35:00-07:00"
+  sourceStory: owner_approved_local_product_final_pass_decision_review_after_full_8_row_browser_pass
+  approvalConsumed: user_request_local_product_final_pass_decision_review_2026_06_26
+  approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md
+  decisionReviewPath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  ownerAcceptanceDecisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  sourceFull8EvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  sourceFull8AuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
   scope:
     localSourceChange: false
     focusedUnitTest: false
-    browserRuntime: true
-    credentialDocumentRead: true
-    credentialOrEnvRead: credential_file_only_no_env
+    browserRuntime: false
+    credentialDocumentRead: false
+    credentialOrEnvRead: false
     providerCall: false
     costCalibration: false
     databaseConnectionOrWrite: false
@@ -536,51 +536,50 @@ currentTask:
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
-    finalPassClaim: false
+    localProductFinalPassDecisionReview: true
+    releaseReadinessDecision: false
   requirementMapping:
-    personalStandardStudent: verify_no_advanced_ai_or_backend_access
-    personalAdvancedStudent: verify_ai_generation_entry_and_no_backend_access
-    organizationStandardEmployee: verify_no_advanced_ai_or_training_or_backend_access
-    organizationAdvancedEmployee: verify_ai_and_training_entries_and_no_backend_access
-    organizationStandardAdmin: verify_no_advanced_admin_ai_or_training_and_denied_or_unavailable_direct_paths
-    organizationAdvancedAdmin: verify_admin_ai_training_entries_submit_redacted_summary_and_denied_boundaries
-    contentAdmin: verify_content_ai_entries_submit_redacted_summary_and_denied_boundaries
-    opsAdmin: verify_ops_entries_and_denied_content_organization_boundaries
+    personalStandardStudent: local_product_scope_pass_from_latest_full_8_evidence
+    personalAdvancedStudent: local_product_scope_pass_from_latest_full_8_evidence
+    organizationStandardEmployee: local_product_scope_pass_from_latest_full_8_evidence
+    organizationAdvancedEmployee: local_product_scope_pass_from_latest_full_8_evidence
+    organizationStandardAdmin: local_product_scope_pass_from_latest_full_8_evidence
+    organizationAdvancedAdmin: local_product_scope_pass_from_latest_full_8_evidence
+    contentAdmin: local_product_scope_pass_from_latest_full_8_evidence
+    opsAdmin: local_product_scope_pass_from_latest_full_8_evidence
     editionAwareAuthorization: server_derived_role_scoped_no_client_authority_change
-    roleExperienceMatrix: full_eight_row_runtime_evidence
+    roleExperienceMatrix: latest_full_eight_row_runtime_evidence_reviewed
     formalContentBoundary: summary_only_no_question_or_paper_write
-    providerBoundary: blocked_in_this_task
+    providerBoundary: excluded_and_blocked_from_decision
+    releaseBoundary: excluded_and_blocked_from_decision
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_full_8_browser_rerun_2026_06_26
+      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_full_8_browser_rerun_2026_06_26
-  branch: codex/full-8-admin-ai-loop-rerun-20260626
+      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+  branch: codex/mvp-final-pass-decision-review-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    playwrightVersion: pass_1_60_0
-    localTargetProbe: pass_200
-    credentialStructureCheck: pass_all_8_rows_redacted
-    initialRunnerTimeout: observed_no_secret_or_raw_artifact_output
-    intermediateCheckerFalseFail: observed_4_pass_4_fail_due_cross_workspace_denial_classifier
-    realBrowserFull8Rerun: pass_8_rows_0_fail_0_blocked_after_classifier_repair
-    adminAiLocalContractSubmitSummary: pass_content_and_org_advanced_summary_only
-    browserConsoleIssues: "0_each_row"
-    browserRuntimeExecuted: true
-    credentialDocumentReadByCodex: true_redacted
+    decisionReviewPrepared: pass
+    localProductEntryCriteria: pass
+    localProductFinalPassDecision: pass_local_product_only
+    providerCostReleaseGatesExcluded: pass_excluded_blocked
+    staleEvidenceCheck: pass_no_product_runtime_change_since_full_8_evidence
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
     credentialValuesPrintedOrRecorded: false
     prettierScoped: pass
     gitDiffCheck: pass
@@ -598,8 +597,64 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    finalPassClaim: false
-  nextRecommendedTask: mvp-final-pass-decision-review-2026-06-26
+    localProductFinalPassOnly: pass
+    releaseFinalPassClaim: false
+  nextRecommendedTask: owner_select_external_or_release_gate_package_if_scope_expands
+mvpFinalPassDecisionReview20260626:
+  taskId: mvp-final-pass-decision-review-2026-06-26
+  phase: mvp-final-pass-decision-review-2026-06-26
+  recordedAt: "2026-06-26T07:20:00-07:00"
+  status: closed
+  result: pass_local_product_mvp_final_pass_decision_review_provider_cost_release_gates_excluded
+  validatedAt: "2026-06-26T07:35:00-07:00"
+  reviewedAt: "2026-06-26T07:35:00-07:00"
+  closedAt: "2026-06-26T07:35:00-07:00"
+  branch: codex/mvp-final-pass-decision-review-20260626
+  entryMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
+  entryOriginMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
+  approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md
+  decisionReviewPath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
+  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  sourceFull8EvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+  scope:
+    localProductDecisionReview: true
+    localSourceChange: false
+    focusedUnitTest: false
+    browserRuntime: false
+    credentialDocumentRead: false
+    envSecretAccess: false
+    providerCall: false
+    costCalibration: false
+    databaseConnectionOrWrite: false
+    schemaMigration: false
+    accountMutation: false
+    formalQuestionOrPaperWrite: false
+    stagingProdDeploy: false
+    paymentExternalService: false
+    releaseReadinessDecision: false
+  decisionLayers:
+    localProductMvpFinalPass: pass
+    providerCostReadiness: excluded_blocked_requires_separate_gate
+    releaseEnvironmentReadiness: excluded_blocked_requires_separate_gate
+    paymentExternalServiceReadiness: excluded_blocked_requires_separate_gate
+  validationSummary:
+    decisionReviewPrepared: pass
+    localProductEntryCriteria: pass
+    staleEvidenceCheck: pass_no_product_runtime_change_since_full_8_evidence
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    sourceTestPackageLockfileChanged: false
+    dbSeedSchemaMigrationAccountMutationExecuted: false
+    providerCostStagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: owner_select_external_or_release_gate_package_if_scope_expands
 roleSeparatedFull8RowPostAdminAiLocalContractLoopBrowserRerun20260626:
   taskId: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
   phase: role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun-2026-06-26
