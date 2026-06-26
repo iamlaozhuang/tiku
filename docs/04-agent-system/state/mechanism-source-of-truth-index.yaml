@@ -175,6 +175,8 @@ sopGroups:
       path: docs/04-agent-system/sop/codex-app-readiness-audit-governance.md
     - id: local-first-validation-governance
       path: docs/04-agent-system/sop/local-first-validation-governance.md
+    - id: batch-execution-package-governance
+      path: docs/04-agent-system/sop/batch-execution-package-governance.md
   risk_gates:
     - id: dependency-introduction-gate
       path: docs/04-agent-system/sop/dependency-introduction-gate.md
@@ -344,6 +346,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
     decisionOutput: queueDrainDecision
     role: default executable entry for bounded queue drain; emits queueDrainDefaultEntry, queueDrainEntryContract, moduleApprovalWindowDecision, hardStopState, recoveryPacketRequired, and repo-external recoveryPacketPath rules while consuming runner and dispatcher decisions, enforcing wake budgets and repeated blocker fingerprints, and returning the next agent-layer action so each drained batch still passes serial execution, approved closeout, finalizer, and startup gates
+  - id: module-run-v2-redacted-smoke-runner
+    path: scripts/agent-system/Invoke-ModuleRunV2RedactedSmokeRunner.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2RedactedSmokeRunner.Smoke.ps1
+    decisionOutput: redactedSmokeRunnerDecision
+    role: governed local smoke command wrapper that defaults to dry-run, requires Execute for command execution, caps attempts to one, writes summary-only JSON with command/output hashes and counts, removes raw stdout/stderr temp files, and does not approve Provider, DB, env/secret, browser/e2e, staging/prod, payment, external-service, publish, Cost Calibration, or final Pass work by itself
   - id: module-run-v2-queue-slimming-self-repair
     path: scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
     smokePath: scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.Smoke.ps1

@@ -113,23 +113,50 @@ validationPolicies:
     meaning: Use task-declared validationCommands without inferred privileges.
   docs_state:
     requiredCommands:
+      - scoped prettier write for changed docs/state/evidence/audit/task-plan files
       - git diff --check
       - scoped prettier check for changed docs/state/evidence/audit/task-plan files
+      - relevant mechanism diagnostics or smoke scripts
+    broadCommandsExcludedByDefault:
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - relevant mechanism diagnostics or smoke scripts
+    meaning: Docs/state validation proves governance file shape only. It does not prove source or runtime behavior.
   local_unit:
     requiredCommands:
       - focused unit command
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
+    ordering:
+      - focused unit command first
+      - lint and typecheck after focused behavior passes
   runtime_unit:
     requiredCommands:
       - focused runtime unit command without real private data
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
+  local_route_smoke_capped:
+    requiredCommands:
+      - readonly or low-cost preflight when available
+      - capped local route smoke command approved by task
+      - redacted status/count evidence
+      - git diff --check
+      - scoped prettier check for changed docs/state/evidence/audit/task-plan files
+    requiredTaskCaps:
+      - max request count
+      - max DB write count by table when mutation is approved
+      - allowed actor or route context
+      - evidence redaction fields
+    broadCommandsExcludedByDefault:
+      - unrelated full test suites
+      - unrelated route smoke reruns
+  focused_script_smoke:
+    requiredCommands:
+      - focused smoke script for changed mechanism script
+      - scoped prettier write/check for changed docs/state/evidence/audit/task-plan files
+      - git diff --check
+      - relevant Module Run v2 hardening gate
   local_full_flow:
     requiredCommands:
       - explicit local-only startup or fixture command approved by task
@@ -381,6 +408,26 @@ workPacket:
     localFullFlow: single_task_only
     forbiddenClaims:
       - guarded goal packet diagnostics do not execute tasks, mutate queue state, run Browser/Playwright/e2e, merge, push, deploy, call providers, change dependencies, change schema, or execute Cost Calibration Gate
+  batchExecutionPackage:
+    sopPath: docs/04-agent-system/sop/batch-execution-package-governance.md
+    templatePath: docs/04-agent-system/templates/module-run-v2-execution-package-template.yaml
+    preferredSerialTaskCount: 3-5
+    taskGranularity: one_verifiable_closure
+    preflightFirst: true
+    reusableRedactedSmokeRunnerPath: scripts/agent-system/Invoke-ModuleRunV2RedactedSmokeRunner.ps1
+    blockedByDefault:
+      - dependency_package_lockfile_change
+      - schema_migration_or_drizzle_push
+      - destructive_database_operation
+      - env_secret_value_access_or_edit
+      - provider_call_unless_named_and_freshly_approved
+      - browser_e2e_unless_task_approved
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - formal_publish_or_student_visible_content
+      - cost_calibration_gate
+      - pr_force_push
+      - final_acceptance_pass
 localFullFlowGate:
   default: blocked_without_task_profile
   approvedValue: approved_localhost_only

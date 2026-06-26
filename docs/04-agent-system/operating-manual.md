@@ -21,6 +21,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 - Post-merge evidence-only commits are not required by default; use final handoff or `project-state.yaml` for final SHAs
   unless durable post-merge evidence is needed for recovery or a gate explicitly requires it.
 - Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
+- Batch execution packages are the preferred shape for 3-5 serial tasks that share one verifiable closure. The package
+  records approval boundaries, preflight, validation layering, and blocked gates up front, but each child task still
+  keeps its own branch, plan, evidence, audit, validation, commit, and closeout decision.
 
 ## Recovery Read Order
 
@@ -135,6 +138,24 @@ Guarded goal packet v1 is read-only until a task explicitly adopts it. `Test-Mod
 ready docs/state/audit-only tasks for guarded serial packet closeout when their allowed files stay inside mechanism
 state/SOP/operating-manual/evidence/task-plan/audit paths, evidence and audit paths exist, and local commit closeout is
 task-scoped. Product or runtime scope must keep one task and one closeout. `local_full_flow` is always single-task only.
+
+## Batch Execution Package Rule
+
+Use `docs/04-agent-system/sop/batch-execution-package-governance.md` before a serial chain would otherwise require
+repeated approval packages for the same closure. A package can pre-approve only the child capabilities it names, such as
+docs/state changes, focused source TDD, readonly preflight, capped local route smoke, draft-only local DB mutation, or one
+named Provider smoke. Anything not named remains blocked.
+
+Before mutating or costly validation, prefer a readonly or low-cost preflight that checks actor, route, local data,
+migration journal, command, and evidence readiness without expanding the task scope. Route smoke should use capped
+request/write counts and redacted evidence. Provider/cost and publish/student-visible content remain separate gates.
+
+Validation should be layered by changed surface:
+
+- docs/state tasks use scoped Prettier write/check, `git diff --check`, and relevant Module Run gates;
+- mechanism script tasks add focused script smoke;
+- source tasks run focused unit tests first, then lint/typecheck;
+- route smoke tasks avoid unrelated full validation unless shared source changed.
 
 Queue slimming/self-repair v1 is diagnostic-only. `Get-ModuleRunV2QueueSlimmingSelfRepair.ps1` reports terminal
 active-queue archive candidates outside the recovery window and separates safe mechanism docs/state task-packet metadata
@@ -298,3 +319,18 @@ The focused smoke for that gate is:
 ```powershell
 .\scripts\agent-system\Test-ModuleRunV2RequirementSsotReadiness.Smoke.ps1
 ```
+
+The governed redacted command wrapper for future approved local smoke commands is:
+
+```powershell
+.\scripts\agent-system\Invoke-ModuleRunV2RedactedSmokeRunner.ps1
+```
+
+Its focused smoke is:
+
+```powershell
+.\scripts\agent-system\Invoke-ModuleRunV2RedactedSmokeRunner.Smoke.ps1
+```
+
+The runner records summary-only JSON and does not authorize Provider, DB, env/secret, browser/e2e, staging/prod, payment,
+external-service, publish, Cost Calibration, or final Pass work by itself.

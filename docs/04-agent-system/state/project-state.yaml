@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: formal-publish-student-visible-content-approval-package-2026-06-26
-updatedAt: "2026-06-26T13:06:09-07:00"
+currentPhase: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
+updatedAt: "2026-06-26T13:27:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,32 +504,29 @@ repository:
   lastKnownMasterSha: 215939565bcf1c7242c24754e443c8b0b9040c55
   lastKnownOriginMasterSha: 215939565bcf1c7242c24754e443c8b0b9040c55
 currentTask:
-  id: formal-publish-student-visible-content-approval-package-2026-06-26
-  status: closed
-  result: pass_approval_package_prepared_publish_execution_blocked_pending_fresh_approval
-  claimedAt: "2026-06-26T13:06:09-07:00"
-  plannedAt: "2026-06-26T13:06:09-07:00"
-  validatedAt: "2026-06-26T13:06:09-07:00"
-  reviewedAt: "2026-06-26T13:06:09-07:00"
-  closedAt: "2026-06-26T13:06:09-07:00"
-  sourceStory: successor-of-provider-cost-real-provider-paper-composition-smoke-execution-2026-06-26
-  approvalSource: current_user_five_step_serial_goal_approval_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-publish-student-visible-content-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-publish-student-visible-content-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-publish-student-visible-content-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-publish-student-visible-content-approval-package.md
-  branch: codex/formal-publish-approval-20260626
+  id: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
+  status: ready_for_closeout
+  result: pass_local_validation_ready_for_fresh_closeout_approval
+  claimedAt: "2026-06-26T13:27:17-07:00"
+  plannedAt: "2026-06-26T13:27:17-07:00"
+  validatedAt: "2026-06-26T13:33:05-07:00"
+  reviewedAt: "2026-06-26T13:33:05-07:00"
+  sourceStory: active_goal_mechanism_tuning_batch_boundaries_preflight_layered_validation_runner_templates
+  approvalSource: active_thread_goal_mechanism_tuning_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  branch: codex/mechanism-execution-package-runner-20260626
   scope:
     docsStateEvidenceAudit: true
-    approvalDecisionPackage: true
+    mechanismSopChanged: true
+    mechanismTemplateAdded: true
+    mechanismScriptAdded: true
+    executionProfileCatalogChanged: true
     localSourceChange: false
     focusedUnitTest: false
     schemaMigrationFileChange: false
-    drizzleMetadataJournalAlignment: false
-    localMigrationExecutionApprovedForThisTask: false
-    routeIntegrationExecuted: false
     localRouteSmokeApprovedForThisTask: false
-    localDatabaseConnectionApprovedForThisTask: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
@@ -549,49 +546,45 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    approvalPackageOnly: true
-    formalPublishExecutionApprovedInThisTask: false
-    formalPublishFreshApprovalRequired: true
-    proposedEnvironment: local_dev_only
-    proposedMaxPublishCallCount: 1
-    proposedRollbackStrategy: archive_not_delete
-    localDbMutationInThisTaskApproved: false
-    providerCallApproved: false
-    providerCredentialReadApproved: false
-    costCalibrationExecutionApproved: false
-    formalPublishApproved: false
-    studentVisibleContentApproved: false
-    stagingProdReleaseFinalPassApproved: false
+    mechanismTuningOnly: true
+    batchExecutionPackageSop: added
+    minimalStateQueueTemplate: added
+    redactedSmokeRunner: added
+    validationLayeringCatalogUpdate: added
+    localCommitApproved: true
+    mergePushCleanupFreshApprovalRequired: true
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_five_step_serial_goal_approval_2026_06_26
+      approvalSource: active_thread_goal_mechanism_tuning_2026_06_26
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_five_step_serial_goal_approval_2026_06_26
+      approvalSource: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_five_step_serial_goal_approval_2026_06_26
+      approvalSource: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_five_step_serial_goal_approval_2026_06_26
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    acceptancePackagePrepared: true
-    docsOnly: true
+    evidencePrepared: true
+    auditReviewPrepared: true
+    docsOnly: false
+    mechanismScriptSmoke: pass
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     routeSmokeExecuted: false
     providerCallExecuted: false
-    providerCallCount: 1
+    providerCallCount: 0
     providerRetryCount: 0
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
@@ -601,8 +594,65 @@ currentTask:
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: blocked_until_fresh_formal_publish_execution_approval
+  nextRecommendedTask: fresh_closeout_approval_for_merge_push_cleanup_after_local_commit
+mechanismBatchExecutionPackageAndSmokeRunner20260626:
+  taskId: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
+  phase: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
+  recordedAt: "2026-06-26T13:27:17-07:00"
+  status: ready_for_closeout
+  result: pass_local_validation_ready_for_fresh_closeout_approval
+  validatedAt: "2026-06-26T13:33:05-07:00"
+  reviewedAt: "2026-06-26T13:33:05-07:00"
+  branch: codex/mechanism-execution-package-runner-20260626
+  approvalSource: active_thread_goal_mechanism_tuning_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+  sopPath: docs/04-agent-system/sop/batch-execution-package-governance.md
+  templatePath: docs/04-agent-system/templates/module-run-v2-execution-package-template.yaml
+  redactedSmokeRunnerPath: scripts/agent-system/Invoke-ModuleRunV2RedactedSmokeRunner.ps1
+  redactedSmokeRunnerSmokePath: scripts/agent-system/Invoke-ModuleRunV2RedactedSmokeRunner.Smoke.ps1
+  decision:
+    mechanismTuningOnly: true
+    batchExecutionPackageSop: added
+    minimalStateQueueTemplate: added
+    redactedSmokeRunner: added
+    validationLayeringCatalogUpdate: added
+    localCommitApproved: true
+    mergePushCleanupFreshApprovalRequired: true
+  validationSummary:
+    taskPlanPrepared: true
+    evidencePrepared: true
+    auditReviewPrepared: true
+    mechanismScriptSmoke: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    productSourceChanged: false
+    providerCallExecuted: false
+    databaseMutationExecuted: false
+    formalPublishExecuted: false
+    studentVisibleContentExecuted: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    costCalibrationExecuted: false
+    finalPassClaimed: false
+  blockedWithoutFreshApproval:
+    - merge_push_or_branch_cleanup
+    - source_or_test_change
+    - dependency_package_lockfile_change
+    - schema_migration_or_drizzle_push
+    - database_connection_or_mutation
+    - provider_model_call_or_provider_credential_read
+    - env_secret_access_or_env_file_change
+    - browser_e2e_or_dev_server
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - formal_publish_or_student_visible_content
+    - cost_calibration_gate
+    - pr_force_push
+    - final_acceptance_pass
+  nextRecommendedTask: fresh_closeout_approval_for_merge_push_cleanup_after_local_commit
 formalPublishStudentVisibleContentApprovalPackage20260626:
   taskId: formal-publish-student-visible-content-approval-package-2026-06-26
   phase: formal-publish-student-visible-content-approval-package-2026-06-26

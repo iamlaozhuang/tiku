@@ -1,0 +1,153 @@
+# Module Run v2 execution package template.
+# Copy the needed fields into project-state.yaml/task-queue.yaml; do not treat this template as approval.
+schemaVersion: 1
+package:
+  id: example-execution-package-YYYY-MM-DD
+  status: draft_pending_human_approval
+  goal: "one verifiable closure"
+  maxSerialTasks: 5
+  packageBoundary:
+    docsStateOnlyTasks:
+      - example-boundary-package-task
+    sourceOrTestTasks:
+      - example-contract-adapter-tdd-task
+    readonlyPreflightTasks:
+      - example-readonly-preflight-task
+    localDbTasks:
+      readonly: []
+      draftOnlyMutation: []
+    routeSmokeTasks:
+      - taskId: example-route-smoke-task
+        maxRequestCount: 1
+        maxWriteCounts:
+          question: 0
+          paper: 0
+          paper_section: 0
+          paper_question: 0
+    providerTasks:
+      - taskId: example-provider-smoke-task
+        provider: example-provider
+        model: example-model
+        credentialAlias: EXAMPLE_API_KEY
+        maxCallCount: 1
+        maxRetryCount: 0
+        maxTotalTokens: 2000
+        maxBudgetUsd: "1.00"
+    blockedForWholePackage:
+      - dependency_package_lockfile_change
+      - schema_migration_or_drizzle_push
+      - destructive_database_operation
+      - env_secret_value_output_or_edit
+      - provider_call_unless_named_above
+      - browser_e2e_unless_named_above
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - formal_publish_or_student_visible_content_unless_named_above
+      - cost_calibration_gate
+      - pr_force_push
+      - final_acceptance_pass
+  validationLayering:
+    docsStateOnly:
+      - scoped_prettier_write_check
+      - git_diff_check
+      - module_run_v2_relevant_gate
+    source:
+      - focused_unit_first
+      - lint_typecheck_after_focused_behavior
+    routeSmoke:
+      - readonly_preflight_first
+      - capped_request_and_write_counts
+      - redacted_status_count_evidence
+    providerSmoke:
+      - fresh_approval_required
+      - one_call_unless_package_says_otherwise
+      - no_raw_payload_evidence
+
+taskPacket:
+  id: example-task-YYYY-MM-DD
+  title: "Example task"
+  phase: example-execution-package-YYYY-MM-DD
+  taskKind: mechanism_hardening
+  moduleRunVersion: 2
+  executionProfile: mechanism_batch_package
+  evidenceMode: redacted_summary_only
+  validationPolicy: docs_state_scoped_or_focused_script_smoke
+  status: pending
+  requiredOutcome: >-
+    State the verifiable closure this task owns. Keep it to one reviewable behavior or mechanism boundary.
+  capabilities:
+    docsStateEvidenceAudit: approved
+    localSourceChange: blocked
+    focusedUnitTest: blocked
+    localDatabaseConnection: blocked
+    localDatabaseMutation: blocked
+    routeSmoke: blocked
+    providerCall: blocked
+    providerCredentialRead: blocked
+    browserE2E: blocked
+    schemaMigration: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentExternalService: blocked
+    costCalibrationGate: blocked
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/example-task.md
+    - docs/05-execution-logs/evidence/example-task.md
+    - docs/05-execution-logs/audits-reviews/example-task.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown <changed-docs-state-evidence-audit-files>
+    - npx.cmd prettier --check --ignore-unknown <changed-docs-state-evidence-audit-files>
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId example-task-YYYY-MM-DD
+  planPath: docs/05-execution-logs/task-plans/example-task.md
+  evidencePath: docs/05-execution-logs/evidence/example-task.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/example-task.md
+  branch: codex/example-task-YYYYMMDD
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: example_fresh_or_standing_approval
+    mergeToMaster:
+      approved: false
+      approvalSource: fresh_closeout_approval_required
+    push:
+      approved: false
+      approvalSource: fresh_closeout_approval_required
+    cleanup:
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
+  blockedWithoutFreshApproval:
+    - dependency_package_lockfile_change
+    - schema_migration_or_drizzle_push
+    - destructive_database_operation
+    - env_secret_access_or_env_file_change
+    - provider_model_call_or_provider_enablement
+    - browser_e2e_or_dev_server
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - formal_publish_or_student_visible_content
+    - cost_calibration_gate
+    - pr_force_push
+    - final_acceptance_pass
+  validationSummary:
+    taskPlanPrepared: false
+    evidencePrepared: false
+    auditReviewPrepared: false
+    productSourceChanged: false
+    providerCallExecuted: false
+    databaseMutationExecuted: false
+    stagingProdTouched: false
+    finalPassClaimed: false
