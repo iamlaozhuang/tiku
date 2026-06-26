@@ -2569,6 +2569,229 @@ tasks:
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     nextRecommendedTask: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
 
+  - id: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+    title: Admin AI generation local DB read history route smoke execution
+    phase: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+    sourceStory: current-user-request-execute-local-db-read-history-route-smoke-then-generated-result-storage-package
+    dependencies:
+      - admin-ai-generation-local-db-read-history-route-smoke-approval-package-2026-06-26
+    taskKind: local_db_read_route_smoke
+    moduleRunVersion: 2
+    executionProfile: local_db_read_only_admin_ai_generation_history_route_smoke
+    evidenceMode: redacted_route_status_count_and_metadata_categories_only
+    validationPolicy: local_route_smoke_docs_format_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_execute_after_approval_package
+    requiredOutcome: >-
+      Consume the local DB read history route smoke approval package exactly once. Execute at most two local-only GET
+      history route smokes, one for content admin and one for organization admin, then record redacted route status/count
+      metadata and keep generated result storage, Provider/Cost, formal content writes, and final Pass out of scope.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      localDbReadOnlyRouteSmoke: approved_by_approval_package_2026_06_26_max_2_get_requests
+      databaseConnection: approved_local_read_only_route_path
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseSeedOrWrite: blocked
+      directSqlOrRawDbRows: blocked
+      schemaMigration: blocked
+      migrationExecution: blocked
+      generatedResultStorage: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/runtime-database.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+    blockedWithoutFreshApproval:
+      - current_task_third_get_request
+      - post_patch_delete_route
+      - generated_result_storage_implementation
+      - generated_content_persistence
+      - db_write_seed_direct_sql_or_raw_row_dump
+      - schema_or_migration_file_change
+      - migration_execution
+      - drizzle_kit_push
+      - destructive_database_operation
+      - account_mutation
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - cost_calibration_gate
+      - formal_question_or_paper_write
+      - final_acceptance_pass
+    riskTypes:
+      - local_db_read_history_route_smoke_boundary
+      - evidence_redaction
+      - credential_and_session_redaction
+      - generated_result_storage_boundary
+      - provider_cost_gate_boundary
+      - formal_content_write_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - node_modules\.bin\tsx.cmd - < redacted inline direct route GET history smoke harness
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+    status: closed
+    result: pass_local_db_read_only_history_get_route_smoke_max_2_no_provider_no_generated_result_storage_no_final_pass
+    approvedAt: "2026-06-26T18:35:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+    claimedAt: "2026-06-26T18:40:00-07:00"
+    plannedAt: "2026-06-26T18:40:00-07:00"
+    executedAt: "2026-06-26T18:55:00-07:00"
+    validatedAt: "2026-06-26T19:05:00-07:00"
+    reviewedAt: "2026-06-26T19:05:00-07:00"
+    closedAt: "2026-06-26T19:05:00-07:00"
+    branch: codex/admin-ai-db-read-history-smoke-exec-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    smokeSummary:
+      totalGetRequests: 2
+      content:
+        route: GET /api/v1/content-ai-generation-requests
+        count: 1
+        httpStatus: 200
+        apiCode: 0
+        messageClass: ok
+        itemCount: 1
+        latestTaskPresent: true
+        runtimeStatus: local_contract_only
+        runtimeBridgeStatus: provider_call_blocked
+        contentVisibility: summary_only
+        evidenceStatus: none
+        formalQuestionWriteStatus: blocked_without_follow_up_task
+        formalPaperWriteStatus: blocked_without_follow_up_task
+      organization:
+        route: GET /api/v1/organization-ai-generation-requests
+        count: 1
+        httpStatus: 200
+        apiCode: 0
+        messageClass: ok
+        itemCount: 0
+        latestTaskPresent: false
+        emptyHistoryShapeAccepted: true
+        responseRedactionStatus: redacted
+    validationSummary:
+      localDbReadHistoryRouteSmokeExecuted: pass
+      totalGetRequestsWithinApprovalCap: pass
+      contentGetRouteSmoke: pass
+      organizationGetRouteSmoke: pass_empty_history_shape_accepted
+      taskPlanCreated: pass
+      evidenceCreated: pass
+      auditReviewCreated: pass
+      taskQueuePacketCreated: pass
+      projectStateUpdated: pass
+      postPatchDeleteExecuted: false
+      databaseWriteOrSeedExecuted: false
+      schemaMigrationOrMigrationExecutionExecuted: false
+      directSqlOrRawDbRowsExecuted: false
+      credentialOrEnvReadExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      generatedResultStorageApprovedOrImplemented: false
+      formalQuestionOrPaperWriteExecuted: false
+      browserDevServerE2eExecuted: false
+      sourceTestPackageLockfileScriptEnvChanged: false
+      stagingProdPaymentExternalExecuted: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

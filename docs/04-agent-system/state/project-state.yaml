@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-local-db-read-history-route-smoke-approval-package-2026-06-26
-updatedAt: "2026-06-26T18:20:00-07:00"
+currentPhase: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+updatedAt: "2026-06-26T18:55:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,37 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 810d3b67b09adedecd894cab3c222e83d451910c
-  lastKnownOriginMasterSha: 810d3b67b09adedecd894cab3c222e83d451910c
+  lastKnownMasterSha: 967c0ed4979185ef971612224b77bacb5be668a9
+  lastKnownOriginMasterSha: 967c0ed4979185ef971612224b77bacb5be668a9
 currentTask:
-  id: admin-ai-generation-local-db-read-history-route-smoke-approval-package-2026-06-26
+  id: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
   status: closed
-  result: pass_docs_only_local_db_read_history_route_smoke_approval_package_prepared_no_db_or_route_execution_no_final_pass
-  claimedAt: "2026-06-26T18:20:00-07:00"
-  plannedAt: "2026-06-26T18:20:00-07:00"
-  validatedAt: "2026-06-26T18:35:00-07:00"
-  reviewedAt: "2026-06-26T18:35:00-07:00"
-  closedAt: "2026-06-26T18:35:00-07:00"
-  sourceStory: current_user_request_local_db_read_history_route_smoke_approval_package_before_generated_result_storage
-  approvalConsumed: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
-  approvalSource: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
-  approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+  result: pass_local_db_read_only_history_get_route_smoke_max_2_no_provider_no_generated_result_storage_no_final_pass
+  claimedAt: "2026-06-26T18:55:00-07:00"
+  plannedAt: "2026-06-26T18:55:00-07:00"
+  implementedAt: "2026-06-26T18:58:00-07:00"
+  validatedAt: "2026-06-26T19:05:00-07:00"
+  reviewedAt: "2026-06-26T19:05:00-07:00"
+  closedAt: "2026-06-26T19:05:00-07:00"
+  sourceStory: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package
+  approvalConsumed: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+  approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
   sourceHistoryUiEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd.md
   sourceRouteIntegrationEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
   sourceLocalDbRouteSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
   scope:
     docsStateEvidenceAudit: true
-    approvalPackageOnly: true
-    futureLocalDbReadHistoryRouteSmokeApproval: approved_max_2_get_requests
+    approvalPackageOnly: false
+    localDbReadHistoryRouteSmoke: approved_and_executed_max_2_get_requests
     staticSourceRead: true
     localSourceChange: false
     focusedUnitTest: false
-    routeDbAdapterIntegration: false
+    routeDbAdapterIntegration: read_path_smoked_only
     repositoryPortContract: false
-    currentTaskRouteSmokeExecuted: false
+    currentTaskRouteSmokeExecuted: true
     browserRuntime: false
     devServer: false
     e2eRuntime: false
@@ -539,7 +540,7 @@ currentTask:
     credentialOrEnvRead: false
     providerCall: false
     costCalibration: false
-    databaseConnectionOrWrite: false
+    databaseConnectionOrWrite: local_db_read_only_route_path
     directSqlOrRawDbRows: false
     schemaMigration: false
     migrationExecution: false
@@ -549,55 +550,55 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: approve_next_local_db_read_only_history_get_route_smoke
-    aiGenerationTask: future_smoke_metadata_history_only
-    generatedResultStorage: blocked_deferred_until_after_history_route_smoke
-    formalContentBoundary: history_route_smoke_must_not_write_formal_question_or_paper
+    adminAiGeneration: local_db_read_only_history_get_route_smoke_passed
+    aiGenerationTask: metadata_history_only
+    generatedResultStorage: blocked_deferred_to_next_approval_package
+    formalContentBoundary: history_route_smoke_did_not_write_formal_question_or_paper
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
-  futureApprovedBoundary:
-    nextTaskId: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
-    localTargetOnly: true
-    allowedMethod: GET
-    maxTotalRequests: 2
-    routes:
-      - /api/v1/content-ai-generation-requests
-      - /api/v1/organization-ai-generation-requests
-    evidenceMode: redacted_route_status_count_and_metadata_categories_only
-    migrationExecutionAllowed: false
-    databaseWriteAllowed: false
-    providerCallAllowed: false
-    generatedResultStorageAllowed: false
-    formalQuestionPaperWriteAllowed: false
+  smokeSummary:
+    totalGetRequests: 2
+    contentGet:
+      httpStatus: 200
+      apiCode: 0
+      itemCount: 1
+      latestTaskPresent: true
+      localContractSummaryMetadata: present
+    organizationGet:
+      httpStatus: 200
+      apiCode: 0
+      itemCount: 0
+      latestTaskPresent: false
+      localContractSummaryMetadata: empty_history_accepted
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
+      approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
+      approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
+      approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_local_db_read_history_route_smoke_approval_package_2026_06_26
-  branch: codex/admin-ai-db-read-history-smoke-approval-20260626
+      approvalSource: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+  branch: codex/admin-ai-db-read-history-smoke-exec-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    approvalPackageCreated: pass
+    approvalPackageConsumed: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    futureReadHistoryRouteSmokeApproval: pass_max_2_get_requests
-    generatedResultStorageDecision: blocked_deferred_until_after_get_history_smoke
-    localCapabilityGate: not_required_no_db_provider_env_browser_capability_executed
+    readHistoryRouteSmoke: pass_2_get_requests
+    generatedResultStorageDecision: blocked_deferred_to_next_approval_package
+    localCapabilityGate: not_required_approval_package_consumed
     migrationExecution: not_run_blocked
-    routeSmoke: not_run_blocked
+    routeSmoke: pass_content_and_organization_get_history
     focusedUnitTest: not_applicable_docs_only
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
@@ -608,7 +609,7 @@ currentTask:
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    databaseConnectionExecuted: false
+    databaseConnectionExecuted: true_local_read_only_route_path
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     migrationFileCreated: false
@@ -625,7 +626,57 @@ currentTask:
     testChanged: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+  nextRecommendedTask: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
+adminAiGenerationLocalDbReadHistoryRouteSmokeExecution20260626:
+  taskId: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+  phase: admin-ai-generation-local-db-read-history-route-smoke-execution-2026-06-26
+  recordedAt: "2026-06-26T18:55:00-07:00"
+  status: closed
+  result: pass_local_db_read_only_history_get_route_smoke_max_2_no_provider_no_generated_result_storage_no_final_pass
+  branch: codex/admin-ai-db-read-history-smoke-exec-20260626
+  entryMasterSha: 967c0ed4979185ef971612224b77bacb5be668a9
+  entryOriginMasterSha: 967c0ed4979185ef971612224b77bacb5be668a9
+  approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+  approvalConsumed: current_user_request_execute_local_db_read_history_route_smoke_then_generated_result_storage_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-execution.md
+  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-read-history-route-smoke-approval-package.md
+  executionBoundary:
+    localTargetOnly: true
+    totalGetRequests: 2
+    contentGetExecuted: true
+    organizationGetExecuted: true
+    postPatchDeleteExecuted: false
+    directSqlOrRawDbRowsRead: false
+    migrationSeedWriteOrAccountMutationExecuted: false
+    providerCallExecuted: false
+    generatedResultStorageExecuted: false
+    formalQuestionOrPaperWriteExecuted: false
+    browserDevServerE2EExecuted: false
+  smokeSummary:
+    contentGet:
+      httpStatus: 200
+      apiCode: 0
+      itemCount: 1
+      latestTaskPresent: true
+      latestTaskStatus: pending
+      runtimeStatus: local_contract_only
+      runtimeBridgeStatus: provider_call_blocked
+      formalWriteStatus: blocked_without_follow_up_task
+    organizationGet:
+      httpStatus: 200
+      apiCode: 0
+      itemCount: 0
+      latestTaskPresent: false
+      emptyHistoryAccepted: true
+  validationSummary:
+    directRouteSmoke: pass_2_get_requests
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: admin-ai-generation-generated-result-storage-approval-package-2026-06-26
 adminAiGenerationLocalDbReadHistoryRouteSmokeApprovalPackage20260626:
   taskId: admin-ai-generation-local-db-read-history-route-smoke-approval-package-2026-06-26
   phase: admin-ai-generation-local-db-read-history-route-smoke-approval-package-2026-06-26
