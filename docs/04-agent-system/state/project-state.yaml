@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: mvp-final-pass-decision-criteria-package-2026-06-26
-updatedAt: "2026-06-26T02:15:00-07:00"
+currentPhase: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
+updatedAt: "2026-06-26T02:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
-  lastKnownOriginMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
+  lastKnownMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
+  lastKnownOriginMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
 currentTask:
-  id: mvp-final-pass-decision-criteria-package-2026-06-26
+  id: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
   status: closed
-  result: pass_docs_only_mvp_final_pass_decision_criteria_package_prepared_no_final_pass
-  claimedAt: "2026-06-26T02:00:00-07:00"
-  plannedAt: "2026-06-26T02:00:00-07:00"
-  validatedAt: "2026-06-26T02:15:00-07:00"
-  reviewedAt: "2026-06-26T02:15:00-07:00"
-  closedAt: "2026-06-26T02:15:00-07:00"
-  sourceStory: owner_acceptance_after_full_8_row_local_browser_pass
-  approvalConsumed: user_request_mvp_final_pass_decision_criteria_package_2026_06_26
-  approvalSource: user_request_mvp_final_pass_decision_criteria_package_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  result: pass_docs_only_ai_generation_scope_inventory_package_prepared_no_final_pass
+  claimedAt: "2026-06-26T02:45:00-07:00"
+  plannedAt: "2026-06-26T02:45:00-07:00"
+  validatedAt: "2026-06-26T03:00:00-07:00"
+  reviewedAt: "2026-06-26T03:05:00-07:00"
+  closedAt: "2026-06-26T03:05:00-07:00"
+  sourceStory: owner_question_after_mvp_final_pass_criteria_about_ai_generation_completion_state
+  approvalConsumed: user_request_ai_generation_scope_inventory_package_2026_06_26
+  approvalSource: user_request_ai_generation_scope_inventory_package_2026_06_26
+  ownerProviderCostRealModelCallAuthorization:
+    status: recorded_for_separate_task_scoped_gate
+    recordedAt: "2026-06-26T02:45:00-07:00"
+    consumedByThisTask: false
+    statement: owner_added_authorization_allowing_provider_cost_and_real_model_calls
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
   criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-criteria-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-criteria-package.md
-  sourceOwnerDecisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
-  sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
-  sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   allowedScope:
     docsStateEvidenceAudit: true
-    criteriaPackage: true
-    ownerDecisionPackage: false
+    aiScopeInventoryPackage: true
+    sourceStaticReadOnlyInspection: true
+    providerCostGatePlanning: true
     localBrowserRuntimeRerun: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
@@ -546,68 +550,39 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  criteriaScope:
-    purpose: define_entry_criteria_for_later_mvp_final_pass_decision_process
-    currentLocalEvidence:
-      localFullEightRowBrowserPass: pass_8_of_8
-      sourceEvidence: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
-    requiredSeparateGateApprovals:
-      - provider_model_call_or_provider_enablement
-      - provider_cost_quota_pricing_measurement
-      - staging_prod_cloud_deploy
-      - payment_external_service
-      - env_secret_or_dotenv_read_write
-      - database_schema_migration_account_mutation
-      - dependency_package_lockfile_change
-      - final_acceptance_pass
-    allowedEvidenceFields:
-      - committed_evidence_path
-      - aggregate_pass_fail_blocked_count
-      - gate_status
-      - criteria_label
-      - owner_decision_wording
-    blockedEvidenceFields:
-      - credentials
-      - account_identifiers
-      - tokens
-      - cookies
-      - env_values
-      - raw_db_rows
-      - raw_public_ids
-      - employee_personal_data
-      - paper_or_question_content
-      - local_or_session_storage
-      - provider_payloads
-      - screenshots_or_traces
-      - raw_dom
-      - cleartext_redeem_code
+  inventoryScope:
+    personalAdvancedLearnerAi: local_contract_scaffold_not_real_provider_completion
+    organizationAdvancedEmployeeAi: partial_local_contract_scaffold_persistence_lifecycle_incomplete
+    contentAdminAi: entry_only_no_generation_api_or_draft_review_workflow
+    organizationAdminAi: entry_only_no_generation_api_or_org_owned_result_lifecycle
+    providerBridge: gated_code_exists_public_route_does_not_execute
+    formalAdoption: review_or_follow_up_boundary_formal_target_write_blocked
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
     push:
       approved: true
       target: origin/master
-      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
+      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
     cleanup:
       deleteShortBranch: true
-      approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
-  branch: codex/mvp-final-pass-criteria-package-20260626
+      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
+  branch: codex/ai-generation-scope-inventory-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    docsOnlyCriteriaPackagePrepared: true
-    sourceFullEightRowLocalBrowserPass: pass_8_of_8
+    docsOnlyAiScopeInventoryPackagePrepared: true
     prettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_alignment
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
@@ -621,7 +596,54 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRequiredTask: owner_decision_select_enter_local_product_final_pass_review_or_request_external_gate_package
+  nextRecommendedTask: ai-generation-provider-cost-gate-package-2026-06-26
+aiGenerationScopeInventoryAndMvpDecisionPackage20260626:
+  taskId: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
+  phase: ai-generation-scope-inventory-and-mvp-decision-package-2026-06-26
+  recordedAt: "2026-06-26T02:45:00-07:00"
+  status: closed
+  result: pass_docs_only_ai_generation_scope_inventory_package_prepared_no_final_pass
+  validatedAt: "2026-06-26T03:00:00-07:00"
+  reviewedAt: "2026-06-26T03:05:00-07:00"
+  closedAt: "2026-06-26T03:05:00-07:00"
+  branch: codex/ai-generation-scope-inventory-20260626
+  entryMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
+  entryOriginMasterSha: 97b0e24745a0f7aeb4733243d4009623a8f1a887
+  approvalSource: user_request_ai_generation_scope_inventory_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  ownerProviderCostRealModelCallAuthorization:
+    status: recorded_for_separate_task_scoped_gate
+    consumedByThisTask: false
+  inventoryDecision:
+    personalAdvancedLearnerAi: local_contract_scaffold_not_real_provider_completion
+    organizationAdvancedEmployeeAi: partial_local_contract_scaffold_persistence_lifecycle_incomplete
+    contentAdminAi: entry_only_no_generation_api_or_draft_review_workflow
+    organizationAdminAi: entry_only_no_generation_api_or_org_owned_result_lifecycle
+    providerBridge: gated_code_exists_public_route_does_not_execute
+    formalAdoption: review_or_follow_up_boundary_formal_target_write_blocked
+  validationSummary:
+    docsOnlyAiScopeInventoryPackagePrepared: true
+    prettierWrite: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_alignment
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    providerCallExecuted: false
+    costCalibrationExecuted: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  nextRecommendedTask: ai-generation-provider-cost-gate-package-2026-06-26
 mvpFinalPassDecisionCriteriaPackage20260626:
   taskId: mvp-final-pass-decision-criteria-package-2026-06-26
   phase: mvp-final-pass-decision-criteria-package-2026-06-26
