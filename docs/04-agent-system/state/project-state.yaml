@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
-updatedAt: "2026-06-26T11:25:00-07:00"
+currentPhase: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+updatedAt: "2026-06-26T11:55:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,26 +504,28 @@ repository:
   lastKnownMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
   lastKnownOriginMasterSha: f01536e39ef84c0a4efe9ff4b1be8a71be7b2f61
 currentTask:
-  id: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
+  id: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
   status: closed
-  result: pass_dashboard_summary_employee_statistics_scoped_ux_focused_unit_tests
-  claimedAt: "2026-06-26T11:05:00-07:00"
-  plannedAt: "2026-06-26T11:05:00-07:00"
-  validatedAt: "2026-06-26T11:25:00-07:00"
-  reviewedAt: "2026-06-26T11:25:00-07:00"
-  closedAt: "2026-06-26T11:25:00-07:00"
-  sourceStory: organization_analytics_dashboard_ux_plan_source_task
-  approvalConsumed: user_request_execute_serial_batch_if_suitable_2026_06_26
-  approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-summary-employee-tabs-tdd.md
-  sourceAnalyticsPlanPath: docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+  result: pass_admin_ai_generation_task_persistence_contract_repository_port_focused_unit_tests
+  claimedAt: "2026-06-26T11:55:00-07:00"
+  plannedAt: "2026-06-26T11:55:00-07:00"
+  validatedAt: "2026-06-26T12:15:00-07:00"
+  reviewedAt: "2026-06-26T12:15:00-07:00"
+  closedAt: "2026-06-26T12:15:00-07:00"
+  sourceStory: user_requested_admin_ai_generation_task_persistence_contract_first
+  approvalConsumed: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+  approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  sourceRuntimeBridgePlanPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
   scope:
     docsStateEvidenceAudit: true
     decisionPlanOnly: false
     localSourceChange: true
     focusedUnitTest: true
+    repositoryPortContract: true
+    realDbAdapter: false
     browserRuntime: false
     credentialDocumentRead: false
     credentialOrEnvRead: false
@@ -536,42 +538,43 @@ currentTask:
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    organizationAnalytics: dashboard_summary_employee_statistics_tabs_existing_routes_only
-    employeeStatistics: summary_only_no_subjective_answer_text
-    exportReadiness: disabled_deferred_no_external_delivery
+    adminAiGeneration: task_persistence_contract_repository_port_platform_and_organization_owner
+    aiGenerationTask: pending_task_metadata_only_fake_gateway_no_db_adapter
+    formalContentBoundary: question_paper_write_blocked_without_follow_up_task
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
-  branch: codex/org-analytics-summary-employee-tabs-20260626
+      approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+  branch: codex/admin-ai-persistence-contract-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    tddRedObserved: pass_failed_before_implementation_missing_scope_context_employee_statistics
+    tddRedObserved: pass_failed_before_implementation_missing_repository_module
     focusedUnitTest: pass_4_tests
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialOrEnvReadExecuted: false
+    lint: pass
+    typecheck: pass
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     databaseConnectionExecuted: false
-    databaseReadExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
@@ -584,7 +587,7 @@ currentTask:
     testChanged: true
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: provider_cost_smoke_deferred_until_owner_reapproves_after_product_bridge
+  nextRecommendedTask: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
 organizationAnalyticsDashboardUxSummaryEmployeeTabsTdd20260626:
   taskId: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
   phase: organization-analytics-dashboard-ux-summary-employee-tabs-tdd-2026-06-26
@@ -615,6 +618,40 @@ organizationAnalyticsDashboardUxSummaryEmployeeTabsTdd20260626:
     stagingProdPaymentExternalExecuted: false
     releaseReadinessClaimed: false
   nextRecommendedTask: provider_cost_smoke_deferred_until_owner_reapproves_after_product_bridge
+adminAiGenerationTaskPersistenceContractAndRepositoryTdd20260626:
+  taskId: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+  phase: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+  recordedAt: "2026-06-26T11:55:00-07:00"
+  status: closed
+  result: pass_admin_ai_generation_task_persistence_contract_repository_port_focused_unit_tests
+  branch: codex/admin-ai-persistence-contract-20260626
+  entryMasterSha: 8b4a036b5e4f7d9596cfa48624d778a31923bb8b
+  entryOriginMasterSha: 8b4a036b5e4f7d9596cfa48624d778a31923bb8b
+  approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+  validationSummary:
+    tddRedObserved: pass_failed_before_implementation_missing_repository_module
+    focusedUnitTest: pass_4_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    providerCallExecuted: false
+    credentialOrEnvReadExecuted: false
+    formalQuestionOrPaperWriteExecuted: false
+    packageLockfileChanged: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+  nextRecommendedTask: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
 adminAiGenerationProviderDisabledRuntimeBridgeContractTdd20260626:
   taskId: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
   phase: admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26

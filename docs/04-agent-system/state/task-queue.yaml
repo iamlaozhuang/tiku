@@ -722,6 +722,155 @@ tasks:
       releaseReadinessClaimed: false
     nextRecommendedTask: provider_cost_smoke_deferred_until_owner_reapproves_after_product_bridge
 
+  - id: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+    title: Admin AI generation task persistence contract and repository TDD
+    phase: admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+    sourceStory: user_requested_admin_ai_generation_task_persistence_contract_first
+    dependencies:
+      - admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: low_risk_local_code
+    evidenceMode: redacted_unit_test_and_persistence_contract_summary_only
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26
+    requiredOutcome: >-
+      Add a focused admin AI generation task persistence contract and repository port that converts accepted
+      Provider-disabled admin local contracts into safe pending persistence inputs with platform or organization owner
+      semantics. Use fake gateway tests first. Do not add a real DB adapter, connect to a database, mutate DB/account
+      state, change schema/migration/seed, execute Provider calls, read env/credentials, create formal question/paper
+      records, or modify package/lockfile files.
+    capabilities:
+      localSourceChange: approved_by_user_request_2026_06_26_low_risk
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      repositoryPortContract: approved
+      realDbAdapter: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/ai-generation-task-request-contract.ts
+      - src/server/models/ai-generation-task.ts
+      - src/server/models/ai-generation-task-request.ts
+      - src/server/models/ai-rag.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/services/ai-generation-task-request-service.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/mappers/personal-ai-generation-request-mapper.ts
+      - src/db/schema/ai-rag.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-task-persistence-contract-and-repository-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+    status: closed
+    result: pass_admin_ai_generation_task_persistence_contract_repository_port_focused_unit_tests
+    claimedAt: "2026-06-26T11:55:00-07:00"
+    plannedAt: "2026-06-26T11:55:00-07:00"
+    validatedAt: "2026-06-26T12:15:00-07:00"
+    reviewedAt: "2026-06-26T12:15:00-07:00"
+    closedAt: "2026-06-26T12:15:00-07:00"
+    branch: codex/admin-ai-persistence-contract-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_admin_ai_generation_task_persistence_contract_and_repository_tdd_2026_06_26
+    validationSummary:
+      tddRedObserved: pass_failed_before_implementation_missing_repository_module
+      focusedUnitTest: pass_4_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      browserRuntimeExecuted: false
+      databaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      accountMutationExecuted: false
+      providerCallExecuted: false
+      credentialOrEnvReadExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      packageLockfileChanged: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+    nextRecommendedTask: admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
