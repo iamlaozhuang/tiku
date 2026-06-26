@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
-updatedAt: "2026-06-26T16:05:00-07:00"
+currentPhase: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+updatedAt: "2026-06-26T17:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,78 +501,86 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c9a15889ddf5c9d818092e3017d1043c192f68f1
-  lastKnownOriginMasterSha: c9a15889ddf5c9d818092e3017d1043c192f68f1
+  lastKnownMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
+  lastKnownOriginMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
 currentTask:
-  id: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
+  id: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
   status: closed
-  result: pass_local_db_migration_and_route_smoke_provider_disabled_no_final_pass
-  claimedAt: "2026-06-26T16:05:00-07:00"
-  plannedAt: "2026-06-26T16:05:00-07:00"
-  validatedAt: "2026-06-26T16:35:00-07:00"
-  reviewedAt: "2026-06-26T16:45:00-07:00"
-  closedAt: "2026-06-26T16:45:00-07:00"
-  sourceStory: successor_of_admin_ai_generation_local_db_migration_execution_approval_package
-  approvalConsumed: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
-  approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
-  sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-migration-execution-approval-package.md
-  sourceSchemaAndAdapterEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+  result: pass_provider_disabled_product_closure_decision_metadata_only_history_first_no_generated_result_storage_no_final_pass
+  claimedAt: "2026-06-26T17:05:00-07:00"
+  plannedAt: "2026-06-26T17:05:00-07:00"
+  validatedAt: "2026-06-26T17:20:00-07:00"
+  reviewedAt: "2026-06-26T17:20:00-07:00"
+  closedAt: "2026-06-26T17:20:00-07:00"
+  sourceStory: successor_of_admin_ai_generation_local_db_migration_execution_and_route_smoke
+  approvalConsumed: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+  approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  sourceRuntimeBridgePlanPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+  sourceProviderDisabledBridgeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
   sourceRouteIntegrationEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  sourceLocalDbRouteSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
   scope:
     docsStateEvidenceAudit: true
+    acceptanceDecisionPackage: true
     approvalPackageOnly: false
     staticSchemaRead: true
     localSourceChange: false
     focusedUnitTest: false
-    routeDbAdapterIntegration: true
+    routeDbAdapterIntegration: false
     repositoryPortContract: false
-    realDbAdapterDefaultWiring: true
+    realDbAdapterDefaultWiring: false
     browserRuntime: false
     credentialDocumentRead: false
     credentialOrEnvRead: false
     providerCall: false
     costCalibration: false
-    databaseConnectionOrWrite: true
-    schemaMigration: true
-    migrationExecution: true
+    databaseConnectionOrWrite: false
+    schemaMigration: false
+    migrationExecution: false
+    generatedResultStorage: false
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: local_dev_route_smoke_for_content_and_organization_admin_task_persistence
-    aiGenerationTask: apply_reviewed_migration_and_verify_shared_task_plus_admin_metadata_persistence
-    formalContentBoundary: provider_and_question_paper_write_remain_blocked
+    adminAiGeneration: provider_disabled_metadata_only_task_status_history_closure_first
+    aiGenerationTask: reuse_existing_task_and_admin_metadata_for_pending_status_history
+    generatedResultStorage: defer_to_separate_schema_or_storage_approval_after_real_result_source_decision
+    formalContentBoundary: provider_disabled_history_must_not_write_formal_question_or_paper
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
-  branch: codex/admin-ai-db-migration-route-smoke-20260626
+      approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+  branch: codex/admin-ai-provider-disabled-closure-decision-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    localCapabilityGate: pass
-    migrationExecution: pass
-    routeSmoke: pass_2_workflows_final_verified_reused_after_process_timeout_retry
-    routeDbAdapterIntegration: pass
+    acceptanceDecisionPackageCreated: pass
+    providerDisabledClosureDecision: pass_metadata_only_task_history_first
+    generatedResultStorageDecision: deferred_requires_separate_approval
+    localCapabilityGate: not_applicable_docs_only
+    migrationExecution: not_run_blocked
+    routeSmoke: not_run_blocked
+    routeDbAdapterIntegration: not_changed
     tddRedObserved: not_applicable_docs_only
     focusedUnitTest: not_applicable_docs_only
     browserRuntimeExecuted: false
@@ -584,13 +592,14 @@ currentTask:
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
-    databaseConnectionExecuted: true_local_dev
-    databaseWriteExecuted: true_ai_generation_task_and_admin_metadata_only
-    schemaMigrationExecuted: true_local_dev
+    databaseConnectionExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
     migrationFileCreated: false
     drizzleSnapshotUpdated: false
     migrationGenerationExecuted: false
-    realDbAdapterDefaultWiring: prior_task_source_wiring_used_for_smoke
+    realDbAdapterDefaultWiring: not_changed
+    generatedResultStorageApproved: false
     accountMutationExecuted: false
     providerCallExecuted: false
     costCalibrationExecuted: false
@@ -601,7 +610,34 @@ currentTask:
     testChanged: false
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin_ai_generation_provider_disabled_product_closure_or_generated_result_storage_decision
+  nextRecommendedTask: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+adminAiGenerationProviderDisabledProductClosureOrGeneratedResultStorageDecision20260626:
+  taskId: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+  phase: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+  recordedAt: "2026-06-26T17:05:00-07:00"
+  status: closed
+  result: pass_provider_disabled_product_closure_decision_metadata_only_history_first_no_generated_result_storage_no_final_pass
+  branch: codex/admin-ai-provider-disabled-closure-decision-20260626
+  entryMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
+  entryOriginMasterSha: 45d416e4c54360daa0714b8df1938bdc0b9a1a48
+  approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+  decision:
+    providerDisabledProductClosure: metadata_only_pending_status_and_history_first
+    generatedResultStorage: deferred_requires_separate_approval_after_result_source_and_storage_policy
+    providerCostSmoke: blocked_until_product_closure_source_task_or_fresh_owner_override
+    formalQuestionPaperWrite: blocked
+  validationSummary:
+    taskPlanCreated: pass
+    acceptanceDecisionPackageCreated: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
+  nextRecommendedTask: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
 adminAiGenerationLocalDbMigrationExecutionAndRouteSmoke20260626:
   taskId: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
   phase: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26

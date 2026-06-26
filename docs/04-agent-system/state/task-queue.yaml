@@ -1964,6 +1964,196 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
 
+  - id: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+    title: Admin AI generation provider-disabled product closure or generated result storage decision
+    phase: admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+    sourceStory: successor_of_admin_ai_generation_local_db_migration_execution_and_route_smoke
+    dependencies:
+      - admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
+    taskKind: docs_only_decision_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_acceptance_decision_only
+    evidenceMode: redacted_static_source_and_prior_evidence_summary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_provider_disabled_product_closure_decision
+    requiredOutcome: >-
+      Decide whether the next admin AI generation step should be Provider-disabled pending/status/history closure or
+      generated-result storage. Avoid jumping directly to real Provider smoke. Define next implementation boundary for
+      content and organization admin backend AI generation while Provider, Cost Calibration, generated-result storage,
+      formal question/paper writes, DB migration, staging/prod, payment, external service, deployment, and release
+      readiness remain blocked.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      acceptanceDecisionPackage: approved_by_current_user_2026_06_26
+      sourceStaticRead: approved
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      migrationExecution: blocked
+      generatedResultStorage: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-runtime-bridge-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/contracts/personal-ai-generation-result-history-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - generated_result_storage_implementation
+      - generated_content_persistence
+      - db_connection_or_write
+      - schema_or_migration_file_change
+      - migration_execution
+      - drizzle_kit_push
+      - destructive_database_operation
+      - database_seed_execution
+      - account_mutation
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - provider_disabled_product_closure_boundary
+      - generated_result_storage_boundary
+      - evidence_redaction
+      - formal_content_write_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+    status: closed
+    result: pass_provider_disabled_product_closure_decision_metadata_only_history_first_no_generated_result_storage_no_final_pass
+    approvedAt: "2026-06-26T17:05:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+    claimedAt: "2026-06-26T17:05:00-07:00"
+    plannedAt: "2026-06-26T17:05:00-07:00"
+    validatedAt: "2026-06-26T17:20:00-07:00"
+    reviewedAt: "2026-06-26T17:20:00-07:00"
+    closedAt: "2026-06-26T17:20:00-07:00"
+    branch: codex/admin-ai-provider-disabled-closure-decision-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_open_admin_ai_generation_provider_disabled_closure_decision_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      taskPlanCreated: pass
+      acceptanceDecisionPackageCreated: pass
+      providerDisabledClosureDecision: pass_metadata_only_task_history_first
+      generatedResultStorageDecision: deferred_requires_separate_approval
+      sourceTestSchemaMigrationPackageChanged: false
+      databaseConnectionOrWriteExecuted: false
+      migrationExecution: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
+    nextRecommendedTask: admin-ai-generation-provider-disabled-task-history-and-status-ui-tdd-2026-06-26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
