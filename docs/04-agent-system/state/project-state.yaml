@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
-updatedAt: "2026-06-26T08:55:00-07:00"
+currentPhase: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+updatedAt: "2026-06-26T09:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,114 +501,123 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b6019280bf6c326a9895d6e107e7e99401f7a282
-  lastKnownOriginMasterSha: b6019280bf6c326a9895d6e107e7e99401f7a282
+  lastKnownMasterSha: ed0d6cdd1d7af069a56b551b30f59a390fa6ae9b
+  lastKnownOriginMasterSha: ed0d6cdd1d7af069a56b551b30f59a390fa6ae9b
 currentTask:
-  id: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+  id: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
   status: closed
-  result: partial_local_real_provider_smoke_pass_product_bridge_blocked_no_final_pass
-  claimedAt: "2026-06-26T08:35:00-07:00"
-  plannedAt: "2026-06-26T08:35:00-07:00"
-  validatedAt: "2026-06-26T08:55:00-07:00"
-  reviewedAt: "2026-06-26T08:55:00-07:00"
-  closedAt: "2026-06-26T08:55:00-07:00"
-  sourceStory: owner_approved_task2_provider_credentials_and_real_model_calls_under_task1_gate
-  approvalConsumed: user_request_task2_provider_cost_smoke_or_calibration_2026_06_26
-  approvalSource: user_request_task2_provider_cost_smoke_or_calibration_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
-  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
-  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  result: pass_docs_only_inventory_confirms_partial_ai_generation_and_analytics_scope_no_runtime_change
+  claimedAt: "2026-06-26T09:05:00-07:00"
+  plannedAt: "2026-06-26T09:10:00-07:00"
+  validatedAt: "2026-06-26T09:25:00-07:00"
+  reviewedAt: "2026-06-26T09:25:00-07:00"
+  closedAt: "2026-06-26T09:25:00-07:00"
+  sourceStory: owner_approved_serial_batch_1_to_5_with_gated_execution_2026_06_26
+  approvalConsumed: user_request_execute_serial_batch_if_suitable_2026_06_26
+  approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  inventoryPath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
   sourceAdminAiLocalContractFocusedEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
   sourceFull8EvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
   scope:
+    docsStateEvidenceAudit: true
+    inventoryOnly: true
     localSourceChange: false
     focusedUnitTest: false
     browserRuntime: false
     credentialDocumentRead: false
-    credentialOrEnvRead: true
-    providerCall: true
-    costCalibration: token_call_cost_summary_only
+    credentialOrEnvRead: false
+    providerCall: false
+    costCalibration: false
     databaseConnectionOrWrite: false
     schemaMigration: false
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
-    localProductFinalPassDecisionReview: false
-    providerCostSmokeOrCalibration: true
-    releaseReadinessDecision: false
+    finalPassClaim: false
   requirementMapping:
-    contentAdmin: local_provider_cost_smoke_labels_content_ai_question_and_paper
-    organizationAdvancedAdmin: local_provider_cost_smoke_labels_organization_ai_question_and_paper
-    organizationStandardAdmin: remains_denied_or_unavailable_for_organization_ai_generation
+    personalAdvancedStudent: partial_implemented_entry_request_persistence_history_provider_default_blocked
+    organizationAdvancedEmployee: partial_implemented_shared_learner_path_org_auth_context_provider_default_blocked
+    organizationAdvancedAdmin: partial_local_contract_loop_no_provider_no_durable_result_persistence
+    contentAdmin: partial_local_contract_loop_no_provider_no_durable_result_persistence
+    organizationAnalytics: partial_backend_summary_exists_ui_minimal_manual_public_id_no_completion_ux
     formalContentBoundary: no_question_or_paper_write
-    providerBoundary: max_four_local_dev_provider_calls_no_retry
-    costCalibrationBoundary: token_call_cost_summary_only_no_production_quota_or_pricing_default
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
-  executionGate:
-    sourceGatePackage: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
-    providerModel:
-      modelProvider: openai_compatible
-      providerName: alibaba-qwen
-      modelName: qwen3.7-max
-      baseUrlHost: dashscope.aliyuncs.com
-      secretAlias: ALIBABA_API_KEY
-    maxProviderCalls: 4
-    maxRetries: 0
-    allowedWorkflows:
-      - content_ai_question
-      - content_ai_paper
-      - organization_ai_question
-      - organization_ai_paper
-    evidenceRedaction: summary_only_no_raw_prompt_output_payload_or_secret
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
-  branch: codex/ai-provider-cost-final-pass-smoke-20260626
+      approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+  branch: codex/ai-org-analytics-inventory-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    providerCostSmokeExecuted: pass
-    providerCallCount: pass_4_of_4_max
-    providerSmokeResult: pass_local_real_model_4_calls
-    localContractSummaryStatus: blocked_product_routes_remain_local_contract_only
+    implementationInventoryPrepared: pass
+    followUpTask2Seeded: pass
+    followUpTask3Seeded: pass
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
-    credentialValuesPrintedOrRecorded: false
+    credentialOrEnvReadExecuted: false
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    envSecretAccessExecuted: true_provider_credential_only
     databaseConnectionExecuted: false
     databaseReadExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
     packageLockfileChanged: false
-    providerCallExecuted: true_4_calls
-    costCalibrationExecuted: token_call_cost_summary_only
+    providerCallExecuted: false
+    costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    localProductFinalPassOnly: unchanged_existing_pass
-    releaseFinalPassClaim: false
-  nextRecommendedTask: focused_provider_bridge_diagnostic_or_provider_disabled_product_loop_plan
+    sourceTestPackageLockfileChanged: false
+    releaseReadinessClaimed: false
+  nextRecommendedTask: admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+aiGenerationAndOrganizationAnalyticsImplementationInventory20260626:
+  taskId: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+  phase: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+  recordedAt: "2026-06-26T09:25:00-07:00"
+  status: closed
+  result: pass_docs_only_inventory_confirms_partial_ai_generation_and_analytics_scope_no_runtime_change
+  branch: codex/ai-org-analytics-inventory-20260626
+  entryMasterSha: ed0d6cdd1d7af069a56b551b30f59a390fa6ae9b
+  entryOriginMasterSha: ed0d6cdd1d7af069a56b551b30f59a390fa6ae9b
+  approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  inventoryPath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+  validationSummary:
+    implementationInventoryPrepared: pass
+    sourceRuntimeChanged: false
+    testsChanged: false
+    databaseSchemaMigrationAccountMutationExecuted: false
+    providerCostExecuted: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  nextRecommendedTask: admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
 providerCostFinalPassBoundaryAndCostCalibrationDecisionPackage20260626:
   taskId: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
   phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26

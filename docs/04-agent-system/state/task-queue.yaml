@@ -44,6 +44,384 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+    title: AI generation and organization analytics implementation inventory
+    phase: ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+    sourceStory: owner_approved_serial_batch_1_to_5_with_gated_execution_2026_06_26
+    dependencies:
+      - ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+    taskKind: docs_only_implementation_inventory
+    moduleRunVersion: 2
+    executionProfile: docs_state_inventory_only
+    evidenceMode: redacted_static_source_and_committed_evidence_summary_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_serial_batch_start
+    requiredOutcome: >-
+      Produce a docs-only inventory that classifies personal advanced learner, organization advanced employee,
+      organization advanced admin, content admin AI generation, and organization analytics dashboard surfaces across
+      entry, local contract, persistence, Provider bridge, result materialization, formal content write, and statistics
+      UX. Seed the follow-up docs-only decision tasks. Do not modify source/tests/DB/schema/migration/seed/package/
+      lockfile/env files, run Provider calls, read credentials, run browser/dev-server/e2e, or claim release readiness.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      sourceStaticRead: approved
+      committedEvidenceRead: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      credentialDocumentRead: blocked
+      credentialEntry: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/app/(admin)/organization/ai-question-generation/page.tsx
+      - src/app/(admin)/organization/ai-paper-generation/page.tsx
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-and-organization-analytics-implementation-inventory-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+    inventoryPath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+    status: closed
+    result: pass_docs_only_inventory_confirms_partial_ai_generation_and_analytics_scope_no_runtime_change
+    claimedAt: "2026-06-26T09:05:00-07:00"
+    plannedAt: "2026-06-26T09:10:00-07:00"
+    validatedAt: "2026-06-26T09:25:00-07:00"
+    reviewedAt: "2026-06-26T09:25:00-07:00"
+    closedAt: "2026-06-26T09:25:00-07:00"
+    branch: codex/ai-org-analytics-inventory-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+    validationSummary:
+      implementationInventoryPrepared: pass
+      followUpTask2Seeded: pass
+      followUpTask3Seeded: pass
+      sourceTestPackageLockfileChanged: false
+      databaseSchemaMigrationAccountMutationExecuted: false
+      providerCostExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+
+  - id: admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+    title: Admin AI generation runtime bridge and persistence plan
+    phase: admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+    sourceStory: inventory_follow_up_for_content_and_organization_admin_ai_generation
+    dependencies:
+      - ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+    taskKind: docs_only_runtime_bridge_and_persistence_plan
+    moduleRunVersion: 2
+    executionProfile: docs_state_decision_plan_only
+    evidenceMode: redacted_static_source_and_gate_decision_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: serial_batch_follow_up_after_inventory
+    requiredOutcome: >-
+      Decide the smallest architecture and task split for connecting content admin and organization advanced admin AI
+      local contract loops to Provider execution, durable result persistence, and formal-adoption boundaries. The plan
+      must decide whether to reuse the personal Provider bridge or create a shared admin runtime. Do not modify source,
+      tests, DB/schema/migration/seed/package/lockfile/env files, read credentials, run Provider calls, or claim final
+      Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/services/ai-generation-task-request-service.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/ai-generation-task-provider-adapter-service.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-runtime-bridge-and-persistence-plan-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+    decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+    status: pending
+    branch: codex/admin-ai-runtime-plan-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+
+  - id: organization-analytics-dashboard-ux-completion-plan-2026-06-26
+    title: Organization analytics dashboard UX completion plan
+    phase: organization-analytics-dashboard-ux-completion-plan-2026-06-26
+    sourceStory: inventory_follow_up_for_organization_analytics_dashboard
+    dependencies:
+      - ai-generation-and-organization-analytics-implementation-inventory-2026-06-26
+    taskKind: docs_only_dashboard_ux_completion_plan
+    moduleRunVersion: 2
+    executionProfile: docs_state_decision_plan_only
+    evidenceMode: redacted_static_source_and_ux_scope_decision_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: serial_batch_follow_up_after_inventory
+    requiredOutcome: >-
+      Define the smallest organization analytics dashboard UX completion path, including organization selection,
+      employee statistics tab or section, trend/summary display, loading/empty/error states, and export readiness
+      boundaries. Do not modify source, tests, DB/schema/migration/seed/package/lockfile/env files, run browser/e2e, or
+      claim final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      sourceStaticRead: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-and-organization-analytics-implementation-inventory.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - src/app/(admin)/organization/analytics/page.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-dashboard-ux-completion-plan-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-dashboard-ux-completion-plan-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+    decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-analytics-dashboard-ux-completion-plan.md
+    status: pending
+    branch: codex/org-analytics-ux-plan-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_execute_serial_batch_if_suitable_2026_06_26
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
