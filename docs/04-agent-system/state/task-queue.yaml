@@ -1773,6 +1773,197 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
 
+  - id: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
+    title: Admin AI generation local DB migration execution and route smoke
+    phase: admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
+    sourceStory: successor_of_admin_ai_generation_local_db_migration_execution_approval_package
+    dependencies:
+      - admin-ai-generation-local-db-migration-execution-approval-package-2026-06-26
+    taskKind: local_db_migration_execution_and_route_smoke
+    moduleRunVersion: 2
+    executionProfile: local_dev_db_migration_execution_and_direct_route_handler_smoke
+    evidenceMode: redacted_command_status_schema_and_route_workflow_summary_only
+    validationPolicy: local_capability_gate_migration_route_smoke_docs_format_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_execute_local_db_migration_and_route_smoke
+    requiredOutcome: >-
+      Apply the reviewed local dev migration drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql and run at
+      most two direct route handler smoke requests for content/org admin AI generation task persistence. Use injected
+      local session objects and the existing default Postgres DB adapter. Do not open/read/record env files or secrets,
+      run drizzle-kit push, modify source/tests/schema/migration/seed/package/lockfile/script files, start browser/
+      dev-server/e2e, call Provider, run Cost Calibration, write formal question/paper, or claim release/final Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_current_user_2026_06_26
+      schemaMigration: approved_migration_plan
+      localDbMigrationExecution: approved_by_current_user_2026_06_26
+      localDatabaseConnection: approved_local_dev_only_by_current_user_2026_06_26
+      localRouteSmokeExecution: approved_by_current_user_2026_06_26
+      routeSmokeMaxRequests: 2
+      routeSmokeSessionInjection: approved
+      sourceStaticRead: approved
+      localCommit: approved_by_current_user_2026_06_26
+      mergeToMaster: approved_by_current_user_2026_06_26
+      pushOriginMaster: approved_by_current_user_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseSeedOrWriteOutsideRoutePersistence: blocked
+      destructiveDatabaseOperation: blocked
+      accountMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      credentialDocumentReadByCodex: blocked
+      credentialEntryByCodex: blocked
+      envSecretAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      schemaMigrationFileChange: blocked
+      drizzleMigrationFileChange: blocked
+      drizzleKitPush: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      formalQuestionOrPaperWrite: blocked
+      releaseReadinessDecision: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - tsconfig.json
+      - vitest.config.ts
+      - drizzle.config.ts
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-migration-execution-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+      - drizzle/20260626134500_add_admin_ai_generation_task_metadata.sql
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/runtime-database.ts
+      - src/db/schema/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - more_than_two_route_smoke_requests
+      - drizzle_kit_push
+      - schema_or_migration_file_change
+      - destructive_database_operation
+      - database_seed_execution
+      - account_mutation
+      - dev_server_start
+      - browser_runtime_or_e2e_execution
+      - credential_document_read_by_codex
+      - credential_entry_by_codex
+      - env_secret_access_or_env_file_change
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_package_lockfile_change
+      - source_test_script_change
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_db_migration_execution
+      - local_db_route_smoke
+      - evidence_redaction
+      - provider_disabled_boundary
+      - formal_content_write_boundary
+      - no_final_pass_claim
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26 -Capability schemaMigration -Intent use_capability
+      - npx.cmd drizzle-kit migrate
+      - node_modules\.bin\tsx.cmd - < redacted inline route smoke harness
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-local-db-migration-execution-and-route-smoke-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-local-db-migration-execution-and-route-smoke.md
+    sourceApprovalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-local-db-migration-execution-approval-package.md
+    status: closed
+    result: pass_local_db_migration_and_route_smoke_provider_disabled_no_final_pass
+    approvedAt: "2026-06-26T16:05:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+    claimedAt: "2026-06-26T16:05:00-07:00"
+    plannedAt: "2026-06-26T16:05:00-07:00"
+    validatedAt: "2026-06-26T16:35:00-07:00"
+    reviewedAt: "2026-06-26T16:45:00-07:00"
+    closedAt: "2026-06-26T16:45:00-07:00"
+    branch: codex/admin-ai-db-migration-route-smoke-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_execute_local_db_migration_and_route_smoke_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      localCapabilityGate: pass
+      migrationExecution: pass
+      routeSmoke: pass_2_workflows_final_verified_reused_after_process_timeout_retry
+      routeSmokeRequestCountMax: 2
+      finalVerifiedRouteSmokeWorkflowCount: 2
+      routeSmokeRetryNote: first_full_route_smoke_process_timed_out_before_output_final_verified_run_reused_smoke_rows
+      credentialOrEnvReadExecuted: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      stagingProdPaymentExternalExecuted: false
+      sourceTestSchemaMigrationPackageChanged: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_checkpoint_repair
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
