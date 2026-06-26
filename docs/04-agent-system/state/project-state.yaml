@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-route-provider-disabled-focused-smoke-2026-06-26
+currentPhase: admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
 updatedAt: "2026-06-26T23:59:59-07:00"
 architecture:
   status: complete
@@ -501,12 +501,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 898784d059b6a1f29891959890a9b8ab9e7f93dd
-  lastKnownOriginMasterSha: 898784d059b6a1f29891959890a9b8ab9e7f93dd
+  lastKnownMasterSha: a501f5aac5800e23768ec311c79c401733ab3e02
+  lastKnownOriginMasterSha: a501f5aac5800e23768ec311c79c401733ab3e02
 currentTask:
-  id: admin-ai-generation-route-provider-disabled-focused-smoke-2026-06-26
+  id: admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
   status: closed
-  result: pass_admin_route_provider_disabled_focused_smoke_no_provider_no_db_no_final_pass
+  result: pass_provider_route_integrated_smoke_conditional_approval_boundary_prepared_no_provider_no_credential_no_final_pass
   claimedAt: "2026-06-26T23:59:59-07:00"
   plannedAt: "2026-06-26T23:59:59-07:00"
   validatedAt: "2026-06-26T23:59:59-07:00"
@@ -514,15 +514,17 @@ currentTask:
   closedAt: "2026-06-26T23:59:59-07:00"
   sourceStory: current_user_request_batch_serial_admin_route_runtime_bridge_provider_disabled_then_smoke_then_provider_route_smoke_approval_2026_06_26
   approvalSource: current_user_request_batch_serial_admin_route_runtime_bridge_provider_disabled_then_smoke_then_provider_route_smoke_approval_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-route-provider-disabled-focused-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-provider-disabled-focused-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-route-provider-disabled-focused-smoke.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
   sourceRouteIntegrationEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-runtime-bridge-provider-disabled-integration-tdd.md
+  sourceProviderDisabledSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-provider-disabled-focused-smoke.md
   scope:
     docsStateEvidenceAudit: true
+    approvalPackage: true
     localSourceChange: false
-    focusedUnitTest: true
-    providerDisabledOnly: true
+    focusedUnitTest: false
     routeSmokeExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -540,13 +542,20 @@ currentTask:
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  validationSurface:
-    focusedTests:
-      - src/server/services/admin-ai-generation-local-contract-route.test.ts
-      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
-      - src/server/services/route-integrated-provider-execution-service.test.ts
-    defaultRuntimeStatus: provider_call_blocked
-    sourceChanged: false
+  decision:
+    currentDirectRealProviderRouteSmoke: not_ready_for_direct_execution
+    decisionStatus: conditional_approval_boundary_prepared
+    requiredPrecedingSourceTask: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+    futureExecutionRequiresSeparateUserTask: true
+    futureMaxProviderCalls: 4
+    futureAllowedWorkflows:
+      - content_ai_question_generation
+      - content_ai_paper_generation
+      - organization_ai_question_generation
+      - organization_ai_paper_generation
+    providerCallAllowedNow: false
+    credentialReadAllowedNow: false
+    formalQuestionPaperWriteAllowedNow: false
   closeoutPolicy:
     localCommit:
       approved: true
@@ -562,25 +571,25 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_request_batch_serial_admin_route_runtime_bridge_provider_disabled_then_smoke_then_provider_route_smoke_approval_2026_06_26
-  branch: codex/admin-ai-route-provider-disabled-smoke-20260626
+  branch: codex/admin-ai-provider-route-smoke-approval-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
+    acceptancePackageCreated: pass
     evidenceCreated: pass
     auditReviewCreated: pass
     taskQueuePacketCreated: pass
     projectStateUpdated: pass
-    focusedRegressionTests: pass_19
-    typecheck: pass
-    lint: pass
-    runtimeBridgeDefault: provider_call_blocked
+    focusedRegressionTests: not_applicable_docs_only
+    typecheck: not_applicable_docs_only
+    lint: not_applicable_docs_only
     providerCostSmokeExecuted: false
     providerCallCount: 0
     providerSmokeResult: not_executed
-    adminRouteIntegratedProviderPassAllowed: false_requires_later_provider_route_smoke_approval_package
+    adminRouteIntegratedProviderPassAllowed: false_requires_fake_provider_route_runner_then_separate_execution_task
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -599,7 +608,58 @@ currentTask:
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
+  nextRecommendedTask: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+adminAiGenerationProviderRouteIntegratedSmokeApprovalPackage20260626:
+  taskId: admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
+  phase: admin-ai-generation-provider-route-integrated-smoke-approval-package-2026-06-26
+  recordedAt: "2026-06-26T23:59:59-07:00"
+  status: closed
+  result: pass_provider_route_integrated_smoke_conditional_approval_boundary_prepared_no_provider_no_credential_no_final_pass
+  validatedAt: "2026-06-26T23:59:59-07:00"
+  reviewedAt: "2026-06-26T23:59:59-07:00"
+  closedAt: "2026-06-26T23:59:59-07:00"
+  branch: codex/admin-ai-provider-route-smoke-approval-20260626
+  entryMasterSha: a501f5aac5800e23768ec311c79c401733ab3e02
+  entryOriginMasterSha: a501f5aac5800e23768ec311c79c401733ab3e02
+  approvalSource: current_user_request_batch_serial_admin_route_runtime_bridge_provider_disabled_then_smoke_then_provider_route_smoke_approval_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-provider-route-integrated-smoke-approval-package.md
+  decision:
+    currentDirectRealProviderRouteSmoke: not_ready_for_direct_execution
+    decisionStatus: conditional_approval_boundary_prepared
+    requiredPrecedingSourceTask: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
+    futureExecutionRequiresSeparateUserTask: true
+    futureMaxProviderCalls: 4
+    providerCallAllowedNow: false
+    credentialReadAllowedNow: false
+    formalQuestionPaperWriteAllowedNow: false
+  validationSummary:
+    taskPlanCreated: pass
+    acceptancePackageCreated: pass
+    evidenceCreated: pass
+    auditReviewCreated: pass
+    taskQueuePacketCreated: pass
+    projectStateUpdated: pass
+    focusedRegressionTests: not_applicable_docs_only
+    typecheck: not_applicable_docs_only
+    lint: not_applicable_docs_only
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceFilesChanged: false
+    testFilesChanged: false
+    packageLockfileChanged: false
+    databaseSchemaMigrationAccountMutationExecuted: false
+    providerCallExecuted: false
+    credentialReadExecuted: false
+    stagingProdPaymentExternalExecuted: false
+    formalQuestionPaperWriteExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+  nextRecommendedTask: admin-ai-generation-provider-enabled-route-runtime-bridge-fake-provider-tdd-2026-06-26
 adminAiGenerationRouteProviderDisabledFocusedSmoke20260626:
   taskId: admin-ai-generation-route-provider-disabled-focused-smoke-2026-06-26
   phase: admin-ai-generation-route-provider-disabled-focused-smoke-2026-06-26
