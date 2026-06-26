@@ -44,6 +44,189 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: provider-cost-real-provider-paper-composition-smoke-execution-2026-06-26
+    title: Provider Cost real Provider paper composition smoke execution
+    phase: provider-cost-real-provider-paper-composition-smoke-execution-2026-06-26
+    sourceStory: successor-of-provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package-2026-06-26
+    dependencies:
+      - provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package-2026-06-26
+    taskKind: local_provider_paper_composition_smoke
+    moduleRunVersion: 2
+    executionProfile: local_real_provider_one_call_plus_draft_only_paper_composition
+    evidenceMode: redacted_provider_status_counts_only
+    validationPolicy: focused_unit_transient_smoke_docs_prettier_diff_module_run_v2
+    queueSelectionMode: current_user_fresh_provider_execution_approval_2026_06_26
+    requiredOutcome: >-
+      Execute one local real Provider smoke for content admin `content_ai_paper_generation`, then execute formal draft
+      composition adoption into one draft `paper` with one companion draft `question`, one `paper_section`, and one
+      `paper_question`. Evidence must be redacted. Do not publish, expose student-visible content, touch staging/prod,
+      payment, external service, deployment/release readiness, Cost Calibration, source/test/package/env/schema files,
+      or final Pass.
+    status: closed
+    result: pass_real_provider_paper_composition_smoke_draft_only_no_publish_no_final_pass
+    approvedAt: "2026-06-26T12:49:54-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_provider_paper_composition_smoke_approval_2026_06_26
+      scope: local_one_provider_call_content_paper_generation_then_draft_only_formal_paper_composition
+    claimedAt: "2026-06-26T12:49:54-07:00"
+    plannedAt: "2026-06-26T12:49:54-07:00"
+    validatedAt: "2026-06-26T13:00:16-07:00"
+    reviewedAt: "2026-06-26T13:00:16-07:00"
+    closedAt: "2026-06-26T13:00:16-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: approved
+      transientSmokeHarness: approved_removed_after_execution
+      providerCall: approved_one_local_call
+      providerCredentialRead: approved_alias_only_ALIBABA_API_KEY
+      providerConfigurationChange: blocked
+      costCalibrationExecution: blocked
+      localDatabaseConnection: approved_existing_runtime_local_only
+      localDatabaseMutation: approved_draft_only_formal_composition_caps
+      formalQuestionPaperDraftLiveWrite: approved_draft_only_caps
+      formalPublish: blocked
+      studentVisibleContent: blocked
+      sourceTestChange: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      cleanupDelete: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-route-integrated-smoke-execution.md
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/services/question-service.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/repositories/paper-draft-repository.ts
+      - src/server/repositories/question-repository.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - additional_provider_model_call_or_retry
+      - provider_configuration_or_fallback_change
+      - provider_payload_prompt_or_raw_output_evidence
+      - credential_secret_value_output_or_persistence
+      - cost_calibration_execution
+      - source_test_package_lockfile_env_schema_migration_change
+      - seed_fixture_cleanup_delete_or_data_repair
+      - formal_publish_or_student_visible_content
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    riskTypes:
+      - provider_cost_boundary
+      - credential_redaction
+      - local_draft_only_database_write
+      - formal_content_adoption_boundary
+      - no_publish_no_final_pass
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - node_modules\.bin\tsx.cmd <transient-repo-root-provider-paper-composition-smoke-harness>
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId provider-cost-real-provider-paper-composition-smoke-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId provider-cost-real-provider-paper-composition-smoke-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+    branch: codex/provider-cost-paper-composition-smoke-20260626
+    nextRecommendedTask: formal-publish-student-visible-content-approval-package-2026-06-26_if_provider_smoke_passes
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_provider_paper_composition_smoke_approval_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_provider_paper_composition_smoke_approval_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_provider_paper_composition_smoke_approval_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_provider_paper_composition_smoke_approval_2026_06_26
+    validationSummary:
+      focusedUnit: "passed: 3 files, 16 tests"
+      transientProviderSmoke: "passed: one call, zero retries, redacted evidence"
+      actorState: present
+      providerCallExecuted: true
+      providerCallCount: 1
+      providerRetryCount: 0
+      providerResultStatus: pass
+      providerTotalTokens: 579
+      tokenCapExceeded: false
+      providerCredentialReadExecuted: true_alias_only_value_redacted
+      costCalibrationExecuted: false
+      contentSetupPostCount: 1
+      formalAdoptionPostCount: 1
+      formalTargetWriteStatus: draft_created
+      paperCompositionStatus: composed
+      companionQuestionDraftCount: 1
+      paperSectionCount: 1
+      paperQuestionCount: 1
+      liveDatabaseConnectionExecuted: true
+      databaseWriteExecuted: true_draft_only_companion_question_paper_section_paper_question
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleContentExecuted: false
+      stagingProdTouched: false
+      paymentTouched: false
+      deploymentReleaseReadinessTouched: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package-2026-06-26
     title: Provider Cost boundary or real Provider paper composition smoke approval package
     phase: provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package-2026-06-26
