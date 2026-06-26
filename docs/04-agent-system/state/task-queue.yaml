@@ -44,6 +44,152 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
+    title: Full eight-row role-separated browser rerun after visible-label repair using approved private credentials
+    phase: role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
+    sourceStory: active_goal_full_8_row_role_separated_browser_acceptance
+    dependencies:
+      - role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
+    taskKind: local_real_browser_runtime_rerun
+    moduleRunVersion: 2
+    executionProfile: browser_only_role_separated_runtime_rerun
+    evidenceMode: full_redacted
+    validationPolicy: private_credential_browser_runtime_docs_gate
+    queueSelectionMode: active_goal_continuation_after_post_visible_label_credential_scope_block
+    requiredOutcome: >-
+      Execute a strict full eight-row role-separated local browser rerun after the visible-label repair using the
+      approved local private role-account credential source. Record only redacted role/route/status/count evidence. Do
+      not change source/tests/package/lockfiles, write DB/seed, change schema/migration, mutate accounts, touch
+      Provider/Cost/staging/prod/payment/external services, or claim final MVP Pass.
+    capabilities:
+      browserRuntime: approved_by_active_goal_2026_06_26
+      credentialDocumentRead: approved_by_active_goal_2026_06_26_redacted
+      credentialEntry: approved_by_active_goal_2026_06_26_redacted
+      docsStateEvidenceAudit: approved_by_active_goal_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-learner-employee-ai-paper-action-enabled-state-repair.md
+      - docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd playwright --version
+      - Invoke-WebRequest http://127.0.0.1:3000/login
+      - private credential structure check with role labels only
+      - local real-browser full 8 row rerun with redacted compact matrix
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: blocked_ops_admin_visible_technical_labels_7_pass_1_fail_no_final_pass
+    claimedAt: "2026-06-26T00:00:00-07:00"
+    plannedAt: "2026-06-26T00:00:00-07:00"
+    validatedAt: "2026-06-26T00:20:00-07:00"
+    reviewedAt: "2026-06-26T00:20:00-07:00"
+    closedAt: "2026-06-26T00:20:00-07:00"
+    validationSummary:
+      playwrightVersion: pass_1_60_0
+      localTargetReachability: pass_login_http_200
+      privateCredentialStructure: pass_8_of_8_role_labels_with_login_and_password_fields
+      browserMatrixExecuted: true
+      rowsExecuted: 8
+      passRows: 7
+      failRows: 1
+      blockedRows: 0
+      failingRow: ops_admin
+      remainingBlocker: visible_technical_labels_on_ops_organizations_and_redeem_code_routes
+      sourceChanged: false
+      databaseSeedSchemaMigrationExecuted: false
+      providerOrCostTouched: false
+      finalPassClaim: false
+      nextRequiredTask: ops-admin-visible-technical-label-residual-cleanup-2026-06-26
+    branch: codex/full-8-post-visible-private-rerun-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_goal_private_credential_browser_rerun_2026_06_26
+    blockedWithoutFreshApproval:
+      - source_test_package_lockfile_change
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - env_secret_or_dotenv_read_write
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
     title: Full eight-row role-separated browser rerun after visible-label repair
     phase: role-separated-full-8-row-post-visible-label-repair-browser-rerun-2026-06-25
