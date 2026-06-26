@@ -44,6 +44,180 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ai-generation-provider-smoke-execution-2026-06-26
+    title: AI generation Provider smoke execution
+    phase: ai-generation-provider-smoke-execution-2026-06-26
+    sourceStory: owner_execute_provider_smoke_after_provider_cost_gate_package
+    dependencies:
+      - ai-generation-provider-cost-gate-package-2026-06-26
+    taskKind: local_provider_smoke_execution
+    moduleRunVersion: 2
+    executionProfile: local_dev_provider_smoke_single_call
+    evidenceMode: redacted_provider_status_usage_and_error_summary_only
+    validationPolicy: provider_smoke_gate_plus_docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_after_provider_cost_gate_package
+    requiredOutcome: >-
+      Execute exactly one local dev Provider smoke under the 2026-06-26 Provider/Cost gate package. Use
+      `openai_compatible` / `alibaba-qwen` / `qwen3.7-max` through `dashscope.aliyuncs.com`, read only
+      `ALIBABA_API_KEY` from ephemeral process env or task-approved local `.env.local` fallback, record only redacted
+      status/usage/error evidence, and decide the next task. Do not run Cost Calibration, browser/e2e, DB, source/test
+      edits, package/lockfile changes, schema/migration, staging/prod/deploy, payment, other external-service work, PR,
+      force push, or final MVP Pass.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      providerSmokeExecution: approved_by_user_request_2026_06_26
+      providerCall: approved_single_local_dev_call
+      providerConfiguration: approved_existing_runner_config_only
+      envSecretAccess: approved_ALIBABA_API_KEY_only
+      credentialDocumentRead: approved_local_dotenv_fallback_ALIBABA_API_KEY_only
+      credentialEntry: blocked
+      costCalibrationGate: blocked
+      localSourceChange: blocked
+      focusedUnitTest: approved_existing_tests_only
+      browserRuntime: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      pr: blocked
+      forcePush: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - .env.local
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+    blockedFiles:
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name alibaba-qwen --model qwen3.7-max --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --base-url https://dashscope.aliyuncs.com/compatible-mode/v1 --execute
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-provider-smoke-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-provider-smoke-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+    gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+    status: closed
+    result: pass_local_provider_smoke_execution_redacted_no_final_pass
+    claimedAt: "2026-06-26T04:05:00-07:00"
+    plannedAt: "2026-06-26T04:05:00-07:00"
+    validatedAt: "2026-06-26T04:30:00-07:00"
+    reviewedAt: "2026-06-26T04:30:00-07:00"
+    closedAt: "2026-06-26T04:30:00-07:00"
+    branch: codex/ai-provider-smoke-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_2026_06_26_execute_provider_smoke_and_closeout
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_2026_06_26_execute_provider_smoke_and_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_2026_06_26_execute_provider_smoke_and_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_2026_06_26_execute_provider_smoke_and_closeout
+    blockedInThisTask:
+      - provider_request_retry_or_second_call
+      - raw_prompt_provider_payload_provider_response_or_raw_model_output_evidence
+      - secret_value_partial_secret_authorization_header_or_raw_env_line_evidence
+      - cost_calibration_gate_execution
+      - source_test_package_lockfile_change
+      - browser_or_playwright_runtime
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - staging_prod_cloud_deploy
+      - payment_or_non_provider_external_service
+      - pr_force_push
+      - final_acceptance_pass
+    validationSummary:
+      providerSmokeExecuted: true
+      providerSmokeResult: pass
+      providerSmokeRequestCount: 1
+      providerSmokeRetryCount: 0
+      providerSmokeDurationMs: 8640
+      providerSmokeUsageCounters:
+        inputTokens: 24
+        outputTokens: 412
+        totalTokens: 436
+        reasoningTokens: 406
+        cachedInputTokens: 0
+      secretAlias: ALIBABA_API_KEY
+      secretSourceKind: local_dotenv
+      secretPresence: present
+      credentialValueRecorded: false
+      credentialDocumentReadByCodex: true
+      redactionStatus: passed
+      focusedUnitProviderSmokeTests: pass_2_files_13_tests
+      prettierWrite: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      costCalibrationExecuted: false
+      costEstimateRecorded: false
+      browserRuntimeExecuted: false
+      sourceTestPackageLockfileChanged: false
+      databaseReadExecuted: false
+      databaseWriteExecuted: false
+      schemaMigrationExecuted: false
+      accountMutationExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      finalAcceptancePass: false
+    nextRecommendedTask: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: ai-generation-provider-cost-gate-package-2026-06-26
     title: AI generation Provider and Cost gate package
     phase: ai-generation-provider-cost-gate-package-2026-06-26

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-cost-gate-package-2026-06-26
-updatedAt: "2026-06-26T03:45:00-07:00"
+currentPhase: ai-generation-provider-smoke-execution-2026-06-26
+updatedAt: "2026-06-26T04:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,38 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
-  lastKnownOriginMasterSha: c454d72a42e25b36e8979ae3cc783aa0bb7ff054
+  lastKnownMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
+  lastKnownOriginMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
 currentTask:
-  id: ai-generation-provider-cost-gate-package-2026-06-26
+  id: ai-generation-provider-smoke-execution-2026-06-26
   status: closed
-  result: pass_docs_only_provider_cost_gate_package_prepared_no_final_pass
-  claimedAt: "2026-06-26T03:30:00-07:00"
-  plannedAt: "2026-06-26T03:30:00-07:00"
-  validatedAt: "2026-06-26T03:45:00-07:00"
-  reviewedAt: "2026-06-26T03:45:00-07:00"
-  closedAt: "2026-06-26T03:45:00-07:00"
-  sourceStory: owner_execute_provider_cost_gate_package_after_ai_scope_inventory
-  approvalConsumed: user_request_ai_generation_provider_cost_gate_package_2026_06_26
-  approvalSource: user_request_ai_generation_provider_cost_gate_package_2026_06_26
+  result: pass_local_provider_smoke_execution_redacted_no_final_pass
+  claimedAt: "2026-06-26T04:05:00-07:00"
+  plannedAt: "2026-06-26T04:05:00-07:00"
+  validatedAt: "2026-06-26T04:30:00-07:00"
+  reviewedAt: "2026-06-26T04:30:00-07:00"
+  closedAt: "2026-06-26T04:30:00-07:00"
+  sourceStory: owner_execute_provider_smoke_after_provider_cost_gate_package
+  approvalConsumed: user_request_ai_generation_provider_smoke_execution_2026_06_26
+  approvalSource: user_request_ai_generation_provider_smoke_execution_2026_06_26
   ownerProviderCostRealModelCallAuthorization:
-    status: materialized_as_gate_package
-    recordedAt: "2026-06-26T03:30:00-07:00"
-    consumedByThisTask: false
-    statement: owner_approved_provider_cost_and_real_model_call_work_but_this_task_only_prepares_the_gate
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-gate-package.md
+    status: consumed_for_one_local_provider_smoke
+    recordedAt: "2026-06-26T04:05:00-07:00"
+    consumedByThisTask: true
+    statement: owner_approved_one_real_provider_smoke_under_gate_package_with_redacted_evidence
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md
   gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-gate-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-gate-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
   sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   allowedScope:
     docsStateEvidenceAudit: true
-    providerCostGatePackage: true
-    providerSmokeExecutionPlanning: true
+    providerCostGatePackage: false
+    providerSmokeExecutionPlanning: false
     costCalibrationDecision: true
     localBrowserRuntimeRerun: false
-    credentialDocumentReadByCodex: false
+    credentialDocumentReadByCodex: true
     credentialEntryByCodex: false
     localRuntimeDiagnostic: false
     localSourceChange: false
@@ -543,25 +543,33 @@ currentTask:
     accountMutation: false
     schemaMigration: false
     dependencyIntroduction: false
-    envSecretAccess: false
-    providerCall: false
-    providerConfiguration: false
+    envSecretAccess: true
+    providerCall: true
+    providerConfiguration: true
     stagingProdDeploy: false
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  gateDecision:
-    nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+  smokeGate:
+    sourceGatePackageTask: ai-generation-provider-cost-gate-package-2026-06-26
     providerSmoke:
       modelProvider: openai_compatible
       providerName: alibaba-qwen
       modelName: qwen3.7-max
-      baseUrlHost: dashscope.aliyuncs.com
       secretAlias: ALIBABA_API_KEY
       maxRequests: 1
       maxRetries: 0
       maxOutputTokens: 8
       timeoutMs: 30000
+      baseUrl: redacted_host_only
+      baseUrlHost: dashscope.aliyuncs.com
+      streaming: blocked
+      fallbackProvider: blocked
+      rawOutputEvidence: blocked
+    credentialReadMethod:
+      preferred: owner_supplied_ephemeral_process_env
+      fallback: local_dotenv_read_allowed_for_ALIBABA_API_KEY_only
+      credentialValueRecorded: false
     costCalibration:
       executeInNextSmoke: false
       decision: defer_full_cost_calibration_to_separate_gate
@@ -580,20 +588,30 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
-  branch: codex/ai-provider-cost-gate-package-20260626
+  branch: codex/ai-provider-smoke-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    docsOnlyProviderCostGatePackagePrepared: true
-    prettierWrite: pass
-    prettierCheck: pass
-    gitDiffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    providerSmokeExecuted: true
+    providerSmokeResult: pass
+    providerSmokeRequestCount: 1
+    providerSmokeRetryCount: 0
+    providerSmokeDurationMs: 8640
+    providerSmokeUsageCounters:
+      inputTokens: 24
+      outputTokens: 412
+      totalTokens: 436
+      reasoningTokens: 406
+      cachedInputTokens: 0
+    secretSourceKind: local_dotenv
+    secretPresence: present
+    credentialValueRecorded: false
+    redactionStatus: passed
+    focusedUnitProviderSmokeTests: pass_2_files_13_tests
     browserRuntimeExecuted: false
-    credentialDocumentReadByCodex: false
+    credentialDocumentReadByCodex: true
     credentialEntryByCodex: false
     sourceChanged: false
     testsChanged: false
@@ -601,11 +619,84 @@ currentTask:
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
-    providerOrCostTouched: false
+    providerOrCostTouched: true_local_provider_smoke_only
+    costCalibrationExecuted: false
+    costEstimateRecorded: false
+    prettierWrite: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRecommendedTask: ai-generation-provider-smoke-execution-2026-06-26
+  nextRecommendedTask: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+aiGenerationProviderSmokeExecution20260626:
+  taskId: ai-generation-provider-smoke-execution-2026-06-26
+  phase: ai-generation-provider-smoke-execution-2026-06-26
+  recordedAt: "2026-06-26T04:05:00-07:00"
+  status: closed
+  result: pass_local_provider_smoke_execution_redacted_no_final_pass
+  validatedAt: "2026-06-26T04:30:00-07:00"
+  reviewedAt: "2026-06-26T04:30:00-07:00"
+  closedAt: "2026-06-26T04:30:00-07:00"
+  branch: codex/ai-provider-smoke-20260626
+  entryMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
+  entryOriginMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
+  approvalSource: user_request_ai_generation_provider_smoke_execution_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+  providerSmokeResult:
+    provider: openai_compatible
+    providerName: alibaba-qwen
+    modelName: qwen3.7-max
+    baseUrlHost: dashscope.aliyuncs.com
+    requestCount: 1
+    retryCount: 0
+    maxOutputTokens: 8
+    timeoutMs: 30000
+    resultStatus: pass
+    providerCallExecuted: true
+    durationMs: 8640
+    redactionStatus: passed
+    usageCounters:
+      inputTokens: 24
+      outputTokens: 412
+      totalTokens: 436
+      reasoningTokens: 406
+      cachedInputTokens: 0
+  credentialEvidence:
+    secretAlias: ALIBABA_API_KEY
+    secretSourceKind: local_dotenv
+    secretPresence: present
+    credentialValueRecorded: false
+    credentialDocumentReadByCodex: true
+  validationSummary:
+    providerSmokeExecuted: true
+    providerSmokeResult: pass
+    focusedUnitProviderSmokeTests: pass_2_files_13_tests
+    prettierWrite: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    sourceTestPackageLockfileChanged: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    costCalibrationExecuted: false
+    costEstimateRecorded: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  residualRisk:
+    - provider_usage_counter_semantics_require_later_cost_calibration_gate
+    - content_and_organization_ai_product_loops_remain_unimplemented
+  nextRecommendedTask: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
 aiGenerationProviderCostGatePackage20260626:
   taskId: ai-generation-provider-cost-gate-package-2026-06-26
   phase: ai-generation-provider-cost-gate-package-2026-06-26
