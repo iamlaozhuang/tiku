@@ -1011,6 +1011,157 @@ tasks:
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     nextRecommendedTask: admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
 
+  - id: admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
+    title: Admin AI generation task persistence DB schema mapping approval package
+    phase: admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
+    sourceStory: successor_of_admin_ai_generation_task_persistence_route_integration_plan_or_db_adapter_decision
+    dependencies:
+      - admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision
+    taskKind: docs_only_schema_mapping_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_only
+    evidenceMode: redacted_static_schema_contract_mapping_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26
+    requiredOutcome: >-
+      Prepare a docs/state-only approval package that chooses between extending ai_generation_task, adding an admin
+      metadata companion table, or creating a separate backend AI generation task table for content/organization admin
+      AI generation persistence. Do not write adapters, change schema/migrations/seeds, connect to a database, modify
+      source/tests/package/lockfile/env files, run Provider calls, or claim release/final Pass readiness.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      staticSourceRead: approved
+      staticSchemaRead: approved
+      schemaMappingApprovalPackage: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      realDbAdapter: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      migrationGeneration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-runtime-bridge-and-persistence-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-route-integration-plan-or-db-adapter-decision.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-contract-and-repository-tdd.md
+      - src/db/schema/ai-rag.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/ai-generation-task-contract.ts
+      - src/server/contracts/ai-generation-task-request-contract.ts
+      - src/server/models/ai-generation-task.ts
+      - src/server/models/ai-generation-task-request.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-task-persistence-db-schema-mapping-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+    status: closed
+    result: pass_docs_only_select_admin_metadata_companion_table_schema_approval_still_required
+    claimedAt: "2026-06-26T13:15:00-07:00"
+    plannedAt: "2026-06-26T13:15:00-07:00"
+    validatedAt: "2026-06-26T13:30:00-07:00"
+    reviewedAt: "2026-06-26T13:30:00-07:00"
+    closedAt: "2026-06-26T13:30:00-07:00"
+    branch: codex/admin-ai-db-mapping-approval-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_admin_ai_generation_task_persistence_db_schema_mapping_approval_package_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_admin_ai_generation_task_persistence_db_schema_mapping_approval_package_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_admin_ai_generation_task_persistence_db_schema_mapping_approval_package_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_admin_ai_generation_task_persistence_db_schema_mapping_approval_package_2026_06_26
+    validationSummary:
+      approvalPackagePrepared: pass
+      selectedStorageShape: admin_ai_generation_task_metadata_companion_table
+      aiGenerationTaskSharedLifecycleRetained: true
+      separateBackendLifecycleTableRejected: true
+      schemaMigrationExecuted: false
+      migrationGenerationExecuted: false
+      realDbAdapterImplemented: false
+      sourceChanged: false
+      testChanged: false
+      databaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      providerCallExecuted: false
+      credentialOrEnvReadExecuted: false
+      formalQuestionOrPaperWriteExecuted: false
+      packageLockfileChanged: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26_requires_fresh_schema_migration_approval
+
   - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
     title: Provider Cost final Pass boundary and Cost Calibration decision package
     phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
