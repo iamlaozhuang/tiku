@@ -824,7 +824,7 @@ function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
     return {
       formatLabel: "userPublicId 绑定导入",
       isReady: lines.length > 0,
-      message: `将按 publicId 绑定格式解析 ${lines.length} 行员工。`,
+      message: `将按公开编号绑定格式解析 ${lines.length} 行员工。`,
       rowCount: lines.length,
     };
   }
@@ -1474,7 +1474,7 @@ function OrgAuthDetailPanel({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-xs font-medium">org_auth</p>
+          <p className="text-brand-primary text-xs font-medium">企业授权</p>
           <h2 className="text-text-primary text-base font-semibold">
             {orgAuth.name}
           </h2>
@@ -1737,7 +1737,7 @@ function EmployeeImportResultPanel({
             员工导入反馈
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            仅展示聚合数量、行号和拒绝原因；原始导入内容与 publicId
+            仅展示聚合数量、行号和拒绝原因；原始导入内容与公开编号
             不在结果反馈中回显。
           </p>
         </div>
@@ -1800,7 +1800,7 @@ function EmployeeConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
-          员工操作只提交用户和企业 publicId；后端继续执行角色校验和脱敏审计。
+          员工操作只提交用户和企业公开编号；后端继续执行角色校验和脱敏审计。
         </p>
         <div className="flex gap-2">
           <button
@@ -2062,7 +2062,7 @@ function OrgAuthConfirmationDialog({
         </div>
         <p className="text-text-muted text-sm">
           {isCreate
-            ? "创建会提交企业 publicId、授权范围、专业等级、额度和有效期，由后端执行重叠校验。"
+            ? "创建会提交企业公开编号、授权范围、专业等级、额度和有效期，由后端执行重叠校验。"
             : "取消会终止该企业授权，并由后端处理受影响的练习和模拟考试会话。"}
         </p>
         {createOrgAuthInput === null ? null : (
@@ -2133,7 +2133,7 @@ function OrganizationConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
-          组织树写操作只提交企业 publicId、层级、父级 publicId
+          组织树写操作只提交企业公开编号、层级、父级公开编号
           和必要维护字段；后端继续记录脱敏审计日志。
         </p>
         <div className="flex gap-2">
@@ -2458,7 +2458,7 @@ function OrgAuthActionPanel({
     >
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">org_auth</p>
+          <p className="text-brand-primary text-xs font-medium">企业授权</p>
           <h2 className="text-text-primary text-base font-semibold">
             创建企业授权
           </h2>
@@ -2644,8 +2644,7 @@ function OrgAuthActionPanel({
                       {organization.name}
                     </span>
                     <span className="text-text-muted block text-xs">
-                      {orgTierLabels[organization.orgTier]} /{" "}
-                      {organization.publicId}
+                      {orgTierLabels[organization.orgTier]}
                     </span>
                   </span>
                 </label>
@@ -2894,7 +2893,7 @@ function SystemOpsPurchaseGuidanceContactConfig() {
         <div className="min-w-0 space-y-3">
           <div className="space-y-1">
             <p className="text-brand-primary text-xs font-medium">
-              contact_config
+              购买联系配置
             </p>
             <h2 className="text-text-primary text-base font-semibold">
               {contactConfig.title}
@@ -3568,14 +3567,14 @@ export function AdminOrgAuthPage() {
     <main className="space-y-6">
       <AdminPageHeader
         title="企业授权运营"
-        description="查看企业组织、企业授权与员工账号的最小运营切片，所有数据均来自受保护的本地 runtime API。"
+        description="查看企业组织、企业授权与员工账号的最小运营切片，所有数据均来自受保护的本地运行接口。"
         icon={<Building2 className="size-5" aria-hidden="true" />}
       />
 
       <SystemOpsRequiredRoleEntry
         actionHref="#org-auth-create-panel"
         actionLabel="新增企业授权"
-        description="企业授权新增入口在本页下方，点击后定位到内联表单；提交前仍由二次确认保护写操作，并继续只提交 publicId。"
+        description="企业授权新增入口在本页下方，点击后定位到内联表单；提交前仍由二次确认保护写操作，并继续只提交公开编号。"
         testId="system-ops-org-auth-create-entry"
         title="新增企业授权入口"
       />
@@ -3922,7 +3921,7 @@ export function AdminRedeemCodePage() {
     <main className="space-y-6">
       <AdminPageHeader
         title="卡密管理"
-        description="查看卡密使用状态和授权范围。页面只展示 API 提供的脱敏卡密，不展示明文或哈希。"
+        description="查看卡密使用状态和授权范围。页面只展示接口提供的脱敏卡密，不展示明文或哈希。"
         icon={<Ticket className="size-5" aria-hidden="true" />}
       />
 

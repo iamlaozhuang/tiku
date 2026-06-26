@@ -728,6 +728,29 @@ describe("admin user organization authorization ops baseline", () => {
     expect(orgAuthEntry).not.toHaveTextContent("staging 必验");
   });
 
+  it("does not expose sampled visible technical labels on ops org auth and redeem code pages", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("system-ops-org-auth-create-entry");
+    expect(document.body).not.toHaveTextContent(
+      /publicId|org_auth|runtime API|contact_config/,
+    );
+
+    cleanup();
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByTestId("system-ops-redeem-code-generate-entry");
+    expect(document.body).not.toHaveTextContent(
+      /publicId|org_auth|runtime API|contact_config/,
+    );
+  });
+
   it("closes org_auth create and cancel actions on the organization page", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetch();

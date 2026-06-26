@@ -44,6 +44,149 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ops-admin-visible-technical-label-residual-cleanup-2026-06-26
+    title: Clean residual visible technical labels on ops organization and redeem-code routes
+    phase: ops-admin-visible-technical-label-residual-cleanup-2026-06-26
+    sourceStory: active_goal_full_8_row_role_separated_browser_acceptance
+    dependencies:
+      - role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
+    taskKind: focused_local_source_repair
+    moduleRunVersion: 2
+    executionProfile: local_source_repair_unit_browser_smoke
+    evidenceMode: full_redacted
+    validationPolicy: focused_unit_lint_typecheck_browser_smoke_docs_gate
+    queueSelectionMode: active_goal_next_smallest_repair_after_full_8_row_7_pass_1_fail
+    requiredOutcome: >-
+      Remove the remaining user-visible technical labels observed for the `ops_admin` row on `/ops/organizations` and
+      `/ops/redeem-codes` during the 2026-06-26 full eight-row browser rerun. Preserve raw identifiers in API
+      contracts, route paths, data attributes, and test identifiers. Do not write DB/seed, change schema/migration,
+      mutate accounts, touch Provider/Cost/staging/prod/payment/external services, or claim final MVP Pass.
+    capabilities:
+      localSourceChange: approved_by_active_goal_next_smallest_repair
+      focusedUnitTest: approved_by_active_goal_next_smallest_repair
+      focusedBrowserRuntime: approved_by_active_goal_2026_06_26_redacted
+      credentialDocumentRead: approved_by_active_goal_2026_06_26_redacted
+      credentialEntry: approved_by_active_goal_2026_06_26_redacted
+      docsStateEvidenceAudit: approved_by_active_goal_2026_06_26
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      finalAcceptancePass: blocked
+    allowedFiles:
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-25-visible-chinese-ui-technical-label-runtime-cleanup-residual-repair.md
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - npx.cmd playwright --version
+      - focused local browser rerun for ops_admin routes with redacted status/count evidence
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx tests/unit/admin-user-org-auth-ops-baseline.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md docs/05-execution-logs/evidence/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-admin-visible-technical-label-residual-cleanup-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-admin-visible-technical-label-residual-cleanup-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ops-admin-visible-technical-label-residual-cleanup.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    status: closed
+    result: pass_ops_admin_visible_technical_label_repair_focused_browser_pass_no_final_pass
+    claimedAt: "2026-06-26T00:30:00-07:00"
+    plannedAt: "2026-06-26T00:30:00-07:00"
+    validatedAt: "2026-06-26T00:45:00-07:00"
+    reviewedAt: "2026-06-26T00:45:00-07:00"
+    closedAt: "2026-06-26T00:45:00-07:00"
+    validationSummary:
+      redUnit: pass_failed_before_repair_with_visible_technical_labels
+      focusedUnit: pass_18_tests
+      focusedBrowserRerun: pass_ops_routes_zero_target_tokens_and_denied_boundaries
+      playwrightVersion: pass_1_60_0
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+      sourceChanged: true
+      databaseSeedSchemaMigrationExecuted: false
+      providerOrCostTouched: false
+      finalPassClaim: false
+      nextRequiredTask: role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun-2026-06-26
+    branch: codex/ops-visible-label-cleanup-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_goal_next_smallest_repair_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: active_goal_next_smallest_repair_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_goal_next_smallest_repair_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_goal_next_smallest_repair_2026_06_26
+    blockedWithoutFreshApproval:
+      - database_seed_or_write
+      - account_user_employee_authorization_mutation
+      - schema_migration_or_drizzle_schema_change
+      - env_secret_or_dotenv_read_write
+      - provider_model_call_or_provider_enablement
+      - provider_cost_quota_pricing_measurement
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - dependency_or_package_lock_change
+      - pr_force_push
+      - final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
     title: Full eight-row role-separated browser rerun after visible-label repair using approved private credentials
     phase: role-separated-full-8-row-post-visible-label-private-credential-browser-rerun-2026-06-26
