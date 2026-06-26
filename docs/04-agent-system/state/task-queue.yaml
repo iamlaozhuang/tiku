@@ -44,6 +44,480 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    title: Admin AI generation formal draft adapter route integration approval package
+    phase: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-draft-adapter-contract-tdd-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-draft-adapter-contract-tdd-2026-06-26
+    taskKind: docs_only_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_no_source_no_db_no_provider
+    evidenceMode: redacted_approval_boundary_only
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    requiredOutcome: >-
+      Decide and materialize the next route integration boundary for content admin generated result formal adoption:
+      connect the existing adoption route to the formal draft adapter in a later source TDD task, define adoption metadata
+      update behavior after draft creation, and pre-approve a separate max-two-call local DB route smoke after TDD
+      succeeds. This task must not change source/tests/schema/migration/package/env files, connect DB, run route smoke,
+      call Provider, or claim staging/prod/release final Pass.
+    status: closed
+    approvedAt: "2026-06-26T09:45:55-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      scope: docs_state_approval_package_only
+    claimedAt: "2026-06-26T09:45:55-07:00"
+    plannedAt: "2026-06-26T09:45:55-07:00"
+    validatedAt: "2026-06-26T09:50:35-07:00"
+    reviewedAt: "2026-06-26T09:50:35-07:00"
+    closedAt: "2026-06-26T09:50:35-07:00"
+    result: pass_formal_draft_route_integration_approval_package_prepared_no_execution
+    decision:
+      approvedNextImplementationTask: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+      approvedLaterLocalRouteSmokeTask: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+      routeIntegrationApprovedForNextTdd: true
+      adoptionMetadataUpdateApprovedForNextTdd: true
+      liveDbConnectionApprovedForThisTask: false
+      liveDbConnectionApprovedForNextTdd: false
+      localDbRouteSmokeApprovedOnlyForLaterTask: true
+      laterRouteSmokeMaxPostCalls: 2
+      laterRouteSmokeMaxEligibleSourceLookups: 2
+      laterRouteSmokeMayCreateFormalDraftsInLocalDb: true
+      seedOrFixtureCreationApproved: false
+      providerCallApproved: false
+      stagingProdReleaseFinalPassApproved: false
+    capabilities:
+      docsStateEvidenceAudit: approved
+      approvalPackage: approved
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      routeIntegrationExecution: blocked
+      liveDatabaseConnection: blocked
+      localRouteSmoke: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      formalQuestionPaperDraftLiveWrite: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-route-integration-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-route-integration-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-contract-tdd.md
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/contracts/admin-ai-generation-formal-adoption-contract.ts
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/question-service.ts
+      - src/server/services/paper-draft-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - live_db_connection_or_route_smoke
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - live_formal_question_paper_draft_write
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - env_secret_write_or_secret_evidence
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_adoption_boundary
+      - approval_scope_control
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+    branch: codex/admin-ai-formal-draft-route-integration-approval-20260626
+    validationSummary:
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      providerCallExecuted: false
+    nextRecommendedTask: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+    title: Admin AI generation formal draft adapter route integration and metadata TDD
+    phase: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_source_route_service_repository_tdd_no_live_db_no_provider
+    evidenceMode: redacted_unit_test_contract_summary_only
+    validationPolicy: red_green_focused_unit_lint_typecheck_prettier_diff_module_run_v2_gates
+    queueSelectionMode: seeded_by_formal_draft_route_integration_approval_package_2026_06_26
+    requiredOutcome: >-
+      Wire the content admin formal adoption route/service/runtime to the formal draft adapter and add adoption metadata
+      update support after a draft is created. Prove content question and content paper workflows through focused unit
+      tests using fake or injected writer/repository boundaries. Do not connect live DB, run route smoke, execute
+      migration, seed data, call Provider, or claim staging/prod/release final Pass.
+    status: pending
+    approvedAt: "2026-06-26T09:45:55-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      scope: source_tdd_route_integration_and_adoption_metadata_update_no_live_db
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      sourceTestChange: approved
+      focusedUnitTest: approved
+      routeIntegrationSourceChange: approved
+      formalDraftAdapterInvocationSourceChange: approved
+      adoptionMetadataUpdateSourceChange: approved
+      liveDatabaseConnection: blocked
+      localRouteSmoke: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      formalQuestionPaperDraftLiveWrite: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/contracts/admin-ai-generation-formal-adoption-contract.ts
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/models/admin-ai-generation-formal-adoption.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - src/server/contracts/question-contract.ts
+      - src/server/contracts/paper-draft-contract.ts
+      - src/server/services/question-service.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/repositories/question-repository.ts
+      - src/server/repositories/paper-draft-repository.ts
+      - src/server/validators/question.ts
+      - src/server/validators/paper-draft.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - src/features/**
+    blockedWithoutFreshApproval:
+      - live_db_connection_or_route_smoke
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - live_formal_question_paper_draft_write
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_adoption_boundary
+      - route_service_repository_contract
+      - existing_formal_writer_reuse
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts src/server/contracts/admin-ai-generation-formal-adoption-contract.ts src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/models/admin-ai-generation-formal-adoption.ts src/server/repositories/admin-ai-generation-formal-adoption-repository.ts src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-service.ts src/server/services/admin-ai-generation-formal-adoption-runtime.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/services/admin-ai-generation-formal-draft-adapter.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+    nextRecommendedTask: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+    title: Admin AI generation formal draft local DB route smoke execution
+    phase: admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
+    taskKind: local_route_smoke_execution
+    moduleRunVersion: 2
+    executionProfile: local_db_route_handler_smoke_max_two_content_formal_draft_writes_no_seed_no_provider
+    evidenceMode: redacted_route_smoke_summary_only
+    validationPolicy: transient_route_smoke_docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: seeded_by_formal_draft_route_integration_approval_package_2026_06_26
+    requiredOutcome: >-
+      Execute at most two content admin formal adoption route-handler POST calls against existing local dev DB generated
+      results after route integration TDD closes: one content question adoption and one content paper adoption when
+      eligible sources exist. The route may create local formal question/paper drafts and update adoption metadata for
+      those calls only. Do not seed data, execute migrations, call Provider, publish formal content, or claim
+      staging/prod/release final Pass.
+    status: pending
+    approvedAt: "2026-06-26T09:45:55-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      scope: local_route_smoke_only_max_two_post_calls_existing_local_sources_no_seed_no_provider
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localDbConnection: approved_local_dev_route_handler_and_sanitized_lookup_only
+      sanitizedEligibleSourceLookup: approved_max_2
+      routeSmoke: approved_max_2_content_formal_adoption_post_calls
+      formalQuestionPaperDraftLocalWrite: approved_max_2_route_calls_only
+      adoptionMetadataUpdateLocalWrite: approved_max_2_route_calls_only
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      envSecretWrite: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/question-service.ts
+      - src/server/services/paper-draft-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - route_smoke_more_than_two_post_calls
+      - eligible_source_lookup_more_than_two_queries
+      - formal_publish_or_paper_question_composition
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - env_secret_write_or_secret_evidence
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_db_route_smoke
+      - formal_content_draft_write_boundary
+      - evidence_redaction
+      - no_seed_no_provider
+      - no_final_pass_claim
+    validationCommands:
+      - transient Vitest route-handler smoke harness outside repository, documented in evidence, max 2 POST calls and max 2 sanitized eligible-source lookups
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-execution.md
+    nextRecommendedTask: admin-ai-generation-formal-draft-product-closeout-review-or-paper-composition-plan-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: admin-ai-generation-formal-draft-adapter-contract-tdd-2026-06-26
     title: Admin AI generation formal draft adapter contract TDD
     phase: admin-ai-generation-formal-draft-adapter-contract-tdd-2026-06-26
