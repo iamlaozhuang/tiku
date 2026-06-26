@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
-updatedAt: "2026-06-26T01:45:00-07:00"
+currentPhase: mvp-final-pass-decision-criteria-package-2026-06-26
+updatedAt: "2026-06-26T02:15:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,30 +501,32 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
-  lastKnownOriginMasterSha: a70067c3ab4b92db0dfcf1845b61f7211026fd1d
+  lastKnownMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
+  lastKnownOriginMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
 currentTask:
-  id: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
+  id: mvp-final-pass-decision-criteria-package-2026-06-26
   status: closed
-  result: pass_docs_only_owner_acceptance_decision_package_prepared_no_final_pass
-  claimedAt: "2026-06-26T01:30:00-07:00"
-  plannedAt: "2026-06-26T01:30:00-07:00"
-  validatedAt: "2026-06-26T01:45:00-07:00"
-  reviewedAt: "2026-06-26T01:45:00-07:00"
-  closedAt: "2026-06-26T01:45:00-07:00"
+  result: pass_docs_only_mvp_final_pass_decision_criteria_package_prepared_no_final_pass
+  claimedAt: "2026-06-26T02:00:00-07:00"
+  plannedAt: "2026-06-26T02:00:00-07:00"
+  validatedAt: "2026-06-26T02:15:00-07:00"
+  reviewedAt: "2026-06-26T02:15:00-07:00"
+  closedAt: "2026-06-26T02:15:00-07:00"
   sourceStory: owner_acceptance_after_full_8_row_local_browser_pass
-  approvalConsumed: user_request_docs_only_owner_acceptance_decision_package_2026_06_26
-  approvalSource: user_request_docs_only_owner_acceptance_decision_package_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
-  decisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  approvalConsumed: user_request_mvp_final_pass_decision_criteria_package_2026_06_26
+  approvalSource: user_request_mvp_final_pass_decision_criteria_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  sourceOwnerDecisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
   sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
   sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   allowedScope:
     docsStateEvidenceAudit: true
-    ownerDecisionPackage: true
+    criteriaPackage: true
+    ownerDecisionPackage: false
     localBrowserRuntimeRerun: false
     credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
@@ -544,24 +546,26 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  ownerDecisionScope:
-    purpose: separate_local_browser_pass_from_unapproved_external_release_gates
-    completedEvidenceTrack:
+  criteriaScope:
+    purpose: define_entry_criteria_for_later_mvp_final_pass_decision_process
+    currentLocalEvidence:
       localFullEightRowBrowserPass: pass_8_of_8
       sourceEvidence: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
-    stillUnapprovedTrack:
+    requiredSeparateGateApprovals:
       - provider_model_call_or_provider_enablement
       - provider_cost_quota_pricing_measurement
       - staging_prod_cloud_deploy
       - payment_external_service
+      - env_secret_or_dotenv_read_write
+      - database_schema_migration_account_mutation
+      - dependency_package_lockfile_change
       - final_acceptance_pass
     allowedEvidenceFields:
       - committed_evidence_path
-      - role_label
       - aggregate_pass_fail_blocked_count
-      - route_category
       - gate_status
-      - decision_option
+      - criteria_label
+      - owner_decision_wording
     blockedEvidenceFields:
       - credentials
       - account_identifiers
@@ -576,6 +580,7 @@ currentTask:
       - provider_payloads
       - screenshots_or_traces
       - raw_dom
+      - cleartext_redeem_code
   closeoutPolicy:
     localCommit:
       approved: true
@@ -591,13 +596,14 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: standingUnattendedLocalCloseoutApproval_plus_user_request_2026_06_26
-  branch: codex/owner-acceptance-decision-package-20260626
+  branch: codex/mvp-final-pass-criteria-package-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    docsOnlyPackagePrepared: true
+    docsOnlyCriteriaPackagePrepared: true
+    sourceFullEightRowLocalBrowserPass: pass_8_of_8
     prettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -615,7 +621,62 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRequiredTask: owner_decision_select_enter_final_pass_review_or_request_additional_gate_packages
+  nextRequiredTask: owner_decision_select_enter_local_product_final_pass_review_or_request_external_gate_package
+mvpFinalPassDecisionCriteriaPackage20260626:
+  taskId: mvp-final-pass-decision-criteria-package-2026-06-26
+  phase: mvp-final-pass-decision-criteria-package-2026-06-26
+  recordedAt: "2026-06-26T02:00:00-07:00"
+  status: closed
+  result: pass_docs_only_mvp_final_pass_decision_criteria_package_prepared_no_final_pass
+  validatedAt: "2026-06-26T02:15:00-07:00"
+  reviewedAt: "2026-06-26T02:15:00-07:00"
+  closedAt: "2026-06-26T02:15:00-07:00"
+  branch: codex/mvp-final-pass-criteria-package-20260626
+  entryMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
+  entryOriginMasterSha: 2868df351336663348a86c97d8d05547e0c1cf42
+  approvalSource: user_request_mvp_final_pass_decision_criteria_package_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-criteria-package.md
+  sourceOwnerDecisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  sourceFullEightRowEvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  sourceFullEightRowAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+  packageDecisionPurpose: >-
+    Define the criteria for entering a later local-product MVP final Pass decision process and the gates that require
+    separate approval before they can be included in any final Pass claim.
+  validationSummary:
+    docsOnlyCriteriaPackagePrepared: true
+    sourceFullEightRowLocalBrowserPass: pass_8_of_8
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    providerOrCostTouched: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  blockedWithoutFreshApproval:
+    - browser_or_playwright_runtime
+    - credential_read_or_entry
+    - source_test_package_lockfile_change
+    - database_seed_or_write
+    - account_user_employee_authorization_mutation
+    - schema_migration_or_drizzle_schema_change
+    - env_secret_or_dotenv_read_write
+    - provider_model_call_or_provider_enablement
+    - provider_cost_quota_pricing_measurement
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - pr_force_push
+    - final_acceptance_pass
 ownerAcceptanceDecisionPackageAfterFull8RowLocalBrowserPass20260626:
   taskId: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
   phase: owner-acceptance-decision-package-after-full-8-row-local-browser-pass-2026-06-26
