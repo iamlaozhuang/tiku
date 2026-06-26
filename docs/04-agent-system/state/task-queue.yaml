@@ -1192,6 +1192,178 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
+    title: Admin AI generation content paper generated result local route setup and formal draft route smoke
+    phase: admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package-2026-06-26
+    taskKind: local_route_smoke
+    moduleRunVersion: 2
+    executionProfile: local_db_route_handler_smoke_route_based_setup_no_source_change_no_provider
+    evidenceMode: redacted_route_workflow_status_counts_public_ids_only
+    validationPolicy: capped_local_route_smoke_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    requiredOutcome: >-
+      Use the approved route-based setup path to create or reuse one content admin AI paper generated result with
+      Provider disabled/default local contract only, then run one content paper formal adoption route smoke to prove a
+      formal paper draft can be created from the route-produced generated result. Do not modify source/tests/schema/
+      migration/package/env files, seed or repair data directly, call Provider, publish content, or claim final Pass.
+    status: closed
+    approvedAt: "2026-06-26T11:12:03-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package-2026-06-26
+      scope: local_db_content_paper_route_based_generated_result_setup_and_formal_draft_route_smoke_max_one_each_no_provider
+    claimedAt: "2026-06-26T11:12:03-07:00"
+    plannedAt: "2026-06-26T11:12:03-07:00"
+    implementedAt: "2026-06-26T11:20:44-07:00"
+    validatedAt: "2026-06-26T11:20:44-07:00"
+    reviewedAt: "2026-06-26T11:20:44-07:00"
+    closedAt: "2026-06-26T11:20:44-07:00"
+    result: pass_content_paper_route_setup_and_formal_draft_route_smoke
+    decision:
+      contentPaperSetupPostApproved: true
+      contentPaperFormalAdoptionPostApproved: true
+      maxContentPaperSetupPostCalls: 1
+      maxContentPaperFormalAdoptionPostCalls: 1
+      directDbSeedOrFixtureApproved: false
+      providerCallApproved: false
+      localMigrationExecutionApprovedForThisTask: false
+      organizationScopedAdoptionApproved: false
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localDatabaseConnection: approved_via_existing_route_runtime_only
+      localRouteSmoke: approved
+      contentPaperSetupPost: approved_max_one
+      contentPaperFormalAdoptionPost: approved_max_one
+      formalPaperDraftRouteWrite: approved_local_route_smoke_only
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      directRawDbMutationOrCleanupDelete: blocked
+      paperSectionQuestionComposition: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-retry-after-reused-actor-context-repair.md
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - schema_migration_or_drizzle_push
+      - local_migration_execution
+      - direct_db_seed_fixture_or_data_repair
+      - route_smoke_more_than_approved_caps
+      - direct_raw_db_mutation_or_cleanup_delete
+      - formal_publish_or_student_visible_content
+      - paper_section_question_composition
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - env_secret_write_or_secret_evidence
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_route_smoke
+      - formal_content_adoption_boundary
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - node_modules\.bin\tsx.cmd .\.codex-tmp-admin-ai-content-paper-source-setup-formal-draft-smoke.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+    branch: codex/admin-ai-content-paper-source-setup-formal-draft-smoke-20260626
+    nextRecommendedTask: none_goal_scope_achieved_provider_cost_and_release_gates_still_separate
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    validationSummary:
+      routeSmoke: pass_content_paper_setup_and_formal_draft_created
+      actorLookupCount: 1
+      contentPaperSetupPostCallCount: 1
+      contentPaperFormalAdoptionPostCallCount: 1
+      setupResponseCode: 0
+      setupRuntimeStatus: local_contract_only
+      setupProviderCallExecuted: false
+      setupResultPublicIdState: present
+      setupLatencyMs: 95
+      formalAdoptionResponseCode: 0
+      formalTargetWriteStatus: draft_created
+      formalPaperPublicIdState: present
+      formalQuestionPublicIdState: missing
+      formalAdoptionPersistenceStatus: reused
+      formalAdoptionLatencyMs: 71
+      liveDatabaseConnectionExecuted: true
+      routeSmokeExecuted: true
+      formalQuestionPaperWriteAgainstLiveDbExecuted: paper_draft_created_route_only
+      schemaMigrationExecuted: false
+      providerCallExecuted: false
+      prettierScoped: pass_after_write
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    retryCount: 0
+    lastFailurePath: null
+
   - id: admin-ai-generation-formal-draft-local-db-route-smoke-retry-after-reused-actor-context-repair-2026-06-26
     title: Admin AI generation formal draft local DB route smoke retry after reused actor context repair
     phase: admin-ai-generation-formal-draft-local-db-route-smoke-retry-after-reused-actor-context-repair-2026-06-26
