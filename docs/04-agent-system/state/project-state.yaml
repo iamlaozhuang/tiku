@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
-updatedAt: "2026-06-25T16:42:42-07:00"
+currentPhase: role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun-closed-2026-06-25
+updatedAt: "2026-06-25T17:10:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,39 +501,37 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6363a5e49b43a1f11ff385df470be3ee48b3a39a
-  lastKnownOriginMasterSha: 6363a5e49b43a1f11ff385df470be3ee48b3a39a
+  lastKnownMasterSha: 800df0048e93de76a1da8af84fbfc13f3776d854
+  lastKnownOriginMasterSha: 800df0048e93de76a1da8af84fbfc13f3776d854
 currentTask:
-  id: organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair-2026-06-25
+  id: role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun-2026-06-25
   status: closed
-  result: pass_org_advanced_employee_visible_list_500_source_repaired_focused_browser_pass_no_final_pass
-  claimedAt: "2026-06-25T16:23:24-07:00"
-  plannedAt: "2026-06-25T16:23:24-07:00"
-  validatedAt: "2026-06-25T16:40:34-07:00"
-  reviewedAt: "2026-06-25T16:40:34-07:00"
-  closedAt: "2026-06-25T16:42:42-07:00"
-  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_employee_visible_list_500_blocker
-  approvalConsumed: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
-  approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
-  planPath: docs/05-execution-logs/task-plans/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
+  result: runtime_observation_completed_8_rows_2_pass_6_fail_no_final_pass
+  claimedAt: "2026-06-25T16:46:20-07:00"
+  plannedAt: "2026-06-25T16:46:20-07:00"
+  validatedAt: "2026-06-25T17:10:06-07:00"
+  reviewedAt: "2026-06-25T17:10:06-07:00"
+  closedAt: "2026-06-25T17:10:06-07:00"
+  sourceStory: goal_full_8_row_role_separated_browser_acceptance_after_organization_training_visible_list_repair
+  approvalConsumed: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
+  approvalSource: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
+  planPath: docs/05-execution-logs/task-plans/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-role-separated-full-8-row-post-org-training-visible-list-repair-browser-rerun.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
-  predecessorAlignmentEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-published-assignment-local-alignment.md
-  predecessorReadonlyInspectionEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-assignment-readonly-inspection.md
-  predecessorFocusedBrowserEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-post-assignment-focused-browser-rerun.md
+  predecessorVisibleListRepairEvidencePath: docs/05-execution-logs/evidence/2026-06-25-organization-training-advanced-employee-visible-list-500-runtime-diagnostic-repair.md
   allowedScope:
     docsStateEvidenceAudit: true
-    localRuntimeDiagnostic: true
-    localSourceChange: source_root_cause_only
-    focusedUnitTests: source_root_cause_only
+    localRuntimeDiagnostic: false
+    localSourceChange: false
+    focusedUnitTests: false
     localBrowserRuntimeRerun: true
     credentialDocumentReadByCodex: true
     credentialEntryByCodex: true
     credentialMode: local_private_role_account_file_redacted
-    databaseRead: read_only_local_redacted_counts_status
+    databaseRead: false
     databaseWrite: false
-    seedReadOnlyInspection: true
+    seedReadOnlyInspection: false
     seedWrite: false
     accountMutation: false
     schemaMigration: false
@@ -544,15 +542,13 @@ currentTask:
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  diagnosticAndRepairScope:
-    taskKind: local_runtime_diagnostic_first_repair
-    purpose: locate_and_repair_org_advanced_employee_visible_list_500_if_source_caused
+  fullEightRowBrowserRerunScope:
+    taskKind: local_real_browser_role_separated_runtime_rerun
+    purpose: observe_all_8_role_rows_after_visible_list_repair
     allowedEvidenceFields:
       - command_name
       - pass_fail_status
       - redacted_role_label
-      - redacted_count
-      - redacted_status
       - landing_path
       - route_access_status
       - training_row_count
@@ -577,19 +573,19 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      approvalSource: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      approvalSource: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
+      approvalSource: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approval_2026_06_25_visible_list_500_runtime_diagnostic_repair
-  branch: codex/org-training-visible-list-500-20260625
+      approvalSource: active_goal_and_prior_user_approval_full_8_row_rerun_after_focused_repair_pass
+  branch: codex/full-8-row-visible-list-rerun-20260625
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -598,21 +594,16 @@ currentTask:
     browserRuntimeExecuted: true
     credentialDocumentReadByCodex: true
     credentialEntryByCodex: true
-    databaseReadExecuted: true_read_only_counts_status
+    databaseReadExecuted: false
     databaseWriteExecuted: false
-    sourceRepairExecuted: true
-    focusedUnitTests: pass_repository_test_21_tests
-    exactRepositoryDiagnosticAfterRepair: pass_one_visible_published_version
-    orgStandardEmployeeTrainingWorkflowEntered: false
-    orgStandardEmployeeVisibleListHttpStatus: 200
-    orgStandardEmployeeVisibleListCode: 409076
-    orgAdvancedEmployeeTrainingRowCount: 1
-    orgAdvancedEmployeeVisibleListHttpStatus: 200
-    orgAdvancedEmployeeVisibleListCode: 0
+    rowsExecuted: 8
+    passRows: 2
+    failRows: 6
+    blockedRows: 0
     schemaMigrationExecuted: false
     accountMutationExecuted: false
     finalPassClaim: false
-  nextRequiredTask: full_8_row_role_separated_browser_rerun_scope_after_focused_visible_list_repair
+  nextRequiredTask: learner_employee_ai_route_strictness_and_ai_paper_enabled_state_repair
 learnerOrgEmployeeAiDirectRouteGuardPostRepairBrowserRerun20260625:
   taskId: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
   phase: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
