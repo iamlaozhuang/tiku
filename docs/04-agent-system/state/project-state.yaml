@@ -501,41 +501,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 476277eabc794be8adab5f16027572ac0a486053
-  lastKnownOriginMasterSha: 476277eabc794be8adab5f16027572ac0a486053
+  lastKnownMasterSha: 5fbef9c678f46e083a91037290bf494b2cdef580
+  lastKnownOriginMasterSha: 5fbef9c678f46e083a91037290bf494b2cdef580
 currentTask:
-  id: admin-ai-generation-formal-adoption-local-route-smoke-approval-package-2026-06-26
+  id: admin-ai-generation-formal-adoption-local-route-smoke-execution-2026-06-26
   status: closed
-  result: pass_formal_adoption_local_route_smoke_approval_package_prepared_no_execution
-  claimedAt: "2026-06-26T23:59:59-07:00"
-  plannedAt: "2026-06-26T23:59:59-07:00"
-  implementedAt: "2026-06-26T23:59:59-07:00"
-  validatedAt: "2026-06-26T23:59:59-07:00"
-  reviewedAt: "2026-06-26T23:59:59-07:00"
-  closedAt: "2026-06-26T23:59:59-07:00"
-  sourceStory: successor-of-admin-ai-generation-formal-adoption-route-integration-tdd-2026-06-26
-  approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-approval-package.md
-  branch: codex/admin-ai-formal-adoption-route-smoke-approval-20260626
+  result: pass_formal_adoption_local_route_smoke_question_only_paper_source_not_found
+  claimedAt: "2026-06-26T09:25:44-07:00"
+  plannedAt: "2026-06-26T09:25:44-07:00"
+  implementedAt: "2026-06-26T09:29:21-07:00"
+  validatedAt: "2026-06-26T09:30:40-07:00"
+  reviewedAt: "2026-06-26T09:30:40-07:00"
+  closedAt: "2026-06-26T09:30:40-07:00"
+  sourceStory: successor-of-admin-ai-generation-formal-adoption-local-route-smoke-approval-package-2026-06-26
+  approvalSource: admin-ai-generation-formal-adoption-local-route-smoke-approval-package-2026-06-26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-execution.md
+  acceptancePath: null
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-route-smoke-execution.md
+  branch: codex/admin-ai-formal-adoption-route-smoke-exec-20260626
   scope:
     docsStateEvidenceAudit: true
-    approvalDecisionPackage: true
+    approvalDecisionPackage: false
     localSourceChange: false
     focusedUnitTest: false
     schemaMigrationFileChange: false
     drizzleMetadataJournalAlignment: false
     localMigrationExecutionApprovedForThisTask: false
     routeIntegrationExecuted: false
-    liveDatabaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    liveDatabaseConnectionExecuted: true
+    databaseWriteExecuted: formal_adoption_metadata_only
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialOrEnvRead: false
+    credentialOrEnvRead: local_db_runtime_only_no_evidence
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -546,8 +546,7 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    nextExecutionTask: admin-ai-generation-formal-adoption-local-route-smoke-execution-2026-06-26
-    localRouteSmokeApprovedForNextTask: true
+    consumedApprovalPackage: ADMIN_AI_GENERATION_FORMAL_ADOPTION_LOCAL_ROUTE_SMOKE_2026_06_26
     maxRouteSmokePostCalls: 2
     maxEligibleSourceLookupQueries: 2
     allowedRoute: /api/v1/content-ai-generation-results/{publicId}/formal-adoptions
@@ -555,8 +554,8 @@ currentTask:
       - content_question_formal_adoption
       - content_paper_formal_adoption
     localMigrationExecutionApprovedForThisTask: false
-    liveDatabaseConnectionApproved: false
-    routeSmokeApprovedForNextTask: true
+    liveDatabaseConnectionApproved: true
+    routeSmokeApprovedForThisTask: true
     formalQuestionOrPaperWriteApproved: false
     providerCallApproved: false
   closeoutPolicy:
@@ -579,15 +578,19 @@ currentTask:
   retryCount: 0
   lastFailurePath: null
   validationSummary:
+    routeSmokeExecuted: true
+    routePostCallCount: 1
+    eligibleSourceLookupQueryCount: 1
+    contentQuestionFormalAdoption: pass
+    contentPaperFormalAdoption: not_attempted_no_eligible_local_source
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
-    databaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    databaseConnectionExecuted: true
+    databaseWriteExecuted: formal_adoption_metadata_only
     schemaMigrationFileChanged: false
     schemaMigrationExecuted: false
-    routeSmokeExecuted: false
     providerCallExecuted: false
     credentialReadExecuted: false
     costCalibrationExecuted: false
@@ -597,7 +600,7 @@ currentTask:
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: admin-ai-generation-formal-adoption-local-route-smoke-execution-2026-06-26
+  nextRecommendedTask: admin-ai-generation-formal-draft-adapter-contract-tdd-2026-06-26
 adminAiGenerationFormalAdoptionDbSchemaAdapterRouteIntegrationApprovalPackage20260626:
   taskId: admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
   phase: admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
