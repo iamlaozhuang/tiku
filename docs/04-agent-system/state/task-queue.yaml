@@ -44,6 +44,147 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: admin-ai-generation-formal-adoption-local-migration-execution-2026-06-26
+    title: Admin AI generation formal adoption local migration execution
+    phase: admin-ai-generation-formal-adoption-local-migration-execution-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-adoption-local-migration-execution-approval-package-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-adoption-local-migration-execution-approval-package-2026-06-26
+    taskKind: local_migration_execution
+    moduleRunVersion: 2
+    executionProfile: local_migration_execution_only
+    evidenceMode: redacted_command_status_and_schema_exists_summary_only
+    validationPolicy: approved_local_migration_sanitized_schema_read_docs_format_module_run_v2_gates
+    queueSelectionMode: approved_by_prior_approval_package_2026_06_26
+    requiredOutcome: >-
+      Apply the reviewed local migration `20260626235000_add_admin_ai_generation_formal_adoption` once against local
+      dev DB, then run one sanitized schema-read confirmation that the table exists. Do not modify source, tests,
+      schema, migration files, package/lockfiles, or env files. Do not run route smoke, write formal question/paper
+      drafts, call Provider, access staging/prod, or claim release final Pass.
+    status: closed
+    approvedAt: "2026-06-26T23:59:59-07:00"
+    approvedBy: approval_package_admin_ai_generation_formal_adoption_local_migration_execution_2026_06_26
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    implementedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    result: pass_admin_ai_generation_formal_adoption_local_migration_execution_no_route_no_formal_write
+    approvalConsumed:
+      approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution-approval-package.md
+      scope: local_migration_execution_once_and_sanitized_schema_read_once_only
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localMigrationExecution: approved
+      localDbConnection: approved_migration_command_only
+      sanitizedSchemaRead: approved
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      schemaMigrationFileChange: blocked
+      routeIntegration: blocked
+      routeSmoke: blocked
+      formalQuestionPaperDraftWrite: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution-approval-package.md
+      - drizzle/20260626235000_add_admin_ai_generation_formal_adoption.sql
+      - drizzle.config.ts
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - schema_migration_file_change_or_drizzle_generate
+      - second_migration_execution
+      - second_schema_read_confirmation
+      - route_integration_or_route_smoke
+      - formal_question_paper_draft_write
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - local_migration_execution
+      - local_db_connection_redaction
+      - formal_content_boundary
+    validationCommands:
+      - npx.cmd drizzle-kit migrate
+      - sanitized schema-read confirmation for admin_ai_generation_formal_adoption
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-adoption-local-migration-execution-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-adoption-local-migration-execution-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-local-migration-execution.md
+    branch: codex/admin-ai-formal-adoption-local-migration-execution-20260626
+    validationSummary:
+      migrationExecution: pass_1_execution
+      schemaReadConfirmation: pass_1_actual_read_1_preflight_failure_before_db
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+      routeSmokeExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdReleaseFinalPassClaimed: false
+    nextRecommendedTask: admin-ai-generation-formal-adoption-route-integration-tdd-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: admin-ai-generation-formal-adoption-local-migration-execution-approval-package-2026-06-26
     title: Admin AI generation formal adoption local migration execution approval package
     phase: admin-ai-generation-formal-adoption-local-migration-execution-approval-package-2026-06-26
