@@ -4395,6 +4395,7 @@ tasks:
       - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
       - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
       - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-history-read-ui-closure-tdd.md
       - scripts/ai/run-personal-ai-provider-smoke.mjs
       - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
       - src/server/services/admin-ai-generation-local-contract-route.ts
@@ -4429,28 +4430,28 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
     gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
     status: closed
-    result: partial_local_real_provider_smoke_pass_product_bridge_blocked_no_final_pass
-    claimedAt: "2026-06-26T08:35:00-07:00"
-    plannedAt: "2026-06-26T08:35:00-07:00"
-    validatedAt: "2026-06-26T08:55:00-07:00"
-    reviewedAt: "2026-06-26T08:55:00-07:00"
-    closedAt: "2026-06-26T08:55:00-07:00"
-    branch: codex/ai-provider-cost-final-pass-smoke-20260626
+    result: partial_refreshed_local_real_provider_smoke_pass_product_bridge_blocked_no_final_pass
+    claimedAt: "2026-06-26T23:59:30-07:00"
+    plannedAt: "2026-06-26T23:59:30-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    branch: codex/ai-provider-cost-smoke-refresh-20260626
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
       mergeToMaster:
         approved: true
         targetBranch: master
-        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
       push:
         approved: true
         target: origin/master
-        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
       cleanup:
         deleteShortBranch: true
-        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+        approvalSource: current_user_request_execute_real_provider_smoke_after_refreshed_gate_2026_06_26
     blockedWithoutFreshApproval:
       - source_test_package_lockfile_change
       - env_file_edit_or_secret_value_evidence
@@ -4465,7 +4466,9 @@ tasks:
       providerCostSmokeExecuted: pass
       providerCallCount: pass_4_of_4_max
       providerSmokeResult: pass_local_real_model_4_calls
-      localContractSummaryStatus: blocked_product_routes_remain_local_contract_only
+      localContractSummaryStatus: blocked_product_routes_remain_provider_call_blocked
+      routeIntegratedProviderPassAllowed: false_current_routes_provider_call_blocked
+      monetaryCostEstimated: false
       sourceTestPackageLockfileChanged: false
       databaseSchemaMigrationAccountMutationExecuted: false
       stagingProdPaymentExternalExecuted: false

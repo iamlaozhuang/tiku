@@ -2,10 +2,10 @@
 
 ## Scope
 
-Local dev Provider/Cost smoke or calibration under the task 1 gate package.
+Local dev Provider/Cost smoke or calibration under the refreshed task 1 gate package.
 
-This task may read the approved local Provider credential source and execute at most four real Provider calls. Evidence
-must remain redacted.
+This task read the approved local Provider credential source and executed four real Provider calls. Evidence remains
+redacted.
 
 ## Changed Files
 
@@ -19,9 +19,10 @@ must remain redacted.
 
 Approved by:
 
-- task 1 gate package:
+- refreshed task 1 gate package:
   `docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md`
-- current owner instruction approving task 2 Provider credential read and real model calls under the task 1 cap.
+- current owner instruction to execute real Provider smoke only after the gate package explicitly allows it;
+- prior owner instruction approving task 2 Provider credential read and real model calls under the task 1 cap.
 
 Blocked:
 
@@ -50,6 +51,8 @@ Mapping conclusion:
   workflows.
 - Formal `question` and `paper` writes remain blocked.
 - Provider/Cost evidence remains local only and does not approve staging/prod/release readiness.
+- Admin route-integrated Provider Pass remains blocked because the current admin route status is
+  `provider_call_blocked`.
 
 ## Provider Profile
 
@@ -77,12 +80,12 @@ Mapping conclusion:
 
 Execution result: `pass_local_real_model_smoke_4_calls`.
 
-| Workflow                   | Status | Calls | Retry | Duration ms | Input tokens | Output tokens | Total tokens | Reasoning tokens | Error category |
-| -------------------------- | ------ | ----- | ----- | ----------- | ------------ | ------------- | ------------ | ---------------- | -------------- |
-| `content_ai_question`      | pass   | 1     | 0     | 11831       | 24           | 466           | 490          | 460              | null           |
-| `content_ai_paper`         | pass   | 1     | 0     | 9921        | 24           | 485           | 509          | 479              | null           |
-| `organization_ai_question` | pass   | 1     | 0     | 12229       | 24           | 626           | 650          | 620              | null           |
-| `organization_ai_paper`    | pass   | 1     | 0     | 15177       | 24           | 706           | 730          | 700              | null           |
+| Workflow                   | Status | Calls | Retry | Duration ms | Input tokens | Output tokens | Total tokens | Reasoning tokens | Cached input tokens | Error category |
+| -------------------------- | ------ | ----- | ----- | ----------- | ------------ | ------------- | ------------ | ---------------- | ------------------- | -------------- |
+| `content_ai_question`      | pass   | 1     | 0     | 11848       | 24           | 588           | 612          | 582              | 0                   | null           |
+| `content_ai_paper`         | pass   | 1     | 0     | 11410       | 24           | 573           | 597          | 567              | 0                   | null           |
+| `organization_ai_question` | pass   | 1     | 0     | 10977       | 24           | 559           | 583          | 554              | 0                   | null           |
+| `organization_ai_paper`    | pass   | 1     | 0     | 12420       | 24           | 640           | 664          | 634              | 0                   | null           |
 
 Execution controls:
 
@@ -105,9 +108,11 @@ The four workflow labels map to content and organization admin local contract lo
 evidence and current route source still show local contract behavior:
 
 - `runtimeStatus`: `local_contract_only`
+- `productChainStatus`: `provider_call_blocked`
 - `providerCallExecuted`: `false`
-- `envSecretAccessed`: `false`
-- `costCalibrationExecuted`: `false`
+- `adminRouteIntegratedProviderPass`: false
+- `envSecretAccessedByAdminRoute`: `false`
+- `costCalibrationExecutedByAdminRoute`: `false`
 - `contentVisibility`: `summary_only`
 - formal `question`/`paper` write: blocked
 
@@ -118,11 +123,11 @@ follow-up implementation or diagnostic item.
 
 - provider calls: `4`
 - total input tokens: `96`
-- total output tokens: `2283`
-- total tokens: `2379`
-- total reasoning tokens: `2259`
+- total output tokens: `2360`
+- total tokens: `2456`
+- total reasoning tokens: `2337`
 - cached input tokens: `0`
-- total recorded duration: `49158 ms`
+- total recorded duration: `46655 ms`
 - monetary cost estimated: false
 - pricing lookup executed: false
 - Cost Calibration Gate Pass: false
@@ -132,11 +137,11 @@ This is recorded as usage-counter evidence only, not as quota/pricing calibratio
 
 ## Validation Results
 
-1. Local Provider/Cost smoke loop under the task 1 gate package:
+1. Local Provider/Cost smoke loop under the refreshed task 1 gate package:
    - Result: pass for local Provider reachability and usage counters; `4` calls, `0` retries.
    - Product-chain result: blocked because admin local contract routes remain provider-disabled.
 2. `npx.cmd prettier --write --ignore-unknown ...`
-   - Result: pass; scoped files formatted.
+   - Result: pass; scoped files unchanged after formatting.
 3. `npx.cmd prettier --check --ignore-unknown ...`
    - Result: pass; all matched files use Prettier code style.
 4. `git diff --check`
@@ -144,8 +149,8 @@ This is recorded as usage-counter evidence only, not as quota/pricing calibratio
 5. `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26`
    - Result: pass; five files matched declared scope; Cost Calibration Gate remains blocked.
 6. `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26 -SkipRemoteAheadCheck`
-   - Result: pass; branch, `master`, `origin/master`, and state checkpoint all matched the task 1 closeout SHA
-     `b6019280bf6c326a9895d6e107e7e99401f7a282`.
+   - Result: pass; branch, `master`, `origin/master`, and state checkpoint all matched
+     `d9f69bba162c75cd3fd5f5027f4f91891b7d1697`.
 
 ## Blocked Work Statement
 
@@ -155,5 +160,5 @@ blocked.
 
 ## Next Step
 
-Recommended next step: create a focused provider-bridge diagnostic or provider-disabled product loop implementation plan
-for the content/organization admin AI local contract routes before including Provider/Cost in a final Pass boundary.
+Recommended next step: create a focused admin runtime bridge diagnostic or provider-disabled product loop implementation
+plan for the content/organization admin AI local contract routes before including Provider/Cost in a final Pass boundary.
