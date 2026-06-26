@@ -44,6 +44,492 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    title: Formal paper draft composition adoption approval package
+    phase: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    sourceStory: current-user-five-step-formal-paper-draft-composition-goal-2026-06-26
+    dependencies:
+      - admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
+    taskKind: docs_only_approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_no_source_no_db_no_provider_no_publish
+    evidenceMode: redacted_approval_boundary_only
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+    requiredOutcome: >-
+      Decide whether content admin generated paper result formal adoption may compose `paper_section` and
+      `paper_question` rows, decide the question source strategy, decide adapter/repository contract scope, and decide
+      whether later local DB route smoke is allowed. This task must not change source/tests/schema/migration/package/env
+      files, connect DB, run route smoke, call Provider, publish content, or claim staging/prod/release final Pass.
+    status: closed
+    approvedAt: "2026-06-26T11:35:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+      scope: docs_state_approval_package_only
+    claimedAt: "2026-06-26T11:35:00-07:00"
+    plannedAt: "2026-06-26T11:35:00-07:00"
+    implementedAt: "2026-06-26T11:35:00-07:00"
+    validatedAt: "2026-06-26T11:35:00-07:00"
+    reviewedAt: "2026-06-26T11:35:00-07:00"
+    closedAt: "2026-06-26T11:35:00-07:00"
+    result: approved_formal_paper_draft_composition_tdd_and_capped_local_route_smoke
+    decision:
+      approvedNextImplementationTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+      approvedLaterLocalRouteSmokeTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+      paperSectionQuestionCompositionApprovedForLaterTasks: true
+      questionSourceStrategy: mixed_existing_or_companion_question_draft_via_adapter
+      adapterContractExtensionApproved: true
+      repositoryContractExtensionApprovedByDefault: false
+      liveDbConnectionApprovedForThisTask: false
+      liveDbConnectionApprovedForNextTdd: false
+      localDbRouteSmokeApprovedOnlyForLaterTask: true
+      laterRouteSmokeMaxContentPaperSetupPostCalls: 1
+      laterRouteSmokeMaxFormalAdoptionPostCalls: 1
+      laterRouteSmokeMaxEligibleSourceLookups: 2
+      laterRouteSmokeMaxCompanionQuestionDraftCreations: 3
+      laterRouteSmokeMaxPaperSectionRows: 3
+      laterRouteSmokeMaxPaperQuestionRows: 3
+      schemaMigrationApproved: false
+      seedOrFixtureCreationApproved: false
+      providerCallApproved: false
+      formalPublishApproved: false
+      stagingProdReleaseFinalPassApproved: false
+    capabilities:
+      docsStateEvidenceAudit: approved
+      approvalPackage: approved
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      routeIntegrationExecution: blocked
+      liveDatabaseConnection: blocked
+      localRouteSmoke: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      cleanupDelete: blocked
+      formalQuestionPaperDraftLiveWrite: blocked
+      formalPublish: blocked
+      studentVisibleContent: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-retry-after-reused-actor-context-repair.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-adapter-contract-tdd.md
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/repositories/paper-draft-repository.ts
+      - src/server/validators/paper-draft.ts
+      - src/db/schema/paper.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - live_db_connection_or_route_smoke
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - direct_raw_db_mutation_or_cleanup_delete
+      - formal_publish_or_student_visible_content
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - env_secret_write_or_secret_evidence
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_adoption_boundary
+      - approval_scope_control
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId formal-paper-draft-composition-adoption-approval-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+    branch: codex/formal-paper-draft-composition-adoption-approval-20260626
+    nextRecommendedTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+    validationSummary:
+      approvalPackagePrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      providerCallExecuted: false
+      formalPublishExecuted: false
+      finalPassClaimed: false
+      prettierScoped: pass_after_write
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    title: Formal paper draft composition adapter TDD
+    phase: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    sourceStory: successor-of-formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    dependencies:
+      - formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_source_adapter_service_tdd_no_live_db_no_provider_no_publish
+    evidenceMode: redacted_unit_test_contract_summary_only
+    validationPolicy: red_green_focused_unit_lint_typecheck_prettier_diff_module_run_v2_gates
+    queueSelectionMode: seeded_by_formal_paper_draft_composition_approval_package_2026_06_26
+    requiredOutcome: >-
+      Extend the content admin formal draft adapter contract and service so generated paper adoption can create an
+      editable formal paper draft with `paper_section` and `paper_question` composition. Support existing formal
+      question references and adapter-created companion question drafts, verified with focused TDD only. Do not connect
+      live DB, run route smoke, execute migration, seed data, call Provider, publish formal content, or claim final Pass.
+    status: pending
+    approvedAt: "2026-06-26T11:35:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      scope: source_tdd_adapter_composition_no_live_db_no_provider_no_publish
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      sourceTestChange: approved
+      focusedUnitTest: approved
+      adapterContractExtension: approved
+      companionQuestionDraftAdapterTdd: approved
+      paperSectionQuestionCompositionTdd: approved
+      liveDatabaseConnection: blocked
+      localRouteSmoke: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      organizationScopedAdoption: blocked
+      formalPublish: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.test.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - src/server/contracts/paper-draft-contract.ts
+      - src/server/contracts/question-contract.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/services/question-service.ts
+      - src/server/repositories/paper-draft-repository.ts
+      - src/server/repositories/question-repository.ts
+      - src/server/validators/paper-draft.ts
+      - src/server/validators/question.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - src/features/**
+    blockedWithoutFreshApproval:
+      - live_db_connection_or_route_smoke
+      - schema_migration_file_change_or_drizzle_generate
+      - local_migration_execution
+      - data_seed_or_fixture_creation
+      - formal_publish_or_student_visible_content
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_access
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_adoption_boundary
+      - adapter_contract_expansion
+      - companion_question_draft_creation_boundary
+      - paper_section_question_composition
+      - evidence_redaction
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/services/admin-ai-generation-formal-draft-adapter.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/services/admin-ai-generation-formal-draft-adapter.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId formal-paper-draft-composition-adapter-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId formal-paper-draft-composition-adapter-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+    branch: codex/formal-paper-draft-composition-adapter-tdd-20260626
+    nextRecommendedTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    title: Formal paper draft composition route integration local smoke
+    phase: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    sourceStory: successor-of-formal-paper-draft-composition-adapter-tdd-2026-06-26
+    dependencies:
+      - formal-paper-draft-composition-adapter-tdd-2026-06-26
+    taskKind: local_route_smoke
+    moduleRunVersion: 2
+    executionProfile: local_db_route_handler_smoke_capped_composed_paper_draft_no_provider_no_publish
+    evidenceMode: redacted_route_workflow_status_counts_public_id_states_only
+    validationPolicy: focused_unit_then_capped_local_route_smoke_prettier_diff_module_run_v2_gates
+    queueSelectionMode: seeded_by_formal_paper_draft_composition_approval_package_2026_06_26
+    requiredOutcome: >-
+      After composition adapter TDD passes, execute a capped local route smoke proving a content admin generated paper
+      result can be adopted into a formal paper draft with at least one `paper_section` and one `paper_question`. The
+      route may create at most 3 companion question drafts and at most 3 paper questions through the approved
+      route/service path. Do not execute migration, seed data, call Provider, publish formal content, touch staging/prod,
+      or claim final Pass.
+    status: pending
+    approvedAt: "2026-06-26T11:35:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      scope: capped_local_route_smoke_after_tdd_existing_or_route_created_content_paper_source_no_provider_no_publish
+    capabilities:
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: approved
+      localDatabaseConnection: approved_local_dev_only_after_tdd
+      localRuntimeDbConfigRead: approved_without_secret_evidence
+      sanitizedEligibleSourceLookup: approved_max_2
+      contentPaperSetupPost: approved_max_1_provider_disabled
+      contentFormalAdoptionPostSmoke: approved_max_1
+      companionQuestionDraftCreation: approved_max_3_route_service_path_only
+      paperSectionDraftComposition: approved_max_3_route_service_path_only
+      paperQuestionDraftComposition: approved_max_3_route_service_path_only
+      formalPublish: blocked
+      localSourceChange: blocked
+      sourceTestChange: blocked
+      schemaMigrationFileChange: blocked
+      localMigrationExecution: blocked
+      seedOrFixtureCreation: blocked
+      cleanupDelete: blocked
+      organizationScopedAdoption: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adapter-tdd.md
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/services/admin-ai-generation-formal-draft-adapter.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/question-service.ts
+      - src/server/services/paper-draft-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - schema_migration_or_drizzle_push
+      - local_migration_execution
+      - seed_or_fixture_creation
+      - route_smoke_more_than_approved_caps
+      - eligible_source_lookup_more_than_two_queries
+      - companion_question_draft_creation_more_than_three
+      - paper_section_or_paper_question_composition_more_than_three
+      - direct_raw_db_mutation_or_cleanup_delete
+      - formal_publish_or_student_visible_content
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - env_secret_write_or_secret_evidence
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - live_local_db_route_smoke
+      - formal_content_adoption_boundary
+      - composed_paper_draft_write_boundary
+      - evidence_redaction
+      - no_provider_no_publish
+      - no_final_pass_claim
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - node_modules\.bin\tsx.cmd <transient-repo-root-route-smoke-harness>
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId formal-paper-draft-composition-route-integration-local-smoke-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+    branch: codex/formal-paper-draft-composition-route-smoke-20260626
+    nextRecommendedTask: provider-cost-boundary-or-real-provider-paper-composition-smoke-approval-package-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26
     title: Admin AI generation formal draft adapter route integration approval package
     phase: admin-ai-generation-formal-draft-adapter-route-integration-approval-package-2026-06-26

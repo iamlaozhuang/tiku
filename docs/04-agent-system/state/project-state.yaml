@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
-updatedAt: "2026-06-26T10:22:37-07:00"
+currentPhase: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+updatedAt: "2026-06-26T11:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,110 +504,163 @@ repository:
   lastKnownMasterSha: 21bf14a18f7355701d855e521e8510e98df47ec5
   lastKnownOriginMasterSha: 21bf14a18f7355701d855e521e8510e98df47ec5
 currentTask:
-  id: admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
+  id: formal-paper-draft-composition-adoption-approval-package-2026-06-26
   status: closed
-  result: pass_content_paper_route_setup_and_formal_draft_route_smoke
-  claimedAt: "2026-06-26T11:12:03-07:00"
-  plannedAt: "2026-06-26T11:12:03-07:00"
-  implementedAt: "2026-06-26T11:20:44-07:00"
-  validatedAt: "2026-06-26T11:20:44-07:00"
-  reviewedAt: "2026-06-26T11:20:44-07:00"
-  closedAt: "2026-06-26T11:20:44-07:00"
-  sourceStory: successor-of-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package-2026-06-26
-  approvalSource: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-paper-eligible-source-setup-or-route-smoke-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
-  branch: codex/admin-ai-content-paper-source-setup-formal-draft-smoke-20260626
+  result: approved_formal_paper_draft_composition_tdd_and_capped_local_route_smoke
+  claimedAt: "2026-06-26T11:35:00-07:00"
+  plannedAt: "2026-06-26T11:35:00-07:00"
+  implementedAt: "2026-06-26T11:35:00-07:00"
+  validatedAt: "2026-06-26T11:35:00-07:00"
+  reviewedAt: "2026-06-26T11:35:00-07:00"
+  closedAt: "2026-06-26T11:35:00-07:00"
+  sourceStory: current-user-five-step-formal-paper-draft-composition-goal-2026-06-26
+  approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  branch: codex/formal-paper-draft-composition-adoption-approval-20260626
   scope:
     docsStateEvidenceAudit: true
-    approvalDecisionPackage: false
+    approvalDecisionPackage: true
     localSourceChange: false
     focusedUnitTest: false
     schemaMigrationFileChange: false
     drizzleMetadataJournalAlignment: false
     localMigrationExecutionApprovedForThisTask: false
-    routeIntegrationExecuted: true
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: route_only_formal_paper_draft_created
+    routeIntegrationExecuted: false
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialOrEnvRead: approved_local_db_runtime_config_only
+    credentialOrEnvRead: false
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    formalQuestionOrPaperWrite: approved_local_route_smoke_draft_only_max_one_paper
+    formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    contentPaperSetupPostApproved: true
-    contentPaperFormalAdoptionPostApproved: true
-    directDbSeedOrFixtureApproved: false
-    maxContentPaperSetupPostCalls: 1
-    maxContentPaperFormalAdoptionPostCalls: 1
-    localMigrationExecutionApprovedForThisTask: false
+    paperSectionQuestionCompositionApprovedForLaterTasks: true
+    questionSourceStrategy: mixed_existing_or_companion_question_draft_via_adapter
+    approvedNextImplementationTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    approvedLaterLocalRouteSmokeTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    adapterContractExtensionApproved: true
+    repositoryContractExtensionApprovedByDefault: false
+    localRouteSmokeApprovedOnlyAfterTdd: true
+    localDbConnectionApprovedForThisTask: false
+    localDbConnectionApprovedForNextTdd: false
+    localDbConnectionApprovedForLaterSmoke: true
+    routeSmokeMaxContentPaperSetupPostCalls: 1
+    routeSmokeMaxFormalAdoptionPostCalls: 1
+    routeSmokeMaxCompanionQuestionDraftCreations: 3
+    routeSmokeMaxPaperSectionRows: 3
+    routeSmokeMaxPaperQuestionRows: 3
+    localMigrationExecutionApproved: false
+    schemaMigrationFileChangeApproved: false
     seedOrFixtureCreationApproved: false
     providerCallApproved: false
-    organizationScopedAdoptionApproved: false
+    formalPublishApproved: false
+    studentVisibleContentApproved: false
+    stagingProdReleaseFinalPassApproved: false
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    routeSmoke: pass_content_paper_setup_and_formal_draft_created
-    actorLookupCount: 1
-    contentPaperSetupPostCallCount: 1
-    contentPaperFormalAdoptionPostCallCount: 1
-    setupResponseCode: 0
-    setupRuntimeStatus: local_contract_only
-    setupProviderCallExecuted: false
-    setupResultPublicIdState: present
-    setupLatencyMs: 95
-    formalAdoptionResponseCode: 0
-    formalTargetWriteStatus: draft_created
-    formalPaperPublicIdState: present
-    formalQuestionPublicIdState: missing
-    formalAdoptionPersistenceStatus: reused
-    formalAdoptionLatencyMs: 71
+    approvalPackagePrepared: true
+    docsOnly: true
+    sourceOrTestChanged: false
+    schemaMigrationExecuted: false
+    liveDatabaseConnectionExecuted: false
+    routeSmokeExecuted: false
+    providerCallExecuted: false
+    formalPublishExecuted: false
+    finalPassClaimed: false
     prettierScoped: pass_after_write
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    databaseConnectionExecuted: true
-    databaseWriteExecuted: route_only_formal_paper_draft_created
-    schemaMigrationFileChanged: false
+  nextRecommendedTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+formalPaperDraftCompositionAdoptionApprovalPackage20260626:
+  taskId: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  phase: formal-paper-draft-composition-adoption-approval-package-2026-06-26
+  recordedAt: "2026-06-26T11:35:00-07:00"
+  status: closed
+  result: approved_formal_paper_draft_composition_tdd_and_capped_local_route_smoke
+  branch: codex/formal-paper-draft-composition-adoption-approval-20260626
+  sourceStory: current-user-five-step-formal-paper-draft-composition-goal-2026-06-26
+  approvalSource: current_user_fresh_five_step_serial_goal_approval_2026_06_26
+  predecessorEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+  decision:
+    paperSectionQuestionCompositionApprovedForLaterTasks: true
+    questionSourceStrategy: mixed_existing_or_companion_question_draft_via_adapter
+    approvedNextImplementationTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
+    approvedLaterLocalRouteSmokeTask: formal-paper-draft-composition-route-integration-local-smoke-2026-06-26
+    adapterContractExtensionApproved: true
+    repositoryContractExtensionApprovedByDefault: false
+    localRouteSmokeApprovedOnlyAfterTdd: true
+    routeSmokeMaxContentPaperSetupPostCalls: 1
+    routeSmokeMaxFormalAdoptionPostCalls: 1
+    routeSmokeMaxCompanionQuestionDraftCreations: 3
+    routeSmokeMaxPaperSectionRows: 3
+    routeSmokeMaxPaperQuestionRows: 3
+    schemaMigrationApproved: false
+    providerCallApproved: false
+    formalPublishApproved: false
+  validationSummary:
+    approvalPackagePrepared: true
+    docsOnly: true
+    sourceOrTestChanged: false
+    liveDatabaseConnectionExecuted: false
+    routeSmokeExecuted: false
     schemaMigrationExecuted: false
     providerCallExecuted: false
-    credentialReadExecuted: approved_local_db_runtime_config_only
-    costCalibrationExecuted: false
-    stagingProdTouched: false
-    paymentExternalServiceTouched: false
-    formalQuestionOrPaperWriteExecuted: paper_draft_created_route_only
-    packageLockfileChanged: false
-    releaseReadinessClaimed: false
+    formalPublishExecuted: false
     finalPassClaimed: false
-  nextRecommendedTask: none_goal_scope_achieved_provider_cost_and_release_gates_still_separate
+    prettierScoped: pass_after_write
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  blockedWithoutFreshApproval:
+    - source_or_test_change_in_this_task
+    - live_db_connection_or_route_smoke_in_this_task
+    - schema_migration_or_drizzle_push
+    - direct_db_seed_fixture_or_data_repair
+    - direct_raw_db_mutation_or_cleanup_delete
+    - formal_publish_or_student_visible_content
+    - organization_scoped_adoption
+    - provider_model_call_or_provider_enablement
+    - provider_credential_or_env_secret_access
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+    - final_acceptance_pass
+  nextRecommendedTask: formal-paper-draft-composition-adapter-tdd-2026-06-26
 adminAiGenerationContentPaperGeneratedResultLocalRouteSetupAndFormalDraftRouteSmoke20260626:
   taskId: admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
   phase: admin-ai-generation-content-paper-generated-result-local-route-setup-and-formal-draft-route-smoke-2026-06-26
