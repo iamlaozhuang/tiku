@@ -504,54 +504,56 @@ repository:
   lastKnownMasterSha: 5e95d40cac28ead8d3e67fb2c6f662f16f961b73
   lastKnownOriginMasterSha: 5e95d40cac28ead8d3e67fb2c6f662f16f961b73
 currentTask:
-  id: admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+  id: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
   status: closed
-  result: pass_formal_draft_writer_mutation_context_repair_tdd_no_live_db
-  claimedAt: "2026-06-26T10:19:36-07:00"
-  plannedAt: "2026-06-26T10:19:36-07:00"
-  implementedAt: "2026-06-26T10:22:37-07:00"
-  validatedAt: "2026-06-26T10:22:37-07:00"
-  reviewedAt: "2026-06-26T10:22:37-07:00"
-  closedAt: "2026-06-26T10:22:37-07:00"
-  sourceStory: successor-of-admin-ai-generation-formal-draft-local-db-route-smoke-execution-2026-06-26
+  result: blocked_route_smoke_retry_question_500014_reused_adoption_reviewer_actor_missing
+  claimedAt: "2026-06-26T10:31:05-07:00"
+  plannedAt: "2026-06-26T10:31:05-07:00"
+  implementedAt: "2026-06-26T10:41:25-07:00"
+  validatedAt: "2026-06-26T10:41:25-07:00"
+  reviewedAt: "2026-06-26T10:41:25-07:00"
+  closedAt: "2026-06-26T10:41:25-07:00"
+  sourceStory: retry-after-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
   approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
-  acceptancePath: null
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
-  branch: codex/admin-ai-formal-draft-writer-context-repair-20260626
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-retry.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-draft-adapter-route-integration-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-retry.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-draft-local-db-route-smoke-retry.md
+  branch: codex/admin-ai-formal-draft-local-db-smoke-retry-20260626
   scope:
     docsStateEvidenceAudit: true
     approvalDecisionPackage: false
-    localSourceChange: true
+    localSourceChange: false
     focusedUnitTest: true
     schemaMigrationFileChange: false
     drizzleMetadataJournalAlignment: false
     localMigrationExecutionApprovedForThisTask: false
     routeIntegrationExecuted: false
-    liveDatabaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    liveDatabaseConnectionExecuted: pending
+    databaseWriteExecuted: pending_route_only
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    credentialOrEnvRead: false
+    credentialOrEnvRead: approved_local_db_runtime_config_only
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    formalQuestionOrPaperWrite: false
+    formalQuestionOrPaperWrite: approved_local_route_smoke_draft_only_max_two_posts
     stagingProdDeploy: false
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    repairFormalDraftWriterMutationContext: true
-    sourceTddApproved: true
+    localDbRouteSmokeRetryApproved: true
+    maxPostCalls: 2
+    maxEligibleSourceLookups: 2
+    localFormalQuestionPaperDraftWriteApprovedForRouteCallsOnly: true
     localMigrationExecutionApprovedForThisTask: false
-    liveDatabaseConnectionApproved: false
-    formalQuestionOrPaperWriteApproved: false
+    seedOrFixtureCreationApproved: false
     providerCallApproved: false
+    organizationScopedAdoptionApproved: false
   closeoutPolicy:
     localCommit:
       approved: true
@@ -572,27 +574,80 @@ currentTask:
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    tddRed: pass_expected_failure_observed
-    tddGreen: pass
     focusedUnit: pass_2_files_8_tests
+    routeSmoke: blocked_question_route_response_500014
+    eligibleSourceLookupCount: 1
+    actorLookupCount: 1
+    routePostCallCount: 1
+    readOnlyDiagnostic: pass_reused_adoption_reviewer_admin_missing
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    databaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    databaseConnectionExecuted: true
+    databaseWriteExecuted: attempted_route_only_not_confirmed_500014
     schemaMigrationFileChanged: false
     schemaMigrationExecuted: false
     providerCallExecuted: false
-    credentialReadExecuted: false
+    credentialReadExecuted: approved_local_db_runtime_config_only
     costCalibrationExecuted: false
     stagingProdTouched: false
     paymentExternalServiceTouched: false
-    formalQuestionOrPaperWriteExecuted: false
+    formalQuestionOrPaperWriteExecuted: attempted_question_not_confirmed_500014
     packageLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
+  nextRecommendedTask: admin-ai-generation-formal-draft-reused-adoption-writer-actor-context-repair-tdd-2026-06-26
+adminAiGenerationFormalDraftLocalDbRouteSmokeRetry20260626:
+  taskId: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
+  phase: admin-ai-generation-formal-draft-local-db-route-smoke-retry-2026-06-26
+  recordedAt: "2026-06-26T10:31:05-07:00"
+  status: closed
+  result: blocked_route_smoke_retry_question_500014_reused_adoption_reviewer_actor_missing
+  branch: codex/admin-ai-formal-draft-local-db-smoke-retry-20260626
+  sourceStory: retry-after-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd-2026-06-26
+  approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+  predecessorEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-draft-writer-mutation-context-repair-tdd.md
+  decision:
+    localDbRouteSmokeRetryApproved: true
+    maxPostCalls: 2
+    routePostCallCount: 1
+    localFormalQuestionPaperDraftWriteApprovedForRouteCallsOnly: true
+    localMigrationExecutionApprovedForThisTask: false
+    seedOrFixtureCreationApproved: false
+    providerCallApproved: false
+    organizationScopedAdoptionApproved: false
+  validationSummary:
+    focusedUnit: pass_2_files_8_tests
+    routeSmoke: blocked_question_route_response_500014
+    eligibleSourceLookupCount: 1
+    actorLookupCount: 1
+    routePostCallCount: 1
+    readOnlyDiagnostic: pass_reused_adoption_reviewer_admin_missing
+    sourceOrTestChanged: false
+    schemaMigrationExecuted: false
+    liveDatabaseConnectionExecuted: true
+    routeSmokeExecuted: true
+    formalQuestionPaperWriteAgainstLiveDbExecuted: attempted_question_not_confirmed_500014
+    providerCallExecuted: false
+  blockedWithoutFreshApproval:
+    - source_or_test_change
+    - schema_migration_or_drizzle_push
+    - local_migration_execution
+    - seed_or_fixture_creation
+    - route_smoke_more_than_two_post_calls
+    - eligible_source_lookup_more_than_two_queries
+    - direct_raw_db_mutation_or_cleanup_delete
+    - formal_publish_or_student_visible_content
+    - paper_section_question_composition
+    - organization_scoped_adoption
+    - provider_model_call_or_provider_enablement
+    - env_secret_write_or_secret_evidence
+    - staging_prod_cloud_deploy
+    - payment_external_service
+    - cost_calibration_gate
+    - final_acceptance_pass
+  nextRecommendedTask: admin-ai-generation-formal-draft-reused-adoption-writer-actor-context-repair-tdd-2026-06-26
 adminAiGenerationFormalDraftAdapterRouteIntegrationAndMetadataTdd20260626:
   taskId: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
   phase: admin-ai-generation-formal-draft-adapter-route-integration-and-metadata-tdd-2026-06-26
