@@ -547,6 +547,61 @@ export const adminAiGenerationResult = pgTable(
   ],
 );
 
+export const adminAiGenerationFormalAdoption = pgTable(
+  "admin_ai_generation_formal_adoption",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    source_result_public_id: text("source_result_public_id").notNull(),
+    source_task_public_id: text("source_task_public_id").notNull(),
+    source_request_public_id: text("source_request_public_id").notNull(),
+    workspace: text("workspace").notNull(),
+    generation_kind: text("generation_kind").notNull(),
+    owner_type: text("owner_type").notNull(),
+    owner_public_id: text("owner_public_id").notNull(),
+    organization_public_id: text("organization_public_id"),
+    target_type: text("target_type").notNull(),
+    target_domain: text("target_domain").notNull(),
+    review_status: text("review_status").notNull(),
+    formal_target_write_status: text("formal_target_write_status").notNull(),
+    formal_question_public_id: text("formal_question_public_id"),
+    formal_paper_public_id: text("formal_paper_public_id"),
+    reviewer_public_id: text("reviewer_public_id").notNull(),
+    reviewed_at: timestampColumn("reviewed_at"),
+    content_digest: text("content_digest").notNull(),
+    content_preview_masked: text("content_preview_masked").notNull(),
+    evidence_status: evidenceStatusEnum("evidence_status")
+      .default("none")
+      .notNull(),
+    citation_count: integer("citation_count").default(0).notNull(),
+    ai_call_log_public_id: text("ai_call_log_public_id"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_admin_ai_generation_formal_adoption_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_admin_ai_generation_formal_adoption_source_target").on(
+      table.source_result_public_id,
+      table.target_type,
+      table.target_domain,
+    ),
+    index("idx_admin_ai_generation_formal_adoption_source_result").on(
+      table.source_result_public_id,
+    ),
+    index("idx_admin_ai_generation_formal_adoption_reviewer").on(
+      table.reviewer_public_id,
+    ),
+    index("idx_admin_ai_generation_formal_adoption_write_status").on(
+      table.formal_target_write_status,
+    ),
+    index("idx_admin_ai_generation_formal_adoption_created_at").on(
+      table.created_at,
+    ),
+  ],
+);
+
 export const personalAiGenerationResult = pgTable(
   "personal_ai_generation_result",
   {

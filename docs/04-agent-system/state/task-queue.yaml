@@ -44,6 +44,169 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd-2026-06-26
+    title: Admin AI generation formal adoption DB schema and adapter TDD
+    phase: admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd-2026-06-26
+    sourceStory: successor-of-admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
+    dependencies:
+      - admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    executionProfile: local_schema_migration_file_db_adapter_tdd_only
+    evidenceMode: redacted_unit_test_schema_metadata_and_scope_summary_only
+    validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_advance_approval_2026_06_26
+    requiredOutcome: >-
+      Add the approved `admin_ai_generation_formal_adoption` companion table schema, reviewed local migration file,
+      Drizzle metadata/journal alignment, and a focused Postgres DB adapter implementing the existing formal adoption
+      repository gateway. Do not execute migration, connect live DB, integrate routes, run route smoke, write formal
+      question/paper drafts, call Provider, read credentials or env files, modify package/lockfiles, or claim
+      staging/prod/release final Pass.
+    status: closed
+    approvedAt: "2026-06-26T23:59:59-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-26T23:59:59-07:00"
+    plannedAt: "2026-06-26T23:59:59-07:00"
+    implementedAt: "2026-06-26T23:59:59-07:00"
+    validatedAt: "2026-06-26T23:59:59-07:00"
+    reviewedAt: "2026-06-26T23:59:59-07:00"
+    closedAt: "2026-06-26T23:59:59-07:00"
+    result: pass_admin_ai_generation_formal_adoption_db_schema_adapter_tdd_no_migration_no_live_db_no_formal_write
+    approvalConsumed:
+      approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      scope: local_schema_migration_file_db_adapter_focused_tdd_only_no_migration_execution_no_live_db_no_route_no_formal_write
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      schemaMigrationFileChange: approved
+      drizzleMetadataJournalAlignment: approved
+      localMigrationExecution: blocked
+      liveDatabaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      routeIntegration: blocked
+      routeSmoke: blocked
+      formalQuestionPaperDraftWrite: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+      - src/db/schema/ai-rag.ts
+      - drizzle/20260626235000_add_admin_ai_generation_formal_adoption.sql
+      - drizzle/meta/_journal.json
+      - drizzle/meta/20260626235000_snapshot.json
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-contract-and-repository-tdd.md
+      - src/server/models/admin-ai-generation-formal-adoption.ts
+      - src/server/contracts/admin-ai-generation-formal-adoption-contract.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    blockedWithoutFreshApproval:
+      - local_migration_execution
+      - live_db_connection_or_mutation
+      - route_integration_or_route_smoke
+      - formal_question_paper_draft_write
+      - organization_scoped_adoption
+      - provider_model_call_or_provider_enablement
+      - provider_credential_or_env_secret_access
+      - dependency_package_lockfile_change
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - pr_force_push
+      - cost_calibration_gate
+      - final_acceptance_pass
+    riskTypes:
+      - formal_content_boundary
+      - schema_migration_file_without_execution
+      - drizzle_metadata_alignment
+      - adoption_idempotency
+      - provenance_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md src/db/schema/ai-rag.ts drizzle/20260626235000_add_admin_ai_generation_formal_adoption.sql drizzle/meta/_journal.json drizzle/meta/20260626235000_snapshot.json src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-formal-adoption-db-schema-and-adapter-tdd.md
+    branch: codex/admin-ai-formal-adoption-db-adapter-tdd-20260626
+    validationSummary:
+      redTest: pass_expected_missing_adapter_before_implementation
+      focusedUnitTests: pass_1_file_4_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_state_sha_alignment
+      migrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      routeSmokeExecuted: false
+      formalQuestionPaperWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdReleaseFinalPassClaimed: false
+    nextRecommendedTask: admin-ai-generation-formal-adoption-local-migration-execution-approval-package-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_advance_approval_admin_ai_generation_goal_execution_2026_06_26
+    retryCount: 0
+    lastFailurePath: null
+
   - id: admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
     title: Admin AI generation formal adoption DB schema adapter or route integration approval package
     phase: admin-ai-generation-formal-adoption-db-schema-adapter-or-route-integration-approval-package-2026-06-26
