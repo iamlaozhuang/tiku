@@ -44,6 +44,272 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+    title: Provider Cost final Pass boundary and Cost Calibration decision package
+    phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+    sourceStory: owner_requested_provider_cost_final_pass_boundary_before_real_admin_ai_provider_smoke
+    dependencies:
+      - mvp-final-pass-decision-review-2026-06-26
+    taskKind: docs_only_provider_cost_final_pass_boundary_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_provider_cost_boundary_package_only
+    evidenceMode: redacted_gate_boundary_and_next_task_rules_only
+    validationPolicy: docs_format_scope_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_provider_cost_boundary_then_smoke
+    requiredOutcome: >-
+      Prepare a docs/state-only Provider/Cost final Pass boundary and Cost Calibration decision package. Define whether
+      real model calls may enter a later final Pass boundary; use the existing provider/model convention; limit the
+      follow-up task to content admin and organization advanced admin AI question/paper local contract workflows; cap
+      calls at four; define credential, cost-summary, evidence redaction, and failure-branch rules. Do not execute real
+      Provider calls, read credentials, modify source/tests/DB/schema/migration/seed/package/lockfile/env files, touch
+      staging/prod/payment/external services, or claim release readiness.
+    capabilities:
+      docsStateEvidenceAudit: approved_by_user_request_2026_06_26
+      providerCostBoundaryPackage: approved_by_user_request_2026_06_26
+      task2ProviderCostSmokeAuthorizationMaterialization: approved_by_user_request_2026_06_26
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      credentialDocumentRead: blocked
+      credentialEntry: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked_in_this_task_deferred_to_task2
+      providerConfiguration: blocked_in_this_task_deferred_to_task2
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: boundary_only_deferred_to_task2
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/ai-generation-task-provider-adapter-service.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    status: closed
+    result: pass_docs_only_provider_cost_final_pass_boundary_package_task2_allowed_no_provider_call
+    claimedAt: "2026-06-26T08:05:00-07:00"
+    plannedAt: "2026-06-26T08:05:00-07:00"
+    validatedAt: "2026-06-26T08:20:00-07:00"
+    reviewedAt: "2026-06-26T08:20:00-07:00"
+    closedAt: "2026-06-26T08:20:00-07:00"
+    branch: codex/provider-cost-final-pass-boundary-20260626
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+    validationSummary:
+      providerCostBoundaryPackagePrepared: pass
+      task2AllowedByGatePackage: pass
+      providerCallExecuted: false
+      credentialReadExecuted: false
+      costCalibrationExecuted: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceTestPackageLockfileChanged: false
+      stagingProdPaymentExternalExecuted: false
+      releaseReadinessClaimed: false
+    nextRecommendedTask: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+
+  - id: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+    title: AI generation Provider Cost final Pass smoke or calibration
+    phase: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+    sourceStory: owner_approved_task2_provider_credentials_and_real_model_calls_under_task1_gate
+    dependencies:
+      - provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+    taskKind: local_provider_cost_smoke_or_calibration
+    moduleRunVersion: 2
+    executionProfile: local_dev_provider_cost_smoke_max_four_calls
+    evidenceMode: redacted_provider_status_usage_cost_summary_and_local_contract_summary_only
+    validationPolicy: task1_gate_package_provider_call_cap_redaction_and_module_run_v2_gate
+    queueSelectionMode: direct_user_request_2026_06_26_task2_after_gate_package
+    requiredOutcome: >-
+      Execute only the real Provider smoke or cost calibration allowed by the task 1 gate package. Verify the content
+      admin and organization advanced admin AI question/paper local contract workflows against real Provider capability
+      without exceeding the max call cap. Record redacted provider/model, call count, status, latency, token/cost
+      summary, error category, route/workflow, and local contract summary status. Do not record raw prompt, raw output,
+      provider payload, API key, token, cookie, Authorization header, raw provider payload, raw DOM, screenshot, trace,
+      DB rows, full question/paper content, or generated content body.
+    capabilities:
+      providerCostSmokeOrCalibration: approved_by_task1_gate_package_and_user_request_2026_06_26
+      providerCall: approved_local_dev_max_four_calls_by_task1_gate_package
+      providerCredentialRead: approved_provider_credentials_only_by_user_request_2026_06_26
+      providerConfiguration: existing_gate_profile_only
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked_unless_task1_gate_or_fresh_user_approval_explicitly_adds_it
+      credentialDocumentRead: blocked_except_provider_credential_source_metadata
+      databaseConnection: blocked
+      databaseSeedOrWrite: blocked
+      accountMutation: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - package.json
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - local Provider/Cost smoke or calibration exactly as defined by the task 1 gate package, max four calls and redacted evidence
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-cost-final-pass-smoke-or-calibration.md
+    gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+    status: pending
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: user_request_task2_provider_cost_smoke_commit_merge_push_cleanup_2026_06_26
+    blockedWithoutFreshApproval:
+      - source_test_package_lockfile_change
+      - env_file_edit_or_secret_value_evidence
+      - provider_call_count_over_four_or_retry
+      - raw_prompt_raw_output_provider_payload_or_generated_content_evidence
+      - browser_or_role_credential_runtime_unless_separately_approved
+      - db_seed_schema_migration_account_mutation
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - release_readiness_or_final_pass_claim
+
   - id: mvp-final-pass-decision-review-2026-06-26
     title: MVP final Pass decision review for local product scope
     phase: mvp-final-pass-decision-review-2026-06-26

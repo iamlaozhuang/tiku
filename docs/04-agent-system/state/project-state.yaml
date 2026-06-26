@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: mvp-final-pass-decision-review-2026-06-26
-updatedAt: "2026-06-26T07:35:00-07:00"
+currentPhase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+updatedAt: "2026-06-26T08:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,28 +501,28 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
-  lastKnownOriginMasterSha: c70143f82a369bff8bc0c4b2ded360e14327b0d7
+  lastKnownMasterSha: 436dbd55218a4c465f22fa55b2f48931a021bcb8
+  lastKnownOriginMasterSha: 436dbd55218a4c465f22fa55b2f48931a021bcb8
 currentTask:
-  id: mvp-final-pass-decision-review-2026-06-26
+  id: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
   status: closed
-  result: pass_local_product_mvp_final_pass_decision_review_provider_cost_release_gates_excluded
-  claimedAt: "2026-06-26T07:20:00-07:00"
-  plannedAt: "2026-06-26T07:20:00-07:00"
-  validatedAt: "2026-06-26T07:35:00-07:00"
-  reviewedAt: "2026-06-26T07:35:00-07:00"
-  closedAt: "2026-06-26T07:35:00-07:00"
-  sourceStory: owner_approved_local_product_final_pass_decision_review_after_full_8_row_browser_pass
-  approvalConsumed: user_request_local_product_final_pass_decision_review_2026_06_26
-  approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-mvp-final-pass-decision-review.md
-  decisionReviewPath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-mvp-final-pass-decision-review.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mvp-final-pass-decision-review.md
-  criteriaPackagePath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
-  ownerAcceptanceDecisionPackagePath: docs/05-execution-logs/acceptance/2026-06-26-owner-acceptance-decision-package-after-full-8-row-local-browser-pass.md
+  result: pass_docs_only_provider_cost_final_pass_boundary_package_task2_allowed_no_provider_call
+  claimedAt: "2026-06-26T08:05:00-07:00"
+  plannedAt: "2026-06-26T08:05:00-07:00"
+  validatedAt: "2026-06-26T08:20:00-07:00"
+  reviewedAt: "2026-06-26T08:20:00-07:00"
+  closedAt: "2026-06-26T08:20:00-07:00"
+  sourceStory: owner_requested_provider_cost_final_pass_boundary_before_real_admin_ai_provider_smoke
+  approvalConsumed: user_request_provider_cost_final_pass_boundary_and_task2_authorization_2026_06_26
+  approvalSource: user_request_provider_cost_final_pass_boundary_and_task2_authorization_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  sourceLocalProductFinalPassDecisionPath: docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  sourceAdminAiLocalContractFocusedEvidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-admin-local-contract-loop-focused-browser-rerun.md
   sourceFull8EvidencePath: docs/05-execution-logs/evidence/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
-  sourceFull8AuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
   scope:
     localSourceChange: false
     focusedUnitTest: false
@@ -536,48 +536,58 @@ currentTask:
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
-    localProductFinalPassDecisionReview: true
+    localProductFinalPassDecisionReview: false
+    providerCostBoundaryPackage: true
     releaseReadinessDecision: false
   requirementMapping:
-    personalStandardStudent: local_product_scope_pass_from_latest_full_8_evidence
-    personalAdvancedStudent: local_product_scope_pass_from_latest_full_8_evidence
-    organizationStandardEmployee: local_product_scope_pass_from_latest_full_8_evidence
-    organizationAdvancedEmployee: local_product_scope_pass_from_latest_full_8_evidence
-    organizationStandardAdmin: local_product_scope_pass_from_latest_full_8_evidence
-    organizationAdvancedAdmin: local_product_scope_pass_from_latest_full_8_evidence
-    contentAdmin: local_product_scope_pass_from_latest_full_8_evidence
-    opsAdmin: local_product_scope_pass_from_latest_full_8_evidence
-    editionAwareAuthorization: server_derived_role_scoped_no_client_authority_change
-    roleExperienceMatrix: latest_full_eight_row_runtime_evidence_reviewed
-    formalContentBoundary: summary_only_no_question_or_paper_write
-    providerBoundary: excluded_and_blocked_from_decision
-    releaseBoundary: excluded_and_blocked_from_decision
+    contentAdmin: provider_cost_follow_up_limited_to_content_ai_question_and_paper_local_contract_loop
+    organizationAdvancedAdmin: provider_cost_follow_up_limited_to_organization_ai_question_and_paper_local_contract_loop
+    organizationStandardAdmin: remains_denied_or_unavailable_for_organization_ai_generation
+    formalContentBoundary: no_question_or_paper_write
+    providerBoundary: next_task_allowed_max_four_local_dev_provider_calls
+    costCalibrationBoundary: token_call_cost_summary_only_no_production_quota_or_pricing_default
+    releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
+  gateDecision:
+    nextTask: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+    providerModel:
+      modelProvider: openai_compatible
+      providerName: alibaba-qwen
+      modelName: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      secretAlias: ALIBABA_API_KEY
+    maxProviderCalls: 4
+    maxRetries: 0
+    allowedWorkflows:
+      - content_ai_question
+      - content_ai_paper
+      - organization_ai_question
+      - organization_ai_paper
+    evidenceRedaction: summary_only_no_raw_prompt_output_payload_or_secret
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_local_product_final_pass_decision_review_2026_06_26
+      approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+      approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
+      approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: standing_docs_state_fast_lane_closeout_plus_current_user_request_2026_06_26
-  branch: codex/mvp-final-pass-decision-review-20260626
+      approvalSource: user_request_provider_cost_boundary_commit_merge_push_cleanup_2026_06_26
+  branch: codex/provider-cost-final-pass-boundary-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    decisionReviewPrepared: pass
-    localProductEntryCriteria: pass
-    localProductFinalPassDecision: pass_local_product_only
-    providerCostReleaseGatesExcluded: pass_excluded_blocked
-    staleEvidenceCheck: pass_no_product_runtime_change_since_full_8_evidence
+    providerCostBoundaryPackagePrepared: pass
+    task2AllowedByGatePackage: pass
+    maxProviderCallsDefined: pass_4
+    evidenceRedactionDefined: pass
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialValuesPrintedOrRecorded: false
@@ -597,9 +607,56 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     formalQuestionOrPaperWriteExecuted: false
-    localProductFinalPassOnly: pass
+    localProductFinalPassOnly: unchanged_existing_pass
     releaseFinalPassClaim: false
-  nextRecommendedTask: owner_select_external_or_release_gate_package_if_scope_expands
+  nextRecommendedTask: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
+providerCostFinalPassBoundaryAndCostCalibrationDecisionPackage20260626:
+  taskId: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+  phase: provider-cost-final-pass-boundary-and-cost-calibration-decision-package-2026-06-26
+  recordedAt: "2026-06-26T08:05:00-07:00"
+  status: closed
+  result: pass_docs_only_provider_cost_final_pass_boundary_package_task2_allowed_no_provider_call
+  validatedAt: "2026-06-26T08:20:00-07:00"
+  reviewedAt: "2026-06-26T08:20:00-07:00"
+  closedAt: "2026-06-26T08:20:00-07:00"
+  branch: codex/provider-cost-final-pass-boundary-20260626
+  entryMasterSha: 436dbd55218a4c465f22fa55b2f48931a021bcb8
+  entryOriginMasterSha: 436dbd55218a4c465f22fa55b2f48931a021bcb8
+  approvalSource: user_request_provider_cost_final_pass_boundary_and_task2_authorization_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-final-pass-boundary-and-cost-calibration-decision-package.md
+  gateDecision:
+    task2Allowed: true
+    maxProviderCalls: 4
+    maxRetries: 0
+    allowedWorkflows:
+      - content_ai_question
+      - content_ai_paper
+      - organization_ai_question
+      - organization_ai_paper
+    provider:
+      modelProvider: openai_compatible
+      providerName: alibaba-qwen
+      modelName: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      secretAlias: ALIBABA_API_KEY
+    costBoundary: token_call_cost_summary_only_no_production_quota_or_pricing_default
+    redactionBoundary: no_raw_prompt_raw_output_provider_payload_or_secret
+  validationSummary:
+    providerCostBoundaryPackagePrepared: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    providerCallExecuted: false
+    credentialReadExecuted: false
+    costCalibrationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    stagingProdPaymentExternalExecuted: false
+    releaseReadinessClaimed: false
+  nextRecommendedTask: ai-generation-provider-cost-final-pass-smoke-or-calibration-2026-06-26
 mvpFinalPassDecisionReview20260626:
   taskId: mvp-final-pass-decision-review-2026-06-26
   phase: mvp-final-pass-decision-review-2026-06-26
