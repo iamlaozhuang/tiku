@@ -31,7 +31,8 @@ export type AdminAiGenerationFormalAdoptionReviewStatus =
   "approved_for_formal_adoption";
 
 export type AdminAiGenerationFormalTargetWriteStatus =
-  "blocked_without_follow_up_task";
+  | "blocked_without_follow_up_task"
+  | "draft_created";
 
 export type AdminAiGenerationFormalAdoptionAdminRole =
   | "super_admin"
