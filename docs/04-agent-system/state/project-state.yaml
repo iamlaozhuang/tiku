@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-smoke-execution-2026-06-26
-updatedAt: "2026-06-26T04:05:00-07:00"
+currentPhase: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+updatedAt: "2026-06-26T04:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,38 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
-  lastKnownOriginMasterSha: 303626d980d2eedf2608fbe6bd47c2107c19321d
+  lastKnownMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
+  lastKnownOriginMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
 currentTask:
-  id: ai-generation-provider-smoke-execution-2026-06-26
+  id: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
   status: closed
-  result: pass_local_provider_smoke_execution_redacted_no_final_pass
-  claimedAt: "2026-06-26T04:05:00-07:00"
-  plannedAt: "2026-06-26T04:05:00-07:00"
-  validatedAt: "2026-06-26T04:30:00-07:00"
-  reviewedAt: "2026-06-26T04:30:00-07:00"
-  closedAt: "2026-06-26T04:30:00-07:00"
-  sourceStory: owner_execute_provider_smoke_after_provider_cost_gate_package
-  approvalConsumed: user_request_ai_generation_provider_smoke_execution_2026_06_26
-  approvalSource: user_request_ai_generation_provider_smoke_execution_2026_06_26
-  ownerProviderCostRealModelCallAuthorization:
-    status: consumed_for_one_local_provider_smoke
-    recordedAt: "2026-06-26T04:05:00-07:00"
-    consumedByThisTask: true
-    statement: owner_approved_one_real_provider_smoke_under_gate_package_with_redacted_evidence
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-provider-smoke-execution.md
-  gatePackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-provider-cost-gate-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+  result: pass_docs_only_content_organization_ai_product_loop_implementation_plan_prepared_no_final_pass
+  claimedAt: "2026-06-26T04:45:00-07:00"
+  plannedAt: "2026-06-26T04:45:00-07:00"
+  validatedAt: "2026-06-26T05:00:00-07:00"
+  reviewedAt: "2026-06-26T05:00:00-07:00"
+  closedAt: "2026-06-26T05:00:00-07:00"
+  sourceStory: owner_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass
+  approvalConsumed: user_request_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass_2026_06_26
+  approvalSource: user_request_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  implementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  sourceProviderSmokeAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-provider-smoke-execution.md
+  sourceScopeInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
   sourceInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
   allowedScope:
     docsStateEvidenceAudit: true
+    implementationPlanPackage: true
+    sourceStaticReadOnlyInspection: true
     providerCostGatePackage: false
     providerSmokeExecutionPlanning: false
-    costCalibrationDecision: true
+    costCalibrationDecision: false
     localBrowserRuntimeRerun: false
-    credentialDocumentReadByCodex: true
+    credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
     localRuntimeDiagnostic: false
     localSourceChange: false
@@ -543,75 +543,47 @@ currentTask:
     accountMutation: false
     schemaMigration: false
     dependencyIntroduction: false
-    envSecretAccess: true
-    providerCall: true
-    providerConfiguration: true
+    envSecretAccess: false
+    providerCall: false
+    providerConfiguration: false
     stagingProdDeploy: false
     paymentExternalService: false
     costCalibrationGate: false
     finalPassClaim: false
-  smokeGate:
-    sourceGatePackageTask: ai-generation-provider-cost-gate-package-2026-06-26
-    providerSmoke:
-      modelProvider: openai_compatible
-      providerName: alibaba-qwen
-      modelName: qwen3.7-max
-      secretAlias: ALIBABA_API_KEY
-      maxRequests: 1
-      maxRetries: 0
-      maxOutputTokens: 8
-      timeoutMs: 30000
-      baseUrl: redacted_host_only
-      baseUrlHost: dashscope.aliyuncs.com
-      streaming: blocked
-      fallbackProvider: blocked
-      rawOutputEvidence: blocked
-    credentialReadMethod:
-      preferred: owner_supplied_ephemeral_process_env
-      fallback: local_dotenv_read_allowed_for_ALIBABA_API_KEY_only
-      credentialValueRecorded: false
-    costCalibration:
-      executeInNextSmoke: false
-      decision: defer_full_cost_calibration_to_separate_gate
+  implementationPlanDecision:
+    providerSmokePrecondition: pass_local_dev_one_call_redacted
+    currentContentOrgAiState: entry_only_no_submit_api_no_task_loop_no_draft_queue
+    firstRecommendedSourceTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+    fullProductCompletionRequires:
+      - durable_task_and_result_persistence_decision
+      - draft_review_queue_implementation
+      - formal_adoption_gate_if_needed
+      - later_cost_calibration_gate_before_quota_pricing_claims
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
+      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
+      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
     push:
       approved: true
       target: origin/master
-      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
+      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
     cleanup:
       deleteShortBranch: true
-      approvalSource: user_request_2026_06_26_execute_next_task_and_prior_closeout_approval
-  branch: codex/ai-provider-smoke-20260626
+      approvalSource: user_request_2026_06_26_execute_provider_smoke_then_enter_product_loop_plan
+  branch: codex/content-org-ai-loop-plan-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
-    providerSmokeExecuted: true
-    providerSmokeResult: pass
-    providerSmokeRequestCount: 1
-    providerSmokeRetryCount: 0
-    providerSmokeDurationMs: 8640
-    providerSmokeUsageCounters:
-      inputTokens: 24
-      outputTokens: 412
-      totalTokens: 436
-      reasoningTokens: 406
-      cachedInputTokens: 0
-    secretSourceKind: local_dotenv
-    secretPresence: present
-    credentialValueRecorded: false
-    redactionStatus: passed
-    focusedUnitProviderSmokeTests: pass_2_files_13_tests
+    implementationPlanPackagePrepared: true
+    providerSmokePrecondition: pass
     browserRuntimeExecuted: false
-    credentialDocumentReadByCodex: true
+    credentialDocumentReadByCodex: false
     credentialEntryByCodex: false
     sourceChanged: false
     testsChanged: false
@@ -619,7 +591,7 @@ currentTask:
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     accountMutationExecuted: false
-    providerOrCostTouched: true_local_provider_smoke_only
+    providerOrCostTouched: false
     costCalibrationExecuted: false
     costEstimateRecorded: false
     prettierWrite: pass
@@ -630,7 +602,59 @@ currentTask:
     stagingProdTouched: false
     paymentExternalServiceTouched: false
     finalPassClaim: false
-  nextRecommendedTask: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+  nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+contentOrganizationAiGenerationProductLoopImplementationPlan20260626:
+  taskId: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+  phase: content-organization-ai-generation-product-loop-implementation-plan-2026-06-26
+  recordedAt: "2026-06-26T04:45:00-07:00"
+  status: closed
+  result: pass_docs_only_content_organization_ai_product_loop_implementation_plan_prepared_no_final_pass
+  validatedAt: "2026-06-26T05:00:00-07:00"
+  reviewedAt: "2026-06-26T05:00:00-07:00"
+  closedAt: "2026-06-26T05:00:00-07:00"
+  branch: codex/content-org-ai-loop-plan-20260626
+  entryMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
+  entryOriginMasterSha: 83df383825e3c22fdb4fe205caa4d9aa5f4dd53b
+  approvalSource: user_request_enter_content_organization_ai_product_loop_plan_after_provider_smoke_pass_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  implementationPlanPackagePath: docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+  sourceProviderSmokeEvidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+  sourceScopeInventoryPackagePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+  sourceInspectionResult:
+    contentAiGenerationRoutes: entry_only
+    organizationAiGenerationRoutes: entry_only
+    contentOrganizationSubmitApis: missing
+    sharedAiTaskDomainContracts: present_partial_provider_agnostic
+    providerSmokePrecondition: pass_local_dev_one_call_redacted
+  planDecision:
+    firstRecommendedSourceTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
+    firstTaskMode: source_repair_local_contract_loop_no_provider_no_schema_by_default
+    persistenceSchemaGateRequiredForFullCompletion: true
+    providerIntegrationGateRequiredForFutureRealRuntimeCalls: true
+    costCalibrationGateRequiredForQuotaPricingClaims: true
+    finalPassClaim: false
+  validationSummary:
+    implementationPlanPackagePrepared: true
+    prettierWrite: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    credentialDocumentReadByCodex: false
+    databaseReadExecuted: false
+    databaseWriteExecuted: false
+    schemaMigrationExecuted: false
+    accountMutationExecuted: false
+    sourceTestPackageLockfileChanged: false
+    providerCallExecuted: false
+    costCalibrationExecuted: false
+    stagingProdTouched: false
+    paymentExternalServiceTouched: false
+    finalPassClaim: false
+  nextRecommendedTask: content-organization-ai-generation-admin-local-contract-loop-source-repair-2026-06-26
 aiGenerationProviderSmokeExecution20260626:
   taskId: ai-generation-provider-smoke-execution-2026-06-26
   phase: ai-generation-provider-smoke-execution-2026-06-26
