@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type {
   AdminAiGenerationTaskPersistenceGateway,
+  AdminAiGenerationTaskPersistenceRepository,
+  AdminAiGenerationTaskPersistenceResult,
   AdminAiGenerationTaskPersistenceRow,
   CreateAdminAiGenerationTaskPersistenceInput,
+  CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminAiGenerationLocalContractDto } from "../contracts/admin-ai-generation-local-contract";
 import type { AdminRole } from "../models/auth";
@@ -78,6 +81,8 @@ async function createAcceptedLocalContract(input: {
         adminRoles: input.adminRoles,
         organizationPublicId: input.organizationPublicId,
       }),
+      taskPersistenceRepository:
+        createLocalContractRouteTaskPersistenceRepository(),
     },
   );
 
@@ -98,6 +103,62 @@ async function createAcceptedLocalContract(input: {
   expect(payload.data).not.toBeNull();
 
   return payload.data as AdminAiGenerationLocalContractDto;
+}
+
+function createLocalContractRouteTaskPersistenceResult(
+  input: CreateOrReuseAdminAiGenerationTaskInput,
+): AdminAiGenerationTaskPersistenceResult {
+  const taskRequest = input.localContract.taskRequest;
+
+  return {
+    persistenceStatus: "created",
+    task: {
+      requestPublicId: input.requestPublicId,
+      taskPublicId: taskRequest.taskPublicId,
+      taskType:
+        taskRequest.taskType === "ai_paper_generation"
+          ? "ai_paper_generation"
+          : "ai_question_generation",
+      workspace: input.localContract.workspace,
+      generationKind: input.localContract.generationKind,
+      status: "pending",
+      requestedAt: input.requestedAt.toISOString(),
+      authorizationSource: taskRequest.authorizationSource,
+      authorizationPublicId: taskRequest.authorizationPublicId,
+      actorPublicId: taskRequest.actorPublicId,
+      ownerType: taskRequest.ownerType,
+      ownerPublicId: taskRequest.ownerPublicId,
+      organizationPublicId: taskRequest.organizationPublicId,
+      quotaOwnerType: taskRequest.quotaOwnerType,
+      quotaOwnerPublicId: taskRequest.quotaOwnerPublicId,
+      resultPublicId: null,
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: null,
+      runtimeStatus: "local_contract_only",
+      runtimeBridgeStatus: "provider_call_blocked",
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      costCalibrationExecuted: false,
+      formalContentBoundary: {
+        questionWriteStatus: "blocked_without_follow_up_task",
+        paperWriteStatus: "blocked_without_follow_up_task",
+      },
+      sourceQuestionPublicId: null,
+      sourcePaperPublicId: null,
+      contentVisibility: "summary_only",
+      redactionStatus: "redacted",
+    },
+  };
+}
+
+function createLocalContractRouteTaskPersistenceRepository(): AdminAiGenerationTaskPersistenceRepository {
+  return {
+    async createOrReuseTask(input) {
+      return createLocalContractRouteTaskPersistenceResult(input);
+    },
+  };
 }
 
 function createPersistenceRow(

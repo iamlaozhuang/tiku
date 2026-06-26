@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import {
@@ -7,13 +9,20 @@ import {
 } from "../contracts/api-response";
 import type {
   AdminAiGenerationKind,
+  AdminAiGenerationLocalContractBaseDto,
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
+  AdminAiGenerationLocalContractTaskPersistenceDto,
   AdminAiGenerationRuntimeBridgeExecutionSummaryDto,
   AdminAiGenerationWorkspace,
 } from "../contracts/admin-ai-generation-local-contract";
+import type {
+  AdminAiGenerationTaskPersistenceRepository,
+  AdminAiGenerationTaskPersistenceResult,
+} from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
+import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
 import { createDefaultBlockedRouteIntegratedProviderExecutionOutcome } from "./personal-ai-generation-route-integrated-provider-execution-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -22,8 +31,13 @@ import type { SessionService } from "./session-service";
 export type { AdminAiGenerationWorkspace };
 
 export type AdminAiGenerationLocalContractRouteOptions = {
+  createRequestPublicId?: (
+    input: AdminAiGenerationRequestPublicIdInput,
+  ) => string;
+  requestClock?: () => Date;
   sessionService?: Pick<SessionService, "getCurrentSession">;
   runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
+  taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 };
 
 type AdminAiGenerationActor = {
@@ -36,6 +50,13 @@ type AdminAiGenerationRuntimeBridgeControlInput = {
   actorPublicId: string;
   organizationPublicId: string | null;
   generationKind: AdminAiGenerationKind;
+  workspace: AdminAiGenerationWorkspace;
+};
+
+type AdminAiGenerationRequestPublicIdInput = {
+  actorPublicId: string;
+  generationKind: AdminAiGenerationKind;
+  taskPublicId: string;
   workspace: AdminAiGenerationWorkspace;
 };
 
@@ -124,6 +145,18 @@ function createTaskPublicId(input: {
     input.workspace,
     input.generationKind,
     input.actorPublicId,
+  ].join("_");
+}
+
+function createDefaultRequestPublicId(
+  input: AdminAiGenerationRequestPublicIdInput,
+): string {
+  return [
+    "admin_ai_generation_request",
+    input.workspace,
+    input.generationKind,
+    input.actorPublicId,
+    randomUUID().replaceAll("-", ""),
   ].join("_");
 }
 
@@ -271,8 +304,13 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
 
 async function buildAdminAiGenerationLocalContract(input: {
   actor: AdminAiGenerationActor;
+  createRequestPublicId: (
+    requestPublicIdInput: AdminAiGenerationRequestPublicIdInput,
+  ) => string;
   generationKind: AdminAiGenerationKind;
+  requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
+  taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationLocalContractDto | null>> {
   const taskRequestResponse = buildAiGenerationTaskRequestPolicyReadModel(
@@ -286,7 +324,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   const taskRequest = taskRequestResponse.data;
   const runtimeBridge = await resolveAdminAiGenerationRuntimeBridge(input);
 
-  return createSuccessResponse({
+  const localContract = {
     runtimeStatus: "local_contract_only",
     workspace: input.workspace,
     generationKind: input.generationKind,
@@ -307,7 +345,43 @@ async function buildAdminAiGenerationLocalContract(input: {
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
     },
+  } satisfies AdminAiGenerationLocalContractBaseDto;
+
+  const taskPersistence =
+    await input.taskPersistenceRepository.createOrReuseTask({
+      localContract,
+      requestPublicId: input.createRequestPublicId({
+        actorPublicId: input.actor.publicId,
+        generationKind: input.generationKind,
+        taskPublicId: taskRequest.taskPublicId,
+        workspace: input.workspace,
+      }),
+      requestedAt: input.requestClock(),
+    });
+
+  return createSuccessResponse({
+    ...localContract,
+    taskPersistence:
+      mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(
+        taskPersistence,
+      ),
   });
+}
+
+function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(
+  result: AdminAiGenerationTaskPersistenceResult,
+): AdminAiGenerationLocalContractTaskPersistenceDto {
+  return {
+    persistenceStatus: result.persistenceStatus,
+    requestPublicId: result.task.requestPublicId,
+    taskPublicId: result.task.taskPublicId,
+    status: result.task.status,
+    resultPublicId: result.task.resultPublicId,
+    contentVisibility: result.task.contentVisibility,
+    evidenceStatus: result.task.evidenceStatus,
+    citationCount: result.task.citationCount,
+    redactionStatus: result.task.redactionStatus,
+  };
 }
 
 async function resolveAdminAiGenerationActor(
@@ -340,7 +414,13 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
   workspace: AdminAiGenerationWorkspace,
   options: AdminAiGenerationLocalContractRouteOptions = {},
 ) {
+  const createRequestPublicId =
+    options.createRequestPublicId ?? createDefaultRequestPublicId;
+  const requestClock = options.requestClock ?? (() => new Date());
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const taskPersistenceRepository =
+    options.taskPersistenceRepository ??
+    createPostgresAdminAiGenerationTaskPersistenceRepository();
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -370,8 +450,11 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
         return createJsonResponse(
           await buildAdminAiGenerationLocalContract({
             actor,
+            createRequestPublicId,
             generationKind,
+            requestClock,
             runtimeBridgeControl: options.runtimeBridgeControl,
+            taskPersistenceRepository,
             workspace,
           }),
         );

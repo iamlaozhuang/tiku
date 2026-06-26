@@ -70,7 +70,7 @@ export type AdminAiGenerationLocalContractFormalContentBoundaryDto = {
   paperWriteStatus: "blocked_without_follow_up_task";
 };
 
-export type AdminAiGenerationLocalContractDto = {
+export type AdminAiGenerationLocalContractBaseDto = {
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   workspace: AdminAiGenerationWorkspace;
   generationKind: AdminAiGenerationKind;
@@ -81,3 +81,20 @@ export type AdminAiGenerationLocalContractDto = {
   runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
 };
+
+export type AdminAiGenerationLocalContractTaskPersistenceDto = {
+  persistenceStatus: "created" | "reused";
+  requestPublicId: string;
+  taskPublicId: string;
+  status: AiGenerationTaskStatus;
+  resultPublicId: string | null;
+  contentVisibility: AiGenerationTaskResultContentVisibility;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationLocalContractDto =
+  AdminAiGenerationLocalContractBaseDto & {
+    taskPersistence: AdminAiGenerationLocalContractTaskPersistenceDto;
+  };

@@ -153,7 +153,7 @@ export type AdminAiGenerationTaskPersistenceResult = {
 };
 
 export type CreateOrReuseAdminAiGenerationTaskInput = {
-  localContract: import("./admin-ai-generation-local-contract").AdminAiGenerationLocalContractDto;
+  localContract: import("./admin-ai-generation-local-contract").AdminAiGenerationLocalContractBaseDto;
   requestPublicId: string;
   requestedAt: Date;
 };

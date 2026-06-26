@@ -501,77 +501,75 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a690077a889d3c505c5d1c85afdc2f586ae8d2df
-  lastKnownOriginMasterSha: a690077a889d3c505c5d1c85afdc2f586ae8d2df
+  lastKnownMasterSha: 840a1d306a25b5b8ef58426a89974dbf6b7e177f
+  lastKnownOriginMasterSha: 840a1d306a25b5b8ef58426a89974dbf6b7e177f
 currentTask:
-  id: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
+  id: admin-ai-generation-route-db-adapter-integration-tdd-2026-06-26
   status: closed
-  result: pass_local_schema_companion_metadata_and_db_adapter_tdd_no_db_execution_no_final_pass
-  claimedAt: "2026-06-26T13:45:00-07:00"
-  plannedAt: "2026-06-26T13:45:00-07:00"
-  validatedAt: "2026-06-26T14:05:00-07:00"
-  reviewedAt: "2026-06-26T14:05:00-07:00"
-  closedAt: "2026-06-26T14:05:00-07:00"
-  sourceStory: successor_of_admin_ai_generation_task_persistence_db_schema_mapping_approval_package
-  approvalConsumed: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
-  approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
-  sourceSchemaMappingApprovalPath: docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-task-persistence-db-schema-mapping-approval-package.md
+  result: pass_local_route_db_adapter_integration_tdd_no_db_execution_no_final_pass
+  claimedAt: "2026-06-26T14:30:00-07:00"
+  plannedAt: "2026-06-26T14:30:00-07:00"
+  validatedAt: "2026-06-26T14:55:00-07:00"
+  reviewedAt: "2026-06-26T14:55:00-07:00"
+  closedAt: "2026-06-26T14:55:00-07:00"
+  sourceStory: successor_of_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd
+  approvalConsumed: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
+  approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  sourceSchemaAndAdapterEvidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-task-persistence-db-schema-and-adapter-tdd.md
   scope:
     docsStateEvidenceAudit: true
     approvalPackageOnly: false
-    staticSchemaRead: true
+    staticSchemaRead: false
     localSourceChange: true
     focusedUnitTest: true
-    repositoryPortContract: false
-    realDbAdapter: true
+    routeDbAdapterIntegration: true
+    repositoryPortContract: true
+    realDbAdapterDefaultWiring: true
     browserRuntime: false
     credentialDocumentRead: false
     credentialOrEnvRead: false
     providerCall: false
     costCalibration: false
     databaseConnectionOrWrite: false
-    schemaMigration: true
+    schemaMigration: false
     migrationExecution: false
     formalQuestionOrPaperWrite: false
     stagingProdDeploy: false
     paymentExternalService: false
     finalPassClaim: false
   requirementMapping:
-    adminAiGeneration: admin_metadata_companion_table_implementation_for_non_lossy_task_metadata
-    aiGenerationTask: retained_as_shared_lifecycle_with_narrow_compatibility_migration
-    formalContentBoundary: question_paper_write_blocked_without_follow_up_task
+    adminAiGeneration: content_and_organization_admin_local_contract_routes_persist_trackable_task_summary
+    aiGenerationTask: route_success_path_uses_existing_admin_task_persistence_port_and_postgres_db_adapter
+    formalContentBoundary: provider_and_question_paper_write_remain_blocked
     releaseBoundary: staging_prod_payment_external_service_deployment_release_readiness_excluded
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
+      approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_request_admin_ai_generation_task_persistence_db_schema_and_adapter_tdd_2026_06_26
-  branch: codex/admin-ai-db-schema-adapter-tdd-20260626
+      approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
+  branch: codex/admin-ai-route-db-adapter-integration-tdd-20260626
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanCreated: pass
-    selectedStorageShape: admin_ai_generation_task_metadata_companion_table
-    aiGenerationTaskSharedLifecycleRetained: true
-    separateBackendLifecycleTableRejected: true
-    tddRedObserved: pass_schema_nullability_and_missing_adapter_module
-    schemaMigrationCapabilityGate: pass
-    focusedUnitTest: pass_3_files_33_tests
+    routeDbAdapterIntegration: pass
+    tddRedObserved: pass_missing_task_persistence_and_repository_calls
+    focusedUnitTest: pass_3_files_15_tests
     browserRuntimeExecuted: false
     credentialDocumentReadByCodex: false
     credentialOrEnvReadExecuted: false
@@ -584,10 +582,10 @@ currentTask:
     databaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
-    migrationFileCreated: true
-    drizzleSnapshotUpdated: true
+    migrationFileCreated: false
+    drizzleSnapshotUpdated: false
     migrationGenerationExecuted: false
-    realDbAdapterImplemented: true
+    realDbAdapterDefaultWiring: pass_source_wiring_only
     accountMutationExecuted: false
     providerCallExecuted: false
     costCalibrationExecuted: false
@@ -598,7 +596,47 @@ currentTask:
     testChanged: pass
     packageLockfileChanged: false
     releaseReadinessClaimed: false
-  nextRecommendedTask: admin_ai_generation_route_db_adapter_integration_tdd_after_local_migration_execution_decision
+  nextRecommendedTask: local_db_migration_execution_decision_or_admin_ai_generation_persistence_runtime_diagnostic
+adminAiGenerationRouteDbAdapterIntegrationTdd20260626:
+  taskId: admin-ai-generation-route-db-adapter-integration-tdd-2026-06-26
+  phase: admin-ai-generation-route-db-adapter-integration-tdd-2026-06-26
+  recordedAt: "2026-06-26T14:55:00-07:00"
+  status: closed
+  result: pass_local_route_db_adapter_integration_tdd_no_db_execution_no_final_pass
+  branch: codex/admin-ai-route-db-adapter-integration-tdd-20260626
+  entryMasterSha: 840a1d306a25b5b8ef58426a89974dbf6b7e177f
+  entryOriginMasterSha: 840a1d306a25b5b8ef58426a89974dbf6b7e177f
+  approvalSource: current_user_request_admin_ai_generation_route_db_adapter_integration_tdd_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-route-db-adapter-integration-tdd.md
+  implementationSummary:
+    contentRoutePersistenceIntegrated: true
+    organizationRoutePersistenceIntegrated: true
+    defaultPostgresDbAdapterWiring: true
+    responseTaskPersistenceSummary: redacted_public_reference_only
+    providerBoundary: provider_call_blocked
+    formalQuestionPaperWriteBoundary: blocked_without_follow_up_task
+  validationSummary:
+    tddRedObserved: pass_missing_task_persistence_and_repository_calls
+    focusedUnitTest: pass_3_files_15_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  safetyBoundary:
+    localDbMigrationExecuted: false
+    liveDatabaseRouteValidationExecuted: false
+    destructiveDatabaseOperationExecuted: false
+    seedOrAccountMutationExecuted: false
+    providerCallExecuted: false
+    costCalibrationExecuted: false
+    formalQuestionOrPaperWriteExecuted: false
+    stagingProdPaymentExternalServiceTouched: false
+    releaseReadinessOrFinalPassClaimed: false
+  nextRecommendedTask: local_db_migration_execution_decision_or_admin_ai_generation_persistence_runtime_diagnostic
 adminAiGenerationTaskPersistenceDbSchemaAndAdapterTdd20260626:
   taskId: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26
   phase: admin-ai-generation-task-persistence-db-schema-and-adapter-tdd-2026-06-26

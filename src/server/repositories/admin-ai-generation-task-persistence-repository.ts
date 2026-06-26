@@ -7,7 +7,7 @@ import type {
   CreateAdminAiGenerationTaskPersistenceInput,
   CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
-import type { AdminAiGenerationLocalContractDto } from "../contracts/admin-ai-generation-local-contract";
+import type { AdminAiGenerationLocalContractBaseDto } from "../contracts/admin-ai-generation-local-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import type { AiGenerationTaskResultKind } from "../models/ai-generation-task-request";
 
@@ -174,7 +174,7 @@ function createServerOwnedPendingTaskInput(
 }
 
 function assertAcceptedProviderDisabledAdminLocalContract(
-  localContract: AdminAiGenerationLocalContractDto,
+  localContract: AdminAiGenerationLocalContractBaseDto,
 ): void {
   const taskRequest = localContract.taskRequest;
   const resultReference = taskRequest.resultReference;
@@ -236,7 +236,7 @@ function assertAcceptedProviderDisabledAdminLocalContract(
 }
 
 function matchesContentAdminOwnerBoundary(
-  localContract: AdminAiGenerationLocalContractDto,
+  localContract: AdminAiGenerationLocalContractBaseDto,
 ): boolean {
   const taskRequest = localContract.taskRequest;
 
@@ -251,7 +251,7 @@ function matchesContentAdminOwnerBoundary(
 }
 
 function matchesOrganizationAdminOwnerBoundary(
-  localContract: AdminAiGenerationLocalContractDto,
+  localContract: AdminAiGenerationLocalContractBaseDto,
 ): boolean {
   const taskRequest = localContract.taskRequest;
 
