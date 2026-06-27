@@ -44,6 +44,167 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+    title: Three layer acceptance minimal closure high risk approval matrix
+    phase: three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+    sourceStory: current_user_goal_three_layer_acceptance_minimal_closure_approval_matrix_2026_06_27
+    dependencies: []
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      Current user approval permits a docs/state-only task package to create a three-layer acceptance minimal closure
+      and high-risk approval matrix. Scope is limited to project-state.yaml, task-queue.yaml, task plan, evidence, audit,
+      and acceptance docs. Browser/dev-server/e2e, DB read/write/seed/migration/rollback, Provider calls, Provider
+      credential reads, Provider configuration, Cost Calibration, real retry/adoption mutation, formal publish,
+      student-visible runtime, staging/prod/deploy/payment/external-service work, PR, force push, release readiness,
+      and final Pass remain blocked. Local commit is approved; ff-only merge, push, and short-branch cleanup require
+      later fresh closeout approval.
+    targetClosureItem: three-layer acceptance minimal closure and high-risk approval matrix prepared
+    behaviorBoundary: docs_state::three_layer_acceptance_approval_matrix_no_runtime_no_final_pass
+    executionProfile: docs_state_acceptance_approval_matrix
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout
+    taskKind: docs_state_approval_matrix
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_three_layer_acceptance_minimal_closure_high_risk_approval_matrix_prepared
+    approvedAt: "2026-06-27T03:45:50-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_goal_three_layer_acceptance_minimal_closure_approval_matrix_2026_06_27
+    claimedAt: "2026-06-27T03:45:50-07:00"
+    plannedAt: "2026-06-27T03:45:50-07:00"
+    implementedAt: "2026-06-27T03:45:50-07:00"
+    validatedAt: "2026-06-27T03:49:46-07:00"
+    reviewedAt: "2026-06-27T03:49:46-07:00"
+    branch: codex/three-layer-acceptance-matrix-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      acceptanceMatrix: approved
+      approvalBoundaryPlanning: approved
+      localCommit: approved
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+      - docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+      - docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - acceptance_boundary_matrix
+      - high_risk_approval_boundary
+      - no_runtime_claim
+      - no_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_goal_three_layer_acceptance_minimal_closure_approval_matrix_2026_06_27
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    validationSummary:
+      taskPlanPrepared: true
+      acceptanceMatrixPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_current_task_active
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_finalization
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_seed_migration_or_rollback
+      - provider_call_or_provider_credential_read
+      - provider_configuration_change
+      - cost_calibration_gate
+      - retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_acceptance_pass
+    retryCount: 0
+    lastFailurePath: null
+
   - id: active-queue-terminal-archive-cleanup-2026-06-27
     title: Active queue terminal archive cleanup
     phase: active-queue-terminal-archive-cleanup-2026-06-27
