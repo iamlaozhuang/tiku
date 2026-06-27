@@ -501,24 +501,24 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 39645361ea367edf81fbbfaf98bb62bf54f01704
-  lastKnownOriginMasterSha: 39645361ea367edf81fbbfaf98bb62bf54f01704
+  lastKnownMasterSha: e8f9dce64bbdbb6a84e4c172eaa7d632fc27eb91
+  lastKnownOriginMasterSha: e8f9dce64bbdbb6a84e4c172eaa7d632fc27eb91
 currentTask:
-  id: organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
+  id: content-admin-ai-review-ux-enhancement-approval-2026-06-26
   status: closed
-  result: pass_org_admin_ai_usage_statistics_ux_enhancement_boundary_package_prepared_no_implementation
-  claimedAt: "2026-06-26T20:05:00-07:00"
-  plannedAt: "2026-06-26T20:05:00-07:00"
-  validatedAt: "2026-06-26T20:05:00-07:00"
-  reviewedAt: "2026-06-26T20:05:00-07:00"
-  closedAt: "2026-06-26T20:05:00-07:00"
+  result: pass_content_admin_ai_review_ux_boundary_package_prepared_no_implementation
+  claimedAt: "2026-06-26T20:20:00-07:00"
+  plannedAt: "2026-06-26T20:20:00-07:00"
+  validatedAt: "2026-06-26T20:20:00-07:00"
+  reviewedAt: "2026-06-26T20:20:00-07:00"
+  closedAt: "2026-06-26T20:20:00-07:00"
   sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
   approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
-  branch: codex/org-admin-ai-statistics-ux-approval-20260626
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+  branch: codex/content-ai-review-ux-approval-20260626
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
@@ -549,11 +549,19 @@ currentTask:
     finalPassClaim: false
   decision:
     docsOnlyApprovalPackage: true
-    currentAiGenerationClosureRequiresStatisticsUx: false
-    secondLayerEnhancement: true
-    futureRequiredWhenEmployeeVisibleOrganizationTrainingInScope: true
-    rawEmployeeAnswerOrRawAiContentAccess: blocked
-    exportOrExternalService: blocked
+    necessaryContentAdminReviewClosure:
+      - single_result_review_detail
+      - validate_before_adopt
+      - adopt_reject_action
+      - reviewer_and_source_attribution
+      - adoption_record_traceability
+    secondLayerContentAdminReviewEnhancements:
+      - batch_review
+      - failed_adoption_retry
+      - generated_result_to_formal_draft_diff
+      - adoption_history_timeline
+    directPublishOrStudentVisibleContent: blocked
+    rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     implementationStillBlocked: true
     localCommitApproved: true
     mergePushCleanupApproved: true
@@ -595,8 +603,9 @@ currentTask:
     providerRetryCount: 0
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
-    rawEmployeeAnswerOrRawAiContentAccessExecuted: false
-    exportOrExternalServiceExecuted: false
+    reviewAdoptionMutationExecuted: false
+    batchAdoptionRetryDiffExecuted: false
+    rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
     formalPublishExecuted: false
     studentVisibleContentExecuted: false
     finalPassClaimed: false
@@ -605,7 +614,7 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: content-admin-ai-review-ux-enhancement-approval-2026-06-26
+  nextRecommendedTask: stop_no_pending_task_after_batch_closeout
 aiGenerationProductBoundaryExecutionPackageApproval20260626:
   taskId: ai-generation-product-boundary-execution-package-approval-2026-06-26
   phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
