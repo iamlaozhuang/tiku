@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: idle_no_pending_task
-updatedAt: "2026-06-27T05:30:00-07:00"
+currentPhase: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+updatedAt: "2026-06-27T00:15:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,29 +501,35 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 217f9a2444ab94bc83ce5017fa4a23b848a0fb14
-  lastKnownOriginMasterSha: 217f9a2444ab94bc83ce5017fa4a23b848a0fb14
+  lastKnownMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
+  lastKnownOriginMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
 currentTask:
-  id: content-admin-review-local-browser-smoke-task-packet-normalization-approval-2026-06-27
+  id: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
   status: closed
-  result: pass_task_packet_normalized_for_local_browser_smoke
-  claimedAt: "2026-06-27T00:01:02-07:00"
-  plannedAt: "2026-06-27T00:01:02-07:00"
-  implementedAt: "2026-06-27T00:08:54-07:00"
-  validatedAt: "2026-06-27T00:08:54-07:00"
-  reviewedAt: "2026-06-27T00:08:54-07:00"
-  closedAt: "2026-06-27T00:08:54-07:00"
+  result: constrained_partial_browser_smoke_redirected_to_login_no_credential_scope
+  claimedAt: "2026-06-27T00:15:48-07:00"
+  plannedAt: "2026-06-27T00:15:48-07:00"
+  implementedAt: "2026-06-27T00:29:45-07:00"
+  validatedAt: "2026-06-27T00:29:45-07:00"
+  reviewedAt: "2026-06-27T00:35:10-07:00"
+  closedAt: "2026-06-27T00:35:10-07:00"
   sourceStory: current_user_serial_tasks_1_and_2_2026_06_27
   approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
-  branch: codex/content-admin-browser-smoke-packet-normalization-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-local-browser-smoke-validation.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-local-browser-smoke-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-local-browser-smoke-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-local-browser-smoke-validation.md
+  branch: codex/content-admin-local-browser-smoke-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    taskPacketNormalization: true
+    browserRuntime: true
+    devServer: true
+    localhostOnly: true
+    routeSmokeTarget:
+      - /content/ai-question-generation
+      - /content/ai-paper-generation
+    taskPacketNormalization: false
     sourceContractChange: false
     serviceSourceChange: false
     uiSourceChange: false
@@ -534,8 +540,6 @@ currentTask:
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
-    browserRuntime: false
-    devServer: false
     e2eRuntime: false
     credentialOrEnvRead: false
     providerCall: false
@@ -550,8 +554,8 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    task1PacketNormalization: docs_state_only
-    task2BrowserSmokePacketState: prepared_pending_localhost_only
+    task2BrowserSmoke: local_browser_dev_server_smoke_content_admin_only
+    routeCorrection: next_route_group_admin_segment_not_in_url
     historyMutationDecision: blocked_requires_separate_approval
     formalPublishDecision: blocked_requires_separate_approval
     retryMutationDecision: blocked_requires_separate_approval
@@ -592,13 +596,15 @@ currentTask:
     auditReviewPrepared: true
     docsOnly: true
     tddRedObserved: not_applicable
-    focusedUnitTests: not_applicable
+    focusedUnitTests: blocked_by_task_scope
     mechanismScriptSmoke: not_applicable
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
-    routeSmokeExecuted: false
+    routeSmokeExecuted: true
+    browserSmokeExecuted: true
+    browserSmokeResult: constrained_partial_redirected_to_login
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -613,12 +619,12 @@ currentTask:
     finalPassClaimed: false
     prettierScoped: pass
     gitDiffCheck: pass
-    lint: not_applicable
-    typecheck: not_applicable
+    lint: pass
+    typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: pass_task2_executable_after_current_closeout
+    projectStatusDiagnostic: pass_idle_no_pending_task_wait_for_instruction
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+  nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
