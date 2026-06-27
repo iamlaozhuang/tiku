@@ -5,13 +5,15 @@
 - Task id: `high-risk-blocked-task-packet-metadata-repair-2026-06-27`
 - Branch: `codex/high-risk-blocked-metadata-repair-20260627`
 - Result: pass.
-- Result detail: pass_metadata_repair_local_validation.
-- Commit: `73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6` pre-task baseline; local task commit is created after evidence and
-  gates pass.
+- Result detail: pass_metadata_repair_local_validation_and_ff_only_master_closeout_gates.
+- Commit: `10eee195105fbf6af0af7e5c8d274f805588e721`.
+- Pre-task baseline: `73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6`.
+- Closeout approval: current user fresh closeout approval on 2026-06-27 for ff-only merge to `master`, master gates,
+  push to `origin/master`, and deletion of the merged short branch.
 - localFullLoopGate: not applicable; this is a docs/state metadata repair with browser/dev-server/e2e runtime blocked.
 - threadRolloverGate: not required for this single metadata repair task.
-- nextModuleRunCandidate: fresh closeout approval for this branch, or a separate archive task for the unrelated terminal
-  archive candidate.
+- nextModuleRunCandidate: a separate archive task for the unrelated terminal archive candidate, or the next
+  owner-approved task packet.
 - Cost Calibration Gate remains blocked.
 
 ## Allowed files
@@ -69,9 +71,44 @@ current_task_not_closed:high-risk-blocked-task-packet-metadata-repair-2026-06-27
   - Exit code: 0.
   - Evidence: `module-closeout readiness passed`.
 
+## Master closeout gates
+
+- `git fetch origin master`
+  - Exit code: 0.
+  - Evidence: fetched `origin/master`; local `master` and `origin/master` were both
+    `73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6` before merge.
+- `git switch master`
+  - Exit code: 0.
+- `git pull --ff-only origin master`
+  - Exit code: 0.
+  - Evidence: already up to date before merge.
+- `git merge --ff-only codex/high-risk-blocked-metadata-repair-20260627`
+  - Exit code: 0.
+  - Evidence: fast-forwarded `master` from `73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6` to
+    `10eee195105fbf6af0af7e5c8d274f805588e721`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`
+  - Exit code: 0 on `master`.
+  - Evidence: `highRiskRepairBlockedCount: 0`; `archiveCandidateCount: 1` remains out of scope.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`
+  - Exit code: 0 on `master`.
+  - Evidence: `repository: branch=master; head=10eee1951; dirty=false`; task was still
+    `ready_for_closeout` before this closeout evidence update.
+- `npx.cmd prettier --check --ignore-unknown ...`
+  - Exit code: 0 on `master`.
+  - Evidence: all matched files use Prettier code style.
+- `git diff --check`
+  - Exit code: 0 on `master`.
+- `npm.cmd run lint`
+  - Exit code: 0 on `master`.
+- `npm.cmd run typecheck`
+  - Exit code: 0 on `master`.
+
 ## Closeout
 
-- Local commit is approved by the task packet and remains pending until final post-evidence gates pass.
-- Fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup require fresh closeout approval.
+- Local task commit `10eee195105fbf6af0af7e5c8d274f805588e721` was fast-forward merged into `master`.
+- Fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup are approved by the current user
+  fresh closeout approval.
+- Push to `origin/master` and deletion of `codex/high-risk-blocked-metadata-repair-20260627` are pending pre-push
+  readiness and successful remote update.
 - PR, force push, release readiness, final Pass, browser/dev-server/e2e runtime, DB work, Provider work, source changes,
   and Cost Calibration Gate remain blocked.

@@ -62,14 +62,14 @@ tasks:
     validationPolicy: queue_slimming_high_risk_metadata_clear_and_docs_state_gates
     taskKind: mechanism_docs_state_metadata_repair
     moduleRunVersion: 2
-    status: ready_for_closeout
-    result: pass_high_risk_blocked_task_packet_metadata_repair_local_validation
+    status: closed
+    result: pass_high_risk_blocked_task_packet_metadata_repair_ff_merged_master_gates_passed_push_cleanup_approved
     claimedAt: "2026-06-27T02:44:21-07:00"
     plannedAt: "2026-06-27T02:44:21-07:00"
     implementedAt: "2026-06-27T02:52:24-07:00"
     validatedAt: "2026-06-27T02:52:24-07:00"
     reviewedAt: "2026-06-27T02:52:24-07:00"
-    closedAt: null
+    closedAt: "2026-06-27T03:00:10-07:00"
     branch: codex/high-risk-blocked-metadata-repair-20260627
     targetRepairCandidateCount: 19
     allowedFiles:
@@ -127,16 +127,16 @@ tasks:
         approved: true
         approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
