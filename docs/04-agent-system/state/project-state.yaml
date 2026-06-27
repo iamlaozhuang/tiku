@@ -501,36 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
-  lastKnownOriginMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
+  lastKnownMasterSha: b70ce0995ac90fc5e8decb439b8b4cedc42dec63
+  lastKnownOriginMasterSha: b70ce0995ac90fc5e8decb439b8b4cedc42dec63
 currentTask:
-  id: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
-  status: closed
-  result: pass_credentialed_browser_smoke_content_admin_review_ui_visible_no_repair_seeded
-  claimedAt: "2026-06-27T01:18:00-07:00"
-  plannedAt: "2026-06-27T01:18:00-07:00"
-  implementedAt: "2026-06-27T01:23:25-07:00"
-  validatedAt: "2026-06-27T01:23:25-07:00"
-  reviewedAt: "2026-06-27T01:23:25-07:00"
-  closedAt: "2026-06-27T01:23:25-07:00"
-  sourceStory: current_user_credentialed_content_admin_browser_smoke_2026_06_27
-  approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+  id: content-admin-review-credentialed-browser-smoke-closeout-2026-06-27
+  status: planned
+  result: pending_ff_only_merge_push_cleanup
+  claimedAt: "2026-06-27T01:31:16-07:00"
+  plannedAt: "2026-06-27T01:31:16-07:00"
+  implementedAt: null
+  validatedAt: null
+  reviewedAt: null
+  closedAt: null
+  sourceStory: current_user_fresh_closeout_current_short_branch_2026_06_27
+  approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
   branch: codex/content-admin-credentialed-browser-scope-20260627
   scope:
     docsStateEvidenceAudit: true
-    acceptancePackagePrepared: true
-    credentialedBrowserScopeApproval: true
-    browserRuntime: true
-    devServer: true
-    localhostOnly: true
-    routeSmokeTarget:
-      - /content/ai-question-generation
-      - /content/ai-paper-generation
-    taskPacketNormalization: false
+    closeoutTaskPacket: true
+    ffOnlyMergeToMaster: true
+    masterGates: true
+    pushOriginMaster: true
+    deleteMergedShortBranch: true
+    browserRuntime: false
+    devServer: false
     sourceContractChange: false
     serviceSourceChange: false
     uiSourceChange: false
@@ -542,8 +540,8 @@ currentTask:
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     e2eRuntime: false
-    credentialOrEnvRead: true
-    credentialReadApprovedForNextTask: true
+    credentialOrEnvRead: false
+    credentialReadApprovedForNextTask: false
     credentialEvidenceRedacted: true
     providerCall: false
     providerCallCount: 0
@@ -557,40 +555,39 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    credentialedBrowserSmokeScope: approved_localhost_only
-    credentialedBrowserSmokeRerun: passed_redacted_localhost_content_admin_ui_visible
-    credentialReadAndFillDecision: approved_for_local_login_only_redacted
-    routeCorrection: next_route_group_admin_segment_not_in_url
-    repairSeedDecision: not_seeded_no_ui_or_permission_defect_found
-    historyMutationDecision: blocked_requires_separate_approval
-    formalPublishDecision: blocked_requires_separate_approval
-    retryMutationDecision: blocked_requires_separate_approval
-    batchAdoptionMutationDecision: blocked_requires_separate_approval
-    e2eRuntimeDecision: blocked_requires_separate_approval
+    closeoutApproval: approved_for_current_short_branch_only
+    ffOnlyMergeDecision: approved_target_master
+    pushDecision: approved_target_origin_master
+    cleanupDecision: approved_delete_merged_short_branch
+    prDecision: blocked
+    forcePushDecision: blocked
+    releaseReadinessDecision: blocked
+    finalPassDecision: blocked
+    e2eRuntimeDecision: blocked
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    browserValidationDecision: current_task_approved_credentialed_localhost_browser_rerun
+    browserValidationDecision: blocked_no_browser_rerun_in_closeout
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     implementationStillBlocked: false
     localCommitApproved: true
-    mergePushCleanupApproved: false
-    mergePushCleanupApprovalSource: fresh_approval_required_before_remote_closeout
+    mergePushCleanupApproved: true
+    mergePushCleanupApprovalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
     mergeToMaster:
-      approved: false
+      approved: true
       targetBranch: master
-      approvalSource: fresh_approval_required
+      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
     push:
-      approved: false
+      approved: true
       target: origin/master
-      approvalSource: fresh_approval_required
+      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
     cleanup:
-      deleteShortBranch: false
-      approvalSource: fresh_approval_required
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -609,8 +606,8 @@ currentTask:
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     routeSmokeExecuted: true
-    browserSmokeExecuted: true
-    browserSmokeResult: pass_two_content_routes_render_review_surface_no_console_errors_adopt_reject_disabled
+    browserSmokeExecuted: false
+    browserSmokeResult: not_applicable_closeout_only
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -623,13 +620,13 @@ currentTask:
     formalPublishCallCount: 0
     studentVisibleContentExecuted: false
     finalPassClaimed: false
-    prettierScoped: pass
-    gitDiffCheck: pass
-    lint: not_applicable_docs_state_only
-    typecheck: not_applicable_docs_state_only
-    moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: idle_no_pending_task
-    moduleRunV2PrePushReadiness: not_applicable_no_push_approval
+    prettierScoped: pass_pre_merge
+    gitDiffCheck: pass_pre_merge
+    lint: pass_pre_merge
+    typecheck: pass_pre_merge
+    moduleRunV2PreCommitHardening: pass_pre_merge
+    projectStatusDiagnostic: pending
+    moduleRunV2PrePushReadiness: pending_after_master_merge
   nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
