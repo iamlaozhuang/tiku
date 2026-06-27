@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-adoption-command-contract-approval-package-2026-06-27
-updatedAt: "2026-06-27T04:58:00-07:00"
+currentPhase: layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
+updatedAt: "2026-06-27T05:20:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,41 +501,42 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
-  lastKnownOriginMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
+  lastKnownMasterSha: 352ced483a069103ccc1011504bf7c3c946130b4
+  lastKnownOriginMasterSha: 352ced483a069103ccc1011504bf7c3c946130b4
 currentTask:
-  id: content-admin-review-adoption-command-contract-tdd-2026-06-27
+  id: layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
   status: closed
-  result: pass_source_test_command_contract_closed_runtime_db_provider_still_blocked
-  claimedAt: "2026-06-27T05:30:00-07:00"
-  plannedAt: "2026-06-27T05:30:00-07:00"
-  implementedAt: "2026-06-27T05:05:00-07:00"
-  validatedAt: "2026-06-27T05:05:00-07:00"
-  reviewedAt: "2026-06-27T05:05:00-07:00"
-  closedAt: "2026-06-27T05:05:00-07:00"
-  sourceStory: content-admin-review-adoption-command-contract-approval-package-2026-06-27
-  approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
-  branch: codex/content-admin-adoption-command-tdd-20260627
+  result: pass_layer_2_command_contract_rollup_refreshed_business_runtime_still_blocked
+  claimedAt: "2026-06-27T05:17:25-07:00"
+  plannedAt: "2026-06-27T05:17:25-07:00"
+  implementedAt: "2026-06-27T05:17:25-07:00"
+  validatedAt: "2026-06-27T05:20:16-07:00"
+  reviewedAt: "2026-06-27T05:20:16-07:00"
+  closedAt: "2026-06-27T05:20:16-07:00"
+  sourceStory: layer-2-business-closure-evidence-rollup-after-command-contract-2026-06-27
+  approvalSource: current_user_fresh_docs_state_layer_2_rollup_refresh_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+  branch: codex/layer-2-rollup-refresh-20260627
   scope:
     docsStateEvidenceAudit: true
+    acceptanceRollupRefresh: true
     approvalPackageAuthoring: false
     successorBlockedTaskRegistration: false
-    sourceOrTestChange: true
+    sourceOrTestChange: false
     allowedStateFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
     browserRuntime: false
     devServer: false
-    sourceContractChange: true
-    serviceSourceChange: true
-    repositorySourceChange: true
+    sourceContractChange: false
+    serviceSourceChange: false
+    repositorySourceChange: false
     runtimeSourceChange: false
-    focusedUnitTest: true
-    testsOrE2eChange: true
+    focusedUnitTest: false
+    testsOrE2eChange: false
     schemaMigrationFileChange: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -556,17 +557,17 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    tddDecision: in_progress_add_rejected_review_decision_contract
+    rollupRefreshDecision: layer_2_command_contract_source_test_closed_runtime_still_blocked
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: evidence_rollup_complete_business_closure_missing_adopt_reject_command_contract
-    layer2ExpectedAfterTask: source_test_command_contract_closed_runtime_db_provider_still_blocked
+    layer2StatusBeforeTask: evidence_rollup_complete_business_closure_missing_runtime_after_command_contract
+    layer2ExpectedAfterTask: source_test_command_contract_closed_business_runtime_db_browser_provider_still_blocked
     layer3Status: blocked_provider_cost_pre_release_gates
-    activeQueueNonTerminalCountBeforeTask: 29
+    activeQueueNonTerminalCountBeforeTask: 28
     localCommitApproved: true
     mergePushCleanupApproved: true
     mergePushCleanupApprovalSource: current_user_independent_branch_closeout_instruction_2026_06_27
-    successorTask: layer-2-business-closure-evidence-rollup-refresh-after-command-contract
-    successorTaskDecision: not_created_by_this_source_test_task
+    successorTask: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+    successorTaskDecision: proposed_copyable_approval_text_only_not_executed
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -584,18 +585,18 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_docs_state_layer_2_rollup_refresh_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_docs_state_layer_2_rollup_refresh_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_docs_state_layer_2_rollup_refresh_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_docs_state_layer_2_rollup_refresh_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -606,13 +607,16 @@ currentTask:
     successorBlockedTaskRegistered: false
     evidencePrepared: true
     auditReviewPrepared: true
-    docsOnly: false
+    acceptanceRefreshPrepared: true
+    docsOnly: true
     ssotReadListPrepared: true
-    activeQueueNonTerminalCountBeforeTask: 29
-    tddRedObserved: pass_expected_rejected_contract_failures
-    focusedUnitTests: pass_4_files_21_tests
+    activeQueueNonTerminalCountBeforeTask: 28
+    sourceCommandContractEvidenceRead: pass_content_admin_adoption_tdd_closed
+    explicitAdoptRejectCommandContractStatus: covered_source_test_only
+    businessRuntimeClosureStatus: blocked_pending_fresh_runtime_db_browser_approval
+    focusedUnitTests: not_run_docs_state_only
     mechanismScriptSmoke: pending
-    sourceOrTestChanged: true
+    sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -632,21 +636,21 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 21
+    archiveCandidateCountAfterTask: 22
     highRiskRepairBlockedCountAfterTask: 0
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_result_class_repair
     moduleRunV2PrePushReadiness: pass
     ffOnlyMergeToMaster: pending
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
-    baselineOriginMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
-    currentBranch: codex/content-admin-adoption-command-tdd-20260627
-  nextRecommendedTask: layer-2-business-closure-evidence-rollup-refresh-after-command-contract
+    baselineMasterSha: 352ced483a069103ccc1011504bf7c3c946130b4
+    baselineOriginMasterSha: 352ced483a069103ccc1011504bf7c3c946130b4
+    currentBranch: codex/layer-2-rollup-refresh-20260627
+  nextRecommendedTask: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
