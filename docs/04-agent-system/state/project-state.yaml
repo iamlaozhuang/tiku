@@ -501,12 +501,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2493560ee174a965a0ab6141cd19e8eb25f8a4ac
-  lastKnownOriginMasterSha: 2493560ee174a965a0ab6141cd19e8eb25f8a4ac
+  lastKnownMasterSha: b76b012c222b8cf35d253b88d2c835aea5a75f0d
+  lastKnownOriginMasterSha: b76b012c222b8cf35d253b88d2c835aea5a75f0d
 currentTask:
-  id: content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+  id: content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
   status: closed
-  result: pass_batch_selection_source_contract_tdd_preview_only
+  result: pass_failed_retry_source_contract_tdd_request_state_only
   claimedAt: "2026-06-27T00:00:00-07:00"
   plannedAt: "2026-06-27T00:00:00-07:00"
   implementedAt: "2026-06-27T00:00:00-07:00"
@@ -515,11 +515,11 @@ currentTask:
   closedAt: "2026-06-27T00:00:00-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
-  branch: codex/content-admin-review-batch-selection-contract-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-failed-retry-source-contract-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-failed-retry-source-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-failed-retry-source-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-failed-retry-source-contract-tdd.md
+  branch: codex/content-admin-review-failed-retry-contract-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
@@ -549,14 +549,13 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    batchSelectionSourceContract: preview_only
-    candidateSelectionValidationState: implemented
-    batchCandidatePreviewContract: implemented
+    failedRetrySourceContract: request_state_only
+    retryEligibilityState: implemented
+    retryRequestContract: implemented
+    retryMutationDecision: blocked_requires_separate_approval
     batchAdoptionMutationDecision: blocked_requires_separate_approval
-    failedRetryDecision: blocked_future_source_contract_task_only
     resultDiffDecision: blocked_future_read_model_task_only
     adoptionHistoryDecision: blocked_future_read_model_task_only
-    retryMutationDecision: blocked_requires_fresh_approval
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: deferred_requires_separate_approval
@@ -591,8 +590,8 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: false
-    tddRedObserved: pass_missing_service_import
-    focusedUnitTests: pass_1_file_2_tests
+    tddRedObserved: pass
+    focusedUnitTests: pass
     mechanismScriptSmoke: not_applicable
     sourceOrTestChanged: true
     schemaMigrationExecuted: false
@@ -618,7 +617,7 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
+  nextRecommendedTask: content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

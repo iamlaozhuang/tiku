@@ -1,5 +1,6 @@
 import type { AiGenerationTaskRequestPolicyDto } from "./ai-generation-task-request-contract";
 import type {
+  AiGenerationTaskFailureCategory,
   AiGenerationTaskStatus,
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
@@ -183,5 +184,76 @@ export type AdminAiGenerationTaskHistoryDto = {
   workspace: AdminAiGenerationWorkspace;
   latestTask: AdminAiGenerationTaskHistoryItemDto | null;
   items: AdminAiGenerationTaskHistoryItemDto[];
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationFailedRetrySource = {
+  taskPublicId: string;
+  requestPublicId: string;
+  workspace: AdminAiGenerationWorkspace;
+  generationKind: AdminAiGenerationKind;
+  taskType: Extract<
+    AiGenerationTaskType,
+    "ai_question_generation" | "ai_paper_generation"
+  >;
+  status: AiGenerationTaskStatus;
+  failureCategory: AiGenerationTaskFailureCategory | null;
+  failedAt: string | null;
+  retryCount: number;
+  maxRetryCount: number;
+  resultPublicId: string | null;
+  contentVisibility: AiGenerationTaskResultContentVisibility;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  aiCallLogPublicId: string | null;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationFailedRetryBlockedReason =
+  | "blocked_non_failed_task"
+  | "blocked_non_retryable_failure"
+  | "blocked_retry_limit_reached";
+
+export type AdminAiGenerationFailedRetryRequestStatus =
+  | "retry_request_available"
+  | AdminAiGenerationFailedRetryBlockedReason;
+
+export type AdminAiGenerationFailedRetryStateDto = {
+  retryRequestStatus: AdminAiGenerationFailedRetryRequestStatus;
+  sourceTask: {
+    taskPublicId: string;
+    requestPublicId: string;
+    workspace: AdminAiGenerationWorkspace;
+    generationKind: AdminAiGenerationKind;
+    taskType: Extract<
+      AiGenerationTaskType,
+      "ai_question_generation" | "ai_paper_generation"
+    >;
+    status: AiGenerationTaskStatus;
+    failureCategory: AiGenerationTaskFailureCategory | null;
+    failedAt: string | null;
+    resultPublicId: string | null;
+    contentVisibility: AiGenerationTaskResultContentVisibility;
+    evidenceStatus: EvidenceStatus;
+    citationCount: number;
+    aiCallLogPublicId: string | null;
+    redactionStatus: "redacted";
+  };
+  retryState: {
+    canRequestRetry: boolean;
+    blockedReason: AdminAiGenerationFailedRetryBlockedReason | null;
+    retryCount: number;
+    maxRetryCount: number;
+    nextRetryAttempt: number | null;
+  };
+  executionBoundary: {
+    requestOnly: true;
+    providerCallExecuted: false;
+    providerCredentialRead: false;
+    providerPayloadRequired: false;
+    retryMutationStatus: "not_executed";
+    retryExecutionStatus: "not_executed";
+    redactionStatus: "redacted";
+  };
   redactionStatus: "redacted";
 };
