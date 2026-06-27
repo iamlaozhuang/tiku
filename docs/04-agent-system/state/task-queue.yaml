@@ -44,6 +44,200 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: layer-2-business-closure-evidence-rollup-2026-06-27
+    title: Layer 2 business closure evidence rollup
+    phase: layer-2-business-closure-evidence-rollup-2026-06-27
+    sourceStory: current_goal_layer_2_business_closure_evidence_rollup_2026_06_27
+    dependencies:
+      - three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+      - high-risk-approval-package-consolidation-retirement-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      Current user instruction requires each task to use an independent short branch and, after scoped completion,
+      complete local commit, ff-only merge to master, push origin/master, and merged-branch cleanup. This task remains
+      docs/state-only: browser/dev-server/e2e, DB connection/read/write, credential reads, Provider calls, Cost
+      Calibration, real mutation, staging/prod/deploy/payment/external-service work, PR, force push, release readiness,
+      and final Pass remain blocked.
+    targetClosureItem: Layer 2 existing evidence mapped to the smallest remaining local business closure chain
+    behaviorBoundary: docs_state::layer_2_business_evidence_rollup_no_runtime_no_final_pass
+    executionProfile: docs_state_layer_2_business_closure_rollup
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_acceptance_rollup
+    moduleRunVersion: 2
+    status: closed
+    result: pass_layer_2_business_closure_evidence_rollup_ready_for_ff_merge_push_cleanup
+    approvedAt: "2026-06-27T04:27:12-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    claimedAt: "2026-06-27T04:27:12-07:00"
+    plannedAt: "2026-06-27T04:27:12-07:00"
+    implementedAt: "2026-06-27T04:37:00-07:00"
+    validatedAt: "2026-06-27T04:46:00-07:00"
+    reviewedAt: "2026-06-27T04:46:00-07:00"
+    closedAt: "2026-06-27T04:46:00-07:00"
+    branch: codex/layer-2-business-rollup-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      acceptanceRollup: approved
+      layer2EvidenceRollup: approved
+      taskQueueRegistration: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/modules/04-ai-scoring.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/acceptance/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - layer_2_business_closure_evidence_rollup
+      - approval_boundary_preparation
+      - no_browser_runtime
+      - no_database_connection
+      - no_provider_call
+      - no_mutation_execution
+      - no_final_pass
+    layer2RollupScope:
+      layer1Status: local_role_flow_complete_no_regression_claim_only
+      layer2StatusBeforeTask: partial_local_business_loop_evidence_exists_closure_not_complete
+      smallestNextClosureTask: content-admin-review-adoption-command-contract-tdd-2026-06-27
+      layer3Status: blocked_provider_cost_pre_release_gates
+      CostCalibrationGateRemainsBlocked: true
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup.md docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-2-business-closure-evidence-rollup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-2-business-closure-evidence-rollup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-2-business-closure-evidence-rollup-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    validationSummary:
+      taskPlanPrepared: true
+      acceptanceRollupPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 19
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - credential_or_env_secret_read
+      - provider_call_or_configuration
+      - cost_calibration
+      - real_retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: high-risk-approval-package-consolidation-retirement-2026-06-27
     title: High risk approval package consolidation retirement
     phase: high-risk-approval-package-consolidation-retirement-2026-06-27
