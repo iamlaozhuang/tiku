@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
-updatedAt: "2026-06-27T07:10:04-07:00"
+currentPhase: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+updatedAt: "2026-06-27T07:33:03-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,38 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3388c6f4a40b9590b74840f9e0c09a742c98a612
-  lastKnownOriginMasterSha: 3388c6f4a40b9590b74840f9e0c09a742c98a612
+  lastKnownMasterSha: 6e483b75fcdc96bf5e1dab7eb0680a9e65e074c6
+  lastKnownOriginMasterSha: 6e483b75fcdc96bf5e1dab7eb0680a9e65e074c6
 currentTask:
-  id: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+  id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
-  result: pass_single_synthetic_test_owned_target_rejected_postgres_smoke
-  claimedAt: "2026-06-27T07:10:04-07:00"
-  plannedAt: "2026-06-27T07:10:04-07:00"
-  implementedAt: "2026-06-27T07:15:13-07:00"
-  validatedAt: "2026-06-27T07:15:13-07:00"
-  reviewedAt: "2026-06-27T07:15:13-07:00"
-  closedAt: "2026-06-27T07:15:13-07:00"
-  sourceStory: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
-  approvalSource: current_user_fresh_local_postgres_test_owned_target_setup_execution_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
-  branch: codex/content-admin-test-target-execution-20260627
+  result: pass_layer_2_postgres_test_owned_rejected_rollup_layer3_blocked
+  claimedAt: "2026-06-27T07:28:30-07:00"
+  plannedAt: "2026-06-27T07:28:30-07:00"
+  implementedAt: "2026-06-27T07:33:03-07:00"
+  validatedAt: "2026-06-27T07:33:03-07:00"
+  reviewedAt: "2026-06-27T07:33:03-07:00"
+  closedAt: "2026-06-27T07:33:03-07:00"
+  sourceStory: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+  approvalSource: current_user_fresh_docs_state_layer_2_rollup_after_postgres_test_owned_target_smoke_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+  branch: codex/layer-2-postgres-smoke-rollup-20260627
   scope:
     docsStateEvidenceAudit: true
-    approvalPackageAuthoring: false
+    approvalPackageAuthoring: true
     nonterminalCloseoutTriagePackage: false
     existingTaskStatusChange: false
     archiveIndexMovement: false
     taskHistoryIndexWrite: false
-    localPostgresExecution: true
+    localPostgresExecution: false
     sourceOrTestChange: false
-    runtimeExecutedByThisTask: true
-    defaultPostgresRuntimeUsed: true
+    runtimeExecutedByThisTask: false
+    defaultPostgresRuntimeUsed: false
     localDbCredentialEnvReadApproved: false
-    localDbRuntimeEnvResolutionUsedByApplicationCode: true
+    localDbRuntimeEnvResolutionUsedByApplicationCode: false
     allowedStateFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -541,16 +541,16 @@ currentTask:
     e2eRuntime: false
     testsOrE2eChange: false
     schemaMigrationFileChange: false
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: true
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     schemaMigrationExecuted: false
     credentialOrEnvRead: false
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    targetSetupOrSelectionExecuted: true
-    retryOrAdoptionMutationExecuted: true_rejected_single_command_only
+    targetSetupOrSelectionExecuted: false
+    retryOrAdoptionMutationExecuted: false
     formalQuestionOrPaperWrite: false
     formalPublish: false
     studentVisibleContent: false
@@ -559,34 +559,34 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: pass_local_postgres_test_owned_target_setup_execution
+    packageDecision: pass_layer_2_postgres_test_owned_rejected_evidence_rollup
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: blocked_single_test_owned_candidate_not_found_no_db_mutation_pass
-    layer2StatusAfterTask: local_postgres_rejected_target_setup_mutation_readback_minimum_passed
+    layer2StatusBeforeTask: local_postgres_rejected_target_setup_mutation_readback_minimum_passed_not_yet_rolled_up
+    layer2StatusAfterTask: local_postgres_rejected_target_setup_mutation_readback_minimum_rolled_up_approved_path_browser_publish_still_separate
     layer3Status: blocked_provider_cost_pre_release_gates
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountBeforeTask: 30
-    projectedArchiveCandidateCountAfterTask: 31
+    archiveCandidateCountBeforeTask: 31
+    projectedArchiveCandidateCountAfterTask: 32
     futureNonterminalCloseoutApplyTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
     futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_independent_branch_closeout_instruction_2026_06_27
-    nextExecutionApprovalRequired: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+    mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+    nextExecutionApprovalRequired: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
     nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     nextNonterminalCloseoutApprovalRequired: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    recommendedExecutionOption: target_setup_or_selection_then_rejected_lower_risk_first
-    alternateExecutionOption: owner_supplied_target_selection_only_then_rejected
+    recommendedExecutionOption: layer_3_docs_state_provider_cost_pre_release_matrix_refresh_before_any_provider_or_cost_execution
+    alternateExecutionOption: optional_layer_2_approved_formal_draft_or_credentialed_browser_package_if_owner_requires_stronger_l2
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
     finalPassDecision: blocked
     e2eRuntimeDecision: blocked
     formalPublishOrStudentVisibleRuntime: blocked
-    defaultPostgresRuntimeDecision: approved_for_this_single_task_only
+    defaultPostgresRuntimeDecision: not_executed_by_this_docs_state_rollup_previous_runtime_evidence_consumed_only
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
@@ -610,7 +610,7 @@ currentTask:
       approvalSource: current_user_independent_branch_closeout_instruction_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -621,7 +621,7 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    docsOnly: false
+    docsOnly: true
     ssotReadListPrepared: true
     existingTaskStatusChanged: false
     archiveIndexMovementExecuted: false
@@ -629,23 +629,23 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 29
+    archiveCandidateCountBeforeTask: 31
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: true
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     browserSmokeExecuted: false
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
-    targetSetupOrSelectionExecuted: true
-    reviewAdoptionMutationExecuted: true
-    routeInvocationCount: 1
-    targetCount: 1
-    mutationCount: 1
-    runtimeSmokeResult: pass_single_synthetic_test_owned_target_rejected
+    targetSetupOrSelectionExecuted: false
+    reviewAdoptionMutationExecuted: false
+    routeInvocationCount: 0
+    targetCount: 0
+    mutationCount: 0
+    runtimeSmokeResultConsumed: pass_single_synthetic_test_owned_target_rejected
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
     formalPublishExecuted: false
     formalPublishCallCount: 0
@@ -653,10 +653,10 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 31
+    archiveCandidateCountAfterTask: 32
     highRiskRepairBlockedCountAfterTask: 0
-    lint: pass
-    typecheck: pass
+    lint: not_run_docs_state_only_no_source_change
+    typecheck: not_run_docs_state_only_no_source_change
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
@@ -666,10 +666,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 3388c6f4a40b9590b74840f9e0c09a742c98a612
-    baselineOriginMasterSha: 3388c6f4a40b9590b74840f9e0c09a742c98a612
-    currentBranch: codex/content-admin-test-target-execution-20260627
-  nextRecommendedTask: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+    baselineMasterSha: 6e483b75fcdc96bf5e1dab7eb0680a9e65e074c6
+    baselineOriginMasterSha: 6e483b75fcdc96bf5e1dab7eb0680a9e65e074c6
+    currentBranch: codex/layer-2-postgres-smoke-rollup-20260627
+  nextRecommendedTask: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
