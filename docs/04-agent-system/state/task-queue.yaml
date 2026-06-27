@@ -44,6 +44,157 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: mechanism-batch-closeout-state-reconciliation-2026-06-26
+    title: Mechanism batch closeout durable state reconciliation
+    phase: mechanism-batch-closeout-state-reconciliation-2026-06-26
+    sourceStory: current_user_request_execute_first_step_before_next_thread_ai_boundary_package
+    dependencies:
+      - mechanism-batch-execution-package-and-smoke-runner-2026-06-26
+    taskKind: docs_state_closeout_reconciliation
+    moduleRunVersion: 2
+    executionProfile: docs_state_closeout_reconciliation_no_product_runtime
+    evidenceMode: redacted_summary_only
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_reconciliation_2026_06_26
+    requiredOutcome: >-
+      Reconcile durable state and queue with the completed Git closeout for the mechanism batch execution package
+      runner task. Record that `master` and `origin/master` are aligned at the mechanism tuning commit and that the
+      short-lived mechanism branch was cleaned up. Do not change product source, Provider, DB, env/secret, publish,
+      staging/prod, payment, external service, deployment, release readiness, or final Pass boundaries.
+    status: closed
+    result: pass_durable_state_queue_closeout_reconciled_after_git_closeout
+    approvedAt: "2026-06-26T18:41:42-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_execute_first_step_state_reconciliation_2026_06_26
+      scope: docs_state_closeout_reconciliation_only
+    claimedAt: "2026-06-26T18:41:42-07:00"
+    plannedAt: "2026-06-26T18:41:42-07:00"
+    validatedAt: "2026-06-26T18:41:42-07:00"
+    reviewedAt: "2026-06-26T18:41:42-07:00"
+    closedAt: "2026-06-26T18:41:42-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      closeoutStateReconciliation: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      productRuntimeChange: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      formalPublishStudentVisibleContent: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - product_runtime_change
+      - dependency_package_lockfile_change
+      - schema_migration_or_drizzle_push
+      - database_connection_or_mutation
+      - provider_model_call_or_provider_credential_read
+      - env_secret_access_or_env_file_change
+      - browser_e2e_or_dev_server
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - formal_publish_or_student_visible_content
+      - cost_calibration_gate
+      - pr_force_push
+      - final_acceptance_pass
+    riskTypes:
+      - docs_state_reconciliation
+      - closeout_state_repair
+      - no_product_runtime
+      - no_high_risk_gate_execution
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-closeout-state-reconciliation.md docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-closeout-state-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-closeout-state-reconciliation.md docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-closeout-state-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-batch-closeout-state-reconciliation-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId mechanism-batch-closeout-state-reconciliation-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-closeout-state-reconciliation.md
+    branch: codex/mechanism-closeout-state-reconciliation-20260626
+    nextRecommendedTask: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_execute_first_step_state_reconciliation_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_execute_first_step_state_reconciliation_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_execute_first_step_state_reconciliation_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_execute_first_step_state_reconciliation_2026_06_26
+    closeoutReality:
+      predecessorImplementationCommitSha: d47db49e906442f2e857760bd02ab884e4c08066
+      predecessorFinalMasterSha: d47db49e906442f2e857760bd02ab884e4c08066
+      predecessorFinalOriginMasterSha: d47db49e906442f2e857760bd02ab884e4c08066
+      predecessorShortBranchPresent: false
+    validationSummary:
+      docsStateOnly: true
+      productSourceChanged: false
+      providerCallExecuted: false
+      databaseMutationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleContentExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      costCalibrationExecuted: false
+      finalPassClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
     title: Mechanism batch execution package and redacted smoke runner
     phase: mechanism-batch-execution-package-and-smoke-runner-2026-06-26
@@ -60,8 +211,8 @@ tasks:
       Tune the Module Run v2 mechanism so future serial work can use upfront 3-5 task execution packages, larger
       verifiable task closures, readonly preflight before smoke, layered validation, a reusable redacted smoke runner,
       and a minimal state/queue template. Do not alter product runtime behavior or approve high-risk gates.
-    status: ready_for_closeout
-    result: pass_local_validation_ready_for_fresh_closeout_approval
+    status: closed
+    result: pass_mechanism_tuning_closed_on_master
     approvedAt: "2026-06-26T13:27:17-07:00"
     approvedBy: laozhuang_active_goal
     approvalConsumed:
@@ -71,6 +222,7 @@ tasks:
     plannedAt: "2026-06-26T13:27:17-07:00"
     validatedAt: "2026-06-26T13:33:05-07:00"
     reviewedAt: "2026-06-26T13:33:05-07:00"
+    closedAt: "2026-06-26T18:41:42-07:00"
     capabilities:
       docsStateEvidenceAudit: approved
       mechanismSopChange: approved
@@ -79,9 +231,9 @@ tasks:
       mechanismScriptFocusedSmoke: approved
       executionProfileCatalogChange: approved
       localCommit: approved
-      mergeToMaster: blocked_without_fresh_closeout_approval
-      pushOriginMaster: blocked_without_fresh_closeout_approval
-      branchCleanup: blocked_without_fresh_closeout_approval
+      mergeToMaster: approved_and_completed
+      pushOriginMaster: approved_and_completed
+      branchCleanup: approved_and_completed
       localSourceChange: blocked
       productRuntimeChange: blocked
       focusedProductUnitTest: blocked
@@ -146,7 +298,6 @@ tasks:
       - D:/tiku-local-private/**
       - D:\tiku-local-private\**
     blockedWithoutFreshApproval:
-      - merge_push_or_branch_cleanup
       - source_or_test_change
       - product_runtime_change
       - dependency_package_lockfile_change
@@ -177,22 +328,22 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-mechanism-batch-execution-package-and-smoke-runner.md
     branch: codex/mechanism-execution-package-runner-20260626
-    nextRecommendedTask: fresh_closeout_approval_for_merge_push_cleanup_after_local_commit
+    nextRecommendedTask: ai-generation-product-boundary-execution-package-approval-2026-06-26
     closeoutPolicy:
       localCommit:
         approved: true
         approvalSource: active_thread_goal_mechanism_tuning_2026_06_26
       mergeToMaster:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_execute_merge_push_cleanup_2026_06_26
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_execute_merge_push_cleanup_2026_06_26
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_execute_merge_push_cleanup_2026_06_26
     validationSummary:
       taskPlanPrepared: true
       batchExecutionPackageSopAdded: true
@@ -214,6 +365,14 @@ tasks:
       paymentExternalServiceTouched: false
       costCalibrationExecuted: false
       finalPassClaimed: false
+    closeoutReality:
+      implementationCommitSha: d47db49e906442f2e857760bd02ab884e4c08066
+      finalMasterSha: d47db49e906442f2e857760bd02ab884e4c08066
+      finalOriginMasterSha: d47db49e906442f2e857760bd02ab884e4c08066
+      branchMerged: true
+      pushedToOriginMaster: true
+      shortBranchPresent: false
+      worktreeCleanAfterCloseout: true
     retryCount: 0
     lastFailurePath: null
 
