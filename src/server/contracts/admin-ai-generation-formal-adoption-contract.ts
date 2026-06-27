@@ -307,6 +307,93 @@ export type AdminAiGenerationReviewResultDiffDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationAdoptionHistoryStatus = "traceable" | "empty";
+
+export type AdminAiGenerationAdoptionHistoryEventType =
+  | "generated_result_created"
+  | "formal_adoption_approved"
+  | "formal_draft_created";
+
+export type AdminAiGenerationAdoptionHistoryActionType =
+  | "admin_ai_generation_result.generated_result.create"
+  | "admin_ai_generation_result.formal_adoption.approve"
+  | "admin_ai_generation_result.formal_draft.create";
+
+export type AdminAiGenerationAdoptionHistoryTargetResourceType =
+  | "admin_ai_generation_result"
+  | "formal_question"
+  | "formal_paper";
+
+export type AdminAiGenerationAdoptionHistoryEventSource = {
+  eventPublicId: string;
+  eventType: AdminAiGenerationAdoptionHistoryEventType;
+  eventAt: string;
+  actorPublicId: string;
+  actionType: AdminAiGenerationAdoptionHistoryActionType;
+  targetResourceType: AdminAiGenerationAdoptionHistoryTargetResourceType;
+  targetPublicId: string;
+  metadataSummaryMasked: string;
+  contentDigest: string | null;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationAdoptionHistoryEventDto =
+  AdminAiGenerationAdoptionHistoryEventSource;
+
+export type AdminAiGenerationAdoptionHistoryReadModelSource = {
+  resultPublicId: string;
+  adoptionPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+  targetDomain: AdminAiGenerationFormalAdoptionTargetDomain;
+  formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+  formalQuestionPublicId: string | null;
+  formalPaperPublicId: string | null;
+  reviewerPublicId: string;
+  reviewedAt: string;
+  events: readonly AdminAiGenerationAdoptionHistoryEventSource[];
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationAdoptionHistoryReadModelDto = {
+  historyStatus: AdminAiGenerationAdoptionHistoryStatus;
+  resultPublicId: string;
+  adoptionPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  target: {
+    targetType: AdminAiGenerationFormalAdoptionTargetType;
+    targetDomain: AdminAiGenerationFormalAdoptionTargetDomain;
+    formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+    formalQuestionPublicId: string | null;
+    formalPaperPublicId: string | null;
+  };
+  timelineSummary: {
+    eventCount: number;
+    firstEventAt: string | null;
+    latestEventAt: string | null;
+    generatedResultEventCount: number;
+    adoptionApprovalEventCount: number;
+    formalDraftEventCount: number;
+  };
+  events: AdminAiGenerationAdoptionHistoryEventDto[];
+  readBoundary: {
+    readOnly: true;
+    historyMutationStatus: "not_executed";
+    publishStatus: "not_executed";
+    rawPromptExposed: false;
+    rawGeneratedOutputExposed: false;
+    providerPayloadExposed: false;
+    redactionStatus: "redacted";
+  };
+  reviewedBy: {
+    reviewerPublicId: string;
+    reviewedAt: string;
+  };
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationFormalAdoptionDto = {
   adoptionPublicId: string;
   sourceReference: {
