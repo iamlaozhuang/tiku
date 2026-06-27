@@ -4288,6 +4288,222 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    title: Layer 3 Provider smoke rollup after OpenAI-compatible DashScope repair
+    phase: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    sourceStory: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    dependencies:
+      - layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      Docs/state-only rollup under the current Goal and standing docs-state fast-lane closeout policy. This task may
+      update only project-state.yaml, task-queue.yaml, and task plan/evidence/audit/acceptance documents to record the
+      already-existing OpenAI-compatible DashScope Provider smoke pass and refresh the blocked Cost Calibration and
+      pre-release gates. It must not read or modify `.env*`, read credentials, execute Provider calls, perform Provider
+      configuration, execute Cost Calibration, connect to or read/write DB, run browser/dev-server/e2e, mutate runtime
+      data, edit source/tests/scripts/package/lockfile/schema/migration/seed files, formal publish, touch
+      student-visible runtime, staging/prod/deploy/payment/external-service, OCR/export, archive/index movement, PR,
+      force push, release readiness, or final Pass.
+    targetClosureItem: Layer 3 Provider smoke status rollup and Cost Calibration approval handoff
+    behaviorBoundary: docs_state::provider_smoke_rollup_no_runtime_no_cost_no_final_pass
+    executionProfile: docs_state_provider_smoke_rollup_after_dashscope_repair
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_rollup
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    fastLaneBatchId: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    fastLaneBatchRole: parent
+    status: closed
+    result: pass_provider_smoke_rollup_cost_calibration_blocked
+    approvedAt: "2026-06-27T09:27:05-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_goal_continuation_docs_state_only_rollup_plus_standingDocsStateFastLaneCloseoutApproval
+    claimedAt: "2026-06-27T09:27:05-07:00"
+    plannedAt: "2026-06-27T09:27:05-07:00"
+    implementedAt: "2026-06-27T09:27:05-07:00"
+    validatedAt: "2026-06-27T09:27:05-07:00"
+    reviewedAt: "2026-06-27T09:27:05-07:00"
+    closedAt: "2026-06-27T09:27:05-07:00"
+    branch: codex/provider-smoke-rollup-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      providerSmokeResultRollup: approved_from_existing_evidence_only
+      approvalTextAuthoring: approved
+      envSecretRead: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      costCalibrationExecution: blocked
+      sourceOrTestChange: blocked
+      scriptChange: blocked
+      packageLockfileChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    redaction:
+      allowedEvidenceFields:
+        - public_task_ids
+        - provider_label_from_existing_evidence
+        - provider_name_from_existing_evidence
+        - model_label_from_existing_evidence
+        - base_url_host_from_existing_evidence
+        - pass_fail_blocked_status
+        - counts_from_existing_evidence
+        - cap_status
+        - redaction_status
+        - forbidden_action_checklist
+        - future_approval_text
+      forbiddenEvidenceFields:
+        - env_file_content
+        - secret_value
+        - token_value
+        - credential_value
+        - db_url
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - provider_payload
+        - raw_provider_error_body
+        - raw_provider_error_message
+        - raw_generated_ai_content
+        - full_paper_material_content
+        - db_row
+        - sql_output
+        - screenshot_trace_cookie_localstorage
+    riskTypes:
+      - docs_state_rollup
+      - layer_3_provider_status_rollup
+      - cost_calibration_blocked_gate_preservation
+      - no_provider_call
+      - no_env_secret_read
+      - no_database_connection
+      - no_browser_runtime
+      - no_source_test_script_package_change
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    validationSummary:
+      providerSmokeRollup: pass_openai_compatible_dashscope_qwen37max
+      providerCallExecutedByThisTask: false
+      envSecretReadByThisTask: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      ocrExportExecuted: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 40
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - provider_call_or_retry
+      - env_file_read_or_alias_loader
+      - provider_credential_value_output
+      - provider_configuration_change_or_fallback_path
+      - raw_error_prompt_response_payload_or_secret_inspection
+      - cost_calibration_execution
+      - source_or_test_script_package_lockfile_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27
