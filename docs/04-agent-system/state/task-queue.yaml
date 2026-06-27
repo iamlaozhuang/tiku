@@ -5341,11 +5341,17 @@ tasks:
     validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
     taskKind: high_risk_staging_pre_release_execution
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: blocked_missing_concrete_isolated_staging_target_no_staging_action
     approvedAt: "2026-06-27T10:10:52-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_staging_pre_release_boundary_2026_06_27
+    claimedAt: "2026-06-27T10:33:34-07:00"
+    plannedAt: "2026-06-27T10:33:34-07:00"
+    implementedAt: "2026-06-27T10:33:34-07:00"
+    validatedAt: "2026-06-27T10:33:34-07:00"
+    reviewedAt: "2026-06-27T10:33:34-07:00"
+    closedAt: "2026-06-27T10:33:34-07:00"
     branch: codex/staging-pre-release-execution-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -5447,6 +5453,12 @@ tasks:
       requiredRegisteredTargetStatus: exactly_one_isolated_staging_url_or_deploy_target
       currentKnownTargetStatusFromPackage: missing_concrete_isolated_staging_target
       defaultIfTargetMissing: blocked_evidence_closeout_only
+      executionResult: blocked_missing_concrete_isolated_staging_target_no_staging_action
+      targetRegistrationStatus: missing_concrete_isolated_staging_target
+      deployOrSmokeExecuted: false
+      requestOrCommandCount: 0
+      redactionStatus: passed
+      successorRollupTask: layer-3-staging-pre-release-rollup-2026-06-27
       prodBoundary: forbidden
       noProdDataBoundary: true
       stopConditions:
@@ -5486,6 +5498,186 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    validationSummary:
+      taskPlanPrepared: true
+      targetPreflightExecuted: true
+      targetPreflightResult: blocked_missing_concrete_isolated_staging_target
+      stagingDeployOrSmokeExecuted: false
+      stagingDeployOrSmokeCount: 0
+      stagingTargetCount: 0
+      providerCallExecuted: false
+      providerCallCount: 0
+      providerRetryCount: 0
+      costCalibrationExecuted: false
+      envSecretReadOrOutput: false
+      dbConnectionExecuted: false
+      browserRuntimeExecuted: false
+      e2eRuntimeExecuted: false
+      screenshotTraceCookieLocalStorageEvidence: false
+      sourceOrTestChanged: false
+      scriptPackageLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      prodDeployExecuted: false
+      productionDataAccessed: false
+      paymentExternalServiceTouched: false
+      ocrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_next_executable_task_seeded_close_current_changes_first
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_blocked_evidence_closeout
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+
+  - id: layer-3-staging-pre-release-rollup-2026-06-27
+    title: Layer 3 staging pre-release rollup
+    phase: layer-3-staging-pre-release-rollup-2026-06-27
+    sourceStory: layer-3-staging-pre-release-redacted-execution-2026-06-27
+    dependencies:
+      - layer-3-staging-pre-release-redacted-execution-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      This docs/state-only rollup may refresh Layer 3 staging/pre-release status after the staging execution task. It
+      may update only project state, task queue, and task plan/evidence/audit/acceptance documents. It must not execute
+      staging/prod/deploy, connect to DB, open .env*, read credentials, call Providers, execute Cost Calibration, run
+      browser/dev-server/e2e, mutate runtime data, modify source/tests/scripts/package/lockfiles/schema/migration/seed,
+      touch payment/external-service, execute OCR/export, move archive/index entries, create PRs, force push, or claim
+      release readiness/final Pass.
+    targetClosureItem: Layer 3 staging/pre-release rollup after blocked target preflight
+    behaviorBoundary: docs_state::staging_pre_release_rollup_no_execution_no_final_pass
+    executionProfile: docs_state_staging_pre_release_rollup
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_rollup
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-27T10:10:52-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    branch: codex/staging-pre-release-rollup-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      stagingPreReleaseEvidenceRollup: approved
+      successorPaymentExternalServiceApprovalPackageRegistration: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      stagingPreReleaseExecution: blocked
+      prodDeployExecution: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      costCalibrationExecution: blocked
+      databaseConnection: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      paymentExternalServiceExecution: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-rollup.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-rollup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-rollup.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-rollup.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    caps:
+      stagingExecutionByThisTask: 0
+      deployOrSmokeByThisTask: 0
+      providerCallsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      archiveIndexMovesByThisTask: 0
+      successorApprovalPackageRegistration: 1
+    redaction:
+      evidenceAllowedFields:
+        - sourceTaskId
+        - stagingTargetRegistrationStatus
+        - deployOrSmokeExecuted
+        - requestOrCommandCount
+        - passFailBlocked
+        - capStatus
+        - redactionStatus
+        - stopCondition
+        - forbiddenActionChecklist
+      forbiddenEvidence:
+        - env_file_content
+        - secret
+        - token
+        - database_url
+        - provider_credential
+        - authorization_header
+        - raw_request
+        - raw_response
+        - raw_log
+        - raw_page_text
+        - raw_prompt
+        - raw_provider_payload
+        - raw_generated_ai_content
+        - full_paper_or_material_content
+        - screenshot
+        - trace
+        - cookie
+        - local_storage
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-rollup.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-rollup.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-rollup.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-staging-pre-release-rollup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-staging-pre-release-rollup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-staging-pre-release-rollup-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-rollup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-rollup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-rollup.md
 
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
