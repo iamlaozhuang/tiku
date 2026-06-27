@@ -44,6 +44,175 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: organization-analytics-ux-design-first-package-2026-06-27
+    title: Organization analytics UX design-first package
+    phase: organization-analytics-ux-design-first-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - formal-publish-local-execution-one-draft-paper-2026-06-27
+    taskKind: docs_state_ux_design_first_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_design_package_no_source_no_browser
+    evidenceMode: redacted_design_boundary_and_followup_split
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Prepare the organization analytics UX design-first package, decide source/UI/browser validation sequencing, and
+      create blocked follow-up task boundaries without implementing source, UI, DB, browser/e2e, Provider, staging/prod,
+      payment, external service, release readiness, or final Pass.
+    status: closed
+    result: pass_design_first_package_source_ui_browser_followups_blocked
+    approvedAt: "2026-06-27T01:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      scope: docs_state_ux_design_package_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T01:00:00-07:00"
+    plannedAt: "2026-06-27T01:00:00-07:00"
+    validatedAt: "2026-06-27T01:10:00-07:00"
+    reviewedAt: "2026-06-27T01:10:00-07:00"
+    closedAt: "2026-06-27T01:10:00-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state_design_first_package
+      - organization_analytics_privacy_boundary
+      - followup_task_split
+    designDecision:
+      uxClassification: second_layer_enhancement_for_current_ai_generation_closure
+      requiredWhen: employee_visible_organization_training_needs_admin_oversight
+      sourceTdd: required_next
+      uiImplementation: required_after_source_contract
+      browserValidation: deferred_requires_fresh_local_runtime_approval
+    followUpBoundaryTasks:
+      - organization-analytics-redacted-statistics-source-contract-tdd-approval-2026-06-27
+      - organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+      - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-ux-design-first-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-ux-design-first-package-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+    branch: codex/org-analytics-ux-design-package-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+
+  - id: organization-analytics-redacted-statistics-source-contract-tdd-approval-2026-06-27
+    title: Organization analytics redacted statistics source contract TDD approval
+    phase: organization-analytics-ux-design-first-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - organization-analytics-ux-design-first-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: source_contract_unit_tests_allowed_files_no_db_browser
+    boundary: redacted_organization_analytics_dto_role_scope_no_raw_content
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - databaseConnection
+      - browserRuntime
+
+  - id: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+    title: Organization analytics admin UI implementation local validation approval
+    phase: organization-analytics-ux-design-first-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - organization-analytics-redacted-statistics-source-contract-tdd-approval-2026-06-27
+    taskKind: ui_implementation_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_ui_implementation_approval
+    nextApprovalRequired: ui_source_allowed_files_component_tests_local_validation
+    boundary: organization_admin_desktop_analytics_surface_after_source_contract
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - browserRuntime
+      - databaseConnection
+
+  - id: organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+    title: Organization analytics local browser smoke validation approval
+    phase: organization-analytics-ux-design-first-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+    taskKind: browser_validation_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_local_browser_smoke_approval
+    nextApprovalRequired: dev_server_local_account_seed_or_fixture_and_browser_scope
+    boundary: local_only_browser_smoke_after_source_ui_exist_no_staging_prod
+    blockedCapabilities:
+      - browserRuntime
+      - devServer
+      - e2eRuntime
+      - databaseConnection
+
   - id: formal-publish-local-execution-one-draft-paper-2026-06-27
     title: Formal publish local execution for one copied draft paper
     phase: formal-publish-local-execution-one-draft-paper-2026-06-27

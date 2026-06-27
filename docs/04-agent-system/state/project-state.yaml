@@ -501,36 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 141d02bd7f43ac1b02498293f1224955251c7634
-  lastKnownOriginMasterSha: 141d02bd7f43ac1b02498293f1224955251c7634
+  lastKnownMasterSha: 7c4a013ef8a3a00c27a9acd27afd8919ef493826
+  lastKnownOriginMasterSha: 7c4a013ef8a3a00c27a9acd27afd8919ef493826
 currentTask:
-  id: formal-publish-local-execution-one-draft-paper-2026-06-27
+  id: organization-analytics-ux-design-first-package-2026-06-27
   status: closed
-  result: pass_local_copy_one_publish_archive_execution_archived_no_runtime_final_pass
-  claimedAt: "2026-06-27T00:40:00-07:00"
-  plannedAt: "2026-06-27T00:40:00-07:00"
-  validatedAt: "2026-06-27T00:50:00-07:00"
-  reviewedAt: "2026-06-27T00:50:00-07:00"
-  closedAt: "2026-06-27T00:50:00-07:00"
+  result: pass_design_first_package_source_ui_browser_followups_blocked
+  claimedAt: "2026-06-27T01:00:00-07:00"
+  plannedAt: "2026-06-27T01:00:00-07:00"
+  validatedAt: "2026-06-27T01:10:00-07:00"
+  reviewedAt: "2026-06-27T01:10:00-07:00"
+  closedAt: "2026-06-27T01:10:00-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
-  branch: codex/formal-publish-local-execution-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+  branch: codex/org-analytics-ux-design-package-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    batchExecutionPackagePrepared: false
-    followUpTaskBoundariesCreated: false
+    batchExecutionPackagePrepared: true
+    followUpTaskBoundariesCreated: true
     localSourceChange: false
     focusedUnitTest: false
     testsOrE2eChange: false
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: true
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
@@ -540,25 +540,22 @@ currentTask:
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    formalQuestionOrPaperWrite: local_copied_paper_only
-    formalPublish: local_max_one_call_consumed
+    formalQuestionOrPaperWrite: false
+    formalPublish: false
     studentVisibleContent: false
     stagingProdDeploy: false
     paymentExternalService: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    docsOnlyApprovalPackage: false
-    publishTargetSelection: copy_named_published_local_sample_to_draft
-    sourcePaperPublicId: paper-de7955bc-d827-4b23-bbf6-8bae5e14fe6b
-    targetDraftPublicId: paper-989beac0-471f-493e-ad83-26cef5461a92
-    publishCallBudget: 1
-    publishCallCount: 1
-    rollbackStrategy: archived_copied_published_paper_after_evidence
-    finalTargetPaperStatus: archived
-    studentVisibleRuntimeVerification: blocked
+    docsOnlyApprovalPackage: true
+    organizationAnalyticsUxClassification: second_layer_enhancement_for_current_ai_generation_closure
+    futureTrainingClosureRequirement: required_when_employee_visible_org_training_needs_admin_oversight
+    sourceTddDecision: required_next_for_redacted_contract_and_org_scope
+    uiImplementationDecision: required_after_source_contract
+    browserValidationDecision: deferred_requires_fresh_local_runtime_approval
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    implementationStillBlocked: false
+    implementationStillBlocked: true
     localCommitApproved: true
     mergePushCleanupApproved: true
     mergePushCleanupApprovalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
@@ -587,12 +584,12 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: false
-    followUpTasksRecordedAsBlocked: false
+    followUpTasksRecordedAsBlocked: true
     mechanismScriptSmoke: not_applicable
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
-    liveDatabaseConnectionExecuted: true
-    databaseWriteExecuted: true
+    liveDatabaseConnectionExecuted: false
+    databaseWriteExecuted: false
     routeSmokeExecuted: false
     providerCallExecuted: false
     providerCallCount: 0
@@ -602,8 +599,8 @@ currentTask:
     reviewAdoptionMutationExecuted: false
     batchAdoptionRetryDiffExecuted: false
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
-    formalPublishExecuted: true
-    formalPublishCallCount: 1
+    formalPublishExecuted: false
+    formalPublishCallCount: 0
     studentVisibleContentExecuted: false
     finalPassClaimed: false
     prettierScoped: pass
@@ -611,7 +608,38 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: organization-admin-ai-usage-statistics-ux-design-first-package-2026-06-27
+  nextRecommendedTask: content-admin-review-ux-design-first-traceability-package-2026-06-27
+organizationAnalyticsUxDesignFirstPackage20260627:
+  taskId: organization-analytics-ux-design-first-package-2026-06-27
+  phase: organization-analytics-ux-design-first-package-2026-06-27
+  recordedAt: "2026-06-27T01:00:00-07:00"
+  status: closed
+  result: pass_design_first_package_source_ui_browser_followups_blocked
+  validatedAt: "2026-06-27T01:10:00-07:00"
+  reviewedAt: "2026-06-27T01:10:00-07:00"
+  closedAt: "2026-06-27T01:10:00-07:00"
+  branch: codex/org-analytics-ux-design-package-20260627
+  approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-ux-design-first-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-ux-design-first-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-ux-design-first-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-ux-design-first-package.md
+  decision:
+    organizationAnalyticsUxClassification: second_layer_enhancement_for_current_ai_generation_closure
+    futureTrainingClosureRequirement: required_when_employee_visible_org_training_needs_admin_oversight
+    sourceTddDecision: required_next_for_redacted_contract_and_org_scope
+    uiImplementationDecision: required_after_source_contract
+    browserValidationDecision: deferred_requires_fresh_local_runtime_approval
+  followUpBoundaryTasks:
+    - organization-analytics-redacted-statistics-source-contract-tdd-approval-2026-06-27
+    - organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+    - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+  validationSummary:
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    moduleRunV2PrePushReadiness: pass
 formalPublishLocalExecutionOneDraftPaper20260627:
   taskId: formal-publish-local-execution-one-draft-paper-2026-06-27
   phase: formal-publish-local-execution-one-draft-paper-2026-06-27
