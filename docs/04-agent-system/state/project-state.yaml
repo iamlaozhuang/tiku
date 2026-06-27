@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
-updatedAt: "2026-06-27T00:15:48-07:00"
+currentPhase: content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
+updatedAt: "2026-06-27T01:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,32 +504,33 @@ repository:
   lastKnownMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
   lastKnownOriginMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
 currentTask:
-  id: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+  id: content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
   status: closed
-  result: constrained_partial_browser_smoke_redirected_to_login_no_credential_scope
-  claimedAt: "2026-06-27T00:15:48-07:00"
-  plannedAt: "2026-06-27T00:15:48-07:00"
-  implementedAt: "2026-06-27T00:29:45-07:00"
-  validatedAt: "2026-06-27T00:29:45-07:00"
-  reviewedAt: "2026-06-27T00:35:10-07:00"
-  closedAt: "2026-06-27T00:35:10-07:00"
-  sourceStory: current_user_serial_tasks_1_and_2_2026_06_27
-  approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-local-browser-smoke-validation.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-local-browser-smoke-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-local-browser-smoke-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-local-browser-smoke-validation.md
-  branch: codex/content-admin-local-browser-smoke-20260627
+  result: pass_credentialed_browser_smoke_scope_prepared_no_runtime_executed
+  claimedAt: "2026-06-27T01:10:00-07:00"
+  plannedAt: "2026-06-27T01:10:00-07:00"
+  implementedAt: "2026-06-27T01:10:00-07:00"
+  validatedAt: "2026-06-27T01:10:00-07:00"
+  reviewedAt: "2026-06-27T01:10:00-07:00"
+  closedAt: "2026-06-27T01:10:00-07:00"
+  sourceStory: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+  approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+  branch: codex/content-admin-credentialed-browser-scope-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    browserRuntime: true
-    devServer: true
+    credentialedBrowserScopeApproval: true
+    browserRuntime: false
+    devServer: false
     localhostOnly: true
     routeSmokeTarget:
       - /content/ai-question-generation
       - /content/ai-paper-generation
-    taskPacketNormalization: false
+    taskPacketNormalization: true
     sourceContractChange: false
     serviceSourceChange: false
     uiSourceChange: false
@@ -542,6 +543,8 @@ currentTask:
     schemaMigrationExecuted: false
     e2eRuntime: false
     credentialOrEnvRead: false
+    credentialReadApprovedForNextTask: true
+    credentialEvidenceRedacted: true
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -554,7 +557,8 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    task2BrowserSmoke: local_browser_dev_server_smoke_content_admin_only
+    credentialedBrowserSmokeScope: approved_for_next_task_localhost_only
+    credentialReadAndFillDecision: approved_for_local_login_only_redacted
     routeCorrection: next_route_group_admin_segment_not_in_url
     historyMutationDecision: blocked_requires_separate_approval
     formalPublishDecision: blocked_requires_separate_approval
@@ -568,23 +572,23 @@ currentTask:
     providerCallDecision: blocked
     implementationStillBlocked: false
     localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+    mergePushCleanupApproved: false
+    mergePushCleanupApprovalSource: fresh_approval_required_before_remote_closeout
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+      approvalSource: current_user_credentialed_content_admin_browser_smoke_2026_06_27
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+      approvalSource: fresh_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+      approvalSource: fresh_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+      deleteShortBranch: false
+      approvalSource: fresh_approval_required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -602,9 +606,9 @@ currentTask:
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
-    routeSmokeExecuted: true
-    browserSmokeExecuted: true
-    browserSmokeResult: constrained_partial_redirected_to_login
+    routeSmokeExecuted: false
+    browserSmokeExecuted: false
+    browserSmokeResult: not_executed_scope_only
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -622,9 +626,9 @@ currentTask:
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_wait_for_instruction
-    moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: null
+    projectStatusDiagnostic: pending_after_scope_commit
+    moduleRunV2PrePushReadiness: not_applicable_no_push_approval
+  nextRecommendedTask: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

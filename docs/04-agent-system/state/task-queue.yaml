@@ -1387,6 +1387,278 @@ tasks:
       - databaseMutation
       - formalPublishStudentVisibleContent
 
+  - id: content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
+    title: Content-admin review credentialed Browser smoke scope approval
+    phase: content-admin-review-credentialed-browser-smoke-2026-06-27
+    sourceStory: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+    dependencies:
+      - content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+    taskKind: docs_state_runtime_scope_approval
+    moduleRunVersion: 2
+    executionProfile: docs_state_credentialed_browser_scope_approval_no_runtime
+    evidenceMode: redacted_scope_approval_only
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_credentialed_browser_smoke_2026_06_27
+    requiredOutcome: >-
+      Prepare the credentialed content-admin local Browser smoke scope before any browser rerun. Record that the user
+      explicitly approved credential read and fill for localhost login only, while evidence must not contain credentials,
+      tokens, Authorization headers, raw page text, screenshots, DB rows, Provider payloads, prompts, generated output,
+      or mutation artifacts.
+    status: closed
+    result: pass_credentialed_browser_smoke_scope_prepared_no_runtime_executed
+    approvedAt: "2026-06-27T01:10:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
+      scope: localhost_content_admin_login_credential_read_fill_scope_package_only_no_runtime
+    claimedAt: "2026-06-27T01:10:00-07:00"
+    plannedAt: "2026-06-27T01:10:00-07:00"
+    implementedAt: "2026-06-27T01:10:00-07:00"
+    validatedAt: "2026-06-27T01:10:00-07:00"
+    reviewedAt: "2026-06-27T01:10:00-07:00"
+    closedAt: "2026-06-27T01:10:00-07:00"
+    nextApprovalRequired: none_for_task_2_localhost_credentialed_browser_rerun
+    boundary: docs_state_scope_only_no_browser_runtime_no_credential_value_read
+    localFullLoopGate: L0
+    targetRoute:
+      - /content/ai-question-generation
+      - /content/ai-paper-generation
+    approvedNextTask:
+      taskId: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
+      browserRuntime: approved_localhost_only
+      credentialReadAndFill: approved_localhost_login_only
+      loginSessionSideEffect: approved_local_auth_session_only
+      directDatabaseConnection: blocked
+      productMutation: blocked
+      providerCall: blocked
+      publish: blocked
+      evidenceMode: redacted_summary_only
+    capabilities:
+      docsStateEvidenceAudit: approved
+      credentialScopeApproval: approved
+      browserRuntime: blocked_scope_task_only
+      credentialRead: blocked_scope_task_only
+      credentialFill: blocked_scope_task_only
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      e2eRuntime: blocked
+      directDatabaseConnection: blocked
+      directDatabaseReadWrite: blocked
+      productMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerPayloadAccess: blocked
+      costCalibrationGate: blocked
+      formalPublishStudentVisibleContent: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - credential_scope_approval
+      - local_browser_smoke_validation
+      - localhost_only
+      - content_admin_review
+      - redacted_evidence
+      - no_source_change
+      - no_db_direct_access
+      - no_provider
+      - no_product_mutation
+      - no_publish
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+    branch: codex/content-admin-credentialed-browser-scope-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required
+    blockedCapabilities:
+      - sourceChange
+      - e2eRuntime
+      - directDatabaseConnection
+      - productMutation
+      - providerCall
+      - formalPublishStudentVisibleContent
+
+  - id: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
+    title: Content-admin review credentialed Browser smoke rerun
+    phase: content-admin-review-credentialed-browser-smoke-2026-06-27
+    sourceStory: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+    dependencies:
+      - content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
+    taskKind: local_browser_smoke_validation
+    moduleRunVersion: 2
+    executionProfile: local_credentialed_browser_smoke_content_admin_only
+    evidenceMode: redacted_browser_smoke_summary_only
+    validationPolicy: credentialed_browser_smoke_docs_prettier_diff_module_run_v2
+    queueSelectionMode: current_user_directed_credentialed_browser_smoke_2026_06_27
+    requiredOutcome: >-
+      Use the approved local content-admin credentials only for localhost login, then revisit the two content admin AI
+      generation routes and verify whether batch/retry/diff/history UI is visible, console errors are absent, and
+      mutation controls remain disabled or read-only. If a UI or permission issue is found, seed a separate scoped repair
+      task instead of changing source in this task.
+    status: pending
+    result: pending_credentialed_browser_smoke_rerun
+    approvedAt: "2026-06-27T01:10:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
+      scope: localhost_content_admin_login_browser_rerun_redacted_evidence
+    claimedAt: null
+    plannedAt: null
+    implementedAt: null
+    validatedAt: null
+    reviewedAt: null
+    closedAt: null
+    nextApprovalRequired: none_localhost_content_admin_credentialed_browser_only
+    boundary: local_browser_only_content_admin_review_no_source_no_e2e_no_direct_db_no_provider_no_product_mutation
+    localFullLoopGate: L5
+    targetRoute:
+      - /content/ai-question-generation
+      - /content/ai-paper-generation
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_only
+      devServer: approved_existing_project_script_or_existing_current_repo_server
+      credentialRead: approved_local_content_admin_login_only
+      credentialFill: approved_localhost_login_only
+      loginSessionSideEffect: approved_local_auth_session_only
+      localCommit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      e2eRuntime: blocked
+      directDatabaseConnection: blocked
+      directDatabaseReadWrite: blocked
+      productMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerPayloadAccess: blocked
+      costCalibrationGate: blocked
+      formalPublishStudentVisibleContent: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-repair-seed.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-repair-seed.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-repair-seed.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-repair-seed.md
+    readOnlyCredentialSources:
+      - user_current_browser_login_form
+      - approved_local_private_credential_handoff_outside_repo
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - credentialed_local_browser_smoke
+      - localhost_only
+      - content_admin_review
+      - redacted_evidence
+      - no_source_change
+      - no_e2e
+      - no_direct_db
+      - no_provider
+      - no_product_mutation
+      - no_publish
+    validationCommands:
+      - Browser plugin localhost credentialed smoke for /content/ai-question-generation and /content/ai-paper-generation
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+    branch: codex/content-admin-credentialed-browser-scope-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_credentialed_content_admin_browser_smoke_2026_06_27
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required
+    blockedCapabilities:
+      - sourceChange
+      - e2eRuntime
+      - directDatabaseConnection
+      - productMutation
+      - providerCall
+      - formalPublishStudentVisibleContent
+
   - id: organization-analytics-ux-design-first-package-2026-06-27
     title: Organization analytics UX design-first package
     phase: organization-analytics-ux-design-first-package-2026-06-27
