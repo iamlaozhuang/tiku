@@ -26,6 +26,18 @@ type GuardedFixtureFields = {
   guardedMarkerEight: string;
 };
 
+const expectedRedactedStatisticsBoundary = {
+  visibilityScope: "organization_admin_own_scope",
+  trainingStatisticsPolicy: "summary_counts_score_time_only",
+  employeeStatisticsPolicy: "status_score_time_only",
+  rawEmployeeAnswerPolicy: "blocked",
+  rawAiGeneratedContentPolicy: "blocked",
+  promptProviderPayloadPolicy: "blocked",
+  exportPolicy: "blocked_requires_fresh_approval",
+  crossOrganizationAnalyticsPolicy: "blocked",
+  redactionStatus: "redacted_boundary",
+} as const;
+
 function createFormalLearningSummaryFixture(guardedMarker: string) {
   return {
     formalPracticeCount: 7,
@@ -324,6 +336,7 @@ describe("organization analytics dashboard service", () => {
           quotaRemainingPoint: 823,
           redactionStatus: "summary_only",
         },
+        redactedStatisticsBoundary: expectedRedactedStatisticsBoundary,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T08:15:00Z",
       },
@@ -535,6 +548,7 @@ describe("organization analytics employee statistics service", () => {
             redactionStatus: "summary_only",
           },
         ],
+        redactedStatisticsBoundary: expectedRedactedStatisticsBoundary,
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T08:15:00Z",
       },

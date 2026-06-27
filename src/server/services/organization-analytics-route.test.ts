@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createSuccessResponse } from "../contracts/api-response";
-import type {
-  OrganizationAnalyticsDashboardSummaryDto,
-  OrganizationAnalyticsDateRangeDto,
-  OrganizationAnalyticsEmployeeStatisticsSummaryDto,
+import {
+  createOrganizationAnalyticsRedactedStatisticsBoundary,
+  type OrganizationAnalyticsDashboardSummaryDto,
+  type OrganizationAnalyticsDateRangeDto,
+  type OrganizationAnalyticsEmployeeStatisticsSummaryDto,
 } from "../contracts/organization-analytics-contract";
 import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
 import type { RuntimeDatabase } from "../repositories/runtime-database";
@@ -85,6 +86,8 @@ function createDashboardSummary(
     },
     formalLearningSummary: createFormalLearningSummaryFixture(),
     quotaSummary: createQuotaSummaryFixture(),
+    redactedStatisticsBoundary:
+      createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "aggregate_only",
     updatedAt: "2026-06-16T08:00:00.000Z",
   };
@@ -121,6 +124,8 @@ function createEmployeeStatisticsSummary(
         redactionStatus: "summary_only",
       },
     ],
+    redactedStatisticsBoundary:
+      createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "summary_only",
     updatedAt: "2026-06-16T08:30:00.000Z",
   };

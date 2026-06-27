@@ -2,29 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import * as organizationAnalyticsContract from "./organization-analytics-contract";
 
-type DashboardRouteResponseFactory = (data: {
-  organizationPublicId: string;
-  scopeOrganizationPublicIds: readonly string[];
-  dateRange: {
-    startAt: string;
-    endAt: string;
-  };
-  trainingSummary: {
-    eligibleEmployeeCount: number;
-    submittedEmployeeCount: number;
-    unfinishedEmployeeCount: number;
-    completionRate: number;
-    averageScore: number | null;
-    maxScore: number | null;
-    minScore: number | null;
-    submittedTrend: readonly { date: string; submittedCount: number }[];
-  };
-  redactionStatus: "aggregate_only";
-  updatedAt: string;
-}) => unknown;
-
 type ContractExports = typeof organizationAnalyticsContract & {
-  createOrganizationAnalyticsDashboardRouteResponse?: DashboardRouteResponseFactory;
+  createOrganizationAnalyticsDashboardRouteResponse?: typeof organizationAnalyticsContract.createOrganizationAnalyticsDashboardRouteResponse;
 };
 
 describe("organization analytics route contract", () => {
@@ -58,6 +37,8 @@ describe("organization analytics route contract", () => {
         },
         formalLearningSummary: null,
         quotaSummary: null,
+        redactedStatisticsBoundary:
+          organizationAnalyticsContract.createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
       });
@@ -91,5 +72,24 @@ describe("organization analytics route contract", () => {
       "scopeOrganizationPublicIds",
     );
     expect(JSON.stringify(response)).not.toContain("organization_public_child");
+    expect(JSON.stringify(response)).not.toContain(
+      "redactedStatisticsBoundary",
+    );
+  });
+
+  it("creates a redacted statistics boundary contract for internal summaries", () => {
+    expect(
+      organizationAnalyticsContract.createOrganizationAnalyticsRedactedStatisticsBoundary(),
+    ).toEqual({
+      visibilityScope: "organization_admin_own_scope",
+      trainingStatisticsPolicy: "summary_counts_score_time_only",
+      employeeStatisticsPolicy: "status_score_time_only",
+      rawEmployeeAnswerPolicy: "blocked",
+      rawAiGeneratedContentPolicy: "blocked",
+      promptProviderPayloadPolicy: "blocked",
+      exportPolicy: "blocked_requires_fresh_approval",
+      crossOrganizationAnalyticsPolicy: "blocked",
+      redactionStatus: "redacted_boundary",
+    });
   });
 });

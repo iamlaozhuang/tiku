@@ -3,16 +3,17 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import type {
-  OrganizationAnalyticsAuditLogReferenceAction,
-  OrganizationAnalyticsAuditLogReferenceDto,
-  OrganizationAnalyticsDashboardSummaryDto,
-  OrganizationAnalyticsDateRangeDto,
-  OrganizationAnalyticsEmployeeStatisticsSummaryDto,
-  OrganizationAnalyticsExportReadinessSummaryDto,
-  OrganizationAnalyticsExportScope,
-  OrganizationAnalyticsFormalLearningSummaryDto,
-  OrganizationAnalyticsQuotaSummaryDto,
+import {
+  createOrganizationAnalyticsRedactedStatisticsBoundary,
+  type OrganizationAnalyticsAuditLogReferenceAction,
+  type OrganizationAnalyticsAuditLogReferenceDto,
+  type OrganizationAnalyticsDashboardSummaryDto,
+  type OrganizationAnalyticsDateRangeDto,
+  type OrganizationAnalyticsEmployeeStatisticsSummaryDto,
+  type OrganizationAnalyticsExportReadinessSummaryDto,
+  type OrganizationAnalyticsExportScope,
+  type OrganizationAnalyticsFormalLearningSummaryDto,
+  type OrganizationAnalyticsQuotaSummaryDto,
 } from "../contracts/organization-analytics-contract";
 import {
   createOrganizationAnalyticsAuditLogRedactedReference,
@@ -215,6 +216,8 @@ export function buildOrganizationAnalyticsDashboardSummary(
       command.formalLearningSummary,
     ),
     quotaSummary: createQuotaSummary(command.quotaSummary),
+    redactedStatisticsBoundary:
+      createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "aggregate_only",
     updatedAt: command.updatedAt,
   });
@@ -359,6 +362,8 @@ export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
     dateRange: command.dateRange,
     employeeCount: employees.length,
     employees,
+    redactedStatisticsBoundary:
+      createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "summary_only",
     updatedAt: command.updatedAt,
   });

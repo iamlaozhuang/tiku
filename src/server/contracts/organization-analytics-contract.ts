@@ -39,6 +39,18 @@ export type OrganizationAnalyticsQuotaSummaryDto = {
   redactionStatus: "summary_only";
 };
 
+export type OrganizationAnalyticsRedactedStatisticsBoundaryDto = {
+  visibilityScope: "organization_admin_own_scope";
+  trainingStatisticsPolicy: "summary_counts_score_time_only";
+  employeeStatisticsPolicy: "status_score_time_only";
+  rawEmployeeAnswerPolicy: "blocked";
+  rawAiGeneratedContentPolicy: "blocked";
+  promptProviderPayloadPolicy: "blocked";
+  exportPolicy: "blocked_requires_fresh_approval";
+  crossOrganizationAnalyticsPolicy: "blocked";
+  redactionStatus: "redacted_boundary";
+};
+
 export type OrganizationAnalyticsAnswerOrganizationSnapshotDto = {
   organizationPublicId: string;
   organizationName: string;
@@ -66,13 +78,14 @@ export type OrganizationAnalyticsEmployeeStatisticsSummaryDto = {
   dateRange: OrganizationAnalyticsDateRangeDto;
   employeeCount: number;
   employees: OrganizationAnalyticsEmployeeTrainingSummaryDto[];
+  redactedStatisticsBoundary: OrganizationAnalyticsRedactedStatisticsBoundaryDto;
   redactionStatus: "summary_only";
   updatedAt: string;
 };
 
 export type OrganizationAnalyticsEmployeeStatisticsRouteDto = Omit<
   OrganizationAnalyticsEmployeeStatisticsSummaryDto,
-  "scopeOrganizationPublicIds"
+  "scopeOrganizationPublicIds" | "redactedStatisticsBoundary"
 >;
 
 export type OrganizationAnalyticsEmployeeStatisticsRouteResponse =
@@ -147,13 +160,14 @@ export type OrganizationAnalyticsDashboardSummaryDto = {
   trainingSummary: OrganizationTrainingAggregateMetricsDto;
   formalLearningSummary: OrganizationAnalyticsFormalLearningSummaryDto | null;
   quotaSummary: OrganizationAnalyticsQuotaSummaryDto | null;
+  redactedStatisticsBoundary: OrganizationAnalyticsRedactedStatisticsBoundaryDto;
   redactionStatus: "aggregate_only";
   updatedAt: string;
 };
 
 export type OrganizationAnalyticsDashboardRouteDto = Omit<
   OrganizationAnalyticsDashboardSummaryDto,
-  "scopeOrganizationPublicIds"
+  "scopeOrganizationPublicIds" | "redactedStatisticsBoundary"
 >;
 
 export type OrganizationAnalyticsDashboardRouteResponse =
@@ -191,6 +205,20 @@ function createQuotaSummaryRouteDto(
       summary.organizationTrainingGenerationConsumedPoint,
     quotaRemainingPoint: summary.quotaRemainingPoint,
     redactionStatus: summary.redactionStatus,
+  };
+}
+
+export function createOrganizationAnalyticsRedactedStatisticsBoundary(): OrganizationAnalyticsRedactedStatisticsBoundaryDto {
+  return {
+    visibilityScope: "organization_admin_own_scope",
+    trainingStatisticsPolicy: "summary_counts_score_time_only",
+    employeeStatisticsPolicy: "status_score_time_only",
+    rawEmployeeAnswerPolicy: "blocked",
+    rawAiGeneratedContentPolicy: "blocked",
+    promptProviderPayloadPolicy: "blocked",
+    exportPolicy: "blocked_requires_fresh_approval",
+    crossOrganizationAnalyticsPolicy: "blocked",
+    redactionStatus: "redacted_boundary",
   };
 }
 
