@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-archive-apply-2026-06-27
-updatedAt: "2026-06-27T02:14:24-07:00"
+currentPhase: stopped-automation-hygiene-cleanup-2026-06-27
+updatedAt: "2026-06-27T02:22:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,34 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6f3a9d576087115da84eeee3812a13c35e3b9379
-  lastKnownOriginMasterSha: 6f3a9d576087115da84eeee3812a13c35e3b9379
+  lastKnownMasterSha: 3fd41a24c1988bb3b721e41a71680e9a546e68b2
+  lastKnownOriginMasterSha: 3fd41a24c1988bb3b721e41a71680e9a546e68b2
 currentTask:
-  id: active-queue-slimming-archive-apply-2026-06-27
+  id: stopped-automation-hygiene-cleanup-2026-06-27
   status: closed
-  result: pass_archived_terminal_history_to_june_archive_and_index
-  claimedAt: "2026-06-27T02:01:57-07:00"
-  plannedAt: "2026-06-27T02:01:57-07:00"
-  implementedAt: "2026-06-27T02:01:57-07:00"
-  validatedAt: "2026-06-27T02:06:58-07:00"
-  reviewedAt: "2026-06-27T02:06:58-07:00"
-  closedAt: "2026-06-27T02:06:58-07:00"
-  sourceStory: current_user_archive_index_write_and_terminal_task_movement_approval_2026_06_27
-  approvalSource: current_user_archive_index_write_and_terminal_task_movement_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-apply.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-apply.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-apply.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-apply.md
-  branch: codex/active-queue-slimming-archive-20260627
+  result: pass_stopped_automation_hygiene_cleanup
+  claimedAt: "2026-06-27T02:22:45-07:00"
+  plannedAt: "2026-06-27T02:22:45-07:00"
+  implementedAt: "2026-06-27T02:24:50-07:00"
+  validatedAt: "2026-06-27T02:24:58-07:00"
+  reviewedAt: "2026-06-27T02:25:14-07:00"
+  closedAt: "2026-06-27T02:25:14-07:00"
+  sourceStory: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
+  approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-stopped-automation-hygiene-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
+  branch: codex/stopped-automation-hygiene-cleanup-20260627
   scope:
     docsStateEvidenceAudit: true
     queueSlimmingDiagnostic: true
-    terminalTaskMovement: true
-    archiveFileWrite: true
-    taskHistoryIndexWrite: true
-    archiveApplyExecuted: true
-    queueEntryMovementExecuted: true
-    terminalTaskBlocksMoved: 216
+    stoppedAutomationHygieneCleanup: true
+    cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+    cleanupMode: script_guarded_cleanup_only
+    cleanupCandidateKind: stale_clean_worktree
+    cleanupCandidateSample: C:\Users\jzzhu\.codex\worktrees\cb44\tiku
+    terminalTaskMovement: allowed_if_recovery_window_overflows
+    archiveFileWrite: allowed_if_recovery_window_overflows
+    taskHistoryIndexWrite: allowed_if_recovery_window_overflows
     retainedTerminalRecoveryWindow: 8
     browserRuntime: false
     devServer: false
@@ -555,15 +557,14 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    archiveExecutionDecision: approved_and_executed
-    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    movedTerminalTaskBlockCount: 216
+    cleanupExecutionDecision: cleanup_completed
+    cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+    cleanupCandidateKind: stale_clean_worktree
     retainedTerminalRecoveryWindow: 8
-    closeoutApproval: approved_for_ff_only_merge_push_cleanup
-    ffOnlyMergeDecision: pass_master_advanced_to_027ce89a9d3aad41e4fdc8bd53ecd984c63c7925
-    pushDecision: approved_target_origin_master_pending_after_evidence_commit
-    cleanupDecision: approved_delete_merged_short_branch_after_push
+    closeoutApproval: local_commit_only
+    ffOnlyMergeDecision: blocked_requires_fresh_closeout_approval
+    pushDecision: blocked_requires_fresh_closeout_approval
+    cleanupDecision: blocked_requires_fresh_closeout_approval
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -575,23 +576,23 @@ currentTask:
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_closeout_approval_2026_06_27
+    mergePushCleanupApproved: false
+    mergePushCleanupApprovalSource: fresh_closeout_approval_required
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_archive_index_write_and_terminal_task_movement_approval_2026_06_27
-    mergeToMaster:
-      approved: true
+      approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
+    fastForwardMerge:
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -602,10 +603,14 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: true
-    archiveApplyExecuted: true
-    terminalTaskBlocksMoved: 216
-    taskHistoryIndexEntriesAdded: 216
-    archiveCandidateCountBeforeTask: 214
+    cleanupBaselineDecision: cleanup_available
+    cleanupCandidateCountBeforeTask: 1
+    cleanupCandidateKind: stale_clean_worktree
+    cleanupExecuted: true
+    cleanupDecisionAfterTask: clean
+    cleanupActionCount: 1
+    cleanupDeferredCount: 0
+    archiveCandidateCountBeforeTask: 0
     archiveCandidateCountAfterTask: 0
     tddRedObserved: not_applicable
     focusedUnitTests: blocked_by_task_scope
@@ -630,26 +635,19 @@ currentTask:
     finalPassClaimed: false
     prettierScoped: pass
     gitDiffCheck: pass
-    lint: not_applicable_docs_state_only
-    typecheck: not_applicable_docs_state_only
+    lint: pass
+    typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_queue_slimming_clean
-    masterScopedPrettierCheck: pass
-    masterGitDiffCheck: pass_origin_master_to_head
-    masterLint: pass_on_master
-    masterTypecheck: pass_on_master
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_on_master
-    ffOnlyMergeToMaster: pass
-    pushOriginMaster: pending_after_evidence_commit
-    mergedShortBranchCleanup: pending_after_push
+    moduleRunV2ModuleCloseoutReadiness: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task_hygiene_clean_queue_slimming_clean
   diagnosticsBaseline:
-    queueSlimmingDecisionBeforeMovement: slimming_candidates
-    activeQueueTaskCountBeforeMovement: 267
-    activeQueueTerminalCountBeforeMovement: 223
-    archiveCandidateCountBeforeMovement: 214
-    activeQueueTaskCountAfterMovement: 52
-    activeQueueTerminalCountAfterMovement: 8
-    archiveCandidateCountAfterMovement: 0
+    stoppedAutomationHygieneDecisionBeforeCleanup: cleanup_available
+    stoppedAutomationHygieneCleanupCandidateCountBeforeCleanup: 1
+    stoppedAutomationHygieneCleanupCandidateKindBeforeCleanup: stale_clean_worktree
+    queueSlimmingDecisionBeforeTask: clean
+    activeQueueTaskCountBeforeTask: 52
+    activeQueueTerminalCountBeforeTask: 8
+    archiveCandidateCountBeforeTask: 0
   nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
@@ -10779,18 +10777,21 @@ lastActiveQueueSlimmingRecoveryWindow:
     destructive DB, staging/prod/cloud database, org_auth runtime behavior, or Cost Calibration Gate state.
 
 lastStoppedAutomationHygieneCleanup:
-  taskId: stopped-automation-hygiene-cleanup-2026-06-21
-  cleanedAt: "2026-06-21T23:26:48-07:00"
-  branch: codex/stopped-automation-hygiene-cleanup-20260621
-  commitSha: b3cc3ff852852a7003482433382565ad3b0ea587
+  taskId: stopped-automation-hygiene-cleanup-2026-06-27
+  cleanedAt: "2026-06-27T02:24:50-07:00"
+  branch: codex/stopped-automation-hygiene-cleanup-20260627
+  commitSha: null
   decision: pass_stopped_automation_hygiene_cleanup
   cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
   cleanupMode: script_guarded_cleanup
-  cleanupCandidateKind: expired_active_terminal_registry
-  cleanupRegistryRunId: 7375a744fe17193c45f3bfe67e538d26e1602ed691a18ffdcced58d6d51eae3c
-  displacedArchiveTaskId: close-redeem-code-audit-redaction
-  activeQueueTaskCountAfter: 51
-  activeQueueTerminalCountAfter: 8
+  cleanupCandidateKind: stale_clean_worktree
+  cleanupCandidateSample: C:\Users\jzzhu\.codex\worktrees\cb44\tiku
+  cleanupActionCount: 1
+  cleanupDeferredCount: 0
+  postCleanupDecision: clean
+  displacedArchiveTaskId: none_archive_candidate_count_zero
+  activeQueueTaskCountAfter: 53
+  activeQueueTerminalCountAfter: 9
   archiveCandidateCountAfter: 0
   boundary: >-
     This task executed stopped automation hygiene cleanup through the approved local script and kept the active
