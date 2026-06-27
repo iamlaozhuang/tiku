@@ -4779,11 +4779,17 @@ tasks:
     validationPolicy: task_plan_pre_execution_then_single_call_scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
     taskKind: high_risk_local_provider_cost_execution
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_single_call_cost_calibration_closed
     approvedAt: "2026-06-27T09:41:19-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_cost_calibration_env_loader_and_execution_cap_2026_06_27
+    claimedAt: "2026-06-27T09:59:25-07:00"
+    plannedAt: "2026-06-27T09:59:25-07:00"
+    implementedAt: "2026-06-27T09:59:25-07:00"
+    validatedAt: "2026-06-27T10:02:21-07:00"
+    reviewedAt: "2026-06-27T10:02:21-07:00"
+    closedAt: "2026-06-27T10:02:21-07:00"
     branch: codex/cost-calibration-execution-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -4953,11 +4959,39 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-execution.md
     validationSummary:
-      status: pending_execution
+      status: pass_single_call_cost_calibration_closed
       maxProviderCalls: 1
       maxRetries: 0
       spendStopLimitUsd: 0.05
       blockedCloseoutApprovedIfFailOrBlocked: true
+      localCommandConstructionRetryCount: 1
+      localCommandConstructionRetryClass: pre_execution_shell_quote_conflict_no_env_or_provider_call
+      providerLabel: openai_compatible
+      providerName: alibaba-qwen
+      modelLabel: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      requestCount: 1
+      providerCallExecuted: true
+      retryCount: 0
+      tokenCountSummary:
+        inputTokens: 13
+        outputTokens: 229
+        totalTokens: 242
+      localMinimumEstimateUsd: 0.001155229
+      estimateStatus: estimated_from_sdk_usage
+      spendCapExceeded: false
+      redactionStatus: passed_no_raw_prompt_response_payload_secret_output
+      forbiddenActionChecklist: passed
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_current_task_active_before_closed_state
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_wording_repair
+      moduleRunV2PrePushReadiness: pass
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 42
+      highRiskRepairBlockedCountAfterTask: 0
+      closeoutGates: pass
     blockedWithoutFreshApproval:
       - second_provider_call_or_retry
       - provider_configuration_change_or_fallback_path
