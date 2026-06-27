@@ -1415,6 +1415,264 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    title: Content admin review adoption local PostgreSQL route smoke execution
+    phase: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    sourceStory: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    dependencies:
+      - content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    taskPlanPolicy: required_before_runtime_execution
+    humanApprovalBoundary: >-
+      Current user fresh-approves a Layer 2 local PostgreSQL-backed route/runtime smoke execution task for
+      `content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27`. Only the `rejected` decision is
+      allowed. The task may use existing runtime database configuration from `.env.local` through application code only,
+      but it must not open, output, copy, record, or commit any `.env*` content, secret, token, DB URL, or credential
+      value. It may execute one route/service command against one test-owned content_admin generated-result review
+      target, with at most one redacted pre-read and one redacted post-readback. Browser/dev-server/e2e, Provider, Cost
+      Calibration, schema/migration/seed/destructive DB, raw SQL, raw row dump, broad scan, formal publish,
+      student-visible runtime, staging/prod/deploy/payment external-service, OCR/export, PR, force push, release
+      readiness, and final Pass remain blocked.
+    targetClosureItem: Local PostgreSQL-backed rejected review command smoke for content-admin generated result adoption
+    behaviorBoundary: local_postgres_route_runtime::single_rejected_decision_no_seed_no_scan_no_final_pass
+    executionProfile: local_postgres_route_runtime_smoke_single_target
+    evidenceMode: redacted_status_counts_only
+    validationPolicy: local_capability_gate_redacted_runtime_smoke_lint_typecheck_scoped_prettier_diff_project_status_precommit_module_closeout_prepush
+    taskKind: local_postgres_route_runtime_smoke_execution
+    moduleRunVersion: 2
+    status: closed
+    result: pass_blocked_single_candidate_not_found_no_mutation
+    approvedAt: "2026-06-27T06:39:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_local_postgres_rejected_route_smoke_approval_2026_06_27
+    claimedAt: "2026-06-27T06:39:00-07:00"
+    plannedAt: "2026-06-27T06:39:00-07:00"
+    implementedAt: "2026-06-27T06:40:00-07:00"
+    validatedAt: "2026-06-27T06:43:00-07:00"
+    reviewedAt: "2026-06-27T06:43:00-07:00"
+    closedAt: "2026-06-27T06:43:00-07:00"
+    branch: codex/content-admin-postgres-smoke-execution-20260627
+    localDockerDatabase: approved_local_dev_only
+    capabilities:
+      localPostgresRouteRuntimeSmoke: approved_by_current_user_fresh_execution_approval_2026_06_27
+      runtimeDatabaseUrlResolution: approved_runtime_only_no_manual_secret_read_or_output
+      localDatabaseConnection: approved_single_route_command_only
+      localDatabaseRead: approved_single_target_only
+      localDatabaseMutation: approved_single_rejected_command_only_but_not_executed_target_missing
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      manualEnvSecretRead: blocked
+      envSecretOutputOrCopy: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      schemaMigration: blocked
+      seedOrBootstrap: blocked
+      destructiveDatabaseOperation: blocked
+      rawSql: blocked
+      rawRowDump: blocked
+      broadScan: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - local_postgres_route_runtime
+      - secret_safe_runtime_env_resolution
+      - single_target_only
+      - rejected_decision_only
+      - no_seed
+      - no_schema_migration
+      - no_raw_sql
+      - no_raw_row_dump
+      - no_broad_scan
+      - no_browser_runtime
+      - no_provider_call
+      - no_cost_calibration
+      - no_formal_publish
+      - no_student_visible_runtime
+      - no_release_readiness
+      - no_final_pass
+    runtimeSmokeResult:
+      commandLabel: content_admin_formal_adoption_local_postgres_route_smoke
+      environment: local_dev
+      roleLabel: content_admin
+      decision: rejected
+      targetCount: 1
+      routeInvocationCount: 1
+      mutationCount: 0
+      readbackCount: 0
+      resultCategory: blocked_single_candidate_not_found
+      redactionStatus: redacted
+      rawGeneratedContentReturned: false
+      syntheticAuthorizationReturned: false
+      internalNumericIdReturned: false
+      databaseUrlReturned: false
+      browserDevServerE2E: false
+      providerCall: false
+      costCalibration: false
+      schemaMigrationSeedDestructiveDb: false
+      rawRowDumpOrBroadScan: false
+      manualEnvReadOrOutput: false
+      formalPublishOrStudentVisibleRuntime: false
+      stagingProdDeployPaymentExternalService: false
+      releaseReadinessOrFinalPass: false
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27 -Capability localDockerDatabase -Intent use_capability
+      - node_modules\.bin\tsx.cmd - < redacted inline route/service smoke harness
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_local_postgres_rejected_route_smoke_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_local_postgres_rejected_route_smoke_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_local_postgres_rejected_route_smoke_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_local_postgres_rejected_route_smoke_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    validationSummary:
+      taskPlanPrepared: true
+      runtimeSmokeExecuted: true
+      runtimeSmokeResult: blocked_single_candidate_not_found
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      defaultPostgresRuntimeExecuted: true
+      runtimeEnvResolutionUsedByApplicationCode: true
+      manualEnvSecretReadOrOutput: false
+      localDbReadAttempted: true
+      localDbMutationExecuted: false
+      targetCount: 1
+      routeInvocationCount: 1
+      mutationCount: 0
+      readbackCount: 0
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      schemaMigrationSeedDestructiveDbExecuted: false
+      rawRowDumpOrBroadScanExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      localCapabilityGate: pass
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 29
+      highRiskRepairBlockedCountAfterTask: 0
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    nextApprovalRequired: test_owned_generated_result_target_setup_or_selection
+    blockedWithoutFreshApproval:
+      - second_target_or_second_mutation_retry
+      - test_owned_target_setup_seed_or_fixture_creation
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - manual_env_secret_or_dotenv_read_output_copy
+      - provider_call_or_configuration
+      - cost_calibration
+      - schema_migration_seed_destructive_db_raw_sql
+      - raw_db_row_dump_or_broad_scan
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27
