@@ -18,4 +18,5 @@ ACCEPTED AS LOCAL DOCS-STATE ARCHIVE APPLY.
 
 216 terminal historical task blocks were moved into `docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml`
 and indexed in `docs/04-agent-system/state/task-history-index.yaml`. Active queue slimming now reports zero archive
-candidates. Merge, push, and branch cleanup still require fresh closeout approval.
+candidates. Fresh closeout approval has been granted and consumed for ff-only merge to `master`, master gates, push to
+`origin/master`, and deleting the merged short branch.

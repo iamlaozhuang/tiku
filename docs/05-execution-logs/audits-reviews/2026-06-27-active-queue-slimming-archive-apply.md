@@ -29,3 +29,10 @@ database rows, browser session values, or credential values should be captured.
 Scoped Prettier, `git diff --check`, queue slimming diagnostics, project status diagnostics, and archive/index
 consistency checks passed before final hardening rerun. The task correctly avoids source/runtime/DB/Provider/browser/PR/
 force-push/release/final-Pass claims.
+
+## Master Closeout Review
+
+Fresh closeout approval was granted on 2026-06-27 for ff-only merge to `master`, master gates, push to `origin/master`,
+and deleting the merged short branch. The ff-only merge completed on `master`, and master gates passed before this
+evidence-only closeout update. PR, force push, release readiness, final Pass, source/runtime/DB/Provider/browser/e2e, and
+Cost Calibration Gate remain blocked.

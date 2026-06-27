@@ -4365,16 +4365,16 @@ tasks:
         approved: true
         approvalSource: current_user_archive_index_write_and_terminal_task_movement_approval_2026_06_27
       mergeToMaster:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
     blockedWithoutFreshApproval:
       - source_or_test_change
       - browser_or_playwright_runtime

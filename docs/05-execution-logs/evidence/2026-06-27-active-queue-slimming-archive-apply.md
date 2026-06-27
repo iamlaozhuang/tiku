@@ -257,7 +257,21 @@ result: pass_archived_terminal_history_to_june_archive_and_index
 - Queue status: closed after archive movement.
 - Actual archival movement: executed for 216 terminal task blocks.
 - Local commit: approved by this task package.
-- Fast-forward merge, push, and branch cleanup: not executed in this task; fresh closeout approval required.
+- Fresh closeout approval: granted by user on 2026-06-27 for ff-only merge to `master`, master gates, push to
+  `origin/master`, and deleting the merged short branch.
+- Fast-forward merge to `master`: executed; `master` advanced from `6f3a9d576087115da84eeee3812a13c35e3b9379` to
+  `027ce89a9d3aad41e4fdc8bd53ecd984c63c7925`.
+- Master closeout gates:
+  - scoped Prettier check: pass
+  - `git diff --check origin/master..HEAD`: pass
+  - queue slimming diagnostic: pass, `archiveCandidateCount: 0`
+  - project status diagnostic: pass, `nextActionDecision: no_pending_task`
+  - `npm.cmd run lint`: pass
+  - `npm.cmd run typecheck`: pass
+  - Module Run v2 pre-push readiness: pass with `-SkipRemoteAheadCheck`
+  - Module Run v2 pre-commit hardening on clean master: pass
+- Push to `origin/master`: pending after this evidence-only closeout commit.
+- Short branch cleanup: pending after successful push.
 
 ## Redaction Boundary
 

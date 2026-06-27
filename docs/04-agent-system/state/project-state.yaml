@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: active-queue-slimming-archive-apply-2026-06-27
-updatedAt: "2026-06-27T02:06:58-07:00"
+updatedAt: "2026-06-27T02:14:24-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -560,10 +560,10 @@ currentTask:
     taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
     movedTerminalTaskBlockCount: 216
     retainedTerminalRecoveryWindow: 8
-    closeoutApproval: local_commit_only
-    ffOnlyMergeDecision: blocked_requires_fresh_closeout_approval
-    pushDecision: blocked_requires_fresh_closeout_approval
-    cleanupDecision: blocked_requires_fresh_closeout_approval
+    closeoutApproval: approved_for_ff_only_merge_push_cleanup
+    ffOnlyMergeDecision: pass_master_advanced_to_027ce89a9d3aad41e4fdc8bd53ecd984c63c7925
+    pushDecision: approved_target_origin_master_pending_after_evidence_commit
+    cleanupDecision: approved_delete_merged_short_branch_after_push
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -575,23 +575,23 @@ currentTask:
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     localCommitApproved: true
-    mergePushCleanupApproved: false
-    mergePushCleanupApprovalSource: fresh_closeout_approval_required
+    mergePushCleanupApproved: true
+    mergePushCleanupApprovalSource: current_user_fresh_closeout_approval_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
       approvalSource: current_user_archive_index_write_and_terminal_task_movement_approval_2026_06_27
     mergeToMaster:
-      approved: false
+      approved: true
       targetBranch: master
-      approvalSource: fresh_closeout_approval_required
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
     push:
-      approved: false
+      approved: true
       target: origin/master
-      approvalSource: fresh_closeout_approval_required
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
     cleanup:
-      deleteShortBranch: false
-      approvalSource: fresh_closeout_approval_required
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -634,7 +634,14 @@ currentTask:
     typecheck: not_applicable_docs_state_only
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task_queue_slimming_clean
-    moduleRunV2PrePushReadiness: not_requested
+    masterScopedPrettierCheck: pass
+    masterGitDiffCheck: pass_origin_master_to_head
+    masterLint: pass_on_master
+    masterTypecheck: pass_on_master
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_on_master
+    ffOnlyMergeToMaster: pass
+    pushOriginMaster: pending_after_evidence_commit
+    mergedShortBranchCleanup: pending_after_push
   diagnosticsBaseline:
     queueSlimmingDecisionBeforeMovement: slimming_candidates
     activeQueueTaskCountBeforeMovement: 267
