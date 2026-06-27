@@ -501,24 +501,24 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9bfb93a2ef3e545e09ef21baaa96b801c8283e1e
-  lastKnownOriginMasterSha: 9bfb93a2ef3e545e09ef21baaa96b801c8283e1e
+  lastKnownMasterSha: 39645361ea367edf81fbbfaf98bb62bf54f01704
+  lastKnownOriginMasterSha: 39645361ea367edf81fbbfaf98bb62bf54f01704
 currentTask:
-  id: formal-publish-student-visible-content-execution-approval-2026-06-26
+  id: organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
   status: closed
-  result: pass_formal_publish_fresh_approval_template_prepared_execution_still_blocked
-  claimedAt: "2026-06-26T19:50:00-07:00"
-  plannedAt: "2026-06-26T19:50:00-07:00"
-  validatedAt: "2026-06-26T19:50:00-07:00"
-  reviewedAt: "2026-06-26T19:50:00-07:00"
-  closedAt: "2026-06-26T19:50:00-07:00"
+  result: pass_org_admin_ai_usage_statistics_ux_enhancement_boundary_package_prepared_no_implementation
+  claimedAt: "2026-06-26T20:05:00-07:00"
+  plannedAt: "2026-06-26T20:05:00-07:00"
+  validatedAt: "2026-06-26T20:05:00-07:00"
+  reviewedAt: "2026-06-26T20:05:00-07:00"
+  closedAt: "2026-06-26T20:05:00-07:00"
   sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
   approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-publish-student-visible-content-execution-approval.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-formal-publish-student-visible-content-execution-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-publish-student-visible-content-execution-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-publish-student-visible-content-execution-approval.md
-  branch: codex/formal-publish-execution-approval-20260626
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+  branch: codex/org-admin-ai-statistics-ux-approval-20260626
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
@@ -549,12 +549,11 @@ currentTask:
     finalPassClaim: false
   decision:
     docsOnlyApprovalPackage: true
-    publishExecutionApprovedInThisTask: false
-    futureFreshPublishApprovalRequired: true
-    futureDefaultMaxPublishCalls: 1
-    futureStudentVisibleValidationDefault: blocked_without_explicit_approval
-    publishTargetMustBeNamedOrReadOnlyPreflightApproved: true
-    stagingProdReleaseFinalPass: blocked
+    currentAiGenerationClosureRequiresStatisticsUx: false
+    secondLayerEnhancement: true
+    futureRequiredWhenEmployeeVisibleOrganizationTrainingInScope: true
+    rawEmployeeAnswerOrRawAiContentAccess: blocked
+    exportOrExternalService: blocked
     implementationStillBlocked: true
     localCommitApproved: true
     mergePushCleanupApproved: true
@@ -596,8 +595,8 @@ currentTask:
     providerRetryCount: 0
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
-    publishExecutionExecuted: false
-    studentVisibleRuntimeValidationExecuted: false
+    rawEmployeeAnswerOrRawAiContentAccessExecuted: false
+    exportOrExternalServiceExecuted: false
     formalPublishExecuted: false
     studentVisibleContentExecuted: false
     finalPassClaimed: false
@@ -606,7 +605,7 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
+  nextRecommendedTask: content-admin-ai-review-ux-enhancement-approval-2026-06-26
 aiGenerationProductBoundaryExecutionPackageApproval20260626:
   taskId: ai-generation-product-boundary-execution-package-approval-2026-06-26
   phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
