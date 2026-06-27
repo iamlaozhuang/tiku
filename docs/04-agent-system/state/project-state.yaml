@@ -501,29 +501,29 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 0bea81905709f8967fb4462b3a8100ef222a694d
-  lastKnownOriginMasterSha: 0bea81905709f8967fb4462b3a8100ef222a694d
+  lastKnownMasterSha: 842c579389ee7b9aee3b7f5554ae52592e2a58dc
+  lastKnownOriginMasterSha: 842c579389ee7b9aee3b7f5554ae52592e2a58dc
 currentTask:
-  id: ai-generation-product-boundary-execution-package-approval-2026-06-26
+  id: org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
   status: closed
-  result: pass_ai_generation_product_boundary_execution_package_prepared_follow_up_tasks_blocked_no_implementation_no_final_pass
-  claimedAt: "2026-06-26T18:58:57-07:00"
-  plannedAt: "2026-06-26T18:58:57-07:00"
-  validatedAt: "2026-06-26T19:09:05-07:00"
-  reviewedAt: "2026-06-26T19:09:05-07:00"
-  closedAt: "2026-06-26T19:09:05-07:00"
-  sourceStory: current_user_request_execute_second_step_ai_generation_product_boundary_package_2026_06_26
-  approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
-  branch: codex/ai-generation-product-boundary-package-20260626
+  result: pass_org_ai_generation_owned_draft_boundary_package_prepared_no_implementation
+  claimedAt: "2026-06-26T19:20:00-07:00"
+  plannedAt: "2026-06-26T19:20:00-07:00"
+  validatedAt: "2026-06-26T19:20:00-07:00"
+  reviewedAt: "2026-06-26T19:20:00-07:00"
+  closedAt: "2026-06-26T19:20:00-07:00"
+  sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+  approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+  planPath: docs/05-execution-logs/task-plans/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+  branch: codex/org-ai-owned-draft-boundary-20260626
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    batchExecutionPackagePrepared: true
-    followUpTaskBoundariesCreated: true
+    batchExecutionPackagePrepared: false
+    followUpTaskBoundariesCreated: false
     localSourceChange: false
     focusedUnitTest: false
     testsOrE2eChange: false
@@ -548,31 +548,32 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    productBoundaryPackageOnly: true
-    organizationAdvancedAdminBoundary: organization_owned_draft_allowed_platform_formal_draft_blocked
-    learnerBoundary: private_generated_result_history_and_private_use_loop_required
-    publishBoundary: separate_fresh_approval_required
-    organizationStatisticsUxBoundary: second_layer_enhancement_not_current_generation_closure
-    contentReviewUxBoundary: traceability_required_batch_retry_diff_second_layer
-    followUpTasksRecordedAsBlocked: true
+    docsOnlyApprovalPackage: true
+    organizationGeneratedResultHistoryRequired: true
+    futureOrganizationOwnedDraftAllowedAfterFreshSourceApproval: true
+    organizationTrainingAdoptionAllowedAfterFreshSourceApproval: true
+    platformFormalDraftDirectWriteByOrganizationAdmin: blocked
+    contentAdminReviewRequiredForAnyPlatformFormalIntake: true
+    publishOrStudentVisibleContent: blocked
+    implementationStillBlocked: true
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+    mergePushCleanupApprovalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -583,7 +584,7 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: true
-    followUpTasksRecordedAsBlocked: true
+    followUpTasksRecordedAsBlocked: false
     mechanismScriptSmoke: not_applicable
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
@@ -603,13 +604,7 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  followUpBoundaryTasks:
-    - org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
-    - learner-ai-generation-private-result-use-loop-approval-2026-06-26
-    - formal-publish-student-visible-content-execution-approval-2026-06-26
-    - organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
-    - content-admin-ai-review-ux-enhancement-approval-2026-06-26
-  nextRecommendedTask: stop_for_fresh_approval_before_any_follow_up_execution
+  nextRecommendedTask: learner-ai-generation-private-result-use-loop-approval-2026-06-26
 aiGenerationProductBoundaryExecutionPackageApproval20260626:
   taskId: ai-generation-product-boundary-execution-package-approval-2026-06-26
   phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
