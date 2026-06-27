@@ -44,6 +44,126 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: formal-publish-local-execution-one-draft-paper-2026-06-27
+    title: Formal publish local execution for one copied draft paper
+    phase: formal-publish-local-execution-one-draft-paper-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+    taskKind: local_formal_publish_execution
+    moduleRunVersion: 2
+    executionProfile: local_docker_db_copy_publish_archive_no_provider_no_browser
+    evidenceMode: redacted_public_ids_statuses_counts_only
+    validationPolicy: local_service_execution_prettier_diff_module_run_v2
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Execute one local formal publish flow by copying a named published sample paper to a draft, publishing that
+      copied draft at most once through the application service, and archiving the copied paper as rollback evidence.
+      Do not run browser/e2e/student-visible runtime verification or touch Provider, env, staging/prod, payment,
+      external services, source/test/schema/package/lockfile files, release readiness, or final Pass.
+    status: closed
+    result: pass_local_copy_one_publish_archive_execution_archived_no_runtime_final_pass
+    approvedAt: "2026-06-27T00:40:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      scope: local_docker_db_copy_one_publish_archive_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T00:40:00-07:00"
+    plannedAt: "2026-06-27T00:40:00-07:00"
+    validatedAt: "2026-06-27T00:50:00-07:00"
+    reviewedAt: "2026-06-27T00:50:00-07:00"
+    closedAt: "2026-06-27T00:50:00-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localDatabaseConnection: approved_local_docker_dev_only
+      localDatabaseRead: approved_local_docker_dev_only
+      localDatabaseMutation: approved_copy_publish_archive_local_only
+      formalPublishStudentVisibleContent: approved_local_publish_only_no_runtime_verification
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      destructiveDatabaseOperation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+      - docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+      - docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_formal_publish
+      - local_database_mutation
+      - copied_paper_archive_rollback
+      - redacted_evidence
+    targetSelection:
+      sourcePaperPublicId: paper-de7955bc-d827-4b23-bbf6-8bae5e14fe6b
+      targetDraftPublicId: paper-989beac0-471f-493e-ad83-26cef5461a92
+      contentAdminActorPublicId: admin-dev-super-admin
+      publishCallBudget: 1
+      publishCallCount: 1
+      rollbackStrategy: archived_copied_published_paper_after_evidence
+      finalTargetPaperStatus: archived
+    validationCommands:
+      - local Docker DB preflight query with redacted output
+      - local application-service copy, one publish call, and archive rollback with redacted output
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId formal-publish-local-execution-one-draft-paper-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId formal-publish-local-execution-one-draft-paper-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+    branch: codex/formal-publish-local-execution-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+
   - id: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
     title: Learner private AI generated result practice and paper attempt source TDD
     phase: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27

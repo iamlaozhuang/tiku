@@ -501,36 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f6aeffc847974d8e68ca3693b151aad49d67a76a
-  lastKnownOriginMasterSha: f6aeffc847974d8e68ca3693b151aad49d67a76a
+  lastKnownMasterSha: 141d02bd7f43ac1b02498293f1224955251c7634
+  lastKnownOriginMasterSha: 141d02bd7f43ac1b02498293f1224955251c7634
 currentTask:
-  id: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+  id: formal-publish-local-execution-one-draft-paper-2026-06-27
   status: closed
-  result: pass_private_result_history_reference_boundary_no_runtime_mutation
-  claimedAt: "2026-06-27T00:00:00-07:00"
-  plannedAt: "2026-06-27T00:00:00-07:00"
-  validatedAt: "2026-06-27T00:30:00-07:00"
-  reviewedAt: "2026-06-27T00:30:00-07:00"
-  closedAt: "2026-06-27T00:30:00-07:00"
+  result: pass_local_copy_one_publish_archive_execution_archived_no_runtime_final_pass
+  claimedAt: "2026-06-27T00:40:00-07:00"
+  plannedAt: "2026-06-27T00:40:00-07:00"
+  validatedAt: "2026-06-27T00:50:00-07:00"
+  reviewedAt: "2026-06-27T00:50:00-07:00"
+  closedAt: "2026-06-27T00:50:00-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
-  branch: codex/learner-ai-private-loop-tdd-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  branch: codex/formal-publish-local-execution-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
     batchExecutionPackagePrepared: false
     followUpTaskBoundariesCreated: false
-    localSourceChange: true
-    focusedUnitTest: true
-    testsOrE2eChange: true
+    localSourceChange: false
+    focusedUnitTest: false
+    testsOrE2eChange: false
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
-    liveDatabaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    liveDatabaseConnectionExecuted: true
+    databaseWriteExecuted: true
     schemaMigrationExecuted: false
     browserRuntime: false
     devServer: false
@@ -540,8 +540,8 @@ currentTask:
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    formalQuestionOrPaperWrite: false
-    formalPublish: false
+    formalQuestionOrPaperWrite: local_copied_paper_only
+    formalPublish: local_max_one_call_consumed
     studentVisibleContent: false
     stagingProdDeploy: false
     paymentExternalService: false
@@ -549,12 +549,14 @@ currentTask:
     finalPassClaim: false
   decision:
     docsOnlyApprovalPackage: false
-    learnerGeneratedResultOwnership: learner_private
-    privatePracticeAttemptSource: contract_ready_no_mutation
-    privatePaperAttemptSource: contract_ready_no_mutation
-    organizationPrivateAdoption: blocked_without_organization_admin_task
-    platformFormalDraftAdoption: requires_content_admin_review_follow_up
-    directPublishOrStudentVisibleContent: blocked
+    publishTargetSelection: copy_named_published_local_sample_to_draft
+    sourcePaperPublicId: paper-de7955bc-d827-4b23-bbf6-8bae5e14fe6b
+    targetDraftPublicId: paper-989beac0-471f-493e-ad83-26cef5461a92
+    publishCallBudget: 1
+    publishCallCount: 1
+    rollbackStrategy: archived_copied_published_paper_after_evidence
+    finalTargetPaperStatus: archived
+    studentVisibleRuntimeVerification: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     implementationStillBlocked: false
     localCommitApproved: true
@@ -587,10 +589,10 @@ currentTask:
     docsOnly: false
     followUpTasksRecordedAsBlocked: false
     mechanismScriptSmoke: not_applicable
-    sourceOrTestChanged: true
+    sourceOrTestChanged: false
     schemaMigrationExecuted: false
-    liveDatabaseConnectionExecuted: false
-    databaseWriteExecuted: false
+    liveDatabaseConnectionExecuted: true
+    databaseWriteExecuted: true
     routeSmokeExecuted: false
     providerCallExecuted: false
     providerCallCount: 0
@@ -600,7 +602,8 @@ currentTask:
     reviewAdoptionMutationExecuted: false
     batchAdoptionRetryDiffExecuted: false
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
-    formalPublishExecuted: false
+    formalPublishExecuted: true
+    formalPublishCallCount: 1
     studentVisibleContentExecuted: false
     finalPassClaimed: false
     prettierScoped: pass
@@ -608,7 +611,39 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: formal-publish-local-execution-one-draft-paper-2026-06-27
+  nextRecommendedTask: organization-admin-ai-usage-statistics-ux-design-first-package-2026-06-27
+formalPublishLocalExecutionOneDraftPaper20260627:
+  taskId: formal-publish-local-execution-one-draft-paper-2026-06-27
+  phase: formal-publish-local-execution-one-draft-paper-2026-06-27
+  recordedAt: "2026-06-27T00:40:00-07:00"
+  status: closed
+  result: pass_local_copy_one_publish_archive_execution_archived_no_runtime_final_pass
+  validatedAt: "2026-06-27T00:50:00-07:00"
+  reviewedAt: "2026-06-27T00:50:00-07:00"
+  closedAt: "2026-06-27T00:50:00-07:00"
+  branch: codex/formal-publish-local-execution-20260627
+  approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-formal-publish-local-execution-one-draft-paper.md
+  boundary:
+    sourcePaperPublicId: paper-de7955bc-d827-4b23-bbf6-8bae5e14fe6b
+    targetDraftPublicId: paper-989beac0-471f-493e-ad83-26cef5461a92
+    publishCallBudget: 1
+    publishCallCount: 1
+    rollbackStrategy: archived_copied_published_paper_after_evidence
+    finalTargetPaperStatus: archived
+    studentVisibleRuntimeVerification: blocked
+  validationSummary:
+    localPreflight: pass_named_source_and_actor_found
+    serviceCopyPublishArchive: pass_copy_0_publish_0_archive_0
+    finalArchiveVerification: pass_archived_with_published_at_and_archived_at
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    moduleRunV2PrePushReadiness: pass
 learnerAiGenerationPrivateResultPracticePaperAttemptTdd20260627:
   taskId: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
   phase: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
