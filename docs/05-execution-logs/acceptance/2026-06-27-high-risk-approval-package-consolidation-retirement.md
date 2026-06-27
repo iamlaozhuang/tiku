@@ -9,6 +9,8 @@ Decision: `HIGH_RISK_APPROVAL_PACKAGES_CONSOLIDATED_ACTIVE_PLACEHOLDERS_RETIRED_
 This is a docs/state-only consolidation ledger. It retires or merges active AP-01 through AP-11 queue placeholders, but it
 does not approve or execute any high-risk gate.
 
+Closeout decision: `FF_ONLY_MERGED_TO_MASTER_PUSH_AND_BRANCH_CLEANUP_APPROVED_PENDING_MASTER_GATES`.
+
 ## Consolidation Summary
 
 | Slice                                                               | Before | After | Decision                                                                 |

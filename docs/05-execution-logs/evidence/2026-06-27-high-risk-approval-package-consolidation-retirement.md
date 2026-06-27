@@ -94,7 +94,8 @@ Cost Calibration Gate remains blocked pending fresh explicit approval.
 ## Thread And Handoff
 
 - threadRolloverGate: not required; this task stays in the current thread.
-- automationHandoffPolicy: stop after local commit unless the owner gives fresh closeout approval for ff-only merge, push, and branch cleanup.
+- automationHandoffPolicy: fresh closeout approval was provided for ff-only merge, master gates, push, and branch cleanup
+  only.
 - nextModuleRunCandidate: `layer-2-business-closure-evidence-rollup-2026-06-27` or `layer-2-minimal-local-business-closure-approval-package-2026-06-27`.
 
 ## Validation Transcript
@@ -136,6 +137,78 @@ Cost Calibration Gate remains blocked pending fresh explicit approval.
 - Remediation: added a `Commit` section with the accepted pre-task baseline SHA.
 - Final rerun exit code: 0
 - `OK_BATCH_COMMIT_EVIDENCE_RECORDED`
+- `module-closeout readiness passed`
+
+## Closeout Status
+
+- Local task commit: completed as `2d396bec96f017d50ed521456a004113e55c882a`.
+- Fast-forward merge to `master`: approved by current user fresh closeout approval and completed locally.
+- Push to `origin/master`: approved by current user fresh closeout approval, gated by master pre-push readiness.
+- Short-branch cleanup: approved by current user fresh closeout approval after successful push.
+
+## Fresh Closeout Approval
+
+Approval source: `current_user_fresh_closeout_approval_2026_06_27_high_risk_consolidation_retirement`
+
+Approved actions only:
+
+- ff-only merge `codex/high-risk-approval-consolidation-20260627` to `master`;
+- run necessary gates on `master`;
+- push `master` to `origin/master`;
+- delete the merged short branch after push success.
+
+Explicitly not approved:
+
+- PR, force push, Provider, DB, browser/e2e, Cost Calibration, `staging`/`prod`, payment/external service, release
+  readiness, or final Pass.
+
+## Master Closeout Transcript
+
+`git merge --ff-only codex/high-risk-approval-consolidation-20260627`
+
+- Exit code: 0
+- Result: `master` fast-forwarded from `20c665c1c5b9dfd8ca026592489c5580c8375e54` to
+  `2d396bec96f017d50ed521456a004113e55c882a`.
+
+`npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-high-risk-approval-package-consolidation-retirement.md docs/05-execution-logs/evidence/2026-06-27-high-risk-approval-package-consolidation-retirement.md docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-approval-package-consolidation-retirement.md docs/05-execution-logs/acceptance/2026-06-27-high-risk-approval-package-consolidation-retirement.md`
+
+- Exit code: 0
+- `All matched files use Prettier code style!`
+
+`git diff --check`
+
+- Exit code: 0
+
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`
+
+- Exit code: 0
+- `projectStatusDecision: idle_no_pending_task`
+- `activeQueueNonTerminalCount: 28`
+- `archiveCandidateCount: 18`
+- `highRiskRepairBlockedCount: 0`
+- `Cost Calibration Gate remains blocked`
+
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27`
+
+- Exit code: 0
+- `filesToScan: 5`
+- `pre-commit hardening passed`
+
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27 -SkipRemoteAheadCheck`
+
+- Exit code: 0
+- `branch: master`
+- `master: 2d396bec96f017d50ed521456a004113e55c882a`
+- `originMaster: 20c665c1c5b9dfd8ca026592489c5580c8375e54`
+- `pre-push readiness passed`
+
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27`
+
+- Previous closeout-state run exit code: 1
+- Finding: `HARD_BLOCK_VALIDATION_NOT_RECORDED` for pre-push readiness.
+- Remediation: recorded the master pre-push readiness command and output in this evidence file.
+- Final rerun exit code: 0
+- `OK_VALIDATION_RECORDED Test-ModuleRunV2PrePushReadiness`
 - `module-closeout readiness passed`
 
 ## Redaction

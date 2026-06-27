@@ -65,8 +65,8 @@ tasks:
     validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout
     taskKind: docs_state_high_risk_approval_consolidation
     moduleRunVersion: 2
-    status: ready_for_closeout
-    result: pass_high_risk_approval_package_consolidation_retirement_prepared
+    status: closed
+    result: pass_high_risk_approval_package_consolidation_retirement_ff_merged_master_gates_passed_push_pending
     approvedAt: "2026-06-27T04:06:49-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_docs_state_high_risk_package_consolidation_2026_06_27
@@ -75,6 +75,7 @@ tasks:
     implementedAt: "2026-06-27T04:06:49-07:00"
     validatedAt: "2026-06-27T04:11:29-07:00"
     reviewedAt: "2026-06-27T04:11:29-07:00"
+    closedAt: "2026-06-27T04:17:06-07:00"
     branch: codex/high-risk-approval-consolidation-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -82,6 +83,9 @@ tasks:
       queueStatusRetirement: approved
       acceptanceLedger: approved
       localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
       sourceOrTestChange: blocked
       browserRuntime: blocked
       devServer: blocked
@@ -159,21 +163,22 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId high-risk-approval-package-consolidation-retirement-2026-06-27 -SkipRemoteAheadCheck
     closeoutPolicy:
       localCommit:
         approved: true
         approvalSource: current_user_fresh_docs_state_high_risk_package_consolidation_2026_06_27
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27_high_risk_consolidation_retirement
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27_high_risk_consolidation_retirement
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27_high_risk_consolidation_retirement
     planPath: docs/05-execution-logs/task-plans/2026-06-27-high-risk-approval-package-consolidation-retirement.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-approval-package-consolidation-retirement.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-approval-package-consolidation-retirement.md
@@ -203,6 +208,14 @@ tasks:
       highRiskRepairBlockedCountAfterRetirement: 0
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_finalization
+      ffOnlyMergeToMaster: pass
+      moduleRunV2PrePushReadiness: pass
+      masterCloseout:
+        ffOnlyMerge: pass_2d396bec96f017d50ed521456a004113e55c882a
+        pushOriginMaster: approved_after_pre_push_readiness
+        deleteShortBranch: approved_after_push_success
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
     blockedWithoutFreshApproval:
       - source_or_test_change
       - browser_or_playwright_runtime
