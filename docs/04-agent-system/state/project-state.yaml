@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
-updatedAt: "2026-06-27T08:34:33-07:00"
+currentPhase: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+updatedAt: "2026-06-27T08:53:39-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,30 +501,30 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
-  lastKnownOriginMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
+  lastKnownMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
+  lastKnownOriginMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
 currentTask:
-  id: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+  id: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
   status: closed
-  result: pass_provider_error_follow_up_approval_package_prepared_execution_blocked
-  claimedAt: "2026-06-27T08:34:33-07:00"
-  plannedAt: "2026-06-27T08:34:33-07:00"
-  implementedAt: "2026-06-27T08:34:33-07:00"
-  validatedAt: "2026-06-27T08:34:33-07:00"
-  reviewedAt: "2026-06-27T08:34:33-07:00"
-  closedAt: "2026-06-27T08:34:33-07:00"
-  sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
-  approvalSource: current_user_approved_docs_state_provider_error_follow_up_approval_package_execution_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
-  branch: codex/provider-error-followup-approval-20260627
+  result: pass_blocked_provider_error_http_401_no_retry_evidence_closeout
+  claimedAt: "2026-06-27T08:53:39-07:00"
+  plannedAt: "2026-06-27T08:53:39-07:00"
+  implementedAt: "2026-06-27T08:57:25-07:00"
+  validatedAt: "2026-06-27T08:57:25-07:00"
+  reviewedAt: "2026-06-27T08:57:25-07:00"
+  closedAt: "2026-06-27T08:57:25-07:00"
+  sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+  approvalSource: current_user_fresh_unattended_serial_package_step_1_provider_error_code_diagnostic_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+  branch: codex/provider-error-code-diagnostic-20260627
   scope:
     docsStateEvidenceAudit: true
-    layer3ProviderSmokeExecution: false
-    providerSmokeBoundaryDefinition: true
-    approvalTextAuthoring: true
+    layer3ProviderSmokeExecution: approved_single_diagnostic_call
+    providerSmokeBoundaryDefinition: false
+    approvalTextAuthoring: false
     existingTaskStatusChange: false
     archiveIndexMovement: false
     taskHistoryIndexWrite: false
@@ -545,12 +545,12 @@ currentTask:
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
-    credentialOrEnvRead: false
-    envFileReadByCodex: false
+    credentialOrEnvRead: approved_env_local_single_alias_loader_current_command_only
+    envFileReadByCodex: approved_single_alias_only_for_this_command
     providerCredentialAlias: ALIBABA_API_KEY
     providerCredentialValueOutput: false
-    providerCall: false
-    providerCallCount: 0
+    providerCall: approved_one_diagnostic_call_only
+    providerCallCount: 1
     providerRetryCount: 0
     providerPath: alibaba/qwen-plus
     providerConfiguration: false
@@ -572,14 +572,15 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: pass_provider_error_follow_up_approval_package_prepared_execution_blocked
+    packageDecision: pass_blocked_provider_error_http_401_no_retry_evidence_closeout
     layer1Status: local_role_flow_complete_no_regression_claim_only
     layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_rolled_up_approved_path_browser_publish_still_separate
-    layer3Status: blocked_provider_smoke_provider_error_follow_up_approval_package_prepared
+    layer3Status: blocked_provider_error_http_401_no_retry
     priorLayer3MatrixTask: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
     priorProviderSmokeApprovalPackageTask: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
     priorProviderSmokeExecutionTask: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
-    providerSmokeDecision: blocked_provider_error_follow_up_approval_package_prepared
+    priorProviderErrorFollowUpTask: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+    providerSmokeDecision: blocked_provider_error_http_401_no_retry
     providerSmokeExpectedStopIfMissingEnv: true
     providerConfigurationDecision: blocked_no_configuration_change_approved
     costCalibrationDecision: blocked_not_in_this_task
@@ -592,7 +593,7 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 36
+    archiveCandidateCountBeforeTask: 37
     highRiskRepairBlockedCountBeforeTask: 0
     futureCostCalibrationTask: layer-3-cost-calibration-redacted-approval-package-2026-06-27
     futurePreReleaseTask: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
@@ -602,19 +603,19 @@ currentTask:
     futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
-    nextExecutionApprovalRequired: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27_or_manual_provider_console_verification
+    mergePushCleanupApprovalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
+    nextExecutionApprovalRequired: owner_provider_key_or_entitlement_or_region_review_required_before_retry
     nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     nextNonterminalCloseoutApprovalRequired: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    recommendedExecutionOption: owner_choose_follow_up_path_from_approval_package
+    recommendedExecutionOption: stop_serial_package_after_provider_error_http_401_blocked_evidence
     alternateExecutionOption: optional_layer_2_approved_formal_draft_or_credentialed_browser_package_if_owner_requires_stronger_l2
     prDecision: blocked
     forcePushDecision: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
-    providerCallDecision: blocked_not_in_docs_state_follow_up_package
-    providerCredentialReadDecision: blocked_not_in_docs_state_follow_up_package
+    providerCallDecision: approved_one_diagnostic_call_only
+    providerCredentialReadDecision: approved_env_local_single_alias_loader_current_command_only
     costCalibrationGateDecision: blocked
     stagingProdDeployDecision: blocked
     paymentExternalServiceGateDecision: blocked
@@ -623,18 +624,18 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -653,27 +654,27 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 36
+    archiveCandidateCountBeforeTask: 37
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     browserSmokeExecuted: false
-    providerSmokeCommandExecuted: false
-    providerCallExecuted: false
-    providerCallCount: 0
+    providerSmokeCommandExecuted: true
+    providerCallExecuted: true
+    providerCallCount: 1
     providerRetryCount: 0
     providerConfigurationChanged: false
-    providerCredentialReadExecuted: false
+    providerCredentialReadExecuted: approved_env_local_single_alias_loader_current_command_only
     costCalibrationExecuted: false
     targetSetupOrSelectionExecuted: false
     reviewAdoptionMutationExecuted: false
     routeInvocationCount: 0
     targetCount: 0
     mutationCount: 0
-    providerSmokeResult: not_run_docs_state_follow_up_approval_package_only
-    providerSmokeRedactionStatus: not_applicable_no_provider_call
-    providerSmokeStopCondition: provider_error_follow_up_execution_blocked_pending_owner_choice
+    providerSmokeResult: blocked_provider_error_http_401_no_retry
+    providerSmokeRedactionStatus: passed
+    providerSmokeStopCondition: diagnostic_failed_or_blocked_no_retry
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
     formalPublishExecuted: false
     formalPublishCallCount: 0
@@ -684,7 +685,7 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 37
+    archiveCandidateCountAfterTask: 38
     highRiskRepairBlockedCountAfterTask: 0
     lint: not_run_docs_state_only_no_source_change
     typecheck: not_run_docs_state_only_no_source_change
@@ -697,10 +698,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
-    baselineOriginMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
-    currentBranch: codex/provider-error-followup-approval-20260627
-  nextRecommendedTask: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27_or_manual_provider_console_verification
+    baselineMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
+    baselineOriginMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
+    currentBranch: codex/provider-error-code-diagnostic-20260627
+  nextRecommendedTask: stop_serial_package_after_provider_error_http_401_owner_review_required
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
