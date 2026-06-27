@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: idle_no_pending_task
-updatedAt: "2026-06-27T05:00:00-07:00"
+updatedAt: "2026-06-27T05:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,32 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5df4c3447cd8d195776421775b55a87019f419e3
-  lastKnownOriginMasterSha: 5df4c3447cd8d195776421775b55a87019f419e3
+  lastKnownMasterSha: 2493560ee174a965a0ab6141cd19e8eb25f8a4ac
+  lastKnownOriginMasterSha: 2493560ee174a965a0ab6141cd19e8eb25f8a4ac
 currentTask:
-  id: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+  id: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   status: closed
-  result: pass_organization_analytics_admin_ui_redacted_boundary_no_runtime
-  claimedAt: "2026-06-27T04:45:00-07:00"
-  plannedAt: "2026-06-27T04:45:00-07:00"
-  validatedAt: "2026-06-27T05:00:00-07:00"
-  reviewedAt: "2026-06-27T05:00:00-07:00"
-  closedAt: "2026-06-27T05:00:00-07:00"
+  result: pass_content_admin_review_enhancement_package_seeded_followups_no_implementation
+  claimedAt: "2026-06-27T05:20:00-07:00"
+  plannedAt: "2026-06-27T05:20:00-07:00"
+  validatedAt: "2026-06-27T05:30:00-07:00"
+  reviewedAt: "2026-06-27T05:30:00-07:00"
+  closedAt: "2026-06-27T05:30:00-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
-  branch: codex/org-analytics-admin-ui-local-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  branch: codex/content-admin-review-enhancement-package-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    sourceContractChange: true
+    sourceContractChange: false
     serviceSourceChange: false
-    uiSourceChange: true
-    focusedUnitTest: true
-    testsOrE2eChange: true
+    uiSourceChange: false
+    focusedUnitTest: false
+    testsOrE2eChange: false
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
     liveDatabaseConnectionExecuted: false
@@ -548,18 +548,20 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    uiImplementationApproved: true
-    organizationAnalyticsUxClassification: second_layer_enhancement_for_current_ai_generation_closure
-    redactedStatisticsBoundaryRouteDecision: expose_policy_metadata_only
-    rawEmployeeAnswerAccess: blocked
-    rawAiGeneratedContentAccess: blocked
-    promptProviderPayloadAccess: blocked
-    crossOrganizationAnalyticsAccess: blocked
-    exportDownloadExternalSharing: blocked_requires_fresh_approval
+    enhancementPackageApproved: true
+    contentAdminReviewEnhancementClassification: second_layer_enhancement
+    batchReviewDecision: blocked_future_source_contract_task_only
+    failedRetryDecision: blocked_future_source_contract_task_only
+    resultDiffDecision: blocked_future_read_model_task_only
+    adoptionHistoryDecision: blocked_future_read_model_task_only
+    sourceImplementationDecision: blocked_requires_fresh_approval
+    retryMutationDecision: blocked_requires_fresh_approval
+    batchAdoptionMutationDecision: blocked_requires_fresh_approval
+    formalPublishOrStudentVisibleRuntime: blocked
+    rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: deferred_requires_separate_approval
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
-    rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     implementationStillBlocked: false
     localCommitApproved: true
     mergePushCleanupApproved: true
@@ -588,11 +590,11 @@ currentTask:
     acceptancePackagePrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
-    docsOnly: false
-    tddRedObserved: pass
-    focusedUnitTests: pass
+    docsOnly: true
+    tddRedObserved: not_applicable
+    focusedUnitTests: not_applicable
     mechanismScriptSmoke: not_applicable
-    sourceOrTestChanged: true
+    sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -611,12 +613,52 @@ currentTask:
     finalPassClaimed: false
     prettierScoped: pass
     gitDiffCheck: pass
-    lint: pass
-    typecheck: pass
+    lint: not_applicable_docs_only
+    typecheck: not_applicable_docs_only
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+  nextRecommendedTask: content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
+  taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+  phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+  recordedAt: "2026-06-27T05:20:00-07:00"
+  status: closed
+  result: pass_content_admin_review_enhancement_package_seeded_followups_no_implementation
+  branch: codex/content-admin-review-enhancement-package-20260627
+  approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+  boundary:
+    docsOnlyPackage: true
+    batchReviewSelection: follow_up_source_contract_only
+    failedRetry: follow_up_source_contract_only
+    resultDiff: follow_up_redacted_read_model_only
+    adoptionHistory: follow_up_read_only_traceability_only
+    combinedUiValidation: follow_up_after_source_contracts
+    sourceImplementation: blocked_requires_fresh_approval
+    databaseConnection: blocked
+    providerCall: blocked
+    batchAdoptionMutation: blocked
+    retryMutation: blocked
+    formalPublish: blocked
+    studentVisibleContent: blocked
+    browserRuntime: blocked
+  seededFollowUpTasks:
+    - content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+    - content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
+    - content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
+    - content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
+    - content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+  validationSummary:
+    focusedUnitTests: not_applicable_docs_only
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    moduleRunV2PrePushReadiness: pass
 organizationAnalyticsAdminUiImplementationLocalValidation20260627:
   taskId: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
   phase: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27

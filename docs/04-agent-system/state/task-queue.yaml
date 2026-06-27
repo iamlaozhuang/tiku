@@ -407,22 +407,242 @@ tasks:
 
   - id: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
     title: Content-admin review batch retry diff history enhancement package
-    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
     sourceStory: current_user_serial_batch_queue_2026_06_27
     dependencies:
       - content-admin-review-ux-design-traceability-package-2026-06-27
-    taskKind: enhancement_package_followup_blocked
+    taskKind: enhancement_package_docs_only
+    moduleRunVersion: 2
+    executionProfile: docs_state_approval_package_only
+    evidenceMode: redacted_docs_only_evidence
+    validationPolicy: scoped_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Prepare a docs/state enhancement package for content-admin batch review, failed retry, result diff, and adoption
+      history, seeding follow-up task boundaries without implementing source/test/UI, DB, Provider, retry mutation,
+      batch adoption, publish, student-visible runtime, browser/e2e, dev server, staging/prod, payment, external service,
+      PR, force push, release readiness, or final Pass.
+    status: closed
+    result: pass_content_admin_review_enhancement_package_seeded_followups_no_implementation
+    approvedAt: "2026-06-27T05:20:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      scope: docs_state_evidence_audit_acceptance_package_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T05:20:00-07:00"
+    plannedAt: "2026-06-27T05:20:00-07:00"
+    validatedAt: "2026-06-27T05:30:00-07:00"
+    reviewedAt: "2026-06-27T05:30:00-07:00"
+    closedAt: "2026-06-27T05:30:00-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      testChange: blocked
+      uiImplementation: blocked
+      batchReviewRetryDiffHistory: blocked
+      batchAdoptionMutation: blocked
+      retryMutation: blocked
+      formalPublishStudentVisibleContent: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - enhancement_package_docs_only
+      - content_admin_review_batch_retry_diff_history
+      - no_db_mutation
+      - no_provider
+      - no_publish
+      - redacted_evidence
+    boundary:
+      batchReviewSelection: follow_up_source_contract_only
+      failedRetry: follow_up_source_contract_only
+      resultDiff: follow_up_redacted_read_model_only
+      adoptionHistory: follow_up_read_only_traceability_only
+      combinedUiValidation: follow_up_after_source_contracts
+      sourceImplementation: blocked_requires_fresh_approval
+      databaseConnection: blocked
+      providerCall: blocked
+      batchAdoptionMutation: blocked
+      retryMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      browserValidation: blocked_requires_separate_approval
+    seededFollowUpTasks:
+      - content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+      - content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
+      - content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
+      - content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
+      - content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-enhancement-package.md
+    branch: codex/content-admin-review-enhancement-package-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+
+  - id: content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+    title: Content-admin review batch selection source contract TDD approval
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
     moduleRunVersion: 2
     status: blocked
-    result: blocked_pending_fresh_enhancement_package_approval
-    nextApprovalRequired: batch_retry_diff_history_scope_decision_before_source_or_ui
-    boundary: batch_review_failed_retry_diff_view_adoption_history_second_layer
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: batch_selection_contract_allowed_files_and_no_mutation_boundary
+    boundary: batch_candidate_selection_validation_state_preview_only_no_batch_adoption_mutation
     blockedCapabilities:
       - localSourceChange
       - testChange
       - databaseConnection
-      - batchReviewRetryDiffHistory
+      - databaseMutation
+      - batchAdoptionMutation
       - browserRuntime
+
+  - id: content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
+    title: Content-admin review failed retry source contract TDD approval
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: failed_retry_contract_allowed_files_provider_and_mutation_boundary
+    boundary: failed_generation_retry_request_state_only_no_provider_call_no_retry_mutation
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - providerCall
+      - providerCredentialRead
+      - retryMutation
+      - databaseConnection
+      - browserRuntime
+
+  - id: content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
+    title: Content-admin review result diff read-model source TDD approval
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: redacted_diff_read_model_allowed_files_and_raw_content_boundary
+    boundary: redacted_generated_result_vs_adopted_draft_diff_read_model_only_no_raw_prompt_output_provider_payload
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - rawGeneratedOutputAccess
+      - providerPayloadAccess
+      - databaseConnection
+      - browserRuntime
+
+  - id: content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
+    title: Content-admin review adoption history read-model source TDD approval
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: adoption_history_read_model_allowed_files_and_no_publish_boundary
+    boundary: read_only_adoption_history_traceability_contract_no_history_mutation_no_publish
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - databaseConnection
+      - databaseMutation
+      - formalPublishStudentVisibleContent
+      - browserRuntime
+
+  - id: content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+    title: Content-admin review batch retry diff history UI local validation approval
+    phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+      - content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
+      - content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
+      - content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
+    taskKind: ui_implementation_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_ui_local_validation_approval
+    nextApprovalRequired: ui_allowed_files_component_tests_local_validation_after_source_contracts
+    boundary: batch_retry_diff_history_ui_after_source_contracts_no_browser_no_mutation_no_provider_no_publish
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - browserRuntime
+      - devServer
+      - e2eRuntime
+      - databaseConnection
+      - batchAdoptionMutation
+      - retryMutation
+      - formalPublishStudentVisibleContent
 
   - id: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
     title: Content-admin review local browser smoke validation approval
