@@ -3009,6 +3009,7 @@ tasks:
       - docs/03-standards/code-taste-ten-commandments.md
       - docs/01-requirements/00-index.md
       - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
       - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
       - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
       - docs/02-architecture/adr/**
@@ -3474,6 +3475,299 @@ tasks:
       - provider_configuration
       - provider_retry_second_call_or_payload_inspection
       - cost_calibration_execution
+      - real_retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+    title: Layer 3 provider smoke local dev redacted execution provider error follow-up approval package
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+    sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+    dependencies:
+      - layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+      - layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+      - layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      Current user approves execution of the docs/state-only Provider error follow-up approval package after the
+      `alibaba` / `qwen-plus` Provider smoke retry returned a sanitized `provider_error`. This task may update only
+      project-state.yaml, task-queue.yaml, and task plan/evidence/audit/acceptance documents. It may define copyable
+      follow-up approval text for a future redacted Provider error-code diagnostic, a manual owner Provider console
+      verification path, or a Provider configuration-boundary package. It must not execute Provider calls, retry, inspect
+      raw Provider errors, read `.env*`, output credential values, change Provider configuration, run Cost Calibration,
+      touch DB/browser/e2e/staging/prod/deploy/payment/OCR/export, perform archive/index movement, create PRs, force
+      push, or claim release readiness/final Pass.
+    targetClosureItem: Docs/state-only Provider error follow-up approval package, no Provider execution
+    behaviorBoundary: docs_state::provider_error_follow_up_approval_package_no_provider_no_env_no_cost_no_final_pass
+    executionProfile: docs_state_lite
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_provider_error_follow_up_approval_package_prepared_execution_blocked
+    approvedAt: "2026-06-27T08:34:33-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_docs_state_provider_error_follow_up_approval_package_execution_2026_06_27
+    claimedAt: "2026-06-27T08:34:33-07:00"
+    plannedAt: "2026-06-27T08:34:33-07:00"
+    implementedAt: "2026-06-27T08:34:33-07:00"
+    validatedAt: "2026-06-27T08:34:33-07:00"
+    reviewedAt: "2026-06-27T08:34:33-07:00"
+    closedAt: "2026-06-27T08:34:33-07:00"
+    branch: codex/provider-error-followup-approval-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      approvalPackageAuthoring: approved
+      taskQueueRegistration: approved
+      providerErrorDiagnosticExecution: blocked_future_fresh_approval_required
+      localProviderSmokeExecution: blocked
+      envLocalSingleAliasLoader: blocked
+      envFileRead: blocked
+      providerCredentialValueOutputOrCopy: blocked
+      providerConfiguration: blocked
+      providerRetry: blocked
+      providerPayloadInspection: blocked
+      providerSecondCall: blocked
+      costCalibrationExecution: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
+      - docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-redacted-provider-error-code-diagnostics.md
+      - docs/05-execution-logs/task-plans/2026-06-19-ap-01-qwen-one-request-redacted-error-code-diagnostic-run.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - layer_3_provider_error_follow_up_approval_package
+      - high_risk_gate_boundary_preparation
+      - no_source_test_change
+      - no_browser_runtime
+      - no_database_connection
+      - no_env_secret_read
+      - no_provider_call_or_configuration
+      - no_cost_calibration_execution
+      - no_mutation_execution
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    providerErrorFollowUpApprovalPackage:
+      sourceBlockedTask: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+      sourceResult: blocked_provider_error_one_call_no_retry
+      sourceProviderLabel: alibaba
+      sourceModelLabel: qwen-plus
+      sourceRequestCount: 1
+      sourceRetryCount: 0
+      sourceRawErrorAvailableInEvidence: false
+      recommendedNextTask: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+      alternativeNoCallPath: manual_provider_console_verification_by_owner_no_codex_secret_or_provider_call
+      alternativeConfigBoundaryPackage: layer-3-provider-smoke-provider-configuration-boundary-approval-package-2026-06-27
+      futureDiagnosticBoundary:
+        providerLabel: alibaba
+        modelLabel: qwen-plus
+        credentialAlias: ALIBABA_API_KEY
+        credentialLoadingMode: env_local_single_alias_loader_to_current_process_environment
+        callCap: 1
+        retryCap: 0
+        providerTargetCount: 1
+        timeoutMs: 30000
+        maxOutputTokensScriptCap: 8
+        spendStopLimitUsd: 0.05
+        allowedDiagnosticFields:
+          - provider_label
+          - model_label
+          - result_status
+          - failure_category
+          - request_count
+          - provider_call_executed_boolean
+          - retry_count
+          - provider_error_summary_http_status
+          - provider_error_summary_provider_error_code
+          - redaction_status
+          - cap_status
+          - stop_condition
+          - forbidden_action_checklist
+        forbiddenDiagnosticFields:
+          - env_file_content
+          - secret_value
+          - token_value
+          - db_url
+          - authorization_header
+          - raw_prompt
+          - raw_response
+          - provider_payload
+          - raw_provider_error_body
+          - raw_provider_error_message
+          - raw_generated_ai_content
+          - full_paper_material_content
+          - db_row
+          - sql_output
+          - screenshot_trace_cookie_localstorage
+      blockedUntilFreshApproval:
+        - any_provider_call_or_retry
+        - env_local_read_or_alias_loader
+        - provider_configuration_change_or_fallback_path
+        - raw_error_prompt_response_payload_or_secret_inspection
+        - cost_calibration
+        - staging_prod_deploy_payment_external_service
+        - release_readiness_or_final_pass
+    copyableApprovalText:
+      redactedErrorCodeDiagnosticExecution: >-
+        我 fresh approve 一个 Layer 3 Provider smoke redacted error-code diagnostic execution 任务：
+        layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27。允许 Codex 在本地 dev 仅为本次命令打开
+        `.env.local`，只提取 `ALIBABA_API_KEY` 到当前命令进程环境；禁止输出、复制、记录或提交任何 `.env*` 内容、secret、token、
+        Provider credential、DB URL 或任何 credential 值。允许对 `alibaba` / `qwen-plus` 执行最多 1 次 Provider diagnostic call，
+        0 retry，timeout 30000ms，max output tokens 8，spend stop limit USD 0.05。证据只能记录 provider label、model label、
+        result status、failure category、request count、Provider call executed boolean、retry count、redaction status、cap status、
+        stop condition、以及脱敏 `providerErrorSummary.httpStatus` / `providerErrorSummary.providerErrorCode`；禁止记录 raw prompt、
+        raw response、Provider payload、raw Provider error body/message、raw generated content、secret、token、Authorization header、
+        DB URL、DB row、SQL output、截图、trace、cookie/localStorage。不批准第二次调用、retry loop、Provider configuration 变更、
+        Cost Calibration、DB、浏览器/dev-server/e2e、staging/prod/deploy/payment external service、OCR/export、PR、force push、
+        release readiness 或 final Pass。若缺少 alias、命令 fail/blocked 后需要第二次调用或 raw 细节、或机制门禁失败，必须停止并写
+        脱敏 blocked evidence。
+      manualProviderConsoleVerification: >-
+        我选择人工在 Provider 控制台核验 `ALIBABA_API_KEY` 对 `alibaba` / `qwen-plus` 的权限、额度、区域和服务开通状态。Codex 不读取
+        `.env*`，不调用 Provider，不接收 secret/raw response；我会只回传脱敏结论分类，例如 `key_valid_model_denied`、
+        `quota_or_billing_blocked`、`model_name_or_region_mismatch`、`provider_console_ok`。
+      providerConfigurationBoundaryPackage: >-
+        我 fresh approve 一个 docs/state-only Provider configuration boundary approval package：
+        layer-3-provider-smoke-provider-configuration-boundary-approval-package-2026-06-27。范围仅 project-state.yaml、task-queue.yaml、
+        task plan/evidence/audit/acceptance 文档；允许定义是否改用 openai-compatible DashScope path、base URL、provider name、model label
+        或 SDK provider path 的后续执行边界和审批文本。不批准 Provider call、读取 `.env*`、Provider configuration 变更执行、Cost
+        Calibration、DB、浏览器/e2e、staging/prod/deploy/payment external service、PR、force push、release readiness 或 final Pass。
+    validationSummary:
+      taskPlanPrepared: true
+      approvalPackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      providerCallExecuted: false
+      envFileReadByCodex: false
+      providerCredentialValueOutput: false
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      ocrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - provider_call_or_retry
+      - env_file_read_or_alias_loader
+      - provider_credential_value_output
+      - provider_configuration_change_or_fallback_path
+      - raw_error_prompt_response_payload_or_secret_inspection
+      - cost_calibration_execution
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
       - real_retry_or_adoption_mutation
       - formal_publish_or_student_visible_runtime
       - staging_prod_deploy_payment_external_service

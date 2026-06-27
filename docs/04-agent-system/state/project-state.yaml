@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
-updatedAt: "2026-06-27T08:28:23-07:00"
+currentPhase: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+updatedAt: "2026-06-27T08:34:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,36 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 4b40d63b897809c05a35995635660cd96140aa48
-  lastKnownOriginMasterSha: 4b40d63b897809c05a35995635660cd96140aa48
+  lastKnownMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
+  lastKnownOriginMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
 currentTask:
-  id: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+  id: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
   status: closed
-  result: blocked_provider_error_one_call_no_retry
-  claimedAt: "2026-06-27T08:22:28-07:00"
-  plannedAt: "2026-06-27T08:22:28-07:00"
-  implementedAt: "2026-06-27T08:25:31-07:00"
-  validatedAt: "2026-06-27T08:28:23-07:00"
-  reviewedAt: "2026-06-27T08:28:23-07:00"
-  closedAt: "2026-06-27T08:28:23-07:00"
-  sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
-  approvalSource: current_user_fresh_provider_smoke_retry_env_local_alias_loader_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
-  branch: codex/provider-smoke-retry-env-local-alias-20260627
+  result: pass_provider_error_follow_up_approval_package_prepared_execution_blocked
+  claimedAt: "2026-06-27T08:34:33-07:00"
+  plannedAt: "2026-06-27T08:34:33-07:00"
+  implementedAt: "2026-06-27T08:34:33-07:00"
+  validatedAt: "2026-06-27T08:34:33-07:00"
+  reviewedAt: "2026-06-27T08:34:33-07:00"
+  closedAt: "2026-06-27T08:34:33-07:00"
+  sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+  approvalSource: current_user_approved_docs_state_provider_error_follow_up_approval_package_execution_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+  branch: codex/provider-error-followup-approval-20260627
   scope:
     docsStateEvidenceAudit: true
-    layer3ProviderSmokeExecution: true
-    providerSmokeBoundaryDefinition: false
-    approvalTextAuthoring: false
+    layer3ProviderSmokeExecution: false
+    providerSmokeBoundaryDefinition: true
+    approvalTextAuthoring: true
     existingTaskStatusChange: false
     archiveIndexMovement: false
     taskHistoryIndexWrite: false
     localPostgresExecution: false
     sourceOrTestChange: false
-    runtimeExecutedByThisTask: true
+    runtimeExecutedByThisTask: false
     defaultPostgresRuntimeUsed: false
     localDbCredentialEnvReadApproved: false
     localDbRuntimeEnvResolutionUsedByApplicationCode: false
@@ -545,12 +545,12 @@ currentTask:
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
-    credentialOrEnvRead: env_local_alias_loader_single_key_no_value_output
-    envFileReadByCodex: approved_single_alias_only_for_this_command
+    credentialOrEnvRead: false
+    envFileReadByCodex: false
     providerCredentialAlias: ALIBABA_API_KEY
     providerCredentialValueOutput: false
-    providerCall: approved_one_call_only
-    providerCallCount: 1
+    providerCall: false
+    providerCallCount: 0
     providerRetryCount: 0
     providerPath: alibaba/qwen-plus
     providerConfiguration: false
@@ -572,14 +572,14 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: blocked_provider_error_one_call_no_retry
+    packageDecision: pass_provider_error_follow_up_approval_package_prepared_execution_blocked
     layer1Status: local_role_flow_complete_no_regression_claim_only
     layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_rolled_up_approved_path_browser_publish_still_separate
-    layer3Status: blocked_provider_smoke_provider_error_one_call_no_retry
+    layer3Status: blocked_provider_smoke_provider_error_follow_up_approval_package_prepared
     priorLayer3MatrixTask: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
     priorProviderSmokeApprovalPackageTask: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
     priorProviderSmokeExecutionTask: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
-    providerSmokeDecision: blocked_provider_error_one_call_no_retry
+    providerSmokeDecision: blocked_provider_error_follow_up_approval_package_prepared
     providerSmokeExpectedStopIfMissingEnv: true
     providerConfigurationDecision: blocked_no_configuration_change_approved
     costCalibrationDecision: blocked_not_in_this_task
@@ -592,7 +592,7 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 35
+    archiveCandidateCountBeforeTask: 36
     highRiskRepairBlockedCountBeforeTask: 0
     futureCostCalibrationTask: layer-3-cost-calibration-redacted-approval-package-2026-06-27
     futurePreReleaseTask: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
@@ -602,19 +602,19 @@ currentTask:
     futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: standingAutonomyApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
-    nextExecutionApprovalRequired: provider_error_follow_up_approval_required_before_any_retry_or_diagnostic
+    mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
+    nextExecutionApprovalRequired: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27_or_manual_provider_console_verification
     nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     nextNonterminalCloseoutApprovalRequired: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    recommendedExecutionOption: stop_serial_package_after_provider_error_blocked_evidence
+    recommendedExecutionOption: owner_choose_follow_up_path_from_approval_package
     alternateExecutionOption: optional_layer_2_approved_formal_draft_or_credentialed_browser_package_if_owner_requires_stronger_l2
     prDecision: blocked
     forcePushDecision: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
-    providerCallDecision: consumed_single_redacted_attempt_provider_error
-    providerCredentialReadDecision: env_local_alias_loader_single_key_no_value_output_no_other_env_keys
+    providerCallDecision: blocked_not_in_docs_state_follow_up_package
+    providerCredentialReadDecision: blocked_not_in_docs_state_follow_up_package
     costCalibrationGateDecision: blocked
     stagingProdDeployDecision: blocked
     paymentExternalServiceGateDecision: blocked
@@ -623,18 +623,18 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: standingAutonomyApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: standingAutonomyApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: standingAutonomyApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: standingAutonomyApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_approved_execution_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -645,7 +645,7 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    docsOnly: false
+    docsOnly: true
     ssotReadListPrepared: true
     existingTaskStatusChanged: false
     archiveIndexMovementExecuted: false
@@ -653,27 +653,27 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 35
+    archiveCandidateCountBeforeTask: 36
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
     browserSmokeExecuted: false
-    providerSmokeCommandExecuted: true
-    providerCallExecuted: true
-    providerCallCount: 1
+    providerSmokeCommandExecuted: false
+    providerCallExecuted: false
+    providerCallCount: 0
     providerRetryCount: 0
     providerConfigurationChanged: false
-    providerCredentialReadExecuted: env_local_alias_loader_single_key_no_value_output
+    providerCredentialReadExecuted: false
     costCalibrationExecuted: false
     targetSetupOrSelectionExecuted: false
     reviewAdoptionMutationExecuted: false
     routeInvocationCount: 0
     targetCount: 0
     mutationCount: 0
-    providerSmokeResult: blocked_provider_error_one_call_no_retry
-    providerSmokeRedactionStatus: passed
-    providerSmokeStopCondition: command_returned_fail_no_retry
+    providerSmokeResult: not_run_docs_state_follow_up_approval_package_only
+    providerSmokeRedactionStatus: not_applicable_no_provider_call
+    providerSmokeStopCondition: provider_error_follow_up_execution_blocked_pending_owner_choice
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
     formalPublishExecuted: false
     formalPublishCallCount: 0
@@ -682,25 +682,25 @@ currentTask:
     paymentExternalServiceTouched: false
     ocrExportExecuted: false
     finalPassClaimed: false
-    projectStatusDiagnostic: pass_idle_no_pending_task_after_provider_error_blocked_record
+    projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 36
+    archiveCandidateCountAfterTask: 37
     highRiskRepairBlockedCountAfterTask: 0
     lint: not_run_docs_state_only_no_source_change
     typecheck: not_run_docs_state_only_no_source_change
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass_blocked_evidence_closeout
+    moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass
     ffOnlyMergeToMaster: pending
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 4b40d63b897809c05a35995635660cd96140aa48
-    baselineOriginMasterSha: 4b40d63b897809c05a35995635660cd96140aa48
-    currentBranch: codex/provider-smoke-retry-env-local-alias-20260627
-  nextRecommendedTask: stop_until_provider_smoke_retry_result_is_known
+    baselineMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
+    baselineOriginMasterSha: 81b3f64a0248ed164d6f1f79b63edf7269346c00
+    currentBranch: codex/provider-error-followup-approval-20260627
+  nextRecommendedTask: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27_or_manual_provider_console_verification
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
