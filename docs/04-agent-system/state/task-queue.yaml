@@ -1025,15 +1025,114 @@ tasks:
       - content-admin-review-failed-retry-source-contract-tdd-approval-2026-06-27
       - content-admin-review-result-diff-read-model-source-tdd-approval-2026-06-27
       - content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
-    taskKind: ui_implementation_followup_blocked
+    taskKind: ui_implementation_local_validation
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_ui_local_validation_approval
+    executionProfile: ui_source_component_test_local_only
+    evidenceMode: redacted_unit_test_evidence
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    status: closed
+    result: pass_batch_retry_diff_history_ui_local_validation_no_runtime
+    approvedAt: "2026-06-27T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      scope: batch_retry_diff_history_ui_local_validation_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T00:00:00-07:00"
+    plannedAt: "2026-06-27T00:00:00-07:00"
+    implementedAt: "2026-06-26T22:46:36-07:00"
+    validatedAt: "2026-06-26T22:46:36-07:00"
+    reviewedAt: "2026-06-26T22:46:36-07:00"
+    closedAt: "2026-06-26T22:48:27-07:00"
     nextApprovalRequired: ui_allowed_files_component_tests_local_validation_after_source_contracts
     boundary: batch_retry_diff_history_ui_after_source_contracts_no_browser_no_mutation_no_provider_no_publish
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerPayloadAccess: blocked
+      costCalibrationGate: blocked
+      batchAdoptionMutation: blocked
+      retryMutation: blocked
+      historyMutation: blocked
+      formalPublishStudentVisibleContent: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - ui_implementation_local_validation
+      - content_admin_review_batch_retry_diff_history
+      - no_browser
+      - no_mutation
+      - no_provider
+      - no_publish
+    validationCommands:
+      - npm.cmd exec vitest -- run tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --write --ignore-unknown src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+      - npx.cmd prettier --check --ignore-unknown src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+    branch: codex/content-admin-review-batch-retry-ui-local-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
     blockedCapabilities:
-      - localSourceChange
-      - testChange
       - browserRuntime
       - devServer
       - e2eRuntime

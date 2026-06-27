@@ -501,33 +501,33 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7149af38b1cab62db708567a59ade2f9014c737f
-  lastKnownOriginMasterSha: 7149af38b1cab62db708567a59ade2f9014c737f
+  lastKnownMasterSha: 89466b47072c6aeabd85f2056a6065aa3b51d84a
+  lastKnownOriginMasterSha: 89466b47072c6aeabd85f2056a6065aa3b51d84a
 currentTask:
-  id: content-admin-review-adoption-history-read-model-source-tdd-approval-2026-06-27
+  id: content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
   status: closed
-  result: pass_adoption_history_read_model_source_tdd_read_only
+  result: pass_batch_retry_diff_history_ui_local_validation_no_runtime
   claimedAt: "2026-06-27T00:00:00-07:00"
   plannedAt: "2026-06-27T00:00:00-07:00"
-  implementedAt: "2026-06-27T00:00:00-07:00"
-  validatedAt: "2026-06-27T00:00:00-07:00"
-  reviewedAt: "2026-06-27T00:00:00-07:00"
-  closedAt: "2026-06-27T00:00:00-07:00"
+  implementedAt: "2026-06-26T22:46:36-07:00"
+  validatedAt: "2026-06-26T22:46:36-07:00"
+  reviewedAt: "2026-06-26T22:46:36-07:00"
+  closedAt: "2026-06-26T22:48:27-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-history-read-model-source-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-history-read-model-source-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-history-read-model-source-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-history-read-model-source-tdd.md
-  branch: codex/content-admin-review-adoption-history-contract-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
+  branch: codex/content-admin-review-batch-retry-ui-local-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
-    sourceContractChange: true
-    serviceSourceChange: true
-    uiSourceChange: false
+    sourceContractChange: false
+    serviceSourceChange: false
+    uiSourceChange: true
     focusedUnitTest: true
-    testsOrE2eChange: false
+    testsOrE2eChange: true
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
     liveDatabaseConnectionExecuted: false
@@ -549,14 +549,17 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    adoptionHistoryReadModel: read_only_traceability_only
-    adoptionTimelineContract: implemented
+    batchRetryDiffHistoryUi: local_validation_only
+    batchSelectionUiState: implemented
+    failedRetryUiState: implemented
+    resultDiffUiState: implemented
+    adoptionHistoryUiState: implemented
     historyMutationDecision: blocked_requires_separate_approval
     formalPublishDecision: blocked_requires_separate_approval
     retryMutationDecision: blocked_requires_separate_approval
     batchAdoptionMutationDecision: blocked_requires_separate_approval
     resultDiffDecision: closed_read_model_only
-    adoptionHistoryDecision: planned_read_model_only
+    adoptionHistoryDecision: closed_read_model_only
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: deferred_requires_separate_approval
@@ -618,7 +621,7 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+  nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

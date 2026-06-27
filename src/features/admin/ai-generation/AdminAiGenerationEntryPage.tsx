@@ -136,6 +136,29 @@ function formatRequestedAt(requestedAt: string): string {
   return requestedAt.slice(0, 16).replace("T", " ");
 }
 
+const contentAdminReviewLocalValidationItems = [
+  {
+    boundaryStatus: "batch_adoption_mutation:not_executed",
+    contractStatus: "batch_selection_preview",
+    validationMode: "preview_only",
+  },
+  {
+    boundaryStatus: "retry_mutation:not_executed",
+    contractStatus: "failed_retry_state",
+    validationMode: "request_only",
+  },
+  {
+    boundaryStatus: "raw_payload_exposure:not_executed",
+    contractStatus: "result_diff_read_model",
+    validationMode: "read_only",
+  },
+  {
+    boundaryStatus: "history_mutation:not_executed",
+    contractStatus: "adoption_history_read_model",
+    validationMode: "read_only",
+  },
+] as const;
+
 function AdminAiGenerationTaskHistoryPanel({
   state,
   taskHistory,
@@ -333,6 +356,53 @@ function ContentAdminReviewTraceabilityPanel() {
           <dd className="text-text-primary mt-1">not_executed</dd>
         </div>
       </dl>
+
+      <section
+        className="border-border bg-muted/40 mt-3 rounded-md border p-3"
+        data-testid="content-admin-review-batch-retry-diff-history-local-validation"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-brand-primary text-xs font-medium">
+              batch_retry_diff_history_local_validation
+            </p>
+            <h5 className="text-text-primary mt-1 text-sm font-semibold">
+              source_contracts_ready
+            </h5>
+          </div>
+          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+            browser_e2e_dev_server:not_executed
+          </span>
+        </div>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {contentAdminReviewLocalValidationItems.map((item) => (
+            <dl
+              className="border-border bg-background rounded-md border p-2 text-xs"
+              key={item.contractStatus}
+            >
+              <div>
+                <dt className="text-text-secondary">contract</dt>
+                <dd className="text-text-primary mt-1">
+                  {item.contractStatus}
+                </dd>
+              </div>
+              <div className="mt-2">
+                <dt className="text-text-secondary">validation_mode</dt>
+                <dd className="text-text-primary mt-1">
+                  {item.validationMode}
+                </dd>
+              </div>
+              <div className="mt-2">
+                <dt className="text-text-secondary">boundary</dt>
+                <dd className="text-text-primary mt-1">
+                  {item.boundaryStatus}
+                </dd>
+              </div>
+            </dl>
+          ))}
+        </div>
+      </section>
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button

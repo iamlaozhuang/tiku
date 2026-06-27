@@ -640,6 +640,18 @@ describe("admin AI generation entry surfaces", () => {
       "blocked_requires_fresh_publish_task",
     );
     expect(traceabilityPanel).toHaveTextContent("not_executed");
+    const localValidationPanel = await screen.findByTestId(
+      "content-admin-review-batch-retry-diff-history-local-validation",
+    );
+    expect(localValidationPanel).toHaveTextContent("batch_selection_preview");
+    expect(localValidationPanel).toHaveTextContent("failed_retry_state");
+    expect(localValidationPanel).toHaveTextContent("result_diff_read_model");
+    expect(localValidationPanel).toHaveTextContent(
+      "adoption_history_read_model",
+    );
+    expect(localValidationPanel).toHaveTextContent("request_only");
+    expect(localValidationPanel).toHaveTextContent("read_only");
+    expect(localValidationPanel).toHaveTextContent("not_executed");
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
     ).toBeDisabled();
