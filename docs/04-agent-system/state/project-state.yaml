@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
-updatedAt: "2026-06-27T11:40:00-07:00"
+currentPhase: three-layer-acceptance-final-evidence-review-2026-06-27
+updatedAt: "2026-06-27T11:58:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,28 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 297fd836f74a38c0bb3294438b412ffee1cf0141
-  lastKnownOriginMasterSha: 297fd836f74a38c0bb3294438b412ffee1cf0141
+  lastKnownMasterSha: 64351f6f7b0d2983398877e6f422c027b97d1207
+  lastKnownOriginMasterSha: 64351f6f7b0d2983398877e6f422c027b97d1207
 currentTask:
-  id: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+  id: three-layer-acceptance-final-evidence-review-2026-06-27
   status: closed
-  result: pass_registered_archive_index_apply_moved_74_candidates_final_review_registered
-  claimedAt: "2026-06-27T11:40:00-07:00"
-  plannedAt: "2026-06-27T11:40:00-07:00"
-  implementedAt: "2026-06-27T11:40:00-07:00"
-  validatedAt: "2026-06-27T11:40:00-07:00"
-  reviewedAt: "2026-06-27T11:40:00-07:00"
-  closedAt: "2026-06-27T11:40:00-07:00"
-  sourceStory: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+  result: partial_blocked_layer1_layer2_provider_cost_pass_prerelease_external_gates_blocked_no_release_readiness_no_final_pass
+  claimedAt: "2026-06-27T11:58:00-07:00"
+  plannedAt: "2026-06-27T11:58:00-07:00"
+  implementedAt: "2026-06-27T11:58:00-07:00"
+  validatedAt: "2026-06-27T11:58:00-07:00"
+  reviewedAt: "2026-06-27T11:58:00-07:00"
+  closedAt: "2026-06-27T11:58:00-07:00"
+  sourceStory: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
   approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
-  branch: codex/active-queue-archive-index-apply-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-three-layer-acceptance-final-evidence-review.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-final-evidence-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-final-evidence-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-final-evidence-review.md
+  branch: codex/three-layer-final-evidence-review-20260627
   scope:
     docsStateEvidenceAudit: true
-    archiveIndexMovement: true
-    taskHistoryIndexWrite: true
-    activeQueueCandidateRemoval: true
-    finalEvidenceReviewTaskRegistered: true
-    unregisteredTaskMovement: false
+    finalEvidenceReview: true
     sourceOrTestChange: false
     scriptPackageLockfileChange: false
     schemaMigrationSeedChange: false
@@ -547,27 +543,24 @@ currentTask:
     stagingProdDeploy: false
     paymentExternalServiceExecution: false
     ocrExportExecution: false
+    archiveIndexMovement: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    archiveIndexDecision: pass_registered_candidates_moved_only
-    movedTaskCount: 74
-    taskHistoryIndexUpdates: 74
-    skippedTaskCount: 0
-    unregisteredTaskMoveCount: 0
-    retainedBlockedTaskCount: 2
-    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    nextRecommendedTask: three-layer-acceptance-final-evidence-review-2026-06-27
-    layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_preserved
+    overallDecision: partial_blocked
+    layer1Status: pass_complete_preserved_no_regression_claim_only
+    layer2Status: pass_minimum_local_postgres_test_owned_rejected_route_runtime_smoke
     layer3ProviderStatus: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
-    layer3CostStatus: pass_local_minimum_single_sample_estimate_preserved
-    preReleaseStatus: blocked_missing_concrete_isolated_staging_target_rolled_up
-    paymentExternalServiceDecision: approval_package_prepared_execution_blocked_future_scope
-    ocrExportDecision: approval_package_prepared_execution_blocked_future_scope
-    releaseReadinessDecision: blocked_pending_final_evidence_review
-    finalPassDecision: blocked_pending_final_evidence_review
+    layer3CostStatus: pass_minimum_local_single_sample_redacted_estimate
+    preReleaseStatus: blocked_missing_concrete_isolated_staging_target
+    paymentExternalServiceDecision: blocked_approval_package_only_no_execution
+    ocrExportDecision: blocked_approval_package_only_no_execution
+    highRiskCleanupStatus: pass_registered_cleanup_ledger_and_archive_index_apply_completed
+    residualArchiveCandidateCount: 2
+    activeQueueNonTerminalCount: 3
+    releaseReadinessDecision: blocked
+    finalPassDecision: blocked
+    nextRecommendedTask: blocked_pending_human_decision_for_concrete_staging_target_or_partial_goal_closeout
   closeoutPolicy:
     localCommit:
       approved: true
@@ -590,11 +583,7 @@ currentTask:
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    archiveIndexMovementExecuted: true
-    movedTaskCount: 74
-    taskHistoryIndexUpdates: 74
-    unregisteredTaskMoves: 0
-    finalEvidenceReviewTaskRegistered: true
+    finalEvidenceReviewCompleted: true
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
@@ -615,12 +604,12 @@ currentTask:
     stagingProdDeployExecuted: false
     paymentExternalServiceExecuted: false
     ocrExportExecuted: false
+    archiveIndexMovementExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    queueSlimmingDiagnostic: pass_residual_unregistered_cleanup_archive_candidates_2
-    projectStatusDiagnostic: pass_next_final_evidence_review_dirty_worktree_advisory_only
-    activeQueueNonTerminalCountAfterTask: 3
-    archiveCandidateCountAfterTask: 2
+    projectStatusDiagnostic: pass_idle_no_pending_task_partial_blocked
+    activeQueueNonTerminalCountAfterTask: 2
+    archiveCandidateCountAfterTask: 3
     highRiskRepairBlockedCountAfterTask: 0
     lint: not_run_docs_state_only_no_source_change
     typecheck: not_run_docs_state_only_no_source_change
@@ -632,7 +621,7 @@ currentTask:
     ffOnlyMergeToMaster: pending
     pushOriginMaster: pending
     shortBranchCleanup: pending
-  nextRecommendedTask: three-layer-acceptance-final-evidence-review-2026-06-27
+  nextRecommendedTask: blocked_pending_human_decision_for_concrete_staging_target_or_partial_goal_closeout
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

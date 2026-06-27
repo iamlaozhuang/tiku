@@ -348,11 +348,17 @@ tasks:
     validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
     taskKind: docs_state_final_evidence_review
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: partial_blocked_layer1_layer2_provider_cost_pass_prerelease_external_gates_blocked_no_release_readiness_no_final_pass
     approvedAt: "2026-06-27T10:10:52-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    claimedAt: "2026-06-27T11:58:00-07:00"
+    plannedAt: "2026-06-27T11:58:00-07:00"
+    implementedAt: "2026-06-27T11:58:00-07:00"
+    validatedAt: "2026-06-27T11:58:00-07:00"
+    reviewedAt: "2026-06-27T11:58:00-07:00"
+    closedAt: "2026-06-27T11:58:00-07:00"
     branch: codex/three-layer-final-evidence-review-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -472,6 +478,50 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-final-evidence-review.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-final-evidence-review.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-three-layer-acceptance-final-evidence-review.md
+    finalEvidenceReview:
+      layer1Status: pass_complete_preserved_no_regression_claim_only
+      layer2Status: pass_minimum_local_postgres_test_owned_rejected_route_runtime_smoke
+      layer3ProviderStatus: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
+      layer3CostStatus: pass_minimum_local_single_sample_redacted_estimate
+      layer3PreReleaseStatus: blocked_missing_concrete_isolated_staging_target
+      paymentExternalServiceStatus: blocked_approval_package_only_no_execution
+      ocrExportStatus: blocked_approval_package_only_no_execution
+      highRiskCleanupStatus: pass_registered_cleanup_ledger_and_archive_index_apply_completed
+      residualArchiveCandidateCount: 2
+      activeQueueNonTerminalCount: 3
+      releaseReadinessDecision: blocked
+      finalPassDecision: blocked
+      overallDecision: partial_blocked
+      reasonCategory: prerelease_external_service_ocr_export_gates_unproven
+      nextHumanDecisionNeeded: register_concrete_isolated_staging_target_or_accept_partial_blocked_goal_closeout
+    validationSummary:
+      taskPlanPrepared: true
+      finalEvidenceReviewCompleted: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_partial_blocked
+      activeQueueNonTerminalCountAfterTask: 2
+      archiveCandidateCountAfterTask: 3
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27
