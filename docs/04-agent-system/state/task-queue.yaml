@@ -44,6 +44,205 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: content-admin-review-ux-design-traceability-package-2026-06-27
+    title: Content-admin review UX design and traceability package
+    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - organization-analytics-ux-design-first-package-2026-06-27
+    taskKind: docs_state_ux_design_first_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_design_package_no_source_no_browser
+    evidenceMode: redacted_design_boundary_and_followup_split
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Prepare the content-admin AI review UX design-first package, define the single-result traceability source TDD
+      follow-up task, and classify batch/retry/diff/history as second-layer enhancement work without source, UI, DB,
+      Provider, browser/e2e, publish, staging/prod, payment, external service, release readiness, or final Pass.
+    status: closed
+    result: pass_design_first_package_single_result_traceability_followups_blocked
+    approvedAt: "2026-06-27T01:20:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      scope: docs_state_ux_design_package_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T01:20:00-07:00"
+    plannedAt: "2026-06-27T01:20:00-07:00"
+    validatedAt: "2026-06-27T01:30:00-07:00"
+    reviewedAt: "2026-06-27T01:30:00-07:00"
+    closedAt: "2026-06-27T01:30:00-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      reviewAdoptionMutation: blocked
+      batchReviewRetryDiffHistory: blocked
+      formalPublishStudentVisibleContent: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ux-design-traceability-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ux-design-traceability-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ux-design-traceability-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ux-design-traceability-package.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state_design_first_package
+      - content_admin_review_traceability_boundary
+      - followup_task_split
+      - no_publish
+      - redacted_evidence
+    designDecision:
+      uxClassification: single_result_review_traceability_required
+      sourceTdd: fresh_approval_required_for_single_result_traceability_contract
+      uiImplementation: required_after_source_contract
+      enhancementScope: batch_retry_diff_history_second_layer
+      browserValidation: deferred_requires_fresh_local_runtime_approval
+      directPublishOrStudentVisibleContent: blocked
+    followUpBoundaryTasks:
+      - content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
+      - content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+      - content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ux-design-traceability-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ux-design-traceability-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ux-design-traceability-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-ux-design-traceability-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-ux-design-traceability-package-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ux-design-traceability-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ux-design-traceability-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ux-design-traceability-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ux-design-traceability-package.md
+    branch: codex/content-admin-review-ux-traceability-package-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+
+  - id: content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
+    title: Content-admin review single-result traceability source TDD approval
+    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-ux-design-traceability-package-2026-06-27
+    taskKind: source_tdd_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_tdd_approval
+    nextApprovalRequired: source_contract_unit_tests_allowed_files_no_provider_publish_browser
+    boundary: single_generated_result_review_traceability_contract_no_raw_evidence_no_publish
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - databaseConnection
+      - reviewAdoptionMutation
+      - formalPublishStudentVisibleContent
+      - browserRuntime
+
+  - id: content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+    title: Content-admin review UI implementation local validation approval
+    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
+    taskKind: ui_implementation_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_ui_implementation_approval
+    nextApprovalRequired: ui_source_allowed_files_component_tests_local_validation
+    boundary: content_admin_single_result_review_surface_after_traceability_source_contract
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - browserRuntime
+      - reviewAdoptionMutation
+      - formalPublishStudentVisibleContent
+
+  - id: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+    title: Content-admin review batch retry diff history enhancement package
+    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-ux-design-traceability-package-2026-06-27
+    taskKind: enhancement_package_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_enhancement_package_approval
+    nextApprovalRequired: batch_retry_diff_history_scope_decision_before_source_or_ui
+    boundary: batch_review_failed_retry_diff_view_adoption_history_second_layer
+    blockedCapabilities:
+      - localSourceChange
+      - testChange
+      - databaseConnection
+      - batchReviewRetryDiffHistory
+      - browserRuntime
+
+  - id: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
+    title: Content-admin review local browser smoke validation approval
+    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+    taskKind: browser_validation_followup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_local_browser_smoke_approval
+    nextApprovalRequired: dev_server_local_account_seed_or_fixture_and_browser_scope
+    boundary: local_only_content_admin_review_smoke_after_source_ui_exist_no_publish
+    blockedCapabilities:
+      - browserRuntime
+      - devServer
+      - e2eRuntime
+      - databaseConnection
+      - formalPublishStudentVisibleContent
+
   - id: organization-analytics-ux-design-first-package-2026-06-27
     title: Organization analytics UX design-first package
     phase: organization-analytics-ux-design-first-package-2026-06-27
