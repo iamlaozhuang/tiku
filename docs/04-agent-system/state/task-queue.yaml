@@ -221,6 +221,7 @@ tasks:
       pr: blocked
       forcePush: blocked
     allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
       - src/server/contracts/admin-ai-generation-formal-adoption-contract.ts
       - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
       - src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts
@@ -543,15 +544,112 @@ tasks:
     sourceStory: current_user_serial_batch_queue_2026_06_27
     dependencies:
       - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
-    taskKind: source_tdd_followup_blocked
+    taskKind: source_contract_tdd
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_source_tdd_approval
+    executionProfile: source_contract_tdd_local_only
+    evidenceMode: redacted_tdd_evidence
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    status: closed
+    result: pass_batch_selection_source_contract_tdd_preview_only
+    approvedAt: "2026-06-27T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      scope: batch_selection_source_contract_tdd_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T00:00:00-07:00"
+    plannedAt: "2026-06-27T00:00:00-07:00"
+    implementedAt: "2026-06-27T00:00:00-07:00"
+    validatedAt: "2026-06-27T00:00:00-07:00"
+    reviewedAt: "2026-06-27T00:00:00-07:00"
+    closedAt: "2026-06-27T00:00:00-07:00"
     nextApprovalRequired: batch_selection_contract_allowed_files_and_no_mutation_boundary
     boundary: batch_candidate_selection_validation_state_preview_only_no_batch_adoption_mutation
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      batchAdoptionMutation: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      formalPublishStudentVisibleContent: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - src/server/contracts/admin-ai-generation-formal-adoption-contract.ts
+      - src/server/services/admin-ai-generation-review-batch-selection-service.ts
+      - src/server/services/admin-ai-generation-review-batch-selection-service.test.ts
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - source_contract_tdd
+      - content_admin_review_batch_selection_contract
+      - preview_only_no_batch_adoption_mutation
+      - no_db
+      - no_provider
+      - redacted_evidence
+    validationCommands:
+      - npm.cmd exec vitest -- run src/server/services/admin-ai-generation-review-batch-selection-service.test.ts
+      - npx.cmd prettier --write --ignore-unknown src/server/contracts/admin-ai-generation-formal-adoption-contract.ts src/server/services/admin-ai-generation-review-batch-selection-service.ts src/server/services/admin-ai-generation-review-batch-selection-service.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+      - npx.cmd prettier --check --ignore-unknown src/server/contracts/admin-ai-generation-formal-adoption-contract.ts src/server/services/admin-ai-generation-review-batch-selection-service.ts src/server/services/admin-ai-generation-review-batch-selection-service.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-selection-source-contract-tdd.md
+    branch: codex/content-admin-review-batch-selection-contract-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
     blockedCapabilities:
-      - localSourceChange
-      - testChange
       - databaseConnection
       - databaseMutation
       - batchAdoptionMutation

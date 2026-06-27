@@ -12,7 +12,11 @@ import type {
   AdminAiGenerationKind,
   AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract";
-import type { AdminAiGenerationResultOwnerType } from "../models/admin-ai-generation-result";
+import type {
+  AdminAiGenerationResultOwnerType,
+  AdminAiGenerationResultStatus,
+  AdminAiGenerationResultTaskType,
+} from "../models/admin-ai-generation-result";
 
 export type CreateAdminAiGenerationFormalAdoptionInput =
   AdminAiGenerationFormalAdoptionCommandInput;
@@ -111,6 +115,77 @@ export type AdminAiGenerationFormalAdoptionReviewTraceabilityDto = {
     targetPublicId: string;
     redactionStatus: "redacted";
   };
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewBatchSelectionBlockedReason =
+  | "blocked_non_content_workspace"
+  | "blocked_unsafe_owner_scope"
+  | "blocked_result_not_draft"
+  | "blocked_formal_adoption_not_blocked"
+  | "blocked_target_type_mismatch";
+
+export type AdminAiGenerationReviewBatchSelectionSource = {
+  resultPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  workspace: AdminAiGenerationWorkspace;
+  generationKind: AdminAiGenerationKind;
+  ownerType: AdminAiGenerationResultOwnerType;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+  taskType: AdminAiGenerationResultTaskType;
+  resultStatus: AdminAiGenerationResultStatus;
+  isFormalAdoptionBlocked: boolean;
+  contentDigest: string;
+  contentPreviewMasked: string;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  generatedAt: string;
+};
+
+export type AdminAiGenerationReviewBatchSelectionCandidateDto = {
+  resultPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  generationKind: AdminAiGenerationKind;
+  validationStatus: "eligible" | "blocked";
+  blockedReason: AdminAiGenerationReviewBatchSelectionBlockedReason | null;
+  selectionState: "available" | "selected" | "blocked";
+  contentPreviewMasked: string;
+  contentDigest: string;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  generatedAt: string;
+  formalTargetWriteStatus: "blocked_without_follow_up_task";
+  batchAdoptionMutationStatus: "not_executed";
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewBatchSelectionPreviewInput = {
+  candidates: readonly AdminAiGenerationReviewBatchSelectionSource[];
+  selectedResultPublicIds: readonly string[];
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+};
+
+export type AdminAiGenerationReviewBatchSelectionPreviewDto = {
+  previewStatus:
+    | "ready"
+    | "empty"
+    | "blocked_no_eligible_candidate"
+    | "blocked_by_invalid_selection";
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+  selectionMode: "manual_batch_preview";
+  batchAdoptionMutationStatus: "not_executed";
+  validationState: {
+    candidateCount: number;
+    eligibleCount: number;
+    blockedCount: number;
+    selectedCount: number;
+    invalidSelectedCount: number;
+    previewOnly: true;
+  };
+  candidates: AdminAiGenerationReviewBatchSelectionCandidateDto[];
   redactionStatus: "redacted";
 };
 
