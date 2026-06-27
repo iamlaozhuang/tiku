@@ -289,22 +289,121 @@ tasks:
 
   - id: content-admin-review-ui-implementation-local-validation-approval-2026-06-27
     title: Content-admin review UI implementation local validation approval
-    phase: content-admin-review-ux-design-traceability-package-2026-06-27
+    phase: content-admin-review-ui-implementation-local-validation-approval-2026-06-27
     sourceStory: current_user_serial_batch_queue_2026_06_27
     dependencies:
       - content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
-    taskKind: ui_implementation_followup_blocked
+    taskKind: ui_implementation_local_validation
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_ui_implementation_approval
-    nextApprovalRequired: ui_source_allowed_files_component_tests_local_validation
-    boundary: content_admin_single_result_review_surface_after_traceability_source_contract
-    blockedCapabilities:
-      - localSourceChange
-      - testChange
-      - browserRuntime
-      - reviewAdoptionMutation
-      - formalPublishStudentVisibleContent
+    executionProfile: ui_source_component_test_local_only
+    evidenceMode: redacted_unit_test_evidence
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Implement a local content-admin single-result review traceability UI surface after the source contract exists,
+      covered by focused component/unit tests, without DB connection, DB mutation, Provider, publish, student-visible
+      runtime, browser/e2e, dev server, staging/prod, payment, external service, PR, force push, release readiness, or final Pass.
+    status: closed
+    result: pass_content_admin_review_ui_local_traceability_no_mutation_no_runtime
+    approvedAt: "2026-06-27T03:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      scope: ui_source_component_test_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T03:00:00-07:00"
+    plannedAt: "2026-06-27T03:00:00-07:00"
+    validatedAt: "2026-06-27T04:24:00-07:00"
+    reviewedAt: "2026-06-27T04:24:00-07:00"
+    closedAt: "2026-06-27T04:24:00-07:00"
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      reviewAdoptionMutation: blocked
+      formalPublishStudentVisibleContent: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - ui_implementation_local_validation
+      - content_admin_review_traceability_ui
+      - no_db_mutation
+      - no_provider
+      - no_publish
+      - redacted_evidence
+    boundary:
+      uiSurface: content_admin_single_result_review_traceability
+      adoptionMutation: blocked_disabled_actions_only
+      publish: blocked_requires_separate_fresh_publish_task
+      studentVisibleRuntime: blocked
+      browserValidation: blocked_requires_separate_approval
+    validationCommands:
+      - npm.cmd exec vitest -- run tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --write --ignore-unknown src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+      - npx.cmd prettier --check --ignore-unknown src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ui-implementation-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-ui-implementation-local-validation-approval-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-ui-implementation-local-validation.md
+    branch: codex/content-admin-review-ui-local-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
 
   - id: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
     title: Content-admin review batch retry diff history enhancement package

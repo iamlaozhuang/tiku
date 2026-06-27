@@ -592,6 +592,71 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
+  it("renders content admin review traceability for a single persisted generated result without enabling mutations", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_review_hidden_456";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_review_hidden_456";
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for review traceability",
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const traceabilityPanel = await screen.findByTestId(
+      "content-admin-review-traceability",
+    );
+
+    expect(traceabilityPanel).toHaveTextContent("single_result_traceable");
+    expect(traceabilityPanel).toHaveTextContent("awaiting_metadata_review");
+    expect(traceabilityPanel).toHaveTextContent(
+      "blocked_requires_fresh_publish_task",
+    );
+    expect(traceabilityPanel).toHaveTextContent("not_executed");
+    expect(
+      screen.getByTestId("content-admin-review-adopt-action"),
+    ).toBeDisabled();
+    expect(
+      screen.getByTestId("content-admin-review-reject-action"),
+    ).toBeDisabled();
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+      "/api/v1/content-ai-generation-requests",
+    ]);
+    expect(document.body.textContent).not.toContain(taskPublicId);
+    expect(document.body.textContent).not.toContain(resultPublicId);
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("rawOutput");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
   it("shows persisted redacted generated result summaries for organization advanced admin history", async () => {
     const taskPublicId =
       "admin_ai_generation_task_organization_paper_history_hidden_789";

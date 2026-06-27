@@ -139,9 +139,11 @@ function formatRequestedAt(requestedAt: string): string {
 function AdminAiGenerationTaskHistoryPanel({
   state,
   taskHistory,
+  workspace,
 }: {
   state: AdminAiGenerationHistoryState;
   taskHistory: AdminAiGenerationTaskHistoryDto | null;
+  workspace: AdminAiGenerationWorkspace;
 }) {
   const items = taskHistory?.items ?? [];
 
@@ -280,12 +282,76 @@ function AdminAiGenerationTaskHistoryPanel({
                       </dd>
                     </div>
                   </dl>
+                  {workspace === "content" ? (
+                    <ContentAdminReviewTraceabilityPanel />
+                  ) : null}
                 </div>
               ) : null}
             </article>
           ))}
         </div>
       ) : null}
+    </section>
+  );
+}
+
+function ContentAdminReviewTraceabilityPanel() {
+  return (
+    <section
+      className="border-border bg-background mt-3 rounded-md border p-3"
+      data-testid="content-admin-review-traceability"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">
+            content_admin_review_traceability
+          </p>
+          <h4 className="text-text-primary mt-1 text-sm font-semibold">
+            single_result_traceable
+          </h4>
+        </div>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          blocked_requires_fresh_publish_task
+        </span>
+      </div>
+
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt className="text-text-secondary">review_state</dt>
+          <dd className="text-text-primary mt-1">awaiting_metadata_review</dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">result_scope</dt>
+          <dd className="text-text-primary mt-1">redacted</dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">adoption_mutation</dt>
+          <dd className="text-text-primary mt-1">not_executed</dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">student_visible_runtime</dt>
+          <dd className="text-text-primary mt-1">not_executed</dd>
+        </div>
+      </dl>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          data-testid="content-admin-review-adopt-action"
+          disabled
+          type="button"
+        >
+          adopt_disabled
+        </button>
+        <button
+          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          data-testid="content-admin-review-reject-action"
+          disabled
+          type="button"
+        >
+          reject_disabled
+        </button>
+      </div>
     </section>
   );
 }
@@ -522,6 +588,7 @@ export function AdminAiGenerationEntryPage({
       <AdminAiGenerationTaskHistoryPanel
         state={historyState}
         taskHistory={taskHistory}
+        workspace={workspace}
       />
 
       {requestState === "error" ? (
