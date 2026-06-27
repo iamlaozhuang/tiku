@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
-updatedAt: "2026-06-27T05:35:10-07:00"
+currentPhase: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+updatedAt: "2026-06-27T05:46:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,31 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b36085f20f2097ab52ea184059216d777ff82b6f
-  lastKnownOriginMasterSha: b36085f20f2097ab52ea184059216d777ff82b6f
+  lastKnownMasterSha: f66c71adb1096cfe64f522b461ef4b270d294a08
+  lastKnownOriginMasterSha: f66c71adb1096cfe64f522b461ef4b270d294a08
 currentTask:
-  id: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+  id: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
   status: closed
-  result: pass_local_route_smoke_approval_package_prepared_execution_blocked
-  claimedAt: "2026-06-27T05:28:05-07:00"
-  plannedAt: "2026-06-27T05:28:05-07:00"
-  implementedAt: "2026-06-27T05:28:05-07:00"
-  validatedAt: "2026-06-27T05:35:10-07:00"
-  reviewedAt: "2026-06-27T05:35:10-07:00"
-  closedAt: "2026-06-27T05:35:10-07:00"
-  sourceStory: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27
-  approvalSource: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
-  branch: codex/content-admin-route-smoke-approval-20260627
+  result: pass_route_runtime_rejected_smoke_default_db_path_blocked
+  claimedAt: "2026-06-27T05:40:58-07:00"
+  plannedAt: "2026-06-27T05:40:58-07:00"
+  implementedAt: "2026-06-27T05:43:38-07:00"
+  validatedAt: "2026-06-27T05:46:53-07:00"
+  reviewedAt: "2026-06-27T05:46:53-07:00"
+  closedAt: "2026-06-27T05:46:53-07:00"
+  sourceStory: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27
+  approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+  branch: codex/content-admin-route-smoke-execution-20260627
   scope:
     docsStateEvidenceAudit: true
-    localRouteSmokeApprovalPackage: true
-    futureRuntimeExecutionApproved: false
-    successorBlockedTaskRegistration: true
+    localRouteSmokeExecution: true
+    routeHandlerRuntime: true
     sourceOrTestChange: false
+    injectedTestRepositoryRuntime: true
+    defaultPostgresRuntimeUsed: false
+    localDbCredentialEnvReadApproved: false
+    successorBlockedTaskRegistration: true
     allowedStateFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -535,7 +538,7 @@ currentTask:
     serviceSourceChange: false
     repositorySourceChange: false
     runtimeSourceChange: false
-    focusedUnitTest: false
+    focusedUnitTest: true
     testsOrE2eChange: false
     schemaMigrationFileChange: false
     liveDatabaseConnectionExecuted: false
@@ -547,7 +550,7 @@ currentTask:
     providerCallCount: 0
     providerRetryCount: 0
     costCalibration: false
-    retryOrAdoptionMutationExecuted: false
+    retryOrAdoptionMutationExecuted: route_runtime_injected_repository_only
     formalQuestionOrPaperWrite: false
     formalPublish: false
     studentVisibleContent: false
@@ -557,23 +560,26 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    approvalPackageDecision: local_route_smoke_execution_boundary_prepared_runtime_still_blocked
+    executionDecision: one_rejected_route_handler_runtime_smoke_passed
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: source_test_command_contract_closed_business_runtime_db_browser_provider_still_blocked
-    layer2ExpectedAfterTask: local_route_smoke_execution_approval_package_ready_execution_still_blocked
+    layer2StatusBeforeTask: local_route_smoke_execution_approval_package_ready_execution_still_blocked
+    layer2ExpectedAfterTask: route_runtime_rejected_smoke_with_injected_repository_db_default_path_still_blocked
     layer3Status: blocked_provider_cost_pre_release_gates
     activeQueueNonTerminalCountBeforeTask: 28
     localCommitApproved: true
     mergePushCleanupApproved: true
     mergePushCleanupApprovalSource: current_user_independent_branch_closeout_instruction_2026_06_27
-    successorTask: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
-    successorTaskDecision: blocked_until_fresh_runtime_db_mutation_execution_approval
+    selectedDecision: rejected
+    routeSurface: POST /api/v1/content-ai-generation-results/{publicId}/formal-adoptions
+    successorTask: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+    successorTaskDecision: propose_docs_state_rollup_after_execution
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
     finalPassDecision: blocked
     e2eRuntimeDecision: blocked
     formalPublishOrStudentVisibleRuntime: blocked
+    defaultPostgresRuntimeDecision: blocked_due_env_local_credential_read_boundary
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
@@ -585,43 +591,46 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_docs_state_layer_2_local_route_smoke_approval_package_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    approvalPackagePrepared: true
-    successorBlockedTaskRegistered: true
+    approvalPackagePrepared: not_applicable
+    successorBlockedTaskRegistered: false
     evidencePrepared: true
     auditReviewPrepared: true
-    acceptanceRefreshPrepared: not_applicable
-    docsOnly: true
+    acceptancePrepared: true
+    docsOnly: false
     ssotReadListPrepared: true
     activeQueueNonTerminalCountBeforeTask: 28
     sourceCommandContractEvidenceRead: pass_content_admin_adoption_tdd_closed
     explicitAdoptRejectCommandContractStatus: covered_source_test_only
-    businessRuntimeClosureStatus: blocked_pending_fresh_runtime_db_mutation_execution_approval
-    futureExecutionTask: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
-    testDataBoundaryPrepared: true
-    singleMutationCapPrepared: true
-    dbReadWriteBoundaryPrepared: true
-    rollbackArchiveStrategyPrepared: true
-    redactionRulesPrepared: true
-    focusedUnitTests: not_run_docs_state_only
-    mechanismScriptSmoke: pass
+    businessRuntimeClosureStatus: partial_route_runtime_smoke_passed_db_default_path_still_blocked
+    selectedDecision: rejected
+    routeRuntimeSmokeCommand: pass_focused_runtime_route_rejected_test
+    testDataBoundaryConsumed: existing_synthetic_test_owned_target
+    singleMutationCapConsumed: one_route_handler_invocation
+    dbReadWriteBoundaryConsumed: false_default_postgres_blocked_by_env_boundary
+    rollbackArchiveStrategyConsumed: test_process_cleanup_only
+    redactionRulesConsumed: pass_no_raw_content_token_internal_id
+    focusedUnitTests: pass_1_test_4_skipped
+    lint: pass
+    typecheck: pass
+    mechanismScriptSmoke: pass_after_validation_transcript_repair
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
@@ -633,7 +642,7 @@ currentTask:
     providerRetryCount: 0
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
-    reviewAdoptionMutationExecuted: false
+    reviewAdoptionMutationExecuted: route_runtime_injected_repository_only
     batchAdoptionRetryDiffExecuted: false
     rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
     formalPublishExecuted: false
@@ -642,7 +651,7 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 23
+    archiveCandidateCountAfterTask: 24
     highRiskRepairBlockedCountAfterTask: 0
     prettierScoped: pass
     gitDiffCheck: pass
@@ -653,10 +662,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: b36085f20f2097ab52ea184059216d777ff82b6f
-    baselineOriginMasterSha: b36085f20f2097ab52ea184059216d777ff82b6f
-    currentBranch: codex/content-admin-route-smoke-approval-20260627
-  nextRecommendedTask: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    baselineMasterSha: f66c71adb1096cfe64f522b461ef4b270d294a08
+    baselineOriginMasterSha: f66c71adb1096cfe64f522b461ef4b270d294a08
+    currentBranch: codex/content-admin-route-smoke-execution-20260627
+  nextRecommendedTask: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

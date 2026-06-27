@@ -769,6 +769,208 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    title: Content admin review adoption local route smoke execution
+    phase: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    sourceStory: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27
+    dependencies:
+      - content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+      - content-admin-review-adoption-command-contract-tdd-2026-06-27
+    taskPlanPolicy: required_before_runtime_execution
+    humanApprovalBoundary: >-
+      Current user fresh-approves one Layer 2 capped local route/runtime smoke execution for
+      `content-admin-review-adoption-local-route-smoke-execution-2026-06-27`. The task may execute one local dev
+      content_admin generated-result review route/service smoke with exactly one decision, either `approved` or
+      `rejected`, and may use the previously defined test data, single mutation cap, DB read/write boundary,
+      rollback/archive strategy, and redaction rules. Browser/dev-server/e2e, Provider, Cost Calibration,
+      schema/migration/seed/destructive DB, formal publish, student-visible runtime, staging/prod/deploy/payment
+      external service, OCR/export, PR, force push, release readiness, and final Pass are not approved.
+    targetClosureItem: Execute one capped content-admin review route/runtime smoke
+    behaviorBoundary: local_route_runtime::one_rejected_decision_injected_repository_no_browser_no_provider_no_formal_publish
+    executionProfile: layer_2_capped_local_route_runtime_smoke_after_fresh_approval
+    evidenceMode: redacted_local_route_runtime_smoke
+    validationPolicy: focused_route_runtime_test_lint_typecheck_scoped_docs_state_gates
+    taskKind: local_route_runtime_smoke
+    moduleRunVersion: 2
+    status: closed
+    result: pass_route_runtime_rejected_smoke_default_db_path_blocked
+    approvedAt: "2026-06-27T05:40:58-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+    claimedAt: "2026-06-27T05:40:58-07:00"
+    plannedAt: "2026-06-27T05:40:58-07:00"
+    implementedAt: "2026-06-27T05:43:38-07:00"
+    validatedAt: "2026-06-27T05:46:53-07:00"
+    reviewedAt: "2026-06-27T05:46:53-07:00"
+    closedAt: "2026-06-27T05:46:53-07:00"
+    branch: codex/content-admin-route-smoke-execution-20260627
+    capabilities:
+      localRouteRuntimeSmoke: approved
+      routeHandlerRuntime: approved
+      focusedUnitTest: approved
+      injectedTestRepositoryRuntime: approved
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDockerDatabase: not_consumed_default_postgres_path_blocked_by_env_boundary
+      databaseConnection: not_executed_default_postgres_path_blocked_by_env_boundary
+      databaseReadWriteSeedMigrationRollback: blocked_for_schema_seed_destructive_and_raw_db
+      envSecretRead: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+      - src/app/api/v1/content-ai-generation-results/[publicId]/formal-adoptions/route.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/admin-ai-generation-formal-adoption-service.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+      - src/server/repositories/admin-ai-generation-formal-adoption-db-adapter.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localRouteSmoke:
+      routeSurface: POST /api/v1/content-ai-generation-results/{publicId}/formal-adoptions
+      selectedDecision: rejected
+      roleLabel: content_admin
+      targetType: question
+      invocationCap: one_focused_route_handler_invocation
+      repositoryBoundary: injected_test_repository
+      defaultPostgresBoundary: blocked_not_consumed_because_runtime_database_loads_env_local_for_database_url
+      persistentDbArtifact: none
+      rollbackArchiveStrategy: test_process_exit_discards_injected_state
+      formalDraftCreation: blocked_and_asserted_not_called
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      redaction: command_result_assertion_categories_only
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts -t "allows content admin to reject a generated question without formal draft creation"
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-adoption-local-route-smoke-execution-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_layer_2_capped_local_route_runtime_smoke_execution_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    validationSummary:
+      taskPlanPrepared: true
+      routeRuntimeSmokeExecuted: pass_rejected_route_runtime_injected_repository
+      selectedDecision: rejected
+      focusedRouteRuntimeTest: pass_1_test_4_skipped
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_validation_transcript_repair
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      devServerExecuted: false
+      e2eRuntimeExecuted: false
+      defaultPostgresRuntimeExecuted: false
+      envSecretRead: false
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - env_secret_or_dotenv_read
+      - default_postgres_runtime_database_url_loading
+      - schema_migration_seed_or_destructive_database_operation
+      - raw_db_row_dump_or_broad_scan
+      - provider_call_or_configuration
+      - cost_calibration
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: layer-2-business-closure-evidence-rollup-2026-06-27
     title: Layer 2 business closure evidence rollup
     phase: layer-2-business-closure-evidence-rollup-2026-06-27
