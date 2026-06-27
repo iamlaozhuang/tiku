@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
-updatedAt: "2026-06-27T09:27:05-07:00"
+currentPhase: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+updatedAt: "2026-06-27T09:41:19-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,92 +501,70 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c17debf32d7c41269ce0a17824a01c3115792ddd
-  lastKnownOriginMasterSha: c17debf32d7c41269ce0a17824a01c3115792ddd
+  lastKnownMasterSha: 398e24d496f6cadedf6c165d94d884b0a6755b09
+  lastKnownOriginMasterSha: 398e24d496f6cadedf6c165d94d884b0a6755b09
 currentTask:
-  id: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+  id: layer-3-cost-calibration-redacted-approval-package-2026-06-27
   status: closed
-  result: pass_layer_3_provider_smoke_rollup_cost_calibration_blocked
-  claimedAt: "2026-06-27T09:27:05-07:00"
-  plannedAt: "2026-06-27T09:27:05-07:00"
-  implementedAt: "2026-06-27T09:27:05-07:00"
-  validatedAt: "2026-06-27T09:27:05-07:00"
-  reviewedAt: "2026-06-27T09:27:05-07:00"
-  closedAt: "2026-06-27T09:27:05-07:00"
-  sourceStory: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
-  approvalSource: current_goal_continuation_docs_state_only_rollup_plus_standingDocsStateFastLaneCloseoutApproval
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
-  branch: codex/provider-smoke-rollup-20260627
+  result: pass_cost_calibration_approval_package_ready_execution_seeded
+  claimedAt: "2026-06-27T09:41:19-07:00"
+  plannedAt: "2026-06-27T09:41:19-07:00"
+  implementedAt: "2026-06-27T09:41:19-07:00"
+  validatedAt: "2026-06-27T09:41:19-07:00"
+  reviewedAt: "2026-06-27T09:41:19-07:00"
+  closedAt: "2026-06-27T09:41:19-07:00"
+  sourceStory: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+  approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_cost_calibration_authorization_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+  branch: codex/cost-calibration-approval-package-20260627
   scope:
     docsStateEvidenceAudit: true
-    layer3ProviderSmokeExecution: false
-    providerSmokeBoundaryDefinition: rollup_only_from_existing_evidence
-    approvalTextAuthoring: true
-    existingTaskStatusChange: false
-    archiveIndexMovement: false
-    taskHistoryIndexWrite: false
-    localPostgresExecution: false
-    sourceOrTestChange: false
-    runtimeExecutedByThisTask: false
-    defaultPostgresRuntimeUsed: false
-    localDbCredentialEnvReadApproved: false
-    localDbRuntimeEnvResolutionUsedByApplicationCode: false
-    allowedStateFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-    browserRuntime: false
-    devServer: false
-    e2eRuntime: false
-    testsOrE2eChange: false
-    schemaMigrationFileChange: false
-    liveDatabaseConnectionExecuted: false
-    databaseWriteExecuted: false
-    schemaMigrationExecuted: false
-    credentialOrEnvRead: false
-    envFileReadByCodex: false
-    providerCredentialAlias: none_this_task
-    providerCredentialValueOutput: false
+    officialPublicPricingLookup: true
+    providerSmokeEvidenceRollup: true
+    successorExecutionTaskSeeded: true
+    costCalibrationExecution: false
     providerCall: false
     providerCallCount: 0
     providerRetryCount: 0
-    providerPath: existing_evidence_openai_compatible/alibaba-qwen/qwen3.7-max
-    providerBaseUrlHost: existing_evidence_dashscope.aliyuncs.com
-    providerConfiguration: false
-    providerSmokeCallCap: 1
-    providerSmokeRetryCap: 0
-    providerSmokeMaxOutputTokensApprovedCap: existing_script_cap_only
-    providerSmokeMaxOutputTokensScriptCap: 8
-    providerSmokeTimeoutMs: 30000
-    providerSmokeSpendStopLimitUsd: 0.05
-    costCalibration: false
-    targetSetupOrSelectionExecuted: false
-    retryOrAdoptionMutationExecuted: false
-    formalQuestionOrPaperWrite: false
-    formalPublish: false
-    studentVisibleContent: false
+    envFileReadByThisTask: false
+    providerCredentialValueOutput: false
+    databaseConnectionExecuted: false
+    databaseReadWriteExecuted: false
+    browserRuntime: false
+    devServer: false
+    e2eRuntime: false
+    sourceOrTestChange: false
+    scriptPackageLockfileChange: false
+    schemaMigrationSeedChange: false
     stagingProdDeploy: false
     paymentExternalService: false
     ocrExportExecution: false
+    archiveIndexMovement: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: pass_layer_3_provider_smoke_rollup_cost_calibration_blocked
+    packageDecision: pass_cost_calibration_approval_package_ready_execution_seeded
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_rolled_up_approved_path_browser_publish_still_separate
-    layer3Status: provider_smoke_pass_on_explicit_openai_compatible_dashscope_boundary_cost_calibration_and_pre_release_still_blocked
-    priorLayer3MatrixTask: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
-    priorProviderSmokeApprovalPackageTask: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
-    priorProviderSmokeExecutionTask: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
-    priorProviderErrorFollowUpTask: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
-    priorProviderErrorDiagnosticTask: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
-    priorProviderOpenAiCompatibleRepairTask: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
-    providerSmokeDecision: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
-    providerSmokeExpectedStopIfMissingEnv: true
-    providerConfigurationDecision: approved_cli_boundary_only_no_source_or_persisted_config_change
-    costCalibrationDecision: blocked_requires_fresh_approval_package_then_execution_approval
+    layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_preserved
+    layer3ProviderStatus: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
+    layer3CostStatus: approval_package_ready_execution_pending
+    pricingSourceDecision: official_public_model_pricing_doc_retrieved_2026_06_27
+    pricingSourceUrl: https://www.alibabacloud.com/help/en/model-studio/model-pricing
+    pricingSourceDeploymentScope: china_beijing_chinese_mainland
+    pricingSourceInputUsdPerMillionTokens: 1.65
+    pricingSourceOutputUsdPerMillionTokens: 4.951
+    successorExecutionTask: layer-3-cost-calibration-redacted-execution-2026-06-27
+    successorExecutionProviderPath: openai_compatible/alibaba-qwen/qwen3.7-max
+    successorExecutionBaseUrlHost: dashscope.aliyuncs.com
+    successorExecutionCredentialAlias: ALIBABA_API_KEY
+    successorExecutionMaxProviderCalls: 1
+    successorExecutionMaxRetries: 0
+    successorExecutionTimeoutMs: 30000
+    successorExecutionSpendStopLimitUsd: 0.05
+    preReleaseStatus: blocked
     stagingProdDecision: blocked_not_in_this_task
     deployDecision: blocked_not_in_this_task
     paymentExternalServiceDecision: blocked_not_in_this_task
@@ -594,51 +572,24 @@ currentTask:
     releaseReadinessDecision: blocked
     finalPassDecision: blocked
     activeQueueNonTerminalCountBeforeTask: 28
-    readyForCloseoutCountBeforeTask: 26
-    blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 38
+    archiveCandidateCountBeforeTask: 40
     highRiskRepairBlockedCountBeforeTask: 0
-    futureCostCalibrationTask: layer-3-cost-calibration-redacted-approval-package-2026-06-27
-    futurePreReleaseTask: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
-    futurePaymentExternalServiceTask: layer-3-payment-external-service-approval-package-2026-06-27
-    futureOcrExportTask: layer-3-ocr-export-approval-package-2026-06-27
-    futureNonterminalCloseoutApplyTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
-    localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_materialized_to_task_closeoutPolicy
-    nextExecutionApprovalRequired: layer_3_cost_calibration_approval_package_requires_fresh_approval_before_any_execution
-    nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
-    nextNonterminalCloseoutApprovalRequired: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    recommendedExecutionOption: request_docs_state_cost_calibration_approval_package_before_any_cost_execution
-    alternateExecutionOption: optional_layer_2_approved_formal_draft_or_credentialed_browser_package_if_owner_requires_stronger_l2
-    prDecision: blocked
-    forcePushDecision: blocked
-    rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    browserValidationDecision: blocked_by_task_scope
-    dbSchemaMigrationDecision: blocked
-    providerCallDecision: blocked_not_in_this_rollup
-    providerCredentialReadDecision: blocked_not_in_this_rollup
-    costCalibrationGateDecision: blocked
-    stagingProdDeployDecision: blocked
-    paymentExternalServiceGateDecision: blocked
-    archiveIndexDecision: blocked_requires_fresh_archive_index_apply_approval
-    nonterminalStatusChangeDecision: blocked_requires_fresh_status_only_closeout_approval
+    nextRecommendedTask: layer-3-cost-calibration-redacted-execution-2026-06-27
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_materialized_to_task_closeoutPolicy
+      approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_materialized_to_task_closeoutPolicy
+      approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
     push:
       approved: true
       target: origin/master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_materialized_to_task_closeoutPolicy
+      approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
     cleanup:
       deleteShortBranch: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_materialized_to_task_closeoutPolicy
+      approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -651,44 +602,27 @@ currentTask:
     acceptancePrepared: true
     docsOnly: true
     ssotReadListPrepared: true
-    existingTaskStatusChanged: false
-    archiveIndexMovementExecuted: false
-    taskHistoryIndexWriteExecuted: false
-    activeQueueNonTerminalCountBeforeTask: 28
-    readyForCloseoutCountBeforeTask: 26
-    blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 39
+    officialPublicPricingLookup: pass_no_login_no_console_no_provider_call
     sourceOrTestChanged: false
+    scriptPackageLockfileChanged: false
     schemaMigrationExecuted: false
-    liveDatabaseConnectionExecuted: false
+    databaseConnectionExecuted: false
     databaseWriteExecuted: false
     browserSmokeExecuted: false
-    providerSmokeCommandExecuted: false
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
     providerConfigurationChanged: false
     providerCredentialReadExecuted: false
     costCalibrationExecuted: false
-    targetSetupOrSelectionExecuted: false
-    reviewAdoptionMutationExecuted: false
-    routeInvocationCount: 0
-    targetCount: 0
-    mutationCount: 0
-    providerSmokeResult: pass_openai_compatible_dashscope_qwen37max_from_existing_evidence
-    providerSmokeRedactionStatus: passed
-    providerSmokeStopCondition: rollup_only_no_provider_execution
-    rawPromptGeneratedOutputProviderPayloadEvidenceAccessed: false
-    formalPublishExecuted: false
-    formalPublishCallCount: 0
-    studentVisibleContentExecuted: false
     stagingProdDeployExecuted: false
     paymentExternalServiceTouched: false
     ocrExportExecuted: false
+    archiveIndexMovementExecuted: false
     finalPassClaimed: false
-    projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
-    activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 40
+    projectStatusDiagnostic: pass_next_executable_task_found_close_current_changes_first
+    activeQueueNonTerminalCountAfterTask: 29
+    archiveCandidateCountAfterTask: 41
     highRiskRepairBlockedCountAfterTask: 0
     lint: not_run_docs_state_only_no_source_change
     typecheck: not_run_docs_state_only_no_source_change
@@ -700,11 +634,7 @@ currentTask:
     ffOnlyMergeToMaster: pending
     pushOriginMaster: pending
     shortBranchCleanup: pending
-  diagnosticsBaseline:
-    baselineMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
-    baselineOriginMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
-    currentBranch: codex/provider-error-code-diagnostic-20260627
-  nextRecommendedTask: stop_serial_package_after_provider_error_http_401_owner_review_required
+  nextRecommendedTask: layer-3-cost-calibration-redacted-execution-2026-06-27
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

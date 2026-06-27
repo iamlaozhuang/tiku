@@ -4504,6 +4504,476 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+    title: Layer 3 Cost Calibration redacted approval package
+    phase: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+    sourceStory: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    dependencies:
+      - layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      This task consumes the current user's 2026-06-27 unattended serial high-risk package approval plus the supplemental
+      Cost Calibration pricing-source authorization. It is docs/state-only except for readonly public official pricing
+      lookup. It may define pricing source/date, sample workflow, sample size, max call/retry/token/spend caps, quota
+      ledger policy, redacted ai_call_log/cost summary policy, stop conditions, and successor execution task text. It may
+      not execute Cost Calibration, read .env* or credentials, call Providers, connect to DB, run browser/dev-server/e2e,
+      modify source/tests/scripts/package/lockfiles/schema/migration/seed, deploy, touch payment/external-service, execute
+      OCR/export, move archive/index entries, create PRs, force push, or claim release readiness/final Pass.
+    targetClosureItem: Layer 3 Cost Calibration redacted execution boundary after Provider smoke pass
+    behaviorBoundary: docs_state::cost_calibration_approval_package_no_execution_no_secret_no_provider_call
+    executionProfile: docs_state_layer_3_cost_calibration_approval_package
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_approval_package
+    moduleRunVersion: 2
+    status: closed
+    result: pass_cost_calibration_approval_package_ready_execution_seeded
+    approvedAt: "2026-06-27T09:41:19-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_cost_calibration_authorization_2026_06_27
+    claimedAt: "2026-06-27T09:41:19-07:00"
+    plannedAt: "2026-06-27T09:41:19-07:00"
+    implementedAt: "2026-06-27T09:41:19-07:00"
+    validatedAt: "2026-06-27T09:41:19-07:00"
+    reviewedAt: "2026-06-27T09:41:19-07:00"
+    closedAt: "2026-06-27T09:41:19-07:00"
+    branch: codex/cost-calibration-approval-package-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      officialPublicPricingLookup: approved_readonly_public_official_docs_no_login_no_console
+      approvalPackageAuthoring: approved
+      successorExecutionTaskRegistration: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      costCalibrationExecution: blocked_this_task
+      providerCall: blocked_this_task
+      providerCredentialRead: blocked_this_task
+      envSecretAccess: blocked_this_task
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      providerConfiguration: blocked
+      sourceOrTestChange: blocked
+      scriptPackageLockfileChange: blocked
+      schemaMigrationSeedChange: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+      - https://www.alibabacloud.com/help/en/model-studio/model-pricing
+    blockedFiles:
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - .env*
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    caps:
+      officialPricingLookup:
+        sourceType: public_official_readonly
+        loginRequired: false
+        providerCallAllowed: false
+        credentialAccessAllowed: false
+      costCalibrationExecutionByThisTask: 0
+      providerCallsByThisTask: 0
+      providerRetriesByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      archiveIndexMovesByThisTask: 0
+    redaction:
+      allowedEvidenceFields:
+        - public_pricing_source_url
+        - retrieved_date
+        - provider_label_from_existing_evidence
+        - provider_name_from_existing_evidence
+        - model_label_from_existing_evidence
+        - base_url_host_from_existing_evidence
+        - execution_caps
+        - redaction_policy
+        - stop_conditions
+        - successor_task_id
+        - forbidden_action_checklist
+      forbiddenEvidenceFields:
+        - env_file_content
+        - secret_value
+        - token_value
+        - credential_value
+        - db_url
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - provider_payload
+        - raw_provider_error_body
+        - raw_provider_error_message
+        - raw_generated_ai_content
+        - full_paper_material_content
+        - db_row
+        - sql_output
+        - screenshot_trace_cookie_localstorage
+    pricingSource:
+      sourceType: official_public_model_pricing_doc
+      sourceUrl: https://www.alibabacloud.com/help/en/model-studio/model-pricing
+      retrievedDate: "2026-06-27"
+      modelFamily: qwen_max
+      modelId: qwen3.7-max
+      deploymentScope: china_beijing_chinese_mainland
+      inputPriceUsdPerMillionTokens: 1.65
+      outputPriceUsdPerMillionTokens: 4.951
+      estimateLabelRequired: local_minimum_estimate_usd
+      productionQuotaDefaultDecision: blocked
+    successorExecutionTask:
+      id: layer-3-cost-calibration-redacted-execution-2026-06-27
+      providerLabel: openai_compatible
+      providerName: alibaba-qwen
+      modelLabel: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      credentialAlias: ALIBABA_API_KEY
+      maxSampleWorkflows: 1
+      maxProviderCalls: 1
+      maxRetries: 0
+      timeoutMs: 30000
+      maxOutputTokens: existing_script_cap_only_do_not_increase
+      spendStopLimitUsd: 0.05
+    riskTypes:
+      - docs_state_approval_package
+      - public_official_pricing_lookup
+      - cost_calibration_execution_blocked_this_task
+      - provider_call_blocked_this_task
+      - no_env_secret_read
+      - no_database_connection
+      - no_browser_runtime
+      - no_source_test_script_package_change
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-cost-calibration-redacted-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-cost-calibration-redacted-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-cost-calibration-redacted-approval-package-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_standingDocsStateFastLaneCloseoutApproval
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    validationSummary:
+      officialPricingLookup: pass_no_login_no_console_no_provider_call
+      costCalibrationExecutionByThisTask: false
+      providerCallExecutedByThisTask: false
+      envSecretReadByThisTask: false
+      dbBrowserE2eExecutedByThisTask: false
+      sourceTestScriptPackageChanged: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      ocrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_next_executable_task_found_close_current_changes_first
+      activeQueueNonTerminalCountAfterTask: 29
+      archiveCandidateCountAfterTask: 41
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - second_provider_call_or_retry
+      - provider_configuration_change_or_fallback_path
+      - provider_credential_value_output
+      - raw_prompt_response_payload_or_generated_content
+      - source_or_test_script_package_lockfile_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
+  - id: layer-3-cost-calibration-redacted-execution-2026-06-27
+    title: Layer 3 Cost Calibration redacted execution
+    phase: layer-3-cost-calibration-redacted-execution-2026-06-27
+    sourceStory: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+    dependencies:
+      - layer-3-cost-calibration-redacted-approval-package-2026-06-27
+      - layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    taskPlanPolicy: required_before_execution
+    humanApprovalBoundary: >-
+      This task consumes the current user's 2026-06-27 unattended serial high-risk package approval and supplemental
+      Cost Calibration env-local alias loader / execution cap approval. It may execute one local dev redacted Cost
+      Calibration call using provider openai_compatible, providerName alibaba-qwen, model qwen3.7-max, baseUrlHost
+      dashscope.aliyuncs.com, credential alias ALIBABA_API_KEY, max one Provider call, zero retries, timeout 30000ms,
+      existing max-output cap only, and spend stop USD 0.05. It may open .env.local only for the command to extract
+      ALIBABA_API_KEY into the process environment. It must not output, copy, record, or commit .env.local contents,
+      secrets, tokens, Provider credentials, DB URLs, raw prompts, raw responses, Provider payloads, raw generated AI
+      content, or Authorization headers. It may not change Provider configuration, modify source/tests/scripts/package
+      or lockfiles, connect to DB, run browser/dev-server/e2e, deploy, touch payment/external-service, execute OCR/export,
+      create PRs, force push, or claim release readiness/final Pass.
+    targetClosureItem: One-call redacted local dev Cost Calibration result
+    behaviorBoundary: local_dev::one_provider_call_cost_calibration_no_raw_payload_no_secret_no_retry
+    executionProfile: layer_3_cost_calibration_redacted_single_call
+    evidenceMode: redacted_provider_cost_summary_only
+    validationPolicy: task_plan_pre_execution_then_single_call_scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: high_risk_local_provider_cost_execution
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-27T09:41:19-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_cost_calibration_env_loader_and_execution_cap_2026_06_27
+    branch: codex/cost-calibration-execution-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      envLocalAliasLoader: approved_single_alias_ALIBABA_API_KEY_current_command_only
+      providerCall: approved_one_call_only
+      costCalibrationExecution: approved_one_sample_one_call_zero_retry
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      providerConfiguration: blocked
+      secondProviderCall: blocked
+      retryLoop: blocked
+      sourceOrTestChange: blocked
+      scriptPackageLockfileChange: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+      - package.json
+      - package-lock.json
+    blockedFiles:
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - .env*
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    caps:
+      providerLabel: openai_compatible
+      providerName: alibaba-qwen
+      modelLabel: qwen3.7-max
+      baseUrlHost: dashscope.aliyuncs.com
+      credentialAlias: ALIBABA_API_KEY
+      maxSampleWorkflows: 1
+      maxProviderCalls: 1
+      maxRetries: 0
+      maxTargets: 1
+      timeoutMs: 30000
+      maxOutputTokens: existing_script_cap_only_do_not_increase
+      spendStopLimitUsd: 0.05
+      dbConnections: 0
+      browserRuns: 0
+    pricingSource:
+      sourceType: official_public_model_pricing_doc
+      sourceUrl: https://www.alibabacloud.com/help/en/model-studio/model-pricing
+      retrievedDate: "2026-06-27"
+      deploymentScope: china_beijing_chinese_mainland
+      inputPriceUsdPerMillionTokens: 1.65
+      outputPriceUsdPerMillionTokens: 4.951
+      estimateLabelRequired: local_minimum_estimate_usd
+    redaction:
+      allowedEvidenceFields:
+        - providerLabel
+        - providerName
+        - modelLabel
+        - baseUrlHost
+        - passFailBlocked
+        - requestCount
+        - providerCallExecuted
+        - retryCount
+        - tokenCountSummary
+        - localMinimumEstimateUsd
+        - capStatus
+        - redactionStatus
+        - failureCategory
+        - stopCondition
+        - forbiddenActionChecklist
+      forbiddenEvidenceFields:
+        - env_file_content
+        - secret_value
+        - token_value
+        - credential_value
+        - db_url
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - provider_payload
+        - raw_provider_error_body
+        - raw_provider_error_message
+        - raw_generated_ai_content
+        - full_paper_material_content
+        - db_row
+        - sql_output
+        - screenshot_trace_cookie_localstorage
+    riskTypes:
+      - high_risk_provider_cost_execution
+      - env_local_single_alias_loader
+      - provider_call_single_cap
+      - cost_calibration_single_sample
+      - no_retry
+      - no_provider_configuration_change
+      - no_raw_payload_or_secret_evidence
+      - no_database_connection
+      - no_browser_runtime
+      - no_source_test_script_package_change
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    validationCommands:
+      - node --input-type=module -e <single-alias ALIBABA_API_KEY env-local loader plus one redacted openai_compatible DashScope Cost Calibration call>
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-cost-calibration-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-cost-calibration-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-cost-calibration-redacted-execution-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    validationSummary:
+      status: pending_execution
+      maxProviderCalls: 1
+      maxRetries: 0
+      spendStopLimitUsd: 0.05
+      blockedCloseoutApprovedIfFailOrBlocked: true
+    blockedWithoutFreshApproval:
+      - second_provider_call_or_retry
+      - provider_configuration_change_or_fallback_path
+      - model_or_endpoint_change
+      - provider_credential_value_output
+      - raw_prompt_response_payload_or_generated_content
+      - source_or_test_script_package_lockfile_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27
