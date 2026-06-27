@@ -44,6 +44,518 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    title: AI generation product boundary execution package approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: current_user_request_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+    dependencies:
+      - mechanism-batch-closeout-state-reconciliation-2026-06-26
+    taskKind: docs_state_ai_generation_product_boundary_execution_package
+    moduleRunVersion: 2
+    executionProfile: docs_state_batch_execution_package_approval_no_product_runtime
+    evidenceMode: redacted_boundary_and_task_split_only
+    validationPolicy: docs_prettier_diff_module_run_v2_gates
+    queueSelectionMode: current_user_directed_second_step_approval_package_2026_06_26
+    requiredOutcome: >-
+      Create an AI generation product boundary batch execution package / approval package that resolves organization
+      admin AI generation ownership, learner private generated-result loops, publish separation, organization statistics
+      UX classification, and content operations review UX classification. Generate 3-5 blocked follow-up task
+      boundaries without implementation, Provider, DB, publish, browser/e2e, staging/prod, payment, external-service,
+      release readiness, or final Pass execution.
+    status: closed
+    result: pass_ai_generation_product_boundary_execution_package_prepared_follow_up_tasks_blocked_no_implementation_no_final_pass
+    approvedAt: "2026-06-26T18:58:57-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      scope: docs_state_plan_evidence_audit_acceptance_package_only
+    claimedAt: "2026-06-26T18:58:57-07:00"
+    plannedAt: "2026-06-26T18:58:57-07:00"
+    validatedAt: "2026-06-26T19:09:05-07:00"
+    reviewedAt: "2026-06-26T19:09:05-07:00"
+    closedAt: "2026-06-26T19:09:05-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      batchExecutionPackagePreparation: approved
+      followUpTaskBoundaryCreation: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      productRuntimeChange: blocked
+      localSourceChange: blocked
+      testsOrE2eChange: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      formalPublishStudentVisibleContent: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/batch-execution-package-governance.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/modules/07-retention-log-governance.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-admin-ai-generation-provider-disabled-product-closure-or-generated-result-storage-decision.md
+      - docs/05-execution-logs/evidence/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-admin-ai-generation-generated-result-storage-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-organization-ai-generation-product-loop-implementation-plan.md
+      - docs/05-execution-logs/acceptance/2026-06-26-formal-paper-draft-composition-adoption-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-paper-draft-composition-route-integration-local-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-real-provider-paper-composition-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-26-formal-publish-student-visible-content-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-publish-student-visible-content-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-publish-student-visible-content-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - product_runtime_change
+      - dependency_package_lockfile_change
+      - schema_migration_or_drizzle_push
+      - database_connection_or_mutation
+      - provider_model_call_or_provider_credential_read
+      - env_secret_access_or_env_file_change
+      - browser_e2e_or_dev_server
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - formal_publish_or_student_visible_content
+      - cost_calibration_gate
+      - pr_force_push
+      - release_readiness_or_final_acceptance_pass
+    riskTypes:
+      - docs_state_product_boundary
+      - batch_execution_package_approval
+      - follow_up_task_boundary_materialization
+      - no_product_runtime
+      - no_high_risk_gate_execution
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/acceptance/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/acceptance/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/evidence/2026-06-26-ai-generation-product-boundary-execution-package-approval.md docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-product-boundary-execution-package-approval-2026-06-26
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-product-boundary-execution-package-approval-2026-06-26 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-ai-generation-product-boundary-execution-package-approval.md
+    branch: codex/ai-generation-product-boundary-package-20260626
+    followUpBoundaryTasks:
+      - org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
+      - learner-ai-generation-private-result-use-loop-approval-2026-06-26
+      - formal-publish-student-visible-content-execution-approval-2026-06-26
+      - organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
+      - content-admin-ai-review-ux-enhancement-approval-2026-06-26
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_execute_second_step_ai_generation_product_boundary_package_2026_06_26
+    validationSummary:
+      taskPlanPrepared: true
+      acceptancePackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      docsStateOnly: true
+      followUpTasksRecordedAsBlocked: true
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      databaseMutationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleContentExecuted: false
+      stagingProdTouched: false
+      paymentExternalServiceTouched: false
+      costCalibrationExecuted: false
+      finalPassClaimed: false
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task
+      moduleRunV2PrePushReadiness: pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
+    title: Organization AI generation owned draft boundary and local contract loop approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+    dependencies:
+      - ai-generation-product-boundary-execution-package-approval-2026-06-26
+    taskKind: blocked_follow_up_approval_boundary
+    moduleRunVersion: 2
+    executionProfile: blocked_pending_fresh_product_source_or_docs_approval
+    evidenceMode: redacted_boundary_only
+    validationPolicy: blocked_until_fresh_approval_materializes_scope
+    requiredOutcome: >-
+      If approved later, define or implement the organization advanced admin AI generation loop from organization-scoped
+      generated_result/history into organization-owned draft or training content, while blocking platform formal content
+      draft creation, publish, and student-visible platform content.
+    status: blocked
+    blockedReason: fresh_approval_required_before_docs_or_source_execution
+    branch: codex/org-ai-owned-draft-boundary-20260626
+    boundaryFromPackage: AI_GENERATION_PRODUCT_BOUNDARY_EXECUTION_PACKAGE_2026_06_26
+    defaultAllowedScope: none_until_fresh_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - blocked_until_fresh_approval_materializes_validation_commands
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        reason: fresh_approval_required
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - organization_owned_draft_write
+      - database_connection_or_mutation
+      - schema_migration_or_drizzle_push
+      - provider_model_call_or_provider_credential_read
+      - browser_e2e_or_dev_server
+      - platform_formal_question_or_paper_draft_write
+      - formal_publish_or_student_visible_content
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - release_readiness_or_final_acceptance_pass
+
+  - id: learner-ai-generation-private-result-use-loop-approval-2026-06-26
+    title: Learner AI generation private result use loop approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+    dependencies:
+      - ai-generation-product-boundary-execution-package-approval-2026-06-26
+    taskKind: blocked_follow_up_approval_boundary
+    moduleRunVersion: 2
+    executionProfile: blocked_pending_fresh_product_source_or_docs_approval
+    evidenceMode: redacted_boundary_only
+    validationPolicy: blocked_until_fresh_approval_materializes_scope
+    requiredOutcome: >-
+      If approved later, define or implement personal advanced learner and organization advanced employee private
+      generated_result/history/use loops, including AI question practice and AI paper attempt entries that stay outside
+      formal question, paper, practice, mock_exam, exam_report, and mistake_book records.
+    status: blocked
+    blockedReason: fresh_approval_required_before_docs_or_source_execution
+    branch: codex/learner-ai-private-result-use-20260626
+    boundaryFromPackage: AI_GENERATION_PRODUCT_BOUNDARY_EXECUTION_PACKAGE_2026_06_26
+    defaultAllowedScope: none_until_fresh_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - blocked_until_fresh_approval_materializes_validation_commands
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-learner-ai-generation-private-result-use-loop-approval.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        reason: fresh_approval_required
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - private_generated_result_write_or_use_runtime
+      - database_connection_or_mutation
+      - schema_migration_or_drizzle_push
+      - provider_model_call_or_provider_credential_read
+      - browser_e2e_or_dev_server
+      - formal_question_or_paper_write
+      - formal_practice_mock_exam_exam_report_or_mistake_book_write
+      - organization_admin_raw_employee_ai_content_access
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - release_readiness_or_final_acceptance_pass
+
+  - id: formal-publish-student-visible-content-execution-approval-2026-06-26
+    title: Formal publish student-visible content execution approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+    dependencies:
+      - ai-generation-product-boundary-execution-package-approval-2026-06-26
+    taskKind: blocked_follow_up_approval_boundary
+    moduleRunVersion: 2
+    executionProfile: blocked_pending_fresh_publish_execution_approval
+    evidenceMode: redacted_publish_boundary_only
+    validationPolicy: blocked_until_fresh_publish_approval_materializes_scope
+    requiredOutcome: >-
+      If approved later, materialize a separate local-only formal publish execution task for one selected draft paper
+      with pre-publish checks, capped publish calls, rollback/archive strategy, redacted evidence fields, and explicit
+      continued blocks for Provider/Cost, staging/prod, payment, external service, release readiness, and final Pass.
+    status: blocked
+    blockedReason: fresh_formal_publish_execution_approval_required
+    branch: codex/formal-publish-execution-approval-20260626
+    boundaryFromPackage: AI_GENERATION_PRODUCT_BOUNDARY_EXECUTION_PACKAGE_2026_06_26
+    defaultAllowedScope: none_until_fresh_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - blocked_until_fresh_approval_materializes_validation_commands
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-formal-publish-student-visible-content-execution-approval.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        reason: fresh_approval_required
+    blockedWithoutFreshApproval:
+      - formal_publish_or_student_visible_content
+      - local_db_mutation_or_publish_route_execution
+      - browser_or_student_visible_runtime_validation
+      - provider_model_call_or_provider_credential_read
+      - cost_calibration_gate
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - release_readiness_or_final_acceptance_pass
+
+  - id: organization-admin-ai-usage-statistics-ux-enhancement-approval-2026-06-26
+    title: Organization admin AI usage statistics UX enhancement approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+    dependencies:
+      - ai-generation-product-boundary-execution-package-approval-2026-06-26
+    taskKind: blocked_follow_up_approval_boundary
+    moduleRunVersion: 2
+    executionProfile: blocked_pending_fresh_ux_design_or_source_approval
+    evidenceMode: redacted_boundary_only
+    validationPolicy: blocked_until_fresh_approval_materializes_scope
+    requiredOutcome: >-
+      If approved later, scope the second-layer organization admin statistics UX for AI and organization training
+      summaries, including counts, completion state, score/time summaries, usage/quota rollups, and no raw employee
+      answer or learner AI content exposure.
+    status: blocked
+    blockedReason: fresh_ux_design_or_source_approval_required
+    branch: codex/org-admin-ai-statistics-ux-approval-20260626
+    boundaryFromPackage: AI_GENERATION_PRODUCT_BOUNDARY_EXECUTION_PACKAGE_2026_06_26
+    defaultAllowedScope: none_until_fresh_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - blocked_until_fresh_approval_materializes_validation_commands
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-organization-admin-ai-usage-statistics-ux-enhancement-approval.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        reason: fresh_approval_required
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_e2e_or_dev_server
+      - database_connection_or_mutation
+      - raw_employee_answer_or_raw_ai_content_access
+      - export_or_external_service
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - release_readiness_or_final_acceptance_pass
+
+  - id: content-admin-ai-review-ux-enhancement-approval-2026-06-26
+    title: Content admin AI review UX enhancement approval
+    phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
+    sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
+    dependencies:
+      - ai-generation-product-boundary-execution-package-approval-2026-06-26
+    taskKind: blocked_follow_up_approval_boundary
+    moduleRunVersion: 2
+    executionProfile: blocked_pending_fresh_ux_design_or_source_approval
+    evidenceMode: redacted_boundary_only
+    validationPolicy: blocked_until_fresh_approval_materializes_scope
+    requiredOutcome: >-
+      If approved later, scope content admin AI review UX for required single-result review, validation, adoption
+      traceability, and second-layer batch review, retry, diff, and adoption history enhancements without direct publish
+      or raw generated evidence exposure.
+    status: blocked
+    blockedReason: fresh_ux_design_or_source_approval_required
+    branch: codex/content-ai-review-ux-approval-20260626
+    boundaryFromPackage: AI_GENERATION_PRODUCT_BOUNDARY_EXECUTION_PACKAGE_2026_06_26
+    defaultAllowedScope: none_until_fresh_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+      - docs/05-execution-logs/evidence/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - blocked_until_fresh_approval_materializes_validation_commands
+    planPath: docs/05-execution-logs/task-plans/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        reason: fresh_approval_required
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_e2e_or_dev_server
+      - database_connection_or_mutation
+      - batch_adoption_mutation_or_retry_execution
+      - raw_prompt_raw_generated_output_or_provider_payload_access
+      - formal_publish_or_student_visible_content
+      - staging_prod_cloud_deploy
+      - payment_external_service
+      - cost_calibration_gate
+      - release_readiness_or_final_acceptance_pass
+
   - id: mechanism-batch-closeout-state-reconciliation-2026-06-26
     title: Mechanism batch closeout durable state reconciliation
     phase: mechanism-batch-closeout-state-reconciliation-2026-06-26
