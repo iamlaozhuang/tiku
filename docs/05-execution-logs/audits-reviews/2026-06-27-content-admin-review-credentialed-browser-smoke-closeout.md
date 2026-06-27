@@ -11,10 +11,12 @@ Task id: `content-admin-review-credentialed-browser-smoke-closeout-2026-06-27`
 
 ## Findings
 
-No pre-merge blocking findings.
+No blocking findings.
 
 - Fresh approval is task-scoped to the current short branch closeout path.
-- Pre-merge changed files are limited to docs/state/evidence/audit/acceptance.
+- Changed files are limited to docs/state/evidence/audit/acceptance.
 - Pre-merge validation gates passed.
-- Merge, master gates, push, and branch cleanup are still pending and must be recorded before final handoff.
+- The short branch was fast-forward merged into `master`.
+- Master `git diff --check`, lint, and typecheck passed.
+- Push and merged-branch deletion remain approved final commands after this evidence commit; final handoff records their exact command results.
 - Blocked gates remain blocked: PR, force push, release readiness, final Pass, browser/e2e/dev-server, DB, Provider, publish, staging/prod, payment, and external-service work.

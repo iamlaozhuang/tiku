@@ -1706,8 +1706,8 @@ tasks:
       evidence, push origin/master, and delete the merged short branch. Do not create PRs, force push, claim release
       readiness, claim final Pass, or run browser/e2e/dev-server, DB, Provider, publish, staging/prod, payment, or
       external-service actions.
-    status: planned
-    result: pending_ff_only_merge_push_cleanup
+    status: closed
+    result: pass_ff_only_merge_master_gates_ready_for_approved_push_cleanup
     approvedAt: "2026-06-27T01:31:16-07:00"
     approvedBy: laozhuang
     approvalConsumed:
@@ -1715,10 +1715,10 @@ tasks:
       scope: ff_only_merge_master_master_gates_evidence_push_origin_master_delete_merged_short_branch
     claimedAt: "2026-06-27T01:31:16-07:00"
     plannedAt: "2026-06-27T01:31:16-07:00"
-    implementedAt: null
-    validatedAt: null
-    reviewedAt: null
-    closedAt: null
+    implementedAt: "2026-06-27T01:38:45-07:00"
+    validatedAt: "2026-06-27T01:38:45-07:00"
+    reviewedAt: "2026-06-27T01:38:45-07:00"
+    closedAt: "2026-06-27T01:38:45-07:00"
     nextApprovalRequired: none_for_current_short_branch_closeout_path
     boundary: docs_state_git_closeout_only_no_pr_no_force_no_release_no_final_pass
     localFullLoopGate: closeout
@@ -1847,9 +1847,10 @@ tasks:
       initialOriginMasterSha: b70ce0995ac90fc5e8decb439b8b4cedc42dec63
       initialShortBranchHeadSha: 1267d1247ae860736271f002aa4c06639237ab23
       ffOnlyEligible: true
-      mergeResult: pending
-      pushResult: pending
-      branchCleanupResult: pending
+      mergeResult: pass_ff_only_master_at_6b4699b95f659623d463e2f29ae353c29a2fca64
+      masterGateResult: pass_lint_typecheck_diff_project_status_current_task_active_expected_before_state_update
+      pushResult: approved_pending_final_command_after_evidence_commit
+      branchCleanupResult: approved_pending_after_push
     validationResult:
       preMergeScopedPrettierWrite: pass
       preMergeScopedPrettierCheck: pass
@@ -1857,8 +1858,12 @@ tasks:
       preMergeLint: pass
       preMergeTypecheck: pass
       preMergeModuleRunV2PreCommitHardening: pass
-      masterGates: pending
-      prePushReadiness: pending
+      masterGitDiffCheck: pass
+      masterLint: pass
+      masterTypecheck: pass
+      masterProjectStatusDiagnostic: current_task_active_expected_before_state_update
+      postCloseoutProjectStatusDiagnostic: idle_no_pending_task
+      prePushReadiness: pending_after_evidence_commit
     blockedCapabilities:
       - sourceChange
       - browserRuntime

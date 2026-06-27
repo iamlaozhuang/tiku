@@ -38,11 +38,26 @@ Task id: `content-admin-review-credentialed-browser-smoke-closeout-2026-06-27`
 
 ### Master Gates
 
-Pending until ff-only merge to `master`.
+- `git checkout master`: pass.
+- `git merge --ff-only codex/content-admin-credentialed-browser-scope-20260627`: pass.
+- `master` after merge: `6b4699b95f659623d463e2f29ae353c29a2fca64`.
+- `origin/master` before push: `b70ce0995ac90fc5e8decb439b8b4cedc42dec63`.
+- `git diff --check` on `master`: pass.
+- `npm.cmd run lint` on `master`: pass.
+- `npm.cmd run typecheck` on `master`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`: `current_task_active`, expected before this closeout state update; recommended action was `finish_current_task_closeout:content-admin-review-credentialed-browser-smoke-closeout-2026-06-27`.
+- After the closeout state update, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`: `idle_no_pending_task`; no seed candidate; Cost Calibration Gate remains blocked.
+- Post-evidence `Test-ModuleRunV2PrePushReadiness.ps1`, `git push origin master`, and `git branch -d codex/content-admin-credentialed-browser-scope-20260627` are approved next closeout commands. Their final results are recorded in the final handoff to avoid a self-referential SHA evidence loop.
 
 ## Merge, Push, And Cleanup Results
 
-Pending until the closeout task packet is committed and merged.
+- Merge result: pass, ff-only.
+- Push result: approved and pending after this evidence commit.
+- Branch cleanup result: approved and pending after push.
+- PR: not created.
+- Force push: not used.
+- Release readiness: not claimed.
+- Final Pass: not claimed.
 
 ## Blocked Remainder
 
