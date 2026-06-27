@@ -501,33 +501,34 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 89466b47072c6aeabd85f2056a6065aa3b51d84a
-  lastKnownOriginMasterSha: 89466b47072c6aeabd85f2056a6065aa3b51d84a
+  lastKnownMasterSha: 217f9a2444ab94bc83ce5017fa4a23b848a0fb14
+  lastKnownOriginMasterSha: 217f9a2444ab94bc83ce5017fa4a23b848a0fb14
 currentTask:
-  id: content-admin-review-batch-retry-diff-history-ui-local-validation-approval-2026-06-27
+  id: content-admin-review-local-browser-smoke-task-packet-normalization-approval-2026-06-27
   status: closed
-  result: pass_batch_retry_diff_history_ui_local_validation_no_runtime
-  claimedAt: "2026-06-27T00:00:00-07:00"
-  plannedAt: "2026-06-27T00:00:00-07:00"
-  implementedAt: "2026-06-26T22:46:36-07:00"
-  validatedAt: "2026-06-26T22:46:36-07:00"
-  reviewedAt: "2026-06-26T22:46:36-07:00"
-  closedAt: "2026-06-26T22:48:27-07:00"
-  sourceStory: current_user_serial_batch_queue_2026_06_27
-  approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-batch-retry-diff-history-ui-local-validation.md
-  branch: codex/content-admin-review-batch-retry-ui-local-20260627
+  result: pass_task_packet_normalized_for_local_browser_smoke
+  claimedAt: "2026-06-27T00:01:02-07:00"
+  plannedAt: "2026-06-27T00:01:02-07:00"
+  implementedAt: "2026-06-27T00:08:54-07:00"
+  validatedAt: "2026-06-27T00:08:54-07:00"
+  reviewedAt: "2026-06-27T00:08:54-07:00"
+  closedAt: "2026-06-27T00:08:54-07:00"
+  sourceStory: current_user_serial_tasks_1_and_2_2026_06_27
+  approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-local-browser-smoke-task-packet-normalization.md
+  branch: codex/content-admin-browser-smoke-packet-normalization-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
+    taskPacketNormalization: true
     sourceContractChange: false
     serviceSourceChange: false
-    uiSourceChange: true
-    focusedUnitTest: true
-    testsOrE2eChange: true
+    uiSourceChange: false
+    focusedUnitTest: false
+    testsOrE2eChange: false
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
     liveDatabaseConnectionExecuted: false
@@ -549,41 +550,37 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    batchRetryDiffHistoryUi: local_validation_only
-    batchSelectionUiState: implemented
-    failedRetryUiState: implemented
-    resultDiffUiState: implemented
-    adoptionHistoryUiState: implemented
+    task1PacketNormalization: docs_state_only
+    task2BrowserSmokePacketState: prepared_pending_localhost_only
     historyMutationDecision: blocked_requires_separate_approval
     formalPublishDecision: blocked_requires_separate_approval
     retryMutationDecision: blocked_requires_separate_approval
     batchAdoptionMutationDecision: blocked_requires_separate_approval
-    resultDiffDecision: closed_read_model_only
-    adoptionHistoryDecision: closed_read_model_only
+    e2eRuntimeDecision: blocked_requires_separate_approval
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    browserValidationDecision: deferred_requires_separate_approval
+    browserValidationDecision: task_2_prepared_by_current_fresh_approval
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     implementationStillBlocked: false
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+    mergePushCleanupApprovalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_content_admin_batch_retry_diff_history_serial_approval_2026_06_27
+      approvalSource: current_user_fresh_serial_tasks_1_and_2_approval_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -593,11 +590,11 @@ currentTask:
     acceptancePackagePrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
-    docsOnly: false
-    tddRedObserved: pass
-    focusedUnitTests: pass
+    docsOnly: true
+    tddRedObserved: not_applicable
+    focusedUnitTests: not_applicable
     mechanismScriptSmoke: not_applicable
-    sourceOrTestChanged: true
+    sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -616,12 +613,12 @@ currentTask:
     finalPassClaimed: false
     prettierScoped: pass
     gitDiffCheck: pass
-    lint: pass
-    typecheck: pass
+    lint: not_applicable
+    typecheck: not_applicable
     moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task
+    projectStatusDiagnostic: pass_task2_executable_after_current_closeout
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: null
+  nextRecommendedTask: content-admin-review-local-browser-smoke-validation-approval-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
