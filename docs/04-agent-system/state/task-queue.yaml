@@ -44,6 +44,105 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+    title: High-risk blocked task packet metadata repair
+    phase: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+    sourceStory: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+    dependencies: []
+    taskPlanPolicy: required_before_metadata_repair
+    humanApprovalBoundary: >-
+      Current user approval permits a docs/state-only repair of high-risk blocked task packet metadata in
+      docs/04-agent-system/state/task-queue.yaml, docs/04-agent-system/state/project-state.yaml, and corresponding
+      task-plan/evidence/audit/acceptance records. Source code, browser, DB, Provider, PR, force push, release
+      readiness, and final Pass remain blocked.
+    targetClosureItem: high-risk blocked queue task packets have complete mechanism metadata
+    behaviorBoundary: module_run_v2::blocked_task_packet_metadata_only
+    executionProfile: local_mechanism_docs_state_metadata_repair
+    evidenceMode: full_redacted
+    validationPolicy: queue_slimming_high_risk_metadata_clear_and_docs_state_gates
+    taskKind: mechanism_docs_state_metadata_repair
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_high_risk_blocked_task_packet_metadata_repair_local_validation
+    claimedAt: "2026-06-27T02:44:21-07:00"
+    plannedAt: "2026-06-27T02:44:21-07:00"
+    implementedAt: "2026-06-27T02:52:24-07:00"
+    validatedAt: "2026-06-27T02:52:24-07:00"
+    reviewedAt: "2026-06-27T02:52:24-07:00"
+    closedAt: null
+    branch: codex/high-risk-blocked-metadata-repair-20260627
+    targetRepairCandidateCount: 19
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+      - docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    blockedCapabilities:
+      - sourceChange
+      - browserRuntime
+      - devServer
+      - e2eRuntime
+      - databaseConnection
+      - databaseWrite
+      - schemaMigration
+      - providerCall
+      - envSecretAccess
+      - dependencyIntroduction
+      - stagingProdDeploy
+      - paymentExternalService
+      - pr
+      - forcePush
+      - releaseReadiness
+      - finalPass
+      - costCalibrationGate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId high-risk-blocked-task-packet-metadata-repair-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId high-risk-blocked-task-packet-metadata-repair-2026-06-27
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    retryCount: 0
+
   - id: stopped-automation-hygiene-cleanup-2026-06-27
     title: Stopped automation hygiene cleanup
     phase: stopped-automation-hygiene-cleanup-2026-06-27
@@ -161,6 +260,9 @@ tasks:
       - organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
     taskKind: browser_validation_followup_blocked
     moduleRunVersion: 2
+    executionProfile: blocked_local_browser_smoke_validation_scope
+    evidenceMode: redacted_browser_scope_only
+    validationPolicy: blocked_requires_fresh_dev_server_browser_approval
     status: blocked
     result: blocked_pending_fresh_local_browser_smoke_approval
     nextApprovalRequired: dev_server_local_account_seed_or_fixture_and_browser_scope
@@ -170,6 +272,48 @@ tasks:
       - devServer
       - e2eRuntime
       - databaseConnection
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+      - docs/05-execution-logs/evidence/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+      - docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - blocked_pending_fresh_dev_server_browser_scope_approval
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_dev_server_browser_scope_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_dev_server_browser_scope_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_dev_server_browser_scope_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_dev_server_browser_scope_approval_required
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-local-browser-smoke-validation.md
 
   - id: clarify-student-subject-and-paper-count-copy
     title: Clarify student subject and paper count copy
@@ -2175,6 +2319,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_qwen_post_console_retry_http_403_provider_error_code_null_redacted
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -2325,6 +2471,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_qwen_http_403_provider_error_code_null_redacted
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -2472,6 +2620,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_qwen_openai_compatible_provider_error_redacted
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -2620,6 +2770,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_qwen_base_url_provider_error_redacted
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -2775,6 +2927,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_qwen_provider_error_redacted
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -2912,6 +3066,8 @@ tasks:
       - UC-STD-AI-SCORING-EXPLANATION
     taskKind: provider_smoke_execution
     moduleRunVersion: 2
+    executionProfile: blocked_provider_smoke_execution_scope
+    validationPolicy: blocked_requires_fresh_provider_env_execution_approval
     status: blocked
     result: blocked_missing_deepseek_process_env_no_provider_call
     claimedAt: "2026-06-19T00:00:00-07:00"
@@ -3027,6 +3183,8 @@ tasks:
       - UC-ADV-OPS-AUTH-QUOTA
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3040,6 +3198,44 @@ tasks:
       - paymentExternalService
       - costCalibrationGate
       - envSecretAccess
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-03-provider-staging-execution-approval-package
     title: AP-03 provider staging execution approval package
@@ -3051,6 +3247,8 @@ tasks:
       - UC-GATE-PROVIDER-STAGING-EXECUTION
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3065,6 +3263,44 @@ tasks:
       - stagingProdDeploy
       - paymentExternalService
       - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-04-standard-ai-generation-scope-change-approval-package
     title: AP-04 standard AI generation scope change approval package
@@ -3076,6 +3312,8 @@ tasks:
       - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3089,6 +3327,44 @@ tasks:
       - providerCall
       - envSecretAccess
       - costCalibrationGate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-05-standard-org-self-service-scope-change-approval-package
     title: AP-05 standard org self-service scope change approval package
@@ -3100,6 +3376,8 @@ tasks:
       - UC-FUTURE-STANDARD-ORG-SELF-SERVICE-NON-GOAL
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3113,6 +3391,44 @@ tasks:
       - schemaMigration
       - stagingProdDeploy
       - envSecretAccess
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-06-online-payment-approval-package
     title: AP-06 online payment approval package
@@ -3124,6 +3440,8 @@ tasks:
       - UC-FUTURE-ONLINE-PAYMENT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3137,6 +3455,44 @@ tasks:
       - envSecretAccess
       - stagingProdDeploy
       - dependencyIntroduction
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-07-ocr-auto-import-approval-package
     title: AP-07 OCR auto import approval package
@@ -3148,6 +3504,8 @@ tasks:
       - UC-FUTURE-OCR-AUTO-IMPORT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3161,6 +3519,44 @@ tasks:
       - schemaMigration
       - dependencyIntroduction
       - externalService
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-08-org-data-export-approval-package
     title: AP-08 organization data export approval package
@@ -3172,6 +3568,8 @@ tasks:
       - UC-FUTURE-ORG-DATA-EXPORT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3185,6 +3583,44 @@ tasks:
       - externalService
       - stagingProdDeploy
       - sensitiveEvidence
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-09-runtime-capability-list-approval-package
     title: AP-09 runtime capability list approval package
@@ -3196,6 +3632,8 @@ tasks:
       - UC-FUTURE-RUNTIME-CAPABILITY-LIST
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3208,6 +3646,44 @@ tasks:
       - productSourceChange
       - schemaMigration
       - testChange
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-10-current-checkpoint-audit-repair-approval-package
     title: AP-10 current checkpoint audit repair approval package
@@ -3219,6 +3695,8 @@ tasks:
       - UC-GATE-CURRENT-CHECKPOINT
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3232,6 +3710,44 @@ tasks:
       - testChange
       - e2eSpecChange
       - envSecretAccess
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: ap-11-source-governance-change-approval-package
     title: AP-11 source governance change approval package
@@ -3243,6 +3759,8 @@ tasks:
       - UC-AUDIT-SOURCE-GOVERNANCE
     taskKind: high_risk_approval_package
     moduleRunVersion: 2
+    executionProfile: blocked_high_risk_approval_package_scope
+    validationPolicy: blocked_requires_fresh_capability_specific_approval
     status: blocked
     result: approval_package_seeded_execution_blocked
     evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
@@ -3255,6 +3773,44 @@ tasks:
       - productSourceChange
       - sourceGovernanceRewrite
       - sensitiveEvidence
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+      - docs/05-execution-logs/task-plans/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_capability_specific_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_capability_specific_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_capability_specific_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_capability_specific_approval_required
 
   - id: acceptance-l5-standard-role-flow-run-2026-06-23
     title: Run Standard MVP L5 local role flow evidence
@@ -3351,6 +3907,21 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md
     planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-standard-role-flow-run.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
     blockedWithoutFreshApproval:
       - provider_model_call_or_provider_enablement
       - env_secret_access_or_env_file_change
@@ -3400,6 +3971,7 @@ tasks:
     approvalPackagePath: docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md
     sourceProvisioningEvidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-provisioning-and-credential-handoff-execution.md
     taskPlanPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
     nextTaskBlockedUntilApproval: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
@@ -3458,6 +4030,21 @@ tasks:
       - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/05-execution-logs/acceptance/2026-06-23-role-separated-account-local-account-runtime-rerun-scope-approval-package.md docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: historical_closed_scope_package_metadata_repair
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: historical_closeout_not_reconstructed_by_metadata_repair
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: historical_closeout_not_reconstructed_by_metadata_repair
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: historical_closeout_not_reconstructed_by_metadata_repair
     blockedWithoutFreshApproval:
       - password_values_in_git_evidence_chat_screenshots_logs_env_or_terminal_transcripts
       - credential_document_read_by_codex_or_credential_entry_by_codex

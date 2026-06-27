@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stopped-automation-hygiene-cleanup-2026-06-27
-updatedAt: "2026-06-27T02:33:53-07:00"
+currentPhase: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+updatedAt: "2026-06-27T02:52:24-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,37 +501,33 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
-  lastKnownOriginMasterSha: 3fd41a24c1988bb3b721e41a71680e9a546e68b2
+  lastKnownMasterSha: 73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6
+  lastKnownOriginMasterSha: 73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6
 currentTask:
-  id: stopped-automation-hygiene-cleanup-2026-06-27
-  status: closed
-  result: pass_stopped_automation_hygiene_cleanup
-  claimedAt: "2026-06-27T02:22:45-07:00"
-  plannedAt: "2026-06-27T02:22:45-07:00"
-  implementedAt: "2026-06-27T02:24:50-07:00"
-  validatedAt: "2026-06-27T02:24:58-07:00"
-  reviewedAt: "2026-06-27T02:25:14-07:00"
-  closedAt: "2026-06-27T02:25:14-07:00"
-  sourceStory: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
-  approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-stopped-automation-hygiene-cleanup.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
-  branch: codex/stopped-automation-hygiene-cleanup-20260627
+  id: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+  status: ready_for_closeout
+  result: pass_high_risk_blocked_task_packet_metadata_repair_local_validation
+  claimedAt: "2026-06-27T02:44:21-07:00"
+  plannedAt: "2026-06-27T02:44:21-07:00"
+  implementedAt: "2026-06-27T02:52:24-07:00"
+  validatedAt: "2026-06-27T02:52:24-07:00"
+  reviewedAt: "2026-06-27T02:52:24-07:00"
+  closedAt: null
+  sourceStory: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+  approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+  branch: codex/high-risk-blocked-metadata-repair-20260627
   scope:
     docsStateEvidenceAudit: true
     queueSlimmingDiagnostic: true
-    stoppedAutomationHygieneCleanup: true
-    cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
-    cleanupMode: script_guarded_cleanup_only
-    cleanupCandidateKind: stale_clean_worktree
-    cleanupCandidateSample: C:\Users\jzzhu\.codex\worktrees\cb44\tiku
-    terminalTaskMovement: allowed_if_recovery_window_overflows
-    archiveFileWrite: allowed_if_recovery_window_overflows
-    taskHistoryIndexWrite: allowed_if_recovery_window_overflows
-    retainedTerminalRecoveryWindow: 8
+    taskPacketMetadataRepair: true
+    targetRepairCandidateCount: 19
+    allowedStateFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
     browserRuntime: false
     devServer: false
     sourceContractChange: false
@@ -557,15 +553,12 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    cleanupExecutionDecision: cleanup_completed
-    cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
-    cleanupCandidateKind: stale_clean_worktree
-    retainedTerminalRecoveryWindow: 8
-    closeoutApproval: approved_for_ff_only_merge_push_cleanup
-    closeoutApprovalSource: current_user_fresh_closeout_approval_2026_06_27
-    ffOnlyMergeDecision: pass_master_advanced_to_99697cd7a3a5819e4d253f04406e835bf1e54bf9
-    pushDecision: approved_target_origin_master_pending_after_evidence_commit
-    cleanupDecision: approved_delete_merged_short_branch_after_push
+    metadataRepairDecision: pass_high_risk_metadata_repair_local_validation
+    targetRepairCandidateCount: 19
+    closeoutApproval: local_commit_only
+    ffOnlyMergeDecision: blocked_requires_fresh_closeout_approval
+    pushDecision: blocked_requires_fresh_closeout_approval
+    cleanupDecision: blocked_requires_fresh_closeout_approval
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -577,24 +570,24 @@ currentTask:
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_closeout_approval_2026_06_27
+    mergePushCleanupApproved: false
+    mergePushCleanupApprovalSource: fresh_closeout_approval_required
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
+      approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
     fastForwardMerge:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
-  commitSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -604,15 +597,12 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: true
-    cleanupBaselineDecision: cleanup_available
-    cleanupCandidateCountBeforeTask: 1
-    cleanupCandidateKind: stale_clean_worktree
-    cleanupExecuted: true
-    cleanupDecisionAfterTask: clean
-    cleanupActionCount: 1
-    cleanupDeferredCount: 0
+    metadataRepairBaselineBlockedCount: 19
+    metadataRepairExecuted: true
+    metadataRepairBlockedCountAfterTask: 0
     archiveCandidateCountBeforeTask: 0
-    archiveCandidateCountAfterTask: 0
+    archiveCandidateCountAfterTask: 1
+    archiveCandidateOutOfScope: stopped-automation-hygiene-cleanup-2026-06-27
     tddRedObserved: not_applicable
     focusedUnitTests: blocked_by_task_scope
     mechanismScriptSmoke: not_applicable
@@ -640,22 +630,12 @@ currentTask:
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_hygiene_clean_queue_slimming_clean
-    ffOnlyMergeToMaster: pass
-    masterScopedPrettierCheck: pass
-    masterGitDiffCheck: pass_origin_master_to_head
-    masterLint: pass_on_master
-    masterTypecheck: pass_on_master
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_on_master
-    pushOriginMaster: pending_after_evidence_commit
-    mergedShortBranchCleanup: pending_after_push
+    projectStatusDiagnostic: pass_ready_for_closeout_requires_fresh_closeout_approval
   diagnosticsBaseline:
-    stoppedAutomationHygieneDecisionBeforeCleanup: cleanup_available
-    stoppedAutomationHygieneCleanupCandidateCountBeforeCleanup: 1
-    stoppedAutomationHygieneCleanupCandidateKindBeforeCleanup: stale_clean_worktree
     queueSlimmingDecisionBeforeTask: clean
-    activeQueueTaskCountBeforeTask: 52
-    activeQueueTerminalCountBeforeTask: 8
+    highRiskRepairBlockedCountBeforeTask: 19
+    activeQueueTaskCountBeforeTask: 53
+    activeQueueTerminalCountBeforeTask: 9
     archiveCandidateCountBeforeTask: 0
   nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
