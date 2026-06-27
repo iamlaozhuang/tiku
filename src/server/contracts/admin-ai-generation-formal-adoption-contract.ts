@@ -86,6 +86,43 @@ export type AdminAiGenerationFormalAdoptionRow = {
   created_at: Date;
 };
 
+export type AdminAiGenerationFormalAdoptionAuditActionType =
+  | "admin_ai_generation_result.formal_adoption.approve"
+  | "admin_ai_generation_result.formal_adoption.reject";
+
+export type AdminAiGenerationFormalAdoptionAdoptActionDto =
+  | {
+      actionStatus: "executed";
+      actionType: "admin_ai_generation_result.formal_adoption.approve";
+      actorPublicId: string;
+      actionAt: string;
+      formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+      formalQuestionPublicId: string | null;
+      formalPaperPublicId: string | null;
+    }
+  | {
+      actionStatus: "not_executed";
+      actionType: null;
+      actorPublicId: null;
+      actionAt: null;
+      formalTargetWriteStatus: "blocked_without_follow_up_task";
+      formalQuestionPublicId: null;
+      formalPaperPublicId: null;
+    };
+
+export type AdminAiGenerationFormalAdoptionRejectActionDto =
+  | {
+      actionStatus: "executed";
+      actionType: "admin_ai_generation_result.formal_adoption.reject";
+      actorPublicId: string;
+      actionAt: string;
+    }
+  | {
+      actionStatus: "not_executed";
+      actorPublicId: null;
+      actionAt: null;
+    };
+
 export type AdminAiGenerationFormalAdoptionReviewTraceabilityDto = {
   traceabilityStatus: "single_result_traceable";
   sourceGeneratedResultPublicId: string;
@@ -94,23 +131,11 @@ export type AdminAiGenerationFormalAdoptionReviewTraceabilityDto = {
   reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision;
   reviewerPublicId: string;
   reviewedAt: string;
-  adoptAction: {
-    actionStatus: "executed";
-    actionType: "admin_ai_generation_result.formal_adoption.approve";
-    actorPublicId: string;
-    actionAt: string;
-    formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
-    formalQuestionPublicId: string | null;
-    formalPaperPublicId: string | null;
-  };
-  rejectAction: {
-    actionStatus: "not_executed";
-    actorPublicId: null;
-    actionAt: null;
-  };
+  adoptAction: AdminAiGenerationFormalAdoptionAdoptActionDto;
+  rejectAction: AdminAiGenerationFormalAdoptionRejectActionDto;
   directPublishStatus: "blocked_requires_fresh_publish_task";
   auditSummary: {
-    actionType: "admin_ai_generation_result.formal_adoption.approve";
+    actionType: AdminAiGenerationFormalAdoptionAuditActionType;
     targetResourceType: "admin_ai_generation_result";
     targetPublicId: string;
     redactionStatus: "redacted";
@@ -428,7 +453,7 @@ export type AdminAiGenerationFormalAdoptionDto = {
     redactionStatus: "redacted";
   };
   audit: {
-    actionType: "admin_ai_generation_result.formal_adoption.approve";
+    actionType: AdminAiGenerationFormalAdoptionAuditActionType;
     targetResourceType: "admin_ai_generation_result";
     targetPublicId: string;
     redactionStatus: "redacted";

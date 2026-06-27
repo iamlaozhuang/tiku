@@ -501,41 +501,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6ac7623bc68049e3b69310bcf22d9dad4926151f
-  lastKnownOriginMasterSha: 6ac7623bc68049e3b69310bcf22d9dad4926151f
+  lastKnownMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
+  lastKnownOriginMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
 currentTask:
-  id: content-admin-review-adoption-command-contract-approval-package-2026-06-27
+  id: content-admin-review-adoption-command-contract-tdd-2026-06-27
   status: closed
-  result: pass_content_admin_adoption_command_approval_package_ready_for_ff_merge_push_cleanup
-  claimedAt: "2026-06-27T04:58:00-07:00"
-  plannedAt: "2026-06-27T04:58:00-07:00"
-  implementedAt: "2026-06-27T04:58:00-07:00"
-  validatedAt: "2026-06-27T05:08:00-07:00"
-  reviewedAt: "2026-06-27T05:08:00-07:00"
-  closedAt: "2026-06-27T05:08:00-07:00"
-  sourceStory: current_goal_layer_2_minimal_business_closure_approval_package_2026_06_27
-  approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
-  branch: codex/content-admin-adoption-command-approval-20260627
+  result: pass_source_test_command_contract_closed_runtime_db_provider_still_blocked
+  claimedAt: "2026-06-27T05:30:00-07:00"
+  plannedAt: "2026-06-27T05:30:00-07:00"
+  implementedAt: "2026-06-27T05:05:00-07:00"
+  validatedAt: "2026-06-27T05:05:00-07:00"
+  reviewedAt: "2026-06-27T05:05:00-07:00"
+  closedAt: "2026-06-27T05:05:00-07:00"
+  sourceStory: content-admin-review-adoption-command-contract-approval-package-2026-06-27
+  approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+  branch: codex/content-admin-adoption-command-tdd-20260627
   scope:
     docsStateEvidenceAudit: true
-    approvalPackageAuthoring: true
-    successorBlockedTaskRegistration: true
-    sourceOrTestChange: false
+    approvalPackageAuthoring: false
+    successorBlockedTaskRegistration: false
+    sourceOrTestChange: true
     allowedStateFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
     browserRuntime: false
     devServer: false
-    sourceContractChange: false
-    serviceSourceChange: false
-    repositorySourceChange: false
+    sourceContractChange: true
+    serviceSourceChange: true
+    repositorySourceChange: true
     runtimeSourceChange: false
-    focusedUnitTest: false
-    testsOrE2eChange: false
+    focusedUnitTest: true
+    testsOrE2eChange: true
     schemaMigrationFileChange: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -556,17 +556,17 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    approvalPackageDecision: pass_successor_blocked_pending_fresh_source_test_approval
+    tddDecision: in_progress_add_rejected_review_decision_contract
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: evidence_rollup_complete_business_closure_still_requires_fresh_approval
-    layer2ExpectedAfterTask: source_test_approval_package_ready_business_closure_still_blocked
+    layer2StatusBeforeTask: evidence_rollup_complete_business_closure_missing_adopt_reject_command_contract
+    layer2ExpectedAfterTask: source_test_command_contract_closed_runtime_db_provider_still_blocked
     layer3Status: blocked_provider_cost_pre_release_gates
-    activeQueueNonTerminalCountBeforeTask: 28
+    activeQueueNonTerminalCountBeforeTask: 29
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
-    successorTask: content-admin-review-adoption-command-contract-tdd-2026-06-27
-    successorTaskDecision: blocked_pending_fresh_source_test_approval
+    mergePushCleanupApprovalSource: current_user_independent_branch_closeout_instruction_2026_06_27
+    successorTask: layer-2-business-closure-evidence-rollup-refresh-after-command-contract
+    successorTaskDecision: not_created_by_this_source_test_task
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -584,35 +584,35 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_independent_branch_closeout_instruction_2026_06_27
+      approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    approvalPackagePrepared: true
-    successorBlockedTaskRegistered: true
+    approvalPackagePrepared: not_applicable
+    successorBlockedTaskRegistered: false
     evidencePrepared: true
     auditReviewPrepared: true
-    docsOnly: true
+    docsOnly: false
     ssotReadListPrepared: true
-    activeQueueNonTerminalCountBeforeTask: 28
-    tddRedObserved: not_applicable
-    focusedUnitTests: blocked_by_task_scope
-    mechanismScriptSmoke: not_applicable
-    sourceOrTestChanged: false
+    activeQueueNonTerminalCountBeforeTask: 29
+    tddRedObserved: pass_expected_rejected_contract_failures
+    focusedUnitTests: pass_4_files_21_tests
+    mechanismScriptSmoke: pending
+    sourceOrTestChanged: true
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -631,8 +631,8 @@ currentTask:
     studentVisibleContentExecuted: false
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
-    activeQueueNonTerminalCountAfterTask: 29
-    archiveCandidateCountAfterTask: 20
+    activeQueueNonTerminalCountAfterTask: 28
+    archiveCandidateCountAfterTask: 21
     highRiskRepairBlockedCountAfterTask: 0
     prettierScoped: pass
     gitDiffCheck: pass
@@ -643,10 +643,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 6ac7623bc68049e3b69310bcf22d9dad4926151f
-    baselineOriginMasterSha: 6ac7623bc68049e3b69310bcf22d9dad4926151f
-    currentBranch: codex/content-admin-adoption-command-approval-20260627
-  nextRecommendedTask: content-admin-review-adoption-command-contract-tdd-2026-06-27
+    baselineMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
+    baselineOriginMasterSha: ad3774283a4a16def6ba8b22af22b376ed7d5d71
+    currentBranch: codex/content-admin-adoption-command-tdd-20260627
+  nextRecommendedTask: layer-2-business-closure-evidence-rollup-refresh-after-command-contract
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

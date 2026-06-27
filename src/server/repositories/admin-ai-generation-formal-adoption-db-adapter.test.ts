@@ -195,6 +195,28 @@ describe("admin AI generation formal adoption DB adapter", () => {
     }
   });
 
+  it("builds metadata-only rejection insert values without formal draft writes", () => {
+    const input = createAdoptionInput({
+      reviewStatus: "rejected",
+    });
+    const values = createAdminAiGenerationFormalAdoptionInsertValue(input);
+
+    expect(values).toMatchObject({
+      public_id: input.adoptionPublicId,
+      source_result_public_id: input.sourceResultPublicId,
+      review_status: "rejected",
+      formal_target_write_status: "blocked_without_follow_up_task",
+      formal_question_public_id: null,
+      formal_paper_public_id: null,
+      reviewer_public_id: "admin_content_public_901",
+      content_digest: "sha256:admin_ai_generation_result_901",
+      content_preview_masked: "masked formal adoption source preview",
+    });
+    for (const protectedTerm of protectedAiTerms()) {
+      expect(JSON.stringify(values)).not.toContain(protectedTerm);
+    }
+  });
+
   it("maps generated-result rows to adoption source DTOs without internal ids", () => {
     const sourceResult =
       mapAdminAiGenerationFormalAdoptionSourceResultDbRowToSourceResult(
@@ -251,6 +273,25 @@ describe("admin AI generation formal adoption DB adapter", () => {
       evidence_status: "weak",
       citation_count: 1,
       ai_call_log_public_id: null,
+    });
+    expect(JSON.stringify(row)).not.toMatch(/"id":/u);
+  });
+
+  it("maps rejected adoption DB rows while keeping formal target writes blocked", () => {
+    const row = mapAdminAiGenerationFormalAdoptionDbRowToRow(
+      createAdoptionDbRow({
+        review_status: "rejected",
+      }),
+    );
+
+    expect(row satisfies AdminAiGenerationFormalAdoptionRow).toMatchObject({
+      adoption_public_id: "admin_ai_formal_adoption_public_901",
+      source_result_public_id: "admin_ai_generation_result_public_901",
+      review_status: "rejected",
+      formal_target_write_status: "blocked_without_follow_up_task",
+      formal_question_public_id: null,
+      formal_paper_public_id: null,
+      reviewer_public_id: "admin_content_public_901",
     });
     expect(JSON.stringify(row)).not.toMatch(/"id":/u);
   });

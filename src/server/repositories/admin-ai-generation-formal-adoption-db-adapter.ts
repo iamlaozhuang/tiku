@@ -370,11 +370,25 @@ function assertFormalTargetWriteSafe(
   row: Pick<
     AdminAiGenerationFormalAdoptionDbRow,
     | "target_type"
+    | "review_status"
     | "formal_target_write_status"
     | "formal_question_public_id"
     | "formal_paper_public_id"
   >,
 ): void {
+  if (
+    row.review_status === "rejected" &&
+    row.formal_target_write_status === blockedFormalTargetWriteStatus &&
+    row.formal_question_public_id === null &&
+    row.formal_paper_public_id === null
+  ) {
+    return;
+  }
+
+  if (row.review_status === "rejected") {
+    throw new Error("admin AI generation formal rejection cannot write draft");
+  }
+
   if (
     row.formal_target_write_status === blockedFormalTargetWriteStatus &&
     row.formal_question_public_id === null &&
@@ -495,7 +509,7 @@ function toFormalAdoptionTargetDomain(
 function toFormalAdoptionReviewStatus(
   value: string,
 ): AdminAiGenerationFormalAdoptionReviewStatus {
-  if (value === "approved_for_formal_adoption") {
+  if (value === "approved_for_formal_adoption" || value === "rejected") {
     return value;
   }
 

@@ -254,18 +254,18 @@ tasks:
       task may not be claimed from queue automatically while this approval is absent.
     targetClosureItem: Content-admin review adopt/reject command contract TDD
     behaviorBoundary: source_test_only::content_admin_review_adopt_reject_command_contract_no_runtime_execution
-    executionProfile: blocked_pending_fresh_source_test_approval
+    executionProfile: source_test_only_tdd_after_fresh_approval
     evidenceMode: redacted_source_test_only_after_approval
     validationPolicy: focused_unit_lint_typecheck_module_closeout_after_approval
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_source_test_approval
-    nextApprovalRequired: source_test_only_layer_2_adopt_reject_command_contract
+    status: closed
+    result: pass_source_test_command_contract_closed_runtime_db_provider_still_blocked
+    nextApprovalRequired: none_for_task_scoped_source_test_closeout
     capabilities:
-      localSourceChange: blocked_pending_fresh_approval
-      focusedUnitTest: blocked_pending_fresh_approval
-      docsStateEvidenceAudit: blocked_pending_fresh_approval
+      localSourceChange: approved_by_current_user_fresh_source_test_approval_2026_06_27
+      focusedUnitTest: approved_by_current_user_fresh_source_test_approval_2026_06_27
+      docsStateEvidenceAudit: approved_by_current_user_fresh_source_test_approval_2026_06_27
       browserRuntime: blocked
       devServer: blocked
       e2eRuntime: blocked
@@ -328,19 +328,19 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-adoption-command-contract-tdd-2026-06-27 -SkipRemoteAheadCheck
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalSource: fresh_source_test_approval_required
+        approved: true
+        approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_source_test_approval_required
+        approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_source_test_approval_required
+        approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_source_test_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_source_test_approval_2026_06_27_plus_current_user_independent_branch_closeout_instruction_2026_06_27
     planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-tdd.md

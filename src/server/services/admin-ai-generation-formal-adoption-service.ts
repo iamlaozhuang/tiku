@@ -75,8 +75,11 @@ export function createAdminAiGenerationFormalAdoptionService(
           await repositories.adoptionRepository.createOrReuseFormalAdoption(
             normalizedInput.value,
           );
+        const shouldCreateFormalDraft =
+          normalizedInput.value.reviewDecision === "approved";
 
         if (
+          !shouldCreateFormalDraft ||
           repositories.formalDraftAdapter === undefined ||
           adoptionResult.adoption.targetReference.formalTargetWriteStatus ===
             "draft_created"

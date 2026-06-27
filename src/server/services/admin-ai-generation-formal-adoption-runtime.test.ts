@@ -151,6 +151,60 @@ function createAdoptionResult(
   };
 }
 
+function createRejectedAdoptionResult(): AdminAiGenerationFormalAdoptionResult {
+  return {
+    ...createAdoptionResult(),
+    adoption: {
+      ...createAdoptionResult().adoption,
+      review: {
+        reviewStatus: "rejected",
+        reviewDecision: "rejected",
+        reviewerPublicId: "admin_content_public_177",
+        reviewedAt: "2026-06-26T20:00:00.000Z",
+      },
+      audit: {
+        actionType: "admin_ai_generation_result.formal_adoption.reject",
+        targetResourceType: "admin_ai_generation_result",
+        targetPublicId: "admin_ai_generation_result_content_question_177",
+        redactionStatus: "redacted",
+      },
+      reviewTraceability: {
+        traceabilityStatus: "single_result_traceable",
+        sourceGeneratedResultPublicId:
+          "admin_ai_generation_result_content_question_177",
+        validationStatus: "validated_for_formal_adoption",
+        reviewStatus: "rejected",
+        reviewDecision: "rejected",
+        reviewerPublicId: "admin_content_public_177",
+        reviewedAt: "2026-06-26T20:00:00.000Z",
+        adoptAction: {
+          actionStatus: "not_executed",
+          actionType: null,
+          actorPublicId: null,
+          actionAt: null,
+          formalTargetWriteStatus: "blocked_without_follow_up_task",
+          formalQuestionPublicId: null,
+          formalPaperPublicId: null,
+        },
+        rejectAction: {
+          actionStatus: "executed",
+          actionType: "admin_ai_generation_result.formal_adoption.reject",
+          actorPublicId: "admin_content_public_177",
+          actionAt: "2026-06-26T20:00:00.000Z",
+        },
+        directPublishStatus: "blocked_requires_fresh_publish_task",
+        auditSummary: {
+          actionType: "admin_ai_generation_result.formal_adoption.reject",
+          targetResourceType: "admin_ai_generation_result",
+          targetPublicId: "admin_ai_generation_result_content_question_177",
+          redactionStatus: "redacted",
+        },
+        redactionStatus: "redacted",
+      },
+    },
+  };
+}
+
 function createAdoptionRepository(
   overrides: Parameters<typeof createAdoptionResult>[0] = {},
 ): AdoptionRepositoryWithDraftUpdate {
@@ -184,6 +238,15 @@ function createFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterService 
         redactionStatus: "redacted" as const,
       },
     })),
+  };
+}
+
+function createRejectedAdoptionRepository(): AdoptionRepositoryWithDraftUpdate {
+  return {
+    createOrReuseFormalAdoption: vi.fn(async () =>
+      createRejectedAdoptionResult(),
+    ),
+    markFormalDraftCreated: vi.fn(),
   };
 }
 
@@ -485,6 +548,110 @@ describe("admin AI generation formal adoption runtime route", () => {
       targetType: "paper",
     });
     expect(serializedPayload).not.toContain(reviewedDraft.rawGeneratedContent);
+    expect(serializedPayload).not.toMatch(/"id":/u);
+  });
+
+  it("allows content admin to reject a generated question without formal draft creation", async () => {
+    const adoptionRepository = createRejectedAdoptionRepository();
+    const formalDraftAdapter = createFormalDraftAdapter();
+    const routeHandlers =
+      createAdminAiGenerationFormalAdoptionRuntimeRouteHandlers({
+        adoptionRepository,
+        createAdoptionPublicId: () =>
+          "admin_ai_formal_adoption_public_route_177",
+        formalDraftAdapter,
+        requestClock: () => new Date("2026-06-26T20:00:00.000Z"),
+        sessionService: {
+          getCurrentSession: vi.fn(async () => createSessionResponse()),
+        },
+      });
+
+    const response = await routeHandlers.formalAdoptions.POST(
+      createPostRequest({
+        targetType: "question",
+        reviewDecision: "rejected",
+        reviewerConfirmed: true,
+        rawGeneratedContent: "RAW GENERATED CONTENT MUST NOT RETURN",
+      }),
+      {
+        params: Promise.resolve({
+          publicId: "admin_ai_generation_result_content_question_177",
+        }),
+      },
+    );
+    const payload = await readJsonResponse(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        persistenceStatus: "created",
+        adoption: {
+          sourceReference: {
+            resultPublicId: "admin_ai_generation_result_content_question_177",
+            workspace: "content",
+            generationKind: "question",
+            ownerType: "platform",
+            organizationPublicId: null,
+          },
+          targetReference: {
+            targetType: "question",
+            targetDomain: "platform_formal_content",
+            formalTargetWriteStatus: "blocked_without_follow_up_task",
+            formalQuestionPublicId: null,
+            formalPaperPublicId: null,
+          },
+          review: {
+            reviewStatus: "rejected",
+            reviewDecision: "rejected",
+            reviewerPublicId: "admin_content_public_177",
+          },
+          audit: {
+            actionType: "admin_ai_generation_result.formal_adoption.reject",
+            redactionStatus: "redacted",
+          },
+          reviewTraceability: {
+            reviewStatus: "rejected",
+            reviewDecision: "rejected",
+            adoptAction: {
+              actionStatus: "not_executed",
+              actorPublicId: null,
+              actionAt: null,
+            },
+            rejectAction: {
+              actionStatus: "executed",
+              actionType: "admin_ai_generation_result.formal_adoption.reject",
+              actorPublicId: "admin_content_public_177",
+              actionAt: "2026-06-26T20:00:00.000Z",
+            },
+            directPublishStatus: "blocked_requires_fresh_publish_task",
+            redactionStatus: "redacted",
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    });
+    expect(adoptionRepository.createOrReuseFormalAdoption).toHaveBeenCalledWith(
+      {
+        adoptionPublicId: "admin_ai_formal_adoption_public_route_177",
+        actor: {
+          publicId: "admin_content_public_177",
+          roles: ["content_admin"],
+        },
+        resultPublicId: "admin_ai_generation_result_content_question_177",
+        targetType: "question",
+        reviewDecision: "rejected",
+        reviewerConfirmed: true,
+        reviewedAt: new Date("2026-06-26T20:00:00.000Z"),
+      },
+    );
+    expect(formalDraftAdapter.createFormalDraft).not.toHaveBeenCalled();
+    expect(adoptionRepository.markFormalDraftCreated).not.toHaveBeenCalled();
+    expect(serializedPayload).not.toContain(
+      "RAW GENERATED CONTENT MUST NOT RETURN",
+    );
+    expect(serializedPayload).not.toContain("synthetic-admin-session");
     expect(serializedPayload).not.toMatch(/"id":/u);
   });
 

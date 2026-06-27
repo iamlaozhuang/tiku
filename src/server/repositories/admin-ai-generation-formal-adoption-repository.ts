@@ -1,4 +1,5 @@
 import type {
+  AdminAiGenerationFormalAdoptionAuditActionType,
   AdminAiGenerationFormalAdoptionDto,
   AdminAiGenerationFormalAdoptionGateway,
   AdminAiGenerationFormalAdoptionRepository,
@@ -13,14 +14,17 @@ import type {
 import {
   canAdoptAdminAiGenerationPlatformFormalContent,
   resolveAdminAiGenerationTaskTypeForFormalTarget,
+  type AdminAiGenerationFormalAdoptionReviewDecision,
+  type AdminAiGenerationFormalAdoptionReviewStatus,
   type AdminAiGenerationFormalAdoptionSourceResult,
 } from "../models/admin-ai-generation-formal-adoption";
 
 const platformFormalContentTargetDomain = "platform_formal_content";
-const formalAdoptionReviewStatus = "approved_for_formal_adoption";
 const formalTargetWriteStatus = "blocked_without_follow_up_task";
-const formalAdoptionAuditActionType =
+const formalAdoptionApproveAuditActionType =
   "admin_ai_generation_result.formal_adoption.approve";
+const formalAdoptionRejectAuditActionType =
+  "admin_ai_generation_result.formal_adoption.reject";
 
 export function createAdminAiGenerationFormalAdoptionRepository(
   gateway: AdminAiGenerationFormalAdoptionGateway,
@@ -86,8 +90,13 @@ function assertConfirmedAdoptionInput(
     throw new Error("explicit formal adoption review confirmation is required");
   }
 
-  if (input.reviewDecision !== "approved") {
-    throw new Error("admin AI generation formal adoption requires approval");
+  if (
+    input.reviewDecision !== "approved" &&
+    input.reviewDecision !== "rejected"
+  ) {
+    throw new Error(
+      "admin AI generation formal adoption review decision is unsupported",
+    );
   }
 }
 
@@ -158,7 +167,7 @@ function createInsertAdoptionRecordInput(
     organizationPublicId: sourceResult.organizationPublicId,
     targetType: input.targetType,
     targetDomain: platformFormalContentTargetDomain,
-    reviewStatus: formalAdoptionReviewStatus,
+    reviewStatus: createFormalAdoptionReviewStatus(input.reviewDecision),
     formalTargetWriteStatus,
     formalQuestionPublicId: null,
     formalPaperPublicId: null,
@@ -171,6 +180,14 @@ function createInsertAdoptionRecordInput(
     aiCallLogPublicId: sourceResult.aiCallLogPublicId,
     createdAt: input.reviewedAt,
   };
+}
+
+function createFormalAdoptionReviewStatus(
+  reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision,
+): AdminAiGenerationFormalAdoptionReviewStatus {
+  return reviewDecision === "approved"
+    ? "approved_for_formal_adoption"
+    : "rejected";
 }
 
 function assertFormalDraftCreatedInput(
@@ -229,7 +246,7 @@ function mapAdminAiGenerationFormalAdoptionRowToDto(
     },
     review: {
       reviewStatus: row.review_status,
-      reviewDecision: "approved",
+      reviewDecision: createFormalAdoptionReviewDecision(row),
       reviewerPublicId: row.reviewer_public_id,
       reviewedAt: row.reviewed_at.toISOString(),
     },
@@ -251,29 +268,49 @@ function createFormalAdoptionReviewTraceability(
   row: AdminAiGenerationFormalAdoptionRow,
 ): AdminAiGenerationFormalAdoptionReviewTraceabilityDto {
   const reviewedAt = row.reviewed_at.toISOString();
+  const reviewDecision = createFormalAdoptionReviewDecision(row);
 
   return {
     traceabilityStatus: "single_result_traceable",
     sourceGeneratedResultPublicId: row.source_result_public_id,
     validationStatus: "validated_for_formal_adoption",
     reviewStatus: row.review_status,
-    reviewDecision: "approved",
+    reviewDecision,
     reviewerPublicId: row.reviewer_public_id,
     reviewedAt,
-    adoptAction: {
-      actionStatus: "executed",
-      actionType: formalAdoptionAuditActionType,
-      actorPublicId: row.reviewer_public_id,
-      actionAt: reviewedAt,
-      formalTargetWriteStatus: row.formal_target_write_status,
-      formalQuestionPublicId: row.formal_question_public_id,
-      formalPaperPublicId: row.formal_paper_public_id,
-    },
-    rejectAction: {
-      actionStatus: "not_executed",
-      actorPublicId: null,
-      actionAt: null,
-    },
+    adoptAction:
+      reviewDecision === "approved"
+        ? {
+            actionStatus: "executed",
+            actionType: formalAdoptionApproveAuditActionType,
+            actorPublicId: row.reviewer_public_id,
+            actionAt: reviewedAt,
+            formalTargetWriteStatus: row.formal_target_write_status,
+            formalQuestionPublicId: row.formal_question_public_id,
+            formalPaperPublicId: row.formal_paper_public_id,
+          }
+        : {
+            actionStatus: "not_executed",
+            actionType: null,
+            actorPublicId: null,
+            actionAt: null,
+            formalTargetWriteStatus,
+            formalQuestionPublicId: null,
+            formalPaperPublicId: null,
+          },
+    rejectAction:
+      reviewDecision === "rejected"
+        ? {
+            actionStatus: "executed",
+            actionType: formalAdoptionRejectAuditActionType,
+            actorPublicId: row.reviewer_public_id,
+            actionAt: reviewedAt,
+          }
+        : {
+            actionStatus: "not_executed",
+            actorPublicId: null,
+            actionAt: null,
+          },
     directPublishStatus: "blocked_requires_fresh_publish_task",
     auditSummary: createFormalAdoptionAuditSummary(row),
     redactionStatus: "redacted",
@@ -284,16 +321,43 @@ function createFormalAdoptionAuditSummary(
   row: AdminAiGenerationFormalAdoptionRow,
 ): AdminAiGenerationFormalAdoptionDto["audit"] {
   return {
-    actionType: formalAdoptionAuditActionType,
+    actionType: createFormalAdoptionAuditActionType(row),
     targetResourceType: "admin_ai_generation_result",
     targetPublicId: row.source_result_public_id,
     redactionStatus: "redacted",
   };
 }
 
+function createFormalAdoptionReviewDecision(
+  row: Pick<AdminAiGenerationFormalAdoptionRow, "review_status">,
+): AdminAiGenerationFormalAdoptionReviewDecision {
+  return row.review_status === "rejected" ? "rejected" : "approved";
+}
+
+function createFormalAdoptionAuditActionType(
+  row: Pick<AdminAiGenerationFormalAdoptionRow, "review_status">,
+): AdminAiGenerationFormalAdoptionAuditActionType {
+  return createFormalAdoptionReviewDecision(row) === "approved"
+    ? formalAdoptionApproveAuditActionType
+    : formalAdoptionRejectAuditActionType;
+}
+
 function assertFormalTargetWriteSafe(
   row: AdminAiGenerationFormalAdoptionRow,
 ): void {
+  if (
+    row.review_status === "rejected" &&
+    row.formal_target_write_status === formalTargetWriteStatus &&
+    row.formal_question_public_id === null &&
+    row.formal_paper_public_id === null
+  ) {
+    return;
+  }
+
+  if (row.review_status === "rejected") {
+    throw new Error("admin AI generation formal rejection cannot write draft");
+  }
+
   if (
     row.formal_target_write_status === formalTargetWriteStatus &&
     row.formal_question_public_id === null &&

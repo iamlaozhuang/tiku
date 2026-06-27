@@ -250,6 +250,85 @@ describe("admin AI generation formal adoption repository", () => {
     expect(serializedResult).not.toMatch(/"id":/u);
   });
 
+  it("records a redacted platform formal rejection without creating formal draft references", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult(),
+      insertedRow: createAdoptionRow({
+        review_status: "rejected",
+      }),
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+    const input = {
+      ...createBaseInput(),
+      reviewDecision: "rejected" as const,
+    };
+
+    const result = await repository.createOrReuseFormalAdoption(input);
+    const serializedResult = JSON.stringify(result);
+
+    expect(insertAdoptionRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        adoptionPublicId: "admin_ai_formal_adoption_public_177",
+        sourceResultPublicId: "admin_ai_generation_result_public_177",
+        reviewStatus: "rejected",
+        formalTargetWriteStatus: "blocked_without_follow_up_task",
+        formalQuestionPublicId: null,
+        formalPaperPublicId: null,
+        reviewerPublicId: "admin_content_public_177",
+      }),
+    );
+    expect(result).toMatchObject({
+      persistenceStatus: "created",
+      adoption: {
+        targetReference: {
+          targetType: "question",
+          targetDomain: "platform_formal_content",
+          formalTargetWriteStatus: "blocked_without_follow_up_task",
+          formalQuestionPublicId: null,
+          formalPaperPublicId: null,
+        },
+        review: {
+          reviewStatus: "rejected",
+          reviewDecision: "rejected",
+          reviewerPublicId: "admin_content_public_177",
+          reviewedAt: "2026-06-26T23:40:00.000Z",
+        },
+        audit: {
+          actionType: "admin_ai_generation_result.formal_adoption.reject",
+          targetResourceType: "admin_ai_generation_result",
+          targetPublicId: "admin_ai_generation_result_public_177",
+          redactionStatus: "redacted",
+        },
+        reviewTraceability: {
+          traceabilityStatus: "single_result_traceable",
+          reviewStatus: "rejected",
+          reviewDecision: "rejected",
+          adoptAction: {
+            actionStatus: "not_executed",
+            actorPublicId: null,
+            actionAt: null,
+          },
+          rejectAction: {
+            actionStatus: "executed",
+            actionType: "admin_ai_generation_result.formal_adoption.reject",
+            actorPublicId: "admin_content_public_177",
+            actionAt: "2026-06-26T23:40:00.000Z",
+          },
+          directPublishStatus: "blocked_requires_fresh_publish_task",
+          auditSummary: {
+            actionType: "admin_ai_generation_result.formal_adoption.reject",
+            redactionStatus: "redacted",
+          },
+          redactionStatus: "redacted",
+        },
+        redactionStatus: "redacted",
+      },
+    });
+    expect(serializedResult).not.toContain(input.protectedGeneratedText);
+    expect(serializedResult).not.toContain(input.protectedProviderArtifact);
+    expect(serializedResult).not.toMatch(/"id":/u);
+  });
+
   it("reuses an existing adoption plan for the same source result and target type", async () => {
     const existingRow = createAdoptionRow({
       adoption_public_id: "admin_ai_formal_adoption_public_existing",

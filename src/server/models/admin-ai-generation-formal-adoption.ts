@@ -16,6 +16,7 @@ export const adminAiGenerationFormalAdoptionTargetTypeValues = [
 
 export const adminAiGenerationFormalAdoptionReviewDecisionValues = [
   "approved",
+  "rejected",
 ] as const;
 
 export type AdminAiGenerationFormalAdoptionTargetType =
@@ -28,7 +29,8 @@ export type AdminAiGenerationFormalAdoptionReviewDecision =
   (typeof adminAiGenerationFormalAdoptionReviewDecisionValues)[number];
 
 export type AdminAiGenerationFormalAdoptionReviewStatus =
-  "approved_for_formal_adoption";
+  | "approved_for_formal_adoption"
+  | "rejected";
 
 export type AdminAiGenerationFormalTargetWriteStatus =
   | "blocked_without_follow_up_task"
