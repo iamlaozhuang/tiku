@@ -104,9 +104,26 @@ provider payloads, raw employee answer text, full paper content, internal numeri
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27`
   - Result: pass.
   - Key output: `module-closeout readiness passed`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27 -SkipRemoteAheadCheck`
+  - Result: pass.
+  - Key output: `pre-push readiness passed`.
 
 ## Closeout
 
+- Fresh closeout approval: granted by user on 2026-06-27 for ff-only merge to `master`, master gates, push to
+  `origin/master`, and deleting the merged short branch.
+- Fast-forward merge to `master`: executed; `master` advanced from
+  `3fd41a24c1988bb3b721e41a71680e9a546e68b2` to `99697cd7a3a5819e4d253f04406e835bf1e54bf9`.
+- Master closeout gates:
+  - scoped Prettier check: pass
+  - `git diff --check origin/master..HEAD`: pass
+  - Module Run v2 pre-push readiness: pass with `-SkipRemoteAheadCheck`
+  - project status diagnostic: pass, `nextActionDecision: no_pending_task`
+  - stopped automation hygiene diagnostic: pass, `stoppedAutomationHygieneDecision: clean`
+  - `npm.cmd run lint`: pass
+  - `npm.cmd run typecheck`: pass
+- Push to `origin/master`: pending after this amended evidence-only closeout commit.
+- Short branch cleanup: pending after successful push.
 - Cost Calibration Gate remains blocked.
 - Blocked remainder: product source, tests/e2e, browser/dev-server runtime, DB connection/write/migration,
   Provider/model call, env/secret access, dependency changes, payment, external service, staging/prod deploy, PR,

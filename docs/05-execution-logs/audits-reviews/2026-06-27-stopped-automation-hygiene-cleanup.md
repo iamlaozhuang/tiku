@@ -28,3 +28,10 @@
 ## Outcome
 
 APPROVE docs/state hygiene cleanup closeout after final Module Run v2 readiness gates pass.
+
+## Master Closeout Review
+
+Fresh closeout approval was granted on 2026-06-27 for ff-only merge to `master`, master gates, push to `origin/master`,
+and deleting the merged short branch. The ff-only merge completed on `master`, and master closeout gates passed before
+push. PR, force push, release readiness, final Pass, source/runtime/DB/Provider/browser/e2e, and Cost Calibration Gate
+remain blocked.

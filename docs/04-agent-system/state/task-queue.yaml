@@ -131,21 +131,22 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27 -SkipRemoteAheadCheck
     closeoutPolicy:
       localCommit:
         approved: true
         approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_closeout_approval_required
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_approval_required
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_closeout_approval_2026_06_27
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md

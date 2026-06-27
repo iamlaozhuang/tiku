@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stopped-automation-hygiene-cleanup-2026-06-27
-updatedAt: "2026-06-27T02:22:45-07:00"
+updatedAt: "2026-06-27T02:33:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,7 +501,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3fd41a24c1988bb3b721e41a71680e9a546e68b2
+  lastKnownMasterSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
   lastKnownOriginMasterSha: 3fd41a24c1988bb3b721e41a71680e9a546e68b2
 currentTask:
   id: stopped-automation-hygiene-cleanup-2026-06-27
@@ -561,10 +561,11 @@ currentTask:
     cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
     cleanupCandidateKind: stale_clean_worktree
     retainedTerminalRecoveryWindow: 8
-    closeoutApproval: local_commit_only
-    ffOnlyMergeDecision: blocked_requires_fresh_closeout_approval
-    pushDecision: blocked_requires_fresh_closeout_approval
-    cleanupDecision: blocked_requires_fresh_closeout_approval
+    closeoutApproval: approved_for_ff_only_merge_push_cleanup
+    closeoutApprovalSource: current_user_fresh_closeout_approval_2026_06_27
+    ffOnlyMergeDecision: pass_master_advanced_to_99697cd7a3a5819e4d253f04406e835bf1e54bf9
+    pushDecision: approved_target_origin_master_pending_after_evidence_commit
+    cleanupDecision: approved_delete_merged_short_branch_after_push
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -576,24 +577,24 @@ currentTask:
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     localCommitApproved: true
-    mergePushCleanupApproved: false
-    mergePushCleanupApprovalSource: fresh_closeout_approval_required
+    mergePushCleanupApproved: true
+    mergePushCleanupApprovalSource: current_user_fresh_closeout_approval_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
       approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
     fastForwardMerge:
-      approved: false
+      approved: true
       targetBranch: master
-      approvalSource: fresh_closeout_approval_required
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
     push:
-      approved: false
+      approved: true
       target: origin/master
-      approvalSource: fresh_closeout_approval_required
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
     cleanup:
-      deleteShortBranch: false
-      approvalSource: fresh_closeout_approval_required
-  commitSha: null
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+  commitSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -640,6 +641,14 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
     projectStatusDiagnostic: pass_idle_no_pending_task_hygiene_clean_queue_slimming_clean
+    ffOnlyMergeToMaster: pass
+    masterScopedPrettierCheck: pass
+    masterGitDiffCheck: pass_origin_master_to_head
+    masterLint: pass_on_master
+    masterTypecheck: pass_on_master
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_on_master
+    pushOriginMaster: pending_after_evidence_commit
+    mergedShortBranchCleanup: pending_after_push
   diagnosticsBaseline:
     stoppedAutomationHygieneDecisionBeforeCleanup: cleanup_available
     stoppedAutomationHygieneCleanupCandidateCountBeforeCleanup: 1
@@ -10780,7 +10789,7 @@ lastStoppedAutomationHygieneCleanup:
   taskId: stopped-automation-hygiene-cleanup-2026-06-27
   cleanedAt: "2026-06-27T02:24:50-07:00"
   branch: codex/stopped-automation-hygiene-cleanup-20260627
-  commitSha: null
+  commitSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
   decision: pass_stopped_automation_hygiene_cleanup
   cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
   cleanupMode: script_guarded_cleanup
