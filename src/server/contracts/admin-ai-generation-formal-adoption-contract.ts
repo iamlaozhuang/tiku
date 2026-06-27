@@ -189,6 +189,124 @@ export type AdminAiGenerationReviewBatchSelectionPreviewDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationReviewResultDiffStatus =
+  | "ready"
+  | "blocked_missing_adopted_draft";
+
+export type AdminAiGenerationReviewResultDiffFieldKey =
+  | "question"
+  | "standard_answer"
+  | "analysis"
+  | "scoring_point"
+  | "citation";
+
+export type AdminAiGenerationReviewResultDiffChangeStatus =
+  | "changed"
+  | "unchanged"
+  | "generated_result_only"
+  | "adopted_draft_only";
+
+export type AdminAiGenerationReviewResultDiffSegmentSource = {
+  contentDigest: string;
+  contentPreviewMasked: string;
+};
+
+export type AdminAiGenerationReviewResultDiffSegmentDto =
+  AdminAiGenerationReviewResultDiffSegmentSource & {
+    redactionStatus: "redacted";
+  };
+
+export type AdminAiGenerationReviewResultDiffFieldSource = {
+  fieldKey: AdminAiGenerationReviewResultDiffFieldKey;
+  generatedResultDigest: string | null;
+  generatedResultPreviewMasked: string | null;
+  adoptedDraftDigest: string | null;
+  adoptedDraftPreviewMasked: string | null;
+};
+
+export type AdminAiGenerationReviewResultDiffFieldDto = {
+  fieldKey: AdminAiGenerationReviewResultDiffFieldKey;
+  changeStatus: AdminAiGenerationReviewResultDiffChangeStatus;
+  generatedResult: AdminAiGenerationReviewResultDiffSegmentDto | null;
+  adoptedDraft: AdminAiGenerationReviewResultDiffSegmentDto | null;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewResultDiffGeneratedResultSource = {
+  contentDigest: string;
+  contentPreviewMasked: string;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  aiCallLogPublicId: string | null;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewResultDiffAdoptedDraftSource = {
+  draftPublicId: string;
+  contentDigest: string;
+  contentPreviewMasked: string;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewResultDiffSource = {
+  resultPublicId: string;
+  adoptionPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  targetType: AdminAiGenerationFormalAdoptionTargetType;
+  targetDomain: AdminAiGenerationFormalAdoptionTargetDomain;
+  formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+  formalQuestionPublicId: string | null;
+  formalPaperPublicId: string | null;
+  reviewerPublicId: string;
+  reviewedAt: string;
+  generatedResult: AdminAiGenerationReviewResultDiffGeneratedResultSource;
+  adoptedDraft: AdminAiGenerationReviewResultDiffAdoptedDraftSource | null;
+  fields: readonly AdminAiGenerationReviewResultDiffFieldSource[];
+  redactionStatus: "redacted";
+};
+
+export type AdminAiGenerationReviewResultDiffDto = {
+  diffStatus: AdminAiGenerationReviewResultDiffStatus;
+  resultPublicId: string;
+  adoptionPublicId: string;
+  taskPublicId: string;
+  requestPublicId: string;
+  target: {
+    targetType: AdminAiGenerationFormalAdoptionTargetType;
+    targetDomain: AdminAiGenerationFormalAdoptionTargetDomain;
+    formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+    formalQuestionPublicId: string | null;
+    formalPaperPublicId: string | null;
+  };
+  sourceSummary: AdminAiGenerationReviewResultDiffGeneratedResultSource;
+  adoptedDraftSummary: AdminAiGenerationReviewResultDiffAdoptedDraftSource | null;
+  diffSummary: {
+    fieldCount: number;
+    changedCount: number;
+    unchangedCount: number;
+    generatedResultOnlyCount: number;
+    adoptedDraftOnlyCount: number;
+  };
+  fields: AdminAiGenerationReviewResultDiffFieldDto[];
+  readBoundary: {
+    readOnly: true;
+    rawPromptExposed: false;
+    rawGeneratedOutputExposed: false;
+    providerPayloadExposed: false;
+    mutationStatus: "not_executed";
+    publishStatus: "not_executed";
+    redactionStatus: "redacted";
+  };
+  reviewedBy: {
+    reviewerPublicId: string;
+    reviewedAt: string;
+  };
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationFormalAdoptionDto = {
   adoptionPublicId: string;
   sourceReference: {
