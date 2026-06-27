@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-archive-apply-2026-06-27
-  updatedAt: "2026-06-27T02:01:57-07:00"
+  updatedByTask: active-queue-terminal-archive-cleanup-2026-06-27
+  updatedAt: "2026-06-27T03:11:41-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -14353,3 +14353,23 @@ entries:
     commitSha: null
     completedAt: "2026-06-23"
     archivedByTask: active-queue-slimming-archive-apply-2026-06-27
+  - id: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+    phase: high-risk-blocked-task-packet-metadata-repair-2026-06-27
+    status: closed
+    taskKind: mechanism_docs_state_metadata_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
+    completedAt: "2026-06-27T03:00:10-07:00"
+    archivedByTask: active-queue-terminal-archive-cleanup-2026-06-27
+  - id: stopped-automation-hygiene-cleanup-2026-06-27
+    phase: stopped-automation-hygiene-cleanup-2026-06-27
+    status: closed
+    taskKind: mechanism_docs_state_hygiene_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
+    completedAt: "2026-06-27T02:25:14-07:00"
+    archivedByTask: active-queue-terminal-archive-cleanup-2026-06-27

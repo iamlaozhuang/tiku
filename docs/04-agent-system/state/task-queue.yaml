@@ -44,149 +44,49 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
-  - id: high-risk-blocked-task-packet-metadata-repair-2026-06-27
-    title: High-risk blocked task packet metadata repair
-    phase: high-risk-blocked-task-packet-metadata-repair-2026-06-27
-    sourceStory: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+  - id: active-queue-terminal-archive-cleanup-2026-06-27
+    title: Active queue terminal archive cleanup
+    phase: active-queue-terminal-archive-cleanup-2026-06-27
+    sourceStory: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
     dependencies: []
-    taskPlanPolicy: required_before_metadata_repair
+    taskPlanPolicy: required_before_archive_move
     humanApprovalBoundary: >-
-      Current user approval permits a docs/state-only repair of high-risk blocked task packet metadata in
-      docs/04-agent-system/state/task-queue.yaml, docs/04-agent-system/state/project-state.yaml, and corresponding
-      task-plan/evidence/audit/acceptance records. Source code, browser, DB, Provider, PR, force push, release
-      readiness, and final Pass remain blocked.
-    targetClosureItem: high-risk blocked queue task packets have complete mechanism metadata
-    behaviorBoundary: module_run_v2::blocked_task_packet_metadata_only
-    executionProfile: local_mechanism_docs_state_metadata_repair
+      Current user approval permits archiving two terminal active queue tasks:
+      high-risk-blocked-task-packet-metadata-repair-2026-06-27 and
+      stopped-automation-hygiene-cleanup-2026-06-27. Scope is limited to
+      docs/04-agent-system/state/task-queue.yaml, docs/04-agent-system/state/project-state.yaml,
+      docs/04-agent-system/state/archive/**, docs/04-agent-system/state/task-history-index.yaml,
+      and corresponding task-plan/evidence/audit/acceptance records. Source code, browser, DB,
+      Provider, PR, force push, release readiness, and final Pass remain blocked.
+    targetClosureItem: active queue terminal archive candidates moved to archive and indexed
+    behaviorBoundary: module_run_v2::active_queue_terminal_archive_cleanup
+    executionProfile: local_mechanism_docs_state_archive_cleanup
     evidenceMode: full_redacted
-    validationPolicy: queue_slimming_high_risk_metadata_clear_and_docs_state_gates
-    taskKind: mechanism_docs_state_metadata_repair
+    validationPolicy: queue_slimming_archive_candidate_clear_and_docs_state_gates
+    taskKind: mechanism_docs_state_archive_cleanup
     moduleRunVersion: 2
-    status: closed
-    result: pass_high_risk_blocked_task_packet_metadata_repair_ff_merged_master_gates_passed_push_cleanup_approved
-    claimedAt: "2026-06-27T02:44:21-07:00"
-    plannedAt: "2026-06-27T02:44:21-07:00"
-    implementedAt: "2026-06-27T02:52:24-07:00"
-    validatedAt: "2026-06-27T02:52:24-07:00"
-    reviewedAt: "2026-06-27T02:52:24-07:00"
-    closedAt: "2026-06-27T03:00:10-07:00"
-    branch: codex/high-risk-blocked-metadata-repair-20260627
-    targetRepairCandidateCount: 19
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-      - docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-      - docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-    blockedCapabilities:
-      - sourceChange
-      - browserRuntime
-      - devServer
-      - e2eRuntime
-      - databaseConnection
-      - databaseWrite
-      - schemaMigration
-      - providerCall
-      - envSecretAccess
-      - dependencyIntroduction
-      - stagingProdDeploy
-      - paymentExternalService
-      - pr
-      - forcePush
-      - releaseReadiness
-      - finalPass
-      - costCalibrationGate
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-      - git diff --check
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId high-risk-blocked-task-packet-metadata-repair-2026-06-27
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId high-risk-blocked-task-packet-metadata-repair-2026-06-27
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
-    evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-    retryCount: 0
-
-  - id: stopped-automation-hygiene-cleanup-2026-06-27
-    title: Stopped automation hygiene cleanup
-    phase: stopped-automation-hygiene-cleanup-2026-06-27
-    sourceStory: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
-    dependencies: []
-    taskPlanPolicy: required_before_cleanup
-    humanApprovalBoundary: >-
-      Current user approval permits creating and executing a stopped automation hygiene cleanup task, only through
-      scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup, with task plan/evidence/audit/
-      acceptance and necessary mechanism gates. Product source, browser, DB, Provider, PR, force push, release
-      readiness, and final Pass remain blocked.
-    targetClosureItem: stopped automation hygiene stale clean worktree cleanup
-    behaviorBoundary: module_run_v2::stopped_automation_hygiene_cleanup
-    executionProfile: local_mechanism_docs_state_hygiene_cleanup
-    evidenceMode: full_redacted
-    validationPolicy: mechanism_hygiene_cleanup_and_docs_state_gates
-    taskKind: mechanism_docs_state_hygiene_cleanup
-    moduleRunVersion: 2
-    status: closed
-    result: pass_stopped_automation_hygiene_cleanup
-    claimedAt: "2026-06-27T02:22:45-07:00"
-    plannedAt: "2026-06-27T02:22:45-07:00"
-    implementedAt: "2026-06-27T02:24:50-07:00"
-    validatedAt: "2026-06-27T02:24:58-07:00"
-    reviewedAt: "2026-06-27T02:25:14-07:00"
-    closedAt: "2026-06-27T02:25:14-07:00"
-    branch: codex/stopped-automation-hygiene-cleanup-20260627
-    cleanupScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
-    cleanupMode: script_guarded_cleanup_only
-    cleanupCandidateKind: stale_clean_worktree
-    cleanupCandidateSample: C:\Users\jzzhu\.codex\worktrees\cb44\tiku
-    cleanupDecision: cleanup_completed
-    cleanupActionCount: 1
-    cleanupDeferredCount: 0
-    postCleanupDecision: clean
+    status: ready_for_closeout
+    result: pass_active_queue_terminal_archive_cleanup_local_gates_passed_pending_fresh_closeout
+    claimedAt: "2026-06-27T03:11:41-07:00"
+    plannedAt: "2026-06-27T03:11:41-07:00"
+    implementedAt: "2026-06-27T03:15:36-07:00"
+    validatedAt: "2026-06-27T03:17:27-07:00"
+    reviewedAt: "2026-06-27T03:17:27-07:00"
+    branch: codex/active-queue-terminal-archive-cleanup-20260627
+    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    archiveCandidateTaskIds:
+      - high-risk-blocked-task-packet-metadata-repair-2026-06-27
+      - stopped-automation-hygiene-cleanup-2026-06-27
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
       - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-27-stopped-automation-hygiene-cleanup.md
-      - docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
-      - docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md
+      - docs/05-execution-logs/task-plans/2026-06-27-active-queue-terminal-archive-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-27-active-queue-terminal-archive-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-terminal-archive-cleanup.md
+      - docs/05-execution-logs/acceptance/2026-06-27-active-queue-terminal-archive-cleanup.md
     blockedFiles:
       - .env*
       - package.json
@@ -220,36 +120,65 @@ tasks:
       - finalPass
       - costCalibrationGate
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-27-stopped-automation-hygiene-cleanup.md docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-terminal-archive-cleanup.md docs/05-execution-logs/evidence/2026-06-27-active-queue-terminal-archive-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-terminal-archive-cleanup.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-terminal-archive-cleanup.md
+      - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stopped-automation-hygiene-cleanup-2026-06-27 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-terminal-archive-cleanup-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-terminal-archive-cleanup-2026-06-27
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: current_user_stopped_automation_hygiene_cleanup_approval_2026_06_27
+        approvalSource: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
       fastForwardMerge:
-        approved: true
+        approved: false
         targetBranch: master
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
+        requiredApproval: fresh_closeout_approval_required
       push:
-        approved: true
+        approved: false
         target: origin/master
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
+        requiredApproval: fresh_closeout_approval_required
       cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_fresh_closeout_approval_2026_06_27
-    evidencePath: docs/05-execution-logs/evidence/2026-06-27-stopped-automation-hygiene-cleanup.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-stopped-automation-hygiene-cleanup.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-stopped-automation-hygiene-cleanup.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-27-stopped-automation-hygiene-cleanup.md
+        deleteShortBranch: false
+        requiredApproval: fresh_closeout_approval_required
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-terminal-archive-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-terminal-archive-cleanup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-terminal-archive-cleanup.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-terminal-archive-cleanup.md
+    validationSummary:
+      taskPlanPrepared: true
+      acceptancePackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      docsOnly: true
+      archiveCandidatesApproved: 2
+      archivedTaskCount: 2
+      activeQueueCandidateCountAfterMove: 0
+      historyIndexEntriesAdded: 2
+      archiveTaskCountBeforeTask: 1141
+      archiveTaskCountAfterMove: 1143
+      focusedUnitTests: blocked_by_task_scope
+      sourceOrTestChanged: false
+      schemaMigrationExecuted: false
+      liveDatabaseConnectionExecuted: false
+      databaseWriteExecuted: false
+      browserSmokeExecuted: false
+      providerCallExecuted: false
+      providerCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleContentExecuted: false
+      finalPassClaimed: false
+      queueSlimmingDiagnostic: pass_archive_candidate_count_0
+      projectStatusDiagnostic: pass_current_task_active_ready_for_closeout
+      prettierScoped: pass
+      gitDiffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
     retryCount: 0
 
   - id: organization-analytics-local-browser-smoke-validation-approval-2026-06-27

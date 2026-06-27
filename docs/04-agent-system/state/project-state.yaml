@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: high-risk-blocked-task-packet-metadata-repair-2026-06-27
-updatedAt: "2026-06-27T03:00:10-07:00"
+currentPhase: active-queue-terminal-archive-cleanup-2026-06-27
+updatedAt: "2026-06-27T03:17:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,33 +501,39 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 10eee195105fbf6af0af7e5c8d274f805588e721
-  lastKnownOriginMasterSha: 73f791412d4a3c12bccfd4a0cbafe83d2e68d5c6
+  lastKnownMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
+  lastKnownOriginMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
 currentTask:
-  id: high-risk-blocked-task-packet-metadata-repair-2026-06-27
-  status: closed
-  result: pass_high_risk_blocked_task_packet_metadata_repair_ff_merged_master_gates_passed_push_cleanup_approved
-  claimedAt: "2026-06-27T02:44:21-07:00"
-  plannedAt: "2026-06-27T02:44:21-07:00"
-  implementedAt: "2026-06-27T02:52:24-07:00"
-  validatedAt: "2026-06-27T02:52:24-07:00"
-  reviewedAt: "2026-06-27T02:52:24-07:00"
-  closedAt: "2026-06-27T03:00:10-07:00"
-  sourceStory: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
-  approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-blocked-task-packet-metadata-repair.md
-  branch: codex/high-risk-blocked-metadata-repair-20260627
+  id: active-queue-terminal-archive-cleanup-2026-06-27
+  status: ready_for_closeout
+  result: pass_active_queue_terminal_archive_cleanup_local_gates_passed_pending_fresh_closeout
+  claimedAt: "2026-06-27T03:11:41-07:00"
+  plannedAt: "2026-06-27T03:11:41-07:00"
+  implementedAt: "2026-06-27T03:15:36-07:00"
+  validatedAt: "2026-06-27T03:17:27-07:00"
+  reviewedAt: "2026-06-27T03:17:27-07:00"
+  sourceStory: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
+  approvalSource: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-terminal-archive-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-terminal-archive-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-terminal-archive-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-terminal-archive-cleanup.md
+  branch: codex/active-queue-terminal-archive-cleanup-20260627
   scope:
     docsStateEvidenceAudit: true
-    queueSlimmingDiagnostic: true
-    taskPacketMetadataRepair: true
-    targetRepairCandidateCount: 19
+    queueSlimmingArchiveCleanup: true
+    taskHistoryIndexUpdate: true
+    targetArchivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    targetHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    archiveCandidateCount: 2
+    archiveCandidateTaskIds:
+      - high-risk-blocked-task-packet-metadata-repair-2026-06-27
+      - stopped-automation-hygiene-cleanup-2026-06-27
     allowedStateFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
     browserRuntime: false
     devServer: false
     sourceContractChange: false
@@ -553,12 +559,15 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    metadataRepairDecision: pass_high_risk_metadata_repair_local_validation
-    targetRepairCandidateCount: 19
-    closeoutApproval: fresh_closeout_approval_current_user_2026_06_27
-    ffOnlyMergeDecision: pass_ff_only_merged_to_master
-    pushDecision: approved_pending_pre_push_gate
-    cleanupDecision: approved_pending_push_success
+    archiveDecision: pass_terminal_tasks_archived_and_indexed_pending_fresh_closeout
+    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    archiveCandidateTaskIds:
+      - high-risk-blocked-task-packet-metadata-repair-2026-06-27
+      - stopped-automation-hygiene-cleanup-2026-06-27
+    localCommitApproved: true
+    mergePushCleanupApproved: false
+    mergePushCleanupApprovalSource: fresh_closeout_approval_required
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -569,25 +578,22 @@ currentTask:
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
-    localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_closeout_approval_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_high_risk_blocked_task_packet_metadata_repair_approval_2026_06_27
+      approvalSource: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
     fastForwardMerge:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      requiredApproval: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
+      requiredApproval: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_approval_2026_06_27
-  commitSha: 10eee195105fbf6af0af7e5c8d274f805588e721
+      deleteShortBranch: false
+      requiredApproval: fresh_closeout_approval_required
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -597,12 +603,12 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: true
-    metadataRepairBaselineBlockedCount: 19
-    metadataRepairExecuted: true
-    metadataRepairBlockedCountAfterTask: 0
-    archiveCandidateCountBeforeTask: 0
-    archiveCandidateCountAfterTask: 1
-    archiveCandidateOutOfScope: stopped-automation-hygiene-cleanup-2026-06-27
+    archiveCandidatesApproved: 2
+    archivedTaskCount: 2
+    activeQueueCandidateCountAfterMove: 0
+    historyIndexEntriesAdded: 2
+    archiveTaskCountBeforeTask: 1141
+    archiveTaskCountAfterMove: 1143
     tddRedObserved: not_applicable
     focusedUnitTests: blocked_by_task_scope
     mechanismScriptSmoke: not_applicable
@@ -624,23 +630,18 @@ currentTask:
     formalPublishCallCount: 0
     studentVisibleContentExecuted: false
     finalPassClaimed: false
+    queueSlimmingDiagnostic: pass_archive_candidate_count_0
+    projectStatusDiagnostic: pass_current_task_active_ready_for_closeout
     prettierScoped: pass
     gitDiffCheck: pass
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
-    projectStatusDiagnostic: pass_master_ready_for_push_after_ff_merge
-    masterCloseout:
-      ffOnlyMerge: pass_10eee195105fbf6af0af7e5c8d274f805588e721
-      pushOriginMaster: pending_pre_push_gate
-      deleteShortBranch: pending_push_success
   diagnosticsBaseline:
-    queueSlimmingDecisionBeforeTask: clean
-    highRiskRepairBlockedCountBeforeTask: 19
-    activeQueueTaskCountBeforeTask: 53
-    activeQueueTerminalCountBeforeTask: 9
-    archiveCandidateCountBeforeTask: 0
+    baselineMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
+    baselineOriginMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
+    activeQueueTerminalCandidatesApprovedByUser: 2
   nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
