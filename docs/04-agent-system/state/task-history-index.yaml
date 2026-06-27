@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-terminal-archive-cleanup-2026-06-27
-  updatedAt: "2026-06-27T03:11:41-07:00"
+  updatedByTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+  updatedAt: "2026-06-27T11:40:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -14373,3 +14373,669 @@ entries:
     commitSha: 99697cd7a3a5819e4d253f04406e835bf1e54bf9
     completedAt: "2026-06-27T02:25:14-07:00"
     archivedByTask: active-queue-terminal-archive-cleanup-2026-06-27
+  - id: content-admin-review-adoption-command-contract-approval-package-2026-06-27
+    phase: content-admin-review-adoption-command-contract-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-command-contract-tdd-2026-06-27
+    phase: content-admin-review-adoption-command-contract-tdd-2026-06-27
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-command-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
+    phase: layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
+    status: closed
+    taskKind: docs_state_acceptance_rollup_refresh
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-command-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+    phase: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    phase: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    status: closed
+    taskKind: local_route_runtime_smoke
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+    phase: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+    status: closed
+    taskKind: docs_state_acceptance_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    phase: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    phase: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    status: closed
+    taskKind: local_postgres_route_runtime_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package-2026-06-27
+    phase: content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+    phase: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+    status: closed
+    taskKind: local_postgres_route_runtime_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-test-owned-target-setup-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+    phase: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+    status: closed
+    taskKind: docs_state_acceptance_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
+    phase: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
+    status: closed
+    taskKind: docs_state_acceptance_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+    status: closed
+    taskKind: high_risk_provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+    status: closed
+    taskKind: high_risk_provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+    phase: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+    status: closed
+    taskKind: high_risk_provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    phase: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    status: closed
+    taskKind: high_risk_provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    phase: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+    status: closed
+    taskKind: docs_state_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+    phase: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-cost-calibration-redacted-execution-2026-06-27
+    phase: layer-3-cost-calibration-redacted-execution-2026-06-27
+    status: closed
+    taskKind: high_risk_local_provider_cost_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-cost-calibration-redacted-rollup-2026-06-27
+    phase: layer-3-cost-calibration-redacted-rollup-2026-06-27
+    status: closed
+    taskKind: docs_state_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-cost-calibration-redacted-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-cost-calibration-redacted-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+    phase: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-staging-pre-release-redacted-execution-2026-06-27
+    phase: layer-3-staging-pre-release-redacted-execution-2026-06-27
+    status: closed
+    taskKind: high_risk_staging_pre_release_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-staging-pre-release-rollup-2026-06-27
+    phase: layer-3-staging-pre-release-rollup-2026-06-27
+    status: closed
+    taskKind: docs_state_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-payment-external-service-approval-package-2026-06-27
+    phase: layer-3-payment-external-service-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-payment-external-service-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-payment-external-service-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-3-ocr-export-approval-package-2026-06-27
+    phase: layer-3-ocr-export-approval-package-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-ocr-export-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-ocr-export-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    phase: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    status: closed
+    taskKind: docs_state_queue_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-nonterminal-closeout-retirement-apply.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-nonterminal-closeout-retirement-apply.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: layer-2-business-closure-evidence-rollup-2026-06-27
+    phase: layer-2-business-closure-evidence-rollup-2026-06-27
+    status: closed
+    taskKind: docs_state_acceptance_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: high-risk-approval-package-consolidation-retirement-2026-06-27
+    phase: high-risk-approval-package-consolidation-retirement-2026-06-27
+    status: closed
+    taskKind: docs_state_high_risk_approval_consolidation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-high-risk-approval-package-consolidation-retirement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-high-risk-approval-package-consolidation-retirement.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+    phase: three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+    status: closed
+    taskKind: docs_state_approval_matrix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-acceptance-minimal-closure-high-risk-approval-matrix.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: active-queue-terminal-archive-cleanup-2026-06-27
+    phase: active-queue-terminal-archive-cleanup-2026-06-27
+    status: closed
+    taskKind: mechanism_docs_state_archive_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-terminal-archive-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-terminal-archive-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: clarify-student-subject-and-paper-count-copy
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-clarify-student-subject-and-paper-count-copy.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: recheck-adr-006-ai-sdk-baseline
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: read_only_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-recheck-adr-006-ai-sdk-baseline.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: decide-content-admin-ai-generation-scope
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: product_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-content-admin-ai-generation-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-content-admin-ai-generation-scope.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: decide-org-auth-scope-product-model
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: product_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-org-auth-scope-product-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-org-auth-scope-product-model.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: decide-paper-count-and-question-type-policy
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: product_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-decide-paper-count-and-question-type-policy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-decide-paper-count-and-question-type-policy.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: plan-admin-experience-gap-closures
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: implementation_split_plan
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-admin-experience-gap-closures.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-admin-experience-gap-closures.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: plan-org-auth-implementation-split
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: implementation_split_plan
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-org-auth-implementation-split.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-org-auth-implementation-split.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: plan-advanced-enterprise-training-path
+    phase: discovered-issue-closure-2026-06-21
+    status: closed
+    taskKind: blocked_closure_plan
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-plan-advanced-enterprise-training-path.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-plan-advanced-enterprise-training-path.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-org-auth-scope-child-table-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: architecture_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-org-auth-scope-child-table-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-scope-child-table-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-human-review-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_architecture_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-human-review-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-human-review-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-storage-model-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_architecture_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-storage-model-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-storage-model-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-adoption-boundary-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_architecture_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-adoption-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-adoption-boundary-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-log-redaction-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_security_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-log-redaction-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-log-redaction-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-provider-approval-package-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_security_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-provider-approval-package-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-provider-approval-package-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-content-admin-ai-provider-baseline-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_security_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-content-admin-ai-provider-baseline-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-content-admin-ai-provider-baseline-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-paper-count-alias-policy-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_policy_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-count-alias-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-count-alias-policy-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-paper-question-type-strategy-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_policy_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-question-type-strategy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-question-type-strategy-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-paper-performance-acceptance-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_acceptance_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-paper-performance-acceptance-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-paper-performance-acceptance-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-admin-experience-gap-sequencing-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_implementation_sequence_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-admin-experience-gap-sequencing-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-admin-experience-gap-sequencing-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-org-auth-contract-security-merge-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: architecture_sequence_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-org-auth-contract-security-merge-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: record-enterprise-training-admin-first-decision
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: product_implementation_sequence_decision_record
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-record-enterprise-training-admin-first-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-record-enterprise-training-admin-first-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: org-auth-scope-contract-and-security-preflight
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: contract_security_preflight_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-scope-contract-and-security-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-scope-contract-and-security-preflight.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: org-auth-schema-approval-package
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: schema_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-schema-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: org-auth-schema-implementation-plan
+    phase: discovered-issue-closure-2026-06-21-followup-approval
+    status: closed
+    taskKind: schema_implementation_plan
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-org-auth-schema-implementation-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-org-auth-schema-implementation-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: mistake-book-cookie-session-contract-repair
+    phase: student-experience-repair
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-fix-mistake-book-cookie-session.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-fix-mistake-book-cookie-session.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: requirement-fulfillment-role-experience-review-audit-closeout
+    phase: requirement-fulfillment-role-experience-review
+    status: closed
+    taskKind: docs_traceability_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-21-requirement-fulfillment-and-role-experience-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-21"
+  - id: ap-01-qwen-one-request-post-console-remediation-retry-approval
+    phase: ap-01-qwen-one-request-post-console-remediation-retry-approval
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-one-request-post-console-remediation-retry-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+    phase: ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-one-request-redacted-error-code-diagnostic-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-one-request-redacted-error-code-diagnostic-run.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-01-qwen-openai-compatible-one-request-isolation-smoke
+    phase: ap-01-qwen-openai-compatible-one-request-isolation-smoke
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-openai-compatible-one-request-isolation-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-openai-compatible-one-request-isolation-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-01-qwen-provider-smoke-execution-base-url-ready
+    phase: ap-01-qwen-provider-smoke-execution-base-url-ready
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-qwen-provider-smoke-execution-base-url-ready.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-01-provider-smoke-execution-qwen-env-local-ready
+    phase: ap-01-provider-smoke-execution-qwen-env-local-ready
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution-qwen-env-local-ready.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-01-provider-smoke-execution
+    phase: ap-01-provider-smoke-execution
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-ap-01-provider-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-ap-01-provider-smoke-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-19"
+  - id: ap-02-ops-auth-quota-cost-calibration-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-03-provider-staging-execution-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-04-standard-ai-generation-scope-change-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-05-standard-org-self-service-scope-change-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-06-online-payment-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-07-ocr-auto-import-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-08-org-data-export-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-09-runtime-capability-list-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-10-current-checkpoint-audit-repair-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: ap-11-source-governance-change-approval-package
+    phase: blocked-gates-approval-package-materialization
+    status: closed
+    taskKind: high_risk_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-19-blocked-use-case-acceleration-governance-packet.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
