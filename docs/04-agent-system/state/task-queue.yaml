@@ -5165,11 +5165,17 @@ tasks:
     validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
     taskKind: docs_state_approval_package
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_staging_pre_release_approval_package_ready_execution_seeded
     approvedAt: "2026-06-27T10:10:52-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    claimedAt: "2026-06-27T10:24:36-07:00"
+    plannedAt: "2026-06-27T10:24:36-07:00"
+    implementedAt: "2026-06-27T10:24:36-07:00"
+    validatedAt: "2026-06-27T10:24:36-07:00"
+    reviewedAt: "2026-06-27T10:24:36-07:00"
+    closedAt: "2026-06-27T10:24:36-07:00"
     branch: codex/staging-pre-release-approval-package-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -5218,6 +5224,74 @@ tasks:
       - seed/**
       - docs/04-agent-system/state/archive/**
       - docs/04-agent-system/state/task-history-index.yaml
+    caps:
+      stagingTargetsByThisTask: 0
+      stagingDeployOrSmokeAttemptsByThisTask: 0
+      runtimeValidationRoundsByThisTask: 0
+      providerCallsByThisTask: 0
+      providerRetriesByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      e2eRunsByThisTask: 0
+      archiveIndexMovesByThisTask: 0
+      successorExecutionTaskRegistration: 1
+    redaction:
+      allowedEvidenceFields:
+        - stagingTargetLabel
+        - targetType
+        - targetRegistrationStatus
+        - deployOrSmokeExecuted
+        - requestOrCommandCount
+        - passFailBlocked
+        - capStatus
+        - redactionStatus
+        - stopCondition
+        - forbiddenActionChecklist
+      forbiddenEvidence:
+        - env_file_content
+        - secret
+        - token
+        - database_url
+        - provider_credential
+        - authorization_header
+        - raw_request
+        - raw_response
+        - raw_log
+        - raw_page_text
+        - raw_prompt
+        - raw_provider_payload
+        - raw_generated_ai_content
+        - full_paper_or_material_content
+        - screenshot
+        - trace
+        - cookie
+        - local_storage
+    stagingPreReleaseApprovalPackage:
+      packageStatus: prepared_execution_seeded
+      successorExecutionTask: layer-3-staging-pre-release-redacted-execution-2026-06-27
+      existingConcreteStagingTargetRegistered: false
+      targetRegistrationStatus: missing_concrete_isolated_staging_target_in_current_docs_state
+      ownerModel:
+        accountableOwnerRef: laozhuang
+        rollbackOwner: laozhuang
+        monitoringOwner: laozhuang
+        incidentOwner: laozhuang
+        stopOwner: laozhuang
+        evidenceRedactionOwner: laozhuang
+      requiredBeforeExecution:
+        - exactly_one_registered_isolated_staging_url_or_deploy_target
+        - target_must_not_be_prod
+        - no_production_data
+        - no_secret_or_env_value_recording
+        - no_browser_e2e_screenshot_trace_cookie_local_storage_without_fresh_expansion
+      executionStopIf:
+        - no_registered_isolated_staging_target
+        - target_ambiguous_or_prod_like
+        - unregistered_credential_alias_needed
+        - second_deploy_or_second_smoke_needed
+        - raw_sensitive_evidence_needed
+        - mechanism_gate_failure
     validationCommands:
       - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
       - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
@@ -5245,6 +5319,173 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-prod-deploy-pre-release-approval-package.md
+
+  - id: layer-3-staging-pre-release-redacted-execution-2026-06-27
+    title: Layer 3 staging pre-release redacted execution
+    phase: layer-3-staging-pre-release-redacted-execution-2026-06-27
+    sourceStory: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+    dependencies:
+      - layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+    taskPlanPolicy: required_before_execution
+    humanApprovalBoundary: >-
+      This execution task consumes the current user's unattended serial high-risk package approval plus the supplemental
+      staging/pre-release execution boundary. It may execute at most one staging-only deploy-or-smoke validation only if
+      a concrete isolated staging URL or deploy target is already registered in durable state/queue without exposing
+      secrets. If no such target is registered, it must stop and write blocked evidence only. It must not touch prod,
+      production data, payment, OCR/export, Provider, Cost Calibration, DB, browser/e2e, screenshots, traces, cookies,
+      localStorage, PR, force push, release readiness, or final Pass.
+    targetClosureItem: Layer 3 staging-only pre-release validation or blocked target evidence
+    behaviorBoundary: staging_execution::conditional_single_staging_target_or_blocked_no_prod_no_browser_no_final_pass
+    executionProfile: layer_3_staging_pre_release_redacted_execution
+    evidenceMode: redacted_execution_envelope_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: high_risk_staging_pre_release_execution
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-27T10:10:52-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_staging_pre_release_boundary_2026_06_27
+    branch: codex/staging-pre-release-execution-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      stagingPreReleaseExecution: approved_conditionally_only_with_registered_isolated_staging_target
+      failedOrBlockedCloseout: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      prodDeployExecution: blocked
+      productionDataAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked_unless_future_task_registers_non_value_alias_boundary
+      costCalibrationExecution: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      browserRuntime: blocked_without_fresh_expansion
+      devServer: blocked
+      e2eRuntime: blocked_without_fresh_expansion
+      screenshotTraceCookieLocalStorageEvidence: forbidden
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    caps:
+      maxStagingTargets: 1
+      maxDeployOrSmokeAttempts: 1
+      maxRuntimeValidationRounds: 1
+      maxProviderCalls: 0
+      maxProviderRetries: 0
+      maxCostCalibrationExecutions: 0
+      maxDbConnections: 0
+      maxBrowserRuns: 0
+      maxE2eRuns: 0
+      maxProdTargets: 0
+    redaction:
+      evidenceAllowedFields:
+        - stagingTargetLabel
+        - targetType
+        - targetRegistrationStatus
+        - deployOrSmokeExecuted
+        - requestOrCommandCount
+        - passFailBlocked
+        - capStatus
+        - redactionStatus
+        - stopCondition
+        - forbiddenActionChecklist
+      forbiddenEvidence:
+        - env_file_content
+        - secret
+        - token
+        - database_url
+        - provider_credential
+        - authorization_header
+        - raw_request
+        - raw_response
+        - raw_log
+        - raw_page_text
+        - raw_prompt
+        - raw_provider_payload
+        - raw_generated_ai_content
+        - full_paper_or_material_content
+        - screenshot
+        - trace
+        - cookie
+        - local_storage
+    stagingExecutionGate:
+      requiredRegisteredTargetStatus: exactly_one_isolated_staging_url_or_deploy_target
+      currentKnownTargetStatusFromPackage: missing_concrete_isolated_staging_target
+      defaultIfTargetMissing: blocked_evidence_closeout_only
+      prodBoundary: forbidden
+      noProdDataBoundary: true
+      stopConditions:
+        - no_registered_isolated_staging_target
+        - target_ambiguous_or_prod_like
+        - unregistered_credential_alias_needed
+        - second_deploy_or_second_smoke_needed
+        - browser_or_e2e_needed
+        - screenshot_trace_cookie_or_local_storage_needed
+        - provider_cost_payment_ocr_export_needed
+        - raw_sensitive_evidence_needed
+        - mechanism_gate_failure
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-staging-pre-release-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-staging-pre-release-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-staging-pre-release-redacted-execution-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27_plus_supplemental_failed_blocked_closeout
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution.md
 
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
