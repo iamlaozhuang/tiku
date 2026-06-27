@@ -501,32 +501,32 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e8f9dce64bbdbb6a84e4c172eaa7d632fc27eb91
-  lastKnownOriginMasterSha: e8f9dce64bbdbb6a84e4c172eaa7d632fc27eb91
+  lastKnownMasterSha: 60fb5d3361033bc99b69ed99a760a023c5be57b7
+  lastKnownOriginMasterSha: 60fb5d3361033bc99b69ed99a760a023c5be57b7
 currentTask:
-  id: content-admin-ai-review-ux-enhancement-approval-2026-06-26
+  id: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
   status: closed
-  result: pass_content_admin_ai_review_ux_boundary_package_prepared_no_implementation
-  claimedAt: "2026-06-26T20:20:00-07:00"
-  plannedAt: "2026-06-26T20:20:00-07:00"
-  validatedAt: "2026-06-26T20:20:00-07:00"
-  reviewedAt: "2026-06-26T20:20:00-07:00"
-  closedAt: "2026-06-26T20:20:00-07:00"
-  sourceStory: successor_of_ai_generation_product_boundary_execution_package_approval_2026_06_26
-  approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
-  planPath: docs/05-execution-logs/task-plans/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-26-content-admin-ai-review-ux-enhancement-approval.md
-  branch: codex/content-ai-review-ux-approval-20260626
+  result: pass_local_contract_boundary_and_repository_safety_gate_no_runtime_publish
+  claimedAt: "2026-06-27T00:00:00-07:00"
+  plannedAt: "2026-06-27T00:00:00-07:00"
+  validatedAt: "2026-06-27T00:10:00-07:00"
+  reviewedAt: "2026-06-27T00:10:00-07:00"
+  closedAt: "2026-06-27T00:10:00-07:00"
+  sourceStory: current_user_serial_batch_queue_2026_06_27
+  approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  branch: codex/org-ai-owned-draft-contract-tdd-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
     batchExecutionPackagePrepared: false
     followUpTaskBoundariesCreated: false
-    localSourceChange: false
-    focusedUnitTest: false
-    testsOrE2eChange: false
+    localSourceChange: true
+    focusedUnitTest: true
+    testsOrE2eChange: true
     schemaMigrationFileChange: false
     localRouteSmokeApprovedForThisTask: false
     liveDatabaseConnectionExecuted: false
@@ -548,39 +548,32 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    docsOnlyApprovalPackage: true
-    necessaryContentAdminReviewClosure:
-      - single_result_review_detail
-      - validate_before_adopt
-      - adopt_reject_action
-      - reviewer_and_source_attribution
-      - adoption_record_traceability
-    secondLayerContentAdminReviewEnhancements:
-      - batch_review
-      - failed_adoption_retry
-      - generated_result_to_formal_draft_diff
-      - adoption_history_timeline
+    docsOnlyApprovalPackage: false
+    organizationGeneratedResultOwnership: organization_private
+    organizationDraftAdoption: contract_ready_no_db_mutation
+    organizationTrainingSourceUse: contract_ready_no_db_mutation
+    platformFormalDraftAdoption: requires_content_admin_review_follow_up
     directPublishOrStudentVisibleContent: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    implementationStillBlocked: true
+    implementationStillBlocked: false
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+    mergePushCleanupApprovalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
     mergeToMaster:
       approved: true
       targetBranch: master
-      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_batch_approval_5_blocked_follow_up_tasks_2026_06_26
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -590,10 +583,10 @@ currentTask:
     acceptancePackagePrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
-    docsOnly: true
+    docsOnly: false
     followUpTasksRecordedAsBlocked: false
     mechanismScriptSmoke: not_applicable
-    sourceOrTestChanged: false
+    sourceOrTestChanged: true
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
@@ -614,7 +607,39 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: stop_no_pending_task_after_batch_closeout
+  nextRecommendedTask: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+orgAiGenerationOwnedDraftTrainingLocalContractTdd20260627:
+  taskId: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+  phase: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+  recordedAt: "2026-06-27T00:00:00-07:00"
+  status: closed
+  result: pass_local_contract_boundary_and_repository_safety_gate_no_runtime_publish
+  validatedAt: "2026-06-27T00:10:00-07:00"
+  reviewedAt: "2026-06-27T00:10:00-07:00"
+  closedAt: "2026-06-27T00:10:00-07:00"
+  branch: codex/org-ai-owned-draft-contract-tdd-20260627
+  approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+  boundary:
+    organizationGeneratedResultOwnership: organization_private
+    organizationDraftAdoption: contract_ready_no_db_mutation
+    organizationTrainingSourceUse: contract_ready_no_db_mutation
+    platformFormalDraftAdoption: requires_content_admin_review_follow_up
+    publish: blocked
+    studentVisibleContent: blocked
+  validationSummary:
+    focusedRedTest: pass_expected_failure_observed
+    focusedGreenTest: pass_2_files_24_tests
+    prettierScoped: pass
+    gitDiffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    moduleRunV2PrePushReadiness: pass
 aiGenerationProductBoundaryExecutionPackageApproval20260626:
   taskId: ai-generation-product-boundary-execution-package-approval-2026-06-26
   phase: ai-generation-product-boundary-execution-package-approval-2026-06-26

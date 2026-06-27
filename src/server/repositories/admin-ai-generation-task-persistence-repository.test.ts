@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import type {
+  AdminAiGenerationResultPersistenceRepository,
+  AdminAiGenerationResultPersistenceResult,
+  CreateAdminAiGenerationResultInput,
+} from "../contracts/admin-ai-generation-result-persistence-contract";
+import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceGateway,
   AdminAiGenerationTaskPersistenceRepository,
@@ -9,7 +14,10 @@ import type {
   CreateAdminAiGenerationTaskPersistenceInput,
   CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
-import type { AdminAiGenerationLocalContractDto } from "../contracts/admin-ai-generation-local-contract";
+import type {
+  AdminAiGenerationLocalContractBaseDto,
+  AdminAiGenerationLocalContractDto,
+} from "../contracts/admin-ai-generation-local-contract";
 import type { AdminRole } from "../models/auth";
 import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
@@ -74,7 +82,9 @@ async function createAcceptedLocalContract(input: {
   adminRoles: AdminRole[];
   organizationPublicId?: string | null;
   generationKind: "question" | "paper";
-}): Promise<AdminAiGenerationLocalContractDto> {
+}): Promise<AdminAiGenerationLocalContractBaseDto> {
+  const taskPersistenceRecorder =
+    createLocalContractRouteTaskPersistenceRecorder();
   const { collection } = createAdminAiGenerationLocalContractRouteHandlers(
     input.workspace,
     {
@@ -82,8 +92,9 @@ async function createAcceptedLocalContract(input: {
         adminRoles: input.adminRoles,
         organizationPublicId: input.organizationPublicId,
       }),
-      taskPersistenceRepository:
-        createLocalContractRouteTaskPersistenceRepository(),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        createLocalContractRouteResultPersistenceRepository(),
     },
   );
 
@@ -102,8 +113,9 @@ async function createAcceptedLocalContract(input: {
 
   expect(payload.code).toBe(0);
   expect(payload.data).not.toBeNull();
+  expect(taskPersistenceRecorder.calls).toHaveLength(1);
 
-  return payload.data as AdminAiGenerationLocalContractDto;
+  return taskPersistenceRecorder.calls[0].localContract;
 }
 
 function createLocalContractRouteTaskPersistenceResult(
@@ -154,13 +166,75 @@ function createLocalContractRouteTaskPersistenceResult(
   };
 }
 
-function createLocalContractRouteTaskPersistenceRepository(): AdminAiGenerationTaskPersistenceRepository {
+function createLocalContractRouteResultPersistenceResult(
+  input: CreateAdminAiGenerationResultInput,
+): AdminAiGenerationResultPersistenceResult {
   return {
-    async createOrReuseTask(input) {
-      return createLocalContractRouteTaskPersistenceResult(input);
+    persistenceStatus: "created",
+    result: {
+      resultPublicId: input.resultPublicId,
+      taskPublicId: input.taskPublicId,
+      requestPublicId: `${input.taskPublicId}_request`,
+      workspace: input.workspace,
+      generationKind: input.generationKind,
+      ownerType: input.ownerType,
+      ownerPublicId: input.ownerPublicId,
+      organizationPublicId: input.organizationPublicId,
+      taskType: input.taskType,
+      status: "draft",
+      persistedAt: input.createdAt.toISOString(),
+      contentReference: {
+        contentDigest: input.contentDigest,
+        contentPreviewMasked: input.contentPreviewMasked,
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+      },
+      evidenceReference: {
+        evidenceStatus: input.evidenceStatus,
+        citationCount: input.citationCount,
+        aiCallLogPublicId: input.aiCallLogPublicId,
+        redactionStatus: "redacted",
+      },
+      sourceReference: {
+        sourceQuestionPublicId: input.sourceQuestionPublicId,
+        sourcePaperPublicId: input.sourcePaperPublicId,
+      },
+      formalAdoption: {
+        isBlocked: true,
+        status: "blocked",
+      },
     },
-    async listTaskHistory() {
+  };
+}
+
+function createLocalContractRouteResultPersistenceRepository(): AdminAiGenerationResultPersistenceRepository {
+  return {
+    async createOrReuseDraftResult(input) {
+      return createLocalContractRouteResultPersistenceResult(input);
+    },
+    async listDraftResults() {
       return [];
+    },
+  };
+}
+
+function createLocalContractRouteTaskPersistenceRecorder(): {
+  calls: CreateOrReuseAdminAiGenerationTaskInput[];
+  repository: AdminAiGenerationTaskPersistenceRepository;
+} {
+  const calls: CreateOrReuseAdminAiGenerationTaskInput[] = [];
+
+  return {
+    calls,
+    repository: {
+      async createOrReuseTask(input) {
+        calls.push(input);
+
+        return createLocalContractRouteTaskPersistenceResult(input);
+      },
+      async listTaskHistory() {
+        return [];
+      },
     },
   };
 }
@@ -489,6 +563,19 @@ describe("admin AI generation task persistence repository", () => {
         questionWriteStatus: "created",
       },
     } as unknown as AdminAiGenerationLocalContractDto;
+    const unsafeOrganizationOwnedBoundaryContract = {
+      ...localContract,
+      organizationOwnedDraftBoundary: {
+        ...localContract.organizationOwnedDraftBoundary,
+        generatedResultScope: "organization_private",
+        organizationDraftAdoptionStatus:
+          "allowed_as_organization_private_draft",
+        organizationTrainingSourceStatus:
+          "allowed_as_organization_private_training_source",
+        ownerType: "organization",
+        organizationPublicId: "organization_public_unsafe",
+      },
+    } as unknown as AdminAiGenerationLocalContractDto;
 
     await expect(
       repository.createOrReuseTask({
@@ -502,6 +589,14 @@ describe("admin AI generation task persistence repository", () => {
         localContract: unsafeFormalWriteContract,
         requestPublicId: "admin_ai_generation_request_unsafe_formal_901",
         requestedAt: new Date("2026-06-26T19:16:00.000Z"),
+      }),
+    ).rejects.toThrow("unsafe admin AI generation task persistence boundary");
+    await expect(
+      repository.createOrReuseTask({
+        localContract: unsafeOrganizationOwnedBoundaryContract,
+        requestPublicId:
+          "admin_ai_generation_request_unsafe_organization_boundary_901",
+        requestedAt: new Date("2026-06-26T19:17:00.000Z"),
       }),
     ).rejects.toThrow("unsafe admin AI generation task persistence boundary");
     expect(gateway.insertInputs).toEqual([]);

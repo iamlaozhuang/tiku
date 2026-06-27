@@ -231,12 +231,16 @@ function assertAcceptedProviderDisabledAdminLocalContract(
   const isAdminOwnerBoundary =
     matchesContentAdminOwnerBoundary(localContract) ||
     matchesOrganizationAdminOwnerBoundary(localContract);
+  const isOrganizationOwnedDraftBoundary =
+    matchesContentAdminOrganizationOwnedDraftBoundary(localContract) ||
+    matchesOrganizationAdminOrganizationOwnedDraftBoundary(localContract);
 
   if (
     !isAcceptedLocalContract ||
     !isProviderDisabled ||
     !isFormalWriteBlocked ||
-    !isAdminOwnerBoundary
+    !isAdminOwnerBoundary ||
+    !isOrganizationOwnedDraftBoundary
   ) {
     throw new Error(UNSAFE_ADMIN_AI_GENERATION_PERSISTENCE_BOUNDARY_ERROR);
   }
@@ -254,6 +258,54 @@ function matchesContentAdminOwnerBoundary(
     taskRequest.quotaOwnerType === "platform" &&
     taskRequest.organizationPublicId === null &&
     taskRequest.ownerPublicId === taskRequest.quotaOwnerPublicId
+  );
+}
+
+function matchesContentAdminOrganizationOwnedDraftBoundary(
+  localContract: AdminAiGenerationLocalContractBaseDto,
+): boolean {
+  const taskRequest = localContract.taskRequest;
+  const boundary = localContract.organizationOwnedDraftBoundary;
+
+  return (
+    localContract.workspace === "content" &&
+    boundary.generatedResultScope === "platform_review_pool" &&
+    boundary.organizationDraftAdoptionStatus ===
+      "not_applicable_to_content_workspace" &&
+    boundary.organizationTrainingSourceStatus ===
+      "not_applicable_to_content_workspace" &&
+    boundary.platformFormalDraftStatus ===
+      "blocked_requires_content_admin_review" &&
+    boundary.publishStatus === "blocked_requires_fresh_publish_task" &&
+    boundary.studentVisibleStatus === "blocked" &&
+    boundary.ownerType === "platform" &&
+    boundary.ownerPublicId === taskRequest.ownerPublicId &&
+    boundary.organizationPublicId === null &&
+    boundary.redactionStatus === "redacted"
+  );
+}
+
+function matchesOrganizationAdminOrganizationOwnedDraftBoundary(
+  localContract: AdminAiGenerationLocalContractBaseDto,
+): boolean {
+  const taskRequest = localContract.taskRequest;
+  const boundary = localContract.organizationOwnedDraftBoundary;
+
+  return (
+    localContract.workspace === "organization" &&
+    boundary.generatedResultScope === "organization_private" &&
+    boundary.organizationDraftAdoptionStatus ===
+      "allowed_as_organization_private_draft" &&
+    boundary.organizationTrainingSourceStatus ===
+      "allowed_as_organization_private_training_source" &&
+    boundary.platformFormalDraftStatus ===
+      "blocked_requires_content_admin_review" &&
+    boundary.publishStatus === "blocked_requires_fresh_publish_task" &&
+    boundary.studentVisibleStatus === "blocked" &&
+    boundary.ownerType === "organization" &&
+    boundary.ownerPublicId === taskRequest.ownerPublicId &&
+    boundary.organizationPublicId === taskRequest.organizationPublicId &&
+    boundary.redactionStatus === "redacted"
   );
 }
 

@@ -83,6 +83,23 @@ export type AdminAiGenerationLocalContractFormalContentBoundaryDto = {
   paperWriteStatus: "blocked_without_follow_up_task";
 };
 
+export type AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto = {
+  generatedResultScope: "organization_private" | "platform_review_pool";
+  organizationDraftAdoptionStatus:
+    | "allowed_as_organization_private_draft"
+    | "not_applicable_to_content_workspace";
+  organizationTrainingSourceStatus:
+    | "allowed_as_organization_private_training_source"
+    | "not_applicable_to_content_workspace";
+  platformFormalDraftStatus: "blocked_requires_content_admin_review";
+  publishStatus: "blocked_requires_fresh_publish_task";
+  studentVisibleStatus: "blocked";
+  ownerType: "platform" | "organization";
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationLocalContractBaseDto = {
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   workspace: AdminAiGenerationWorkspace;
@@ -93,6 +110,7 @@ export type AdminAiGenerationLocalContractBaseDto = {
   resultState: AdminAiGenerationLocalContractResultStateDto;
   runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
+  organizationOwnedDraftBoundary: AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto;
 };
 
 export type AdminAiGenerationLocalContractTaskPersistenceDto = {
@@ -156,6 +174,7 @@ export type AdminAiGenerationTaskHistoryItemDto = {
   providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
+  organizationOwnedDraftBoundary: AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto;
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto | null;
   redactionStatus: "redacted";
 };

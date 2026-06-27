@@ -832,6 +832,48 @@ describe("admin AI generation local contract route handlers", () => {
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_J");
   });
 
+  it("exposes organization-owned draft and training source boundaries without platform publish access", async () => {
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      body: {
+        generationKind: "paper",
+      },
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        organizationOwnedDraftBoundary: {
+          generatedResultScope: "organization_private",
+          organizationDraftAdoptionStatus:
+            "allowed_as_organization_private_draft",
+          organizationTrainingSourceStatus:
+            "allowed_as_organization_private_training_source",
+          platformFormalDraftStatus: "blocked_requires_content_admin_review",
+          publishStatus: "blocked_requires_fresh_publish_task",
+          studentVisibleStatus: "blocked",
+          ownerType: "organization",
+          ownerPublicId: "organization_public_123",
+          organizationPublicId: "organization_public_123",
+          redactionStatus: "redacted",
+        },
+        formalContentBoundary: {
+          questionWriteStatus: "blocked_without_follow_up_task",
+          paperWriteStatus: "blocked_without_follow_up_task",
+        },
+        runtimeBridge: {
+          providerCallExecuted: false,
+          envSecretAccessed: false,
+          providerConfigurationRead: false,
+          costCalibrationExecuted: false,
+        },
+      },
+    });
+  });
+
   it("accepts organization advanced admin AI paper requests as organization-owned local contracts", async () => {
     const response = await postLocalContractRequest({
       workspace: "organization",
@@ -1368,6 +1410,20 @@ describe("admin AI generation local contract route handlers", () => {
         workspace: "organization",
         latestTask: {
           taskPublicId,
+          organizationOwnedDraftBoundary: {
+            generatedResultScope: "organization_private",
+            organizationDraftAdoptionStatus:
+              "allowed_as_organization_private_draft",
+            organizationTrainingSourceStatus:
+              "allowed_as_organization_private_training_source",
+            platformFormalDraftStatus: "blocked_requires_content_admin_review",
+            publishStatus: "blocked_requires_fresh_publish_task",
+            studentVisibleStatus: "blocked",
+            ownerType: "organization",
+            ownerPublicId: "organization_public_123",
+            organizationPublicId: "organization_public_123",
+            redactionStatus: "redacted",
+          },
           generatedResult: {
             resultPublicId,
             contentPreviewMasked:

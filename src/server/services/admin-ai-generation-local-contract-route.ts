@@ -12,6 +12,7 @@ import type {
   AdminAiGenerationLocalContractGeneratedResultDto,
   AdminAiGenerationLocalContractBaseDto,
   AdminAiGenerationLocalContractDto,
+  AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
   AdminAiGenerationLocalContractTaskPersistenceDto,
   AdminAiGenerationTaskHistoryDto,
@@ -392,6 +393,34 @@ function createAdminAiGenerationRuntimeBridgeInput(input: {
   };
 }
 
+function createAdminAiGenerationOrganizationOwnedDraftBoundary(input: {
+  workspace: AdminAiGenerationWorkspace;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+}): AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto {
+  const isOrganizationOwned =
+    input.workspace === "organization" && input.organizationPublicId !== null;
+
+  return {
+    generatedResultScope: isOrganizationOwned
+      ? "organization_private"
+      : "platform_review_pool",
+    organizationDraftAdoptionStatus: isOrganizationOwned
+      ? "allowed_as_organization_private_draft"
+      : "not_applicable_to_content_workspace",
+    organizationTrainingSourceStatus: isOrganizationOwned
+      ? "allowed_as_organization_private_training_source"
+      : "not_applicable_to_content_workspace",
+    platformFormalDraftStatus: "blocked_requires_content_admin_review",
+    publishStatus: "blocked_requires_fresh_publish_task",
+    studentVisibleStatus: "blocked",
+    ownerType: isOrganizationOwned ? "organization" : "platform",
+    ownerPublicId: input.ownerPublicId,
+    organizationPublicId: input.organizationPublicId,
+    redactionStatus: "redacted",
+  };
+}
+
 async function buildAdminAiGenerationLocalContract(input: {
   actor: AdminAiGenerationActor;
   createRequestPublicId: (
@@ -456,6 +485,12 @@ async function buildAdminAiGenerationLocalContract(input: {
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
     },
+    organizationOwnedDraftBoundary:
+      createAdminAiGenerationOrganizationOwnedDraftBoundary({
+        workspace: input.workspace,
+        ownerPublicId: taskRequest.ownerPublicId,
+        organizationPublicId: taskRequest.organizationPublicId,
+      }),
   } satisfies AdminAiGenerationLocalContractBaseDto;
 
   const taskPersistence =
@@ -612,6 +647,17 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(
       localContract.formalContentBoundary.questionWriteStatus,
     formalPaperWriteStatus:
       localContract.formalContentBoundary.paperWriteStatus,
+    organizationDraftAdoptionStatus:
+      localContract.organizationOwnedDraftBoundary
+        .organizationDraftAdoptionStatus,
+    organizationTrainingSourceStatus:
+      localContract.organizationOwnedDraftBoundary
+        .organizationTrainingSourceStatus,
+    platformFormalDraftStatus:
+      localContract.organizationOwnedDraftBoundary.platformFormalDraftStatus,
+    publishStatus: localContract.organizationOwnedDraftBoundary.publishStatus,
+    studentVisibleStatus:
+      localContract.organizationOwnedDraftBoundary.studentVisibleStatus,
   };
 }
 
@@ -661,6 +707,12 @@ function mapAdminAiGenerationTaskPersistenceDtoToHistoryItem(
     providerConfigurationRead: task.providerConfigurationRead,
     costCalibrationExecuted: task.costCalibrationExecuted,
     formalContentBoundary: task.formalContentBoundary,
+    organizationOwnedDraftBoundary:
+      createAdminAiGenerationOrganizationOwnedDraftBoundary({
+        workspace: task.workspace,
+        ownerPublicId: task.ownerPublicId,
+        organizationPublicId: task.organizationPublicId,
+      }),
     generatedResult:
       generatedResult === null
         ? null

@@ -44,6 +44,121 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+    title: Organization-owned AI draft and training source local contract TDD
+    phase: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+    sourceStory: current_user_serial_batch_queue_2026_06_27
+    dependencies:
+      - content-admin-ai-review-ux-enhancement-approval-2026-06-26
+    taskKind: source_tdd_local_contract_boundary
+    moduleRunVersion: 2
+    executionProfile: local_source_tdd_no_runtime_provider_db_or_publish
+    evidenceMode: redacted_contract_and_local_gate_outputs
+    validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Add a local source contract that makes organization advanced admin AI generated results explicitly
+      organization-private and adoptable only as organization-private draft/training source inputs, while platform
+      formal draft adoption, publish, and student-visible content remain blocked or delegated to separate follow-up
+      tasks.
+    status: closed
+    result: pass_local_contract_boundary_and_repository_safety_gate_no_runtime_publish
+    approvedAt: "2026-06-27T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      scope: source_tdd_local_contract_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T00:00:00-07:00"
+    plannedAt: "2026-06-27T00:00:00-07:00"
+    validatedAt: "2026-06-27T00:10:00-07:00"
+    reviewedAt: "2026-06-27T00:10:00-07:00"
+    closedAt: "2026-06-27T00:10:00-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      formalPublishStudentVisibleContent: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+      - docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - source_tdd_local_contract
+      - organization_private_content_boundary
+      - no_db_runtime
+      - no_provider_runtime
+      - no_publish
+    validationCommands:
+      - npm.cmd exec vitest run src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - npx.cmd prettier --write --ignore-unknown src/server/contracts/admin-ai-generation-local-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+      - npx.cmd prettier --check --ignore-unknown src/server/contracts/admin-ai-generation-local-contract.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
+    branch: codex/org-ai-owned-draft-contract-tdd-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+
   - id: ai-generation-product-boundary-execution-package-approval-2026-06-26
     title: AI generation product boundary execution package approval
     phase: ai-generation-product-boundary-execution-package-approval-2026-06-26
