@@ -4023,6 +4023,271 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    title: Layer 3 provider smoke OpenAI-compatible DashScope config boundary repair retry
+    phase: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+    sourceStory: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+    dependencies:
+      - layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+    taskPlanPolicy: required_before_provider_execution
+    humanApprovalBoundary: >-
+      Current user fresh approves this Layer 3 Provider smoke configuration-boundary repair + redacted retry task. The
+      task may create an independent short branch, write task plan/state/queue/evidence/audit/acceptance documents, open
+      `.env.local` only for this command, extract only `ALIBABA_API_KEY` into the current command process environment,
+      and execute at most one explicit OpenAI-compatible DashScope Provider smoke using provider `openai_compatible`,
+      providerName `alibaba-qwen`, model `qwen3.7-max`, base URL `https://dashscope.aliyuncs.com/compatible-mode/v1`,
+      retry cap 0, timeout 30000ms, existing script max output token cap, and spend stop limit USD 0.05. Evidence may
+      record only provider label, providerName, model label, baseUrlHost, pass/fail/blocked, request count, Provider call
+      executed boolean, retry count, cap status, redaction status, failure category, sanitized providerErrorSummary, stop
+      condition, and forbidden-action checklist. It must not modify `.env.local`, output/copy/record/commit `.env*`
+      content, secret, token, Provider credential, DB URL, credential value, raw prompt, raw response, raw Provider
+      payload, raw Provider error body/message, raw generated AI content, Authorization header, DB row, SQL output,
+      screenshot, trace, cookie, or localStorage.
+    targetClosureItem: One explicit OpenAI-compatible DashScope local dev Provider smoke or blocked evidence
+    behaviorBoundary: high_risk_provider_smoke::single_call_openai_compatible_dashscope_cli_boundary_no_retry_no_source_config_no_cost
+    executionProfile: layer_3_provider_smoke_openai_compatible_dashscope_config_boundary_repair_retry
+    evidenceMode: redacted_provider_smoke_status_only
+    validationPolicy: provider_smoke_once_then_scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: high_risk_provider_smoke_execution
+    moduleRunVersion: 2
+    status: closed
+    result: pass_openai_compatible_dashscope_provider_smoke_no_followup_execution
+    approvedAt: "2026-06-27T09:15:34-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27
+    claimedAt: "2026-06-27T09:15:34-07:00"
+    plannedAt: "2026-06-27T09:15:34-07:00"
+    implementedAt: "2026-06-27T09:19:23-07:00"
+    validatedAt: "2026-06-27T09:19:23-07:00"
+    reviewedAt: "2026-06-27T09:19:23-07:00"
+    closedAt: "2026-06-27T09:19:23-07:00"
+    branch: codex/provider-openai-compatible-repair-retry-20260627
+    capabilities:
+      envLocalSingleAliasLoader: approved_alibaba_api_key_only_current_command
+      envFileContentOutputOrCopy: blocked
+      providerCredentialValueOutputOrCopy: blocked
+      localProviderSmokeExecution: approved_single_openai_compatible_dashscope_call
+      providerLabel: openai_compatible
+      providerName: alibaba-qwen
+      modelLabel: qwen3.7-max
+      baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+      baseUrlHost: dashscope.aliyuncs.com
+      providerCallCap: 1
+      providerRetryCap: 0
+      providerTargetCountCap: 1
+      timeoutMs: 30000
+      maxOutputTokensScriptCap: 8
+      spendStopLimitUsd: 0.05
+      providerConfiguration: cli_boundary_only_no_source_or_persisted_config_change
+      providerSecondCall: blocked
+      providerRetryLoop: blocked
+      providerFallback: blocked
+      providerPayloadInspection: blocked
+      rawProviderErrorInspection: blocked
+      costCalibrationExecution: blocked
+      sourceOrTestChange: blocked
+      scriptChange: blocked
+      packageLockfileChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-26-ai-generation-provider-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - package.json
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    credentialBoundary:
+      envFileReadMode: env_local_single_alias_loader
+      envFilePath: .env.local
+      allowedAlias: ALIBABA_API_KEY
+      outputCredentialValue: blocked
+      commitCredentialValue: blocked
+      modifyEnvFile: blocked
+      readOtherEnvAliases: blocked
+    redaction:
+      allowedEvidenceFields:
+        - provider_label
+        - provider_name
+        - model_label
+        - base_url_host
+        - result_status
+        - failure_category
+        - request_count
+        - provider_call_executed_boolean
+        - retry_count
+        - provider_error_summary_http_status
+        - provider_error_summary_provider_error_code
+        - redaction_status
+        - cap_status
+        - stop_condition
+        - forbidden_action_checklist
+      forbiddenEvidenceFields:
+        - env_file_content
+        - secret_value
+        - token_value
+        - credential_value
+        - db_url
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - provider_payload
+        - raw_provider_error_body
+        - raw_provider_error_message
+        - raw_generated_ai_content
+        - full_paper_material_content
+        - db_row
+        - sql_output
+        - screenshot_trace_cookie_localstorage
+    riskTypes:
+      - provider_call
+      - env_local_single_alias_loader
+      - layer_3_provider_smoke
+      - openai_compatible_dashscope_cli_boundary
+      - high_risk_gate_execution
+      - no_retry
+      - no_source_or_persisted_provider_configuration
+      - no_cost_calibration_execution
+      - no_database_connection
+      - no_browser_runtime
+      - no_source_test_script_package_change
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    caps:
+      providerCallCap: 1
+      retryCap: 0
+      providerTargetCountCap: 1
+      timeoutMs: 30000
+      maxOutputTokensScriptCap: 8
+      spendStopLimitUsd: 0.05
+      baseUrlHost: dashscope.aliyuncs.com
+    validationCommands:
+      - node --input-type=module -e <single-alias ALIBABA_API_KEY loader plus redacted openai_compatible DashScope Provider smoke call>
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+    validationSummary:
+      providerSmokeCommandExecuted: true
+      providerCallExecuted: true
+      providerCallCount: 1
+      retryCount: 0
+      redactionStatus: passed
+      capStatus: pass_within_caps
+      resultStatus: pass
+      failureCategory: null
+      providerErrorSummaryHttpStatus: null
+      providerErrorSummaryProviderErrorCode: null
+      continueSerialPackage: false_stop_after_this_task_until_followup_approval
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 39
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - second_provider_call_or_retry_loop
+      - second_provider_target
+      - model_or_endpoint_change_outside_approved_cli_boundary
+      - source_script_package_lockfile_change
+      - persisted_provider_configuration_change_or_fallback_path
+      - raw_error_prompt_response_payload_or_secret_inspection
+      - cost_calibration_execution
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27

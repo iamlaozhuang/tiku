@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
-updatedAt: "2026-06-27T08:53:39-07:00"
+currentPhase: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+updatedAt: "2026-06-27T09:15:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,36 +501,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
-  lastKnownOriginMasterSha: 3dbfe4c2451b6ba9a28d678657cc13f6a4362991
+  lastKnownMasterSha: 4c44b4d28ac359971eeaab8678dca3f1c874209c
+  lastKnownOriginMasterSha: 4c44b4d28ac359971eeaab8678dca3f1c874209c
 currentTask:
-  id: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+  id: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
   status: closed
-  result: pass_blocked_provider_error_http_401_no_retry_evidence_closeout
-  claimedAt: "2026-06-27T08:53:39-07:00"
-  plannedAt: "2026-06-27T08:53:39-07:00"
-  implementedAt: "2026-06-27T08:57:25-07:00"
-  validatedAt: "2026-06-27T08:57:25-07:00"
-  reviewedAt: "2026-06-27T08:57:25-07:00"
-  closedAt: "2026-06-27T08:57:25-07:00"
-  sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
-  approvalSource: current_user_fresh_unattended_serial_package_step_1_provider_error_code_diagnostic_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-redacted-error-code-diagnostic-execution.md
-  branch: codex/provider-error-code-diagnostic-20260627
+  result: pass_openai_compatible_dashscope_provider_smoke_no_followup_execution
+  claimedAt: "2026-06-27T09:15:34-07:00"
+  plannedAt: "2026-06-27T09:15:34-07:00"
+  implementedAt: "2026-06-27T09:19:23-07:00"
+  validatedAt: "2026-06-27T09:19:23-07:00"
+  reviewedAt: "2026-06-27T09:19:23-07:00"
+  closedAt: "2026-06-27T09:19:23-07:00"
+  sourceStory: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+  approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry.md
+  branch: codex/provider-openai-compatible-repair-retry-20260627
   scope:
     docsStateEvidenceAudit: true
-    layer3ProviderSmokeExecution: approved_single_diagnostic_call
-    providerSmokeBoundaryDefinition: false
+    layer3ProviderSmokeExecution: approved_single_openai_compatible_dashscope_smoke_call
+    providerSmokeBoundaryDefinition: explicit_cli_boundary_only_no_source_config_change
     approvalTextAuthoring: false
     existingTaskStatusChange: false
     archiveIndexMovement: false
     taskHistoryIndexWrite: false
     localPostgresExecution: false
     sourceOrTestChange: false
-    runtimeExecutedByThisTask: false
+    runtimeExecutedByThisTask: pending_provider_call_only
     defaultPostgresRuntimeUsed: false
     localDbCredentialEnvReadApproved: false
     localDbRuntimeEnvResolutionUsedByApplicationCode: false
@@ -549,14 +549,15 @@ currentTask:
     envFileReadByCodex: approved_single_alias_only_for_this_command
     providerCredentialAlias: ALIBABA_API_KEY
     providerCredentialValueOutput: false
-    providerCall: approved_one_diagnostic_call_only
+    providerCall: approved_one_openai_compatible_dashscope_smoke_call_only
     providerCallCount: 1
     providerRetryCount: 0
-    providerPath: alibaba/qwen-plus
-    providerConfiguration: false
+    providerPath: openai_compatible/alibaba-qwen/qwen3.7-max
+    providerBaseUrlHost: dashscope.aliyuncs.com
+    providerConfiguration: cli_boundary_only_no_persisted_config_change
     providerSmokeCallCap: 1
     providerSmokeRetryCap: 0
-    providerSmokeMaxOutputTokensApprovedCap: 64
+    providerSmokeMaxOutputTokensApprovedCap: existing_script_cap_only
     providerSmokeMaxOutputTokensScriptCap: 8
     providerSmokeTimeoutMs: 30000
     providerSmokeSpendStopLimitUsd: 0.05
@@ -572,17 +573,18 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: pass_blocked_provider_error_http_401_no_retry_evidence_closeout
+    packageDecision: pass_openai_compatible_dashscope_provider_smoke_no_followup_execution
     layer1Status: local_role_flow_complete_no_regression_claim_only
     layer2Status: local_postgres_rejected_target_setup_mutation_readback_minimum_rolled_up_approved_path_browser_publish_still_separate
-    layer3Status: blocked_provider_error_http_401_no_retry
+    layer3Status: provider_smoke_pass_on_explicit_openai_compatible_dashscope_boundary_cost_calibration_still_blocked
     priorLayer3MatrixTask: layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
     priorProviderSmokeApprovalPackageTask: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
     priorProviderSmokeExecutionTask: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
     priorProviderErrorFollowUpTask: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
-    providerSmokeDecision: blocked_provider_error_http_401_no_retry
+    priorProviderErrorDiagnosticTask: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+    providerSmokeDecision: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
     providerSmokeExpectedStopIfMissingEnv: true
-    providerConfigurationDecision: blocked_no_configuration_change_approved
+    providerConfigurationDecision: approved_cli_boundary_only_no_source_or_persisted_config_change
     costCalibrationDecision: blocked_not_in_this_task
     stagingProdDecision: blocked_not_in_this_task
     deployDecision: blocked_not_in_this_task
@@ -593,7 +595,7 @@ currentTask:
     activeQueueNonTerminalCountBeforeTask: 28
     readyForCloseoutCountBeforeTask: 26
     blockedTaskCountBeforeTask: 2
-    archiveCandidateCountBeforeTask: 37
+    archiveCandidateCountBeforeTask: 38
     highRiskRepairBlockedCountBeforeTask: 0
     futureCostCalibrationTask: layer-3-cost-calibration-redacted-approval-package-2026-06-27
     futurePreReleaseTask: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
@@ -603,18 +605,18 @@ currentTask:
     futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     localCommitApproved: true
     mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
-    nextExecutionApprovalRequired: owner_provider_key_or_entitlement_or_region_review_required_before_retry
+    mergePushCleanupApprovalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_task_scoped_closeout_policy
+    nextExecutionApprovalRequired: cost_calibration_or_rollup_requires_fresh_or_existing_applicable_task_approval_after_result
     nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     nextNonterminalCloseoutApprovalRequired: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
-    recommendedExecutionOption: stop_serial_package_after_provider_error_http_401_blocked_evidence
+    recommendedExecutionOption: stop_after_provider_smoke_pass_until_cost_calibration_or_rollup_followup_approval
     alternateExecutionOption: optional_layer_2_approved_formal_draft_or_credentialed_browser_package_if_owner_requires_stronger_l2
     prDecision: blocked
     forcePushDecision: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
-    providerCallDecision: approved_one_diagnostic_call_only
+    providerCallDecision: approved_one_openai_compatible_dashscope_smoke_call_only
     providerCredentialReadDecision: approved_env_local_single_alias_loader_current_command_only
     costCalibrationGateDecision: blocked
     stagingProdDeployDecision: blocked
@@ -624,18 +626,18 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
+      approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
+      approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
+      approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_unattended_serial_package_closeout_2026_06_27
+      approvalSource: current_user_fresh_provider_openai_compatible_dashscope_config_boundary_repair_retry_2026_06_27_plus_existing_goal_independent_task_closeout_instruction
   commitSha: null
   prUrl: null
   retryCount: 0
