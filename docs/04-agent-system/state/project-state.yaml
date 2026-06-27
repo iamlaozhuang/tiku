@@ -501,24 +501,24 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 60fb5d3361033bc99b69ed99a760a023c5be57b7
-  lastKnownOriginMasterSha: 60fb5d3361033bc99b69ed99a760a023c5be57b7
+  lastKnownMasterSha: f6aeffc847974d8e68ca3693b151aad49d67a76a
+  lastKnownOriginMasterSha: f6aeffc847974d8e68ca3693b151aad49d67a76a
 currentTask:
-  id: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
+  id: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
   status: closed
-  result: pass_local_contract_boundary_and_repository_safety_gate_no_runtime_publish
+  result: pass_private_result_history_reference_boundary_no_runtime_mutation
   claimedAt: "2026-06-27T00:00:00-07:00"
   plannedAt: "2026-06-27T00:00:00-07:00"
-  validatedAt: "2026-06-27T00:10:00-07:00"
-  reviewedAt: "2026-06-27T00:10:00-07:00"
-  closedAt: "2026-06-27T00:10:00-07:00"
+  validatedAt: "2026-06-27T00:30:00-07:00"
+  reviewedAt: "2026-06-27T00:30:00-07:00"
+  closedAt: "2026-06-27T00:30:00-07:00"
   sourceStory: current_user_serial_batch_queue_2026_06_27
   approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-org-ai-generation-owned-draft-training-local-contract-tdd.md
-  branch: codex/org-ai-owned-draft-contract-tdd-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  branch: codex/learner-ai-private-loop-tdd-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
@@ -549,9 +549,10 @@ currentTask:
     finalPassClaim: false
   decision:
     docsOnlyApprovalPackage: false
-    organizationGeneratedResultOwnership: organization_private
-    organizationDraftAdoption: contract_ready_no_db_mutation
-    organizationTrainingSourceUse: contract_ready_no_db_mutation
+    learnerGeneratedResultOwnership: learner_private
+    privatePracticeAttemptSource: contract_ready_no_mutation
+    privatePaperAttemptSource: contract_ready_no_mutation
+    organizationPrivateAdoption: blocked_without_organization_admin_task
     platformFormalDraftAdoption: requires_content_admin_review_follow_up
     directPublishOrStudentVisibleContent: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
@@ -607,7 +608,40 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+  nextRecommendedTask: formal-publish-local-execution-one-draft-paper-2026-06-27
+learnerAiGenerationPrivateResultPracticePaperAttemptTdd20260627:
+  taskId: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+  phase: learner-ai-generation-private-result-practice-paper-attempt-tdd-2026-06-27
+  recordedAt: "2026-06-27T00:20:00-07:00"
+  status: closed
+  result: pass_private_result_history_reference_boundary_no_runtime_mutation
+  validatedAt: "2026-06-27T00:30:00-07:00"
+  reviewedAt: "2026-06-27T00:30:00-07:00"
+  closedAt: "2026-06-27T00:30:00-07:00"
+  branch: codex/learner-ai-private-loop-tdd-20260627
+  approvalSource: current_user_serial_batch_source_tdd_and_local_execution_request_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-learner-ai-generation-private-result-practice-paper-attempt-tdd.md
+  boundary:
+    learnerGeneratedResultOwnership: learner_private
+    privatePracticeAttemptSource: contract_ready_no_mutation
+    privatePaperAttemptSource: contract_ready_no_mutation
+    organizationPrivateAdoption: blocked_without_organization_admin_task
+    platformFormalDraftAdoption: requires_content_admin_review_follow_up
+    publish: blocked
+    studentVisibleContent: blocked
+  validationSummary:
+    focusedRedTest: pass_expected_failure_observed
+    focusedGreenTest: pass_4_files_28_tests
+    prettierScoped: pass
+    gitDiffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    moduleRunV2PrePushReadiness: pass
 orgAiGenerationOwnedDraftTrainingLocalContractTdd20260627:
   taskId: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27
   phase: org-ai-generation-owned-draft-training-local-contract-tdd-2026-06-27

@@ -8,6 +8,7 @@ import type {
   PersonalAiGenerationResultHistoryDto,
 } from "../contracts/personal-ai-generation-result-history-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type { PersonalAiGenerationPrivateUseBoundaryDto } from "../contracts/personal-ai-generation-result-reference-contract";
 import {
   comparePersonalAiGenerationResultHistoryItem,
   type PersonalAiGenerationResultDetailQuery,
@@ -44,6 +45,22 @@ export type PersonalAiGenerationResultHistoryService = {
     input: unknown,
   ): Promise<ApiResponse<PersonalAiGenerationResultDetailDto | null>>;
 };
+
+function createPersonalAiGenerationPrivateUseBoundary(): PersonalAiGenerationPrivateUseBoundaryDto {
+  return {
+    generatedResultScope: "learner_private",
+    resultHistoryStatus: "available",
+    privatePracticeAttemptSourceStatus:
+      "allowed_as_private_practice_attempt_source",
+    privatePaperAttemptSourceStatus: "allowed_as_private_paper_attempt_source",
+    organizationPrivateAdoptionStatus:
+      "blocked_without_organization_admin_task",
+    platformFormalDraftStatus: "blocked_requires_content_admin_review",
+    publishStatus: "blocked_requires_fresh_publish_task",
+    studentVisibleStatus: "blocked",
+    redactionStatus: "redacted",
+  };
+}
 
 function mapPersonalAiGenerationResultHistoryItem(
   result: PersonalAiGenerationResultDto,
@@ -82,6 +99,7 @@ function buildPersonalAiGenerationResultHistoryDto(
     contentVisibility: "redacted_snapshot",
     redactionStatus: "redacted",
     formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+    privateUseBoundary: createPersonalAiGenerationPrivateUseBoundary(),
     results: [...results]
       .sort(comparePersonalAiGenerationResultHistoryItem)
       .map(mapPersonalAiGenerationResultHistoryItem),
@@ -96,6 +114,7 @@ function buildPersonalAiGenerationResultDetailDto(
     contentVisibility: "redacted_snapshot",
     redactionStatus: "redacted",
     formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+    privateUseBoundary: createPersonalAiGenerationPrivateUseBoundary(),
     result: mapPersonalAiGenerationResultHistoryItem(result),
   };
 }

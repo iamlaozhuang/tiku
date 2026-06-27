@@ -49,6 +49,22 @@ function createBaseInput() {
   };
 }
 
+function createExpectedPrivateUseBoundary() {
+  return {
+    generatedResultScope: "learner_private",
+    resultHistoryStatus: "available",
+    privatePracticeAttemptSourceStatus:
+      "allowed_as_private_practice_attempt_source",
+    privatePaperAttemptSourceStatus: "allowed_as_private_paper_attempt_source",
+    organizationPrivateAdoptionStatus:
+      "blocked_without_organization_admin_task",
+    platformFormalDraftStatus: "blocked_requires_content_admin_review",
+    publishStatus: "blocked_requires_fresh_publish_task",
+    studentVisibleStatus: "blocked",
+    redactionStatus: "redacted",
+  };
+}
+
 describe("personal AI generation request flow service", () => {
   it("builds a redacted accepted local personal generation request flow", () => {
     const input = createBaseInput();
@@ -163,6 +179,7 @@ describe("personal AI generation request flow service", () => {
             contentVisibility: "summary_only",
             redactionStatus: "redacted",
           },
+          privateUseBoundary: createExpectedPrivateUseBoundary(),
         },
       },
     });

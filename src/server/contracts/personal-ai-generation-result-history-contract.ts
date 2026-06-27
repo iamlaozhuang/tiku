@@ -1,4 +1,5 @@
 import type { PersonalAiGenerationResultDto } from "./personal-ai-generation-result-persistence-contract";
+import type { PersonalAiGenerationPrivateUseBoundaryDto } from "./personal-ai-generation-result-reference-contract";
 import type {
   PersonalAiGenerationResultHistoryContentVisibility,
   PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus,
@@ -11,6 +12,7 @@ export type PersonalAiGenerationResultHistoryDto = {
   contentVisibility: PersonalAiGenerationResultHistoryContentVisibility;
   redactionStatus: PersonalAiGenerationResultHistoryRedactionStatus;
   formalAdoptionWriteStatus: PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus;
+  privateUseBoundary: PersonalAiGenerationPrivateUseBoundaryDto;
   results: PersonalAiGenerationResultDto[];
 };
 
@@ -19,5 +21,6 @@ export type PersonalAiGenerationResultDetailDto = {
   contentVisibility: PersonalAiGenerationResultHistoryContentVisibility;
   redactionStatus: PersonalAiGenerationResultHistoryRedactionStatus;
   formalAdoptionWriteStatus: PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus;
+  privateUseBoundary: PersonalAiGenerationPrivateUseBoundaryDto;
   result: PersonalAiGenerationResultDto;
 };
