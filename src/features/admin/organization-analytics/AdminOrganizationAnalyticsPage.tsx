@@ -17,6 +17,7 @@ import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
   OrganizationAnalyticsDashboardRouteDto,
   OrganizationAnalyticsEmployeeStatisticsRouteDto,
+  OrganizationAnalyticsRedactedStatisticsBoundaryDto,
 } from "@/server/contracts/organization-analytics-contract";
 
 import {
@@ -409,6 +410,10 @@ function DashboardSummaryCard({
         </span>
       </div>
 
+      <RedactedStatisticsBoundaryPanel
+        boundary={summary.redactedStatisticsBoundary}
+      />
+
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="可参与员工"
@@ -499,6 +504,61 @@ function DashboardSummaryCard({
         )}
       </section>
     </article>
+  );
+}
+
+function RedactedStatisticsBoundaryPanel({
+  boundary,
+}: {
+  boundary: OrganizationAnalyticsRedactedStatisticsBoundaryDto;
+}) {
+  return (
+    <section
+      className="border-border bg-muted/40 rounded-md border p-3"
+      data-testid="organization-analytics-redacted-statistics-boundary"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">
+            organization_analytics_boundary
+          </p>
+          <h3 className="text-text-primary mt-1 text-sm font-semibold">
+            {boundary.visibilityScope}
+          </h3>
+        </div>
+        <span className="bg-success/10 text-success rounded-md px-2 py-1 text-xs font-medium">
+          {boundary.redactionStatus}
+        </span>
+      </div>
+
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3">
+        <Row
+          label="training_statistics"
+          value={boundary.trainingStatisticsPolicy}
+        />
+        <Row
+          label="employee_statistics"
+          value={boundary.employeeStatisticsPolicy}
+        />
+        <Row
+          label="raw_employee_answer"
+          value={boundary.rawEmployeeAnswerPolicy}
+        />
+        <Row
+          label="raw_ai_generated_content"
+          value={boundary.rawAiGeneratedContentPolicy}
+        />
+        <Row
+          label="prompt_provider_payload"
+          value={boundary.promptProviderPayloadPolicy}
+        />
+        <Row label="export" value={boundary.exportPolicy} />
+        <Row
+          label="cross_organization"
+          value={boundary.crossOrganizationAnalyticsPolicy}
+        />
+      </dl>
+    </section>
   );
 }
 

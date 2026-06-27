@@ -7,7 +7,7 @@ type ContractExports = typeof organizationAnalyticsContract & {
 };
 
 describe("organization analytics route contract", () => {
-  it("creates a standard dashboard response without scoped organization identifier arrays", () => {
+  it("creates a standard dashboard response with redacted policy metadata but without scoped organization identifier arrays", () => {
     const contractExports = organizationAnalyticsContract as ContractExports;
 
     expect(
@@ -64,6 +64,17 @@ describe("organization analytics route contract", () => {
         },
         formalLearningSummary: null,
         quotaSummary: null,
+        redactedStatisticsBoundary: {
+          visibilityScope: "organization_admin_own_scope",
+          trainingStatisticsPolicy: "summary_counts_score_time_only",
+          employeeStatisticsPolicy: "status_score_time_only",
+          rawEmployeeAnswerPolicy: "blocked",
+          rawAiGeneratedContentPolicy: "blocked",
+          promptProviderPayloadPolicy: "blocked",
+          exportPolicy: "blocked_requires_fresh_approval",
+          crossOrganizationAnalyticsPolicy: "blocked",
+          redactionStatus: "redacted_boundary",
+        },
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
       },
@@ -72,9 +83,7 @@ describe("organization analytics route contract", () => {
       "scopeOrganizationPublicIds",
     );
     expect(JSON.stringify(response)).not.toContain("organization_public_child");
-    expect(JSON.stringify(response)).not.toContain(
-      "redactedStatisticsBoundary",
-    );
+    expect(JSON.stringify(response)).toContain("redactedStatisticsBoundary");
   });
 
   it("creates a redacted statistics boundary contract for internal summaries", () => {

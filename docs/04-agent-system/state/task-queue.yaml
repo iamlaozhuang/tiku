@@ -682,21 +682,129 @@ tasks:
 
   - id: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
     title: Organization analytics admin UI implementation local validation approval
-    phase: organization-analytics-ux-design-first-package-2026-06-27
+    phase: organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
     sourceStory: current_user_serial_batch_queue_2026_06_27
     dependencies:
       - organization-analytics-redacted-statistics-source-contract-tdd-approval-2026-06-27
-    taskKind: ui_implementation_followup_blocked
+    taskKind: ui_implementation_local_validation
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_ui_implementation_approval
-    nextApprovalRequired: ui_source_allowed_files_component_tests_local_validation
-    boundary: organization_admin_desktop_analytics_surface_after_source_contract
-    blockedCapabilities:
-      - localSourceChange
-      - testChange
-      - browserRuntime
-      - databaseConnection
+    executionProfile: ui_route_contract_component_test_local_only
+    evidenceMode: redacted_unit_test_evidence
+    validationPolicy: focused_unit_lint_typecheck_module_run_v2_gates
+    queueSelectionMode: current_user_directed_serial_batch_2026_06_27
+    requiredOutcome: >-
+      Implement a local organization analytics admin UI boundary after the redacted statistics source contract exists,
+      exposing policy metadata through route DTOs and rendering it in the admin UI, without DB connection, DB mutation,
+      Provider, publish, student-visible runtime, browser/e2e, dev server, staging/prod, payment, external service, PR,
+      force push, release readiness, or final Pass.
+    status: closed
+    result: pass_organization_analytics_admin_ui_redacted_boundary_no_runtime
+    approvedAt: "2026-06-27T04:45:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed:
+      approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      scope: ui_route_contract_component_test_docs_state_evidence_audit_acceptance_commit_merge_push_cleanup
+    claimedAt: "2026-06-27T04:45:00-07:00"
+    plannedAt: "2026-06-27T04:45:00-07:00"
+    validatedAt: "2026-06-27T05:00:00-07:00"
+    reviewedAt: "2026-06-27T05:00:00-07:00"
+    closedAt: "2026-06-27T05:00:00-07:00"
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      formalPublishStudentVisibleContent: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/contracts/organization-analytics-contract.test.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+      - docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+      - docs/05-execution-logs/evidence/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - ui_implementation_local_validation
+      - organization_analytics_redacted_statistics_boundary_ui
+      - route_policy_metadata
+      - no_db_mutation
+      - no_provider
+      - no_publish
+      - redacted_evidence
+    boundary:
+      uiSurface: organization_admin_redacted_statistics_boundary
+      routeDtoBoundary: redacted_policy_metadata_only
+      scopedChildOrganizationIds: blocked
+      rawEmployeeAnswer: blocked
+      rawAiGeneratedContent: blocked
+      promptProviderPayload: blocked
+      exportDownload: blocked_requires_fresh_approval
+      studentVisibleRuntime: blocked
+      browserValidation: blocked_requires_separate_approval
+    validationCommands:
+      - npm.cmd exec vitest -- run src/server/contracts/organization-analytics-contract.test.ts src/server/services/organization-analytics-route.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npx.cmd prettier --write --ignore-unknown src/server/contracts/organization-analytics-contract.ts src/server/contracts/organization-analytics-contract.test.ts src/server/services/organization-analytics-route.test.ts src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/evidence/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+      - npx.cmd prettier --check --ignore-unknown src/server/contracts/organization-analytics-contract.ts src/server/contracts/organization-analytics-contract.test.ts src/server/services/organization-analytics-route.test.ts src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/evidence/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-admin-ui-implementation-local-validation.md
+    branch: codex/org-analytics-admin-ui-local-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      mergeToMaster:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_serial_batch_source_ui_enhancement_approval_2026_06_27
 
   - id: organization-analytics-local-browser-smoke-validation-approval-2026-06-27
     title: Organization analytics local browser smoke validation approval

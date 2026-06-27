@@ -85,7 +85,7 @@ export type OrganizationAnalyticsEmployeeStatisticsSummaryDto = {
 
 export type OrganizationAnalyticsEmployeeStatisticsRouteDto = Omit<
   OrganizationAnalyticsEmployeeStatisticsSummaryDto,
-  "scopeOrganizationPublicIds" | "redactedStatisticsBoundary"
+  "scopeOrganizationPublicIds"
 >;
 
 export type OrganizationAnalyticsEmployeeStatisticsRouteResponse =
@@ -167,7 +167,7 @@ export type OrganizationAnalyticsDashboardSummaryDto = {
 
 export type OrganizationAnalyticsDashboardRouteDto = Omit<
   OrganizationAnalyticsDashboardSummaryDto,
-  "scopeOrganizationPublicIds" | "redactedStatisticsBoundary"
+  "scopeOrganizationPublicIds"
 >;
 
 export type OrganizationAnalyticsDashboardRouteResponse =
@@ -222,6 +222,22 @@ export function createOrganizationAnalyticsRedactedStatisticsBoundary(): Organiz
   };
 }
 
+function createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
+  boundary: OrganizationAnalyticsRedactedStatisticsBoundaryDto,
+): OrganizationAnalyticsRedactedStatisticsBoundaryDto {
+  return {
+    visibilityScope: boundary.visibilityScope,
+    trainingStatisticsPolicy: boundary.trainingStatisticsPolicy,
+    employeeStatisticsPolicy: boundary.employeeStatisticsPolicy,
+    rawEmployeeAnswerPolicy: boundary.rawEmployeeAnswerPolicy,
+    rawAiGeneratedContentPolicy: boundary.rawAiGeneratedContentPolicy,
+    promptProviderPayloadPolicy: boundary.promptProviderPayloadPolicy,
+    exportPolicy: boundary.exportPolicy,
+    crossOrganizationAnalyticsPolicy: boundary.crossOrganizationAnalyticsPolicy,
+    redactionStatus: boundary.redactionStatus,
+  };
+}
+
 export function createOrganizationAnalyticsDashboardRouteResponse(
   data: OrganizationAnalyticsDashboardSummaryDto | null,
   message = "ok",
@@ -256,6 +272,10 @@ export function createOrganizationAnalyticsDashboardRouteResponse(
         data.formalLearningSummary,
       ),
       quotaSummary: createQuotaSummaryRouteDto(data.quotaSummary),
+      redactedStatisticsBoundary:
+        createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
+          data.redactedStatisticsBoundary,
+        ),
       redactionStatus: data.redactionStatus,
       updatedAt: data.updatedAt,
     },
@@ -302,6 +322,10 @@ export function createOrganizationAnalyticsEmployeeStatisticsRouteResponse(
         latestTrainingSubmittedAt: employee.latestTrainingSubmittedAt,
         redactionStatus: employee.redactionStatus,
       })),
+      redactedStatisticsBoundary:
+        createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
+          data.redactedStatisticsBoundary,
+        ),
       redactionStatus: data.redactionStatus,
       updatedAt: data.updatedAt,
     },

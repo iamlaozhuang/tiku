@@ -56,6 +56,18 @@ const standardAdminSessionPayload = {
   },
 };
 
+const redactedStatisticsBoundaryPayload = {
+  visibilityScope: "organization_admin_own_scope",
+  trainingStatisticsPolicy: "summary_counts_score_time_only",
+  employeeStatisticsPolicy: "status_score_time_only",
+  rawEmployeeAnswerPolicy: "blocked",
+  rawAiGeneratedContentPolicy: "blocked",
+  promptProviderPayloadPolicy: "blocked",
+  exportPolicy: "blocked_requires_fresh_approval",
+  crossOrganizationAnalyticsPolicy: "blocked",
+  redactionStatus: "redacted_boundary",
+};
+
 const dashboardSummaryPayload = {
   code: 0,
   message: "ok",
@@ -102,6 +114,7 @@ const dashboardSummaryPayload = {
       redactionStatus: "summary_only",
       internalNumericId: 77123,
     },
+    redactedStatisticsBoundary: redactedStatisticsBoundaryPayload,
     redactionStatus: "aggregate_only",
     updatedAt: "2026-06-16T08:00:00.000Z",
     id: 99123,
@@ -158,6 +171,7 @@ const employeeStatisticsPayload = {
         redactionStatus: "summary_only",
       },
     ],
+    redactedStatisticsBoundary: redactedStatisticsBoundaryPayload,
     redactionStatus: "summary_only",
     updatedAt: "2026-06-16T08:00:00.000Z",
     id: 77124,
@@ -320,6 +334,22 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(summaryCard).toHaveTextContent("7 次正式练习");
     expect(summaryCard).toHaveTextContent("823 剩余额度");
     expect(summaryCard).toHaveTextContent("聚合脱敏");
+    const redactedBoundaryPanel = within(summaryCard).getByTestId(
+      "organization-analytics-redacted-statistics-boundary",
+    );
+    expect(redactedBoundaryPanel).toHaveTextContent(
+      "organization_admin_own_scope",
+    );
+    expect(redactedBoundaryPanel).toHaveTextContent(
+      "summary_counts_score_time_only",
+    );
+    expect(redactedBoundaryPanel).toHaveTextContent("status_score_time_only");
+    expect(redactedBoundaryPanel).toHaveTextContent("blocked");
+    expect(redactedBoundaryPanel).toHaveTextContent(
+      "blocked_requires_fresh_approval",
+    );
+    expect(redactedBoundaryPanel).toHaveTextContent("redacted_boundary");
+
     expect(
       within(summaryCard).getByTestId("organization-analytics-submitted-trend"),
     ).toHaveTextContent("2026-06-01");

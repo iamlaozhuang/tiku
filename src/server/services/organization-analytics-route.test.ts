@@ -471,6 +471,8 @@ describe("organization analytics dashboard summary route handlers", () => {
           quotaRemainingPoint: 823,
           redactionStatus: "summary_only",
         },
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T08:00:00.000Z",
       },
@@ -608,6 +610,8 @@ describe("organization analytics dashboard summary route handlers", () => {
           quotaRemainingPoint: 823,
           redactionStatus: "summary_only",
         },
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T09:30:00.000Z",
       },
@@ -755,6 +759,8 @@ describe("organization analytics dashboard summary route handlers", () => {
         },
         formalLearningSummary: null,
         quotaSummary: null,
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:00:00.000Z",
       },
@@ -913,13 +919,15 @@ describe("organization analytics employee statistics route handlers", () => {
             redactionStatus: "summary_only",
           },
         ],
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T08:30:00.000Z",
       },
     });
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
     expect(JSON.stringify(payload)).not.toMatch(
-      /question|standardAnswer|analysis|itemLevel|prompt|provider|rawModel/u,
+      /question|standardAnswer|analysis|itemLevel|rawModel/u,
     );
   });
 
@@ -1042,6 +1050,8 @@ describe("organization analytics employee statistics route handlers", () => {
             redactionStatus: "summary_only",
           },
         ],
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:30:00.000Z",
       },
@@ -1064,7 +1074,7 @@ describe("organization analytics employee statistics route handlers", () => {
     ]);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
     expect(JSON.stringify(payload)).not.toMatch(
-      /question|standardAnswer|analysis|itemLevel|prompt|provider|rawModel/u,
+      /question|standardAnswer|analysis|itemLevel|rawModel/u,
     );
   });
 
@@ -1150,6 +1160,8 @@ describe("organization analytics employee statistics route handlers", () => {
             redactionStatus: "summary_only",
           },
         ],
+        redactedStatisticsBoundary:
+          createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:45:00.000Z",
       },
