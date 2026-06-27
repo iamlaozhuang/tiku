@@ -1540,19 +1540,19 @@ tasks:
       generation routes and verify whether batch/retry/diff/history UI is visible, console errors are absent, and
       mutation controls remain disabled or read-only. If a UI or permission issue is found, seed a separate scoped repair
       task instead of changing source in this task.
-    status: pending
-    result: pending_credentialed_browser_smoke_rerun
+    status: closed
+    result: pass_credentialed_browser_smoke_content_admin_review_ui_visible_no_repair_seeded
     approvedAt: "2026-06-27T01:10:00-07:00"
     approvedBy: laozhuang
     approvalConsumed:
       approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
       scope: localhost_content_admin_login_browser_rerun_redacted_evidence
-    claimedAt: null
-    plannedAt: null
-    implementedAt: null
-    validatedAt: null
-    reviewedAt: null
-    closedAt: null
+    claimedAt: "2026-06-27T01:18:00-07:00"
+    plannedAt: "2026-06-27T01:18:00-07:00"
+    implementedAt: "2026-06-27T01:23:25-07:00"
+    validatedAt: "2026-06-27T01:23:25-07:00"
+    reviewedAt: "2026-06-27T01:23:25-07:00"
+    closedAt: "2026-06-27T01:23:25-07:00"
     nextApprovalRequired: none_localhost_content_admin_credentialed_browser_only
     boundary: local_browser_only_content_admin_review_no_source_no_e2e_no_direct_db_no_provider_no_product_mutation
     localFullLoopGate: L5
@@ -1636,6 +1636,36 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
     branch: codex/content-admin-credentialed-browser-scope-20260627
+    browserSmokeResult:
+      credentialSource: approved_private_acceptance_handoff_outside_repo
+      loginResult: pass_localhost_content_admin_session_created
+      routeResults:
+        - route: /content/ai-question-generation
+          category: rendered_review_surface
+          visibleReviewSurface: true
+          validationItemCount: 12
+          adoptActionCount: 3
+          rejectActionCount: 3
+          disabledReviewMutations: true
+          consoleErrorsOrWarnings: 0
+        - route: /content/ai-paper-generation
+          category: rendered_review_surface
+          visibleReviewSurface: true
+          validationItemCount: 12
+          adoptActionCount: 3
+          rejectActionCount: 3
+          disabledReviewMutations: true
+          consoleErrorsOrWarnings: 0
+      productMutationClicked: false
+      repairSeeded: false
+    validationResult:
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      projectStatusDiagnostic: idle_no_pending_task
+      lint: not_applicable_docs_state_only
+      typecheck: not_applicable_docs_state_only
     closeoutPolicy:
       localCommit:
         approved: true

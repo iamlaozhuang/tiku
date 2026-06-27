@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
-updatedAt: "2026-06-27T01:10:00-07:00"
+currentPhase: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
+updatedAt: "2026-06-27T01:18:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,33 +504,33 @@ repository:
   lastKnownMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
   lastKnownOriginMasterSha: 52eb94a92659eaf4bfd7855c85a5086d88ddea8e
 currentTask:
-  id: content-admin-review-credentialed-browser-smoke-scope-approval-2026-06-27
+  id: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
   status: closed
-  result: pass_credentialed_browser_smoke_scope_prepared_no_runtime_executed
-  claimedAt: "2026-06-27T01:10:00-07:00"
-  plannedAt: "2026-06-27T01:10:00-07:00"
-  implementedAt: "2026-06-27T01:10:00-07:00"
-  validatedAt: "2026-06-27T01:10:00-07:00"
-  reviewedAt: "2026-06-27T01:10:00-07:00"
-  closedAt: "2026-06-27T01:10:00-07:00"
+  result: pass_credentialed_browser_smoke_content_admin_review_ui_visible_no_repair_seeded
+  claimedAt: "2026-06-27T01:18:00-07:00"
+  plannedAt: "2026-06-27T01:18:00-07:00"
+  implementedAt: "2026-06-27T01:23:25-07:00"
+  validatedAt: "2026-06-27T01:23:25-07:00"
+  reviewedAt: "2026-06-27T01:23:25-07:00"
+  closedAt: "2026-06-27T01:23:25-07:00"
   sourceStory: current_user_credentialed_content_admin_browser_smoke_2026_06_27
   approvalSource: current_user_explicit_credential_read_and_fill_approval_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-scope.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-rerun.md
   branch: codex/content-admin-credentialed-browser-scope-20260627
   scope:
     docsStateEvidenceAudit: true
     acceptancePackagePrepared: true
     credentialedBrowserScopeApproval: true
-    browserRuntime: false
-    devServer: false
+    browserRuntime: true
+    devServer: true
     localhostOnly: true
     routeSmokeTarget:
       - /content/ai-question-generation
       - /content/ai-paper-generation
-    taskPacketNormalization: true
+    taskPacketNormalization: false
     sourceContractChange: false
     serviceSourceChange: false
     uiSourceChange: false
@@ -542,7 +542,7 @@ currentTask:
     databaseWriteExecuted: false
     schemaMigrationExecuted: false
     e2eRuntime: false
-    credentialOrEnvRead: false
+    credentialOrEnvRead: true
     credentialReadApprovedForNextTask: true
     credentialEvidenceRedacted: true
     providerCall: false
@@ -557,9 +557,11 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    credentialedBrowserSmokeScope: approved_for_next_task_localhost_only
+    credentialedBrowserSmokeScope: approved_localhost_only
+    credentialedBrowserSmokeRerun: passed_redacted_localhost_content_admin_ui_visible
     credentialReadAndFillDecision: approved_for_local_login_only_redacted
     routeCorrection: next_route_group_admin_segment_not_in_url
+    repairSeedDecision: not_seeded_no_ui_or_permission_defect_found
     historyMutationDecision: blocked_requires_separate_approval
     formalPublishDecision: blocked_requires_separate_approval
     retryMutationDecision: blocked_requires_separate_approval
@@ -567,7 +569,7 @@ currentTask:
     e2eRuntimeDecision: blocked_requires_separate_approval
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    browserValidationDecision: task_2_prepared_by_current_fresh_approval
+    browserValidationDecision: current_task_approved_credentialed_localhost_browser_rerun
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
     implementationStillBlocked: false
@@ -606,9 +608,9 @@ currentTask:
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
-    routeSmokeExecuted: false
-    browserSmokeExecuted: false
-    browserSmokeResult: not_executed_scope_only
+    routeSmokeExecuted: true
+    browserSmokeExecuted: true
+    browserSmokeResult: pass_two_content_routes_render_review_surface_no_console_errors_adopt_reject_disabled
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -623,12 +625,12 @@ currentTask:
     finalPassClaimed: false
     prettierScoped: pass
     gitDiffCheck: pass
-    lint: pass
-    typecheck: pass
+    lint: not_applicable_docs_state_only
+    typecheck: not_applicable_docs_state_only
     moduleRunV2PreCommitHardening: pass
-    projectStatusDiagnostic: pending_after_scope_commit
+    projectStatusDiagnostic: idle_no_pending_task
     moduleRunV2PrePushReadiness: not_applicable_no_push_approval
-  nextRecommendedTask: content-admin-review-credentialed-browser-smoke-rerun-2026-06-27
+  nextRecommendedTask: null
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
