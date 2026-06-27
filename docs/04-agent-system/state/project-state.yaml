@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
-updatedAt: "2026-06-27T05:58:00-07:00"
+currentPhase: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+updatedAt: "2026-06-27T06:06:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,31 +501,30 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8747de0caf31ee6c2d5ebe8e9d4a2daa7df91b59
-  lastKnownOriginMasterSha: 8747de0caf31ee6c2d5ebe8e9d4a2daa7df91b59
+  lastKnownMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
+  lastKnownOriginMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
 currentTask:
-  id: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+  id: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
   status: closed
-  result: pass_layer_2_route_smoke_rollup_real_db_browser_provider_still_blocked
-  claimedAt: "2026-06-27T05:52:58-07:00"
-  plannedAt: "2026-06-27T05:53:00-07:00"
-  implementedAt: "2026-06-27T05:55:00-07:00"
-  validatedAt: "2026-06-27T05:58:00-07:00"
-  reviewedAt: "2026-06-27T05:58:00-07:00"
-  closedAt: "2026-06-27T05:58:00-07:00"
-  sourceStory: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+  result: pass_local_postgres_route_smoke_approval_package_execution_blocked
+  claimedAt: "2026-06-27T06:01:58-07:00"
+  plannedAt: "2026-06-27T06:02:00-07:00"
+  implementedAt: "2026-06-27T06:06:00-07:00"
+  validatedAt: "2026-06-27T06:10:00-07:00"
+  reviewedAt: "2026-06-27T06:10:00-07:00"
+  closedAt: "2026-06-27T06:10:00-07:00"
+  sourceStory: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
   approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
-  branch: codex/layer-2-route-smoke-rollup-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+  branch: codex/content-admin-postgres-smoke-approval-20260627
   scope:
     docsStateEvidenceAudit: true
-    acceptanceRollup: true
-    layer2EvidenceRollup: true
+    approvalPackageAuthoring: true
+    localPostgresExecution: false
     sourceOrTestChange: false
-    localRouteSmokeEvidenceConsumed: true
     runtimeExecutedByThisTask: false
     defaultPostgresRuntimeUsed: false
     localDbCredentialEnvReadApproved: false
@@ -555,24 +554,25 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    rollupDecision: route_runtime_rejected_smoke_recorded_real_db_browser_provider_still_blocked
+    packageDecision: local_postgres_route_smoke_approval_package_prepared_execution_blocked
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: route_runtime_rejected_smoke_with_injected_repository_db_default_path_still_blocked
-    layer2StatusAfterTask: stronger_partial_route_runtime_rejected_smoke_recorded_real_db_browser_provider_still_blocked
+    layer2StatusBeforeTask: stronger_partial_route_runtime_rejected_smoke_recorded_real_db_browser_provider_still_blocked
+    layer2StatusAfterTask: local_postgres_route_smoke_package_ready_execution_still_requires_fresh_approval
     layer3Status: blocked_provider_cost_pre_release_gates
     activeQueueNonTerminalCountBeforeTask: 28
     localCommitApproved: true
     mergePushCleanupApproved: true
     mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
-    nextDocsOnlyPackage: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
     nextExecutionApprovalRequired: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    recommendedExecutionOption: rejected_lower_risk_first
+    alternateExecutionOption: approved_higher_risk_requires_formal_draft_metadata_boundary
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
     finalPassDecision: blocked
     e2eRuntimeDecision: blocked
     formalPublishOrStudentVisibleRuntime: blocked
-    defaultPostgresRuntimeDecision: blocked_due_env_local_credential_read_boundary
+    defaultPostgresRuntimeDecision: blocked_until_fresh_secret_safe_local_db_execution_approval
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
     browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
@@ -602,17 +602,13 @@ currentTask:
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    acceptanceRollupPrepared: true
+    approvalPackagePrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
+    acceptancePrepared: true
     docsOnly: true
     ssotReadListPrepared: true
     activeQueueNonTerminalCountBeforeTask: 28
-    routeSmokeEvidenceConsumed: pass_rejected_route_runtime_injected_repository
-    explicitAdoptRejectCommandContractStatus: covered_source_test_only
-    businessRuntimeClosureStatus: stronger_partial_route_runtime_smoke_passed_real_db_browser_provider_still_blocked
-    localFullLoopGateReached: L4_injected_route_handler_runtime
-    localFullLoopGateNotReached: L3_default_postgres_and_L5_browser_still_blocked
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
@@ -631,7 +627,7 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 25
+    archiveCandidateCountAfterTask: 26
     highRiskRepairBlockedCountAfterTask: 0
     prettierScoped: pass
     gitDiffCheck: pass
@@ -642,10 +638,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 8747de0caf31ee6c2d5ebe8e9d4a2daa7df91b59
-    baselineOriginMasterSha: 8747de0caf31ee6c2d5ebe8e9d4a2daa7df91b59
-    currentBranch: codex/layer-2-route-smoke-rollup-20260627
-  nextRecommendedTask: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    baselineMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
+    baselineOriginMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
+    currentBranch: codex/content-admin-postgres-smoke-approval-20260627
+  nextRecommendedTask: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

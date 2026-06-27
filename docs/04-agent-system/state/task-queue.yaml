@@ -1181,6 +1181,240 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    title: Content admin review adoption local PostgreSQL route smoke approval package
+    phase: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+    sourceStory: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+    dependencies:
+      - layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+      - content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      This task is docs/state-only and consumes no DB, env, credential, browser, Provider, Cost Calibration, or runtime
+      execution approval. It prepares the future local PostgreSQL-backed route smoke approval package only. Scope is
+      limited to project state, task queue, task plan, evidence, audit, and acceptance documents. Browser/dev-server/e2e,
+      DB connection/read/write, `.env*` or credential reads, Provider calls, Cost Calibration, real mutation, formal
+      publish, student-visible runtime, staging/prod/deploy/payment external-service work, OCR/export, archive/index
+      movement, PR, force push, release readiness, and final Pass remain blocked.
+    targetClosureItem: Local PostgreSQL-backed content-admin review route smoke approval package
+    behaviorBoundary: docs_state::local_postgres_route_smoke_package_no_db_no_env_no_runtime_no_final_pass
+    executionProfile: docs_state_layer_2_local_postgres_route_smoke_approval_package
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_approval_package
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_postgres_route_smoke_approval_package_execution_blocked
+    approvedAt: "2026-06-27T06:01:58-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    claimedAt: "2026-06-27T06:01:58-07:00"
+    plannedAt: "2026-06-27T06:02:00-07:00"
+    implementedAt: "2026-06-27T06:06:00-07:00"
+    validatedAt: "2026-06-27T06:10:00-07:00"
+    reviewedAt: "2026-06-27T06:10:00-07:00"
+    closedAt: "2026-06-27T06:10:00-07:00"
+    branch: codex/content-admin-postgres-smoke-approval-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      approvalPackageAuthoring: approved
+      taskQueueRegistration: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      envSecretRead: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-route-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - local_postgres_route_smoke_approval_package
+      - secret_safe_local_db_boundary_preparation
+      - approval_boundary_preparation
+      - no_source_test_change
+      - no_browser_runtime
+      - no_database_connection
+      - no_env_secret_read
+      - no_provider_call
+      - no_mutation_execution
+      - no_archive_index_movement
+      - no_final_pass
+    localPostgresApprovalPackage:
+      proposedExecutionTask: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+      executionStatus: blocked_pending_fresh_approval
+      decisionChoiceRequired: true
+      recommendedOption: rejected_lower_risk_first
+      alternateOption: approved_higher_risk_requires_formal_draft_metadata_boundary
+      secretSafeDbHandling:
+        runtimeEnvResolutionMayBeApprovedLater: true
+        manualEnvFileRead: blocked
+        secretOrDatabaseUrlOutput: blocked
+        envFileEdit: blocked
+      mutationCap:
+        targetCount: 1
+        reviewerContextCount: 1
+        decisionCount: 1
+        routeOrServiceCommandCount: 1
+        preReadbackCountMax: 1
+        postReadbackCountMax: 1
+      dataBoundary:
+        targetEnvironment: local_dev_only
+        targetOwnership: test_owned_required
+        stagingProdCloudData: blocked
+        rawDbRows: blocked
+        broadScans: blocked
+      rollbackRecoveryOptions:
+        - test_owned_state_can_remain
+        - source_defined_non_destructive_reversal_if_fresh_approved
+        - disposable_fixture_cleanup_if_separately_approved
+      blockedDuringPackage:
+        - db_connection_or_read_write
+        - dotenv_or_secret_read
+        - browser_dev_server_e2e
+        - provider_call_or_configuration
+        - cost_calibration
+        - formal_publish_or_student_visible_runtime
+        - staging_prod_deploy_payment_external_service
+        - ocr_export
+        - pr_force_push_release_readiness_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+    validationSummary:
+      taskPlanPrepared: true
+      approvalPackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      envSecretRead: false
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 26
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - env_secret_or_dotenv_read
+      - default_postgres_runtime_database_url_loading
+      - database_connection_read_write_seed_migration_rollback
+      - raw_db_row_dump_or_broad_scan
+      - provider_call_or_configuration
+      - cost_calibration
+      - real_retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: layer-2-business-closure-evidence-rollup-2026-06-27
     title: Layer 2 business closure evidence rollup
     phase: layer-2-business-closure-evidence-rollup-2026-06-27
