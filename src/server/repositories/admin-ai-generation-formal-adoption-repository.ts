@@ -3,6 +3,7 @@ import type {
   AdminAiGenerationFormalAdoptionGateway,
   AdminAiGenerationFormalAdoptionRepository,
   AdminAiGenerationFormalAdoptionResult,
+  AdminAiGenerationFormalAdoptionReviewTraceabilityDto,
   AdminAiGenerationFormalAdoptionRow,
   CreateAdminAiGenerationFormalAdoptionInput,
   FindAdminAiGenerationFormalAdoptionQuery,
@@ -18,6 +19,8 @@ import {
 const platformFormalContentTargetDomain = "platform_formal_content";
 const formalAdoptionReviewStatus = "approved_for_formal_adoption";
 const formalTargetWriteStatus = "blocked_without_follow_up_task";
+const formalAdoptionAuditActionType =
+  "admin_ai_generation_result.formal_adoption.approve";
 
 export function createAdminAiGenerationFormalAdoptionRepository(
   gateway: AdminAiGenerationFormalAdoptionGateway,
@@ -238,12 +241,52 @@ function mapAdminAiGenerationFormalAdoptionRowToDto(
       aiCallLogPublicId: row.ai_call_log_public_id,
       redactionStatus: "redacted",
     },
-    audit: {
-      actionType: "admin_ai_generation_result.formal_adoption.approve",
-      targetResourceType: "admin_ai_generation_result",
-      targetPublicId: row.source_result_public_id,
-      redactionStatus: "redacted",
+    audit: createFormalAdoptionAuditSummary(row),
+    reviewTraceability: createFormalAdoptionReviewTraceability(row),
+    redactionStatus: "redacted",
+  };
+}
+
+function createFormalAdoptionReviewTraceability(
+  row: AdminAiGenerationFormalAdoptionRow,
+): AdminAiGenerationFormalAdoptionReviewTraceabilityDto {
+  const reviewedAt = row.reviewed_at.toISOString();
+
+  return {
+    traceabilityStatus: "single_result_traceable",
+    sourceGeneratedResultPublicId: row.source_result_public_id,
+    validationStatus: "validated_for_formal_adoption",
+    reviewStatus: row.review_status,
+    reviewDecision: "approved",
+    reviewerPublicId: row.reviewer_public_id,
+    reviewedAt,
+    adoptAction: {
+      actionStatus: "executed",
+      actionType: formalAdoptionAuditActionType,
+      actorPublicId: row.reviewer_public_id,
+      actionAt: reviewedAt,
+      formalTargetWriteStatus: row.formal_target_write_status,
+      formalQuestionPublicId: row.formal_question_public_id,
+      formalPaperPublicId: row.formal_paper_public_id,
     },
+    rejectAction: {
+      actionStatus: "not_executed",
+      actorPublicId: null,
+      actionAt: null,
+    },
+    directPublishStatus: "blocked_requires_fresh_publish_task",
+    auditSummary: createFormalAdoptionAuditSummary(row),
+    redactionStatus: "redacted",
+  };
+}
+
+function createFormalAdoptionAuditSummary(
+  row: AdminAiGenerationFormalAdoptionRow,
+): AdminAiGenerationFormalAdoptionDto["audit"] {
+  return {
+    actionType: formalAdoptionAuditActionType,
+    targetResourceType: "admin_ai_generation_result",
+    targetPublicId: row.source_result_public_id,
     redactionStatus: "redacted",
   };
 }

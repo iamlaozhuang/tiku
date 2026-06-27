@@ -67,6 +67,12 @@ function createAdoptionResult(
   const resultPublicId =
     overrides.resultPublicId ??
     `admin_ai_generation_result_content_${generationKind}_177`;
+  const formalTargetWriteStatus =
+    overrides.formalTargetWriteStatus ?? "blocked_without_follow_up_task";
+  const formalQuestionPublicId = overrides.formalQuestionPublicId ?? null;
+  const formalPaperPublicId = overrides.formalPaperPublicId ?? null;
+  const reviewerPublicId =
+    overrides.reviewerPublicId ?? "admin_content_public_177";
 
   return {
     persistenceStatus: "created",
@@ -85,16 +91,14 @@ function createAdoptionResult(
       targetReference: {
         targetType,
         targetDomain: "platform_formal_content",
-        formalTargetWriteStatus:
-          overrides.formalTargetWriteStatus ?? "blocked_without_follow_up_task",
-        formalQuestionPublicId: overrides.formalQuestionPublicId ?? null,
-        formalPaperPublicId: overrides.formalPaperPublicId ?? null,
+        formalTargetWriteStatus,
+        formalQuestionPublicId,
+        formalPaperPublicId,
       },
       review: {
         reviewStatus: "approved_for_formal_adoption",
         reviewDecision: "approved",
-        reviewerPublicId:
-          overrides.reviewerPublicId ?? "admin_content_public_177",
+        reviewerPublicId,
         reviewedAt: "2026-06-26T20:00:00.000Z",
       },
       sourceSummary: {
@@ -109,6 +113,37 @@ function createAdoptionResult(
         actionType: "admin_ai_generation_result.formal_adoption.approve",
         targetResourceType: "admin_ai_generation_result",
         targetPublicId: resultPublicId,
+        redactionStatus: "redacted",
+      },
+      reviewTraceability: {
+        traceabilityStatus: "single_result_traceable",
+        sourceGeneratedResultPublicId: resultPublicId,
+        validationStatus: "validated_for_formal_adoption",
+        reviewStatus: "approved_for_formal_adoption",
+        reviewDecision: "approved",
+        reviewerPublicId,
+        reviewedAt: "2026-06-26T20:00:00.000Z",
+        adoptAction: {
+          actionStatus: "executed",
+          actionType: "admin_ai_generation_result.formal_adoption.approve",
+          actorPublicId: reviewerPublicId,
+          actionAt: "2026-06-26T20:00:00.000Z",
+          formalTargetWriteStatus,
+          formalQuestionPublicId,
+          formalPaperPublicId,
+        },
+        rejectAction: {
+          actionStatus: "not_executed",
+          actorPublicId: null,
+          actionAt: null,
+        },
+        directPublishStatus: "blocked_requires_fresh_publish_task",
+        auditSummary: {
+          actionType: "admin_ai_generation_result.formal_adoption.approve",
+          targetResourceType: "admin_ai_generation_result",
+          targetPublicId: resultPublicId,
+          redactionStatus: "redacted",
+        },
         redactionStatus: "redacted",
       },
       redactionStatus: "redacted",
@@ -317,6 +352,21 @@ describe("admin AI generation formal adoption runtime route", () => {
           review: {
             reviewStatus: "approved_for_formal_adoption",
             reviewerPublicId: "admin_content_public_177",
+          },
+          reviewTraceability: {
+            traceabilityStatus: "single_result_traceable",
+            sourceGeneratedResultPublicId:
+              "admin_ai_generation_result_content_question_177",
+            directPublishStatus: "blocked_requires_fresh_publish_task",
+            adoptAction: {
+              formalTargetWriteStatus: "draft_created",
+              formalQuestionPublicId: "question_formal_draft_route_177",
+              formalPaperPublicId: null,
+            },
+            rejectAction: {
+              actionStatus: "not_executed",
+            },
+            redactionStatus: "redacted",
           },
           redactionStatus: "redacted",
         },

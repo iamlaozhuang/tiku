@@ -82,6 +82,38 @@ export type AdminAiGenerationFormalAdoptionRow = {
   created_at: Date;
 };
 
+export type AdminAiGenerationFormalAdoptionReviewTraceabilityDto = {
+  traceabilityStatus: "single_result_traceable";
+  sourceGeneratedResultPublicId: string;
+  validationStatus: "validated_for_formal_adoption";
+  reviewStatus: AdminAiGenerationFormalAdoptionReviewStatus;
+  reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision;
+  reviewerPublicId: string;
+  reviewedAt: string;
+  adoptAction: {
+    actionStatus: "executed";
+    actionType: "admin_ai_generation_result.formal_adoption.approve";
+    actorPublicId: string;
+    actionAt: string;
+    formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus;
+    formalQuestionPublicId: string | null;
+    formalPaperPublicId: string | null;
+  };
+  rejectAction: {
+    actionStatus: "not_executed";
+    actorPublicId: null;
+    actionAt: null;
+  };
+  directPublishStatus: "blocked_requires_fresh_publish_task";
+  auditSummary: {
+    actionType: "admin_ai_generation_result.formal_adoption.approve";
+    targetResourceType: "admin_ai_generation_result";
+    targetPublicId: string;
+    redactionStatus: "redacted";
+  };
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationFormalAdoptionDto = {
   adoptionPublicId: string;
   sourceReference: {
@@ -121,6 +153,7 @@ export type AdminAiGenerationFormalAdoptionDto = {
     targetPublicId: string;
     redactionStatus: "redacted";
   };
+  reviewTraceability: AdminAiGenerationFormalAdoptionReviewTraceabilityDto;
   redactionStatus: "redacted";
 };
 
