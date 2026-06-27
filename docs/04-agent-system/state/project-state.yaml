@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-credentialed-browser-smoke-closeout-2026-06-27
-updatedAt: "2026-06-27T01:38:45-07:00"
+currentPhase: active-queue-slimming-archive-docs-state-2026-06-27
+updatedAt: "2026-06-27T01:54:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,32 +501,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b70ce0995ac90fc5e8decb439b8b4cedc42dec63
-  lastKnownOriginMasterSha: b70ce0995ac90fc5e8decb439b8b4cedc42dec63
+  lastKnownMasterSha: 6f3a9d576087115da84eeee3812a13c35e3b9379
+  lastKnownOriginMasterSha: 6f3a9d576087115da84eeee3812a13c35e3b9379
 currentTask:
-  id: content-admin-review-credentialed-browser-smoke-closeout-2026-06-27
+  id: active-queue-slimming-archive-docs-state-2026-06-27
   status: closed
-  result: pass_ff_only_merge_master_gates_ready_for_approved_push_cleanup
-  claimedAt: "2026-06-27T01:31:16-07:00"
-  plannedAt: "2026-06-27T01:31:16-07:00"
-  implementedAt: "2026-06-27T01:38:45-07:00"
-  validatedAt: "2026-06-27T01:38:45-07:00"
-  reviewedAt: "2026-06-27T01:38:45-07:00"
-  closedAt: "2026-06-27T01:38:45-07:00"
-  sourceStory: current_user_fresh_closeout_current_short_branch_2026_06_27
-  approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-credentialed-browser-smoke-closeout.md
-  branch: codex/content-admin-credentialed-browser-scope-20260627
+  result: closed_scope_constrained_archive_readiness_actual_movement_blocked
+  claimedAt: "2026-06-27T01:51:41-07:00"
+  plannedAt: "2026-06-27T01:52:00-07:00"
+  implementedAt: "2026-06-27T01:52:00-07:00"
+  validatedAt: "2026-06-27T01:54:54-07:00"
+  reviewedAt: "2026-06-27T01:54:54-07:00"
+  closedAt: "2026-06-27T01:54:54-07:00"
+  sourceStory: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
+  approvalSource: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-docs-state.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-docs-state.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-docs-state.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-docs-state.md
+  branch: codex/active-queue-slimming-archive-20260627
   scope:
     docsStateEvidenceAudit: true
-    closeoutTaskPacket: true
-    ffOnlyMergeToMaster: true
-    masterGates: true
-    pushOriginMaster: true
-    deleteMergedShortBranch: true
+    queueSlimmingDiagnostic: true
+    archiveCandidateInventory: true
+    archiveApplyExecuted: false
+    archiveIndexUpdateExecuted: false
+    queueEntryMovementExecuted: false
+    taskHistoryDeletionExecuted: false
+    closeoutTaskPacket: false
+    ffOnlyMergeToMaster: false
+    masterGates: false
+    pushOriginMaster: false
+    deleteMergedShortBranch: false
     browserRuntime: false
     devServer: false
     sourceContractChange: false
@@ -555,10 +561,17 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    closeoutApproval: approved_for_current_short_branch_only
-    ffOnlyMergeDecision: approved_target_master
-    pushDecision: approved_target_origin_master
-    cleanupDecision: approved_delete_merged_short_branch
+    archiveExecutionDecision: blocked_by_approved_write_surface
+    archiveExecutionRequiredFiles:
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+    archiveExecutionReason: >-
+      Active queue slimming SOP requires terminal task blocks to move to a dated archive file and be indexed. The
+      current approval excludes those files, so deleting terminal active queue blocks would break traceability.
+    closeoutApproval: local_commit_only
+    ffOnlyMergeDecision: blocked_requires_fresh_closeout_approval
+    pushDecision: blocked_requires_fresh_closeout_approval
+    cleanupDecision: blocked_requires_fresh_closeout_approval
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -566,28 +579,28 @@ currentTask:
     e2eRuntimeDecision: blocked
     formalPublishOrStudentVisibleRuntime: blocked
     rawPromptGeneratedOutputProviderPayloadEvidence: blocked
-    browserValidationDecision: blocked_no_browser_rerun_in_closeout
+    browserValidationDecision: blocked_by_task_scope
     dbSchemaMigrationDecision: blocked
     providerCallDecision: blocked
-    implementationStillBlocked: false
+    implementationStillBlocked: true
     localCommitApproved: true
-    mergePushCleanupApproved: true
-    mergePushCleanupApprovalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+    mergePushCleanupApproved: false
+    mergePushCleanupApprovalSource: fresh_closeout_approval_required
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+      approvalSource: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
     mergeToMaster:
-      approved: true
+      approved: false
       targetBranch: master
-      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     push:
-      approved: true
+      approved: false
       target: origin/master
-      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+      approvalSource: fresh_closeout_approval_required
     cleanup:
-      deleteShortBranch: true
-      approvalSource: current_user_fresh_closeout_current_short_branch_2026_06_27
+      deleteShortBranch: false
+      approvalSource: fresh_closeout_approval_required
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -598,6 +611,11 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     docsOnly: true
+    queueSlimmingDiagnosticReadOnly: pass_archive_candidate_count_213
+    archiveCandidateCountBeforeTask: 213
+    archiveApplyExecuted: false
+    archiveIndexUpdateExecuted: false
+    archiveExecutionBlockedByScope: true
     tddRedObserved: not_applicable
     focusedUnitTests: blocked_by_task_scope
     mechanismScriptSmoke: not_applicable
@@ -605,9 +623,9 @@ currentTask:
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
     databaseWriteExecuted: false
-    routeSmokeExecuted: true
+    routeSmokeExecuted: false
     browserSmokeExecuted: false
-    browserSmokeResult: not_applicable_closeout_only
+    browserSmokeResult: blocked_by_task_scope
     providerCallExecuted: false
     providerCallCount: 0
     providerRetryCount: 0
@@ -620,14 +638,30 @@ currentTask:
     formalPublishCallCount: 0
     studentVisibleContentExecuted: false
     finalPassClaimed: false
-    prettierScoped: pass_pre_merge
-    gitDiffCheck: pass_pre_merge
-    lint: pass_pre_merge
-    typecheck: pass_pre_merge
-    moduleRunV2PreCommitHardening: pass_pre_merge
-    projectStatusDiagnostic: idle_no_pending_task_after_closeout_state_update
-    moduleRunV2PrePushReadiness: pending_after_master_merge
-  nextRecommendedTask: null
+    prettierScoped: pass
+    gitDiffCheck: pass
+    lint: not_applicable_docs_state_only
+    typecheck: not_applicable_docs_state_only
+    moduleRunV2PreCommitHardening: pass
+    projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_214
+    moduleRunV2PrePushReadiness: not_requested
+  diagnosticsBaseline:
+    projectStatusDecision: no_pending_task
+    nextExecutableTask: none
+    queueSlimmingDecision: slimming_candidates
+    activeQueueTaskCount: 266
+    activeQueueNonTerminalCount: 44
+    activeQueueTerminalCount: 222
+    archiveCandidateCount: 213
+    selfRepairCandidateCount: 0
+    highRiskRepairBlockedCount: 61
+    firstArchiveCandidates:
+      - content-admin-review-ux-design-traceability-package-2026-06-27
+      - content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
+      - content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+      - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+      - content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+  nextRecommendedTask: active-queue-slimming-archive-apply-with-index-approval
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27

@@ -2807,6 +2807,180 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: active-queue-slimming-archive-docs-state-2026-06-27
+    title: Active queue slimming archive docs-state scope-constrained execution
+    phase: active-queue-slimming-archive-docs-state-2026-06-27
+    sourceStory: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
+    dependencies: []
+    taskKind: mechanism_docs_state_queue_archive
+    moduleRunVersion: 2
+    executionProfile: mechanism_docs_state_queue_archive_scope_constrained_no_archive_index_write
+    evidenceMode: redacted_diagnostic_summary_only
+    validationPolicy: docs_state_prettier_diff_precommit_diagnostic
+    queueSelectionMode: current_user_directed_docs_state_queue_slimming_archive_2026_06_27
+    targetClosureItem: active queue terminal task archive readiness under constrained approved write surface
+    behaviorBoundary: docs_state::queue_slimming_archive_inventory_only_no_task_move_no_archive_index_write
+    requiredOutcome: >-
+      Register and execute the active queue slimming/archive docs-state task package, record the terminal candidate
+      baseline, and stop before moving task entries because the current approval excludes the archive file and
+      task-history index required for traceability-preserving archival.
+    status: closed
+    result: closed_scope_constrained_archive_readiness_actual_movement_blocked
+    approvedAt: "2026-06-27T01:51:41-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
+    claimedAt: "2026-06-27T01:51:41-07:00"
+    plannedAt: "2026-06-27T01:52:00-07:00"
+    validatedAt: "2026-06-27T01:54:54-07:00"
+    reviewedAt: "2026-06-27T01:54:54-07:00"
+    closedAt: "2026-06-27T01:54:54-07:00"
+    capabilities:
+      docsStateEvidenceAudit: approved
+      queueSlimmingDiagnostic: approved
+      archiveCandidateInventory: approved
+      localCommit: approved
+      archiveTaskMovement: blocked_by_scope
+      archiveFileWrite: blocked_by_scope
+      taskHistoryIndexWrite: blocked_by_scope
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      mergeToMaster: blocked_requires_fresh_closeout_approval
+      pushOriginMaster: blocked_requires_fresh_closeout_approval
+      branchCleanup: blocked_requires_fresh_closeout_approval
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-docs-state.md
+      - docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-docs-state.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-docs-state.md
+      - docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-docs-state.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/active-queue-slimming-plan.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - active_queue_slimming
+      - archive_candidate_baseline
+      - scope_constrained_archive_execution
+      - no_runtime_claim
+      - no_final_pass
+    archiveBoundary:
+      archiveApplyExecuted: false
+      archiveFileWriteApproved: false
+      taskHistoryIndexWriteApproved: false
+      terminalTaskBlocksMoved: 0
+      reason: >-
+        The active queue slimming SOP requires terminal task blocks to be moved into a dated archive file and indexed.
+        The current user-approved write surface excludes both required traceability targets.
+      requiredFollowUpApproval:
+        - docs/04-agent-system/state/archive/**
+        - docs/04-agent-system/state/task-history-index.yaml
+    diagnosticsBaseline:
+      projectStatusDecision: no_pending_task
+      nextExecutableTask: none
+      queueSlimmingDecision: slimming_candidates
+      activeQueueTaskCount: 266
+      activeQueueNonTerminalCount: 44
+      activeQueueTerminalCount: 222
+      terminalRecoveryWindow: 8
+      archiveCandidateCount: 213
+      selfRepairCandidateCount: 0
+      highRiskRepairBlockedCount: 61
+      firstArchiveCandidates:
+        - content-admin-review-ux-design-traceability-package-2026-06-27
+        - content-admin-review-single-result-traceability-source-tdd-approval-2026-06-27
+        - content-admin-review-ui-implementation-local-validation-approval-2026-06-27
+        - content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
+        - content-admin-review-batch-selection-source-contract-tdd-approval-2026-06-27
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-docs-state.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-docs-state.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-docs-state.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-slimming-archive-docs-state-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-slimming-archive-docs-state.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-slimming-archive-docs-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-slimming-archive-docs-state.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-slimming-archive-docs-state.md
+    branch: codex/active-queue-slimming-archive-20260627
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_active_queue_slimming_archive_docs_state_approval_2026_06_27
+      mergeToMaster:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required
+    blockedWithoutFreshApproval:
+      - archive_file_write_or_task_history_index_write
+      - task_queue_entry_delete_or_move
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
   - id: org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
     title: Organization AI generation owned draft boundary and local contract loop approval
     phase: org-ai-generation-owned-draft-boundary-and-local-contract-loop-approval-2026-06-26
