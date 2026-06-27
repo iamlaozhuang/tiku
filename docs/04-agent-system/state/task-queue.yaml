@@ -2929,6 +2929,273 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+    title: Layer 3 provider smoke local dev redacted execution
+    phase: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+    sourceStory: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+    dependencies:
+      - layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+      - layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
+    taskPlanPolicy: required_before_runtime_execution
+    humanApprovalBoundary: >-
+      Current user fresh-approves a centralized serial high-risk package. This task may execute exactly one local dev
+      redacted Provider smoke using the preferred `alibaba` / `qwen-plus` path and credential alias `ALIBABA_API_KEY`.
+      It may use the existing `scripts/ai/run-personal-ai-provider-smoke.mjs` command without modifying it. Caps are one
+      Provider call, zero retry, max output tokens 64, timeout 30000ms, and spend stop limit USD 0.05. Provider
+      configuration changes, second calls, retry loops, Cost Calibration, DB, browser/e2e, staging/prod/deploy/payment,
+      OCR/export, PR, force push, release readiness, and final Pass remain blocked.
+    targetClosureItem: One local dev redacted Provider smoke attempt or blocked evidence
+    behaviorBoundary: high_risk::provider_smoke_local_dev_one_call_redacted_no_retry_no_env_file_no_cost_no_final_pass
+    executionProfile: layer_3_provider_smoke_local_dev_redacted_execution
+    evidenceMode: redacted_provider_smoke_envelope_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: high_risk_provider_smoke_execution
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_missing_provider_env_no_provider_call
+    approvedAt: "2026-06-27T08:07:01-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_central_serial_high_risk_package_approval_2026_06_27_plus_current_user_blocked_evidence_closeout_approval_2026_06_27
+    claimedAt: "2026-06-27T08:07:01-07:00"
+    plannedAt: "2026-06-27T08:07:01-07:00"
+    implementedAt: "2026-06-27T08:10:10-07:00"
+    validatedAt: "2026-06-27T08:10:10-07:00"
+    reviewedAt: "2026-06-27T08:10:10-07:00"
+    closedAt: "2026-06-27T08:16:00-07:00"
+    branch: codex/layer-3-provider-smoke-execution-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      taskQueueRegistration: approved
+      localProviderSmokeExecution: approved_one_call_only
+      processEnvAliasRead: approved_no_value_output
+      envFileRead: blocked
+      providerCredentialValueOutputOrCopy: blocked
+      providerConfiguration: blocked
+      providerRetry: blocked
+      providerPayloadInspection: blocked
+      providerSecondCall: blocked
+      costCalibrationExecution: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      archiveIndexMovement: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution-approval-package.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - high_risk_provider_call_gate
+      - local_dev_provider_smoke
+      - redacted_evidence_only
+      - one_call_cap
+      - zero_retry_cap
+      - no_env_file_read
+      - no_provider_configuration_change
+      - no_cost_calibration_execution
+      - no_database_connection
+      - no_browser_runtime
+      - no_source_test_change
+      - no_archive_index_movement
+      - no_release_readiness
+      - no_final_pass
+    providerSmokeExecution:
+      providerCandidateKey: preferred_alibaba_qwen_plus
+      providerLabel: alibaba
+      modelLabel: qwen-plus
+      credentialAlias: ALIBABA_API_KEY
+      credentialAliasPresencePrecheck: absent_in_current_process_environment_no_value_output
+      executionResult: blocked_missing_provider_env_no_provider_call
+      providerCallExecuted: false
+      requestCount: 0
+      retryCount: 0
+      redactionStatus: passed
+      stopCondition: missing_credential_alias_in_process_environment
+      envFileReadByCodex: false
+      commandScript: scripts/ai/run-personal-ai-provider-smoke.mjs
+      commandMode: execute
+      approvalGateEnvKey: TIKU_PROVIDER_SMOKE_APPROVED
+      approvalGateEnvValueRecorded: redacted_boolean_only
+      callCap: 1
+      retryCap: 0
+      providerTargetCount: 1
+      maxOutputTokensApprovedCap: 64
+      maxOutputTokensScriptCap: 8
+      timeoutMs: 30000
+      maxSpendUsdStopLimit: 0.05
+      costCalibrationGateRemainsBlocked: true
+      expectedBlockedIfMissingAlias: true
+    evidenceRedaction:
+      allowedFields:
+        - provider_label
+        - model_label
+        - pass_fail_blocked
+        - request_count
+        - provider_call_executed_boolean
+        - retry_count
+        - cap_status
+        - redaction_status
+        - failure_category
+        - stop_condition
+        - forbidden_action_checklist
+      forbiddenFields:
+        - env_file_content
+        - secret_value
+        - token_value
+        - db_url
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - provider_payload
+        - raw_generated_ai_content
+        - full_paper_material_content
+        - db_row
+        - sql_output
+        - screenshot_trace_cookie_localstorage
+    stopConditions:
+      - missing_credential_alias_in_process_environment
+      - command_returns_blocked_or_fail
+      - need_to_open_or_output_env_file
+      - need_to_change_provider_configuration
+      - need_to_retry_after_failure
+      - need_second_provider_call_or_second_target
+      - cap_would_be_exceeded
+      - evidence_would_include_raw_prompt_response_payload_or_secret
+      - cost_measurement_or_pricing_decision_needed
+      - validation_or_mechanism_gate_failure
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_blocked_evidence_closeout_approval_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_blocked_evidence_closeout_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_blocked_evidence_closeout_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_blocked_evidence_closeout_approval_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-provider-smoke-local-dev-redacted-execution.md
+    validationSummary:
+      taskPlanPrepared: true
+      taskQueueRegisteredBeforeExecution: true
+      providerSmokeCommandExecuted: true
+      providerSmokeResult: blocked_missing_provider_env_no_provider_call
+      providerCallExecuted: false
+      providerCallCount: 0
+      providerRetryCount: 0
+      envFileReadByCodex: false
+      providerCredentialValueOutput: false
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      ocrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_blocked_record
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_blocked_evidence_closeout
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - database_connection_read_write_seed_migration_rollback
+      - env_file_open_output_copy_record_or_commit
+      - provider_credential_value_output
+      - provider_configuration
+      - provider_retry_second_call_or_payload_inspection
+      - cost_calibration_execution
+      - real_retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - active_queue_archive_or_index_movement
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
     phase: active-queue-archive-index-approval-package-2026-06-27
