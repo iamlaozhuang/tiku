@@ -1415,6 +1415,259 @@ tasks:
       - pr_or_force_push
       - release_readiness_or_final_pass
 
+  - id: active-queue-archive-index-approval-package-2026-06-27
+    title: Active queue archive index approval package
+    phase: active-queue-archive-index-approval-package-2026-06-27
+    sourceStory: current_goal_three_layer_acceptance_high_risk_package_cleanup_2026_06_27
+    dependencies:
+      - content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+      - active-queue-terminal-archive-cleanup-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      This task is docs/state-only and prepares a future archive/index execution approval package. It may update only
+      project state, task queue, and task plan/evidence/audit/acceptance documents. It must not write
+      docs/04-agent-system/state/archive/** or docs/04-agent-system/state/task-history-index.yaml, move queue task
+      blocks, edit source/tests/e2e/schema/migration/seed/package/lockfiles/.env*, run browser/dev-server/e2e, connect
+      to DB, read credentials, call Providers, execute Cost Calibration, perform runtime mutation, formal publish,
+      student-visible runtime, staging/prod/deploy/payment external-service work, OCR/export, PR, force push, release
+      readiness, or final Pass.
+    targetClosureItem: Future active queue archive/index execution approval package
+    behaviorBoundary: docs_state::archive_index_approval_package_no_archive_move_no_runtime_no_final_pass
+    executionProfile: docs_state_archive_index_approval_package
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_queue_slimming_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_approval_package
+    moduleRunVersion: 2
+    status: closed
+    result: pass_archive_index_approval_package_prepared_movement_blocked
+    approvedAt: "2026-06-27T06:25:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    claimedAt: "2026-06-27T06:25:00-07:00"
+    plannedAt: "2026-06-27T06:25:00-07:00"
+    implementedAt: "2026-06-27T06:25:00-07:00"
+    validatedAt: "2026-06-27T06:25:00-07:00"
+    reviewedAt: "2026-06-27T06:25:00-07:00"
+    closedAt: "2026-06-27T06:25:00-07:00"
+    branch: codex/active-queue-archive-approval-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      approvalPackageAuthoring: approved
+      queueSlimmingDiagnostic: approved
+      taskQueueRegistration: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      archiveIndexMovement: blocked
+      taskHistoryIndexWrite: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseReadWriteSeedMigrationRollback: blocked
+      envSecretRead: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-approval-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/01-requirements/00-index.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
+      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - archive_index_approval_package
+      - high_risk_package_cleanup_preparation
+      - queue_slimming_preparation
+      - no_archive_index_movement
+      - no_source_test_change
+      - no_browser_runtime
+      - no_database_connection
+      - no_provider_call
+      - no_mutation_execution
+      - no_final_pass
+    archiveIndexApprovalPackage:
+      proposedExecutionTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+      executionStatus: blocked_pending_fresh_archive_index_approval
+      observedDiagnosticBeforeTask:
+        activeQueueTaskCount: 63
+        activeQueueNonTerminalCount: 28
+        activeQueueTerminalCount: 35
+        terminalRecoveryWindow: 8
+        archiveCandidateCount: 26
+        highRiskRepairBlockedCount: 0
+      projectedAfterTask:
+        activeQueueTaskCount: 64
+        activeQueueNonTerminalCount: 28
+        activeQueueTerminalCount: 36
+        projectedArchiveCandidateCount: 27
+      archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+      candidateTaskIds:
+        - content-admin-review-adoption-command-contract-approval-package-2026-06-27
+        - content-admin-review-adoption-command-contract-tdd-2026-06-27
+        - layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
+        - content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+        - content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+        - layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+        - content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+        - layer-2-business-closure-evidence-rollup-2026-06-27
+        - high-risk-approval-package-consolidation-retirement-2026-06-27
+        - three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+        - active-queue-terminal-archive-cleanup-2026-06-27
+        - ap-01-qwen-one-request-post-console-remediation-retry-approval
+        - ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+        - ap-01-qwen-openai-compatible-one-request-isolation-smoke
+        - ap-01-qwen-provider-smoke-execution-base-url-ready
+        - ap-01-provider-smoke-execution-qwen-env-local-ready
+        - ap-01-provider-smoke-execution
+        - ap-02-ops-auth-quota-cost-calibration-approval-package
+        - ap-03-provider-staging-execution-approval-package
+        - ap-04-standard-ai-generation-scope-change-approval-package
+        - ap-05-standard-org-self-service-scope-change-approval-package
+        - ap-06-online-payment-approval-package
+        - ap-07-ocr-auto-import-approval-package
+        - ap-08-org-data-export-approval-package
+        - ap-09-runtime-capability-list-approval-package
+        - ap-10-current-checkpoint-audit-repair-approval-package
+        - ap-11-source-governance-change-approval-package
+      blockedDuringPackage:
+        - archive_file_write
+        - task_history_index_write
+        - task_block_movement
+        - source_test_e2e_schema_migration_seed_dependency_package_lockfile_env_secret
+        - browser_dev_server_e2e_runtime
+        - database_connection_or_read_write
+        - provider_call_or_configuration
+        - cost_calibration
+        - formal_publish_or_student_visible_runtime
+        - staging_prod_deploy_payment_external_service
+        - ocr_export
+        - pr_force_push_release_readiness_final_pass
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-approval-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-approval-package.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-archive-index-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-archive-index-approval-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-archive-index-approval-package-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-approval-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-approval-package.md
+    validationSummary:
+      taskPlanPrepared: true
+      approvalPackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      archiveIndexMovementExecuted: false
+      taskHistoryIndexWriteExecuted: false
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      envSecretRead: false
+      providerCallOrCredentialReadExecuted: false
+      costCalibrationExecuted: false
+      formalPublishExecuted: false
+      studentVisibleRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      paymentExternalServiceTouched: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
+      activeQueueNonTerminalCountAfterTask: 28
+      archiveCandidateCountAfterTask: 27
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      queueSlimmingDiagnostic: pass_slimming_candidates_archive_candidate_count_27
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+    blockedWithoutFreshApproval:
+      - active_queue_archive_or_index_movement
+      - task_history_index_write
+      - source_or_test_change
+      - browser_runtime_or_dev_server_or_e2e
+      - env_secret_or_dotenv_read
+      - database_connection_read_write_seed_migration_rollback
+      - provider_call_or_configuration
+      - cost_calibration
+      - real_retry_or_adoption_mutation
+      - formal_publish_or_student_visible_runtime
+      - staging_prod_deploy_payment_external_service
+      - ocr_execution_or_export_generation
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+
   - id: layer-2-business-closure-evidence-rollup-2026-06-27
     title: Layer 2 business closure evidence rollup
     phase: layer-2-business-closure-evidence-rollup-2026-06-27

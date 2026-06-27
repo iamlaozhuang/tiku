@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
-updatedAt: "2026-06-27T06:06:00-07:00"
+currentPhase: active-queue-archive-index-approval-package-2026-06-27
+updatedAt: "2026-06-27T06:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,28 +501,32 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
-  lastKnownOriginMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
+  lastKnownMasterSha: 9f3d94291c0626659ca05323a9cadb13f3725a0e
+  lastKnownOriginMasterSha: 9f3d94291c0626659ca05323a9cadb13f3725a0e
 currentTask:
-  id: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+  id: active-queue-archive-index-approval-package-2026-06-27
   status: closed
-  result: pass_local_postgres_route_smoke_approval_package_execution_blocked
-  claimedAt: "2026-06-27T06:01:58-07:00"
-  plannedAt: "2026-06-27T06:02:00-07:00"
-  implementedAt: "2026-06-27T06:06:00-07:00"
-  validatedAt: "2026-06-27T06:10:00-07:00"
-  reviewedAt: "2026-06-27T06:10:00-07:00"
-  closedAt: "2026-06-27T06:10:00-07:00"
-  sourceStory: layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+  result: pass_archive_index_approval_package_prepared_movement_blocked
+  claimedAt: "2026-06-27T06:25:00-07:00"
+  plannedAt: "2026-06-27T06:25:00-07:00"
+  implementedAt: "2026-06-27T06:25:00-07:00"
+  validatedAt: "2026-06-27T06:25:00-07:00"
+  reviewedAt: "2026-06-27T06:25:00-07:00"
+  closedAt: "2026-06-27T06:25:00-07:00"
+  sourceStory: current_goal_three_layer_acceptance_high_risk_package_cleanup_2026_06_27
   approvalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-admin-review-adoption-local-postgres-route-smoke-approval-package.md
-  branch: codex/content-admin-postgres-smoke-approval-20260627
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-approval-package.md
+  branch: codex/active-queue-archive-approval-20260627
   scope:
     docsStateEvidenceAudit: true
     approvalPackageAuthoring: true
+    queueSlimmingDiagnostic: true
+    archiveIndexApprovalPackage: true
+    archiveIndexMovement: false
+    taskHistoryIndexWrite: false
     localPostgresExecution: false
     sourceOrTestChange: false
     runtimeExecutedByThisTask: false
@@ -550,20 +554,23 @@ currentTask:
     studentVisibleContent: false
     stagingProdDeploy: false
     paymentExternalService: false
-    archiveIndexMovement: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    packageDecision: local_postgres_route_smoke_approval_package_prepared_execution_blocked
+    packageDecision: archive_index_approval_package_prepared_movement_blocked
     layer1Status: local_role_flow_complete_no_regression_claim_only
-    layer2StatusBeforeTask: stronger_partial_route_runtime_rejected_smoke_recorded_real_db_browser_provider_still_blocked
-    layer2StatusAfterTask: local_postgres_route_smoke_package_ready_execution_still_requires_fresh_approval
+    layer2StatusBeforeTask: local_postgres_route_smoke_package_ready_execution_still_requires_fresh_approval
+    layer2StatusAfterTask: unchanged_local_postgres_route_smoke_execution_still_requires_fresh_approval
     layer3Status: blocked_provider_cost_pre_release_gates
     activeQueueNonTerminalCountBeforeTask: 28
+    archiveCandidateCountBeforeTask: 26
+    projectedArchiveCandidateCountAfterTask: 27
+    futureArchiveApplyTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     localCommitApproved: true
     mergePushCleanupApproved: true
     mergePushCleanupApprovalSource: standingDocsStateFastLaneCloseoutApproval_2026_06_16_plus_current_user_goal_continuation_independent_branch_closeout_instruction_2026_06_27
     nextExecutionApprovalRequired: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    nextArchiveIndexApprovalRequired: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
     recommendedExecutionOption: rejected_lower_risk_first
     alternateExecutionOption: approved_higher_risk_requires_formal_draft_metadata_boundary
     prDecision: blocked
@@ -580,7 +587,7 @@ currentTask:
     costCalibrationDecision: blocked
     stagingProdDecision: blocked
     paymentExternalServiceDecision: blocked
-    archiveIndexDecision: blocked_requires_fresh_archive_index_approval
+    archiveIndexDecision: blocked_requires_fresh_archive_index_apply_approval
   closeoutPolicy:
     localCommit:
       approved: true
@@ -608,7 +615,10 @@ currentTask:
     acceptancePrepared: true
     docsOnly: true
     ssotReadListPrepared: true
+    archiveIndexMovementExecuted: false
+    taskHistoryIndexWriteExecuted: false
     activeQueueNonTerminalCountBeforeTask: 28
+    archiveCandidateCountBeforeTask: 26
     sourceOrTestChanged: false
     schemaMigrationExecuted: false
     liveDatabaseConnectionExecuted: false
@@ -627,7 +637,7 @@ currentTask:
     finalPassClaimed: false
     projectStatusDiagnostic: pass_idle_no_pending_task_after_closed_state
     activeQueueNonTerminalCountAfterTask: 28
-    archiveCandidateCountAfterTask: 26
+    archiveCandidateCountAfterTask: 27
     highRiskRepairBlockedCountAfterTask: 0
     prettierScoped: pass
     gitDiffCheck: pass
@@ -638,10 +648,10 @@ currentTask:
     pushOriginMaster: pending
     shortBranchCleanup: pending
   diagnosticsBaseline:
-    baselineMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
-    baselineOriginMasterSha: 1347369f68fbe0558171cf0348e3ae6ec86076d6
-    currentBranch: codex/content-admin-postgres-smoke-approval-20260627
-  nextRecommendedTask: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+    baselineMasterSha: 9f3d94291c0626659ca05323a9cadb13f3725a0e
+    baselineOriginMasterSha: 9f3d94291c0626659ca05323a9cadb13f3725a0e
+    currentBranch: codex/active-queue-archive-approval-20260627
+  nextRecommendedTask: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
 contentAdminReviewBatchRetryDiffHistoryEnhancementPackage20260627:
   taskId: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
   phase: content-admin-review-batch-retry-diff-history-enhancement-package-2026-06-27
