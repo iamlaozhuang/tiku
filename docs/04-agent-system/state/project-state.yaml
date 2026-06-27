@@ -505,13 +505,14 @@ repository:
   lastKnownOriginMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
 currentTask:
   id: active-queue-terminal-archive-cleanup-2026-06-27
-  status: ready_for_closeout
-  result: pass_active_queue_terminal_archive_cleanup_local_gates_passed_pending_fresh_closeout
+  status: closed
+  result: pass_active_queue_terminal_archive_cleanup_ff_merged_master_gates_passed_push_cleanup_approved
   claimedAt: "2026-06-27T03:11:41-07:00"
   plannedAt: "2026-06-27T03:11:41-07:00"
   implementedAt: "2026-06-27T03:15:36-07:00"
   validatedAt: "2026-06-27T03:17:27-07:00"
   reviewedAt: "2026-06-27T03:17:27-07:00"
+  closedAt: "2026-06-27T03:22:35-07:00"
   sourceStory: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
   approvalSource: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
   planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-terminal-archive-cleanup.md
@@ -566,8 +567,8 @@ currentTask:
       - high-risk-blocked-task-packet-metadata-repair-2026-06-27
       - stopped-automation-hygiene-cleanup-2026-06-27
     localCommitApproved: true
-    mergePushCleanupApproved: false
-    mergePushCleanupApprovalSource: fresh_closeout_approval_required
+    mergePushCleanupApproved: true
+    mergePushCleanupApprovalSource: current_user_merge_push_delete_short_branch_approval_2026_06_27
     prDecision: blocked
     forcePushDecision: blocked
     releaseReadinessDecision: blocked
@@ -583,16 +584,16 @@ currentTask:
       approved: true
       approvalSource: current_user_active_queue_terminal_archive_cleanup_approval_2026_06_27
     fastForwardMerge:
-      approved: false
+      approved: true
       targetBranch: master
-      requiredApproval: fresh_closeout_approval_required
+      approvalSource: current_user_merge_push_delete_short_branch_approval_2026_06_27
     push:
-      approved: false
+      approved: true
       target: origin/master
-      requiredApproval: fresh_closeout_approval_required
+      approvalSource: current_user_merge_push_delete_short_branch_approval_2026_06_27
     cleanup:
-      deleteShortBranch: false
-      requiredApproval: fresh_closeout_approval_required
+      deleteShortBranch: true
+      approvalSource: current_user_merge_push_delete_short_branch_approval_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -631,13 +632,18 @@ currentTask:
     studentVisibleContentExecuted: false
     finalPassClaimed: false
     queueSlimmingDiagnostic: pass_archive_candidate_count_0
-    projectStatusDiagnostic: pass_current_task_active_ready_for_closeout
+    projectStatusDiagnostic: pass_idle_no_pending_task
     prettierScoped: pass
     gitDiffCheck: pass
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    masterCloseout:
+      ffOnlyMerge: pass_1ea612a38f1bcec316fe3b639770c9fa2f871abe
+      pushOriginMaster: approved_after_pre_push_readiness
+      deleteShortBranch: approved_after_push_success
   diagnosticsBaseline:
     baselineMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d
     baselineOriginMasterSha: 7e53b58c8bba1285e149ae48aafb0d03291ab29d

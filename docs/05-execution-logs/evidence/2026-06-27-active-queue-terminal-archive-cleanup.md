@@ -57,6 +57,19 @@ Cost Calibration Gate remains blocked.
 - `high-risk-blocked-task-packet-metadata-repair-2026-06-27`: active queue exact task entry count `0`, archive exact task entry count `1`, history index exact entry count `1`.
 - `stopped-automation-hygiene-cleanup-2026-06-27`: active queue exact task entry count `0`, archive exact task entry count `1`, history index exact entry count `1`.
 
+## Closeout Approval
+
+- Fresh closeout approval: `current_user_merge_push_delete_short_branch_approval_2026_06_27`
+- Approved actions: ff-only merge to `master`, run necessary gates on `master`, push `origin/master`, delete merged short branch.
+- PR, force push, release readiness, final Pass, browser, DB, Provider, credential, dependency, source, schema, migration, seed, deploy, and external service actions remain blocked.
+
+## Master Closeout
+
+- ff-only merge: `pass_1ea612a38f1bcec316fe3b639770c9fa2f871abe`
+- Master closeout evidence/status update: pending local closeout commit after gates
+- Push target: `origin/master`
+- Short branch cleanup target: `codex/active-queue-terminal-archive-cleanup-20260627`
+
 ## Validation Transcript
 
 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`
@@ -114,3 +127,15 @@ Scoped prettier check:
 
 - Exit code: 0
 - `module-closeout readiness passed`
+
+Master closeout gates after ff-only merge:
+
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1`: exit code 0, `queueSlimmingDecision: clean`, `archiveCandidateCount: 0`, `highRiskRepairBlockedCount: 0`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`: exit code 0, `projectStatusDecision: idle_no_pending_task`.
+- Scoped prettier check: exit code 0, `All matched files use Prettier code style!`.
+- `git diff --check`: exit code 0.
+- `npm.cmd run lint`: exit code 0.
+- `npm.cmd run typecheck`: exit code 0.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-terminal-archive-cleanup-2026-06-27`: exit code 0, `pre-commit hardening passed`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-terminal-archive-cleanup-2026-06-27`: exit code 0, `module-closeout readiness passed`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-terminal-archive-cleanup-2026-06-27 -SkipRemoteAheadCheck`: exit code 0, `pre-push readiness passed`.

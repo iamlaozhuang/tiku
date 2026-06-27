@@ -21,4 +21,4 @@ Accepted.
 - Active queue recovery is clean for archive candidates.
 - Local validation gates have passed through pre-commit hardening.
 - Module closeout readiness passed.
-- Merge, push, and short-branch cleanup require fresh closeout approval.
+- Fresh closeout approval was granted for ff-only merge, `origin/master` push, and merged short-branch cleanup.

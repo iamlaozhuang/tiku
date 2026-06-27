@@ -35,3 +35,4 @@ APPROVE: No blocking findings.
 - The active queue diagnostic reports `archiveCandidateCount: 0`.
 - Scope remained docs-state and execution-log only.
 - Browser, DB, Provider, credential, dependency, PR, force push, release readiness, and final Pass actions were not performed.
+- Fresh closeout approval permits ff-only merge, push to `origin/master`, and deletion of the merged short branch only.
