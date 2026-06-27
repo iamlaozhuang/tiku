@@ -6133,11 +6133,17 @@ tasks:
     validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
     taskKind: docs_state_queue_cleanup
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_nonterminal_closeout_retirement_applied_high_risk_cleanup_ledger_registered_archive_apply
     approvedAt: "2026-06-27T10:10:52-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    claimedAt: "2026-06-27T11:19:48-07:00"
+    plannedAt: "2026-06-27T11:19:48-07:00"
+    implementedAt: "2026-06-27T11:19:48-07:00"
+    validatedAt: "2026-06-27T11:19:48-07:00"
+    reviewedAt: "2026-06-27T11:19:48-07:00"
+    closedAt: "2026-06-27T11:19:48-07:00"
     branch: codex/high-risk-nonterminal-cleanup-20260627
     capabilities:
       docsStateEvidenceAudit: approved
@@ -6263,6 +6269,375 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-nonterminal-closeout-retirement-apply.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-nonterminal-closeout-retirement-apply.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-nonterminal-closeout-retirement-apply.md
+    highRiskCleanupLedger:
+      sourceApprovalPackage: active-queue-nonterminal-closeout-triage-approval-package-2026-06-27
+      scope: current_goal_high_risk_packages_plus_registered_nonterminal_ready_for_closeout
+      statusOnly: true
+      archiveIndexMovementExecutedByThisTask: false
+      taskHistoryIndexWriteExecutedByThisTask: false
+      readyForCloseoutApply:
+        previousStatus: ready_for_closeout
+        newStatus: closed
+        cleanupDecision: retire
+        reasonCategory: historical_ready_for_closeout_with_existing_evidence_and_audit_references
+        appliedCount: 26
+      blockedRetained:
+        previousStatus: blocked
+        newStatus: blocked
+        cleanupDecision: keep
+        reasonCategory: explicit_triage_blocked_retention
+        retainedCount: 2
+        taskIds:
+          - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+          - acceptance-l5-standard-role-flow-run-2026-06-23
+      currentGoalHighRiskPackageDecisions:
+        - taskId: content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: superseded_by_local_postgres_test_owned_route_smoke_chain
+        - taskId: content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+          cleanupDecision: retire
+          reasonCategory: blocked_default_path_superseded_by_postgres_test_owned_execution
+        - taskId: content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: superseded_by_test_owned_target_setup_package
+        - taskId: content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+          cleanupDecision: retire
+          reasonCategory: blocked_no_formal_target_superseded_by_test_owned_target_execution
+        - taskId: content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: consumed_by_test_owned_target_setup_execution
+        - taskId: content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_layer_2_minimum_local_postgres_rejected_evidence
+        - taskId: layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: consumed_by_provider_smoke_execution_chain
+        - taskId: layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+          cleanupDecision: retire
+          reasonCategory: blocked_missing_env_process_alias_superseded_by_env_local_alias_retry
+        - taskId: layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+          cleanupDecision: retire
+          reasonCategory: blocked_provider_error_superseded_by_config_boundary_repair
+        - taskId: layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: consumed_by_error_code_diagnostic_and_config_boundary_repair
+        - taskId: layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+          cleanupDecision: retire
+          reasonCategory: blocked_401_diagnostic_superseded_by_openai_compatible_dashscope_repair
+        - taskId: layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_provider_smoke_pass_evidence
+        - taskId: layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_provider_rollup_evidence
+        - taskId: layer-3-cost-calibration-redacted-approval-package-2026-06-27
+          cleanupDecision: merge
+          reasonCategory: consumed_by_cost_calibration_execution
+        - taskId: layer-3-cost-calibration-redacted-execution-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_minimum_cost_calibration_pass_evidence
+        - taskId: layer-3-cost-calibration-redacted-rollup-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_cost_calibration_rollup_evidence
+        - taskId: layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+          cleanupDecision: keep
+          reasonCategory: canonical_staging_boundary_package
+        - taskId: layer-3-staging-pre-release-redacted-execution-2026-06-27
+          cleanupDecision: blocked
+          reasonCategory: true_blocked_gate_missing_concrete_isolated_staging_target
+        - taskId: layer-3-staging-pre-release-rollup-2026-06-27
+          cleanupDecision: blocked
+          reasonCategory: canonical_staging_blocked_rollup
+        - taskId: layer-3-payment-external-service-approval-package-2026-06-27
+          cleanupDecision: blocked
+          reasonCategory: future_execution_blocked_no_payment_external_service_execution
+        - taskId: layer-3-ocr-export-approval-package-2026-06-27
+          cleanupDecision: blocked
+          reasonCategory: future_execution_blocked_no_ocr_export_execution
+      successorArchiveIndexTask:
+        taskId: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+        status: registered_pending_separate_branch
+        archiveIndexMovementAllowedByThisTask: false
+      forbiddenActionChecklist:
+        envSecretRead: false
+        sourceOrTestChange: false
+        browserDevServerE2e: false
+        databaseConnectionOrMutation: false
+        providerCallOrConfiguration: false
+        costCalibrationExecution: false
+        stagingProdDeployPaymentExternalServiceOcrExport: false
+        archiveIndexMovement: false
+        releaseReadinessClaim: false
+        finalPassClaim: false
+    validationSummary:
+      taskPlanPrepared: true
+      cleanupLedgerApplied: true
+      readyForCloseoutStatusChangesApplied: 26
+      blockedTasksRetained: 2
+      successorArchiveIndexTaskRegistered: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      archiveIndexMovementExecuted: false
+      taskHistoryIndexWriteExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_next_archive_index_apply_dirty_worktree_advisory_only
+      activeQueueNonTerminalCountAfterTask: 3
+      archiveCandidateCountAfterTask: 75
+      highRiskRepairBlockedCountAfterTask: 0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
+
+  - id: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+    title: Active queue archive index apply after Layer 2 Postgres package
+    phase: active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+    sourceStory: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    dependencies:
+      - active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+      - active-queue-archive-index-approval-package-2026-06-27
+    taskPlanPolicy: required_before_archive_index_edit
+    humanApprovalBoundary: >-
+      Current user fresh-approved a serial high-risk cleanup package that includes this archive/index apply task. This
+      task may move only the registered candidate task blocks from active queue into
+      docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml and update
+      docs/04-agent-system/state/task-history-index.yaml. It may update project-state.yaml, task-queue.yaml, and this
+      task's task plan/evidence/audit/acceptance documents. It must not move unregistered tasks, delete source or
+      evidence, edit source/tests/e2e/schema/migration/seed/package/lockfiles/.env*, run browser/dev-server/e2e,
+      connect to DB, read credentials, call Providers, execute Cost Calibration, perform runtime mutation, formal
+      publish, student-visible runtime, staging/prod/deploy/payment external-service work, OCR/export, PR, force push,
+      release readiness, or final Pass.
+    targetClosureItem: Registered active queue archive/index movement only
+    behaviorBoundary: docs_state::archive_index_apply_registered_candidates_only_no_runtime_no_final_pass
+    executionProfile: docs_state_archive_index_apply
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_queue_slimming_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_archive_index_apply
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-27T10:10:52-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    branch: codex/active-queue-archive-index-apply-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      archiveIndexMovement: approved
+      taskHistoryIndexWrite: approved
+      activeQueueCandidateRemoval: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      unregisteredTaskMovement: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      envSecretRead: blocked
+      providerCall: blocked
+      providerCredentialRead: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      retryOrAdoptionMutation: blocked
+      formalPublish: blocked
+      studentVisibleRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+      - docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+      - docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    caps:
+      maxRegisteredTaskBlockMoves: 74
+      maxTaskHistoryIndexUpdates: 74
+      runtimeMutationsByThisTask: 0
+      providerCallsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      unregisteredTaskMoves: 0
+    archiveIndexApply:
+      archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+      historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+      candidateTaskIds:
+        - content-admin-review-adoption-command-contract-approval-package-2026-06-27
+        - content-admin-review-adoption-command-contract-tdd-2026-06-27
+        - layer-2-business-closure-evidence-rollup-refresh-after-command-contract-2026-06-27
+        - content-admin-review-adoption-local-route-smoke-approval-package-2026-06-27
+        - content-admin-review-adoption-local-route-smoke-execution-2026-06-27
+        - layer-2-business-closure-evidence-rollup-refresh-after-local-route-smoke-2026-06-27
+        - content-admin-review-adoption-local-postgres-route-smoke-approval-package-2026-06-27
+        - layer-2-business-closure-evidence-rollup-2026-06-27
+        - high-risk-approval-package-consolidation-retirement-2026-06-27
+        - three-layer-acceptance-minimal-closure-high-risk-approval-matrix-2026-06-27
+        - active-queue-terminal-archive-cleanup-2026-06-27
+        - ap-01-qwen-one-request-post-console-remediation-retry-approval
+        - ap-01-qwen-one-request-redacted-error-code-diagnostic-run
+        - ap-01-qwen-openai-compatible-one-request-isolation-smoke
+        - ap-01-qwen-provider-smoke-execution-base-url-ready
+        - ap-01-provider-smoke-execution-qwen-env-local-ready
+        - ap-01-provider-smoke-execution
+        - ap-02-ops-auth-quota-cost-calibration-approval-package
+        - ap-03-provider-staging-execution-approval-package
+        - ap-04-standard-ai-generation-scope-change-approval-package
+        - ap-05-standard-org-self-service-scope-change-approval-package
+        - ap-06-online-payment-approval-package
+        - ap-07-ocr-auto-import-approval-package
+        - ap-08-org-data-export-approval-package
+        - ap-09-runtime-capability-list-approval-package
+        - ap-10-current-checkpoint-audit-repair-approval-package
+        - ap-11-source-governance-change-approval-package
+        - content-admin-review-adoption-local-postgres-route-smoke-execution-2026-06-27
+        - content-admin-review-adoption-local-postgres-test-owned-target-setup-approval-package-2026-06-27
+        - content-admin-review-adoption-local-postgres-test-owned-target-setup-execution-2026-06-27
+        - layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
+        - layer-3-provider-cost-pre-release-approval-matrix-refresh-after-layer-2-local-postgres-minimum-2026-06-27
+        - layer-3-provider-smoke-local-dev-redacted-execution-approval-package-2026-06-27
+        - layer-3-provider-smoke-local-dev-redacted-execution-2026-06-27
+        - layer-3-provider-smoke-local-dev-redacted-execution-retry-env-local-alias-loader-2026-06-27
+        - layer-3-provider-smoke-local-dev-redacted-execution-provider-error-follow-up-approval-package-2026-06-27
+        - layer-3-provider-smoke-redacted-error-code-diagnostic-execution-2026-06-27
+        - layer-3-provider-smoke-openai-compatible-dashscope-config-boundary-repair-retry-2026-06-27
+        - layer-3-provider-smoke-rollup-after-openai-compatible-dashscope-repair-2026-06-27
+        - layer-3-cost-calibration-redacted-approval-package-2026-06-27
+        - layer-3-cost-calibration-redacted-execution-2026-06-27
+        - layer-3-cost-calibration-redacted-rollup-2026-06-27
+        - layer-3-staging-prod-deploy-pre-release-approval-package-2026-06-27
+        - layer-3-staging-pre-release-redacted-execution-2026-06-27
+        - layer-3-staging-pre-release-rollup-2026-06-27
+        - layer-3-payment-external-service-approval-package-2026-06-27
+        - layer-3-ocr-export-approval-package-2026-06-27
+        - active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+        - clarify-student-subject-and-paper-count-copy
+        - recheck-adr-006-ai-sdk-baseline
+        - decide-content-admin-ai-generation-scope
+        - decide-org-auth-scope-product-model
+        - decide-paper-count-and-question-type-policy
+        - plan-admin-experience-gap-closures
+        - plan-org-auth-implementation-split
+        - plan-advanced-enterprise-training-path
+        - record-org-auth-scope-child-table-decision
+        - record-content-admin-ai-human-review-decision
+        - record-content-admin-ai-storage-model-decision
+        - record-content-admin-ai-adoption-boundary-decision
+        - record-content-admin-ai-log-redaction-decision
+        - record-content-admin-ai-provider-approval-package-decision
+        - record-content-admin-ai-provider-baseline-decision
+        - record-paper-count-alias-policy-decision
+        - record-paper-question-type-strategy-decision
+        - record-paper-performance-acceptance-decision
+        - record-admin-experience-gap-sequencing-decision
+        - record-org-auth-contract-security-merge-decision
+        - record-enterprise-training-admin-first-decision
+        - org-auth-scope-contract-and-security-preflight
+        - org-auth-schema-approval-package
+        - org-auth-schema-implementation-plan
+        - mistake-book-cookie-session-contract-repair
+        - requirement-fulfillment-role-experience-review-audit-closeout
+      blockedTaskIdsToRetain:
+        - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+        - acceptance-l5-standard-role-flow-run-2026-06-23
+    redaction:
+      evidenceAllowedFields:
+        - taskId
+        - movedTaskCount
+        - indexUpdateCount
+        - skippedTaskCount
+        - passFailBlocked
+        - capStatus
+        - redactionStatus
+        - forbiddenActionChecklist
+      forbiddenEvidence:
+        - env_file_content
+        - secret
+        - token
+        - database_url
+        - provider_credential
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - raw_provider_payload
+        - raw_generated_ai_content
+        - full_paper_or_material_content
+        - raw_payment_payload
+        - raw_ocr_output
+        - raw_export_file
+        - raw_db_row
+        - screenshot
+        - trace
+        - cookie
+        - local_storage
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId active-queue-archive-index-apply-after-layer-2-postgres-package-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_unattended_serial_high_risk_package_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-active-queue-archive-index-apply-after-layer-2-postgres-package.md
 
   - id: active-queue-archive-index-approval-package-2026-06-27
     title: Active queue archive index approval package
@@ -7545,8 +7920,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: implementation
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_student_home_subject_and_paper_count_copy_local_validation
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T09:45:00-07:00"
     validatedAt: "2026-06-21T09:55:00-07:00"
     branch: codex/clarify-student-home-copy
@@ -7618,8 +7997,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: read_only_audit
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_adr_006_ai_sdk_baseline_freshness_recheck
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T10:05:00-07:00"
     validatedAt: "2026-06-21T10:10:00-07:00"
     branch: codex/recheck-adr-006-ai-sdk-baseline
@@ -7690,8 +8073,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_generation_scope_decision_package
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T10:20:00-07:00"
     validatedAt: "2026-06-21T10:25:00-07:00"
     branch: codex/decide-content-admin-ai-generation-scope
@@ -7761,8 +8148,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_scope_product_decision_package
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T10:30:00-07:00"
     validatedAt: "2026-06-21T10:35:00-07:00"
     branch: codex/decide-org-auth-scope-product-model
@@ -7832,8 +8223,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: product_decision
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_paper_count_and_question_type_policy_package
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T10:40:00-07:00"
     validatedAt: "2026-06-21T10:45:00-07:00"
     branch: codex/decide-paper-count-question-type-policy
@@ -7902,8 +8297,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: implementation_split_plan
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_admin_experience_gap_closure_split_plan
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T10:50:00-07:00"
     validatedAt: "2026-06-21T10:55:00-07:00"
     branch: codex/plan-admin-experience-gap-closures
@@ -7972,8 +8371,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: implementation_split_plan
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_implementation_split_plan
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T11:00:00-07:00"
     validatedAt: "2026-06-21T11:05:00-07:00"
     branch: codex/plan-org-auth-implementation-split
@@ -8043,8 +8446,12 @@ tasks:
     queueSelectionMode: user_directed_serial_discovered_issue_batch
     taskKind: blocked_closure_plan
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_advanced_enterprise_training_blocked_closure_plan
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T11:10:00-07:00"
     validatedAt: "2026-06-21T11:15:00-07:00"
     branch: codex/plan-advanced-enterprise-training-path
@@ -8115,8 +8522,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: architecture_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_scope_child_table_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:26:12-07:00"
     validatedAt: "2026-06-21T15:29:43-07:00"
     branch: codex/record-org-auth-scope-child-table-decision
@@ -8192,8 +8603,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_architecture_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_human_review_gate_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:34:10-07:00"
     validatedAt: "2026-06-21T15:35:51-07:00"
     branch: codex/record-content-admin-ai-human-review-decision
@@ -8267,8 +8682,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_architecture_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_storage_model_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:41:36-07:00"
     validatedAt: "2026-06-21T16:43:17-07:00"
     branch: codex/content-admin-ai-storage-model-decision
@@ -8342,8 +8761,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_architecture_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_adoption_boundary_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:46:31-07:00"
     validatedAt: "2026-06-21T16:48:09-07:00"
     branch: codex/content-admin-ai-adoption-boundary-decision
@@ -8416,8 +8839,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_security_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_log_redaction_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:51:11-07:00"
     validatedAt: "2026-06-21T16:52:48-07:00"
     branch: codex/content-admin-ai-log-redaction-decision
@@ -8491,8 +8918,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_security_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_provider_approval_package_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:58:10-07:00"
     validatedAt: "2026-06-21T16:59:59-07:00"
     branch: codex/content-ai-provider-approval-package-decision
@@ -8567,8 +8998,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_security_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_content_admin_ai_provider_baseline_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T17:05:00-07:00"
     validatedAt: "2026-06-21T17:06:41-07:00"
     branch: codex/content-ai-provider-baseline-decision
@@ -8642,8 +9077,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_policy_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_paper_count_alias_policy_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:38:50-07:00"
     validatedAt: "2026-06-21T15:40:03-07:00"
     branch: codex/record-paper-count-alias-policy-decision
@@ -8717,8 +9156,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_policy_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_paper_question_type_strategy_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:29:34-07:00"
     validatedAt: "2026-06-21T16:31:36-07:00"
     branch: codex/paper-question-type-strategy-decision
@@ -8791,8 +9234,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_acceptance_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_paper_performance_acceptance_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:36:34-07:00"
     validatedAt: "2026-06-21T16:38:05-07:00"
     branch: codex/paper-performance-acceptance-decision
@@ -8866,8 +9313,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_implementation_sequence_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_admin_experience_gap_sequencing_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:43:34-07:00"
     validatedAt: "2026-06-21T15:44:52-07:00"
     branch: codex/record-admin-experience-gap-sequencing-decision
@@ -8941,8 +9392,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: architecture_sequence_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_contract_security_merge_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:49:45-07:00"
     validatedAt: "2026-06-21T15:51:20-07:00"
     branch: codex/record-org-auth-contract-security-merge-decision
@@ -9019,8 +9474,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval_record
     taskKind: product_implementation_sequence_decision_record
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_enterprise_training_admin_first_decision_record
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T15:54:24-07:00"
     validatedAt: "2026-06-21T15:56:41-07:00"
     branch: codex/record-enterprise-training-admin-first-decision
@@ -9095,8 +9554,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval
     taskKind: contract_security_preflight_package
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_scope_contract_security_preflight_package
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:04:42-07:00"
     validatedAt: "2026-06-21T16:07:02-07:00"
     branch: codex/org-auth-contract-security-preflight
@@ -9173,8 +9636,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval
     taskKind: schema_approval_package
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_schema_approval_package
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:10:22-07:00"
     validatedAt: "2026-06-21T16:12:16-07:00"
     branch: codex/org-auth-schema-approval-package
@@ -9252,8 +9719,12 @@ tasks:
     queueSelectionMode: user_directed_followup_approval
     taskKind: schema_implementation_plan
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_org_auth_schema_implementation_plan
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     claimedAt: "2026-06-21T16:18:02-07:00"
     validatedAt: "2026-06-21T16:20:15-07:00"
     branch: codex/org-auth-schema-implementation-plan
@@ -9330,8 +9801,12 @@ tasks:
     taskKind: implementation_tdd
     moduleRunVersion: 2
     seededImplementationTask: true
-    status: ready_for_closeout
+    status: closed
     result: pass_mistake_book_cookie_session_contract_repair_local_validation
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T09:01:00-07:00"
     validatedAt: "2026-06-21T09:06:54-07:00"
@@ -9432,8 +9907,12 @@ tasks:
     queueSelectionMode: user_directed_traceability_audit_closeout
     taskKind: docs_traceability_audit
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: ready_scope_registered_for_five_static_audit_documents
+    closeoutAppliedAt: "2026-06-27T11:19:48-07:00"
+    closeoutAppliedByTask: active-queue-nonterminal-closeout-retirement-apply-2026-06-27
+    closeoutDecision: retired_historical_ready_for_closeout_record_only_no_runtime_claim
+    closeoutEvidenceMode: existing_evidence_and_audit_references_verified_no_runtime_execution
     freshApprovalStatus: current_user_fresh_approval_materialized
     claimedAt: "2026-06-21T08:46:58-07:00"
     validatedAt: "2026-06-21T08:46:58-07:00"
