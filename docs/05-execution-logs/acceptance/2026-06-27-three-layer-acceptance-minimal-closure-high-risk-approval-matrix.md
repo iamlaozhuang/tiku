@@ -211,3 +211,14 @@ payment, external services, release readiness, or final Pass.
 - No Provider call, Provider credential read, Provider configuration, retry, or Cost Calibration was executed.
 - No formal publish, student-visible runtime, `staging`, `prod`, deploy, payment, external service, PR, force push,
   release readiness, production readiness, or final Pass was executed or claimed.
+
+## Fresh Closeout Acceptance
+
+- Fresh closeout approval source:
+  `current_user_fresh_closeout_approval_2026_06_27_three_layer_acceptance_matrix`.
+- ff-only merge to `master`: completed locally from `6a03a93e00c4c0052e2953fcf5705b594d4ee1a7` to
+  `bd413e46ca17cdf04d74f50fc142811e095e4a33`.
+- Push to `origin/master`: approved after master gates pass.
+- Short-branch cleanup: approved after push success.
+- PR, force push, Provider, DB, browser/e2e, Cost Calibration, `staging`/`prod`, payment/external service, release
+  readiness, and final Pass remain not approved and not claimed.

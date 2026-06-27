@@ -42,3 +42,15 @@ APPROVE: No blocking findings after evidence finalization.
 Final scoped Prettier check, `git diff --check`, and Module Run v2 closeout readiness passed after this audit approval
 update. Local commit may proceed under the task approval. Fast-forward merge, push, and short-branch cleanup remain
 blocked pending fresh closeout approval.
+
+## Fresh Closeout Approval Review
+
+APPROVE: The current user provided fresh closeout approval for only the following actions:
+
+- ff-only merge `codex/three-layer-acceptance-matrix-20260627` to `master`;
+- run necessary gates on `master`;
+- push `origin/master`;
+- delete the merged short branch.
+
+No blocking findings for this closeout boundary. The approval does not permit PR, force push, Provider, DB,
+browser/e2e, Cost Calibration, `staging`/`prod`, payment/external service, release readiness, or final Pass.
