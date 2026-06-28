@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: three-layer-goal-completion-blocker-triage-and-next-task-reseed-2026-06-27
-updatedAt: "2026-06-27T20:34:17-07:00"
+currentPhase: staging-infrastructure-readiness-planning-2026-06-27
+updatedAt: "2026-06-27T20:45:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,26 +504,26 @@ repository:
   lastKnownMasterSha: 64351f6f7b0d2983398877e6f422c027b97d1207
   lastKnownOriginMasterSha: 64351f6f7b0d2983398877e6f422c027b97d1207
 currentTask:
-  id: three-layer-goal-completion-blocker-triage-and-next-task-reseed-2026-06-27
+  id: staging-infrastructure-readiness-planning-2026-06-27
   status: closed
-  result: pass_goal_completion_blockers_triaged_staging_target_required_no_runtime_no_final_pass
-  claimedAt: "2026-06-27T20:26:00-07:00"
-  plannedAt: "2026-06-27T20:26:00-07:00"
-  implementedAt: "2026-06-27T20:26:00-07:00"
-  validatedAt: "2026-06-27T20:34:17-07:00"
-  reviewedAt: "2026-06-27T20:34:17-07:00"
-  closedAt: "2026-06-27T20:26:00-07:00"
-  sourceStory: current_user_continue_until_goal_complete_2026_06_27
-  approvalSource: current_user_continue_until_goal_complete_2026_06_27
-  planPath: docs/05-execution-logs/task-plans/2026-06-27-three-layer-goal-completion-blocker-triage-and-next-task-reseed.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-three-layer-goal-completion-blocker-triage-and-next-task-reseed.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-27-three-layer-goal-completion-blocker-triage-and-next-task-reseed.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-three-layer-goal-completion-blocker-triage-and-next-task-reseed.md
-  branch: codex/goal-completion-blocker-triage-20260627
+  result: pass_readiness_plan_created_infrastructure_execution_blocked_no_runtime_no_final_pass
+  claimedAt: "2026-06-27T20:45:06-07:00"
+  plannedAt: "2026-06-27T20:45:06-07:00"
+  implementedAt: "2026-06-27T20:45:06-07:00"
+  validatedAt: "2026-06-27T20:45:06-07:00"
+  reviewedAt: "2026-06-27T20:45:06-07:00"
+  closedAt: "2026-06-27T20:45:06-07:00"
+  sourceStory: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+  approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+  planPath: docs/05-execution-logs/task-plans/2026-06-27-staging-infrastructure-readiness-planning.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-27-staging-infrastructure-readiness-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-staging-infrastructure-readiness-planning.md
+  branch: codex/staging-infra-readiness-planning-20260627
   scope:
     docsStateEvidenceAudit: true
-    blockerTriage: true
-    nextTaskReseed: true
+    stagingInfrastructureReadinessPlanning: true
+    nextApprovalTextAuthoring: true
     sourceOrTestChange: false
     envFileReadByThisTask: false
     databaseConnectionExecuted: false
@@ -539,42 +539,41 @@ currentTask:
     stagingProdDeploy: false
     paymentExternalServiceExecution: false
     ocrExportExecution: false
+    cloudResourcePurchaseOrModification: false
+    cloudDashboardLogin: false
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    overallDecision: blocked_pending_concrete_isolated_staging_target
-    layer1Status: pass_complete_preserved_no_regression_claim_only
-    layer2Status: pass_minimum_local_postgres_test_owned_rejected_route_runtime_smoke
-    layer3ProviderStatus: pass_openai_compatible_dashscope_qwen37max_single_call_zero_retry
-    layer3CostStatus: pass_minimum_local_single_sample_redacted_estimate
-    highRiskCleanupStatus: pass_high_risk_cleanup_done_current_archive_recovery_window_has_one_prior_terminal_candidate
-    preReleaseStatus: blocked_missing_concrete_isolated_staging_target
-    goalEssentialBlockedTask: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
-    retainedOutsideCurrentGoalBlockedTasks:
-      - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
-      - acceptance-l5-standard-role-flow-run-2026-06-23
-    requiredOwnerInputBeforeGoalCanComplete:
-      - concrete_non_secret_isolated_staging_url_or_deploy_target
-      - non_sensitive_target_label
-      - fresh_staging_only_execution_approval
+    overallDecision: pass_planning_only_infrastructure_not_ready_for_staging_execution
+    ownerReportedCloudServerStatus: not_purchased
+    ownerReportedDomainStatus: icp_filing_in_progress
+    concreteStagingTargetStatus: missing
+    readinessPlanningStatus: completed
+    nextOwnerActions:
+      - choose_and_purchase_cloud_server_or_equivalent_staging_host
+      - complete_icp_filing_or_choose_temporary_non_prod_staging_access_strategy
+      - provide_non_secret_staging_target_label_and_value_after_materialization
+    nextApprovalRequired:
+      - staging_materialization_or_target_registration_after_infrastructure_exists
+      - staging_only_smoke_after_concrete_target_is_registered
     releaseReadinessDecision: blocked
     finalPassDecision: blocked
-    nextRecommendedTask: provide_concrete_isolated_staging_target_then_execute_layer_3_staging_successor
+    nextRecommendedTask: owner_infrastructure_procurement_and_icp_or_temporary_access_decision_before_staging_execution
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_continue_until_goal_complete_2026_06_27
+      approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_continue_until_goal_complete_2026_06_27
+      approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_continue_until_goal_complete_2026_06_27
+      approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_continue_until_goal_complete_2026_06_27
+      approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -591,18 +590,21 @@ currentTask:
     providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
     stagingExecutionExecuted: false
+    cloudResourcePurchasedOrModified: false
+    cloudDashboardLoginExecuted: false
+    envSecretReadOrWriteExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    projectStatusDiagnostic: pass_no_pending_task_requires_human_staging_target_archive_candidate_1_high_risk_repair_blocked_0
+    projectStatusDiagnostic: pass_no_pending_task_requires_human_infrastructure_archive_candidate_2_high_risk_repair_blocked_0
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_validation_repair
     moduleRunV2PrePushReadiness: pass
     ffOnlyMergeToMaster: pending
     pushOriginMaster: pending
     shortBranchCleanup: pending
-  nextRecommendedTask: provide_concrete_isolated_staging_target_then_execute_layer_3_staging_successor
+  nextRecommendedTask: owner_infrastructure_procurement_and_icp_or_temporary_access_decision_before_staging_execution
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

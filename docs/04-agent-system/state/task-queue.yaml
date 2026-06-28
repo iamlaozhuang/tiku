@@ -44,6 +44,210 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: staging-infrastructure-readiness-planning-2026-06-27
+    title: Staging infrastructure readiness planning
+    phase: staging-infrastructure-readiness-planning-2026-06-27
+    sourceStory: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+    dependencies:
+      - three-layer-goal-completion-blocker-triage-and-next-task-reseed-2026-06-27
+    taskPlanPolicy: required_before_docs_state_edit
+    humanApprovalBoundary: >-
+      Current user fresh-approved a docs/state-only staging infrastructure readiness planning task. This task may update
+      project-state.yaml, task-queue.yaml, and this task's task plan/evidence/audit/acceptance documents to plan cloud
+      server procurement prerequisites, ICP filing/domain state, staging domain or temporary access strategy,
+      dev/staging/prod isolation, DB, object storage, env var, Provider key, log, backup, rollback, monitoring, incident
+      route, and follow-up approval text. It must not buy resources, log into cloud dashboards, read or output
+      credentials, modify .env*, deploy, connect to DB, call Providers, run Cost Calibration, run browser/e2e, touch
+      prod/payment/OCR/export/external services, create PRs, force push, claim release readiness, or claim final Pass.
+    targetClosureItem: Staging infrastructure readiness checklist and next approval text
+    behaviorBoundary: docs_state::staging_infrastructure_readiness_planning_no_runtime_no_secrets_no_deploy
+    executionProfile: docs_state_staging_infrastructure_readiness_planning
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_staging_infrastructure_readiness_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_readiness_plan_created_infrastructure_execution_blocked_no_runtime_no_final_pass
+    approvedAt: "2026-06-27T20:45:06-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+    claimedAt: "2026-06-27T20:45:06-07:00"
+    plannedAt: "2026-06-27T20:45:06-07:00"
+    implementedAt: "2026-06-27T20:45:06-07:00"
+    validatedAt: "2026-06-27T20:45:06-07:00"
+    reviewedAt: "2026-06-27T20:45:06-07:00"
+    closedAt: "2026-06-27T20:45:06-07:00"
+    branch: codex/staging-infra-readiness-planning-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      readinessPlanning: approved
+      nextApprovalTextAuthoring: approved
+      cloudResourcePurchase: blocked
+      cloudDashboardLogin: blocked
+      envSecretReadOrWrite: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      stagingExecution: blocked
+      prodDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-27-staging-infrastructure-readiness-planning.md
+      - docs/05-execution-logs/evidence/2026-06-27-staging-infrastructure-readiness-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-staging-infrastructure-readiness-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    caps:
+      cloudResourcesPurchasedByThisTask: 0
+      cloudDashboardLoginsByThisTask: 0
+      envSecretReadsOrWritesByThisTask: 0
+      runtimeMutationsByThisTask: 0
+      providerCallsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      stagingExecutionsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    readinessPlanningResult:
+      ownerCurrentInfraStatus:
+        cloudServerPurchased: false
+        domainIcpFilingComplete: false
+        concreteStagingTargetRegistered: false
+      recommendedNextTrack:
+        - owner_cloud_server_procurement
+        - owner_icp_filing_completion_or_temporary_staging_host_decision
+        - docs_state_staging_materialization_approval_package_after_owner_inputs
+        - later_staging_only_smoke_after_target_exists
+      noExecutionThisTask:
+        - cloud_purchase
+        - cloud_login
+        - deploy
+        - db_connection
+        - provider_call
+        - cost_calibration
+        - browser_e2e
+        - release_readiness
+        - final_pass
+      releaseReadinessDecision: blocked
+      finalPassDecision: blocked
+    redaction:
+      evidenceAllowedFields:
+        - taskId
+        - readinessItem
+        - statusLabel
+        - ownerAction
+        - blockedGate
+        - passFailBlocked
+        - capStatus
+        - redactionStatus
+        - forbiddenActionChecklist
+      forbiddenEvidence:
+        - env_file_content
+        - secret
+        - token
+        - database_url
+        - provider_credential
+        - authorization_header
+        - raw_prompt
+        - raw_response
+        - raw_provider_payload
+        - raw_generated_ai_content
+        - cloud_account_identifier
+        - raw_cloud_dashboard_output
+        - full_paper_or_material_content
+        - raw_payment_payload
+        - raw_ocr_output
+        - raw_export_file
+        - raw_db_row
+        - screenshot
+        - trace
+        - cookie
+        - local_storage
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/evidence/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/audits-reviews/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/evidence/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/audits-reviews/2026-06-27-staging-infrastructure-readiness-planning.md docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId staging-infrastructure-readiness-planning-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId staging-infrastructure-readiness-planning-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId staging-infrastructure-readiness-planning-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_docs_state_staging_infrastructure_readiness_planning_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-staging-infrastructure-readiness-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-staging-infrastructure-readiness-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-staging-infrastructure-readiness-planning.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+    validationSummary:
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingExecutionExecuted: false
+      cloudResourcePurchasedOrModified: false
+      cloudDashboardLoginExecuted: false
+      envSecretReadOrWriteExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      projectStatusDiagnostic: pass_no_pending_task_requires_human_infrastructure_archive_candidate_2_high_risk_repair_blocked_0
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_validation_repair
+      moduleRunV2PrePushReadiness: pass
+      ffOnlyMergeToMaster: pending
+      pushOriginMaster: pending
+      shortBranchCleanup: pending
   - id: three-layer-goal-completion-blocker-triage-and-next-task-reseed-2026-06-27
     title: Three layer Goal completion blocker triage and next task reseed
     phase: three-layer-goal-completion-blocker-triage-and-next-task-reseed-2026-06-27
