@@ -2063,14 +2063,17 @@ tasks:
     validationPolicy: ops_admin_session_coverage_scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
     taskKind: local_browser_session_coverage
     moduleRunVersion: 2
-    status: ready_for_closeout_validation
-    result: pass_ops_admin_current_session_coverage_pending_validation
+    status: closed
+    result: pass_ops_admin_current_session_coverage_no_final_pass
     approvedAt: "2026-06-28T16:44:56-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_identified_ops_admin_test_owned_login_material_2026_06_28
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
     claimedAt: "2026-06-28T16:44:56-07:00"
     plannedAt: "2026-06-28T16:44:56-07:00"
+    validatedAt: "2026-06-28T16:57:39-07:00"
+    reviewedAt: "2026-06-28T16:57:39-07:00"
+    closedAt: "2026-06-28T16:57:39-07:00"
     branch: codex/full-acceptance-ops-admin-session-coverage-20260628
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -2215,6 +2218,12 @@ tasks:
       evidencePrepared: pass
       auditReviewPrepared: pass
       acceptancePrepared: pass
+      firstCommit: b56582c35
+      hookLint: pass
+      hookTypecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_after_state_checkpoint_update
       sourceOrTestChanged: false
       browserRuntimeExecuted: true
       databaseConnectionOrMutationExecuted: false

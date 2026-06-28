@@ -3,7 +3,7 @@
 ## Status
 
 - Task: `full-acceptance-ops-admin-session-material-completion-2026-06-28`
-- Status: evidence_recorded_pending_validation
+- Status: evidence_recorded
 - Result: pass_ops_admin_current_session_coverage_no_final_pass
 
 ## Scope Review
@@ -33,5 +33,5 @@ forbidden.
 
 ## Current Decision
 
-Pass pending closeout validation. The durable goal remains incomplete because full checklist workflow coverage and
-repair closure are still broader than this session-row completion.
+APPROVE scoped closeout. The durable goal remains incomplete because full checklist workflow coverage and repair closure
+are still broader than this session-row completion.

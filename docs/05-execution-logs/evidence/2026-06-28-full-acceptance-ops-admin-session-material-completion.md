@@ -4,10 +4,11 @@
 
 - Task: `full-acceptance-ops-admin-session-material-completion-2026-06-28`
 - Branch: `codex/full-acceptance-ops-admin-session-coverage-20260628`
-- Status: evidence_recorded_pending_validation
+- Status: evidence_recorded
 - Result: pass
 - Result detail: pass_ops_admin_current_session_coverage_no_final_pass
 - Batch range: Stage A `ops_admin` current-session material completion only
+- Pre-task master checkpoint: `dc3b46ee0`
 
 ## RED
 
@@ -110,6 +111,13 @@ Combined Option A session coverage:
 - nextModuleRunCandidate: `ai-generation-detail-controls-source-repair-or-role-matrix-rerun-2026-06-28`, because
   current all-role session coverage is now complete but AI generation detail controls remain a recorded acceptance gap.
 
+## Batch Commit Evidence
+
+- Commit: `b56582c35`
+- Commit scope: this task's seven allowed governance/evidence files only.
+- Commit message: `docs(acceptance): complete ops admin session coverage`.
+- Closeout evidence update: this follow-up evidence/state update records final readiness gate results.
+
 ## Validation Results
 
 - `browser-ops-admin-redacted-session-coverage`: pass; 6 allowed ops route samples and 4 denied/unavailable route
@@ -121,7 +129,8 @@ Combined Option A session coverage:
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ops-admin-session-material-completion-2026-06-28`:
   pass.
+- `git commit -m "docs(acceptance): complete ops admin session coverage"`: pass; hook lint/typecheck completed.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ops-admin-session-material-completion-2026-06-28`:
-  pending re-run after first task commit evidence is recorded.
+  pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ops-admin-session-material-completion-2026-06-28 -SkipRemoteAheadCheck`:
-  pending re-run after module closeout passes.
+  pass after updating project-state repository checkpoint from the current local `master` and `origin/master`.

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: full-acceptance-ops-admin-session-material-completion-2026-06-28
-updatedAt: "2026-06-28T16:52:02-07:00"
+updatedAt: "2026-06-28T16:57:39-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2648,12 +2648,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d9e61e84694997740e0716138f6c2188debab430
-  lastKnownOriginMasterSha: d75fcc9a37963b968a4e6a9974ee749d5cd6c696
+  lastKnownMasterSha: dc3b46ee02b8bff22aea12be545e368382497506
+  lastKnownOriginMasterSha: dc3b46ee02b8bff22aea12be545e368382497506
 currentTask:
   id: full-acceptance-ops-admin-session-material-completion-2026-06-28
-  status: ready_for_closeout_validation
-  result: pass_ops_admin_current_session_coverage_pending_validation
+  status: closed
+  result: pass_ops_admin_current_session_coverage_no_final_pass
   taskKind: local_browser_session_coverage
   executionProfile: local_browser_test_owned_ops_admin_session_completion
   approvedAt: "2026-06-28T16:44:56-07:00"
@@ -2662,6 +2662,9 @@ currentTask:
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
   claimedAt: "2026-06-28T16:44:56-07:00"
   plannedAt: "2026-06-28T16:44:56-07:00"
+  validatedAt: "2026-06-28T16:57:39-07:00"
+  reviewedAt: "2026-06-28T16:57:39-07:00"
+  closedAt: "2026-06-28T16:57:39-07:00"
   sourceStory: current_user_identified_ops_admin_test_owned_login_material_and_active_goal_2026_06_28
   planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
@@ -2795,12 +2798,18 @@ currentTask:
     evidencePrepared: pass
     auditReviewPrepared: pass
     acceptancePrepared: pass
+    firstCommit: b56582c35
+    hookLint: pass
+    hookTypecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_update
     browserRuntimeExecuted: true
     credentialOrSessionCaptureExecuted: false
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     sourceOrTestChanged: false
-  nextRecommendedTask: full-acceptance-matrix-execution_or_ai_generation_detail_controls_source_repair_after_ops_admin_coverage
+  nextRecommendedTask: ai_generation_detail_controls_source_repair_or_role_matrix_rerun_after_all_role_session_coverage
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed
