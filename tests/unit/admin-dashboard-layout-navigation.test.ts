@@ -150,7 +150,7 @@ afterEach(() => {
 });
 
 describe("AdminDashboardLayout navigation", () => {
-  it("routes the audit log menu item to the existing ai audit log page", async () => {
+  it("routes operations governance menu items to the existing redacted ops pages", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     vi.stubGlobal(
       "fetch",
@@ -170,10 +170,12 @@ describe("AdminDashboardLayout navigation", () => {
     );
 
     expect(await screen.findByText("admin page")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /审计日志/u })).toHaveAttribute(
-      "href",
-      "/ops/ai-audit-logs",
-    );
+    expect(
+      screen.getByRole("link", { name: /卡密与企业授权/u }),
+    ).toHaveAttribute("href", "/ops/redeem-codes");
+    expect(
+      screen.getByRole("link", { name: /审计与AI调用日志/u }),
+    ).toHaveAttribute("href", "/ops/ai-audit-logs");
   });
 
   it("shows a visible logout control for an allowed backend workspace", async () => {
@@ -209,6 +211,10 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/content/ai-paper-generation",
     );
+    expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /审计与AI调用日志/u }),
+    ).toBeNull();
   });
 
   it("shows explicit workspace switcher destinations for multi-role backend admins", async () => {
@@ -394,6 +400,10 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /审计与AI调用日志/u }),
+    ).toBeNull();
   });
 
   it("denies content admins from the operations workspace", async () => {

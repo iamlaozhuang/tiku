@@ -437,6 +437,191 @@ tasks:
       - release_readiness_or_final_pass
     retryCount: 0
     lastFailurePath: null
+  - id: content-ops-organization-nav-entry-source-only-2026-06-27
+    title: Content, operations, and organization navigation entry source-only UI implementation
+    phase: content-ops-organization-nav-entry-source-only-2026-06-27
+    sourceStory: current_user_approved_content_ops_organization_nav_entry_source_only_2026_06_27
+    dependencies:
+      - standard-advanced-backend-ux-design-first-contract-2026-06-27
+      - backend-workspace-shell-source-only-2026-06-27
+    taskPlanPolicy: required_before_source_or_test_edit
+    humanApprovalBoundary: >-
+      Current user approved low-risk source-only UI task
+      content-ops-organization-nav-entry-source-only-2026-06-27. This task may modify only the task-queue-listed
+      backend operations, content, and organization navigation entry related frontend source files, necessary focused
+      unit tests, and this task's docs/evidence/audit/acceptance. It must follow
+      docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md. It must not
+      modify schema, migration, seed, package files, lockfiles, .env* files, DB, Provider, Cost Calibration,
+      staging/prod/deploy, payment, OCR, export, external-service, browser/dev-server/e2e, PR, force push, release
+      readiness, or final Pass scope.
+    targetClosureItem: Scoped operations, content, and organization backend navigation entries aligned to the backend UX contract
+    behaviorBoundary: source_only::content_ops_organization_nav_entries_no_browser_no_permission_contract_no_final_pass
+    executionProfile: local_low_risk_source_only_ui
+    evidenceMode: redacted_source_only_unit_static
+    validationPolicy: focused_unit_lint_typecheck_scoped_prettier_diff_check_project_status_module_run_v2
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: closed
+    result: pass_source_only_content_ops_organization_nav_entries_no_browser_no_final_pass
+    approvedAt: "2026-06-27T23:31:19-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approval_content_ops_organization_nav_entry_source_only_2026_06_27
+    claimedAt: "2026-06-27T23:31:19-07:00"
+    plannedAt: "2026-06-27T23:31:19-07:00"
+    implementedAt: "2026-06-27T23:34:06-07:00"
+    validatedAt: "2026-06-27T23:36:55-07:00"
+    reviewedAt: "2026-06-27T23:36:55-07:00"
+    closedAt: "2026-06-27T23:36:55-07:00"
+    branch: codex/content-ops-org-nav-source-20260627
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      docsStateEvidenceAudit: approved
+      operationsNavigationEntries: approved
+      contentNavigationEntries: approved
+      organizationNavigationEntries: approved
+      workspaceShellRewrite: blocked
+      permissionContract: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-27-content-ops-organization-nav-entry-source-only.md
+      - docs/05-execution-logs/evidence/2026-06-27-content-ops-organization-nav-entry-source-only.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-content-ops-organization-nav-entry-source-only.md
+      - docs/05-execution-logs/acceptance/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/2026-06-27-backend-workspace-shell-source-only.md
+      - docs/05-execution-logs/evidence/2026-06-27-backend-workspace-shell-source-only.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-backend-workspace-shell-source-only.md
+      - package.json
+      - src/app/(admin)/**
+      - src/components/AdminDashboardLayout/index.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceFilesChangedMax: 1
+      testFilesChangedMax: 1
+      runtimeMutationsByThisTask: 0
+      providerCallsByThisTask: 0
+      providerConfigurationsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      e2eRunsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    localFullLoopGate: L2_focused_unit_plus_L1_static_no_browser
+    threadRolloverGate: resume_from_this_task_plan_evidence_project_state_and_task_queue
+    automationHandoffPolicy: closeout_allowed_only_after_structured_policy_and_module_run_v2_gates_pass
+    nextModuleRunCandidate: backend-workspace-role-guard-contract-tdd-2026-06-27
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/components/AdminDashboardLayout/AdminDashboardLayout.tsx tests/unit/admin-dashboard-layout-navigation.test.ts docs/05-execution-logs/task-plans/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/evidence/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/audits-reviews/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/acceptance/2026-06-27-content-ops-organization-nav-entry-source-only.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/components/AdminDashboardLayout/AdminDashboardLayout.tsx tests/unit/admin-dashboard-layout-navigation.test.ts docs/05-execution-logs/task-plans/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/evidence/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/audits-reviews/2026-06-27-content-ops-organization-nav-entry-source-only.md docs/05-execution-logs/acceptance/2026-06-27-content-ops-organization-nav-entry-source-only.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ops-organization-nav-entry-source-only-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-ops-organization-nav-entry-source-only-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ops-organization-nav-entry-source-only-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: standingAutonomyApproval_and_current_user_source_only_task_approval_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: standingAutonomyApproval_and_current_user_source_only_task_approval_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: standingAutonomyApproval_and_current_user_source_only_task_approval_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: standingAutonomyApproval_and_current_user_source_only_task_approval_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    validationSummary:
+      taskPlanPrepared: true
+      taskQueueMaterialized: true
+      sourceImplementation: pass
+      focusedUnitRed: pass_expected_failure
+      focusedUnitGreen: pass
+      lint: pass
+      typecheck: pass
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_no_pending_task_archive_candidate_count_5_requires_human
+      activeQueueNonTerminalCountAfterTask: 3
+      archiveCandidateCountAfterTask: 5
+      highRiskRepairBlockedCountAfterTask: 0
+      projectStatusRequiresHumanAfterTask: true
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    blockedWithoutFreshApproval:
+      - schema_migration_seed
+      - package_lockfile_dependency_change
+      - env_secret_read_or_write
+      - database_connection_or_mutation
+      - provider_call_or_provider_configuration
+      - cost_calibration_gate
+      - staging_prod_deploy_payment_external_service_ocr_export
+      - browser_dev_server_e2e
+      - pr_force_push
+      - release_readiness_or_final_pass
+    retryCount: 0
+    lastFailurePath: null
   - id: standard-advanced-edition-experience-optimization-planning-2026-06-27
     title: Standard and advanced edition experience optimization planning
     phase: standard-advanced-edition-experience-optimization-planning-2026-06-27
