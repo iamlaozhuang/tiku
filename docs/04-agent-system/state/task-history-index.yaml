@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-queue-slimming-archive-after-organization-workspace-ux-2026-06-28
-  updatedAt: "2026-06-28T03:42:28-07:00"
+  updatedByTask: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+  updatedAt: "2026-06-28T09:21:48-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -15282,3 +15282,174 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-23"
+  - id: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T05:31:00-07:00"
+  - id: local-full-loop-baseline-accounts-auth-db-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T05:51:00-07:00"
+  - id: local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T06:04:00-07:00"
+  - id: local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T06:17:00-07:00"
+  - id: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T06:30:00-07:00"
+  - id: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T06:44:00-07:00"
+  - id: local-full-loop-rollup-evidence-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-rollup-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-rollup-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T07:04:00-07:00"
+  - id: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T08:16:51-07:00"
+  - id: local-ai-provider-experience-smoke-execution-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T08:36:07-07:00"
+  - id: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: provider_smoke_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T08:47:20-07:00"
+  - id: local-ai-provider-error-diagnostic-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: provider_error_diagnostic
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T08:58:56-07:00"
+  - id: local-full-loop-post-provider-rollup-evidence-2026-06-28
+    phase: local-full-loop-acceleration-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T09:12:45-07:00"
+  - id: local-role-browser-acceptance-hardening-2026-06-28
+    phase: local-role-browser-acceptance-hardening-2026-06-28
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-role-browser-acceptance-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-role-browser-acceptance-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T07:34:06-07:00"
+  - id: local-ui-action-loop-browser-smoke-2026-06-28
+    phase: local-ui-action-loop-browser-smoke-2026-06-28
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T08:03:12-07:00"
+  - id: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+    phase: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+    status: closed
+    taskKind: local_dev_schema_alignment_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T05:05:00-07:00"
+  - id: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-23T23:06:11-07:00"
+  - id: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
+    phase: learner-org-employee-home-entry-capability-discovery-repair-2026-06-25
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-home-entry-capability-discovery-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-25T09:14:29-07:00"
+  - id: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
+    phase: learner-org-employee-home-entry-capability-post-repair-browser-rerun-2026-06-25
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-home-entry-capability-post-repair-browser-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-25T09:27:28-07:00"
+  - id: learner-org-employee-ai-direct-route-authorization-guard-repair-2026-06-25
+    phase: learner-org-employee-ai-direct-route-authorization-guard-repair-2026-06-25
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-25-learner-org-employee-ai-direct-route-authorization-guard-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-25-learner-org-employee-ai-direct-route-authorization-guard-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-25T09:49:34-07:00"

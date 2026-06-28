@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-full-loop-post-provider-rollup-evidence-2026-06-28
-updatedAt: "2026-06-28T09:13:55-07:00"
+currentPhase: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+updatedAt: "2026-06-28T09:27:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,114 +501,97 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: efac6c9b43b22bc600857454a3161194fcd94f57
-  lastKnownOriginMasterSha: efac6c9b43b22bc600857454a3161194fcd94f57
+  lastKnownMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
+  lastKnownOriginMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
 currentTask:
-  id: local-full-loop-post-provider-rollup-evidence-2026-06-28
+  id: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
   status: closed
-  result: pass_post_provider_local_full_loop_rollup_release_final_blocked
-  approvedAt: "2026-06-28T09:07:09-07:00"
+  result: pass_active_queue_slimming_after_post_provider_rollup
+  approvedAt: "2026-06-28T09:21:48-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_fresh_approved_post_provider_rollup_only_2026_06_28
-  claimedAt: "2026-06-28T09:07:09-07:00"
-  plannedAt: "2026-06-28T09:07:09-07:00"
-  implementedAt: "2026-06-28T09:12:45-07:00"
-  validatedAt: "2026-06-28T09:12:45-07:00"
-  reviewedAt: "2026-06-28T09:12:45-07:00"
-  closedAt: "2026-06-28T09:12:45-07:00"
-  sourceStory: local-ai-provider-error-diagnostic-2026-06-28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
-  branch: codex/local-post-provider-rollup-20260628
+  approvalConsumed: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+  claimedAt: "2026-06-28T09:21:48-07:00"
+  plannedAt: "2026-06-28T09:21:48-07:00"
+  implementedAt: "2026-06-28T09:27:51-07:00"
+  validatedAt: "2026-06-28T09:27:51-07:00"
+  reviewedAt: "2026-06-28T09:27:51-07:00"
+  closedAt: "2026-06-28T09:27:51-07:00"
+  sourceStory: local-full-loop-post-provider-rollup-evidence-2026-06-28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+  branch: codex/local-full-loop-queue-slimming-20260628
   scope:
     docsStateEvidenceAudit: true
+    archiveIndexMovement: true
     traceabilityWrite: true
     queueReseeding: false
-    focusedUnitTest: false
-    localBrowserRuntime: false
-    localE2ERuntime: false
-    localDevServer: false
-    localDatabaseConnectionExecuted: false
-    localDatabaseMutationExecuted: false
-    localDatabaseMutationBoundary: not_applicable
-    privateAcceptanceCredentialInput: false
     sourceOrTestChange: false
-    localDockerDatabase: false
-    localRagPipelineExecuted: false
-    providerSmokeGateExecuted: false
-    providerCredentialLookupExecuted: false
-    providerCredentialLookupBoundary: not_executed_rollup_only
-    providerExecuteSafeBlockedReason: null
-    schemaMigrationExecuted: false
-    migrationGenerationExecuted: false
     schemaOrMigrationFileChanged: false
+    packageOrLockfileChanged: false
+    envFileChanged: false
+    localDockerDatabase: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
     providerCall: false
     providerConfiguration: false
     costCalibrationExecution: false
-    stagingExecution: false
     stagingProdDeploy: false
     paymentExternalServiceExecution: false
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  localFullLoopPostProviderRollup:
-    sprintId: local-full-loop-acceleration-2026-06-28
-    predecessorTasks:
-      - local-full-loop-rollup-evidence-2026-06-28
-      - local-role-browser-acceptance-hardening-2026-06-28
-      - local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
-      - local-ai-provider-error-diagnostic-2026-06-28
-    approvalSource: current_user_fresh_approved_post_provider_rollup_only_2026_06_28
-    rollupOnly: true
-    localFullLoopEvidence: pass_existing_redacted_local_loop_and_browser_evidence
-    providerDiagnosticEvidence: pass_openai_compatible_dashscope_qwen3_7_max_one_request_zero_retry
-    directProviderPathFinding: direct_alibaba_qwen_plus_failure_classified_path_specific
-    providerCallExecutedThisTask: false
-    envSecretAccessedThisTask: false
-    runtimeExecutedThisTask: false
-    providerRetryAttempted: false
-    providerConfigurationChanged: false
-    envFileModified: false
-    focusedLocalE2E: not_executed_rollup_only
+  activeQueueSlimmingAfterPostProviderRollup:
+    approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    sourceDiagnostic: Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    activeQueueTaskCountBefore: 30
+    activeQueueTerminalCountBefore: 27
+    activeQueueNonTerminalCountBefore: 3
+    terminalRecoveryWindow: 8
+    plannedArchivedTaskCount: 19
+    currentTaskRetainedInActiveQueue: true
+    archiveIndexMovementExecuted: true
+    activeQueueTaskCountAfterMove: 12
+    activeQueueTerminalCountAfterMove: 8
+    activeQueueNonTerminalCountAfterMove: 4
+    archiveCandidateCountAfterMove: 0
+    activeQueueTaskCountAfterClose: 12
+    activeQueueTerminalCountAfterClose: 9
+    activeQueueNonTerminalCountAfterClose: 3
+    archiveCandidateCountAfterClose: 0
   decision:
-    overallDecision: pass_post_provider_local_full_loop_rollup_release_final_blocked
-    localFullLoopGate: pass_localhost_e2e_browser_and_provider_diagnostic_evidence_exists_release_final_blocked
-    nextExecutableTask: none_after_rollup_pending_closeout
-    sourceChangeDecision: docs_state_evidence_only
-    browserRuntimeDecision: not_executed
-    databaseDecision: not_executed
-    providerSmokeDecision: summarized_existing_diagnostic_no_new_provider_call
+    overallDecision: pass_active_queue_slimming_after_post_provider_rollup
+    sourceChangeDecision: docs_state_archive_index_only
+    archiveIndexDecision: approved_current_user_queue_hygiene
+    providerDecision: blocked_not_executed
+    envSecretDecision: blocked_not_executed
+    runtimeDecision: blocked_not_executed
     schemaMigrationDecision: blocked_not_required_no_drizzle_push
-    providerDecision: existing_evidence_openai_compatible_dashscope_qwen3_7_max_passed
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
-    stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
+    stagingExecutionDecision: blocked_pending_fresh_explicit_approval
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: no_pending_executable_task_cost_calibration_release_final_still_blocked
-  localFullLoopGate: pass_localhost_e2e_provider_success_evidence_exists_release_final_blocked
-  threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
-  automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_current_rollup_approval_and_initial_local_full_loop_closeout_approval
+    nextRecommendedTask: none_active_queue_contains_only_blocked_gates_and_closed_recovery_window
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_fresh_approved_post_provider_rollup_only_2026_06_28
+      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_fresh_approved_post_provider_rollup_only_2026_06_28_and_initial_local_full_loop_closeout_approval
+      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_fresh_approved_post_provider_rollup_only_2026_06_28_and_initial_local_full_loop_closeout_approval
+      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_fresh_approved_post_provider_rollup_only_2026_06_28_and_initial_local_full_loop_closeout_approval
+      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
   commitSha: pending_local_commit_at_state_close
   prUrl: null
   retryCount: 0
@@ -619,20 +602,18 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    postProviderRollupPrepared: true
-    localFullLoopEvidenceSummarized: true
-    providerDiagnosticEvidenceSummarized: true
-    providerCallExecuted: false
-    providerRetryAttempted: false
-    focusedLocalE2E: not_executed_rollup_only
-    transientPlaywrightArtifactsCleaned: not_applicable
-    redactionBoundaryRecorded: true
+    archiveIndexMovementExecuted: true
+    movedTaskCount: 19
+    activeQueueTaskCountAfterMove: 12
+    archiveCandidateCountAfterMove: 0
+    activeQueueTaskCountAfterClose: 12
+    activeQueueTerminalCountAfterClose: 9
+    activeQueueNonTerminalCountAfterClose: 3
+    archiveCandidateCountAfterClose: 0
     sourceOrTestChanged: false
     schemaOrMigrationFileChanged: false
     packageOrLockfileChanged: false
     envFileChanged: false
-    localDockerDatabaseHealthy: not_checked_not_required
-    localDevSeedExecuted: false
     browserRuntimeExecuted: false
     e2eRuntimeExecuted: false
     devServerStartedByCodex: false
@@ -644,10 +625,11 @@ currentTask:
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_cost_calibration_blocked
+    queueSlimmingDiagnostic: pass_clean_archive_candidate_count_0
+    projectStatusDiagnostic: pass_current_task_closed_no_unblocked_pending_task
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  nextRecommendedTask: no_pending_executable_task_cost_calibration_release_final_still_blocked
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_before_commit
+  nextRecommendedTask: none_active_queue_contains_only_blocked_gates_and_closed_recovery_window
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
