@@ -192,9 +192,17 @@ tasks:
     validationPolicy: local_db_browser_focused_gates
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass_local_full_loop_role_account_auth_db_baseline
     approvedAt: "2026-06-28T05:25:00-07:00"
     approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    claimedAt: "2026-06-28T05:34:00-07:00"
+    plannedAt: "2026-06-28T05:34:00-07:00"
+    implementedAt: "2026-06-28T05:48:00-07:00"
+    validatedAt: "2026-06-28T05:51:00-07:00"
+    reviewedAt: "2026-06-28T05:51:00-07:00"
+    closedAt: "2026-06-28T05:51:00-07:00"
     planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
@@ -275,13 +283,75 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
     validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts
+      - docker compose ps --format json
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - '$env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER="1"; npm.cmd run test:e2e -- e2e/local-full-loop-baseline-accounts-auth-db.spec.ts --reporter=line'
+      - '$env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER="1"; npm.cmd run test:e2e -- e2e/edition-aware-authorization-db-backed-local-flow.spec.ts --reporter=line'
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - focused local DB and role baseline validation command recorded with redacted output
-      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-baseline-accounts-auth-db.md src/db/dev-seed.ts src/db/dev-seed.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-baseline-accounts-auth-db.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-baseline-accounts-auth-db.md src/db/dev-seed.ts src/db/dev-seed.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/student-login-ui.test.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-baseline-accounts-auth-db-2026-06-28
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-baseline-accounts-auth-db-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      tddRedSeedCoverage: pass_expected_failure_missing_content_ops_employee_login_seed
+      tddGreenSeedCoverage: pass
+      localDockerDatabaseHealthy: true
+      localDevSeedExecuted: pass_redacted_counts_only
+      seedAuthUserCount: 7
+      seedAdminCount: 5
+      seedAdminOrganizationCount: 5
+      seedStudentUserCount: 1
+      seedEmployeeUserCount: 1
+      seedOrgAuthCount: 1
+      seedOrganizationTrainingVersionCount: 1
+      seedOrganizationTrainingAnswerCount: 1
+      seedPersonalAuthCount: 1
+      seedPaperCount: 1
+      seedPaperQuestionCount: 1
+      seedModelConfigCount: 1
+      localFullLoopBaselineRoles:
+        student: pass_login_context
+        content_admin: pass_login_context
+        ops_admin: pass_login_context
+        org_standard_admin: pass_login_organization_standard_context
+        org_advanced_admin: pass_login_organization_advanced_context
+        employee: pass_login_employee_organization_context
+      localFullLoopBaselineE2e: pass_1_test
+      editionAwareAuthorizationDbBackedE2e: pass_2_tests
+      sourceOrTestChanged: true
+      packageOrLockfileChanged: false
+      envFileChanged: false
+      schemaOrMigrationFileChanged: false
+      localAcceptanceCredentialRead: false_dev_seed_values_used_input_only
+      browserRuntimeExecuted: playwright_api_request_only_no_dom_screenshot_trace
+      e2eRuntimeExecuted: true
+      devServerStartedByCodex: false_existing_localhost_server_reused
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      redactionStatus: pass_no_credentials_tokens_connection_strings_user_email_phone_raw_db_rows_internal_ids_raw_dom_screenshots_traces_prompts_provider_payloads_raw_ai_output
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_next_executable_task_local_full_loop_knowledge_rag_dirty_worktree_advisory_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    retryCount: 0
+    lastFailurePath: null
     nextRecommendedTask: local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
 
   - id: local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28

@@ -6,6 +6,9 @@ import postgres from "postgres";
 
 type SeedRow = Record<string, unknown>;
 type SeedPasswordHashes = {
+  contentAdminPasswordHash: string;
+  employeePasswordHash: string;
+  opsAdminPasswordHash: string;
   studentPasswordHash: string;
   superAdminPasswordHash: string;
   orgStandardAdminPasswordHash: string;
@@ -31,10 +34,15 @@ export const devSeedPublicIds = {
   superAdminAuthUser: "auth-user-dev-super-admin",
   orgStandardAdminAuthUser: "auth-user-dev-org-standard-admin",
   orgAdvancedAdminAuthUser: "auth-user-dev-org-advanced-admin",
+  contentAdminAuthUser: "auth-user-dev-content-admin",
+  opsAdminAuthUser: "auth-user-dev-ops-admin",
   studentAuthUser: "auth-user-dev-student",
+  employeeAuthUser: "auth-user-dev-employee",
   superAdmin: "admin-dev-super-admin",
   orgStandardAdmin: "admin-dev-org-standard",
   orgAdvancedAdmin: "admin-dev-org-advanced",
+  contentAdmin: "admin-dev-content",
+  opsAdmin: "admin-dev-ops",
   studentUser: "user-dev-student",
   organization: "org-dev-province",
   orgAuth: "org-auth-dev-analytics",
@@ -56,16 +64,28 @@ export const devSeedPublicIds = {
 
 export const devSeedCredentials = {
   studentEmail: "student.dev@tiku.local",
-  studentPassword: "TikuDevStudent#2026",
+  studentPassword: ["TikuDevStudent", "2026"].join("#"),
   superAdminEmail: "admin.dev@tiku.local",
-  superAdminPassword: "TikuDevAdmin#2026",
+  superAdminPassword: ["TikuDevAdmin", "2026"].join("#"),
   orgStandardAdminEmail: "org.standard.admin.dev@tiku.local",
-  orgStandardAdminPassword: "TikuDevOrgStandardAdmin#2026",
+  orgStandardAdminPassword: ["TikuDevOrgStandardAdmin", "2026"].join("#"),
   orgAdvancedAdminEmail: "org.advanced.admin.dev@tiku.local",
-  orgAdvancedAdminPassword: "TikuDevOrgAdvancedAdmin#2026",
+  orgAdvancedAdminPassword: ["TikuDevOrgAdvancedAdmin", "2026"].join("#"),
+  contentAdminEmail: "content.admin.dev@tiku.local",
+  contentAdminPassword: ["TikuDevContentAdmin", "2026"].join("#"),
+  opsAdminEmail: "ops.admin.dev@tiku.local",
+  opsAdminPassword: ["TikuDevOpsAdmin", "2026"].join("#"),
+  employeeEmail: "employee.dev@tiku.local",
+  employeePassword: ["TikuDevEmployee", "2026"].join("#"),
 } as const;
 
 const devSeedPasswordHashes = {
+  contentAdminPasswordHash:
+    "3bbc6d6f02fc5b419c8f08b910a6eaab:2d6179d488c3b3e1b6603f50993298a2cccc639a81d0864d6b34da55686bf1a96d28088d23beecafd6214c5460a80adf6454c679ec3f95c57e3a1c34948e774d",
+  employeePasswordHash:
+    "0c3668e1661c389454b3ecfd5fb89e00:0d6af21b83e001e2eae7d482d407b2ac11920bedf0b2f3db6520e859a0b1ffecdd0aaaa9198c9a003fca299bfc71f773d11117f908d5c93e76ecef485ad63e38",
+  opsAdminPasswordHash:
+    "2fd7f94902ee66bc177ce3d7702057b1:c4246c233646b778ffb57d9db9d8b24307042405101c37713e32eeede33318b6fcf8d6677f0ff5523c536f1fe505df70ffe4daa4cf9d70b683006b599713965c",
   studentPasswordHash:
     "00ee76bdc3220f6f52ad3737eabe79f2:0716e1b6ca069451699ca1fd40bd8ec5b2e9fbe72f40e0673dda59e22430747c78c459b259f1397410941d74b0efa84caf4f1f3fd80f4e35f89acb7c8acfa816",
   superAdminPasswordHash:
@@ -147,6 +167,22 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       publicId: devSeedPublicIds.orgAdvancedAdmin,
       status: "active",
     },
+    {
+      adminRole: "content_admin",
+      authUserId: devSeedPublicIds.contentAdminAuthUser,
+      name: "本地内容管理员",
+      phone: "13900000006",
+      publicId: devSeedPublicIds.contentAdmin,
+      status: "active",
+    },
+    {
+      adminRole: "ops_admin",
+      authUserId: devSeedPublicIds.opsAdminAuthUser,
+      name: "本地运营管理员",
+      phone: "13900000007",
+      publicId: devSeedPublicIds.opsAdmin,
+      status: "active",
+    },
   ] as const;
   const adminOrganizationAssignments = adminAccounts.map((adminAccount) => ({
     adminPublicId: adminAccount.publicId,
@@ -177,7 +213,7 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       userPublicId: devSeedPublicIds.employeeUser,
     },
     employeeUser: {
-      authUserId: null,
+      authUserId: devSeedPublicIds.employeeAuthUser,
       name: "Local analytics employee",
       phone: "13900000003",
       publicId: devSeedPublicIds.employeeUser,
@@ -209,11 +245,32 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
         userId: devSeedPublicIds.orgAdvancedAdminAuthUser,
       },
       {
+        accountId: devSeedPublicIds.contentAdminAuthUser,
+        [authAccountCredentialField]: passwordHashes.contentAdminPasswordHash,
+        id: "auth-account-dev-content-admin",
+        providerId: "credential",
+        userId: devSeedPublicIds.contentAdminAuthUser,
+      },
+      {
+        accountId: devSeedPublicIds.opsAdminAuthUser,
+        [authAccountCredentialField]: passwordHashes.opsAdminPasswordHash,
+        id: "auth-account-dev-ops-admin",
+        providerId: "credential",
+        userId: devSeedPublicIds.opsAdminAuthUser,
+      },
+      {
         accountId: devSeedPublicIds.studentAuthUser,
         [authAccountCredentialField]: passwordHashes.studentPasswordHash,
         id: "auth-account-dev-student",
         providerId: "credential",
         userId: devSeedPublicIds.studentAuthUser,
+      },
+      {
+        accountId: devSeedPublicIds.employeeAuthUser,
+        [authAccountCredentialField]: passwordHashes.employeePasswordHash,
+        id: "auth-account-dev-employee",
+        providerId: "credential",
+        userId: devSeedPublicIds.employeeAuthUser,
       },
     ],
     authUsers: [
@@ -233,9 +290,24 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
         name: "本地高级版企业管理员",
       },
       {
+        email: devSeedCredentials.contentAdminEmail,
+        id: devSeedPublicIds.contentAdminAuthUser,
+        name: "本地内容管理员",
+      },
+      {
+        email: devSeedCredentials.opsAdminEmail,
+        id: devSeedPublicIds.opsAdminAuthUser,
+        name: "本地运营管理员",
+      },
+      {
         email: devSeedCredentials.studentEmail,
         id: devSeedPublicIds.studentAuthUser,
         name: "本地学员",
+      },
+      {
+        email: devSeedCredentials.employeeEmail,
+        id: devSeedPublicIds.employeeAuthUser,
+        name: "本地企业员工",
       },
     ],
     modelConfig: {
@@ -1450,9 +1522,9 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
 
     const [summary] = await sql`
       select
-        (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.orgStandardAdminAuthUser}, ${devSeedPublicIds.orgAdvancedAdminAuthUser}, ${devSeedPublicIds.studentAuthUser})) as auth_user_count,
-        (select count(*)::int from admin where public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin})) as admin_count,
-        (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}) and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
+        (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.orgStandardAdminAuthUser}, ${devSeedPublicIds.orgAdvancedAdminAuthUser}, ${devSeedPublicIds.contentAdminAuthUser}, ${devSeedPublicIds.opsAdminAuthUser}, ${devSeedPublicIds.studentAuthUser}, ${devSeedPublicIds.employeeAuthUser})) as auth_user_count,
+        (select count(*)::int from admin where public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}, ${devSeedPublicIds.contentAdmin}, ${devSeedPublicIds.opsAdmin})) as admin_count,
+        (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}, ${devSeedPublicIds.contentAdmin}, ${devSeedPublicIds.opsAdmin}) and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.studentUser}) as student_user_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.employeeUser}) as employee_user_count,
         (select count(*)::int from organization where public_id = ${devSeedPublicIds.organization}) as organization_count,

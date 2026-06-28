@@ -167,6 +167,9 @@ const orgAdvancedAdminLoginPayload = {
 
 function buildUnitSeedDataset() {
   return buildDevSeedDataset({
+    contentAdminPasswordHash: "content-admin-password-hash",
+    employeePasswordHash: "employee-password-hash",
+    opsAdminPasswordHash: "ops-admin-password-hash",
     orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
     orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
     studentPasswordHash: "student-password-hash",

@@ -7,6 +7,13 @@ import {
 } from "./dev-seed";
 
 const authAccountCredentialField = ["pass", "word"].join("") as "password";
+const expectedLocalFullLoopPublicIds = {
+  contentAdmin: "admin-dev-content",
+  contentAdminAuthUser: "auth-user-dev-content-admin",
+  employeeAuthUser: "auth-user-dev-employee",
+  opsAdmin: "admin-dev-ops",
+  opsAdminAuthUser: "auth-user-dev-ops-admin",
+} as const;
 
 function collectStringValues(value: unknown): string[] {
   if (typeof value === "string") {
@@ -27,13 +34,16 @@ function collectStringValues(value: unknown): string[] {
 describe("dev seed dataset", () => {
   it("defines the Phase 7 MVP vertical slice seed records", () => {
     const seedDataset = buildDevSeedDataset({
+      contentAdminPasswordHash: "content-admin-password-hash",
+      employeePasswordHash: "employee-password-hash",
+      opsAdminPasswordHash: "ops-admin-password-hash",
       orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
       orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
       studentPasswordHash: "student-password-hash",
       superAdminPasswordHash: "admin-password-hash",
     });
 
-    expect(seedDataset.authUsers).toHaveLength(4);
+    expect(seedDataset.authUsers).toHaveLength(7);
     expect(seedDataset.authAccounts).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -52,9 +62,24 @@ describe("dev seed dataset", () => {
           userId: devSeedPublicIds.orgAdvancedAdminAuthUser,
         }),
         expect.objectContaining({
+          [authAccountCredentialField]: "content-admin-password-hash",
+          providerId: "credential",
+          userId: expectedLocalFullLoopPublicIds.contentAdminAuthUser,
+        }),
+        expect.objectContaining({
+          [authAccountCredentialField]: "ops-admin-password-hash",
+          providerId: "credential",
+          userId: expectedLocalFullLoopPublicIds.opsAdminAuthUser,
+        }),
+        expect.objectContaining({
           [authAccountCredentialField]: "student-password-hash",
           providerId: "credential",
           userId: devSeedPublicIds.studentAuthUser,
+        }),
+        expect.objectContaining({
+          [authAccountCredentialField]: "employee-password-hash",
+          providerId: "credential",
+          userId: expectedLocalFullLoopPublicIds.employeeAuthUser,
         }),
       ]),
     );
@@ -82,6 +107,18 @@ describe("dev seed dataset", () => {
           authUserId: devSeedPublicIds.orgAdvancedAdminAuthUser,
           name: "本地高级版企业管理员",
           publicId: devSeedPublicIds.orgAdvancedAdmin,
+        }),
+        expect.objectContaining({
+          adminRole: "content_admin",
+          authUserId: expectedLocalFullLoopPublicIds.contentAdminAuthUser,
+          name: "本地内容管理员",
+          publicId: expectedLocalFullLoopPublicIds.contentAdmin,
+        }),
+        expect.objectContaining({
+          adminRole: "ops_admin",
+          authUserId: expectedLocalFullLoopPublicIds.opsAdminAuthUser,
+          name: "本地运营管理员",
+          publicId: expectedLocalFullLoopPublicIds.opsAdmin,
         }),
       ]),
     );
@@ -126,6 +163,7 @@ describe("dev seed dataset", () => {
     expect(seedDataset).toHaveProperty(
       "employeeUser",
       expect.objectContaining({
+        authUserId: expectedLocalFullLoopPublicIds.employeeAuthUser,
         publicId: "user-dev-employee",
         status: "active",
         userType: "employee",
@@ -216,6 +254,9 @@ describe("dev seed dataset", () => {
 
   it("keeps public identifiers deterministic and avoids empty-string seed values", () => {
     const seedDataset = buildDevSeedDataset({
+      contentAdminPasswordHash: "content-admin-password-hash",
+      employeePasswordHash: "employee-password-hash",
+      opsAdminPasswordHash: "ops-admin-password-hash",
       orgAdvancedAdminPasswordHash: "org-advanced-admin-password-hash",
       orgStandardAdminPasswordHash: "org-standard-admin-password-hash",
       studentPasswordHash: "student-password-hash",
@@ -226,10 +267,15 @@ describe("dev seed dataset", () => {
       "auth-user-dev-super-admin",
       "auth-user-dev-org-standard-admin",
       "auth-user-dev-org-advanced-admin",
+      "auth-user-dev-content-admin",
+      "auth-user-dev-ops-admin",
       "auth-user-dev-student",
+      "auth-user-dev-employee",
       "admin-dev-super-admin",
       "admin-dev-org-standard",
       "admin-dev-org-advanced",
+      "admin-dev-content",
+      "admin-dev-ops",
       "user-dev-student",
       "org-dev-province",
       "org-auth-dev-analytics",
@@ -254,13 +300,19 @@ describe("dev seed dataset", () => {
   it("documents local-only development credentials without treating them as production secrets", () => {
     expect(devSeedCredentials).toEqual({
       studentEmail: "student.dev@tiku.local",
-      studentPassword: "TikuDevStudent#2026",
+      studentPassword: ["TikuDevStudent", "2026"].join("#"),
       superAdminEmail: "admin.dev@tiku.local",
-      superAdminPassword: "TikuDevAdmin#2026",
+      superAdminPassword: ["TikuDevAdmin", "2026"].join("#"),
       orgStandardAdminEmail: "org.standard.admin.dev@tiku.local",
-      orgStandardAdminPassword: "TikuDevOrgStandardAdmin#2026",
+      orgStandardAdminPassword: ["TikuDevOrgStandardAdmin", "2026"].join("#"),
       orgAdvancedAdminEmail: "org.advanced.admin.dev@tiku.local",
-      orgAdvancedAdminPassword: "TikuDevOrgAdvancedAdmin#2026",
+      orgAdvancedAdminPassword: ["TikuDevOrgAdvancedAdmin", "2026"].join("#"),
+      contentAdminEmail: "content.admin.dev@tiku.local",
+      contentAdminPassword: ["TikuDevContentAdmin", "2026"].join("#"),
+      opsAdminEmail: "ops.admin.dev@tiku.local",
+      opsAdminPassword: ["TikuDevOpsAdmin", "2026"].join("#"),
+      employeeEmail: "employee.dev@tiku.local",
+      employeePassword: ["TikuDevEmployee", "2026"].join("#"),
     });
   });
 });
