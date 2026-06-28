@@ -527,9 +527,17 @@ tasks:
     validationPolicy: local_provider_smoke_focused_gates
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass_local_full_loop_ai_generation_paper_provider_gate_smoke
     approvedAt: "2026-06-28T05:25:00-07:00"
     approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    claimedAt: "2026-06-28T06:10:00-07:00"
+    plannedAt: "2026-06-28T06:13:00-07:00"
+    implementedAt: "2026-06-28T06:15:00-07:00"
+    validatedAt: "2026-06-28T06:16:00-07:00"
+    reviewedAt: "2026-06-28T06:17:00-07:00"
+    closedAt: "2026-06-28T06:17:00-07:00"
     planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
@@ -607,13 +615,56 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
     validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/run-personal-ai-provider-smoke.test.ts
+      - '$env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER="1"; npm.cmd run test:e2e -- e2e/local-full-loop-ai-generation-paper-provider-smoke.spec.ts --reporter=line'
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - '$env:TIKU_PROVIDER_SMOKE_APPROVED="1"; node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --execute'
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - focused AI generation/provider smoke command recorded with redacted output
-      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md e2e/local-full-loop-ai-generation-paper-provider-smoke.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md e2e/local-full-loop-ai-generation-paper-provider-smoke.spec.ts
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-ai-generation-paper-provider-smoke-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      localAiGenerationFocusedUnit: pass_4_files_36_tests
+      localFullLoopAiGenerationE2e: pass_1_test
+      contentAdminQuestionGeneration: pass_succeeded_redacted
+      contentAdminPaperGeneration: pass_succeeded_redacted
+      orgAdvancedAdminQuestionGeneration: pass_succeeded_redacted
+      orgAdvancedAdminPaperGeneration: pass_succeeded_redacted
+      orgStandardAdminDirectRequestDenied: pass
+      providerSmokeDryRun: pass_request_count_0
+      providerSmokeExecuteGate: pass_safe_block_missing_current_process_credential
+      providerCallExecuted: false_missing_current_process_credential
+      packageOrLockfileChanged: false
+      envFileChanged: false
+      schemaOrMigrationFileChanged: false
+      browserRuntimeExecuted: playwright_api_request_only_no_dom_screenshot_trace
+      e2eRuntimeExecuted: true
+      devServerStartedByCodex: false_existing_localhost_server_reused
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      redactionStatus: pass_no_credentials_tokens_connection_strings_user_email_phone_raw_db_rows_internal_ids_raw_dom_screenshots_traces_prompts_provider_payloads_raw_ai_output_full_question_or_paper_content
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_next_executable_task_local_full_loop_student_answer_ai_explanation_dirty_worktree_advisory_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    retryCount: 0
+    lastFailurePath: null
     nextRecommendedTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
 
   - id: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
