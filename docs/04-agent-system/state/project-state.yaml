@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: active-queue-slimming-archive-after-organization-workspace-ux-2026-06-28
+currentPhase: organization-workspace-ux-local-closure-rollup-2026-06-28
 updatedAt: "2026-06-28T03:19:26-07:00"
 architecture:
   status: complete
@@ -501,32 +501,31 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 70f596fde93a3ce08bc1d11e064e8588409b8c27
-  lastKnownOriginMasterSha: 70f596fde93a3ce08bc1d11e064e8588409b8c27
+  lastKnownMasterSha: b16074c89af5c441bf6a6141d97f42d061cc89e4
+  lastKnownOriginMasterSha: b16074c89af5c441bf6a6141d97f42d061cc89e4
 currentTask:
-  id: active-queue-slimming-archive-after-organization-workspace-ux-2026-06-28
+  id: organization-workspace-ux-local-closure-rollup-2026-06-28
   status: closed
-  result: pass_archived_19_terminal_tasks_to_june_archive_and_index_no_runtime_no_final_pass
-  approvedAt: "2026-06-28T03:42:28-07:00"
+  result: pass_local_closure_rollup_with_high_risk_remainders_blocked
+  approvedAt: "2026-06-28T03:55:15-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_serial_batch_item_1_queue_cleanup_commit_merge_push_cleanup_2026_06_28
-  claimedAt: "2026-06-28T03:42:28-07:00"
-  plannedAt: "2026-06-28T03:42:28-07:00"
-  implementedAt: "2026-06-28T03:42:28-07:00"
-  validatedAt: "2026-06-28T03:42:28-07:00"
-  reviewedAt: "2026-06-28T03:42:28-07:00"
-  closedAt: "2026-06-28T03:42:28-07:00"
-  sourceStory: current_user_serial_batch_next_work_item_1_queue_cleanup_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-active-queue-slimming-archive-after-organization-workspace-ux.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-active-queue-slimming-archive-after-organization-workspace-ux.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-active-queue-slimming-archive-after-organization-workspace-ux.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-active-queue-slimming-archive-after-organization-workspace-ux.md
-  branch: codex/queue-slimming-archive-org-ux-20260628
+  approvalConsumed: current_user_serial_batch_item_2_rollup_commit_merge_push_cleanup_2026_06_28
+  claimedAt: "2026-06-28T03:55:15-07:00"
+  plannedAt: "2026-06-28T03:55:15-07:00"
+  implementedAt: "2026-06-28T03:55:15-07:00"
+  validatedAt: "2026-06-28T03:55:15-07:00"
+  reviewedAt: "2026-06-28T03:55:15-07:00"
+  closedAt: "2026-06-28T03:55:15-07:00"
+  sourceStory: current_user_serial_batch_next_work_item_2_local_closure_rollup_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-ux-local-closure-rollup.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-workspace-ux-local-closure-rollup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-ux-local-closure-rollup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-ux-local-closure-rollup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-ux-local-closure-rollup.md
+  branch: codex/org-workspace-ux-local-closure-rollup-20260628
   scope:
     docsStateEvidenceAudit: true
-    taskHistoryIndexWrite: true
-    archiveIndexMovement: true
-    terminalTaskMovement: true
+    traceabilityRollupWrite: true
     sourceOrTestChange: false
     browserRuntime: false
     devServer: false
@@ -542,15 +541,19 @@ currentTask:
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  archiveMovement:
-    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    indexPath: docs/04-agent-system/state/task-history-index.yaml
-    terminalTaskBlocksMoved: 19
-    retainedOldTerminalRecoveryWindow: 7
-    terminalRecoveryWindowAfterClose: 8
+  localClosure:
+    decision: local_closed_with_blocked_high_risk_remainders
+    sourceOnlyUi: closed
+    permissionContractTdd: closed
+    localBrowserValidation: closed
+    dbBackedAuthorizationProof: blocked_requires_fresh_approval
+    providerAndCostCalibration: blocked_requires_fresh_approval
+    stagingProdDeploy: blocked_requires_fresh_approval
+    paymentOcrExportExternalService: blocked_requires_fresh_approval
+    releaseReadinessFinalPass: blocked_not_claimed
   decision:
-    overallDecision: pass_archived_19_terminal_tasks_to_june_archive_and_index_no_runtime_no_final_pass
-    localFullLoopGate: L0_docs_state_governance_only
+    overallDecision: pass_local_closure_rollup_with_high_risk_remainders_blocked
+    localFullLoopGate: L5_local_browser_summary_rollup_only
     sourceChangeDecision: blocked_by_task_scope
     browserRuntimeDecision: blocked_by_task_scope
     databaseDecision: blocked_by_task_scope
@@ -559,36 +562,35 @@ currentTask:
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: organization_workspace_ux_local_closure_rollup_2026_06_28
-  localFullLoopGate: L0_docs_state_governance_only
-  threadRolloverGate: resume_from_this_task_plan_evidence_project_state_task_queue_archive_and_history_index
+    nextRecommendedTask: high_risk_gate_decision_approval_package_after_organization_workspace_ux_2026_06_28
+  localFullLoopGate: L5_local_browser_summary_rollup_only
+  threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
   automationHandoffPolicy: serial_batch_approval_allows_task_scoped_local_commit_merge_push_cleanup_no_pr_no_force_push
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_serial_batch_item_1_queue_cleanup_commit_merge_push_cleanup_2026_06_28
+      approvalSource: current_user_serial_batch_item_2_rollup_commit_merge_push_cleanup_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_serial_batch_item_1_queue_cleanup_commit_merge_push_cleanup_2026_06_28
+      approvalSource: current_user_serial_batch_item_2_rollup_commit_merge_push_cleanup_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_serial_batch_item_1_queue_cleanup_commit_merge_push_cleanup_2026_06_28
+      approvalSource: current_user_serial_batch_item_2_rollup_commit_merge_push_cleanup_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_serial_batch_item_1_queue_cleanup_commit_merge_push_cleanup_2026_06_28
+      approvalSource: current_user_serial_batch_item_2_rollup_commit_merge_push_cleanup_2026_06_28
   commitSha: pending_local_commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
+    traceabilityRollupPrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    queueArchiveExecuted: true
-    taskHistoryIndexUpdated: true
     sourceOrTestChanged: false
     browserRuntimeExecuted: false
     databaseConnectionOrMutationExecuted: false
@@ -600,10 +602,9 @@ currentTask:
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
-    queueSlimmingDiagnostic: pass_clean_archive_candidate_count_zero
-    projectStatusDiagnostic: pass_idle_no_pending_task_requires_human
+    projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_one
     moduleRunV2PreCommitHardening: pass
-  nextRecommendedTask: organization-workspace-ux-local-closure-rollup-2026-06-28
+  nextRecommendedTask: high-risk-gate-decision-approval-package-after-organization-workspace-ux-2026-06-28
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
