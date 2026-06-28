@@ -1,6 +1,8 @@
 import type {
   AdminWorkspace,
+  AdminWorkspaceAuthorizationSource,
   AdminWorkspaceCapabilitySummary,
+  AdminWorkspaceRequiredCapability,
   AdminWorkspaceRouteAccessDecision,
   AdminWorkspaceRouteAccessInput,
   AdminWorkspaceRouteAccessReason,
@@ -103,6 +105,19 @@ function hasAdvancedOrganizationRole(
   return hasAnyRole(capabilitySummary, ["super_admin", "org_advanced_admin"]);
 }
 
+function resolveOrganizationAuthorizationSource(
+  capabilitySummary: AdminWorkspaceCapabilitySummary,
+): AdminWorkspaceAuthorizationSource | null {
+  if (
+    !hasOrganizationAdminRole(capabilitySummary) &&
+    !hasRole(capabilitySummary, "super_admin")
+  ) {
+    return null;
+  }
+
+  return capabilitySummary.organizationAuthorizationSource ?? "org_auth";
+}
+
 function resolveReturnPath(
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ): string {
@@ -131,6 +146,9 @@ function createDecision(input: {
   returnPath: string;
   requiredWorkspace?: AdminWorkspace | null;
   requiredEffectiveEdition?: AdminWorkspaceRouteAccessDecision["requiredEffectiveEdition"];
+  requiredCapability?: AdminWorkspaceRequiredCapability | null;
+  requiredAuthorizationSource?: AdminWorkspaceAuthorizationSource | null;
+  requiredOrganizationContext?: boolean;
 }): AdminWorkspaceRouteAccessDecision {
   return {
     status: input.status,
@@ -139,6 +157,9 @@ function createDecision(input: {
     returnPath: input.returnPath,
     requiredWorkspace: input.requiredWorkspace ?? input.workspace,
     requiredEffectiveEdition: input.requiredEffectiveEdition ?? null,
+    requiredCapability: input.requiredCapability ?? null,
+    requiredAuthorizationSource: input.requiredAuthorizationSource ?? null,
+    requiredOrganizationContext: input.requiredOrganizationContext ?? false,
   };
 }
 
@@ -179,6 +200,10 @@ function resolveOrganizationWorkspaceAccess(input: {
       reason: "organization_context_required",
       returnPath,
       requiredWorkspace: "organization",
+      requiredCapability: "organization_workspace_context",
+      requiredAuthorizationSource:
+        resolveOrganizationAuthorizationSource(capabilitySummary),
+      requiredOrganizationContext: true,
     });
   }
 
@@ -193,6 +218,9 @@ function resolveOrganizationWorkspaceAccess(input: {
       returnPath: "/organization/portal",
       requiredWorkspace: "organization",
       requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource:
+        resolveOrganizationAuthorizationSource(capabilitySummary),
     });
   }
 

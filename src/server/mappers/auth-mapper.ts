@@ -52,6 +52,8 @@ function mapAdminWorkspaceCapabilityToApi(
     adminRoles,
     organizationPublicId,
     organizationEffectiveEdition,
+    organizationAuthorizationSource: "org_auth",
+    capabilitySource: "service_computed",
     canUseOrganizationAdvancedWorkspace:
       organizationEffectiveEdition === "advanced" &&
       organizationPublicId !== null,

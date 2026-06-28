@@ -29,6 +29,8 @@ function createFallbackCapabilitySummary(
     adminRoles: authContext.user.adminRoles ?? [],
     organizationPublicId: authContext.user.organizationPublicId,
     organizationEffectiveEdition: null,
+    organizationAuthorizationSource: null,
+    capabilitySource: "session_fallback",
     canUseOrganizationAdvancedWorkspace: false,
   };
 }

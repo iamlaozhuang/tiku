@@ -12,6 +12,9 @@ function capabilitySummary(
     adminRoles: input.adminRoles,
     organizationEffectiveEdition: input.organizationEffectiveEdition ?? null,
     organizationPublicId: input.organizationPublicId ?? null,
+    organizationAuthorizationSource:
+      input.organizationAuthorizationSource ?? null,
+    capabilitySource: input.capabilitySource ?? "service_computed",
     canUseOrganizationAdvancedWorkspace:
       input.canUseOrganizationAdvancedWorkspace ?? false,
   };
@@ -94,6 +97,56 @@ describe("backend workspace role guard contract", () => {
       status: "allowed",
       workspace: "organization",
       reason: null,
+    });
+  });
+
+  it("returns structured capability requirements for standard-unavailable organization advanced routes", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/admin/organization/ai-paper-generation?draft=1",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["org_standard_admin"],
+          organizationEffectiveEdition: "standard",
+          organizationPublicId: "organization-public-standard-002",
+          organizationAuthorizationSource: "org_auth",
+          canUseOrganizationAdvancedWorkspace: false,
+        }),
+      }),
+    ).toMatchObject({
+      status: "standard_unavailable",
+      workspace: "organization",
+      reason: "organization_advanced_capability_required",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource: "org_auth",
+      requiredOrganizationContext: false,
+      returnPath: "/organization/portal",
+    });
+  });
+
+  it("denies missing organization context before any advanced capability fallback", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/organization/organization-training",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["org_advanced_admin"],
+          organizationEffectiveEdition: "advanced",
+          organizationPublicId: null,
+          organizationAuthorizationSource: "org_auth",
+          canUseOrganizationAdvancedWorkspace: true,
+        }),
+      }),
+    ).toMatchObject({
+      status: "denied",
+      workspace: "organization",
+      reason: "organization_context_required",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: null,
+      requiredCapability: "organization_workspace_context",
+      requiredAuthorizationSource: "org_auth",
+      requiredOrganizationContext: true,
+      returnPath: "/organization/portal",
     });
   });
 

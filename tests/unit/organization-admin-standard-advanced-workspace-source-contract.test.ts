@@ -96,6 +96,8 @@ describe("organization admin standard/advanced workspace source contract", () =>
       adminRoles: ["org_advanced_admin"],
       organizationPublicId: "organization-source-contract-001",
       organizationEffectiveEdition: "advanced",
+      organizationAuthorizationSource: "org_auth",
+      capabilitySource: "service_computed",
       canUseOrganizationAdvancedWorkspace: true,
     });
     expect(mappedAuthContext.user.adminWorkspaceCapability).not.toHaveProperty(
