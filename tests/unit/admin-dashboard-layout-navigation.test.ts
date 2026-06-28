@@ -368,6 +368,7 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/organization/organization-training",
     );
+    expect(screen.getByText("高级组织能力")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /统计摘要/u })).toHaveAttribute(
       "href",
       "/organization/organization-analytics",
@@ -406,6 +407,14 @@ describe("AdminDashboardLayout navigation", () => {
 
     expect(await screen.findByText("organization page")).toBeInTheDocument();
     expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
+    expect(screen.getByText("标准版组织后台")).toBeInTheDocument();
+    expect(
+      screen.getByText(/升级为高级版后可使用企业训练、统计摘要和组织 AI 能力/u),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
     expect(screen.queryByRole("link", { name: /企业训练/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /统计摘要/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();
@@ -440,6 +449,10 @@ describe("AdminDashboardLayout navigation", () => {
 
     const denialAlert = await screen.findByRole("alert");
     expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
+    expect(screen.getByRole("link", { name: "返回内容后台" })).toHaveAttribute(
+      "href",
+      "/content/papers",
+    );
     expect(screen.queryByText("ops page")).toBeNull();
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
   });
@@ -475,6 +488,10 @@ describe("AdminDashboardLayout navigation", () => {
 
     const denialAlert = await screen.findByRole("alert");
     expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
+    expect(screen.getByRole("link", { name: "返回组织后台" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
     expect(screen.queryByText("ops page")).toBeNull();
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
   });

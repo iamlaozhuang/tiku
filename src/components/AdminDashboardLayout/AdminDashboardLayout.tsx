@@ -113,6 +113,10 @@ type AdminDashboardAuthState = {
   adminRoles: readonly string[];
   canUseOrganizationAdvancedWorkspace: boolean;
 };
+type WorkspaceReturnAction = {
+  href: string;
+  label: string;
+};
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
@@ -224,6 +228,33 @@ function getWorkspaceSwitchItems(
   return workspaceItems;
 }
 
+function getForbiddenWorkspaceReturnAction(
+  adminRoles: readonly string[],
+): WorkspaceReturnAction | null {
+  if (hasOrganizationAdminRole(adminRoles)) {
+    return {
+      href: "/organization/portal",
+      label: "返回组织后台",
+    };
+  }
+
+  if (adminRoles.includes("content_admin")) {
+    return {
+      href: "/content/papers",
+      label: "返回内容后台",
+    };
+  }
+
+  if (adminRoles.includes("ops_admin")) {
+    return {
+      href: "/ops/users",
+      label: "返回运营后台",
+    };
+  }
+
+  return null;
+}
+
 function isAdminContext(authContext: AuthContextDto): boolean {
   return (
     authContext.user.adminPublicId !== null &&
@@ -268,8 +299,10 @@ async function fetchAdminAuthContext(): Promise<
 }
 
 function AdminDashboardStatus({
+  returnAction,
   status,
 }: {
+  returnAction?: WorkspaceReturnAction | null;
   status: Exclude<AdminDashboardLayoutStatus, "authorized">;
 }) {
   const isChecking = status === "checking";
@@ -303,6 +336,14 @@ function AdminDashboardStatus({
               ? "当前管理员角色不能进入该后台工作区。"
               : "当前页面需要有效管理员会话，正在前往登录页。"}
         </p>
+        {isForbidden && returnAction !== null && returnAction !== undefined ? (
+          <Link
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+            href={returnAction.href}
+          >
+            {returnAction.label}
+          </Link>
+        ) : null}
       </section>
     </main>
   );
@@ -331,6 +372,14 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     adminRoles,
     canUseOrganizationAdvancedWorkspace,
   );
+  const primaryMenuItems =
+    workspace === "organization"
+      ? menuItems.filter((item) => item.advancedOrganizationOnly !== true)
+      : menuItems;
+  const advancedOrganizationMenuItems =
+    workspace === "organization"
+      ? menuItems.filter((item) => item.advancedOrganizationOnly === true)
+      : [];
   const workspaceSwitchItems = getWorkspaceSwitchItems(adminRoles);
 
   useEffect(() => {
@@ -409,7 +458,16 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   }
 
   if (status !== "authorized") {
-    return <AdminDashboardStatus status={status} />;
+    return (
+      <AdminDashboardStatus
+        returnAction={
+          status === "forbidden"
+            ? getForbiddenWorkspaceReturnAction(adminRoles)
+            : null
+        }
+        status={status}
+      />
+    );
   }
 
   return (
@@ -466,8 +524,51 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Menu */}
         <nav className="flex-1 overflow-y-auto p-3">
+          {workspace === "organization" &&
+          !canUseOrganizationAdvancedWorkspace ? (
+            <div className="border-brand-primary/30 bg-secondary/50 mb-3 rounded-md border p-3">
+              <p className="text-brand-primary text-xs font-medium">
+                标准版组织后台
+              </p>
+              <p className="text-text-secondary mt-2 text-xs leading-5">
+                升级为高级版后可使用企业训练、统计摘要和组织 AI 能力。
+              </p>
+              <Link
+                className="text-brand-primary mt-3 inline-flex text-xs font-medium transition-transform active:scale-[0.98]"
+                href="/organization/portal"
+              >
+                返回组织概览
+              </Link>
+            </div>
+          ) : null}
           <ul className="space-y-1">
-            {menuItems.map((item) => {
+            {primaryMenuItems.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              const Icon = item.Icon;
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-transform active:scale-[0.98] ${
+                      isActive
+                        ? "bg-secondary text-brand-primary font-medium"
+                        : "text-text-secondary hover:bg-muted hover:text-text-primary"
+                    }`}
+                  >
+                    <Icon aria-hidden="true" className="size-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+            {advancedOrganizationMenuItems.length > 0 ? (
+              <li className="text-text-muted px-3 pt-4 pb-1 text-xs font-medium">
+                高级组织能力
+              </li>
+            ) : null}
+            {advancedOrganizationMenuItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               const Icon = item.Icon;
 
