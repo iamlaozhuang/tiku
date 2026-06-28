@@ -17,6 +17,15 @@
 
 Closed with blocked browser-validation result after fresh closeout approval. Do not proceed to release readiness or final Pass. Merge, push, and short-branch cleanup are allowed only under the separate 2026-06-28 closeout approval and do not convert this browser validation into a pass.
 
+Credential-assisted rerun decision: local browser role matrix passed after the current user approved reading local acceptance credentials and operating login in the in-app browser. This supersedes the earlier missing-session blocker for local evidence only. It does not approve staging/prod, Provider, DB/schema/migration, payment/external-service, release readiness, final Pass, PR, force push, merge, push, or branch cleanup for this rerun.
+
+Rerun findings:
+
+- Standard organization admin: 5 listed organization routes reached local standard-edition gated states.
+- Advanced organization admin: 5 listed organization routes reached local authorized rendered states.
+- Role switching used visible logout after each role.
+- Evidence stayed within role, route, state, count, and redacted result fields.
+
 ## Closeout Review
 
 - The first push attempt correctly failed because the pre-push hook anchored on this still-blocked current task.
@@ -25,4 +34,4 @@ Closed with blocked browser-validation result after fresh closeout approval. Do 
 
 ## Residual Need
 
-A future fresh approval should provide a safe role-session handoff or approved local account/session preparation path before rerunning this browser validation.
+Closeout merge, push, and short-branch cleanup for the credential-assisted rerun require fresh approval.

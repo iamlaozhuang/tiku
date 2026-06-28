@@ -1747,21 +1747,23 @@ tasks:
     taskKind: local_browser_validation
     moduleRunVersion: 2
     status: closed
-    result: blocked_local_browser_role_session_missing_existing_target_no_credentials_no_storage_no_final_pass
+    result: pass_credential_assisted_local_browser_role_matrix_standard_gated_advanced_rendered_no_final_pass
     approvedAt: "2026-06-28T01:24:35-07:00"
     approvedBy: laozhuang
-    approvalConsumed: current_user_serial_batch_approval_organization_workspace_polish_local_browser_validation_2026_06_28
+    approvalConsumed: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
     claimedAt: "2026-06-28T01:24:35-07:00"
     plannedAt: "2026-06-28T01:24:35-07:00"
-    implementedAt: "2026-06-28T01:28:39-07:00"
-    validatedAt: "2026-06-28T01:28:39-07:00"
-    reviewedAt: "2026-06-28T01:28:39-07:00"
-    closedAt: "2026-06-28T01:36:57-07:00"
-    branch: codex/org-workspace-ux-polish-serial-20260628
+    implementedAt: "2026-06-28T01:48:25-07:00"
+    validatedAt: "2026-06-28T01:48:25-07:00"
+    reviewedAt: "2026-06-28T01:48:25-07:00"
+    closedAt: "2026-06-28T01:48:25-07:00"
+    branch: codex/org-workspace-browser-rerun-credentials-20260628
     capabilities:
       docsStateEvidenceAudit: approved_current_serial_batch
       localBrowserRuntime: approved_current_serial_batch
       localTargetHttpCheck: approved_current_serial_batch
+      localCredentialRead: approved_current_user_credential_assisted_rerun_2026_06_28
+      localCredentialEvidenceRecording: blocked
       localSourceChange: blocked
       focusedUnitTest: blocked
       e2eRuntime: blocked
@@ -1847,18 +1849,18 @@ tasks:
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: current_user_serial_batch_approval_2026_06_28
+        approvalSource: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
       fastForwardMerge:
-        approved: true
+        approved: false
         targetBranch: master
-        approvalSource: current_user_closeout_all_completed_tasks_merge_push_cleanup_2026_06_28
+        approvalSource: fresh_closeout_approval_required_after_credential_assisted_rerun
       push:
-        approved: true
+        approved: false
         target: origin/master
-        approvalSource: current_user_closeout_all_completed_tasks_merge_push_cleanup_2026_06_28
+        approvalSource: fresh_closeout_approval_required_after_credential_assisted_rerun
       cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_closeout_all_completed_tasks_merge_push_cleanup_2026_06_28
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required_after_credential_assisted_rerun
     planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-local-browser-validation.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md
@@ -1866,6 +1868,18 @@ tasks:
     validationSummary:
       localTargetHttpCheck: pass_http_200
       browserObservation: blocked_5_routes_login_redirect_no_reusable_role_session
+      credentialAssistedRerun: pass
+      credentialReadApproved: true
+      credentialValuesRecorded: false
+      standardOrganizationAdminLogin: pass
+      advancedOrganizationAdminLogin: pass
+      routesCheckedCredentialRerun: 10
+      standardOrganizationRoutesChecked: 5
+      advancedOrganizationRoutesChecked: 5
+      standardOrganizationEditionGatedCount: 5
+      advancedOrganizationAuthorizedRenderedCount: 5
+      visibleLogoutTransitions: 2
+      browserObservationCredentialRerun: pass_standard_5_edition_gated_advanced_5_authorized_rendered
       routesChecked: 5
       standardOrganizationRoleObserved: 0
       advancedOrganizationRoleObserved: 0
@@ -1890,8 +1904,8 @@ tasks:
       prePushReadinessManualClosedTaskAnchor: pass_permission_contract_task_remote_ahead_0_local_ahead_4
       prePushHookInitialAttempt: blocked_hard_block_pre_push_repository_sha_drift_master_current_task_blocked
       closeoutStateRepair: closed_with_blocked_result_preserves_no_browser_pass_claim
-      pushOriginMaster: pending_after_closeout_state_repair
-      shortBranchCleanup: pending_after_push
+      pushOriginMaster: blocked_not_approved_for_credential_assisted_rerun
+      shortBranchCleanup: blocked_not_approved_for_credential_assisted_rerun
     blockedWithoutFreshApproval:
       - browser_or_playwright_runtime
       - non_localhost_target

@@ -3,8 +3,10 @@
 ## Status
 
 - Task id: `organization-workspace-polish-local-browser-validation-2026-06-28`
-- Branch: `codex/org-workspace-ux-polish-serial-20260628`
+- Original branch: `codex/org-workspace-ux-polish-serial-20260628`
+- Credential-assisted rerun branch: `codex/org-workspace-browser-rerun-credentials-20260628`
 - Approval: current user serial batch approval on 2026-06-28.
+- Rerun approval: current user approved one local browser validation rerun on 2026-06-28, then explicitly approved reading credentials under `D:\tiku-local-private\acceptance` and performing login in the in-app browser one role at a time.
 - Execution order: task 3 after task 1 and task 2 closed and committed.
 - Scope: redacted local browser validation against existing localhost/127.0.0.1 target only.
 
@@ -49,14 +51,17 @@ Evidence may record only:
 ## Procedure
 
 1. Confirm `http://127.0.0.1:3000` is already reachable with a HEAD request.
-2. Connect to the existing in-app browser target.
-3. Observe the allowed organization routes for available role/session state.
-4. Record only sanitized role/route/state/count evidence.
-5. If target is unavailable, authentication is missing, or role separation cannot be observed without credentials, DB, seed, dev-server, e2e, or raw storage inspection, stop and record a blocked validation result.
+2. Read only the credential fields needed from `D:\tiku-local-private\acceptance` for the standard organization admin and advanced organization admin login attempts.
+3. Connect to the in-app browser target and perform login for one role at a time.
+4. Observe only the allowed organization routes for the active role/session state.
+5. Record only sanitized role/route/state/count evidence.
+6. Clear or replace the active browser session through visible app logout or a fresh isolated context before switching roles when available; do not inspect token, cookie, localStorage, or raw storage contents.
+7. If target is unavailable, authentication fails, role separation cannot be observed, or validation would require DB, seed, dev-server, e2e, raw storage inspection, source changes, or external service work, stop and record a blocked validation result.
 
 ## Forbidden Evidence
 
 - credentials;
+- password;
 - token, cookie, localStorage;
 - raw DOM;
 - screenshots;
@@ -82,5 +87,5 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 ## Stop Conditions
 
 - Local target is not already reachable.
-- Validation requires starting a dev server, running e2e, modifying source/test/e2e/scripts, accessing DB/schema/migration/seed, reading `.env*`, reading or recording credentials/tokens/cookies/localStorage/raw DOM/screenshots/traces, calling Provider, or touching staging/prod/deploy/payment/external service.
+- Validation requires starting a dev server, running e2e, modifying source/test/e2e/scripts, accessing DB/schema/migration/seed, reading `.env*`, recording credentials/tokens/cookies/localStorage/raw DOM/screenshots/traces, calling Provider, or touching staging/prod/deploy/payment/external service.
 - Browser evidence cannot be kept to role/route/state/count/redacted notes.

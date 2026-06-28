@@ -44,9 +44,44 @@ Aggregate:
 - organization surface pass count: 0.
 - blocked login redirect count: 5.
 
-## Decision
+## Initial Decision
 
 Blocked. The existing localhost target is reachable, but the in-app browser has no reusable standard or advanced organization admin session. Continuing would require credentials, token/localStorage/cookie inspection, DB/seed/account repair, dev-server/e2e, or other out-of-scope action.
+
+## Credential-Assisted Rerun Evidence
+
+- Rerun approval: current user approved one local browser validation rerun on 2026-06-28, then approved reading credentials under `D:\tiku-local-private\acceptance` and performing login in the in-app browser one role at a time.
+- Credential handling: credentials were read only for local login, were not written to evidence, and were not printed in chat. No token, cookie, localStorage, raw DOM, screenshot, or trace was recorded.
+- Target check: `http://127.0.0.1:3000` returned `pass:200`.
+- Browser backend: in-app browser.
+- Role switch handling: visible logout was clicked after each role validation.
+
+Observed rerun matrix:
+
+| Role label                  | Route                                  | Final route                            | State                              | Result |
+| --------------------------- | -------------------------------------- | -------------------------------------- | ---------------------------------- | ------ |
+| standard organization admin | `/organization/portal`                 | `/organization/portal`                 | edition_gated_standard_unavailable | pass   |
+| standard organization admin | `/organization/organization-training`  | `/organization/organization-training`  | edition_gated_standard_unavailable | pass   |
+| standard organization admin | `/organization/organization-analytics` | `/organization/organization-analytics` | edition_gated_standard_unavailable | pass   |
+| standard organization admin | `/organization/ai-question-generation` | `/organization/ai-question-generation` | edition_gated_standard_unavailable | pass   |
+| standard organization admin | `/organization/ai-paper-generation`    | `/organization/ai-paper-generation`    | edition_gated_standard_unavailable | pass   |
+| advanced organization admin | `/organization/portal`                 | `/organization/portal`                 | authorized_surface_rendered        | pass   |
+| advanced organization admin | `/organization/organization-training`  | `/organization/organization-training`  | authorized_surface_rendered        | pass   |
+| advanced organization admin | `/organization/organization-analytics` | `/organization/organization-analytics` | authorized_surface_rendered        | pass   |
+| advanced organization admin | `/organization/ai-question-generation` | `/organization/ai-question-generation` | authorized_surface_rendered        | pass   |
+| advanced organization admin | `/organization/ai-paper-generation`    | `/organization/ai-paper-generation`    | authorized_surface_rendered        | pass   |
+
+Aggregate rerun result:
+
+- roles checked: 2.
+- routes checked: 10.
+- local login pass count: 2.
+- standard organization gated count: 5.
+- advanced organization authorized rendered count: 5.
+- login redirect blocked count after credential-assisted rerun: 0.
+- visible logout transitions: 2.
+
+Rerun decision: passed local credential-assisted browser role matrix. This is local-only evidence and does not claim staging, prod, release readiness, or final Pass.
 
 ## Validation Gates
 
@@ -55,6 +90,13 @@ Blocked. The existing localhost target is reachable, but the in-app browser has 
 - `git diff --check`: passed.
 - `Get-TikuProjectStatus.ps1`: passed as diagnostic with `nextActionDecision: no_pending_task`, `activeQueueNonTerminalCount: 4`, `archiveCandidateCount: 12`, `highRiskRepairBlockedCount: 0`, `projectStatusRequiresHuman: true`, and `Cost Calibration Gate remains blocked`.
 - `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-workspace-polish-local-browser-validation-2026-06-28`: passed; scope scan reported 6 changed files all within task allowed files.
+- credential-assisted rerun browser matrix: passed with 2 roles and 10 route checks.
+- rerun scoped `npx.cmd prettier --write --ignore-unknown ...`: passed; evidence formatting updated.
+- rerun scoped `npx.cmd prettier --check --ignore-unknown ...`: passed.
+- rerun `git diff --check`: passed.
+- rerun `Get-TikuProjectStatus.ps1`: passed as diagnostic with `nextActionDecision: no_pending_task`, `activeQueueNonTerminalCount: 3`, `archiveCandidateCount: 12`, `highRiskRepairBlockedCount: 0`, `projectStatusRequiresHuman: true`, and `Cost Calibration Gate remains blocked`.
+- rerun `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-workspace-polish-local-browser-validation-2026-06-28`: passed; scope scan reported 6 changed files all within task allowed files.
+- rerun sensitive evidence check: no local account phone number or password value was found in changed task evidence files.
 
 ## Closeout Evidence
 
