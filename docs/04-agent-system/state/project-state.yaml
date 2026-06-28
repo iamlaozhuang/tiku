@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-unit-baseline-repair-2026-06-28
-updatedAt: "2026-06-28T12:52:00-07:00"
+currentPhase: full-acceptance-matrix-execution-2026-06-28
+updatedAt: "2026-06-28T13:05:00-07:00"
 fullAcceptanceMatrixUnitBaselineRepairRequirements20260628:
   taskId: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
   phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
@@ -330,6 +330,120 @@ fullUnitBaselineRepair20260628:
     typecheck: pass
     formatAndDiff: pass
     sourceOrTestChanged: true
+fullAcceptanceMatrixExecution20260628:
+  taskId: full-acceptance-matrix-execution-2026-06-28
+  phase: full-acceptance-matrix-execution-2026-06-28
+  status: in_progress
+  result: pending
+  branch: codex/full-acceptance-matrix-execution-20260628
+  executionProfile: local_acceptance_matrix_runtime_after_unit_green
+  taskKind: local_acceptance_matrix
+  createdAt: "2026-06-28T13:05:00-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
+  promptMaterializationRule: >-
+    Before browser, DB, AI, source, or further docs execution, this task's goal, authorization,
+    allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, credential boundary, evidence redaction rules, and
+    closeoutPolicy are materialized here, in task-queue.yaml, and in the task plan. Later execution must use repository
+    governance files as the source of truth and must not expand scope from chat memory.
+  goal: >-
+    Execute a redacted all-role, all-flow, all-function local acceptance matrix after the full unit baseline is green,
+    classify each row as pass/fail/blocked, and split any source/test repair into separately materialized follow-up tasks.
+  unitBaselinePrecondition:
+    taskId: full-unit-baseline-repair-2026-06-28
+    status: pass
+    pushedMasterSha: eb42823fb5a5cbd43eb8da4f7d820b4f766d2b80
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localRuntimeBoundary:
+    browserRuntime: local_app_only_after_materialization
+    devServer: local_app_only_reuse_existing_or_start_without_env_secret_read
+    directDatabaseConnection: blocked
+    databaseMutation: blocked
+    rawDbRowsOrInternalIds: blocked
+    accountLoginOrCredentialExtraction: blocked
+  aiProviderBoundary:
+    providerCall: blocked
+    providerConfigurationReadWrite: blocked
+    providerCredentialRead: blocked
+    promptPayloadRawInputOutputEvidence: blocked
+    costCalibrationGate: blocked
+  credentialBoundary:
+    currentTask: no_password_cookie_token_session_localStorage_or_Authorization_header_capture_or_evidence
+    forbiddenEvidence:
+      - credentials_tokens_cookies_sessions_localStorage_Authorization_headers
+      - env_file_content
+      - database_url_api_key_connection_string
+      - raw_dom_screenshots_traces_html_reports
+  evidenceRedaction:
+    allowed:
+      - role_name
+      - route_or_page_label
+      - workflow_label
+      - pass_fail_blocked_status
+      - redacted_gap_summary
+      - command_name
+      - test_counts
+    forbidden:
+      - raw_dom_screenshots_traces_html_reports
+      - credentials_tokens_cookies_sessions_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_or_chunk_content
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+  blockedWithoutFreshApproval:
+    - direct_database_connection_or_mutation
+    - provider_call_or_provider_configuration_or_credential_read
+    - package_or_lockfile_change
+    - schema_migration_or_drizzle_push
+    - source_or_test_repair_without_split_task_materialization
+    - staging_prod_deploy_payment_ocr_export_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
 ownerFacingLocalExperienceBatch20260628:
   taskId: owner-facing-local-experience-batch-2026-06-28
   phase: owner-facing-local-experience-batch-2026-06-28
@@ -1000,34 +1114,30 @@ repository:
   lastKnownMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
   lastKnownOriginMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
 currentTask:
-  id: full-unit-baseline-repair-2026-06-28
-  status: closed
-  result: pass_full_unit_baseline_repaired
-  taskKind: implementation_tdd
-  executionProfile: local_source_test_repair
-  approvedAt: "2026-06-28T12:30:19-07:00"
+  id: full-acceptance-matrix-execution-2026-06-28
+  status: in_progress
+  result: pending
+  taskKind: local_acceptance_matrix
+  executionProfile: local_acceptance_matrix_runtime_after_unit_green
+  approvedAt: "2026-06-28T13:05:00-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
-  claimedAt: "2026-06-28T12:30:19-07:00"
-  plannedAt: "2026-06-28T12:30:19-07:00"
-  implementedAt: "2026-06-28T12:52:00-07:00"
-  validatedAt: "2026-06-28T12:52:00-07:00"
-  reviewedAt: "2026-06-28T12:52:00-07:00"
-  closedAt: "2026-06-28T12:52:00-07:00"
-  sourceStory: current_user_requested_full_unit_baseline_repair_as_part_of_full_acceptance_goal_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-unit-baseline-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-unit-baseline-repair.md
-  branch: codex/full-unit-baseline-repair-20260628
+  claimedAt: "2026-06-28T13:05:00-07:00"
+  plannedAt: "2026-06-28T13:05:00-07:00"
+  sourceStory: current_user_requested_all_role_all_flow_all_function_acceptance_as_final_objective_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
+  branch: codex/full-acceptance-matrix-execution-20260628
   promptMaterializationRule: >-
     Current prompt scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan. Subsequent
     browser, DB, AI, source, docs, validation, and closeout execution must use those repository governance files as
     source of truth and must not expand scope from chat memory.
   scope:
     docsStateEvidenceAudit: true
-    localSourceChange: true
-    testChange: true
+    localSourceChange: false
+    testChange: false
     focusedUnitTest: true
     fullUnitRuntime: true
     lintTypecheck: true
@@ -1035,9 +1145,9 @@ currentTask:
     mergeToMaster: true
     pushOriginMaster: true
     branchCleanup: true
-    sourceOrTestChanged: true
-    browserRuntimeExecuted: false
-    devServerStartedByCodex: false
+    sourceOrTestChanged: false
+    browserRuntimeExecuted: pending
+    devServerStartedByCodex: pending
     e2eRuntimeExecuted: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -1056,19 +1166,15 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-06-28-full-unit-baseline-repair.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-repair.md
-    - docs/05-execution-logs/acceptance/2026-06-28-full-unit-baseline-repair.md
-    - src/app/**
-    - src/components/**
-    - src/features/**
-    - src/hooks/**
-    - src/lib/**
-    - src/server/**
-    - tests/unit/**
+    - docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
   blockedFiles:
     - .env*
+    - src/**
+    - tests/**
     - e2e/**
     - scripts/**
     - package.json
@@ -1103,13 +1209,10 @@ currentTask:
       approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
   validationSummary:
     taskPlanPrepared: pass
-    fullUnitRedBaseline: pass
-    focusedGreen: pass
-    fullUnitGreen: pass
-    lint: pass
-    typecheck: pass
-    formatAndDiff: pass
-  nextRecommendedTask: full-acceptance-matrix-execution-2026-06-28
+    unitBaselinePrecondition: pass
+    matrixExecution: pending
+    fullUnitGreen: inherited_from_full_unit_task
+  nextRecommendedTask: execute_redacted_acceptance_matrix
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed

@@ -441,9 +441,14 @@ tasks:
     validationPolicy: unit_green_precondition_then_local_acceptance_matrix_then_lint_typecheck_precommit
     taskKind: local_acceptance_matrix
     moduleRunVersion: 2
-    status: pending
+    status: in_progress
     result: pending
-    branch: codex/full-acceptance-matrix-unit-baseline-20260628
+    approvedAt: "2026-06-28T13:05:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
+    claimedAt: "2026-06-28T13:05:00-07:00"
+    plannedAt: "2026-06-28T13:05:00-07:00"
+    branch: codex/full-acceptance-matrix-execution-20260628
     capabilities:
       docsStateEvidenceAudit: approved
       browserRuntime: approved_localhost_or_127_0_0_1_only_after_boundary_materialization
@@ -458,9 +463,9 @@ tasks:
       fullUnitRuntime: approved_precondition_check
       focusedUnitTest: approved_if_gap_repair_is_split_and_materialized
       localCommit: approved
-      mergeToMaster: blocked_fresh_closeout_approval_required
-      pushOriginMaster: blocked_fresh_closeout_approval_required
-      branchCleanup: blocked_fresh_closeout_approval_required
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
       schemaMigration: blocked
       seedExecution: blocked
       dependencyIntroduction: blocked
@@ -509,6 +514,8 @@ tasks:
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28 -SkipRemoteAheadCheck
     planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
