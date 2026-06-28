@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, Copy, FilePlus2, Link2, ShieldCheck } from "lucide-react";
+import { Copy, FilePlus2, Link2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,8 @@ import type { Profession, Subject } from "@/server/models/paper";
 import {
   AdminErrorState,
   AdminLoadingState,
-  AdminSurfaceStatus,
   AdminUnauthorizedState,
+  AdminUpgradeRequiredState,
   createAdminAuthHeaders,
   fetchAdminApi,
   getStoredSessionToken,
@@ -262,10 +262,10 @@ export function AdminOrganizationTrainingPage() {
 
   if (loadState === "standard-unavailable") {
     return (
-      <AdminSurfaceStatus
+      <AdminUpgradeRequiredState
         description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版 org_auth。"
-        icon={<AlertCircle aria-hidden="true" className="size-5" />}
-        state="permission-denied"
+        returnHref="/organization/portal"
+        returnLabel="返回组织概览"
         title="标准版暂不可用"
       />
     );
@@ -548,7 +548,9 @@ function SourceContextForm({
         title="绑定来源"
       />
       {disabled ? (
-        <p className="text-text-secondary text-sm">绑定来源需先创建草稿</p>
+        <p className="text-text-secondary text-sm leading-6">
+          创建草稿后才能绑定来源；本页仅保存来源元数据，不复制完整试卷内容。
+        </p>
       ) : null}
       <TextField
         label="来源业务标识"

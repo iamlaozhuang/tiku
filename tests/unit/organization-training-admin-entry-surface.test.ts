@@ -185,7 +185,7 @@ describe("AdminOrganizationTrainingPage", () => {
     const unavailableState = await screen.findByRole("alert");
     expect(unavailableState).toHaveAttribute(
       "data-admin-ux-state",
-      "permission-denied",
+      "standard-unavailable",
     );
     expect(unavailableState).toHaveTextContent("标准版暂不可用");
     expect(unavailableState).toHaveTextContent(
@@ -193,6 +193,10 @@ describe("AdminOrganizationTrainingPage", () => {
     );
     expect(unavailableState).toHaveTextContent(
       "升级需由运营管理员维护高级版 org_auth",
+    );
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
     );
     expect(screen.queryByRole("form", { name: "组织培训草稿表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
@@ -287,7 +291,8 @@ describe("AdminOrganizationTrainingPage", () => {
       await screen.findByRole("heading", { name: "组织培训" }),
     ).toBeInTheDocument();
     expect(screen.getByText("本页仅创建和复制训练草稿")).toBeInTheDocument();
-    expect(screen.getByText("绑定来源需先创建草稿")).toBeInTheDocument();
+    expect(screen.getByText(/创建草稿后才能绑定来源/u)).toBeInTheDocument();
+    expect(screen.getByText(/仅保存来源元数据/u)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "绑定来源" })).toBeDisabled();
 
     const draftForm = within(

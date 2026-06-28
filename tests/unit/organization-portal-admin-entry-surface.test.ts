@@ -206,6 +206,7 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).toHaveTextContent("标准版暂不可用");
     expect(portalShell).toHaveTextContent("当前组织仍可查看员工和授权摘要");
     expect(portalShell).toHaveTextContent("高级版开通或升级请联系运营管理员");
+    expect(portalShell).toHaveTextContent("高级能力入口保持关闭");
     expect(portalShell).not.toHaveTextContent("AI出题");
     expect(portalShell).not.toHaveTextContent("AI组卷");
     expect(portalShell).not.toHaveTextContent("企业训练");

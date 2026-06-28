@@ -248,7 +248,8 @@ export function AdminOrganizationPortalPage() {
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
             标准版暂不可用。高级版训练、统计和智能草稿能力需要高级版组织授权。
-            当前组织仍可查看员工和授权摘要。高级版开通或升级请联系运营管理员。
+            高级能力入口保持关闭。当前组织仍可查看员工和授权摘要。
+            高级版开通或升级请联系运营管理员。
           </p>
         </section>
       )}

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  AlertCircle,
   BarChart3,
   Download,
   RefreshCw,
@@ -24,8 +23,8 @@ import type {
 import {
   AdminErrorState,
   AdminLoadingState,
-  AdminSurfaceStatus,
   AdminUnauthorizedState,
+  AdminUpgradeRequiredState,
   fetchAdminApi,
   getStoredSessionToken,
   isAdminContext,
@@ -185,10 +184,10 @@ export function AdminOrganizationAnalyticsPage() {
 
   if (loadState === "standard-unavailable") {
     return (
-      <AdminSurfaceStatus
+      <AdminUpgradeRequiredState
         description="标准版组织后台暂不开放统计摘要，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版 org_auth。"
-        icon={<AlertCircle aria-hidden="true" className="size-5" />}
-        state="permission-denied"
+        returnHref="/organization/portal"
+        returnLabel="返回组织概览"
         title="标准版暂不可用"
       />
     );
@@ -574,8 +573,13 @@ function EmployeeStatisticsCard({
 
   if (employeeStatistics === null) {
     return (
-      <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
-        <p className="text-text-secondary text-sm">加载后显示员工统计</p>
+      <section
+        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+        role="status"
+      >
+        <p className="text-text-secondary text-sm leading-6">
+          加载统计摘要后显示脱敏员工统计；导出仍需单独审批。
+        </p>
       </section>
     );
   }

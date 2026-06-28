@@ -20,6 +20,7 @@ import {
   AdminLoadingState,
   AdminSurfaceStatus,
   AdminUnauthorizedState,
+  AdminUpgradeRequiredState,
   fetchAdminApi,
   getStoredSessionToken,
   isAdminContext,
@@ -176,7 +177,7 @@ function AdminAiGenerationTaskHistoryPanel({
       ? {
           eyebrow: "组织草稿池",
           empty:
-            "组织草稿池暂无任务记录。Provider 仍保持阻断，正式写入仍保持阻断。",
+            "组织草稿池暂无任务记录。Provider 仍保持阻断，不会生成正式 question 或 paper。",
         }
       : {
           eyebrow: "Provider-disabled 状态",
@@ -593,10 +594,10 @@ export function AdminAiGenerationEntryPage({
 
   if (loadState === "standard-unavailable") {
     return (
-      <AdminSurfaceStatus
+      <AdminUpgradeRequiredState
         description="标准版组织后台不开放 AI出题 或 AI组卷。升级需由运营管理员维护高级版 org_auth。"
-        icon={<AlertCircle aria-hidden="true" className="size-5" />}
-        state="permission-denied"
+        returnHref="/organization/portal"
+        returnLabel="返回组织概览"
         title="标准版暂不可用"
       />
     );

@@ -521,6 +521,14 @@ describe("admin AI generation entry surfaces", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "升级需由运营管理员维护高级版 org_auth",
     );
+    expect(await screen.findByRole("alert")).toHaveAttribute(
+      "data-admin-ux-state",
+      "standard-unavailable",
+    );
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
     expect(screen.queryByTestId("admin-ai-generation-submit")).toBeNull();
     expect(
       screen.queryByTestId("admin-ai-generation-local-contract-summary"),
@@ -819,6 +827,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("Provider 仍保持阻断");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("不会生成正式 question 或 paper");
   });
 
   it("shows a redacted history error state when metadata history loading fails", async () => {

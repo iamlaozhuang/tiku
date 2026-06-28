@@ -261,7 +261,7 @@ describe("AdminOrganizationAnalyticsPage", () => {
     const unavailableState = await screen.findByRole("alert");
     expect(unavailableState).toHaveAttribute(
       "data-admin-ux-state",
-      "permission-denied",
+      "standard-unavailable",
     );
     expect(unavailableState).toHaveTextContent("标准版暂不可用");
     expect(unavailableState).toHaveTextContent(
@@ -269,6 +269,10 @@ describe("AdminOrganizationAnalyticsPage", () => {
     );
     expect(unavailableState).toHaveTextContent(
       "升级需由运营管理员维护高级版 org_auth",
+    );
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
     );
     expect(screen.queryByRole("form", { name: "组织统计摘要表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
@@ -315,6 +319,10 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(
       screen.getByText("仅展示汇总趋势和脱敏员工统计"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/加载统计摘要后显示脱敏员工统计/u),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/导出仍需单独审批/u)).toBeInTheDocument();
 
     const scopeContext = await screen.findByTestId(
       "organization-analytics-scope-context",
