@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   OrganizationAnalyticsDashboardRouteDto,
   OrganizationAnalyticsEmployeeStatisticsRouteDto,
@@ -30,6 +31,7 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
+import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
 
 type AdminOrganizationAnalyticsLoadState =
   | "loading"
@@ -90,29 +92,19 @@ function formatRedactionStatus(value: string) {
   return "已脱敏";
 }
 
-const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
-const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
-
-function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
-  return expectedRoles.some((expectedRole) =>
-    adminRoles.includes(expectedRole),
+function resolveOrganizationAnalyticsLoadState(authContext: AuthContextDto): {
+  capabilitySummary: AdminWorkspaceCapabilitySummary;
+  loadState: AdminOrganizationAnalyticsLoadState;
+} {
+  const pageAccess = resolveOrganizationWorkspacePageAccess(
+    authContext,
+    "/organization/organization-analytics",
   );
-}
 
-function resolveOrganizationAnalyticsLoadState(
-  authContext: AuthContextDto,
-): AdminOrganizationAnalyticsLoadState {
-  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
-
-  if (hasAnyRole(adminRoles, ["super_admin", ORGANIZATION_ADVANCED_ROLE])) {
-    return "ready";
-  }
-
-  if (adminRoles.includes(ORGANIZATION_STANDARD_ROLE)) {
-    return "standard-unavailable";
-  }
-
-  return "unauthorized";
+  return {
+    capabilitySummary: pageAccess.capabilitySummary,
+    loadState: pageAccess.loadState,
+  };
 }
 
 export function AdminOrganizationAnalyticsPage() {
@@ -155,20 +147,20 @@ export function AdminOrganizationAnalyticsPage() {
           return;
         }
 
-        const nextLoadState = resolveOrganizationAnalyticsLoadState(
+        const accessState = resolveOrganizationAnalyticsLoadState(
           sessionResponse.data,
         );
 
-        if (nextLoadState === "ready") {
+        if (accessState.loadState === "ready") {
           setFormValues((currentValues) => ({
             ...currentValues,
             organizationPublicId:
-              sessionResponse.data?.user.organizationPublicId ??
+              accessState.capabilitySummary.organizationPublicId ??
               currentValues.organizationPublicId,
           }));
         }
 
-        setLoadState(nextLoadState);
+        setLoadState(accessState.loadState);
       } catch {
         if (isActive) {
           setLoadState("error");

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   OrganizationTrainingDraftDto,
   OrganizationTrainingSourceContextAttachmentDto,
@@ -26,6 +27,10 @@ import {
   professionLabels,
   subjectLabels,
 } from "../content-admin-runtime";
+import {
+  createOrganizationTrainingCapabilityContext,
+  resolveOrganizationWorkspacePageAccess,
+} from "../organization-workspace/admin-organization-workspace-access";
 
 type AdminOrganizationTrainingLoadState =
   | "loading"
@@ -86,29 +91,19 @@ const defaultCopyFormValues: CopyFormValues = {
   sourceVersionPublicId: "",
 };
 
-const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
-const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
-
-function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
-  return expectedRoles.some((expectedRole) =>
-    adminRoles.includes(expectedRole),
+function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
+  capabilitySummary: AdminWorkspaceCapabilitySummary;
+  loadState: AdminOrganizationTrainingLoadState;
+} {
+  const pageAccess = resolveOrganizationWorkspacePageAccess(
+    authContext,
+    "/organization/organization-training",
   );
-}
 
-function resolveOrganizationTrainingLoadState(
-  authContext: AuthContextDto,
-): AdminOrganizationTrainingLoadState {
-  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
-
-  if (hasAnyRole(adminRoles, ["super_admin", ORGANIZATION_ADVANCED_ROLE])) {
-    return "ready";
-  }
-
-  if (adminRoles.includes(ORGANIZATION_STANDARD_ROLE)) {
-    return "standard-unavailable";
-  }
-
-  return "unauthorized";
+  return {
+    capabilitySummary: pageAccess.capabilitySummary,
+    loadState: pageAccess.loadState,
+  };
 }
 
 async function mutateAdminOrganizationTrainingApi<TData>(
@@ -129,15 +124,10 @@ async function mutateAdminOrganizationTrainingApi<TData>(
   return (await response.json()) as ApiResponse<TData | null>;
 }
 
-function createCapabilityContext() {
-  return {
-    effectiveEdition: "advanced",
-    authorizationSource: "org_auth",
-    canCreateOrganizationTraining: true,
-  } as const;
-}
-
-function createManualDraftInput(values: DraftFormValues) {
+function createManualDraftInput(
+  values: DraftFormValues,
+  capabilitySummary: AdminWorkspaceCapabilitySummary,
+) {
   return {
     organizationPublicId: values.organizationPublicId,
     authorizationPublicId: values.authorizationPublicId,
@@ -147,17 +137,20 @@ function createManualDraftInput(values: DraftFormValues) {
     title: values.title,
     description:
       values.description.trim().length === 0 ? null : values.description,
-    capabilityContext: createCapabilityContext(),
+    capabilityContext:
+      createOrganizationTrainingCapabilityContext(capabilitySummary),
   };
 }
 
 function createSourceContextInput({
+  capabilitySummary,
   draft,
   draftValues,
   sourceValues,
 }: {
   draft: OrganizationTrainingDraftDto;
   draftValues: DraftFormValues;
+  capabilitySummary: AdminWorkspaceCapabilitySummary;
   sourceValues: SourceContextFormValues;
 }) {
   return {
@@ -166,7 +159,8 @@ function createSourceContextInput({
     authorizationPublicId: draft.authorizationPublicId,
     profession: draft.profession,
     level: draft.level,
-    capabilityContext: createCapabilityContext(),
+    capabilityContext:
+      createOrganizationTrainingCapabilityContext(capabilitySummary),
     sourceContexts: [
       {
         sourceType: sourceValues.sourceType,
@@ -204,6 +198,8 @@ export function AdminOrganizationTrainingPage() {
     defaultSourceContextFormValues,
   );
   const [copyFormValues, setCopyFormValues] = useState(defaultCopyFormValues);
+  const [capabilitySummary, setCapabilitySummary] =
+    useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [lastDraft, setLastDraft] =
     useState<OrganizationTrainingDraftDto | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -236,9 +232,12 @@ export function AdminOrganizationTrainingPage() {
           return;
         }
 
-        setLoadState(
-          resolveOrganizationTrainingLoadState(sessionResponse.data),
+        const accessState = resolveOrganizationTrainingLoadState(
+          sessionResponse.data,
         );
+
+        setCapabilitySummary(accessState.capabilitySummary);
+        setLoadState(accessState.loadState);
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -289,12 +288,17 @@ export function AdminOrganizationTrainingPage() {
     setMessage(null);
 
     try {
+      if (capabilitySummary === null) {
+        setErrorMessage("组织培训权限上下文缺失");
+        return;
+      }
+
       const response = await mutateAdminOrganizationTrainingApi<{
         draft: OrganizationTrainingDraftDto;
       }>(
         "/api/v1/organization-trainings",
         sessionToken,
-        createManualDraftInput(values),
+        createManualDraftInput(values, capabilitySummary),
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -324,6 +328,11 @@ export function AdminOrganizationTrainingPage() {
     setMessage(null);
 
     try {
+      if (capabilitySummary === null) {
+        setErrorMessage("组织培训权限上下文缺失");
+        return;
+      }
+
       const response = await mutateAdminOrganizationTrainingApi<{
         context: OrganizationTrainingSourceContextAttachmentDto;
       }>(
@@ -332,6 +341,7 @@ export function AdminOrganizationTrainingPage() {
         createSourceContextInput({
           draft: lastDraft,
           draftValues: draftFormValues,
+          capabilitySummary,
           sourceValues: values,
         }),
       );

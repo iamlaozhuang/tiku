@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 
 import {
   AdminErrorState,
@@ -22,6 +23,10 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
+import {
+  canUseOrganizationAdvancedWorkspaceCapability,
+  resolveOrganizationWorkspacePageAccess,
+} from "../organization-workspace/admin-organization-workspace-access";
 
 type AdminOrganizationPortalLoadState =
   | "loading"
@@ -97,20 +102,11 @@ const advancedOrganizationPortalDestinations: OrganizationPortalDestination[] =
     },
   ];
 
-function hasAdvancedOrganizationAdminRole(adminRoles: readonly string[]) {
-  return (
-    adminRoles.includes("org_advanced_admin") ||
-    adminRoles.includes("super_admin")
-  );
-}
-
 export function AdminOrganizationPortalPage() {
   const [loadState, setLoadState] =
     useState<AdminOrganizationPortalLoadState>("loading");
-  const [organizationPublicId, setOrganizationPublicId] = useState<
-    string | null
-  >(null);
-  const [adminRoles, setAdminRoles] = useState<readonly string[]>([]);
+  const [capabilitySummary, setCapabilitySummary] =
+    useState<AdminWorkspaceCapabilitySummary | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -138,9 +134,15 @@ export function AdminOrganizationPortalPage() {
           return;
         }
 
-        setOrganizationPublicId(sessionResponse.data.user.organizationPublicId);
-        setAdminRoles(sessionResponse.data.user.adminRoles ?? []);
-        setLoadState("ready");
+        const organizationAccess = resolveOrganizationWorkspacePageAccess(
+          sessionResponse.data,
+          "/organization/portal",
+        );
+
+        setCapabilitySummary(organizationAccess.capabilitySummary);
+        setLoadState(
+          organizationAccess.loadState === "ready" ? "ready" : "unauthorized",
+        );
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -172,7 +174,10 @@ export function AdminOrganizationPortalPage() {
     );
   }
 
-  const hasAdvancedAccess = hasAdvancedOrganizationAdminRole(adminRoles);
+  const hasAdvancedAccess =
+    capabilitySummary !== null &&
+    canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary);
+  const organizationPublicId = capabilitySummary?.organizationPublicId ?? null;
 
   return (
     <section className="space-y-6" data-testid="organization-portal-shell">

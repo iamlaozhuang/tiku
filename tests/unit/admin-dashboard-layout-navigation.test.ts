@@ -102,6 +102,12 @@ const orgStandardAdminSessionPayload = {
       organizationPublicId: "organization-standard-public-001",
       adminPublicId: "admin-org-standard-public-001",
       adminRoles: ["org_standard_admin"],
+      adminWorkspaceCapability: {
+        adminRoles: ["org_standard_admin"],
+        organizationPublicId: "organization-standard-public-001",
+        organizationEffectiveEdition: "standard",
+        canUseOrganizationAdvancedWorkspace: false,
+      },
     },
     session: {
       expiresAt: "2026-05-29T04:00:00.000Z",
@@ -124,6 +130,12 @@ const orgAdvancedAdminSessionPayload = {
       organizationPublicId: "organization-advanced-public-001",
       adminPublicId: "admin-org-advanced-public-001",
       adminRoles: ["org_advanced_admin"],
+      adminWorkspaceCapability: {
+        adminRoles: ["org_advanced_admin"],
+        organizationPublicId: "organization-advanced-public-001",
+        organizationEffectiveEdition: "advanced",
+        canUseOrganizationAdvancedWorkspace: true,
+      },
     },
     session: {
       expiresAt: "2026-05-29T04:00:00.000Z",

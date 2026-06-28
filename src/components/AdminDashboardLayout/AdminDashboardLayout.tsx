@@ -25,6 +25,10 @@ import type { LucideIcon } from "lucide-react";
 
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import {
+  canUseOrganizationAdvancedWorkspaceCapability,
+  getAdminWorkspaceCapabilitySummary,
+} from "@/features/admin/organization-workspace/admin-organization-workspace-access";
 
 /**
  * 后台管理端布局
@@ -107,6 +111,7 @@ type AdminDashboardAuthState = {
   status: AdminDashboardLayoutStatus;
   workspace: AdminWorkspace | null;
   adminRoles: readonly string[];
+  canUseOrganizationAdvancedWorkspace: boolean;
 };
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
@@ -123,13 +128,6 @@ function getWorkspaceFromPath(pathname: string): AdminWorkspace {
   return "ops";
 }
 
-function hasAdvancedOrganizationRole(adminRoles: readonly string[]) {
-  return (
-    adminRoles.includes("super_admin") ||
-    adminRoles.includes("org_advanced_admin")
-  );
-}
-
 function hasOrganizationAdminRole(adminRoles: readonly string[]) {
   return (
     adminRoles.includes("org_standard_admin") ||
@@ -140,6 +138,7 @@ function hasOrganizationAdminRole(adminRoles: readonly string[]) {
 function getWorkspacePresentation(
   workspace: AdminWorkspace,
   adminRoles: readonly string[],
+  canUseOrganizationAdvancedWorkspace: boolean,
 ) {
   if (workspace === "content") {
     return {
@@ -153,7 +152,7 @@ function getWorkspacePresentation(
       menuItems: ORGANIZATION_MENU.filter(
         (item) =>
           item.advancedOrganizationOnly !== true ||
-          hasAdvancedOrganizationRole(adminRoles),
+          canUseOrganizationAdvancedWorkspace,
       ),
       portalName: "组织后台",
     };
@@ -317,14 +316,20 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     status: "checking",
     workspace: null,
     adminRoles: [],
+    canUseOrganizationAdvancedWorkspace: false,
   });
   const status =
     authState.workspace === workspace ? authState.status : "checking";
   const adminRoles =
     authState.workspace === workspace ? authState.adminRoles : [];
+  const canUseOrganizationAdvancedWorkspace =
+    authState.workspace === workspace
+      ? authState.canUseOrganizationAdvancedWorkspace
+      : false;
   const { menuItems, portalName } = getWorkspacePresentation(
     workspace,
     adminRoles,
+    canUseOrganizationAdvancedWorkspace,
   );
   const workspaceSwitchItems = getWorkspaceSwitchItems(adminRoles);
 
@@ -342,17 +347,28 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           sessionResponse.data !== null &&
           isAdminContext(sessionResponse.data)
         ) {
+          const capabilitySummary = getAdminWorkspaceCapabilitySummary(
+            sessionResponse.data,
+          );
+
           setAuthState({
             status: canAccessWorkspace(sessionResponse.data, workspace)
               ? "authorized"
               : "forbidden",
             workspace,
             adminRoles: sessionResponse.data.user.adminRoles ?? [],
+            canUseOrganizationAdvancedWorkspace:
+              canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary),
           });
           return;
         }
 
-        setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
+        setAuthState({
+          status: "unauthorized",
+          workspace,
+          adminRoles: [],
+          canUseOrganizationAdvancedWorkspace: false,
+        });
         router.replace("/login");
       })
       .catch(() => {
@@ -360,7 +376,12 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           return;
         }
 
-        setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
+        setAuthState({
+          status: "unauthorized",
+          workspace,
+          adminRoles: [],
+          canUseOrganizationAdvancedWorkspace: false,
+        });
         router.replace("/login");
       });
 
@@ -377,7 +398,12 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
       });
     } finally {
       localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
-      setAuthState({ status: "unauthorized", workspace, adminRoles: [] });
+      setAuthState({
+        status: "unauthorized",
+        workspace,
+        adminRoles: [],
+        canUseOrganizationAdvancedWorkspace: false,
+      });
       router.replace("/login");
     }
   }

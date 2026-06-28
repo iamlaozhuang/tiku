@@ -1,4 +1,5 @@
 import type { AdminRole, UserStatus, UserType } from "../models/auth";
+import type { AdminWorkspaceCapabilitySummary } from "./admin-workspace-role-guard-contract";
 
 export type AuthenticatedUserDto = {
   publicId: string;
@@ -11,6 +12,7 @@ export type AuthenticatedUserDto = {
   organizationPublicId: string | null;
   adminPublicId?: string | null;
   adminRoles?: AdminRole[];
+  adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary;
 };
 
 export type AuthSessionDto = {

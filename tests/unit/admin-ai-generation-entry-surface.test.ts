@@ -20,6 +20,24 @@ function createSessionResponse(input: {
   adminRoles: AdminRole[];
   organizationPublicId?: string | null;
 }) {
+  const organizationPublicId = input.organizationPublicId ?? null;
+  const isOrganizationAdvancedAdmin =
+    input.adminRoles.includes("org_advanced_admin");
+  const isOrganizationStandardAdmin =
+    input.adminRoles.includes("org_standard_admin");
+  const adminWorkspaceCapability =
+    isOrganizationAdvancedAdmin || isOrganizationStandardAdmin
+      ? {
+          adminRoles: input.adminRoles,
+          organizationPublicId,
+          organizationEffectiveEdition: isOrganizationAdvancedAdmin
+            ? "advanced"
+            : "standard",
+          canUseOrganizationAdvancedWorkspace:
+            isOrganizationAdvancedAdmin && organizationPublicId !== null,
+        }
+      : undefined;
+
   return {
     code: 0,
     message: "ok",
@@ -32,9 +50,12 @@ function createSessionResponse(input: {
         status: "active",
         lockedUntilAt: null,
         employeePublicId: null,
-        organizationPublicId: input.organizationPublicId ?? null,
+        organizationPublicId,
         adminPublicId: "admin_public_123",
         adminRoles: input.adminRoles,
+        ...(adminWorkspaceCapability === undefined
+          ? {}
+          : { adminWorkspaceCapability }),
       },
       session: {
         expiresAt: "2026-06-26T20:00:00.000Z",
@@ -300,6 +321,9 @@ describe("admin AI generation entry surfaces", () => {
     const sharedSurfaceSource = readExpectedSource(
       "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
     );
+    const organizationWorkspaceAccessSource = readExpectedSource(
+      "src/features/admin/organization-workspace/admin-organization-workspace-access.ts",
+    );
 
     expect(questionRouteSource).toContain("AdminAiGenerationEntryPage");
     expect(questionRouteSource).toContain('workspace="organization"');
@@ -310,8 +334,15 @@ describe("admin AI generation entry surfaces", () => {
     expect(portalRouteSource).toContain("AdminOrganizationPortalPage");
     expect(trainingRouteSource).toContain("AdminOrganizationTrainingPage");
     expect(analyticsRouteSource).toContain("AdminOrganizationAnalyticsPage");
-    expect(sharedSurfaceSource).toContain("org_advanced_admin");
-    expect(sharedSurfaceSource).toContain("org_standard_admin");
+    expect(sharedSurfaceSource).toContain(
+      "resolveOrganizationWorkspacePageAccess",
+    );
+    expect(organizationWorkspaceAccessSource).toContain(
+      "AdminWorkspaceCapabilitySummary",
+    );
+    expect(organizationWorkspaceAccessSource).toContain(
+      "resolveAdminWorkspaceRouteAccess",
+    );
     expect(sharedSurfaceSource).toContain("标准版暂不可用");
     expect(sharedSurfaceSource).not.toContain(
       "/content/ai-question-generation",

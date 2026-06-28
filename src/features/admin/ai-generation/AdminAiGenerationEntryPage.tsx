@@ -25,6 +25,7 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
+import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
 
 type AdminAiGenerationEntryLoadState =
   | "loading"
@@ -41,18 +42,24 @@ type AdminAiGenerationRequestState =
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
 
-const ORGANIZATION_ADVANCED_ROLE = "org_advanced_admin";
-const ORGANIZATION_STANDARD_ROLE = "org_standard_admin";
-
 function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
   return expectedRoles.some((expectedRole) =>
     adminRoles.includes(expectedRole),
   );
 }
 
+function getOrganizationAiGenerationPath(
+  generationKind: AdminAiGenerationKind,
+) {
+  return generationKind === "question"
+    ? "/organization/ai-question-generation"
+    : "/organization/ai-paper-generation";
+}
+
 function resolveLoadState(
   authContext: AuthContextDto,
   workspace: AdminAiGenerationWorkspace,
+  generationKind: AdminAiGenerationKind,
 ): AdminAiGenerationEntryLoadState {
   const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
 
@@ -62,15 +69,10 @@ function resolveLoadState(
       : "unauthorized";
   }
 
-  if (hasAnyRole(adminRoles, ["super_admin", ORGANIZATION_ADVANCED_ROLE])) {
-    return "ready";
-  }
-
-  if (adminRoles.includes(ORGANIZATION_STANDARD_ROLE)) {
-    return "standard-unavailable";
-  }
-
-  return "unauthorized";
+  return resolveOrganizationWorkspacePageAccess(
+    authContext,
+    getOrganizationAiGenerationPath(generationKind),
+  ).loadState;
 }
 
 function getPageCopy(
@@ -501,7 +503,11 @@ export function AdminAiGenerationEntryPage({
           return;
         }
 
-        const nextLoadState = resolveLoadState(sessionResponse.data, workspace);
+        const nextLoadState = resolveLoadState(
+          sessionResponse.data,
+          workspace,
+          generationKind,
+        );
 
         if (nextLoadState !== "ready") {
           setLoadState(nextLoadState);
@@ -525,7 +531,7 @@ export function AdminAiGenerationEntryPage({
     return () => {
       isActive = false;
     };
-  }, [refreshTaskHistory, workspace]);
+  }, [generationKind, refreshTaskHistory, workspace]);
 
   async function handleSubmitLocalContractRequest() {
     const sessionToken = getStoredSessionToken();
