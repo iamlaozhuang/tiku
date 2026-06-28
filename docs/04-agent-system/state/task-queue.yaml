@@ -1505,7 +1505,7 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
-    nextRecommendedTask: provider_error_diagnostic_requires_fresh_approval_no_more_provider_calls
+    nextRecommendedTask: local-ai-provider-error-diagnostic-2026-06-28
     executionResult:
       envLocalRead: approved_alibaba_api_key_only_no_value_output
       envFileChanged: false
@@ -1535,12 +1535,164 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
+  - id: local-ai-provider-error-diagnostic-2026-06-28
+    title: Local AI Provider error diagnostic
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+    dependencies:
+      - local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+    taskPlanPolicy: required_before_provider_error_diagnostic
+    humanApprovalBoundary: >-
+      The user fresh-approved Provider error diagnostics after the previous env-local Provider smoke retry failed with
+      a redacted provider_error. This task may read D:\tiku\.env.local for ALIBABA_API_KEY only, inject it only into the
+      current command process, compare the failed direct alibaba/qwen-plus path with the historically passing
+      OpenAI-compatible DashScope path, and execute at most one real Provider diagnostic call with redacted evidence.
+      It must not output, copy, persist, or modify the key; must not modify .env files or Provider configuration; must
+      not record prompts, Provider payloads, raw AI output, raw answers, or full question/paper/resource/chunk content;
+      and must not execute Cost Calibration, cost measurement, pricing, quota defaults, release/final Pass,
+      staging/prod/deploy, payment/OCR/export, external service, package/lockfile, source/test/script change,
+      schema/migration, drizzle-kit push, PR, or force push.
+    targetClosureItem: Redacted Provider error diagnosis for local Provider smoke path selection
+    behaviorBoundary: approved_provider_error_diagnostic_single_request_no_config_change
+    executionProfile: local_provider_error_diagnostic_single_request
+    evidenceMode: redacted_provider_route_status_only
+    validationPolicy: static_compare_dry_run_single_provider_diagnostic_scoped_gates
+    taskKind: provider_error_diagnostic
+    moduleRunVersion: 2
+    status: closed
+    result: pass_provider_error_diagnostic_path_specific_openai_compatible_dashscope
+    approvedAt: "2026-06-28T08:54:00-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-28T08:54:00-07:00"
+    plannedAt: "2026-06-28T08:54:00-07:00"
+    implementedAt: "2026-06-28T08:57:23-07:00"
+    validatedAt: "2026-06-28T08:58:56-07:00"
+    reviewedAt: "2026-06-28T08:58:56-07:00"
+    closedAt: "2026-06-28T08:58:56-07:00"
+    capabilities:
+      providerCall: approved_single_redacted_diagnostic_call
+      providerConfigurationChange: blocked
+      providerCredentialRead: approved_env_local_alibaba_api_key_readonly_no_value_output
+      rawPromptEvidence: blocked
+      providerPayloadEvidence: blocked
+      rawAiOutputEvidence: blocked
+      envSecretAccess: approved_env_local_alibaba_api_key_readonly_no_value_output
+      envFileModification: blocked
+      localBrowserRuntime: blocked
+      devServer: blocked
+      localE2EValidation: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedHosts:
+      - dashscope.aliyuncs.com
+    readOnlySecretFiles:
+      - D:\tiku\.env.local:ALIBABA_API_KEY
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-ai-provider-error-diagnostic.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-error-diagnostic.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-error-diagnostic.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ai-provider-error-diagnostic.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-error-diagnostic.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-error-diagnostic.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name alibaba-qwen --model qwen3.7-max --base-url https://dashscope.aliyuncs.com/compatible-mode/v1 --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - powershell.exe -NoProfile -Command "read ALIBABA_API_KEY from .env.local without output; set TIKU_PROVIDER_SMOKE_APPROVED=1; run one OpenAI-compatible DashScope diagnostic smoke; output redacted status only"
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-error-diagnostic.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-error-diagnostic.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-ai-provider-error-diagnostic-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-ai-provider-error-diagnostic-2026-06-28 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
+    diagnosticPlan:
+      failedPath: direct_alibaba_provider_qwen_plus_failed_redacted_provider_error
+      historicalPassingPath: openai_compatible_alibaba_qwen_qwen3_7_max_dashscope_aliyuncs_com
+      providerRequestLimit: 1
+      retryLimit: 0
+      staticComparison: pass
+      openaiCompatibleDryRun: pass_request_count_0_redaction_passed
+      openaiCompatibleDiagnosticCall: pass_request_count_1_redaction_passed
+      conclusion: direct_alibaba_qwen_plus_failure_is_path_specific_openai_compatible_dashscope_route_passed
+    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_requires_fresh_approval
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      providerDryRun: pass_openai_compatible_request_count_0
+      providerDiagnosticExecute: pass_openai_compatible_request_count_1
+      providerCallExecuted: true
+      providerRetryAttempted: false
+      redactionBoundaryRecorded: true
+      envFileChanged: false
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_prior_high_risk_repair_diagnostic_only_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+
   - id: local-full-loop-post-provider-rollup-evidence-2026-06-28
     title: Local full loop post Provider rollup evidence
     phase: local-full-loop-acceleration-2026-06-28
     sourceStory: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
     dependencies:
       - local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+      - local-ai-provider-error-diagnostic-2026-06-28
     taskPlanPolicy: required_after_provider_smoke_evidence
     humanApprovalBoundary: >-
       This rollup is blocked until redacted local Provider smoke evidence exists. It may summarize local evidence only
@@ -1555,7 +1707,7 @@ tasks:
     taskKind: rollup_blocked
     moduleRunVersion: 2
     status: blocked
-    result: blocked_waiting_for_successful_local_provider_smoke_evidence_retry_failed_redacted_provider_error
+    result: blocked_pending_fresh_rollup_approval_successful_provider_diagnostic_evidence_exists
     approvedAt: null
     approvedBy: null
     capabilities:

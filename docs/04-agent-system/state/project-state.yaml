@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
-updatedAt: "2026-06-28T08:16:51-07:00"
+currentPhase: local-ai-provider-error-diagnostic-2026-06-28
+updatedAt: "2026-06-28T08:54:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,54 +501,54 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fdc033e8b92fd9508e21e8ede57ee9e02e99b390
-  lastKnownOriginMasterSha: fdc033e8b92fd9508e21e8ede57ee9e02e99b390
+  lastKnownMasterSha: 6d1c820a94389a8d0cf0d7920ee4e2f2dd7394c6
+  lastKnownOriginMasterSha: 6d1c820a94389a8d0cf0d7920ee4e2f2dd7394c6
 currentTask:
-  id: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+  id: local-ai-provider-error-diagnostic-2026-06-28
   status: closed
-  result: closed_provider_request_executed_failed_redacted_provider_error_e2e_pass
-  approvedAt: "2026-06-28T08:43:00-07:00"
+  result: pass_provider_error_diagnostic_path_specific_openai_compatible_dashscope
+  approvedAt: "2026-06-28T08:54:00-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
-  claimedAt: "2026-06-28T08:43:00-07:00"
-  plannedAt: "2026-06-28T08:43:00-07:00"
-  implementedAt: "2026-06-28T08:45:43-07:00"
-  validatedAt: "2026-06-28T08:47:20-07:00"
-  reviewedAt: "2026-06-28T08:47:20-07:00"
-  closedAt: "2026-06-28T08:47:20-07:00"
-  sourceStory: local-ai-provider-experience-smoke-execution-2026-06-28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
-  branch: codex/local-provider-env-smoke-20260628
+  approvalConsumed: current_user_fresh_approved_provider_error_diagnostic_2026_06_28
+  claimedAt: "2026-06-28T08:54:00-07:00"
+  plannedAt: "2026-06-28T08:54:00-07:00"
+  implementedAt: "2026-06-28T08:57:23-07:00"
+  validatedAt: "2026-06-28T08:58:56-07:00"
+  reviewedAt: "2026-06-28T08:58:56-07:00"
+  closedAt: "2026-06-28T08:58:56-07:00"
+  sourceStory: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-error-diagnostic.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ai-provider-error-diagnostic.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-error-diagnostic.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-error-diagnostic.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-error-diagnostic.md
+  branch: codex/local-provider-error-diagnostic-20260628
   scope:
     docsStateEvidenceAudit: true
     traceabilityWrite: true
     queueReseeding: false
     focusedUnitTest: false
     localBrowserRuntime: false
-    localE2ERuntime: true
+    localE2ERuntime: false
     localDevServer: false
-    localDatabaseConnectionExecuted: true
-    localDatabaseMutationExecuted: true
-    localDatabaseMutationBoundary: existing_localhost_app_route_flows_only
+    localDatabaseConnectionExecuted: false
+    localDatabaseMutationExecuted: false
+    localDatabaseMutationBoundary: not_applicable
     privateAcceptanceCredentialInput: false
     sourceOrTestChange: false
     localDockerDatabase: false
     localRagPipelineExecuted: false
     providerSmokeGateExecuted: true
-    providerCredentialLookupExecuted: true
-    providerCredentialLookupBoundary: approved_env_local_alibaba_api_key_readonly_no_value_output
+    providerCredentialLookupExecuted: true_single_alias_readonly
+    providerCredentialLookupBoundary: approved_env_local_alibaba_api_key_readonly_no_value_output_no_modification
     providerExecuteSafeBlockedReason: null
     schemaMigrationExecuted: false
     migrationGenerationExecuted: false
     schemaOrMigrationFileChanged: false
     browserRuntime: false
     devServer: false
-    e2eRuntime: true
-    providerCall: true
+    e2eRuntime: false
+    providerCall: true_single_diagnostic_call
     providerConfiguration: false
     costCalibrationExecution: false
     stagingExecution: false
@@ -557,58 +557,66 @@ currentTask:
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  localAiProviderEnvLocalReadonlySmokeRetry:
+  localAiProviderErrorDiagnostic:
     sprintId: local-full-loop-acceleration-2026-06-28
-    predecessorTask: local-ai-provider-experience-smoke-execution-2026-06-28
-    approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+    predecessorTask: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+    approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28
     envLocalReadBoundary: read_alibaba_api_key_only_no_value_output_no_modification
-    providerRequestLimit: 1
-    providerDryRun: pass_request_count_0_redaction_passed
-    providerExecute: fail_redacted_provider_error_request_count_1
+    providerRequestLimit: 1_diagnostic_call
+    providerRetryLimit: 0
+    diagnosticPremise:
+      failedPath: direct_alibaba_provider_qwen_plus_failed_redacted_provider_error
+      historicalPassingPath: openai_compatible_alibaba_qwen_qwen3_7_max_dashscope_aliyuncs_com
+      localRouteIntegratedMetadata: openai_compatible_alibaba_qwen_qwen3_7_max_dashscope_aliyuncs_com
+    diagnosticPlan:
+      staticComparison: pass
+      openaiCompatibleDryRun: pass_request_count_0_redaction_passed
+      openaiCompatibleDiagnosticCall: pass_request_count_1_redaction_passed
+    diagnosticResult:
+      resultStatus: pass
+      providerErrorSummary: null
+      conclusion: direct_alibaba_qwen_plus_failure_is_path_specific_openai_compatible_dashscope_route_passed
     providerCallExecuted: true
     providerRetryAttempted: false
     providerConfigurationChanged: false
     envFileModified: false
-    focusedLocalE2E: pass_3_specs_3_tests
-    transientArtifacts:
-      testResultsDirectory: cleaned_after_e2e
-      playwrightReportDirectory: not_created
+    focusedLocalE2E: not_executed_not_required_for_provider_error_diagnostic
     postProviderRollupEvidence:
-      unblocked: false
-      reason: successful_real_provider_execution_evidence_missing_retry_failed_provider_error
+      unblocked: true
+      reason: successful_redacted_provider_diagnostic_evidence_exists_rollup_still_requires_fresh_approval
   decision:
-    overallDecision: closed_provider_request_executed_failed_redacted_provider_error_e2e_pass
-    localFullLoopGate: pass_localhost_e2e_provider_success_evidence_still_missing_release_final_blocked
-    nextExecutableTask: none_provider_error_diagnostic_requires_fresh_approval
+    overallDecision: pass_provider_error_diagnostic_path_specific_openai_compatible_dashscope
+    localFullLoopGate: pass_localhost_e2e_and_provider_success_evidence_exists_release_final_blocked
+    nextExecutableTask: local_ai_provider_error_diagnostic
     sourceChangeDecision: docs_state_evidence_only
     browserRuntimeDecision: not_executed
-    databaseDecision: executed_only_through_existing_localhost_app_route_flows
-    providerSmokeDecision: failed_redacted_provider_error_after_one_approved_request
+    databaseDecision: not_executed
+    providerSmokeDecision: pass_openai_compatible_dashscope_one_request_diagnostic
     schemaMigrationDecision: blocked_not_required_no_drizzle_push
-    providerDecision: provider_call_executed_but_not_successful
+    providerDecision: direct_alibaba_qwen_plus_failed_but_openai_compatible_dashscope_qwen3_7_max_passed
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: provider_error_diagnostic_requires_fresh_approval_no_more_provider_calls
-  localFullLoopGate: pass_localhost_e2e_provider_success_gap_preserved_release_final_blocked
+    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_requires_fresh_approval
+  localFullLoopGate: pass_localhost_e2e_provider_success_evidence_exists_release_final_blocked
   threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
-  automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_current_user_after_validation
+  automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_initial_sprint_closeout_and_current_diagnostic_approval
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      approvalSource: current_user_fresh_approved_provider_error_diagnostic_2026_06_28_and_initial_local_full_loop_closeout_approval
   commitSha: pending_local_commit_at_state_close
   prUrl: null
   retryCount: 0
@@ -619,23 +627,24 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    providerDryRun: pass_request_count_0_redaction_passed
-    providerExecuteWrapper: fail_redacted_provider_error_request_count_1
+    staticProviderPathComparison: pass_direct_alibaba_qwen_plus_failed_openai_compatible_dashscope_route_present
+    providerDryRun: pass_openai_compatible_request_count_0
+    providerExecuteWrapper: pass_openai_compatible_request_count_1
     providerCallExecuted: true
     providerRetryAttempted: false
-    focusedLocalE2E: pass_3_specs_3_tests
-    transientPlaywrightArtifactsCleaned: true
+    focusedLocalE2E: not_executed_not_required
+    transientPlaywrightArtifactsCleaned: not_applicable
     redactionBoundaryRecorded: true
     sourceOrTestChanged: false
     schemaOrMigrationFileChanged: false
     packageOrLockfileChanged: false
     envFileChanged: false
-    localDockerDatabaseHealthy: not_checked_e2e_app_runtime_only
+    localDockerDatabaseHealthy: not_checked_not_required
     localDevSeedExecuted: false
     browserRuntimeExecuted: false
-    e2eRuntimeExecuted: true
+    e2eRuntimeExecuted: false
     devServerStartedByCodex: false
-    providerCallOrConfigurationExecuted: true_provider_call_only_configuration_unchanged
+    providerCallOrConfigurationExecuted: true_single_provider_call_configuration_unchanged
     costCalibrationExecuted: false
     stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
     releaseReadinessClaimed: false
@@ -646,7 +655,7 @@ currentTask:
     projectStatusDiagnostic: pass_idle_no_pending_task_prior_high_risk_repair_diagnostic_only_cost_calibration_blocked
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  nextRecommendedTask: provider_error_diagnostic_requires_fresh_approval_no_more_provider_calls
+  nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_requires_fresh_approval
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
