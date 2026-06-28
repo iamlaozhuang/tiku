@@ -8,15 +8,16 @@
 | Criterion                                     | Status  |
 | --------------------------------------------- | ------- |
 | Full unit baseline precondition is green      | Pass    |
-| Acceptance matrix rows are executed           | Pending |
-| Student role workflows recorded               | Pending |
-| Organization role workflows recorded          | Pending |
-| Ops/admin role workflows recorded             | Pending |
-| Cross-cutting redaction/authorization checked | Pending |
+| Acceptance matrix rows are executed           | Partial |
+| Student role workflows recorded               | Blocked |
+| Organization role workflows recorded          | Partial |
+| Ops/admin role workflows recorded             | Blocked |
+| Cross-cutting redaction/authorization checked | Partial |
 | Source/test repair is split if needed         | Pending |
-| Sensitive evidence absent                     | Pending |
-| Final Pass/release readiness not claimed      | Pending |
+| Sensitive evidence absent                     | Pass    |
+| Final Pass/release readiness not claimed      | Pass    |
 
 ## Decision
 
-Pending. This task can close acceptance matrix execution evidence, but cannot claim final Pass or release readiness.
+Partial. Current browser session supports organization admin read-only coverage, but all-role and write-flow completion needs
+a separately materialized credential/session and test-owned local mutation boundary.

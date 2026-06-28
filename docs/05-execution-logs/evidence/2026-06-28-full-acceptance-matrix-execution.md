@@ -3,7 +3,7 @@
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
 - Branch: `codex/full-acceptance-matrix-execution-20260628`
 - Evidence status: in progress
-- Updated at: `2026-06-28T13:05:00-07:00`
+- Updated at: `2026-06-28T13:18:00-07:00`
 
 ## Boundary Confirmation
 
@@ -23,12 +23,59 @@
 
 ## Matrix Progress
 
-| Area          | Status  | Evidence summary |
-| ------------- | ------- | ---------------- |
-| Student       | Pending | Not executed yet |
-| Organization  | Pending | Not executed yet |
-| Ops/Admin     | Pending | Not executed yet |
-| Cross-cutting | Pending | Not executed yet |
+| Area          | Status  | Evidence summary                                                                                             |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| Student       | Blocked | `/home` redirects to login; no credential entry or session extraction is approved                            |
+| Organization  | Mixed   | Organization portal/training/AI surfaces load; analytics load action did not produce summary result          |
+| Ops/Admin     | Blocked | Content and ops entries deny current organization admin role as expected; role switching is credential-gated |
+| Cross-cutting | Mixed   | Cross-role denial works; AI organization pages expose Provider-facing text and need follow-up review         |
+
+## Browser Acceptance Evidence
+
+- Current page context: localhost app in in-app browser.
+- Current authenticated surface: organization admin workspace. No credential, cookie, token, session, localStorage, raw DOM,
+  screenshot, trace, or raw API payload was captured.
+- Organization portal:
+  - Result: pass for route load and advanced organization navigation visibility.
+  - Evidence summary: organization portal route showed organization workspace headings and links for training, analytics,
+    AI question generation, and AI paper generation.
+- Organization training:
+  - Result: pass for read-only surface availability.
+  - Evidence summary: training route loaded with draft/source/copy controls visible.
+  - Blocked remainder: creating or copying training drafts is a local data mutation and remains blocked in this task.
+- Organization analytics:
+  - Result: fail/gap.
+  - Evidence summary: analytics route loaded and the read-only summary load control was unique and clickable, but the page
+    remained in the pre-load explanatory/status state after the click.
+  - Gap id: `full-matrix-gap-organization-analytics-load-state-2026-06-28`.
+- Organization AI question generation:
+  - Result: pass with follow-up gap.
+  - Evidence summary: owner-facing route loaded with AI question generation, draft review, redacted evidence, and recent task
+    sections.
+  - Gap id: `full-matrix-gap-organization-ai-provider-copy-2026-06-28` because Provider-facing text was detected on the
+    owner-facing surface.
+  - Blocked remainder: clicking generation is blocked because Provider/AI and local write boundaries are not approved here.
+- Organization AI paper generation:
+  - Result: pass with same follow-up gap class as organization AI question generation.
+  - Evidence summary: owner-facing route loaded with AI paper generation, draft review, redacted evidence, and recent task
+    sections.
+- Student entry:
+  - Result: blocked by credential boundary.
+  - Evidence summary: `/home` resolves to login when no student session is available; no account credential entry is approved.
+- Content admin entry:
+  - Result: pass for cross-role denial under current organization admin session; blocked for content-admin workflow coverage.
+  - Evidence summary: content paper entry displayed no-access state and a safe return path to organization workspace.
+- Ops admin entry:
+  - Result: pass for cross-role denial under current organization admin session; blocked for ops workflow coverage.
+  - Evidence summary: ops user entry displayed no-access state and a safe return path to organization workspace.
+
+## Blocked Completion Requirements
+
+- To complete all-role/all-flow/all-function runtime coverage, a follow-up materialized boundary is required for test-owned
+  local account/session fixtures or an approved safe role-switching method.
+- To complete write workflows, a follow-up materialized boundary is required for localhost UI/API mutations against explicitly
+  test-owned local fixture data.
+- Direct DB reads/writes, Provider calls, Provider configuration/credential reads, and Cost Calibration Gate remain blocked.
 
 ## Validation Commands
 
