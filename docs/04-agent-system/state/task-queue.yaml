@@ -2550,7 +2550,7 @@ tasks:
     validationPolicy: existing_localhost_browser_matrix_docs_prettier_diff_project_status_precommit
     taskKind: local_browser_validation
     moduleRunVersion: 2
-    status: blocked
+    status: closed
     result: blocked_existing_authenticated_local_role_session_unavailable_no_credentials_used
     approvedAt: "2026-06-28T03:01:13-07:00"
     approvedBy: laozhuang
@@ -2560,6 +2560,7 @@ tasks:
     observedAt: "2026-06-28T03:03:33-07:00"
     reviewedAt: "2026-06-28T03:03:33-07:00"
     blockedAt: "2026-06-28T03:03:33-07:00"
+    closedAt: "2026-06-28T03:10:54-07:00"
     branch: codex/organization-workspace-browser-validation-20260628
     capabilities:
       docsStateEvidenceAudit: approved
@@ -2653,12 +2654,14 @@ tasks:
       prettierScoped: pass
       gitDiffCheck: pass
       projectStatusDiagnostic: pass_idle_no_pending_task_requires_human
-      activeQueueNonTerminalCountAfterTask: 4
+      activeQueueNonTerminalCountAfterTask: 3
       archiveCandidateCountAfterTask: 17
       highRiskRepairBlockedCountAfterTask: 0
       projectStatusRequiresHumanAfterTask: true
       projectStatusSafeToProceedAfterTask: false
       moduleRunV2PreCommitHardening: pass
+      initialPrePushAttempt: blocked_repository_sha_drift_no_remote_update
+      closeoutStatusRepair: pass_closed_task_with_blocked_result_retained
       databaseConnectionOrMutationExecuted: false
       providerCallOrConfigurationExecuted: false
       costCalibrationExecuted: false

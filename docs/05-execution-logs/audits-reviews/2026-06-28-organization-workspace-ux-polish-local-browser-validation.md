@@ -30,7 +30,7 @@ Blocking finding:
 
 ## Validation Review
 
-The local target HTTP check passed. Browser observation reached the existing local target but resolved to login. Scoped Prettier, `git diff --check`, project status, and Module Run v2 hardening passed after this blocked-state evidence update.
+The local target HTTP check passed. Browser observation reached the existing local target but resolved to login. Scoped Prettier, `git diff --check`, project status, and Module Run v2 hardening passed after this blocked-state evidence update. The first closeout push attempt was blocked by repository SHA drift because the task status was still nonterminal; the state was repaired to close the task while retaining the blocked result and no remote refs were updated by the failed attempt.
 
 ## Residual Risk
 

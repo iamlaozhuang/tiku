@@ -41,6 +41,7 @@ Accepted only as blocked local-browser evidence:
 | DB/schema/migration/seed excluded                               | pass_not_run       |
 | Provider/Cost Calibration excluded                              | pass_not_run       |
 | Screenshot/trace/raw DOM/storage/credential evidence excluded   | pass_not_recorded  |
+| Closeout status preserves blocked role-validation result        | pass               |
 | Release readiness/final Pass excluded                           | pass_not_claimed   |
 | Full docs/state validation and Module Run v2 gates              | pass               |
 
