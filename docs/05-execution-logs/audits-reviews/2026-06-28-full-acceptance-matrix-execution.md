@@ -1,7 +1,7 @@
 # Audit Review: Full Acceptance Matrix Execution
 
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
-- Status: in progress
+- Status: closed partial
 
 ## Review Checklist
 
@@ -28,3 +28,9 @@
   credential entry.
 - Follow-up task queue entries now materialize credential/session boundary, local mutation boundary, organization analytics
   repair, and organization AI owner-facing Provider-copy repair.
+
+## Review Decision
+
+APPROVE: close current task as partial and blocked by explicit boundaries. This approval is limited to the current
+redacted evidence closeout and follow-up task materialization. Do not claim final Pass, release readiness, DB readiness,
+Provider readiness, or full all-role/write-flow runtime completion.

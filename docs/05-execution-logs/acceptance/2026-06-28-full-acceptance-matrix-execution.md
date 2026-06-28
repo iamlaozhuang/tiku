@@ -1,7 +1,8 @@
 # Acceptance Summary: Full Acceptance Matrix Execution
 
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
-- Status: in progress
+- Status: closed
+- Result: partial blocked; follow-up tasks materialized
 
 ## Acceptance Criteria
 
@@ -20,6 +21,6 @@
 
 ## Decision
 
-Partial. Current browser session supports organization admin read-only coverage, but all-role and write-flow completion needs
-a separately approved credential/session and test-owned local mutation boundary. Follow-up boundary and repair tasks are now
-materialized in the task queue, but this task still cannot claim full acceptance completion.
+Closed as partial. Current browser session supports organization admin read-only coverage, but all-role and write-flow
+completion needs a separately approved credential/session and test-owned local mutation boundary. Follow-up boundary and
+repair tasks are now materialized in the task queue, but this task does not claim full acceptance completion.

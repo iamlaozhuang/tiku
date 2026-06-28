@@ -2,7 +2,7 @@
 
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
 - Branch: `codex/full-acceptance-matrix-execution-20260628`
-- Status: in progress
+- Status: closed partial
 - Date: `2026-06-28`
 
 ## Goal

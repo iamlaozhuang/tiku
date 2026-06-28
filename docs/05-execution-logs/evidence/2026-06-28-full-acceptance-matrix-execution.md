@@ -2,8 +2,8 @@
 
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
 - Branch: `codex/full-acceptance-matrix-execution-20260628`
-- Evidence status: in progress
-- Updated at: `2026-06-28T13:24:10-07:00`
+- Evidence status: closed partial
+- Updated at: `2026-06-28T13:27:44-07:00`
 
 ## Boundary Confirmation
 
@@ -124,6 +124,27 @@
 - GREEN:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28`
   - Result: passed.
+- GREEN:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28`
+  - Result: passed.
+- GREEN:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28 -SkipRemoteAheadCheck`
+  - Result: passed.
+
+## Module Run v2 Closeout Evidence
+
+- Batch range: Batch 1 covers full unit baseline precondition, redacted local browser matrix evidence, blocked rows, and
+  follow-up task materialization.
+- RED: `Test-ModuleRunV2ModuleCloseoutReadiness.ps1` initially failed on missing closeout evidence anchors only.
+- GREEN: closeout evidence anchors were added without source/test, DB, Provider, credential, dependency, or runtime scope
+  expansion.
+- Commit: `a3d0c597b`
+- localFullLoopGate: partial closeout only; all-role session switching and write-flow mutation remain blocked until future
+  task-level approval and materialization.
+- Cost Calibration Gate remains blocked.
+- threadRolloverGate: if this thread rolls over, resume from `project-state.yaml`, `task-queue.yaml`, and this evidence file,
+  not from chat memory.
+- nextModuleRunCandidate: `full-acceptance-session-fixture-boundary-2026-06-28`.
 
 ## Required Closeout Commands
 
@@ -138,5 +159,6 @@
 
 ## Closeout Status
 
-Partial acceptance evidence recorded. Current task is not closable as full acceptance because all-role session switching and
-write-flow mutation coverage remain blocked by explicit boundaries.
+Closed as partial acceptance evidence. Current task is not full acceptance completion because all-role session switching and
+write-flow mutation coverage remain blocked by explicit boundaries. Follow-up tasks are materialized for those boundaries and
+for the two discovered source/test repair gaps.

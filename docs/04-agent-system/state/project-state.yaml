@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: full-acceptance-matrix-execution-2026-06-28
-updatedAt: "2026-06-28T13:05:00-07:00"
+updatedAt: "2026-06-28T13:27:44-07:00"
 fullAcceptanceMatrixUnitBaselineRepairRequirements20260628:
   taskId: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
   phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
@@ -333,12 +333,16 @@ fullUnitBaselineRepair20260628:
 fullAcceptanceMatrixExecution20260628:
   taskId: full-acceptance-matrix-execution-2026-06-28
   phase: full-acceptance-matrix-execution-2026-06-28
-  status: in_progress
-  result: pending
+  status: closed
+  result: partial_blocked_followups_materialized
   branch: codex/full-acceptance-matrix-execution-20260628
   executionProfile: local_acceptance_matrix_runtime_after_unit_green
   taskKind: local_acceptance_matrix
   createdAt: "2026-06-28T13:05:00-07:00"
+  completedAt: "2026-06-28T13:27:44-07:00"
+  validatedAt: "2026-06-28T13:27:44-07:00"
+  reviewedAt: "2026-06-28T13:27:44-07:00"
+  closedAt: "2026-06-28T13:27:44-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
   promptMaterializationRule: >-
@@ -444,6 +448,27 @@ fullAcceptanceMatrixExecution20260628:
   evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
   acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
+  followUpTaskIds:
+    credentialSessionBoundary: full-acceptance-session-fixture-boundary-2026-06-28
+    localMutationBoundary: full-acceptance-local-mutation-boundary-2026-06-28
+    organizationAnalyticsRepair: fix-organization-analytics-load-state-2026-06-28
+    organizationAiProviderCopyRepair: fix-organization-ai-provider-copy-2026-06-28
+  validationSummary:
+    fullUnitBaselinePrecondition: pass_master_eb42823fb
+    lint: pass
+    typecheck: pass
+    fullUnit: pass_317_files_1429_tests
+    browserAcceptanceEvidence: partial_organization_admin_and_public_guard_rows_recorded
+    studentRoleCoverage: blocked_by_credential_session_boundary
+    opsAdminRoleCoverage: blocked_by_credential_session_boundary
+    writeFlowCoverage: blocked_by_local_mutation_boundary
+    sourceTestRepairSplit: pass_followup_tasks_materialized
+    sensitiveEvidenceAbsent: pass
+    finalPassClaimed: false
+    releaseReadinessClaimed: false
+    directDatabaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    credentialSessionStorageCaptureExecuted: false
 ownerFacingLocalExperienceBatch20260628:
   taskId: owner-facing-local-experience-batch-2026-06-28
   phase: owner-facing-local-experience-batch-2026-06-28

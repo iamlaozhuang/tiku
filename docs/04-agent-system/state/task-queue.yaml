@@ -441,13 +441,17 @@ tasks:
     validationPolicy: unit_green_precondition_then_local_acceptance_matrix_then_lint_typecheck_precommit
     taskKind: local_acceptance_matrix
     moduleRunVersion: 2
-    status: in_progress
-    result: pending
+    status: closed
+    result: partial_blocked_followups_materialized
     approvedAt: "2026-06-28T13:05:00-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_inherited_full_acceptance_matrix_full_unit_baseline_goal_and_per_task_closeout_2026_06_28
     claimedAt: "2026-06-28T13:05:00-07:00"
     plannedAt: "2026-06-28T13:05:00-07:00"
+    implementedAt: "2026-06-28T13:27:44-07:00"
+    validatedAt: "2026-06-28T13:27:44-07:00"
+    reviewedAt: "2026-06-28T13:27:44-07:00"
+    closedAt: "2026-06-28T13:27:44-07:00"
     branch: codex/full-acceptance-matrix-execution-20260628
     capabilities:
       docsStateEvidenceAudit: approved
@@ -543,9 +547,25 @@ tasks:
       - source_or_test_gap_repair_without_split_task
       - package_or_lockfile_change
       - staging_prod_deploy_payment_ocr_export_external_service
-      - pr_force_push_merge_push_cleanup
+      - pr_force_push
       - release_readiness_or_final_pass
       - cost_calibration_gate
+    validationSummary:
+      fullUnitBaselinePrecondition: pass_master_eb42823fb
+      lint: pass
+      typecheck: pass
+      fullUnit: pass_317_files_1429_tests
+      browserAcceptanceEvidence: partial_organization_admin_and_public_guard_rows_recorded
+      studentRoleCoverage: blocked_by_credential_session_boundary
+      opsAdminRoleCoverage: blocked_by_credential_session_boundary
+      writeFlowCoverage: blocked_by_local_mutation_boundary
+      sourceTestRepairSplit: pass_followup_tasks_materialized
+      sensitiveEvidenceAbsent: pass
+      finalPassClaimed: false
+      releaseReadinessClaimed: false
+      directDatabaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialSessionStorageCaptureExecuted: false
     retryCount: 0
     lastFailurePath: null
 
