@@ -1066,6 +1066,376 @@ tasks:
       releaseReadinessDecision: blocked
       finalPassClaim: blocked
       finalGateStatus: pass
+    nextRecommendedTask: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+
+  - id: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+    title: Local full loop gap reseed after UI action smoke
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-ui-action-loop-browser-smoke-2026-06-28
+    dependencies:
+      - local-ui-action-loop-browser-smoke-2026-06-28
+    taskPlanPolicy: required_before_state_queue_edit
+    humanApprovalBoundary: >-
+      Current user approved executing the recommended local full-loop gap reseed task and approved local commit,
+      fast-forward merge to master, push origin/master, and merged short-branch cleanup after completion. This task may
+      update docs/state/queue/traceability/evidence/audit/acceptance only and may seed approval-required successor tasks.
+      It must not execute Provider/model calls, read or edit .env files, run DB/browser/dev-server/e2e runtime, change
+      source/tests/scripts/schema/migrations/package/lockfile, execute staging/prod/deploy/payment/OCR/export/external
+      service, create PRs, force push, claim release readiness/final Pass, decide pricing/quota defaults, or execute Cost
+      Calibration.
+    targetClosureItem: Local full-loop next-gap queue reseeded after UI action smoke
+    behaviorBoundary: docs_state_queue_reseed_only_after_local_ui_action_smoke
+    executionProfile: local_full_loop_docs_state_gap_reseed
+    evidenceMode: redacted_metadata_only
+    validationPolicy: docs_state_queue_scoped_gates
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_full_loop_gap_reseed_after_ui_action_smoke
+    approvedAt: "2026-06-28T08:16:51-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+    claimedAt: "2026-06-28T08:16:51-07:00"
+    plannedAt: "2026-06-28T08:16:51-07:00"
+    implementedAt: "2026-06-28T08:16:51-07:00"
+    validatedAt: "2026-06-28T08:16:51-07:00"
+    reviewedAt: "2026-06-28T08:16:51-07:00"
+    closedAt: "2026-06-28T08:16:51-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    branch: codex/local-full-loop-gap-reseed-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      queueReseeding: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-28-local-*.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    riskTypes:
+      - docs_state_queue_reseed
+      - approval_required_provider_successor
+      - no_runtime_execution
+      - no_provider_no_cost_calibration
+      - no_release_final_pass
+    seededSuccessors:
+      - local-ai-provider-experience-smoke-execution-2026-06-28
+      - local-full-loop-post-provider-rollup-evidence-2026-06-28
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      queueReseeded: pass_2_blocked_successors_seeded
+      runtimeExecution: none_docs_state_only
+      sourceOrTestChanged: false
+      schemaOrMigrationFileChanged: false
+      packageOrLockfileChanged: false
+      envFileChanged: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      redactionBoundaryRecorded: true
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_provider_successor_blocked_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      finalGateStatus: pass_docs_state_reseed_release_final_blocked
+    nextRecommendedTask: local-ai-provider-experience-smoke-execution-2026-06-28_requires_fresh_approval
+
+  - id: local-ai-provider-experience-smoke-execution-2026-06-28
+    title: Local AI Provider experience smoke execution
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+    dependencies:
+      - local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+    taskPlanPolicy: required_before_provider_smoke
+    humanApprovalBoundary: >-
+      This task is seeded by the local full-loop gap reseed and is blocked pending fresh explicit approval. If approved,
+      it may execute only a tiny localhost/127.0.0.1 real Provider smoke through existing app/service paths for
+      content_admin AI question/paper generation, org_advanced_admin organization AI question/paper generation, and
+      student AI explanation/讲解. It must not read, print, or edit .env files; must not change Provider configuration;
+      must not record prompt, Provider payload, raw AI output, raw student or employee answer, full question/paper,
+      credentials, token, cookie, localStorage, Authorization header, connection string, raw DB row, screenshot, trace,
+      raw DOM, pricing/quota defaults, or Cost Calibration data.
+    targetClosureItem: Redacted localhost Provider smoke for AI generation and explanation experience
+    behaviorBoundary: blocked_provider_smoke_pending_fresh_approval_no_cost_calibration
+    executionProfile: local_provider_smoke_blocked_until_fresh_approval
+    evidenceMode: redacted_role_route_service_status_count_only
+    validationPolicy: blocked_pending_fresh_provider_execution_approval
+    taskKind: provider_smoke_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_provider_smoke_execution_approval
+    approvedAt: null
+    approvedBy: null
+    capabilities:
+      providerCall: blocked_pending_fresh_explicit_approval
+      providerConfigurationChange: blocked
+      providerCredentialRead: blocked
+      rawPromptEvidence: blocked
+      providerPayloadEvidence: blocked
+      rawAiOutputEvidence: blocked
+      envSecretAccess: blocked
+      localBrowserRuntime: blocked_until_fresh_approval_if_needed
+      devServer: blocked_until_fresh_approval_if_needed
+      localE2EValidation: blocked_until_fresh_approval_if_needed
+      localDatabaseConnection: blocked_unless_app_runtime_only_after_approval
+      localDatabaseMutation: blocked_unless_existing_app_generated_task_only_after_approval
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    plannedCoverage:
+      content_admin:
+        - ai_question_generation_provider_smoke
+        - ai_paper_generation_provider_smoke
+      org_advanced_admin:
+        - organization_ai_question_generation_provider_smoke
+        - organization_ai_paper_generation_provider_smoke
+      student:
+        - ai_explanation_provider_smoke
+      negativeBoundary:
+        - org_standard_admin_provider_generation_denied_or_unavailable
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-experience-smoke-execution.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    ownerInputRequiredForExecution:
+      approvalRequired: local_provider_smoke_execution_only
+      copyableFreshApprovalText: |-
+        批准执行 local-ai-provider-experience-smoke-execution-2026-06-28。
+        范围仅限 localhost/127.0.0.1 的少量真实 Provider 本地 smoke，用于 content_admin AI出题/AI组卷、org_advanced_admin 组织 AI出题/AI组卷、student AI解析/讲解的最小闭环验证。
+        允许使用当前进程或已运行本地服务已有的 Provider 配置，但禁止读取、输出或修改 .env*；禁止 Provider 配置变更；禁止记录 prompt、Provider payload、原始 AI 输出、原始学生/员工答案、完整 question/paper/resource/chunk 内容、凭据、token、cookie、localStorage、Authorization header、连接串或 DB 原始行。
+        禁止 Cost Calibration、成本测量、定价、quota 默认值、release/final Pass、staging/prod/deploy、payment/OCR/export/external-service、package/lockfile、schema/migration、drizzle-kit push、PR、force push。
+        完成后允许本地提交、fast-forward 合入 master、推送 origin/master 并清理短分支。
+    validationCommands:
+      - blocked_pending_fresh_provider_smoke_execution_approval
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_provider_smoke_execution_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_provider_smoke_execution_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_provider_smoke_execution_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_provider_smoke_execution_approval_required
+    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_if_provider_smoke_approved_and_executed
+
+  - id: local-full-loop-post-provider-rollup-evidence-2026-06-28
+    title: Local full loop post Provider rollup evidence
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+    dependencies:
+      - local-ai-provider-experience-smoke-execution-2026-06-28
+    taskPlanPolicy: required_after_provider_smoke_evidence
+    humanApprovalBoundary: >-
+      This rollup is blocked until redacted local Provider smoke evidence exists. It may summarize local evidence only
+      after the Provider smoke task is separately approved and closed. It must not execute runtime, Provider, DB,
+      browser/e2e/dev-server, staging/prod/deploy, payment/OCR/export/external-service, package/lockfile, .env, schema,
+      migration, Cost Calibration, release readiness, or final Pass.
+    targetClosureItem: Post-Provider local full-loop evidence rollup with blocked release gates preserved
+    behaviorBoundary: blocked_rollup_waiting_for_provider_smoke_evidence
+    executionProfile: post_provider_rollup_blocked_until_predecessor_evidence
+    evidenceMode: redacted_metadata_only
+    validationPolicy: blocked_until_provider_smoke_predecessor_closed
+    taskKind: rollup_blocked
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_waiting_for_local_provider_smoke_evidence
+    approvedAt: null
+    approvedBy: null
+    capabilities:
+      docsStateEvidenceAudit: approved_after_predecessor_closed
+      providerCall: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    validationCommands:
+      - blocked_waiting_for_local_provider_smoke_evidence
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: predecessor_provider_smoke_closeout_and_fresh_rollup_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: predecessor_provider_smoke_closeout_and_fresh_rollup_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: predecessor_provider_smoke_closeout_and_fresh_rollup_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: predecessor_provider_smoke_closeout_and_fresh_rollup_approval_required
     nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
 
   - id: local-role-browser-acceptance-hardening-2026-06-28

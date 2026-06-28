@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-ui-action-loop-browser-smoke-2026-06-28
-updatedAt: "2026-06-28T08:03:12-07:00"
+currentPhase: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
+updatedAt: "2026-06-28T08:16:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,50 +501,50 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 02adcaeed3d076bda1282a1fe1c5df8042afe7b1
-  lastKnownOriginMasterSha: 02adcaeed3d076bda1282a1fe1c5df8042afe7b1
+  lastKnownMasterSha: db5b019955cce18f703701cf697dd5e2eb8be692
+  lastKnownOriginMasterSha: db5b019955cce18f703701cf697dd5e2eb8be692
 currentTask:
-  id: local-ui-action-loop-browser-smoke-2026-06-28
+  id: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
   status: closed
-  result: pass_local_ui_action_loop_browser_smoke
-  approvedAt: "2026-06-28T07:48:50-07:00"
+  result: pass_local_full_loop_gap_reseed_after_ui_action_smoke
+  approvedAt: "2026-06-28T08:16:51-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
-  claimedAt: "2026-06-28T07:48:50-07:00"
-  plannedAt: "2026-06-28T07:48:50-07:00"
-  implementedAt: "2026-06-28T08:03:12-07:00"
-  validatedAt: "2026-06-28T08:03:12-07:00"
-  reviewedAt: "2026-06-28T08:03:12-07:00"
-  closedAt: "2026-06-28T08:03:12-07:00"
-  sourceStory: local-role-browser-acceptance-hardening-2026-06-28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ui-action-loop-browser-smoke.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ui-action-loop-browser-smoke.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ui-action-loop-browser-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md
-  branch: codex/local-ui-action-loop-browser-smoke-20260628
+  approvalConsumed: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
+  claimedAt: "2026-06-28T08:16:51-07:00"
+  plannedAt: "2026-06-28T08:16:51-07:00"
+  implementedAt: "2026-06-28T08:16:51-07:00"
+  validatedAt: "2026-06-28T08:16:51-07:00"
+  reviewedAt: "2026-06-28T08:16:51-07:00"
+  closedAt: "2026-06-28T08:16:51-07:00"
+  sourceStory: local-ui-action-loop-browser-smoke-2026-06-28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-gap-reseed-after-ui-action-smoke.md
+  branch: codex/local-full-loop-gap-reseed-20260628
   scope:
     docsStateEvidenceAudit: true
     traceabilityWrite: true
-    focusedUnitTest: blocked_unless_needed_for_browser_observation_repair
-    localBrowserRuntime: approved_localhost_127_0_0_1_only
-    localE2ERuntime: approved_localhost_existing_specs_only
-    localDevServer: approved_existing_localhost_reuse
-    localDatabaseConnectionExecuted: local_app_runtime_only_no_direct_db_connection
-    localDatabaseMutationExecuted: local_app_ui_action_only_no_direct_db_write
-    privateAcceptanceCredentialInput: approved_input_only_no_evidence_values
-    sourceOrTestChange: blocked_unless_fresh_repair_scope_needed
-    queueReseeding: false
-    localDockerDatabase: existing_local_app_runtime_only
+    queueReseeding: true
+    focusedUnitTest: false
+    localBrowserRuntime: false
+    localE2ERuntime: false
+    localDevServer: false
+    localDatabaseConnectionExecuted: false
+    localDatabaseMutationExecuted: false
+    privateAcceptanceCredentialInput: false
+    sourceOrTestChange: false
+    localDockerDatabase: false
     localRagPipelineExecuted: false
     providerSmokeGateExecuted: false
     providerCredentialLookupExecuted: false
     schemaMigrationExecuted: false
     migrationGenerationExecuted: false
     schemaOrMigrationFileChanged: false
-    browserRuntime: local_in_app_browser_pass
-    devServer: existing_localhost_server_reused
-    e2eRuntime: existing_local_smoke_pass
+    browserRuntime: false
+    devServer: false
+    e2eRuntime: false
     providerCall: false
     providerConfiguration: false
     costCalibrationExecution: false
@@ -554,57 +554,52 @@ currentTask:
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  localUiActionLoopBrowserSmoke:
+  localFullLoopGapReseedAfterUiActionSmoke:
     sprintId: local-full-loop-acceleration-2026-06-28
-    previousBrowserAcceptanceTask: local-role-browser-acceptance-hardening-2026-06-28
-    highestTargetLocalValidationLevel: L6_local_role_flow
-    requiredRoles:
-      - student
-      - content_admin
-      - ops_admin
-      - org_standard_admin
-      - org_advanced_admin
-      - employee
-    targetActionSurfaces:
-      student: student_experience_safe_interaction
-      content_admin: content_ai_generation_local_contract_submit
-      ops_admin: ops_read_only_runtime_surface
-      org_standard_admin: advanced_route_standard_unavailable_boundary
-      org_advanced_admin: organization_training_analytics_ai_generation_actions
-      employee: organization_training_entry_action_surface
+    previousUiActionTask: local-ui-action-loop-browser-smoke-2026-06-28
+    highestObservedLocalValidationLevel: L6_local_role_flow_action_loop_smoke
+    reseedDecision: seed_provider_smoke_execution_as_blocked_pending_fresh_approval
+    seededSuccessors:
+      - local-ai-provider-experience-smoke-execution-2026-06-28
+      - local-full-loop-post-provider-rollup-evidence-2026-06-28
+    providerSmokeBoundary: >-
+      The next Provider smoke remains blocked until fresh approval. It may use only current-process or already-running
+      localhost service Provider configuration and must not read or edit .env files, change Provider configuration,
+      record prompts, Provider payloads, raw AI output, raw answer text, full question/paper/resource/chunk content, or
+      any cost-calibration data.
   decision:
-    overallDecision: pass_local_ui_action_loop_browser_smoke
-    localFullLoopGate: pass_local_ui_action_loop_browser_smoke
-    nextExecutableTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
-    sourceChangeDecision: docs_state_evidence_only_unless_blocker
-    browserRuntimeDecision: pass_localhost_127_0_0_1_only
-    databaseDecision: local_app_runtime_only_no_direct_db_connection_or_schema_change
-    providerSmokeDecision: blocked_not_required_for_browser_acceptance
+    overallDecision: pass_local_full_loop_gap_reseed_after_ui_action_smoke
+    localFullLoopGate: pass_docs_state_gap_reseed_after_l6_ui_action_loop
+    nextExecutableTask: none_blocked_successor_requires_fresh_provider_smoke_approval
+    sourceChangeDecision: docs_state_queue_only
+    browserRuntimeDecision: not_executed
+    databaseDecision: not_executed
+    providerSmokeDecision: blocked_pending_fresh_approval
     schemaMigrationDecision: blocked_not_required_no_drizzle_push
     providerDecision: no_provider_call_executed
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
-  localFullLoopGate: pass_local_ui_action_loop_browser_smoke_release_final_blocked
+    nextRecommendedTask: local-ai-provider-experience-smoke-execution-2026-06-28_requires_fresh_approval
+  localFullLoopGate: pass_docs_state_gap_reseed_release_final_blocked
   threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
   automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_current_user_after_validation
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      approvalSource: current_user_approved_local_full_loop_gap_reseed_after_ui_action_smoke_2026_06_28
   commitSha: pending_local_commit_at_state_close
   prUrl: null
   retryCount: 0
@@ -615,15 +610,17 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    localUiActionLoopBrowserSmoke: pass_6_roles_13_actions
+    queueReseeded: pass_2_blocked_successors_seeded
     redactionBoundaryRecorded: true
     sourceOrTestChanged: false
     schemaOrMigrationFileChanged: false
-    localDockerDatabaseHealthy: not_directly_checked_existing_localhost_available
+    packageOrLockfileChanged: false
+    envFileChanged: false
+    localDockerDatabaseHealthy: not_executed_docs_state_only
     localDevSeedExecuted: false
-    browserRuntimeExecuted: pass_localhost_only
-    e2eRuntimeExecuted: pass_3_existing_specs_3_tests
-    devServerStartedByCodex: false_existing_localhost_server_reused
+    browserRuntimeExecuted: false
+    e2eRuntimeExecuted: false
+    devServerStartedByCodex: false
     providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
     stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
@@ -631,13 +628,11 @@ currentTask:
     finalPassClaimed: false
     prettierWriteScoped: pass
     prettierScoped: pass
-    lint: pass
-    typecheck: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_cost_calibration_blocked
+    projectStatusDiagnostic: pass_idle_no_pending_task_provider_successor_blocked_cost_calibration_blocked
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
+  nextRecommendedTask: local-ai-provider-experience-smoke-execution-2026-06-28_requires_fresh_approval
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
