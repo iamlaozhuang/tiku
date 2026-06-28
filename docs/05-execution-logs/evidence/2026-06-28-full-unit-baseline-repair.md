@@ -88,15 +88,18 @@
   - Tests: 1429 passed.
 - Closeout command to run after implementation commit:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-unit-baseline-repair-2026-06-28`
+    - Result: passed before implementation commit and in commit hook.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-repair-2026-06-28`
+    - Result: passed.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-unit-baseline-repair-2026-06-28 -SkipRemoteAheadCheck`
+    - Result: passed.
 
 ## Module Run v2 Closeout Anchors
 
 - Batch range: full-unit-baseline-repair-2026-06-28 single task batch.
 - RED: `npm.cmd run test:unit` reproduced 11 failing files / 20 failing tests before repair.
 - GREEN: focused repair and full unit baseline commands passed as recorded above.
-- Commit: recorded after implementation commit.
+- Commit: `42b869a6b`
 - localFullLoopGate: passed for unit baseline, lint, typecheck, formatting, and diff checks.
 - threadRolloverGate: not required; no context rollover needed for this task.
 - nextModuleRunCandidate: `full-acceptance-matrix-execution-2026-06-28` after merge/push/cleanup.
@@ -105,4 +108,4 @@
 
 ## Closeout Status
 
-Full unit baseline repair is complete locally. Implementation commit and closeout script evidence remain to be recorded before merge/push.
+Full unit baseline repair is complete locally. Implementation commit, closeout readiness, and pre-push readiness are recorded before merge/push.
