@@ -44,6 +44,493 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    title: Full acceptance matrix and full unit baseline repair requirements
+    phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    sourceStory: current_user_requested_full_acceptance_matrix_and_full_unit_baseline_repair_goal_setup_2026_06_28
+    dependencies:
+      - owner-facing-local-experience-batch-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user approved moving forward in phases with the final objective of completing a full all-role/all-flow
+      acceptance matrix plus full unit baseline repair. This requirements-setting task may update governance state,
+      task queue, traceability, task plan, redacted evidence, audit review, and acceptance summary only. It must not run
+      browser, DB, AI/Provider, dev-server, e2e, source/test/package/schema/migration/seed, staging/prod/deploy,
+      payment/OCR/export/external-service, PR, force-push, release readiness, or final Pass work.
+    targetClosureItem: Durable requirements and queue entry points for full acceptance matrix plus full unit baseline repair
+    behaviorBoundary: docs_state::requirements_matrix_queue_only_no_runtime_no_source_no_final_pass
+    executionProfile: docs_state_requirements_alignment_only
+    evidenceMode: redacted_role_flow_status_failure_class_only
+    validationPolicy: scoped_prettier_diff_project_status_precommit
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: pass_requirements_matrix_and_followup_queue_entries_materialized
+    approvedAt: "2026-06-28T12:09:11-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_requested_full_acceptance_matrix_and_full_unit_baseline_repair_goal_setup_2026_06_28
+    claimedAt: "2026-06-28T12:09:11-07:00"
+    plannedAt: "2026-06-28T12:09:11-07:00"
+    implementedAt: "2026-06-28T12:17:08-07:00"
+    validatedAt: "2026-06-28T12:17:08-07:00"
+    reviewedAt: "2026-06-28T12:17:08-07:00"
+    closedAt: "2026-06-28T12:17:08-07:00"
+    branch: codex/full-acceptance-matrix-unit-baseline-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      queueSeeding: approved
+      localCommit: approved
+      mergeToMaster: blocked_fresh_closeout_approval_required
+      pushOriginMaster: blocked_fresh_closeout_approval_required
+      branchCleanup: blocked_fresh_closeout_approval_required
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      fullUnitRuntime: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localPrivateFixtureBoundary:
+      packagePath: D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated
+      accountPath: D:\tiku-local-private\acceptance
+      currentTaskAccess: blocked
+      futureAccess: read_only_input_only_when_future_task_explicitly_allows_it
+      evidenceForbidden:
+        - credentials
+        - complete_question_answer_paper_material_resource_or_chunk_content
+        - raw_fixture_rows
+        - raw_dom_screenshot_trace_or_html_report
+    localDbBoundary:
+      currentTask: no_database_connection_read_write_seed_migration_or_schema_change
+      futureFullAcceptance: local_docker_dev_only_when_task_entry_explicitly_allows_it
+      readOnlyDiagnostics: aggregate_counts_and_status_only_when_allowed
+      forbidden:
+        - staging_prod_cloud_or_customer_database
+        - env_secret_read
+        - raw_db_rows
+        - internal_ids
+        - email_phone_plaintext_redeem_code
+        - schema_migration_drizzle_push_seed_change_without_fresh_task_approval
+        - drop_truncate_reset_or_destructive_operation
+        - non_task_marked_data_update_or_delete
+    aiProviderBoundary:
+      currentTask: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+      futureFullAcceptanceDefault: provider_call_budget_zero_until_future_task_materializes_budget
+      forbidden:
+        - provider_key_endpoint_model_config_or_fallback_config
+        - env_secret
+        - prompt
+        - provider_payload
+        - raw_ai_input_or_output
+        - complete_generated_question_or_paper
+        - cost_calibration_or_pricing_or_quota_default_decision
+    credentialBoundary:
+      currentTask: no_account_login_no_cookie_token_session_localStorage_or_Authorization_header_access
+      futureUse: localhost_login_input_only_when_future_task_explicitly_allows_it
+      forbiddenEvidence:
+        - account_password
+        - cookie
+        - token
+        - session
+        - localStorage
+        - Authorization_header
+        - secret
+        - database_url
+        - api_key
+        - connection_string
+        - env_file_content
+    evidenceRedaction:
+      allowed:
+        - role_labels
+        - route_page_workflow_labels
+        - state_labels
+        - counts
+        - pass_fail
+        - failure_classes
+        - gapId
+        - severity
+        - fix_class
+        - redacted_expected_observed_summary
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - employee_subjective_answers
+        - complete_question_paper_material_resource_or_chunk_content
+    followUpTaskIds:
+      - full-unit-baseline-repair-2026-06-28
+      - full-acceptance-matrix-execution-2026-06-28
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityMatrixPrepared: true
+      followUpFullUnitRepairTaskPrepared: true
+      followUpFullAcceptanceExecutionTaskPrepared: true
+      ssotReadList: pass
+      requirementMappingResult: pass
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_next_executable_full_unit_baseline_repair_dirty_worktree_advisory
+      moduleRunV2PreCommitHardening: pass
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_full_acceptance_matrix_and_full_unit_baseline_repair_goal_setup_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    blockedWithoutFreshApproval:
+      - source_or_test_change_in_current_requirements_task
+      - browser_or_playwright_runtime_in_current_requirements_task
+      - dev_server_start_in_current_requirements_task
+      - database_connection_read_write_migration_or_seed_in_current_requirements_task
+      - provider_call_or_provider_configuration_or_credential_read
+      - ai_budget
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push_merge_push_cleanup
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-unit-baseline-repair-2026-06-28
+    title: Full unit baseline repair
+    phase: full-unit-baseline-repair-2026-06-28
+    sourceStory: current_user_requested_full_unit_baseline_repair_as_part_of_full_acceptance_goal_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    taskPlanPolicy: required_before_source_or_test_edit
+    humanApprovalBoundary: >-
+      Follow-up implementation task for repairing the full npm unit baseline. It may start only after the requirements
+      task is closed and after this task's own plan, allowedFiles/blockedFiles, evidence redaction, and closeoutPolicy
+      are confirmed from repository governance files. Use systematic debugging and TDD: reproduce the full-unit RED
+      baseline, isolate failure clusters, add or correct focused failing tests where needed, then repair source/test
+      contracts until npm run test:unit is green.
+    targetClosureItem: npm run test:unit passes with no known baseline failures
+    behaviorBoundary: local_unit_baseline::tdd_repair_no_db_no_provider_no_dependency_no_schema_no_final_pass
+    executionProfile: local_source_test_repair
+    evidenceMode: redacted_command_status_test_counts_failure_classes_only
+    validationPolicy: reproduce_full_unit_red_then_focused_green_then_full_unit_green_lint_typecheck_precommit
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    branch: codex/full-acceptance-matrix-unit-baseline-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved_unit_baseline_repair_only
+      testChange: approved_unit_baseline_repair_only
+      focusedUnitTest: approved
+      fullUnitRuntime: approved_local_only
+      lintTypecheck: approved
+      localCommit: approved
+      mergeToMaster: blocked_fresh_closeout_approval_required
+      pushOriginMaster: blocked_fresh_closeout_approval_required
+      branchCleanup: blocked_fresh_closeout_approval_required
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-full-unit-baseline-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-unit-baseline-repair.md
+      - src/app/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/lib/**
+      - src/server/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    baselineFailureClassesFromPriorEvidence:
+      - cookie_header_baseline_assertions
+      - organization_auth_service_validation
+      - organization_analytics_mapper_baseline
+      - personal_ai_component_mock_export
+      - organization_portal_link_expectation
+      - ops_content_runtime_expectations
+    validationCommands:
+      - npm.cmd run test:unit
+      - npx.cmd vitest run "<focused failing unit files identified during reproduction>"
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-unit-baseline-repair-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-unit-baseline-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-unit-baseline-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_full_unit_baseline_repair_as_part_of_full_acceptance_goal_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - ai_budget
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push_merge_push_cleanup
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-acceptance-matrix-execution-2026-06-28
+    title: Full all-role acceptance matrix execution
+    phase: full-acceptance-matrix-execution-2026-06-28
+    sourceStory: current_user_requested_all_role_all_flow_all_function_acceptance_as_final_objective_2026_06_28
+    dependencies:
+      - full-unit-baseline-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Follow-up acceptance task for executing the matrix after full unit baseline repair. It must rematerialize local
+      browser/dev-server, DB, AI/Provider, credential, redaction, and closeout boundaries before any runtime action.
+      Provider calls, Cost Calibration, schema/migration/seed, destructive DB operations, staging/prod/deploy, payment,
+      PR, force-push, release readiness, and final Pass remain blocked unless a later task records explicit fresh
+      approval.
+    targetClosureItem: Redacted pass/fail/blocker evidence for each full acceptance matrix row
+    behaviorBoundary: local_full_acceptance::all_roles_all_flows_redacted_no_release_final_pass_without_fresh_approval
+    executionProfile: local_acceptance_matrix_runtime_after_unit_green
+    evidenceMode: redacted_role_route_workflow_status_gap_summary_only
+    validationPolicy: unit_green_precondition_then_local_acceptance_matrix_then_lint_typecheck_precommit
+    taskKind: local_acceptance_matrix
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    branch: codex/full-acceptance-matrix-unit-baseline-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only_after_boundary_materialization
+      devServer: approved_localhost_or_127_0_0_1_only_after_boundary_materialization
+      localDbReadOnlyConnection: blocked_until_future_task_materializes_named_local_target
+      localDatabaseMutation: blocked
+      providerCall: blocked_until_future_task_materializes_explicit_ai_budget
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      localSourceChange: blocked_until_gap_repair_task_is_split_or_materialized
+      testChange: blocked_until_gap_repair_task_is_split_or_materialized
+      fullUnitRuntime: approved_precondition_check
+      focusedUnitTest: approved_if_gap_repair_is_split_and_materialized
+      localCommit: approved
+      mergeToMaster: blocked_fresh_closeout_approval_required
+      pushOriginMaster: blocked_fresh_closeout_approval_required
+      branchCleanup: blocked_fresh_closeout_approval_required
+      schemaMigration: blocked
+      seedExecution: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    acceptanceExitCriteria:
+      - full_unit_baseline_green_before_runtime_acceptance
+      - every_matrix_row_pass_fail_or_blocked_with_gap_id
+      - critical_permission_gaps_zero_unless_blocked_by_fresh_approval_gate
+      - no_sensitive_evidence
+      - no_release_readiness_or_final_pass_claim_without_fresh_user_decision
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-matrix-execution.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-matrix-unit-baseline-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-matrix-execution.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_role_acceptance_as_part_of_full_acceptance_goal_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    blockedWithoutFreshApproval:
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - ai_budget
+      - source_or_test_gap_repair_without_split_task
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push_merge_push_cleanup
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28
