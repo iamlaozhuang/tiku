@@ -171,6 +171,18 @@ function AdminAiGenerationTaskHistoryPanel({
   workspace: AdminAiGenerationWorkspace;
 }) {
   const items = taskHistory?.items ?? [];
+  const historyCopy =
+    workspace === "organization"
+      ? {
+          eyebrow: "组织草稿池",
+          empty:
+            "组织草稿池暂无任务记录。Provider 仍保持阻断，正式写入仍保持阻断。",
+        }
+      : {
+          eyebrow: "Provider-disabled 状态",
+          empty:
+            "暂无任务记录。提交后将显示等待生成、Provider 阻断和正式写入阻断状态。",
+        };
 
   return (
     <section
@@ -180,7 +192,7 @@ function AdminAiGenerationTaskHistoryPanel({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-brand-primary text-xs font-medium">
-            Provider-disabled 状态
+            {historyCopy.eyebrow}
           </p>
           <h2 className="text-text-primary mt-1 text-base font-semibold">
             最近任务
@@ -222,7 +234,7 @@ function AdminAiGenerationTaskHistoryPanel({
           className="bg-muted text-text-secondary mt-4 rounded-md p-3 text-sm leading-6"
           role="status"
         >
-          暂无任务记录。提交后将显示等待生成、Provider 阻断和正式写入阻断状态。
+          {historyCopy.empty}
         </div>
       ) : null}
 
@@ -582,7 +594,7 @@ export function AdminAiGenerationEntryPage({
   if (loadState === "standard-unavailable") {
     return (
       <AdminSurfaceStatus
-        description="标准版组织后台不开放 AI出题 或 AI组卷。"
+        description="标准版组织后台不开放 AI出题 或 AI组卷。升级需由运营管理员维护高级版 org_auth。"
         icon={<AlertCircle aria-hidden="true" className="size-5" />}
         state="permission-denied"
         title="标准版暂不可用"

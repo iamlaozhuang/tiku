@@ -215,6 +215,11 @@ export function AdminOrganizationPortalPage() {
             本地组织工作区
           </span>
         </div>
+        <p className="text-text-secondary mt-3 text-sm leading-6">
+          {hasAdvancedAccess
+            ? "高级版组织授权已生效。训练、统计和智能草稿入口已开放。"
+            : "当前组织仍可查看员工和授权摘要。高级版开通或升级请联系运营管理员。"}
+        </p>
       </section>
 
       <section aria-label="组织后台摘要" className="grid gap-4 lg:grid-cols-2">
@@ -243,6 +248,7 @@ export function AdminOrganizationPortalPage() {
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
             标准版暂不可用。高级版训练、统计和智能草稿能力需要高级版组织授权。
+            当前组织仍可查看员工和授权摘要。高级版开通或升级请联系运营管理员。
           </p>
         </section>
       )}

@@ -186,7 +186,7 @@ export function AdminOrganizationAnalyticsPage() {
   if (loadState === "standard-unavailable") {
     return (
       <AdminSurfaceStatus
-        description="标准版组织后台暂不开放统计摘要，请在组织概览查看员工管理和授权状态。"
+        description="标准版组织后台暂不开放统计摘要，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版 org_auth。"
         icon={<AlertCircle aria-hidden="true" className="size-5" />}
         state="permission-denied"
         title="标准版暂不可用"
@@ -272,6 +272,9 @@ export function AdminOrganizationAnalyticsPage() {
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
             查看组织训练聚合统计，仅展示脱敏汇总，不展示员工原始作答。
           </p>
+          <p className="text-text-secondary text-sm">
+            仅展示汇总趋势和脱敏员工统计
+          </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
           <ShieldCheck aria-hidden="true" className="size-5" />
@@ -303,7 +306,7 @@ export function AdminOrganizationAnalyticsPage() {
         type="button"
       >
         <Download aria-hidden="true" className="size-4" />
-        导出暂缓
+        导出需单独审批
       </Button>
 
       {summary === null ? null : <DashboardSummaryCard summary={summary} />}

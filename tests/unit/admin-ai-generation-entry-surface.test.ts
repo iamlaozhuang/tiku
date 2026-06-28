@@ -518,6 +518,9 @@ describe("admin AI generation entry surfaces", () => {
         "/api/v1/sessions",
       ]);
     });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "升级需由运营管理员维护高级版 org_auth",
+    );
     expect(screen.queryByTestId("admin-ai-generation-submit")).toBeNull();
     expect(
       screen.queryByTestId("admin-ai-generation-local-contract-summary"),
@@ -748,6 +751,9 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("组织草稿池");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("redacted_snapshot");
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
@@ -779,6 +785,40 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("暂无任务记录");
+  });
+
+  it("shows organization-specific empty history guidance without enabling Provider", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("组织草稿池暂无任务记录");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("Provider 仍保持阻断");
   });
 
   it("shows a redacted history error state when metadata history loading fails", async () => {

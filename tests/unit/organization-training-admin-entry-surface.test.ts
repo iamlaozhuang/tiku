@@ -191,6 +191,9 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(unavailableState).toHaveTextContent(
       "标准版组织后台暂不开放企业训练",
     );
+    expect(unavailableState).toHaveTextContent(
+      "升级需由运营管理员维护高级版 org_auth",
+    );
     expect(screen.queryByRole("form", { name: "组织培训草稿表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
@@ -283,6 +286,9 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "组织培训" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("本页仅创建和复制训练草稿")).toBeInTheDocument();
+    expect(screen.getByText("绑定来源需先创建草稿")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "绑定来源" })).toBeDisabled();
 
     const draftForm = within(
       screen.getByRole("form", { name: "组织培训草稿表单" }),

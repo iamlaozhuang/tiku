@@ -163,6 +163,8 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).toHaveTextContent("员工管理");
     expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("organization-portal-scope-001");
+    expect(portalShell).toHaveTextContent("高级版组织授权已生效");
+    expect(portalShell).toHaveTextContent("训练、统计和智能草稿入口已开放");
     expect(portalShell).not.toHaveTextContent("/ops/organizations");
     expect(portalShell).not.toHaveTextContent("Organization Portal");
     expect(portalShell).not.toHaveTextContent("Organization Training");
@@ -202,6 +204,8 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).toHaveTextContent("员工管理");
     expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("标准版暂不可用");
+    expect(portalShell).toHaveTextContent("当前组织仍可查看员工和授权摘要");
+    expect(portalShell).toHaveTextContent("高级版开通或升级请联系运营管理员");
     expect(portalShell).not.toHaveTextContent("AI出题");
     expect(portalShell).not.toHaveTextContent("AI组卷");
     expect(portalShell).not.toHaveTextContent("企业训练");

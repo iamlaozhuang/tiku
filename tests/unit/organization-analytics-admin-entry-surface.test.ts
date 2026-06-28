@@ -267,6 +267,9 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(unavailableState).toHaveTextContent(
       "标准版组织后台暂不开放统计摘要",
     );
+    expect(unavailableState).toHaveTextContent(
+      "升级需由运营管理员维护高级版 org_auth",
+    );
     expect(screen.queryByRole("form", { name: "组织统计摘要表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
@@ -308,6 +311,9 @@ describe("AdminOrganizationAnalyticsPage", () => {
 
     expect(
       await screen.findByRole("heading", { name: "统计摘要" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("仅展示汇总趋势和脱敏员工统计"),
     ).toBeInTheDocument();
 
     const scopeContext = await screen.findByTestId(
@@ -382,6 +388,9 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(
       screen.getByTestId("organization-analytics-export-readiness"),
     ).toBeDisabled();
+    expect(
+      screen.getByTestId("organization-analytics-export-readiness"),
+    ).toHaveTextContent("导出需单独审批");
     expect(summaryCard).not.toHaveTextContent("Dashboard summary");
     expect(summaryCard).not.toHaveTextContent("eligible employees");
     expect(summaryCard).not.toHaveTextContent("aggregate_only");

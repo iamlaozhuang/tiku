@@ -263,7 +263,7 @@ export function AdminOrganizationTrainingPage() {
   if (loadState === "standard-unavailable") {
     return (
       <AdminSurfaceStatus
-        description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。"
+        description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版 org_auth。"
         icon={<AlertCircle aria-hidden="true" className="size-5" />}
         state="permission-denied"
         title="标准版暂不可用"
@@ -405,6 +405,9 @@ export function AdminOrganizationTrainingPage() {
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
             创建组织培训草稿，绑定来源元数据，并从已发布版本复制为新草稿。
           </p>
+          <p className="text-text-secondary text-sm">
+            本页仅创建和复制训练草稿
+          </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
           <ShieldCheck aria-hidden="true" className="size-5" />
@@ -544,6 +547,9 @@ function SourceContextForm({
         icon={<Link2 aria-hidden="true" className="size-4" />}
         title="绑定来源"
       />
+      {disabled ? (
+        <p className="text-text-secondary text-sm">绑定来源需先创建草稿</p>
+      ) : null}
       <TextField
         label="来源业务标识"
         value={values.sourcePublicId}
