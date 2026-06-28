@@ -52,6 +52,7 @@
 2026-06-24 起，标准/高级版 MVP 角色分离修复需求由以下需求树文档承载为 SSOT：
 
 - [Role-Separated MVP Requirement Alignment](./traceability/2026-06-24-role-separated-mvp-requirement-alignment.md)
+- [Standard Advanced Backend UX Design First Contract](./traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md)
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)

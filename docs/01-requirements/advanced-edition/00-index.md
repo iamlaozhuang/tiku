@@ -93,7 +93,8 @@ Advanced edition MVP focuses on:
 - `personal_standard_student`, `org_standard_employee`, and `org_standard_admin` must not receive advanced AI or enterprise training capabilities from frontend visibility alone or by manual URL access.
 - `personal_advanced_student`, `org_advanced_employee`, `org_advanced_admin`, and `content_admin` require discoverable entries for their approved AI or enterprise-training capabilities.
 - `ops_admin`, `content_admin`, and organization admins require separated backend workspaces, role-aware landing, visible logout, scoped menus, and unrelated-surface denial.
-- Backend UI/UX optimization for enterprise, content, and operations workspaces must be preceded by a design-first artifact that defines information architecture, routes, component reuse, states, role/edition boundaries, and allowed implementation scope.
+- Backend UI/UX optimization for enterprise, content, and operations workspaces must follow
+  `docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md` before source implementation. The contract defines information architecture, routes, component reuse, states, role/edition boundaries, and allowed implementation scope.
 - Cost Calibration Gate remains blocked pending fresh explicit approval.
 - Provider, env/secret, staging/prod/cloud/deploy, payment, and external-service work remain out of scope.
 - Code-stage queue seeding remains paused unless explicitly approved later.
