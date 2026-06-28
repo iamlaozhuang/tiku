@@ -39,6 +39,12 @@ type AdminOrganizationAnalyticsLoadState =
   | "unauthorized"
   | "error";
 
+type AdminOrganizationAnalyticsEmployeeStatisticsLoadState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "error";
+
 type DashboardSummaryFormValues = {
   organizationPublicId: string;
   startAt: string;
@@ -116,6 +122,8 @@ export function AdminOrganizationAnalyticsPage() {
     useState<OrganizationAnalyticsDashboardRouteDto | null>(null);
   const [employeeStatistics, setEmployeeStatistics] =
     useState<OrganizationAnalyticsEmployeeStatisticsRouteDto | null>(null);
+  const [employeeStatisticsLoadState, setEmployeeStatisticsLoadState] =
+    useState<AdminOrganizationAnalyticsEmployeeStatisticsLoadState>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -211,6 +219,7 @@ export function AdminOrganizationAnalyticsPage() {
     setErrorMessage(null);
     setMessage(null);
     setEmployeeStatistics(null);
+    setEmployeeStatisticsLoadState("loading");
 
     try {
       const [summaryResponse, employeeStatisticsResponse] = await Promise.all([
@@ -234,6 +243,7 @@ export function AdminOrganizationAnalyticsPage() {
 
       if (summaryResponse.code !== 0 || summaryResponse.data === null) {
         setSummary(null);
+        setEmployeeStatisticsLoadState("error");
         setErrorMessage("统计摘要加载失败。");
         return;
       }
@@ -244,16 +254,19 @@ export function AdminOrganizationAnalyticsPage() {
       ) {
         setSummary(summaryResponse.data);
         setEmployeeStatistics(null);
+        setEmployeeStatisticsLoadState("error");
         setErrorMessage("员工统计加载失败。");
         return;
       }
 
       setSummary(summaryResponse.data);
       setEmployeeStatistics(employeeStatisticsResponse.data);
+      setEmployeeStatisticsLoadState("ready");
       setMessage("统计摘要已加载。");
     } catch {
       setSummary(null);
       setEmployeeStatistics(null);
+      setEmployeeStatisticsLoadState("error");
       setErrorMessage("统计摘要加载失败。");
     } finally {
       setIsSubmitting(false);
@@ -311,7 +324,7 @@ export function AdminOrganizationAnalyticsPage() {
       {summary === null ? null : <DashboardSummaryCard summary={summary} />}
       <EmployeeStatisticsCard
         employeeStatistics={employeeStatistics}
-        isLoading={isSubmitting}
+        loadState={employeeStatisticsLoadState}
       />
     </section>
   );
@@ -558,12 +571,12 @@ function RedactedStatisticsBoundaryPanel({
 
 function EmployeeStatisticsCard({
   employeeStatistics,
-  isLoading,
+  loadState,
 }: {
   employeeStatistics: OrganizationAnalyticsEmployeeStatisticsRouteDto | null;
-  isLoading: boolean;
+  loadState: AdminOrganizationAnalyticsEmployeeStatisticsLoadState;
 }) {
-  if (isLoading) {
+  if (loadState === "loading") {
     return (
       <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <p className="text-text-secondary text-sm">正在加载员工统计</p>
@@ -571,7 +584,20 @@ function EmployeeStatisticsCard({
     );
   }
 
-  if (employeeStatistics === null) {
+  if (loadState === "error") {
+    return (
+      <section
+        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+        role="status"
+      >
+        <p className="text-destructive text-sm leading-6">
+          员工统计暂不可用，请稍后重试。
+        </p>
+      </section>
+    );
+  }
+
+  if (loadState === "idle" || employeeStatistics === null) {
     return (
       <section
         className="bg-surface border-border rounded-md border p-4 shadow-sm"

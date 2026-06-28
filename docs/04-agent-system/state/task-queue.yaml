@@ -846,8 +846,18 @@ tasks:
     validationPolicy: tdd_focused_green_full_unit_lint_typecheck_precommit
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_analytics_load_state_error_state_repaired
+    approvedAt: "2026-06-28T13:49:49-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
+    claimedAt: "2026-06-28T13:49:49-07:00"
+    plannedAt: "2026-06-28T13:49:49-07:00"
+    implementedAt: "2026-06-28T13:57:43-07:00"
+    validatedAt: "2026-06-28T14:02:26-07:00"
+    reviewedAt: "2026-06-28T14:02:26-07:00"
+    closedAt: "2026-06-28T14:02:26-07:00"
+    branch: codex/fix-organization-analytics-load-state-20260628
     capabilities:
       localSourceChange: approved_after_task_materialization
       testChange: approved_after_task_materialization
@@ -919,6 +929,30 @@ tasks:
       - schema_migration_or_drizzle_push
       - release_readiness_or_final_pass
       - cost_calibration_gate
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-organization-analytics-load-state-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-organization-analytics-load-state-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-organization-analytics-load-state-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md
+    validationSummary:
+      redEvidence: pass_missing_explicit_employee_statistics_error_state
+      focusedGreen: pass_1_file_5_tests
+      fullUnitGreen: pass_317_files_1430_tests
+      lint: pass
+      typecheck: pass
+      directDatabaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      packageOrLockfileChanged: false
     retryCount: 0
     lastFailurePath: null
 

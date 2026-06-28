@@ -423,4 +423,62 @@ describe("AdminOrganizationAnalyticsPage", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
   });
+
+  it("shows an explicit employee statistics error state after the load action fails partially", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
+      ) {
+        return createJsonResponse(dashboardSummaryPayload);
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
+      ) {
+        return createJsonResponse({
+          code: 500001,
+          message: "employee statistics unavailable",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationAnalyticsPage));
+
+    const summaryForm = within(
+      await screen.findByRole("form", {
+        name: "组织统计摘要表单",
+      }),
+    );
+    fireEvent.click(summaryForm.getByRole("button", { name: "加载统计摘要" }));
+
+    expect(
+      await screen.findByTestId(
+        "organization-analytics-summary-organization-analytics-scope-001",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("员工统计加载失败。")).toBeInTheDocument();
+    expect(
+      screen.getByText("员工统计暂不可用，请稍后重试。"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/加载统计摘要后显示脱敏员工统计/u)).toBeNull();
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  });
 });
