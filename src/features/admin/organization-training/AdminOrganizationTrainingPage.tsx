@@ -263,7 +263,7 @@ export function AdminOrganizationTrainingPage() {
   if (loadState === "standard-unavailable") {
     return (
       <AdminUpgradeRequiredState
-        description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版 org_auth。"
+        description="标准版组织后台暂不开放企业训练，请在组织概览查看员工管理和授权状态。升级需由运营管理员维护高级版企业授权。"
         returnHref="/organization/portal"
         returnLabel="返回组织概览"
         title="标准版暂不可用"

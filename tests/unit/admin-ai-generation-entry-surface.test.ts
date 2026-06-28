@@ -521,8 +521,9 @@ describe("admin AI generation entry surfaces", () => {
       ]);
     });
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "升级需由运营管理员维护高级版 org_auth",
+      "升级需由运营管理员维护高级版企业授权",
     );
+    expect(await screen.findByRole("alert")).not.toHaveTextContent("org_auth");
     expect(await screen.findByRole("alert")).toHaveAttribute(
       "data-admin-ux-state",
       "standard-unavailable",
@@ -700,8 +701,16 @@ describe("admin AI generation entry surfaces", () => {
       screen.getByTestId("content-admin-review-adopt-action"),
     ).toBeDisabled();
     expect(
+      screen.getByTestId("content-admin-review-adopt-action"),
+    ).toHaveTextContent("采用需后续任务");
+    expect(
       screen.getByTestId("content-admin-review-reject-action"),
     ).toBeDisabled();
+    expect(
+      screen.getByTestId("content-admin-review-reject-action"),
+    ).toHaveTextContent("驳回需后续任务");
+    expect(document.body.textContent).not.toContain("adopt_disabled");
+    expect(document.body.textContent).not.toContain("reject_disabled");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
       "/api/v1/content-ai-generation-requests",

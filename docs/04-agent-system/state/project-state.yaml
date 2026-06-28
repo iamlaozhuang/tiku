@@ -1,8 +1,177 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: owner-facing-role-gap-capture-scope-2026-06-28
-updatedAt: "2026-06-28T10:48:39-07:00"
+currentPhase: owner-facing-local-experience-batch-2026-06-28
+updatedAt: "2026-06-28T11:52:26-07:00"
+ownerFacingLocalExperienceBatch20260628:
+  taskId: owner-facing-local-experience-batch-2026-06-28
+  phase: owner-facing-local-experience-batch-2026-06-28
+  status: closed
+  result: pass_owner_facing_local_experience_batch_with_redacted_gaps_and_small_repairs_full_unit_baseline_blocked
+  branch: codex/owner-facing-local-experience-20260628
+  executionProfile: local_full_flow
+  experienceBatchLabel: owner_facing_local_experience_batch
+  createdAt: "2026-06-28T11:20:10-07:00"
+  completedAt: "2026-06-28T11:52:26-07:00"
+  implementationCommitSha: recorded_in_final_handoff
+  approvedBy: laozhuang
+  approvalConsumed: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+  promptMaterializationRule: >-
+    Before any browser, DB, AI, source, or further docs execution, the current prompt's goal, authorization,
+    allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, account credential boundary, evidence redaction rules,
+    and closeoutPolicy must be materialized into this project-state entry, task-queue.yaml, and the task plan. Later
+    execution must use these repository governance files as source of truth and must not expand scope from chat memory.
+  goal: >-
+    Complete a redacted owner-facing local experience validation and small deterministic repair batch for
+    org_advanced_admin, org_standard_admin, org_advanced_employee, org_standard_employee, ops_admin, content_admin,
+    personal_advanced_student, and personal_standard_student.
+  startRoute: http://localhost:3000/organization/organization-analytics
+  roleCoverage:
+    - org_advanced_admin
+    - org_standard_admin
+    - org_advanced_employee
+    - org_standard_employee
+    - ops_admin
+    - content_admin
+    - personal_advanced_student
+    - personal_standard_student
+  priorEvidenceBoundary:
+    doNotRepeatSixRoleRouteSmoke: true
+    baseline:
+      sixRoleLoginSucceeded: true
+      localBrowserRouteChecks: 18_of_18_passed
+      routeConsoleErrorCount: 0
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+    - src/app/**
+    - src/components/**
+    - src/features/**
+    - src/hooks/**
+    - src/lib/**
+    - src/server/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localPrivateResources:
+    acceptanceAccountsPath: D:\tiku-local-private\acceptance
+    fixturePackagePath: D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated
+    mode: read_only_input_only
+    evidenceForbidden:
+      - credentials
+      - complete_question_answer_paper_material_resource_or_chunk_content
+      - raw_fixture_rows
+  localDbBoundary:
+    target: local_docker_dev_db_only
+    readOnlyDiagnostics: aggregate_counts_and_status_only
+    testOwnedMutation: only_with_owner_facing_20260628_marker
+    forbidden:
+      - env_secret_read
+      - staging_prod_cloud_or_customer_database
+      - raw_db_rows_or_internal_ids
+      - email_phone_plaintext_redeem_code
+      - schema_migration_drizzle_push_seed_change
+      - drop_truncate_reset_or_destructive_operation
+      - non_task_marked_data_update_or_delete
+  aiProviderBoundary:
+    executionPath: localhost_product_ui_or_api_only
+    maxTotalCalls: 30
+    maxRetryPerEntry: 1
+    forbidden:
+      - provider_key_endpoint_model_config_or_fallback_config_read_or_write
+      - env_secret_read
+      - prompt_provider_payload_raw_ai_input_or_output_evidence
+      - complete_generated_question_or_paper_evidence
+      - cost_calibration_pricing_or_quota_default_decision
+  credentialBoundary:
+    localAcceptanceCredentialsUse: localhost_login_input_only
+    forbiddenEvidence:
+      - password_cookie_token_session_localStorage_Authorization_header
+      - secret_database_url_api_key_connection_string
+      - env_file_content
+  evidenceRedaction:
+    allowed:
+      - role_labels
+      - route_page_workflow_labels
+      - state_labels
+      - counts
+      - pass_fail
+      - failure_classes
+      - gapId
+      - severity
+      - fix_class
+      - redacted_expected_observed_summary
+    forbidden:
+      - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - employee_subjective_answers
+      - complete_question_paper_material_resource_or_chunk_content
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+  blockedWithoutFreshApproval:
+    - package_or_lockfile_change
+    - env_secret_access_or_env_file_change
+    - provider_configuration_or_credential_read
+    - cost_calibration_pricing_or_quota_default_decision
+    - schema_migration_drizzle_push_or_seed_change
+    - destructive_database_operation
+    - staging_prod_cloud_deploy
+    - payment_ocr_export_external_service
+    - pr
+    - force_push
+    - release_readiness_or_final_pass
+    - evidence_sensitive_data_exposure
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+  validationSummary:
+    focusedUnit: pass_4_files_25_tests
+    lint: pass
+    typecheck: pass
+    prettierCheckScoped: pass
+    gitDiffCheck: pass
+    browserRoleCoverage: pass_8_roles
+    localAiInteractions: pass_6_of_30_no_retry
+    fullUnit: failed_unrelated_repository_baseline_11_files_20_tests
+    releaseReadinessClaim: false
+    finalPassClaim: false
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,104 +670,156 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
-  lastKnownOriginMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
+  lastKnownMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
+  lastKnownOriginMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
 currentTask:
-  id: owner-facing-role-gap-capture-scope-2026-06-28
+  id: owner-facing-local-experience-batch-2026-06-28
   status: closed
-  result: pass_docs_requirement_scope_recorded
-  approvedAt: "2026-06-28T10:48:39-07:00"
+  result: pass_owner_facing_local_experience_batch_with_redacted_gaps_and_small_repairs_full_unit_baseline_blocked
+  taskKind: local_experience_batch
+  executionProfile: local_full_flow
+  experienceBatchLabel: owner_facing_local_experience_batch
+  approvedAt: "2026-06-28T11:20:10-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
-  claimedAt: "2026-06-28T10:48:39-07:00"
-  plannedAt: "2026-06-28T10:48:39-07:00"
-  implementedAt: "2026-06-28T10:48:39-07:00"
-  validatedAt: "2026-06-28T10:48:39-07:00"
-  reviewedAt: "2026-06-28T10:48:39-07:00"
-  closedAt: "2026-06-28T10:48:39-07:00"
-  sourceStory: current_user_requested_role_checklist_documentation_after_discussion_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-owner-facing-role-gap-capture-scope.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
-  branch: codex/owner-role-gap-scope-docs-20260628
+  approvalConsumed: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+  claimedAt: "2026-06-28T11:20:10-07:00"
+  plannedAt: "2026-06-28T11:20:10-07:00"
+  implementedAt: "2026-06-28T11:52:26-07:00"
+  validatedAt: "2026-06-28T11:52:26-07:00"
+  reviewedAt: "2026-06-28T11:52:26-07:00"
+  closedAt: "2026-06-28T11:52:26-07:00"
+  sourceStory: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+  branch: codex/owner-facing-local-experience-20260628
+  promptMaterializationRule: >-
+    Current prompt scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan. Subsequent
+    browser, DB, AI, source, docs, validation, and closeout execution must use those repository governance files as
+    source of truth and must not expand scope from chat memory.
+  roleCoverage:
+    - org_advanced_admin
+    - org_standard_admin
+    - org_advanced_employee
+    - org_standard_employee
+    - ops_admin
+    - content_admin
+    - personal_advanced_student
+    - personal_standard_student
   scope:
     docsStateEvidenceAudit: true
-    traceabilityWrite: true
+    localSourceChange: true
+    focusedUnitTest: true
+    browserRuntime: true
+    devServer: true
+    localDockerDatabaseReadOnly: true
+    localDbTestOwnedMutationWithMarker: true
+    providerCallViaLocalhostProductUiApi: true
+    localCommit: true
+    mergeToMaster: true
+    pushOriginMaster: true
+    branchCleanup: true
     projectStateTaskMaterialized: true
     taskQueueTaskMaterialized: true
-    sourceOrTestChange: false
-    schemaOrMigrationFileChanged: false
     packageOrLockfileChanged: false
     envFileChanged: false
-    localDockerDatabase: false
-    browserRuntime: false
-    devServer: false
-    e2eRuntime: false
-    providerCall: false
     providerConfiguration: false
+    providerCredentialRead: false
+    modelConfigReadOrWrite: false
     costCalibrationExecution: false
+    schemaOrMigrationFileChanged: false
+    seedExecution: false
+    destructiveDatabaseOperation: false
     stagingProdDeploy: false
     paymentExternalServiceExecution: false
     ocrExportExecution: false
+    pr: false
+    forcePush: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  decision:
-    overallDecision: pass_docs_requirement_scope_recorded
-    roleScopeDecision: captured_owner_facing_role_gap_scope
-    runtimeDecision: blocked_not_executed
-    providerDecision: blocked_not_executed
-    envSecretDecision: blocked_not_executed
-    schemaMigrationDecision: blocked_not_required_no_drizzle_push
-    costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
-    releaseReadinessDecision: blocked_not_evaluated
-    finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: owner_facing_gap_capture_from_org_advanced_admin_analytics
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+    - src/app/**
+    - src/components/**
+    - src/features/**
+    - src/hooks/**
+    - src/lib/**
+    - src/server/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
-  commitSha: pending_local_commit_at_state_close
+      approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+  commitSha: recorded_in_final_handoff
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    traceabilityPrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
-    acceptancePrepared: false
+    acceptancePrepared: true
     projectStateTaskMaterialized: true
     taskQueueTaskMaterialized: true
-    sourceOrTestChanged: false
+    sourceOrTestChanged: true
     schemaOrMigrationFileChanged: false
     packageOrLockfileChanged: false
     envFileChanged: false
-    browserRuntimeExecuted: false
+    browserRuntimeExecuted: true
     e2eRuntimeExecuted: false
     devServerStartedByCodex: false
-    providerCallOrConfigurationExecuted: false
+    localDbReadOnlyDiagnosticExecuted: false
+    localDbTestOwnedMutationExecuted: false
+    providerCallOrConfigurationExecuted: localhost_ui_api_only_6_calls_no_provider_config
     costCalibrationExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     prettierWriteScoped: pass
-    prettierScoped: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_one_staging_blocker
+    focusedUnit: pass_4_files_25_tests
+    lint: pass
+    typecheck: pass
+    fullUnit: failed_unrelated_repository_baseline_11_files_20_tests
+    projectStatusDiagnostic: pass_idle_no_pending_task_after_closeout
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_before_commit
-  nextRecommendedTask: owner_facing_gap_capture_from_org_advanced_admin_analytics
+    moduleRunV2PrePushReadiness: pass
+  nextRecommendedTask: continue_owner_facing_gap_capture_from_org_advanced_admin_analytics
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

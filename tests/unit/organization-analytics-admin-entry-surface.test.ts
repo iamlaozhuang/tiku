@@ -272,8 +272,9 @@ describe("AdminOrganizationAnalyticsPage", () => {
       "标准版组织后台暂不开放统计摘要",
     );
     expect(unavailableState).toHaveTextContent(
-      "升级需由运营管理员维护高级版 org_auth",
+      "升级需由运营管理员维护高级版企业授权",
     );
+    expect(unavailableState).not.toHaveTextContent("org_auth");
     expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
       "href",
       "/organization/portal",

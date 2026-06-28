@@ -426,7 +426,7 @@ function ContentAdminReviewTraceabilityPanel() {
           disabled
           type="button"
         >
-          adopt_disabled
+          采用需后续任务
         </button>
         <button
           className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60"
@@ -434,7 +434,7 @@ function ContentAdminReviewTraceabilityPanel() {
           disabled
           type="button"
         >
-          reject_disabled
+          驳回需后续任务
         </button>
       </div>
     </section>
@@ -595,7 +595,7 @@ export function AdminAiGenerationEntryPage({
   if (loadState === "standard-unavailable") {
     return (
       <AdminUpgradeRequiredState
-        description="标准版组织后台不开放 AI出题 或 AI组卷。升级需由运营管理员维护高级版 org_auth。"
+        description="标准版组织后台不开放 AI出题 或 AI组卷。升级需由运营管理员维护高级版企业授权。"
         returnHref="/organization/portal"
         returnLabel="返回组织概览"
         title="标准版暂不可用"

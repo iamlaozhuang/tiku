@@ -44,6 +44,283 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: owner-facing-local-experience-batch-2026-06-28
+    title: Owner-facing local experience validation and small repair batch
+    phase: owner-facing-local-experience-batch-2026-06-28
+    sourceStory: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    dependencies:
+      - owner-facing-role-gap-capture-scope-2026-06-28
+    evidenceOnlyInputs:
+      - docs/05-execution-logs/evidence/2026-06-28-local-role-browser-acceptance-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-post-provider-rollup-evidence.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user approved an owner-facing local experience validation and small deterministic repair batch covering
+      org_advanced_admin, org_standard_admin, org_advanced_employee, org_standard_employee, ops_admin, content_admin,
+      personal_advanced_student, and personal_standard_student. Before any browser, DB, AI, source, or further docs
+      execution, this prompt scope must be materialized into this queue entry, project-state, and the task plan. Scope
+      permits localhost/127.0.0.1 browser validation, local dev server reuse/start, local Docker/dev DB read-only
+      aggregate diagnostics, tightly marked test-owned local fixture data mutations, localhost product UI/API AI
+      experience checks within the stated call budget, small deterministic repairs, redacted evidence/audit, local
+      commit, fast-forward merge to master, push origin/master, and merged branch cleanup. Scope forbids expanding from
+      chat memory after materialization.
+    targetClosureItem: Redacted owner-facing local gap list and small deterministic fixes without blocked-gate work
+    behaviorBoundary: local_owner_facing_experience::redacted_gap_capture_small_repairs_no_blocked_gates_no_final_pass
+    executionProfile: local_full_flow
+    experienceBatchLabel: owner_facing_local_experience_batch
+    evidenceMode: redacted_role_surface_status_gap_fix_summary_only
+    validationPolicy: local_browser_gap_capture_tdd_small_repair_lint_typecheck_focused_unit_precommit_prepush
+    taskKind: local_experience_batch
+    moduleRunVersion: 2
+    status: closed
+    result: pass_owner_facing_local_experience_batch_with_redacted_gaps_and_small_repairs_full_unit_baseline_blocked
+    approvedAt: "2026-06-28T11:20:10-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    claimedAt: "2026-06-28T11:20:10-07:00"
+    plannedAt: "2026-06-28T11:20:10-07:00"
+    implementedAt: "2026-06-28T11:52:26-07:00"
+    validatedAt: "2026-06-28T11:52:26-07:00"
+    reviewedAt: "2026-06-28T11:52:26-07:00"
+    closedAt: "2026-06-28T11:52:26-07:00"
+    branch: codex/owner-facing-local-experience-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved_small_deterministic_repairs_only
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only
+      devServer: approved_localhost_or_127_0_0_1_only
+      localDbReadOnlyConnection: approved_local_docker_dev_only
+      localDbTestOwnedMutation: approved_conditional_marker_owner_facing_20260628
+      providerCall: approved_via_localhost_product_ui_api_only_max_30_calls
+      providerRetry: approved_max_one_retry_per_ai_entry
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved_delete_merged_short_branch
+      e2eRuntime: blocked_unless_existing_focused_local_command_is_added_to_evidence
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      modelConfigReadOrWrite: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      destructiveDatabaseOperation: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+      - src/app/**
+      - src/components/**
+      - src/features/**
+      - src/hooks/**
+      - src/lib/**
+      - src/server/**
+      - tests/unit/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - package.json
+      - D:/tiku-local-private/acceptance/**
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/**
+      - D:\tiku-local-private\acceptance\**
+      - D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated\**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    roleCoverage:
+      - org_advanced_admin
+      - org_standard_admin
+      - org_advanced_employee
+      - org_standard_employee
+      - ops_admin
+      - content_admin
+      - personal_advanced_student
+      - personal_standard_student
+    localPrivateFixtureBoundary:
+      packagePath: D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated
+      accountPath: D:\tiku-local-private\acceptance
+      readOnly: true
+      evidenceAllowed:
+        - package_path
+        - coverage_labels
+        - file_counts
+        - profession_level_subject_labels
+        - status
+        - redacted_conclusion
+      evidenceForbidden:
+        - credentials
+        - complete_question_answer_paper_material_resource_or_chunk_content
+        - raw_fixture_rows
+        - raw_dom_screenshot_trace_or_html_report
+    localDbBoundary:
+      target: local_docker_dev_db_only
+      readOnlyDiagnostics: approved_aggregate_counts_and_status_only
+      testOwnedMutation: approved_only_with_owner_facing_20260628_marker
+      forbidden:
+        - staging_prod_cloud_or_customer_database
+        - env_secret_read
+        - raw_db_rows
+        - internal_ids
+        - email_phone_plaintext_redeem_code
+        - schema_migration_drizzle_push
+        - drop_truncate_reset_or_destructive_operation
+        - non_task_marked_data_update_or_delete
+    aiProviderBoundary:
+      executionPath: localhost_product_ui_or_api_only
+      maxTotalCalls: 30
+      maxRetryPerEntry: 1
+      allowedEvidence:
+        - entry_label
+        - role
+        - success_or_failure
+        - failure_class
+        - retry_count
+        - redacted_summary
+        - permission_and_experience_result
+      forbidden:
+        - provider_key_endpoint_or_model_config
+        - fallback_config
+        - env_secret
+        - prompt
+        - provider_payload
+        - raw_ai_input_or_output
+        - complete_generated_question_or_paper
+        - cost_calibration_or_pricing_or_quota_default_decision
+    credentialBoundary:
+      localAcceptanceCredentialsUse: localhost_login_input_only
+      forbiddenEvidence:
+        - account_password
+        - cookie
+        - token
+        - session
+        - localStorage
+        - Authorization_header
+        - secret
+        - database_url
+        - api_key
+        - connection_string
+        - env_file_content
+    gapPolicy:
+      severity:
+        - critical
+        - major
+        - minor
+        - polish
+      fixClass:
+        - copy
+        - navigation
+        - empty_state
+        - permission
+        - visible_ui_state
+        - data_contract
+        - source_required
+        - blocked_gate
+      repairPriority:
+        - small_deterministic_copy
+        - navigation
+        - empty_state
+        - permission_state
+        - visible_ui_state
+        - obvious_data_contract_display
+      noLargeRefactor: true
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd vitest run tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run test:unit
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md src/features/student/organization-training/StudentOrganizationTrainingPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md src/features/student/organization-training/StudentOrganizationTrainingPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-facing-local-experience-batch-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-facing-local-experience-batch-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      focusedUnit: pass_4_files_25_tests
+      lint: pass
+      typecheck: pass
+      prettierCheckScoped: pass
+      gitDiffCheck: pass
+      browserRoleCoverage: pass_8_roles
+      localAiInteractions: pass_6_of_30_no_retry
+      fullUnit: failed_unrelated_repository_baseline_11_files_20_tests
+      projectStatusDiagnostic: pass_idle_no_pending_task_after_closeout
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      releaseReadinessClaim: false
+      finalPassClaim: false
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-owner-facing-local-experience-batch.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_owner_facing_local_experience_batch_2026_06_28
+    blockedWithoutFreshApproval:
+      - package_or_lockfile_change
+      - env_secret_access_or_env_file_change
+      - provider_configuration_or_credential_read
+      - cost_calibration_pricing_or_quota_default_decision
+      - schema_migration_drizzle_push_or_seed_change
+      - destructive_database_operation
+      - staging_prod_cloud_deploy
+      - payment_ocr_export_external_service
+      - pr
+      - force_push
+      - release_readiness_or_final_pass
+      - evidence_sensitive_data_exposure
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-role-gap-capture-scope-2026-06-28
     title: Owner-facing role gap capture scope
     phase: owner-facing-role-gap-capture-scope-2026-06-28

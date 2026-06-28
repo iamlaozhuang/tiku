@@ -146,6 +146,8 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "组织培训作答" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("企业训练")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("Organization Training");
     expect(
       screen.getByTestId(
         "organization-training-row-organization-training-version-ui-001",
@@ -154,6 +156,30 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(document.body.textContent).not.toContain(
       COOKIE_BACKED_SESSION_MARKER,
     );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a readable Chinese unavailable state for employees outside advanced organization training scope", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      expect(String(url)).toBe("/api/v1/organization-trainings/visible-list");
+
+      return createJsonResponse({
+        code: 403076,
+        message: "Organization training is unavailable.",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentOrganizationTrainingPage));
+
+    const unavailableState = await screen.findByRole("alert");
+    expect(unavailableState).toHaveTextContent("当前授权暂未开放企业训练");
+    expect(unavailableState).toHaveTextContent(
+      "请确认员工账号已绑定有效的组织高级授权范围",
+    );
+    expect(document.body.textContent).not.toContain("\\u");
+    expect(document.body.textContent).not.toContain("Organization Training");
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

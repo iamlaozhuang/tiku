@@ -99,14 +99,20 @@ function createSubmitRequestBody(
 function StudentOrganizationTrainingStatusMessage({
   action,
   description,
+  role = "alert",
   title,
 }: {
   action?: React.ReactNode;
   description: string;
+  role?: "alert" | "status";
   title: string;
 }) {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
+    <section
+      aria-live={role === "alert" ? "assertive" : "polite"}
+      className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-md flex-col items-center justify-center gap-4 px-6 text-center"
+      role={role}
+    >
       <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
         <AlertCircle aria-hidden="true" className="size-5" />
       </div>
@@ -241,8 +247,8 @@ export function StudentOrganizationTrainingPage() {
   if (loadState === "unavailable") {
     return (
       <StudentOrganizationTrainingStatusMessage
-        title="\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e\u4f01\u4e1a\u8bad\u7ec3"
-        description="\u8bf7\u786e\u8ba4\u5458\u5de5\u8d26\u53f7\u5df2\u7ed1\u5b9a\u6709\u6548\u7684\u7ec4\u7ec7\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\uff1b\u672c\u9875\u4ec5\u663e\u793a\u5df2\u53d1\u5e03\u4e14\u5bf9\u5f53\u524d\u5458\u5de5\u53ef\u89c1\u7684\u57f9\u8bad\u3002"
+        title="当前授权暂未开放企业训练"
+        description="请确认员工账号已绑定有效的组织高级授权范围；本页仅显示已发布且对当前员工可见的培训。"
       />
     );
   }
@@ -250,6 +256,7 @@ export function StudentOrganizationTrainingPage() {
   if (loadState === "empty") {
     return (
       <StudentOrganizationTrainingStatusMessage
+        role="status"
         title="暂无组织培训"
         description="当前组织范围内还没有可作答的组织培训。"
       />
@@ -404,9 +411,7 @@ export function StudentOrganizationTrainingPage() {
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">
-            Organization Training
-          </p>
+          <p className="text-brand-primary text-sm font-medium">企业训练</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             组织培训作答
           </h1>
