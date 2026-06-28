@@ -23,6 +23,7 @@ export type AdminWorkspaceRouteAccessReason =
   | "workspace_role_mismatch"
   | "organization_workspace_role_conflict"
   | "organization_context_required"
+  | "organization_capability_summary_required"
   | "organization_advanced_capability_required";
 
 export type AdminWorkspaceCapabilitySummary = {

@@ -27,7 +27,9 @@ function createJsonResponse(payload: unknown) {
 
 function createOrganizationAdminSession(input: {
   canUseOrganizationAdvancedWorkspace: boolean;
+  capabilitySource?: "service_computed" | "session_fallback";
   organizationEffectiveEdition: "standard" | "advanced" | null;
+  organizationAuthorizationSource?: "org_auth" | null;
 }) {
   return {
     code: 0,
@@ -48,6 +50,9 @@ function createOrganizationAdminSession(input: {
           adminRoles: ["org_advanced_admin"],
           organizationPublicId: "organization-source-contract-001",
           organizationEffectiveEdition: input.organizationEffectiveEdition,
+          organizationAuthorizationSource:
+            input.organizationAuthorizationSource ?? "org_auth",
+          capabilitySource: input.capabilitySource ?? "service_computed",
           canUseOrganizationAdvancedWorkspace:
             input.canUseOrganizationAdvancedWorkspace,
         },
@@ -127,6 +132,37 @@ describe("organization admin standard/advanced workspace source contract", () =>
     );
 
     expect(await screen.findByText("organization page")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /企业训练/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /统计摘要/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
+  });
+
+  it("does not show advanced organization layout entries from a session fallback summary", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        createJsonResponse(
+          createOrganizationAdminSession({
+            capabilitySource: "session_fallback",
+            organizationAuthorizationSource: "org_auth",
+            organizationEffectiveEdition: "advanced",
+            canUseOrganizationAdvancedWorkspace: true,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "organization page"),
+      ),
+    );
+
+    expect(await screen.findByText("organization page")).toBeInTheDocument();
+    expect(screen.getByText("标准版组织后台")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /企业训练/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /统计摘要/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();

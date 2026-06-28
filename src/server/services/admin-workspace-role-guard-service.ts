@@ -167,9 +167,19 @@ function canUseAdvancedOrganizationWorkspace(
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ): boolean {
   return (
+    hasVerifiedOrganizationCapabilitySummary(capabilitySummary) &&
     capabilitySummary.organizationEffectiveEdition === "advanced" &&
     capabilitySummary.canUseOrganizationAdvancedWorkspace &&
     hasAdvancedOrganizationRole(capabilitySummary)
+  );
+}
+
+function hasVerifiedOrganizationCapabilitySummary(
+  capabilitySummary: AdminWorkspaceCapabilitySummary,
+): boolean {
+  return (
+    capabilitySummary.capabilitySource === "service_computed" &&
+    capabilitySummary.organizationAuthorizationSource === "org_auth"
   );
 }
 
@@ -204,6 +214,22 @@ function resolveOrganizationWorkspaceAccess(input: {
       requiredAuthorizationSource:
         resolveOrganizationAuthorizationSource(capabilitySummary),
       requiredOrganizationContext: true,
+    });
+  }
+
+  if (
+    isAdvancedOrganizationWorkspacePath(pathname) &&
+    !hasVerifiedOrganizationCapabilitySummary(capabilitySummary)
+  ) {
+    return createDecision({
+      status: "denied",
+      workspace,
+      reason: "organization_capability_summary_required",
+      returnPath: "/organization/portal",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource: "org_auth",
     });
   }
 

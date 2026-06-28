@@ -73,6 +73,7 @@ describe("backend workspace role guard contract", () => {
           adminRoles: ["org_advanced_admin"],
           organizationEffectiveEdition: "standard",
           organizationPublicId: "organization-public-advanced-stale",
+          organizationAuthorizationSource: "org_auth",
           canUseOrganizationAdvancedWorkspace: false,
         }),
       }),
@@ -90,6 +91,7 @@ describe("backend workspace role guard contract", () => {
           adminRoles: ["org_advanced_admin"],
           organizationEffectiveEdition: "advanced",
           organizationPublicId: "organization-public-advanced-001",
+          organizationAuthorizationSource: "org_auth",
           canUseOrganizationAdvancedWorkspace: true,
         }),
       }),
@@ -116,6 +118,58 @@ describe("backend workspace role guard contract", () => {
       status: "standard_unavailable",
       workspace: "organization",
       reason: "organization_advanced_capability_required",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource: "org_auth",
+      requiredOrganizationContext: false,
+      returnPath: "/organization/portal",
+    });
+  });
+
+  it("denies advanced organization routes when capability summary is not service computed", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/organization/organization-analytics",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["org_advanced_admin"],
+          organizationEffectiveEdition: "advanced",
+          organizationPublicId: "organization-public-session-fallback",
+          organizationAuthorizationSource: "org_auth",
+          capabilitySource: "session_fallback",
+          canUseOrganizationAdvancedWorkspace: true,
+        }),
+      }),
+    ).toMatchObject({
+      status: "denied",
+      workspace: "organization",
+      reason: "organization_capability_summary_required",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource: "org_auth",
+      requiredOrganizationContext: false,
+      returnPath: "/organization/portal",
+    });
+  });
+
+  it("denies advanced organization routes when org_auth source is missing", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/organization/ai-paper-generation",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["org_advanced_admin"],
+          organizationEffectiveEdition: "advanced",
+          organizationPublicId: "organization-public-source-missing",
+          organizationAuthorizationSource: null,
+          capabilitySource: "service_computed",
+          canUseOrganizationAdvancedWorkspace: true,
+        }),
+      }),
+    ).toMatchObject({
+      status: "denied",
+      workspace: "organization",
+      reason: "organization_capability_summary_required",
       requiredWorkspace: "organization",
       requiredEffectiveEdition: "advanced",
       requiredCapability: "organization_advanced_workspace",

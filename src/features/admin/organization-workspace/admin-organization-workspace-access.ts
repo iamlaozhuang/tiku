@@ -81,6 +81,9 @@ export function canUseOrganizationAdvancedWorkspaceCapability(
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ): boolean {
   return (
+    capabilitySummary.capabilitySource === "service_computed" &&
+    capabilitySummary.organizationAuthorizationSource === "org_auth" &&
+    capabilitySummary.organizationPublicId !== null &&
     capabilitySummary.organizationEffectiveEdition === "advanced" &&
     capabilitySummary.canUseOrganizationAdvancedWorkspace
   );
