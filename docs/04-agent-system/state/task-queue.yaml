@@ -1253,6 +1253,192 @@ tasks:
       finalGateStatus: pass_local_role_browser_acceptance_hardening_release_final_blocked
     nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
 
+  - id: local-ui-action-loop-browser-smoke-2026-06-28
+    title: Local UI action loop browser smoke
+    phase: local-ui-action-loop-browser-smoke-2026-06-28
+    sourceStory: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+    dependencies:
+      - local-role-browser-acceptance-hardening-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Current user approved executing the recommended local UI action-loop browser smoke task and approved local
+      commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after completion. This
+      task may reuse the existing localhost dev server, run in-app browser validation against localhost/127.0.0.1,
+      input local private acceptance credentials into localhost login forms, run listed existing local e2e smoke specs,
+      and write redacted docs/state/evidence/audit/acceptance/traceability. It must not record credentials, DOM,
+      screenshots, traces, tokens, cookies, localStorage, Authorization headers, DB rows, internal ids, user
+      emails/phones, plaintext redeem_code, Provider payloads, prompts, raw AI output, employee subjective answers, or
+      full question/paper/resource/chunk content. It must not execute Cost Calibration, pricing/quota default decisions,
+      release readiness, final Pass, staging/prod/deploy, payment/OCR/export/external-service, PR, force push,
+      package/lockfile, .env*, schema/migration, drizzle-kit push, or destructive DB work.
+    targetClosureItem: Local six-role browser action-loop smoke after route acceptance hardening
+    behaviorBoundary: local_ui_action_loop_browser_smoke_localhost_only
+    executionProfile: local_ui_action_loop_browser_smoke
+    evidenceMode: redacted_role_route_action_status_only
+    validationPolicy: local_browser_action_smoke_existing_e2e_docs_quality_gates
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_ui_action_loop_browser_smoke
+    approvedAt: "2026-06-28T07:48:50-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+    claimedAt: "2026-06-28T07:48:50-07:00"
+    plannedAt: "2026-06-28T07:48:50-07:00"
+    implementedAt: "2026-06-28T08:03:12-07:00"
+    validatedAt: "2026-06-28T08:03:12-07:00"
+    reviewedAt: "2026-06-28T08:03:12-07:00"
+    closedAt: "2026-06-28T08:03:12-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ui-action-loop-browser-smoke.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ui-action-loop-browser-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ui-action-loop-browser-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md
+    branch: codex/local-ui-action-loop-browser-smoke-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      browserRuntime: approved_localhost_127_0_0_1_only
+      devServer: approved_existing_localhost_127_0_0_1_reuse_only
+      privateAcceptanceCredentialInput: approved_input_only_no_recording
+      localE2EValidation: approved_local_only_existing_specs
+      localDatabaseConnection: app_runtime_only_no_direct_db_connection
+      localDatabaseMutation: app_runtime_only_no_direct_db_write
+      focusedUnitTest: blocked_unless_new_blocker_needs_fresh_repair_scope
+      localSourceChange: blocked_unless_new_blocker_needs_fresh_repair_scope
+      testChange: blocked_unless_new_blocker_needs_fresh_repair_scope
+      schemaMigration: blocked
+      migrationGeneration: blocked
+      drizzleKitPush: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    coveredRoles:
+      - student
+      - content_admin
+      - ops_admin
+      - org_standard_admin
+      - org_advanced_admin
+      - employee
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-ui-action-loop-browser-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-28-local-*.md
+      - package.json
+      - src/app/**
+      - src/features/**
+      - src/server/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    riskTypes:
+      - local_browser_l6_action_loop
+      - role_separated_acceptance
+      - redacted_browser_evidence
+      - private_credentials_input_only
+      - no_provider_no_cost_calibration
+      - no_release_final_pass
+    localFullLoopGate: L6_local_role_flow_action_loop_smoke_target
+    actionSurfaceMatrix:
+      student: pass_mistake_book_status_filter
+      content_admin: pass_content_ai_generation_local_contract_submit
+      ops_admin: pass_ops_read_only_filter_refresh
+      org_standard_admin: pass_advanced_route_standard_unavailable_boundaries
+      org_advanced_admin: pass_organization_training_analytics_ai_generation_actions
+      employee: pass_organization_training_save_draft
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_local_ui_action_loop_browser_smoke_2026_06_28
+    validationCommands:
+      - in-app browser local UI action-loop smoke against localhost or 127.0.0.1 with redacted role/route/action status only
+      - '$env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER="1"; npm.cmd run test:e2e -- e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/local-full-loop-student-answer-ai-explanation-smoke.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line'
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/task-plans/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/evidence/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ui-action-loop-browser-smoke.md docs/05-execution-logs/acceptance/2026-06-28-local-ui-action-loop-browser-smoke.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-ui-action-loop-browser-smoke-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-ui-action-loop-browser-smoke-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      browserRuntimeExecuted: pass_6_roles_13_actions
+      localE2ERuntimeExecuted: pass_3_existing_specs_3_tests
+      redactionBoundaryRecorded: true
+      sourceOrTestChanged: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      finalGateStatus: pass_local_ui_action_loop_smoke_release_final_blocked
+    nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
+
   - id: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
     title: Layer 3 staging pre-release redacted execution after target materialization
     phase: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
