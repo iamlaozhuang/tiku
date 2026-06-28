@@ -97,6 +97,8 @@ Advanced edition MVP focuses on:
   `docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md` before source implementation. The contract defines information architecture, routes, component reuse, states, role/edition boundaries, and allowed implementation scope.
 - Next organization backend standard/advanced UX polish work follows
   `docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md` and remains split into source-only UI, permission contract, and local browser validation tasks that require fresh approval.
+- Refreshed organization backend standard/advanced UX polish queue work follows
+  `docs/01-requirements/traceability/2026-06-28-standard-advanced-ux-polish-queue-planning.md` and splits shell/nav gated copy, workspace page states, permission contract, and local browser validation into separate approval-required tasks.
 - Cost Calibration Gate remains blocked pending fresh explicit approval.
 - Provider, env/secret, staging/prod/cloud/deploy, payment, and external-service work remain out of scope.
 - Code-stage queue seeding remains paused unless explicitly approved later.

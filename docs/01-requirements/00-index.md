@@ -54,6 +54,7 @@
 - [Role-Separated MVP Requirement Alignment](./traceability/2026-06-24-role-separated-mvp-requirement-alignment.md)
 - [Standard Advanced Backend UX Design First Contract](./traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md)
 - [Standard Advanced Next UX Polish Queue Planning](./traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md)
+- [Standard Advanced UX Polish Queue Planning](./traceability/2026-06-28-standard-advanced-ux-polish-queue-planning.md)
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
