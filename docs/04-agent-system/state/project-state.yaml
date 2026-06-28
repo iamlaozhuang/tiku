@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
-updatedAt: "2026-06-28T04:45:00-07:00"
+currentPhase: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+updatedAt: "2026-06-28T05:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -501,39 +501,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fcc80308916e1b18aacffdb41282289684678bb8
-  lastKnownOriginMasterSha: fcc80308916e1b18aacffdb41282289684678bb8
+  lastKnownMasterSha: 70b6bf0f9eb6c16a8d35548aaa1dc341d845695b
+  lastKnownOriginMasterSha: 70b6bf0f9eb6c16a8d35548aaa1dc341d845695b
 currentTask:
-  id: organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
+  id: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
   status: closed
-  result: pass_planning_package_prepared_execution_blocked_pending_fresh_approval
-  approvedAt: "2026-06-28T04:45:00-07:00"
+  result: pass_local_schema_alignment_and_redacted_org_auth_aggregate_proof
+  approvedAt: "2026-06-28T05:00:00-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_approved_option_1_planning_and_closeout_2026_06_28
-  claimedAt: "2026-06-28T04:45:00-07:00"
-  plannedAt: "2026-06-28T04:45:00-07:00"
-  implementedAt: "2026-06-28T04:45:00-07:00"
-  validatedAt: "2026-06-28T04:45:00-07:00"
-  reviewedAt: "2026-06-28T04:45:00-07:00"
-  closedAt: "2026-06-28T04:45:00-07:00"
-  sourceStory: current_user_approved_test_owned_db_schema_alignment_planning_after_org_auth_db_proof_gap_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
-  branch: codex/org-auth-db-alignment-plan-20260628
+  approvalConsumed: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+  claimedAt: "2026-06-28T05:00:00-07:00"
+  plannedAt: "2026-06-28T05:00:00-07:00"
+  implementedAt: "2026-06-28T05:05:00-07:00"
+  validatedAt: "2026-06-28T05:05:00-07:00"
+  reviewedAt: "2026-06-28T05:05:00-07:00"
+  closedAt: "2026-06-28T05:05:00-07:00"
+  sourceStory: current_user_fresh_approved_org_auth_test_owned_db_schema_alignment_execution_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+  branch: codex/org-auth-db-schema-alignment-20260628
   scope:
     docsStateEvidenceAudit: true
-    traceabilityPlanningWrite: true
-    approvalPackageWrite: true
+    traceabilityDbSchemaAlignmentWrite: true
+    localDockerDatabase: true
+    localDatabaseConnectionExecuted: redacted_local_dev_target_only
+    localDatabaseMutationExecuted: reviewed_migration_apply_and_transaction_scoped_fixture_rollback_only
+    schemaMigrationExecuted: existing_reviewed_migration_only
+    migrationGenerationExecuted: false
+    schemaOrMigrationFileChanged: false
     sourceOrTestChange: false
     browserRuntime: false
     devServer: false
     e2eRuntime: false
-    databaseConnectionExecuted: false
-    databaseMutationExecuted: false
-    schemaMigrationSeed: false
     providerCall: false
     providerConfiguration: false
     costCalibrationExecution: false
@@ -543,64 +545,75 @@ currentTask:
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  planningPackage:
-    previousProofTaskId: organization-auth-db-backed-proof-local-2026-06-28
-    previousProofResult: partial_blocked_by_local_schema_gap
-    blockedGap:
-      orgAuthEditionColumn: missing_in_current_local_db_target
-      authUpgradeTable: missing_in_current_local_db_target
-    sourceScan:
-      orgAuthEditionDefinedInSourceSchema: true
-      authUpgradeDefinedInSourceSchema: true
-    futureExecutionTaskId: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
-    futureExecutionApprovalStatus: blocked_pending_fresh_approval
+  localDbSchemaAlignment:
+    targetLabel: tiku-postgres-dev-local-disposable
+    reviewedMigrationPath: drizzle/20260621024911_add_edition_aware_authorization.sql
+    expectedBooleans:
+      orgAuthEditionColumn: true
+      authUpgradeTable: true
+      authorizationEditionEnum: true
+      authUpgradeStatusEnum: true
+      authUpgradeSourceTypeEnum: true
+    transactionScopedFixtureProof: rollback_only_when_existing_data_cannot_cover_behavior_cases
+    behaviorProof:
+      standardFallback: pass_count_one
+      directAdvanced: pass_count_one
+      activeUpgrade: pass_count_one
+      expiredUpgradeFallback: pass_count_one
+      revokedUpgradeFallback: pass_count_one
+      organizationAdminContextCounts: pass_standard_one_advanced_one
   decision:
-    overallDecision: pass_planning_package_prepared_execution_blocked_pending_fresh_approval
-    localFullLoopGate: L3_docs_state_planning_only
+    overallDecision: pass_local_schema_alignment_and_redacted_org_auth_aggregate_proof
+    localFullLoopGate: L3_local_db_schema_alignment
     sourceChangeDecision: blocked_by_task_scope
     browserRuntimeDecision: blocked_by_task_scope
-    databaseDecision: blocked_not_executed
-    schemaMigrationSeedDecision: blocked_not_executed
+    databaseDecision: approved_local_dev_or_disposable_target_redacted_migration_and_rollback_fixture_only
+    schemaMigrationDecision: approved_existing_reviewed_migration_apply_only_no_drizzle_push
     providerDecision: blocked_by_task_scope
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28_requires_fresh_approval
-  localFullLoopGate: L3_docs_state_planning_only
+    nextRecommendedTask: organization-auth-db-backed-proof-local-rerun-after-schema-alignment-2026-06-28
+  localFullLoopGate: L3_local_db_schema_alignment
   threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
   automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_current_user_after_validation
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
   commitSha: pending_local_commit_at_state_close
   prUrl: null
   retryCount: 0
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    traceabilityPlanningPrepared: true
+    traceabilityPrepared: true
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    copyableFutureApprovalTextPrepared: true
-    sourceSchemaReadOnlyScan: pass_org_auth_edition_and_auth_upgrade_defined
+    redMetadataProof: pass_expected_gap_before_migration
+    reviewedMigrationApply: pass_existing_reviewed_migration
+    greenMetadataProof: pass_required_booleans_true
+    transactionScopedFixtureProof: pass_rollback_confirmed_zero_fixture_rows
+    focusedUnitServiceValidation: pass_4_files_17_tests
+    localDockerDatabaseCapabilityGate: pass
+    schemaMigrationCapabilityGate: pass
     sourceOrTestChanged: false
+    schemaOrMigrationFileChanged: false
     browserRuntimeExecuted: false
-    databaseConnectionOrMutationExecuted: false
-    schemaMigrationSeedExecuted: false
+    e2eRuntimeExecuted: false
     providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
     stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
@@ -609,9 +622,10 @@ currentTask:
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_four
+    projectStatusDiagnostic: pass_idle_no_pending_task
     moduleRunV2PreCommitHardening: pass
-  nextRecommendedTask: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28_requires_fresh_approval
+    moduleRunV2PrePushReadiness: pass_after_state_sha_checkpoint_update
+  nextRecommendedTask: organization-auth-db-backed-proof-local-rerun-after-schema-alignment-2026-06-28
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

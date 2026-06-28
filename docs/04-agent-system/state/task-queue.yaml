@@ -352,6 +352,212 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+    title: Organization auth test-owned DB schema alignment execution
+    phase: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+    sourceStory: current_user_fresh_approved_org_auth_test_owned_db_schema_alignment_execution_2026_06_28
+    dependencies:
+      - organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
+    taskPlanPolicy: required_before_state_docs_db_or_migration_execution
+    humanApprovalBoundary: >-
+      Current user fresh-approved one local test-owned or disposable local dev organization authorization DB/schema
+      alignment execution task. Scope is limited to verifying org_auth.edition, auth_upgrade, org_standard_admin,
+      org_advanced_admin, organization context, direct advanced, standard fallback, active upgrade, and revoked/expired
+      upgrade fallback behavior on an explicitly named local target. Evidence may record only local target labels,
+      roles, route/service labels, statuses, counts, table/column existence booleans, and redacted pass/fail summaries.
+      This approval forbids staging/prod/deploy, Provider, Cost Calibration, payment/OCR/export/external-service, PR,
+      force push, release readiness, final Pass, drizzle-kit push, shared/production-like destructive DB, package,
+      lockfile, and .env* changes.
+    targetClosureItem: Local DB-backed organization authorization schema alignment and redacted aggregate proof
+    behaviorBoundary: local_dev_disposable_db::reviewed_migration_apply_and_redacted_org_auth_aggregate_proof
+    executionProfile: local_dev_schema_alignment_existing_reviewed_migration
+    evidenceMode: redacted_local_target_role_status_count_boolean_summary_only
+    validationPolicy: local_schema_migration_proof_focused_unit_prettier_diff_project_status_capability_precommit_prepush
+    taskKind: local_dev_schema_alignment_execution
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_schema_alignment_and_redacted_org_auth_aggregate_proof
+    approvedAt: "2026-06-28T05:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+    claimedAt: "2026-06-28T05:00:00-07:00"
+    plannedAt: "2026-06-28T05:00:00-07:00"
+    implementedAt: "2026-06-28T05:05:00-07:00"
+    validatedAt: "2026-06-28T05:05:00-07:00"
+    reviewedAt: "2026-06-28T05:05:00-07:00"
+    closedAt: "2026-06-28T05:05:00-07:00"
+    branch: codex/org-auth-db-schema-alignment-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityDbSchemaAlignmentWrite: approved
+      localDockerDatabase: approved_local_dev_only
+      localDatabaseConnection: approved_redacted_local_target_only
+      localDatabaseMutation: approved_reviewed_migration_apply_and_transaction_scoped_fixture_rollback_only
+      schemaMigration: approved_migration_plan
+      transactionScopedFixtureProof: approved_rollback_only
+      migrationGeneration: approved_only_if_existing_reviewed_migration_absent_or_invalid
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      schemaFileChange: blocked
+      migrationFileChange: blocked_unless_stop_and_reapproval
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExport: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - drizzle/20260621024911_add_edition_aware_authorization.sql
+      - drizzle/meta/_journal.json
+      - src/db/schema/auth.ts
+      - src/server/services/**
+      - src/server/repositories/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - local_dev_schema_alignment
+      - reviewed_migration_apply_only
+      - transaction_scoped_fixture_rollback_only
+      - redacted_db_aggregate_proof
+      - authorization_source_of_truth
+      - no_source_or_test_change
+      - no_runtime_browser
+      - no_final_pass
+      - cost_calibration_blocked
+    localDbSchemaAlignment:
+      targetLabel: tiku-postgres-dev-local-disposable
+      reviewedMigrationPath: drizzle/20260621024911_add_edition_aware_authorization.sql
+      transactionScopedFixtureProof: rollback_only_when_existing_data_cannot_cover_behavior_cases
+      orgAuthEditionColumnExpected: true
+      authUpgradeTableExpected: true
+      evidenceRedaction: roles_routes_status_counts_booleans_pass_fail_only
+    validationCommands:
+      - docker compose ps --format json
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -Atc "<redacted metadata proof command>"
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -v ON_ERROR_STOP=1 "<redacted reviewed migration apply command>"
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -Atc "<redacted aggregate behavior proof command>"
+      - npm.cmd run test:unit -- src/server/services/edition-aware-authorization-service.test.ts src/server/services/effective-authorization-service.test.ts src/server/repositories/edition-aware-authorization-repository.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId organization-auth-test-owned-db-schema-alignment-execution-2026-06-28 -Capability schemaMigration -Intent use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-auth-test-owned-db-schema-alignment-execution-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-execution.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_org_auth_db_schema_alignment_execution_2026_06_28
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - new_migration_file_or_schema_file_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - persistent_seed_or_fixture_change
+      - destructive_shared_database_operation
+      - drizzle_kit_push
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - env_secret_access_or_env_file_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      redMetadataProof: pass_expected_gap_before_migration
+      reviewedMigrationApply: pass_existing_reviewed_migration
+      greenMetadataProof: pass_required_booleans_true
+      transactionScopedFixtureProof: pass_rollback_confirmed_zero_fixture_rows
+      focusedUnitServiceValidation: pass_4_files_17_tests
+      localDockerDatabaseCapabilityGate: pass
+      schemaMigrationCapabilityGate: pass
+      sourceOrTestChanged: false
+      schemaOrMigrationFileChanged: false
+      browserRuntimeExecuted: false
+      e2eRuntimeExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_checkpoint_update
+    retryCount: 0
+    lastFailurePath: null
+
   - id: acceptance-role-separated-account-local-account-runtime-rerun-2026-06-23
     title: Run local role-separated account runtime walkthrough
     phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
