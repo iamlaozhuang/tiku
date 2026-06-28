@@ -504,33 +504,33 @@ repository:
   lastKnownMasterSha: 4dc473322220d105736f2b7a35beb615254c4e37
   lastKnownOriginMasterSha: 4dc473322220d105736f2b7a35beb615254c4e37
 currentTask:
-  id: organization-workspace-polish-permission-contract-tdd-2026-06-28
-  status: closed
-  result: pass_organization_workspace_polish_permission_contract_focused_unit_static_no_browser_no_final_pass
-  claimedAt: "2026-06-28T01:17:35-07:00"
-  plannedAt: "2026-06-28T01:17:35-07:00"
-  implementedAt: "2026-06-28T01:21:44-07:00"
-  validatedAt: "2026-06-28T01:21:44-07:00"
-  reviewedAt: "2026-06-28T01:21:44-07:00"
-  closedAt: "2026-06-28T01:21:44-07:00"
-  sourceStory: current_user_approved_serial_organization_workspace_ux_polish_batch_2026_06_28_task_2
-  approvalSource: current_user_serial_batch_approval_organization_workspace_polish_permission_contract_tdd_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+  id: organization-workspace-polish-local-browser-validation-2026-06-28
+  status: blocked
+  result: blocked_local_browser_role_session_missing_existing_target_no_credentials_no_storage_no_final_pass
+  claimedAt: "2026-06-28T01:24:35-07:00"
+  plannedAt: "2026-06-28T01:24:35-07:00"
+  implementedAt: "2026-06-28T01:28:39-07:00"
+  validatedAt: "2026-06-28T01:28:39-07:00"
+  reviewedAt: "2026-06-28T01:28:39-07:00"
+  closedAt: null
+  sourceStory: current_user_approved_serial_organization_workspace_ux_polish_batch_2026_06_28_task_3
+  approvalSource: current_user_serial_batch_approval_organization_workspace_polish_local_browser_validation_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-local-browser-validation.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-local-browser-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md
   branch: codex/org-workspace-ux-polish-serial-20260628
   scope:
     docsStateEvidenceAudit: true
-    permissionContract: true
-    focusedUnitTest: true
-    localSourceChange: true
-    routeGuardIntegration: true
-    capabilityContract: true
-    capabilityContractAdapter: true
+    localBrowserRuntime: true
+    localTargetHttpCheck: true
+    localSourceChange: false
+    focusedUnitTest: false
+    routeGuardIntegration: false
+    capabilityContract: false
+    capabilityContractAdapter: false
     effectiveEditionServiceComputedInvariant: true
     uiAuthorizationBoundary: false
-    browserRuntime: false
     devServer: false
     e2eRuntime: false
     databaseConnectionExecuted: false
@@ -545,22 +545,23 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    overallDecision: pass_permission_contract_tdd_no_runtime_no_final_pass
+    overallDecision: blocked_existing_localhost_reachable_role_session_missing_no_storage_or_credentials
     upstreamDesignContract: docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
     nextUxPolishContract: docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
-    dependencyTaskClosed: organization-workspace-state-polish-source-only-2026-06-28
+    dependencyTasksClosed:
+      - organization-workspace-state-polish-source-only-2026-06-28
+      - organization-workspace-polish-permission-contract-tdd-2026-06-28
     allowedFilesConcrete: true
-    focusedUnitRedObserved: failed_as_expected_3_failed_16_passed_before_contract_implementation
-    focusedUnitGreenObserved: pass_3_files_19_tests_after_contract_implementation
-    browserValidationDecision: blocked_requires_task_3_after_task_2_commit
+    localTargetHeadObserved: pass_http_200
+    browserValidationDecision: blocked_5_routes_login_redirect_no_reusable_role_session
     databaseDecision: blocked_by_current_user_scope
     providerDecision: blocked_by_current_user_scope
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
     stagingExecutionDecision: blocked_pending_owner_infrastructure_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: organization-workspace-polish-local-browser-validation-2026-06-28_after_task_2_commit
-  localFullLoopGate: L2_focused_unit_plus_L1_static_no_browser
+    nextRecommendedTask: fresh_role_session_handoff_or_approved_local_account_preparation_for_browser_rerun
+  localFullLoopGate: L5_local_browser_existing_target_redacted_no_e2e_no_db
   threadRolloverGate: resume_from_this_task_plan_evidence_project_state_and_task_queue
   automationHandoffPolicy: serial_batch_stop_on_failure_no_merge_push_cleanup
   closeoutPolicy:
@@ -584,29 +585,32 @@ currentTask:
   lastFailurePath: null
   validationSummary:
     taskPlanPrepared: true
-    sourceOrTestChanged: true
-    focusedUnitRed: fail_expected_2_files_failed_1_passed_3_failed_16_passed
-    focusedUnitGreen: pass_3_files_19_tests
+    sourceOrTestChanged: false
+    focusedUnitRed: not_applicable_browser_validation_task
+    focusedUnitGreen: not_applicable_browser_validation_task
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    browserRuntimeExecuted: false
+    browserRuntimeExecuted: true
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
     stagingProdDeployPaymentExternalServiceExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    lint: pass
-    typecheck: pass
+    localTargetHttpCheck: pass_http_200
+    browserObservation: blocked_5_routes_login_redirect_no_reusable_role_session
+    lint: not_run_no_source_or_test_change
+    typecheck: not_run_no_source_or_test_change
+    prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_no_pending_task_after_state_update_active_queue_non_terminal_4
+    projectStatusDiagnostic: pass_no_pending_task_after_blocked_state_active_queue_non_terminal_4
     moduleRunV2PreCommitHardening: pass
     ffOnlyMergeToMaster: blocked_fresh_closeout_approval_required
     pushOriginMaster: blocked_fresh_closeout_approval_required
     shortBranchCleanup: blocked_fresh_closeout_approval_required
-  nextRecommendedTask: organization-workspace-polish-local-browser-validation-2026-06-28_after_task_2_commit
+  nextRecommendedTask: fresh_role_session_handoff_or_approved_local_account_preparation_for_browser_rerun
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
