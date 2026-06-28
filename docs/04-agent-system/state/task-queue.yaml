@@ -717,8 +717,18 @@ tasks:
     validationPolicy: scoped_prettier_diff_precommit
     taskKind: docs_requirement_alignment
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_boundary_package_prepared_no_local_mutation
+    approvedAt: "2026-06-28T13:43:09-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
+    claimedAt: "2026-06-28T13:43:09-07:00"
+    plannedAt: "2026-06-28T13:43:09-07:00"
+    implementedAt: "2026-06-28T13:43:09-07:00"
+    validatedAt: "2026-06-28T13:43:09-07:00"
+    reviewedAt: "2026-06-28T13:43:09-07:00"
+    closedAt: "2026-06-28T13:43:09-07:00"
+    branch: codex/full-acceptance-local-mutation-boundary-20260628
     capabilities:
       docsStateEvidenceAudit: approved
       localUiApiMutation: blocked_fresh_approval_required
@@ -726,8 +736,8 @@ tasks:
       schemaMigration: blocked
       providerCall: blocked
       localCommit: approved
-      mergeToMaster: blocked_until_task_closeout
-      pushOriginMaster: blocked_until_task_closeout
+      mergeToMaster: approved_after_task_closeout
+      pushOriginMaster: approved_after_task_closeout
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -775,12 +785,44 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
     blockedWithoutFreshApproval:
+      - local_ui_api_mutation
       - direct_database_connection_read_write_migration_or_seed
       - unmarked_or_non_test_owned_data_mutation
       - provider_call_or_provider_configuration_or_credential_read
       - package_or_lockfile_change
       - release_readiness_or_final_pass
       - cost_calibration_gate
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-local-mutation-boundary.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-local-mutation-boundary-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-local-mutation-boundary-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-local-mutation-boundary-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-local-mutation-boundary.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-local-mutation-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-local-mutation-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-local-mutation-boundary.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-local-mutation-boundary.md
+    validationSummary:
+      boundaryPackagePrepared: true
+      futureApprovalTextPrepared: true
+      localUiApiMutationExecuted: false
+      unmarkedOrNonTestOwnedDataMutationExecuted: false
+      directDatabaseAccessExecuted: false
+      schemaMigrationSeedExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
     retryCount: 0
     lastFailurePath: null
 
