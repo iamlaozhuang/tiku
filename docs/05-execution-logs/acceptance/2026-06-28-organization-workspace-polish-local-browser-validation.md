@@ -2,7 +2,7 @@
 
 ## Acceptance Result
 
-Status: blocked.
+Status: closed with blocked browser-validation result.
 
 ## Blocked Reason
 
@@ -19,4 +19,4 @@ The existing local target is reachable, but no reusable standard or advanced org
 - No standard organization admin pass is claimed.
 - No advanced organization admin pass is claimed.
 - No release readiness or final Pass is claimed.
-- No merge to `master`, push to `origin/master`, or branch cleanup is approved here.
+- Merge to `master`, push to `origin/master`, and short-branch cleanup are approved only by the separate 2026-06-28 closeout approval; they do not change this browser validation result.

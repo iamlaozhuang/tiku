@@ -15,7 +15,13 @@
 
 ## Decision
 
-Blocked local browser validation. Do not proceed to release readiness, final Pass, merge, push, or cleanup.
+Closed with blocked browser-validation result after fresh closeout approval. Do not proceed to release readiness or final Pass. Merge, push, and short-branch cleanup are allowed only under the separate 2026-06-28 closeout approval and do not convert this browser validation into a pass.
+
+## Closeout Review
+
+- The first push attempt correctly failed because the pre-push hook anchored on this still-blocked current task.
+- The state repair changes task status to `closed` while preserving the blocked result and stop reason.
+- The repair does not add source, test, e2e, schema, migration, seed, package, lockfile, env, DB, Provider, Cost Calibration, staging/prod/deploy, payment, or external-service work.
 
 ## Residual Need
 
