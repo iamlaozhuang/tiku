@@ -1367,12 +1367,13 @@ fullAcceptanceRemainingExecutionApprovalPackage20260628:
 fullAcceptanceOptionASessionCoverage20260628:
   taskId: full-acceptance-option-a-session-coverage-2026-06-28
   phase: full-acceptance-option-a-session-coverage-2026-06-28
-  status: in_progress
-  result: running
+  status: closed
+  result: blocked_7_pass_1_blocked_ops_admin_session_material_gap_no_final_pass
   branch: codex/full-acceptance-option-a-session-coverage-20260628
   executionProfile: local_browser_test_owned_session_role_coverage
   taskKind: local_browser_session_coverage
   createdAt: "2026-06-28T15:28:05-07:00"
+  closedAt: "2026-06-28T15:43:35-07:00"
   approvedAt: "2026-06-28T15:28:05-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
@@ -1390,11 +1391,12 @@ fullAcceptanceOptionASessionCoverage20260628:
     personal_advanced_student, and personal_standard_student.
   sourceApprovalPackage: full-acceptance-remaining-execution-approval-package-2026-06-28
   browserResult:
-    status: blocked_pending_closeout_validation
+    status: blocked_closeout_validated
     passRoles: 7
     blockedRoles: 1
     blockedRole: ops_admin
     blockedReason: approved_acceptance_account_input_lacks_usable_ops_admin_login_fields
+    batchCommit: b33ef937876ae59b74f0d25d0fffffdea2a32365
     forbiddenEvidenceRecorded: false
     providerOrAiExecuted: false
     directDbExecuted: false
@@ -1558,8 +1560,8 @@ fullAcceptanceOptionASessionCoverage20260628:
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
 ownerFacingLocalExperienceBatch20260628:
   taskId: owner-facing-local-experience-batch-2026-06-28
   phase: owner-facing-local-experience-batch-2026-06-28
@@ -2231,8 +2233,8 @@ repository:
   lastKnownOriginMasterSha: d75fcc9a37963b968a4e6a9974ee749d5cd6c696
 currentTask:
   id: full-acceptance-option-a-session-coverage-2026-06-28
-  status: in_progress
-  result: running
+  status: closed
+  result: blocked_7_pass_1_blocked_ops_admin_session_material_gap_no_final_pass
   taskKind: local_browser_session_coverage
   executionProfile: local_browser_test_owned_session_role_coverage
   approvedAt: "2026-06-28T15:28:05-07:00"
@@ -2345,12 +2347,12 @@ currentTask:
     taskPlanPrepared: pass
     traceabilitySessionCoveragePrepared: pass
     browserSessionCoverage: blocked_7_pass_1_blocked_ops_admin_missing_usable_login_fields
-    validationCommands: partial_prettier_diff_precommit_pass_closeout_pending
+    validationCommands: pass_blocked_closeout_validated
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     credentialOrSessionCaptureExecuted: false
     sourceOrTestChanged: false
-  nextRecommendedTask: execute_option_a_local_session_role_coverage
+  nextRecommendedTask: full-acceptance-ops-admin-session-material-or-readonly-proof-2026-06-28
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed

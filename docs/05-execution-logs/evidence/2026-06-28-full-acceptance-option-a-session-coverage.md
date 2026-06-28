@@ -60,9 +60,10 @@ Forbidden evidence: credentials, cookies, tokens, sessions, localStorage, Author
 
 ## Batch Commit Evidence
 
-- Batch commit: pending until this evidence and governance state pass closeout validation.
-- Planned commit scope: this task's seven allowed governance/evidence files only.
-- Planned commit message: `docs(acceptance): record option a session coverage`.
+- Commit: `b33ef937876ae59b74f0d25d0fffffdea2a32365`
+- Commit scope: this task's seven allowed governance/evidence files only.
+- Commit message: `docs(acceptance): record option a session coverage`.
+- Closeout evidence update: this follow-up evidence/state update records final readiness pass results.
 
 ## Gate Results
 
@@ -85,6 +86,6 @@ Forbidden evidence: credentials, cookies, tokens, sessions, localStorage, Author
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28`:
   pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28`:
-  pending final closeout run.
+  pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28 -SkipRemoteAheadCheck`:
-  pending final closeout run.
+  pass.

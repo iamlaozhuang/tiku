@@ -1455,11 +1455,12 @@ tasks:
     phase: full-acceptance-option-a-session-coverage-2026-06-28
     sourceStory: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
     browserResult:
-      status: blocked_pending_closeout_validation
+      status: blocked_closeout_validated
       passRoles: 7
       blockedRoles: 1
       blockedRole: ops_admin
       blockedReason: approved_acceptance_account_input_lacks_usable_ops_admin_login_fields
+      batchCommit: b33ef937876ae59b74f0d25d0fffffdea2a32365
       forbiddenEvidenceRecorded: false
       providerOrAiExecuted: false
       directDbExecuted: false
@@ -1483,8 +1484,8 @@ tasks:
     validationPolicy: browser_session_coverage_scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
     taskKind: local_browser_session_coverage
     moduleRunVersion: 2
-    status: in_progress
-    result: running
+    status: closed
+    result: blocked_7_pass_1_blocked_ops_admin_session_material_gap_no_final_pass
     approvedAt: "2026-06-28T15:28:05-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
@@ -1492,6 +1493,7 @@ tasks:
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
     claimedAt: "2026-06-28T15:28:05-07:00"
     plannedAt: "2026-06-28T15:28:05-07:00"
+    closedAt: "2026-06-28T15:43:35-07:00"
     branch: codex/full-acceptance-option-a-session-coverage-20260628
     capabilities:
       docsStateEvidenceAudit: approved
@@ -1630,8 +1632,8 @@ tasks:
       prettierScoped: pass
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2ModuleCloseoutReadiness: pending
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
     retryCount: 0
     lastFailurePath: null
 
