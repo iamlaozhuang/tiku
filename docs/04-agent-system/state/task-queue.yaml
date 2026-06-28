@@ -1846,3 +1846,195 @@ tasks:
       moduleRunV2PreCommitHardening: pass
     retryCount: 0
     lastFailurePath: null
+
+  - id: organization-auth-db-backed-proof-local-2026-06-28
+    title: Organization auth DB-backed proof local
+    phase: organization-auth-db-backed-proof-local-2026-06-28
+    sourceStory: current_user_option_a_db_backed_org_auth_proof_approval_2026_06_28
+    dependencies:
+      - high-risk-gate-decision-approval-package-after-organization-workspace-ux-2026-06-28
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved a separate local DB-backed organization authorization proof for org_standard_admin and
+      org_advanced_admin. Scope is limited to explicitly named local test-owned or approved local dev targets. Evidence
+      may record only role labels, route/service labels, status labels, counts, and redacted pass/fail summaries. This
+      task forbids credentials, connection strings, token, cookie, localStorage, raw DOM, screenshots, traces, raw DB
+      rows, Provider payloads, prompts, raw AI output, plaintext redeem_code, employee subjective answers, complete
+      question or paper content, schema/migration/seed/destructive DB, Provider, Cost Calibration,
+      staging/prod/deploy, payment/OCR/export/external-service, PR, force push, release readiness, and final Pass.
+    targetClosureItem: DB-backed local organization authorization proof for standard and advanced organization admins
+    behaviorBoundary: local_dev_db_read_only::org_auth_context_proof_no_schema_no_seed_no_final_pass
+    executionProfile: local_dev_db_read_only_redacted_proof
+    evidenceMode: redacted_role_route_status_count_summary_only
+    validationPolicy: local_db_read_only_proof_focused_unit_scoped_prettier_diff_project_status_precommit
+    taskKind: local_db_read_only_authorization_proof
+    moduleRunVersion: 2
+    status: closed
+    result: partial_blocked_by_local_schema_gap
+    approvedAt: "2026-06-28T04:29:08-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_option_a_local_db_backed_org_authorization_proof_2026_06_28
+    claimedAt: "2026-06-28T04:29:08-07:00"
+    plannedAt: "2026-06-28T04:29:08-07:00"
+    implementedAt: "2026-06-28T04:29:08-07:00"
+    validatedAt: "2026-06-28T04:29:08-07:00"
+    reviewedAt: "2026-06-28T04:29:08-07:00"
+    closedAt: "2026-06-28T04:29:08-07:00"
+    branch: codex/org-auth-db-proof-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityDbProofWrite: approved
+      localDbReadOnlyConnection: approved_named_local_dev_target
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: blocked
+      pushOriginMaster: blocked
+      branchCleanup: blocked
+      localSourceChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExport: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-organization-auth-db-backed-proof-local.md
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-auth-db-backed-proof-local.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-auth-db-backed-proof-local.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-db-backed-proof-local.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-auth-db-backed-proof-local.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - package.json
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/db/schema/auth.ts
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - local_db_read_only
+      - authorization_source_of_truth
+      - redacted_aggregate_evidence
+      - no_schema_no_seed_no_migration
+      - no_runtime_browser
+      - no_final_pass
+      - cost_calibration_blocked
+    localDbProof:
+      targetLabel: tiku-postgres_dev_read_only
+      orgAuthTableExists: true
+      orgAuthEditionColumnExists: false
+      authUpgradeTableExists: false
+      orgStandardAdminActiveCount: 1
+      orgAdvancedAdminActiveCount: 1
+      orgStandardAdminOrganizationLinkCount: 1
+      orgAdvancedAdminOrganizationLinkCount: 1
+      orgStandardAdminLinkedActiveOrgAuthCount: 1
+      orgAdvancedAdminLinkedActiveOrgAuthCount: 1
+      employeeLinkCount: 0
+      decision: partial_blocked_by_local_schema_gap
+    validationCommands:
+      - docker compose ps --format json
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -Atc "<redacted read-only aggregate proof command>"
+      - npm.cmd run test:unit -- src/server/services/edition-aware-authorization-service.test.ts src/server/services/effective-authorization-service.test.ts src/server/repositories/edition-aware-authorization-repository.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-db-backed-proof-local.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-db-backed-proof-local.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-db-backed-proof-local.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-auth-db-backed-proof-local-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-auth-db-backed-proof-local.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-auth-db-backed-proof-local.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-db-backed-proof-local.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-db-backed-proof-local.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-auth-db-backed-proof-local.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_option_a_local_db_backed_org_authorization_proof_2026_06_28
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_write_migration_seed_or_destructive_operation
+      - schema_migration_or_drizzle_push
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - merge_push_cleanup_pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityDbProofPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      localDbTargetHealthy: true
+      localDbReadOnlyProof: pass_partial_blocked_by_schema_gap
+      focusedUnitServiceValidation: pass_4_files_17_tests
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: read_only_connection_no_mutation
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_three
+      moduleRunV2PreCommitHardening: pass
+    retryCount: 0
+    lastFailurePath: null
