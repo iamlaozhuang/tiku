@@ -33,6 +33,8 @@ function createSessionResponse(input: {
           organizationEffectiveEdition: isOrganizationAdvancedAdmin
             ? "advanced"
             : "standard",
+          organizationAuthorizationSource: "org_auth",
+          capabilitySource: "service_computed",
           canUseOrganizationAdvancedWorkspace:
             isOrganizationAdvancedAdmin && organizationPublicId !== null,
         }
