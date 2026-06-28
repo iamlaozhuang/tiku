@@ -44,6 +44,221 @@ lowRiskTaskTemplates:
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: standard-advanced-edition-experience-optimization-planning-2026-06-27
+    title: Standard and advanced edition experience optimization planning
+    phase: standard-advanced-edition-experience-optimization-planning-2026-06-27
+    sourceStory: current_user_return_to_standard_advanced_edition_feature_detail_and_experience_optimization_2026_06_27
+    dependencies: []
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user requested a docs/state-only planning task for standard and advanced edition feature detail and
+      experience optimization. This task may update only project-state.yaml, task-queue.yaml, docs/01-requirements/**,
+      and this task's task plan/evidence/audit/acceptance documents. It must not modify source, tests, e2e, schema,
+      migration, seed, package files, lockfiles, or .env* files; run browser/dev-server/e2e, DB, Provider, Cost
+      Calibration, staging/prod/deploy, payment, OCR/export, or external-service work; create PRs or force push; or
+      claim release readiness/final Pass.
+    targetClosureItem: Standard/advanced capability matrix, UX/detail risk split, follow-up queue recommendation, and approval text
+    behaviorBoundary: docs_state::standard_advanced_experience_planning_no_runtime_no_final_pass
+    executionProfile: docs_state_planning
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit_module_closeout_prepush
+    taskKind: docs_state_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_standard_advanced_experience_optimization_planning_docs_state_only_no_runtime_no_final_pass
+    approvedAt: "2026-06-27T21:42:27-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_request_standard_advanced_edition_experience_optimization_planning_2026_06_27
+    claimedAt: "2026-06-27T21:42:27-07:00"
+    plannedAt: "2026-06-27T21:42:27-07:00"
+    implementedAt: "2026-06-27T21:42:27-07:00"
+    validatedAt: "2026-06-27T21:52:39-07:00"
+    reviewedAt: "2026-06-27T21:52:39-07:00"
+    closedAt: "2026-06-27T21:52:39-07:00"
+    branch: codex/standard-advanced-experience-planning-20260627
+    capabilities:
+      docsStateEvidenceAudit: approved
+      requirementsReadOnlyPlanning: approved
+      followupTaskRecommendation: approved
+      copyableApprovalText: approved
+      localCommit: approved
+      ffOnlyMergeToMaster: approved
+      pushOriginMaster: approved
+      shortBranchCleanup: approved
+      futureTaskSeeding: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      envSecretRead: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExecution: blocked
+      exportGeneration: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+      - docs/05-execution-logs/evidence/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/acceptance/2026-06-26-ai-generation-scope-inventory-and-mvp-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-criteria-package.md
+      - docs/05-execution-logs/acceptance/2026-06-26-mvp-final-pass-decision-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-admin-ai-local-contract-loop-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-ops-visible-label-repair-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-role-separated-full-8-row-post-visible-label-private-credential-browser-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-26-provider-cost-gate-closeout-review.md
+      - docs/05-execution-logs/acceptance/2026-06-27-staging-infrastructure-readiness-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-27-archive-staging-infrastructure-readiness-planning.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - package-lock.yaml
+      - pnpm-lock.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceOrTestChangedByThisTask: 0
+      runtimeMutationsByThisTask: 0
+      providerCallsByThisTask: 0
+      providerConfigurationsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      futureExecutableTasksSeeded: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    localFullLoopGate: L0_docs_state_planning_only
+    threadRolloverGate: no_new_thread_required_resume_from_task_plan_evidence_project_state_and_task_queue
+    automationHandoffPolicy: not_seeded_future_tasks_require_fresh_approval_by_risk_tier
+    nextModuleRunCandidate: standard-advanced-backend-ux-design-first-contract-2026-06-27
+    planningSummary:
+      standardMatrixPrepared: true
+      advancedMatrixPrepared: true
+      uxDetailInventoryPrepared: true
+      riskTiersPrepared: true
+      followupTaskSplitPrepared: true
+      copyableApprovalTextsPrepared: true
+      followupTasksSeeded: false
+      costCalibrationGateStatus: blocked
+      stagingExecutionStatus: blocked_missing_concrete_isolated_target
+      releaseReadinessDecision: blocked_not_evaluated
+      finalPassDecision: blocked_not_claimed
+    proposedFollowupTaskOrder:
+      - standard-advanced-backend-ux-design-first-contract-2026-06-27
+      - standard-learner-experience-copy-and-unavailable-state-source-only-2026-06-27
+      - advanced-learner-entry-and-organization-training-entry-source-only-2026-06-27
+      - backend-workspace-role-guard-contract-tdd-2026-06-27
+      - ops-redeem-code-edition-auth-contract-planning-2026-06-27
+      - ops-redeem-code-generation-source-contract-tdd-2026-06-27
+      - org-auth-edition-upgrade-contract-tdd-2026-06-27
+      - standard-advanced-local-role-browser-validation-2026-06-27
+      - org-auth-atomic-scope-schema-approval-package-2026-06-27
+      - content-organization-ai-generation-product-loop-planning-2026-06-27
+      - content-organization-ai-generation-product-loop-source-tdd-2026-06-27
+      - provider-smoke-or-cost-calibration-approval-package-2026-06-27
+      - staging-target-materialization-and-smoke-approval-2026-06-27
+      - payment-export-ocr-future-scope-decision-package-2026-06-27
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/evidence/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/acceptance/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/evidence/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-edition-experience-optimization-planning.md docs/05-execution-logs/acceptance/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-advanced-edition-experience-optimization-planning-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standard-advanced-edition-experience-optimization-planning-2026-06-27
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId standard-advanced-edition-experience-optimization-planning-2026-06-27 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_request_standard_advanced_edition_experience_optimization_planning_2026_06_27
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_request_standard_advanced_edition_experience_optimization_planning_2026_06_27
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_request_standard_advanced_edition_experience_optimization_planning_2026_06_27
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_request_standard_advanced_edition_experience_optimization_planning_2026_06_27
+    planPath: docs/05-execution-logs/task-plans/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    validationSummary:
+      taskPlanPrepared: true
+      standardAdvancedMatrixPrepared: true
+      uxDetailInventoryPrepared: true
+      riskTierSplitPrepared: true
+      followupTaskRecommendationsPrepared: true
+      copyableApprovalTextsPrepared: true
+      futureExecutableTasksSeeded: false
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_no_pending_task_archive_candidate_count_2_requires_human
+      activeQueueNonTerminalCountAfterTask: 3
+      archiveCandidateCountAfterTask: 2
+      highRiskRepairBlockedCountAfterTask: 0
+      projectStatusRequiresHumanAfterTask: true
+      costCalibrationGate: blocked_pending_fresh_explicit_approval
+      stagingExecutionGate: blocked_missing_concrete_isolated_target
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+    blockedWithoutFreshApproval:
+      - future_executable_task_seeding
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_provider_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service_ocr_export
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
   - id: archive-staging-infrastructure-readiness-planning-2026-06-27
     title: Archive staging infrastructure readiness planning
     phase: archive-staging-infrastructure-readiness-planning-2026-06-27
