@@ -1391,7 +1391,7 @@ fullAcceptanceOptionASessionCoverage20260628:
     personal_advanced_student, and personal_standard_student.
   sourceApprovalPackage: full-acceptance-remaining-execution-approval-package-2026-06-28
   browserResult:
-    status: blocked_closeout_validated
+    coverageStatus: blocked_closeout_validated
     passRoles: 7
     blockedRoles: 1
     blockedRole: ops_admin

@@ -1455,7 +1455,7 @@ tasks:
     phase: full-acceptance-option-a-session-coverage-2026-06-28
     sourceStory: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
     browserResult:
-      status: blocked_closeout_validated
+      coverageStatus: blocked_closeout_validated
       passRoles: 7
       blockedRoles: 1
       blockedRole: ops_admin
