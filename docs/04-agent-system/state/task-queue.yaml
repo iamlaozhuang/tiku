@@ -44,6 +44,139 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: owner-facing-role-gap-capture-scope-2026-06-28
+    title: Owner-facing role gap capture scope
+    phase: owner-facing-role-gap-capture-scope-2026-06-28
+    sourceStory: current_user_requested_role_checklist_documentation_after_discussion_2026_06_28
+    dependencies:
+      - local-blocked-gate-supersession-triage-2026-06-28
+    taskPlanPolicy: required_before_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved documenting the owner-facing role gap capture checklist after all six role groups were
+      discussed, then approved local commit, fast-forward merge to master, push to origin/master, and short-branch
+      cleanup. Scope is limited to docs/state task materialization, requirement traceability, task plan, evidence, and
+      audit review. It must not execute runtime, browser/e2e/dev-server, DB, Provider, env, source/test/script,
+      package/lockfile, schema/migration/seed, staging/prod/deploy, payment/OCR/export/external-service, PR, force push,
+      Cost Calibration, release readiness, or final Pass work.
+    targetClosureItem: Durable owner-facing role gap capture scope for later local walkthroughs
+    behaviorBoundary: docs_state::role_gap_capture_scope_no_runtime_no_final_pass
+    executionProfile: docs_state_requirement_alignment
+    evidenceMode: redacted_requirement_surface_and_validation_summary_only
+    validationPolicy: scoped_prettier_cached_diff_project_status_precommit_closeout
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_requirement_scope_recorded
+    approvedAt: "2026-06-28T10:48:39-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+    claimedAt: "2026-06-28T10:48:39-07:00"
+    plannedAt: "2026-06-28T10:48:39-07:00"
+    implementedAt: "2026-06-28T10:48:39-07:00"
+    validatedAt: "2026-06-28T10:48:39-07:00"
+    reviewedAt: "2026-06-28T10:48:39-07:00"
+    closedAt: "2026-06-28T10:48:39-07:00"
+    branch: codex/owner-role-gap-scope-docs-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/task-plans/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/task-plans/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/task-plans/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - git diff --cached --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-facing-role-gap-capture-scope-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-facing-role-gap-capture-scope-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-owner-facing-role-gap-capture-scope.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_owner_role_gap_scope_docs_and_closeout_2026_06_28
+    validationSummary:
+      traceabilityPrepared: true
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      projectStateTaskMaterialized: true
+      taskQueueTaskMaterialized: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: local-blocked-gate-supersession-triage-2026-06-28
     title: Local blocked gate supersession triage
     phase: local-blocked-gate-supersession-triage-2026-06-28
