@@ -93,7 +93,9 @@ question/paper/material/resource/chunk content.
 
 ## Batch Commit Evidence
 
-- Commit: pending.
+- Commit: `b302be2a2`
+- Commit scope: this task's seven allowed governance/evidence files only.
+- Commit message: `docs(acceptance): capture ai generation detail gaps`.
 
 ## Gate Results
 
@@ -104,3 +106,21 @@ question/paper/material/resource/chunk content.
 - Final Pass: blocked.
 - nextModuleRunCandidate: `ai-generation-detail-controls-source-repair-or-role-matrix-rerun-2026-06-28`, split into
   source repair for content AI detail controls and role-specific browser rerun for organization/learner AI detail rows.
+
+## Validation Results
+
+- `browser-ai-generation-detail-gap-capture`: blocked gap captured; no Provider, submit, direct DB, credential entry,
+  session inspection, raw DOM output, screenshot, trace, or complete content evidence.
+- `npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md`:
+  pass.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md`:
+  pass.
+- `git diff --check`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28`:
+  pass.
+- `git commit -m "docs(acceptance): capture ai generation detail gaps"`:
+  pass; hook lint/typecheck completed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28`:
+  pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28 -SkipRemoteAheadCheck`:
+  pass.

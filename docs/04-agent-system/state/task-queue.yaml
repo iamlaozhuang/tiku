@@ -1668,8 +1668,8 @@ tasks:
     validationPolicy: browser_detail_gap_capture_scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
     taskKind: acceptance_runtime_walkthrough
     moduleRunVersion: 2
-    status: claimed
-    result: pending_redacted_browser_detail_control_gap_capture
+    status: closed
+    result: blocked_gap_captured_missing_ai_generation_detail_controls_no_final_pass
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
       relevantRows:
@@ -1691,6 +1691,7 @@ tasks:
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
     claimedAt: "2026-06-28T16:06:24-07:00"
     plannedAt: "2026-06-28T16:06:24-07:00"
+    closedAt: "2026-06-28T16:18:12-07:00"
     branch: codex/full-acceptance-ai-generation-detail-gap-20260628
     capabilities:
       docsStateEvidenceAudit: approved
@@ -1842,19 +1843,26 @@ tasks:
       - cost_calibration_gate
       - evidence_sensitive_data_exposure
     validationSummary:
-      taskPlanPrepared: pending
-      traceabilityDetailCriteriaPrepared: pending
-      browserDetailControlCapture: pending
-      evidencePrepared: pending
-      auditReviewPrepared: pending
-      acceptancePrepared: pending
+      taskPlanPrepared: pass
+      traceabilityDetailCriteriaPrepared: pass
+      browserDetailControlCapture: blocked_missing_required_ai_generation_detail_controls
+      evidencePrepared: pass
+      auditReviewPrepared: pass_blocked_closeout_approved
+      acceptancePrepared: pass_blocked_gap_recorded
       sourceOrTestChanged: false
-      browserRuntimeExecuted: pending
+      browserRuntimeExecuted: true
       databaseConnectionOrMutationExecuted: false
       providerCallOrConfigurationExecuted: false
       credentialOrSessionCaptureExecuted: false
       releaseReadinessClaimed: false
       finalPassClaimed: false
+      firstCommit: b302be2a2
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
     retryCount: 0
     lastFailurePath: null
 
