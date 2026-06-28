@@ -40,6 +40,13 @@ interface MenuItem {
   advancedOrganizationOnly?: boolean;
 }
 
+interface WorkspaceSwitchItem {
+  href: string;
+  label: string;
+  workspace: AdminWorkspace;
+  Icon: LucideIcon;
+}
+
 const CONTENT_MENU: MenuItem[] = [
   { href: "/content/papers", label: "试卷管理", Icon: FileText },
   { href: "/content/questions", label: "题库管理", Icon: BookOpenText },
@@ -158,6 +165,66 @@ function getWorkspacePresentation(
   };
 }
 
+function getWorkspaceSwitchItems(
+  adminRoles: readonly string[],
+): WorkspaceSwitchItem[] {
+  if (adminRoles.includes("super_admin")) {
+    return [
+      {
+        href: "/ops/users",
+        label: "运营后台",
+        workspace: "ops",
+        Icon: UserRoundCog,
+      },
+      {
+        href: "/content/papers",
+        label: "内容后台",
+        workspace: "content",
+        Icon: BookOpenText,
+      },
+      {
+        href: "/organization/portal",
+        label: "组织后台",
+        workspace: "organization",
+        Icon: Building2,
+      },
+    ];
+  }
+
+  if (hasOrganizationAdminRole(adminRoles)) {
+    return [
+      {
+        href: "/organization/portal",
+        label: "组织后台",
+        workspace: "organization",
+        Icon: Building2,
+      },
+    ];
+  }
+
+  const workspaceItems: WorkspaceSwitchItem[] = [];
+
+  if (adminRoles.includes("ops_admin")) {
+    workspaceItems.push({
+      href: "/ops/users",
+      label: "运营后台",
+      workspace: "ops",
+      Icon: UserRoundCog,
+    });
+  }
+
+  if (adminRoles.includes("content_admin")) {
+    workspaceItems.push({
+      href: "/content/papers",
+      label: "内容后台",
+      workspace: "content",
+      Icon: BookOpenText,
+    });
+  }
+
+  return workspaceItems;
+}
+
 function isAdminContext(authContext: AuthContextDto): boolean {
   return (
     authContext.user.adminPublicId !== null &&
@@ -259,6 +326,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     workspace,
     adminRoles,
   );
+  const workspaceSwitchItems = getWorkspaceSwitchItems(adminRoles);
 
   useEffect(() => {
     let isCurrentCheck = true;
@@ -336,6 +404,40 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
 
+        {workspaceSwitchItems.length > 1 ? (
+          <nav
+            aria-label="后台工作区切换"
+            className="border-border border-b p-3"
+          >
+            <ul className="grid gap-1">
+              {workspaceSwitchItems.map((item) => {
+                const isActiveWorkspace = item.workspace === workspace;
+                const Icon = item.Icon;
+
+                return (
+                  <li key={item.workspace}>
+                    <Link
+                      href={item.href}
+                      aria-current={isActiveWorkspace ? "page" : undefined}
+                      aria-label={`${
+                        isActiveWorkspace ? "当前" : "切换到"
+                      }${item.label}`}
+                      className={`rounded-radius-md flex items-center gap-2 px-3 py-2 text-sm transition-transform active:scale-[0.98] ${
+                        isActiveWorkspace
+                          ? "bg-secondary text-brand-primary font-medium"
+                          : "text-text-secondary hover:bg-muted hover:text-text-primary"
+                      }`}
+                    >
+                      <Icon aria-hidden="true" className="size-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        ) : null}
+
         {/* Menu */}
         <nav className="flex-1 overflow-y-auto p-3">
           <ul className="space-y-1">
@@ -348,10 +450,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
                   <Link
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
+                    className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-transform active:scale-[0.98] ${
                       isActive
                         ? "bg-secondary text-brand-primary font-medium"
-                        : "text-text-secondary hover:text-text-primary hover:bg-muted"
+                        : "text-text-secondary hover:bg-muted hover:text-text-primary"
                     }`}
                   >
                     <Icon aria-hidden="true" className="size-4" />
@@ -371,7 +473,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           <span className="text-text-muted text-sm">{portalName}</span>
           <button
             aria-label="退出登录"
-            className="text-text-secondary hover:text-text-primary hover:bg-muted flex size-9 items-center justify-center rounded-full transition-colors"
+            className="text-text-secondary hover:bg-muted hover:text-text-primary flex size-9 items-center justify-center rounded-full transition-transform active:scale-[0.98]"
             type="button"
             onClick={handleLogoutClick}
           >

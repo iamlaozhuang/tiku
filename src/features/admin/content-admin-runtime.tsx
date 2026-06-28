@@ -15,6 +15,7 @@ export type AdminLoadState =
   | "unauthorized"
   | "error";
 type AdminUxState = "loading" | "empty" | "error" | "permission-denied";
+type AdminUnavailableUxState = AdminUxState | "standard-unavailable";
 
 export const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 export const COOKIE_BACKED_SESSION_TOKEN = "__cookie_backed_session__";
@@ -128,7 +129,7 @@ export function AdminSurfaceStatus({
   action?: ReactNode;
   description: string;
   icon: ReactNode;
-  state: Exclude<AdminUxState, "loading">;
+  state: Exclude<AdminUnavailableUxState, "loading">;
   title: string;
 }) {
   const role = state === "empty" ? "status" : "alert";
@@ -169,6 +170,35 @@ export function AdminUnauthorizedState() {
       icon={<AlertCircle aria-hidden="true" className="size-5" />}
       state="permission-denied"
       title="请先登录后台"
+    />
+  );
+}
+
+export function AdminUpgradeRequiredState({
+  description,
+  returnHref,
+  returnLabel,
+  title,
+}: {
+  description: string;
+  returnHref: string;
+  returnLabel: string;
+  title: string;
+}) {
+  return (
+    <AdminSurfaceStatus
+      action={
+        <Link
+          className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          href={returnHref}
+        >
+          {returnLabel}
+        </Link>
+      }
+      description={description}
+      icon={<AlertCircle aria-hidden="true" className="size-5" />}
+      state="standard-unavailable"
+      title={title}
     />
   );
 }

@@ -7,6 +7,7 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
+  AdminUpgradeRequiredState,
 } from "@/features/admin/content-admin-runtime";
 
 const forbiddenMarkers = [
@@ -87,5 +88,30 @@ describe("admin common UX state audit", () => {
       "/login",
     );
     expectRedactionSafe(unauthorizedView.container);
+  });
+
+  it("exposes standard-unavailable state for advanced-only backend surfaces", () => {
+    const unavailableView = render(
+      createElement(AdminUpgradeRequiredState, {
+        description:
+          "企业训练和组织 AI 出题需要有效高级版 org_auth 或由平台运营完成升级。",
+        returnHref: "/organization/portal",
+        returnLabel: "返回组织概览",
+        title: "当前标准版组织授权暂不可用",
+      }),
+    );
+
+    const unavailableAlert = screen.getByRole("alert");
+    expect(unavailableAlert).toHaveAttribute(
+      "data-admin-ux-state",
+      "standard-unavailable",
+    );
+    expect(unavailableAlert).toHaveTextContent("当前标准版组织授权暂不可用");
+    expect(unavailableAlert).toHaveTextContent("高级版 org_auth");
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
+    expectRedactionSafe(unavailableView.container);
   });
 });

@@ -211,6 +211,45 @@ describe("AdminDashboardLayout navigation", () => {
     );
   });
 
+  it("shows explicit workspace switcher destinations for multi-role backend admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ...opsAdminSessionPayload,
+          data: {
+            ...opsAdminSessionPayload.data,
+            user: {
+              ...opsAdminSessionPayload.data.user,
+              adminRoles: ["ops_admin", "content_admin"],
+            },
+          },
+        }),
+      })),
+    );
+    pathnameMock = "/ops/users";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "ops page"),
+      ),
+    );
+
+    expect(await screen.findByText("ops page")).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "后台工作区切换" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "切换到内容后台" }),
+    ).toHaveAttribute("href", "/content/papers");
+    expect(screen.queryByRole("link", { name: "切换到组织后台" })).toBeNull();
+  });
+
   it("clears the server-backed session when the backend logout control is clicked", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(
