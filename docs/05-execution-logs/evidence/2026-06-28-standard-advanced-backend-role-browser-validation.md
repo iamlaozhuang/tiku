@@ -3,6 +3,7 @@
 ## Task
 
 - Task id: `standard-advanced-backend-role-browser-validation-2026-06-27`
+- result: `pass_local_browser_backend_role_validation_existing_localhost_redacted_no_e2e_no_final_pass`
 - Branch: `codex/standard-advanced-backend-role-browser-validation-20260628`
 - Commit: pending local commit
 - Evidence mode: redacted role, route, status, count only
@@ -109,3 +110,34 @@ Observed scope:
 ## Handoff
 
 The browser validation is locally complete, but fast-forward merge to `master`, push to `origin/master`, and branch cleanup remain blocked until fresh explicit closeout approval.
+
+## Closeout Evidence
+
+Closeout approval received on 2026-06-28 for task
+`standard-advanced-backend-role-browser-validation-2026-06-27`.
+
+Master merge result:
+
+```text
+mergeTarget=master
+mergeMode=fast-forward
+mergedCommit=d32e15696
+status=pass
+```
+
+Master gate results before remote push:
+
+| Command                                  | Result | Notes                                                          |
+| ---------------------------------------- | ------ | -------------------------------------------------------------- |
+| Scoped Prettier check                    | pass   | Allowed state and execution-log files use Prettier style       |
+| `git diff --check`                       | pass   | No whitespace errors                                           |
+| `Get-TikuProjectStatus.ps1`              | pass   | `no_pending_task`; active non-terminal 3; archive candidates 8 |
+| `Test-ModuleRunV2PreCommitHardening.ps1` | pass   | Explicit 6-file closeout scope scan passed                     |
+
+Closeout readiness applicability:
+
+| Command                                       | Result         | Notes                                                                                                                            |
+| --------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `Test-ModuleRunV2ModuleCloseoutReadiness.ps1` | not_applicable | Legacy strict batch evidence model expected RED/GREEN and batch commit evidence for this non-batch local browser validation task |
+
+Remote push and short-branch cleanup are authorized by closeout approval and remain pending at the time this evidence section is written. The remote action result is recorded in the closeout handoff response.
