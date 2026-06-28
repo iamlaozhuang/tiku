@@ -2229,7 +2229,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d75fcc9a37963b968a4e6a9974ee749d5cd6c696
+  lastKnownMasterSha: d9e61e84694997740e0716138f6c2188debab430
   lastKnownOriginMasterSha: d75fcc9a37963b968a4e6a9974ee749d5cd6c696
 currentTask:
   id: full-acceptance-option-a-session-coverage-2026-06-28
