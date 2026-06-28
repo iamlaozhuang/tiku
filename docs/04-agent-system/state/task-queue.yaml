@@ -840,9 +840,17 @@ tasks:
     validationPolicy: local_org_role_browser_focused_gates
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass_local_full_loop_organization_training_analytics_ai_generation_role_flow
     approvedAt: "2026-06-28T05:25:00-07:00"
     approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    claimedAt: "2026-06-28T06:32:00-07:00"
+    plannedAt: "2026-06-28T06:33:00-07:00"
+    implementedAt: "2026-06-28T06:40:00-07:00"
+    validatedAt: "2026-06-28T06:42:00-07:00"
+    reviewedAt: "2026-06-28T06:44:00-07:00"
+    closedAt: "2026-06-28T06:44:00-07:00"
     planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
@@ -924,13 +932,24 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
     validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/services/organization-analytics-service.test.ts src/server/services/organization-analytics-route.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
+      - '$env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER="1"; npm.cmd run test:e2e -- e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line'
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - focused organization role/training/analytics/AI generation validation recorded with redacted output
-      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      localOrganizationRoleFocusedUnit: pass_7_files_132_tests
+      localFullLoopOrganizationRoleE2e: pass_1_test
+      localDevDatabaseMutation: local_dev_organization_training_fixture_only
+      organizationAiGenerationProviderRuntime: provider_blocked_local_contract_only
+      nonAcceptanceDiagnostic: over_broad_admin_ui_entry_surface_unit_selection_failed_current_unit_auth_state
+      redactionBoundaryRecorded: true
+      finalGateStatus: pass
     nextRecommendedTask: local-full-loop-rollup-evidence-2026-06-28
 
   - id: local-full-loop-rollup-evidence-2026-06-28
