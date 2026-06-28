@@ -1,10 +1,10 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
-  updatedAt: "2026-06-28T09:21:48-07:00"
+  updatedByTask: local-blocked-gate-supersession-triage-2026-06-28
+  updatedAt: "2026-06-28T09:39:13-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -15453,3 +15453,30 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-25T09:49:34-07:00"
+  - id: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+    phase: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+    status: closed
+    taskKind: docs_state_archive_index_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T09:27:51-07:00"
+  - id: organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+    phase: organization-analytics-ux-design-first-package-2026-06-27
+    status: closed
+    taskKind: browser_validation_followup_blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-local-browser-smoke-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T09:39:13-07:00"
+  - id: acceptance-l5-standard-role-flow-run-2026-06-23
+    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
+    status: closed
+    taskKind: acceptance_local_runtime_role_flow
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T09:39:13-07:00"

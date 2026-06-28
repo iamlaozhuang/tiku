@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 lowRiskTaskTemplates:
   blockedFiles: &low_risk_blocked_files
     - .env*
@@ -44,42 +44,47 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
-  - id: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
-    title: Local full loop active queue slimming after post Provider rollup
-    phase: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
-    sourceStory: local-full-loop-post-provider-rollup-evidence-2026-06-28
+  - id: local-blocked-gate-supersession-triage-2026-06-28
+    title: Local blocked gate supersession triage
+    phase: local-blocked-gate-supersession-triage-2026-06-28
+    sourceStory: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
     dependencies:
-      - local-full-loop-post-provider-rollup-evidence-2026-06-28
-    taskPlanPolicy: required_before_archive_index_movement
+      - local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+    taskPlanPolicy: required_before_state_or_archive_edit
     humanApprovalBoundary: >-
-      Current user approved executing the recommended queue/state hygiene task after post-Provider rollup. Scope is
-      docs/state archive and history-index cleanup only. The task may move approved terminal task blocks from active
-      queue to the June archive, update task-history-index, update project-state/task-queue, and write plan,
-      traceability, evidence, audit, and acceptance docs. It must not execute runtime, Provider, DB, browser/e2e,
-      dev-server, source/test/script/package/lockfile, .env, schema, migration, seed, staging/prod/deploy,
-      payment/OCR/export/external-service, PR, force push, Cost Calibration, release readiness, or final Pass.
-    targetClosureItem: Active queue terminal history drained after post-Provider rollup
-    behaviorBoundary: docs_state_archive_index_cleanup_only
-    executionProfile: docs_state_archive_index_cleanup
+      Current user approved executing the recommended docs-only blocked-gate triage after active queue slimming. Scope is
+      limited to closing stale blocked task records as superseded by later local evidence, preserving the remaining
+      staging gate as blocked, moving eligible terminal active-queue overflow to the June archive, updating the history
+      index, and writing traceability, evidence, audit, and acceptance docs. It must not execute runtime, browser/e2e,
+      dev-server, DB, Provider, env, source/test/script/package/lockfile, schema/migration/seed,
+      staging/prod/deploy, payment/OCR/export/external-service, PR, force push, Cost Calibration, release readiness, or
+      final Pass work.
+    targetClosureItem: Superseded local blocked gates retired from active queue while staging remains blocked
+    behaviorBoundary: docs_state::blocked_gate_supersession_triage_and_archive_no_runtime_no_final_pass
+    executionProfile: docs_state_blocked_gate_triage_archive
     evidenceMode: redacted_task_metadata_only
-    validationPolicy: archive_index_scoped_gates
-    taskKind: docs_state_archive_index_cleanup
+    validationPolicy: scoped_prettier_diff_project_status_queue_slimming_precommit_prepush
+    taskKind: docs_state_blocked_gate_triage_archive
     moduleRunVersion: 2
     status: closed
-    result: pass_active_queue_slimming_after_post_provider_rollup
-    approvedAt: "2026-06-28T09:21:48-07:00"
+    result: pass_local_blocked_gate_supersession_triage_staging_remains_blocked
+    approvedAt: "2026-06-28T09:39:13-07:00"
     approvedBy: laozhuang
-    approvalConsumed: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
-    claimedAt: "2026-06-28T09:21:48-07:00"
-    plannedAt: "2026-06-28T09:21:48-07:00"
-    implementedAt: "2026-06-28T09:27:51-07:00"
-    validatedAt: "2026-06-28T09:27:51-07:00"
-    reviewedAt: "2026-06-28T09:27:51-07:00"
-    closedAt: "2026-06-28T09:27:51-07:00"
+    approvalConsumed: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
+    claimedAt: "2026-06-28T09:39:13-07:00"
+    plannedAt: "2026-06-28T09:39:13-07:00"
+    implementedAt: "2026-06-28T09:45:54-07:00"
+    validatedAt: "2026-06-28T09:45:54-07:00"
+    reviewedAt: "2026-06-28T09:45:54-07:00"
+    closedAt: "2026-06-28T09:45:54-07:00"
     capabilities:
       docsStateEvidenceAudit: approved
-      traceabilityWrite: approved
+      blockedGateTriage: approved
       archiveIndexMovement: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
       localSourceChange: blocked
       focusedUnitTest: blocked
       providerCall: blocked
@@ -103,11 +108,11 @@ tasks:
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
       - docs/04-agent-system/state/task-history-index.yaml
-      - docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+      - docs/01-requirements/traceability/2026-06-28-local-blocked-gate-supersession-triage.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-blocked-gate-supersession-triage.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-blocked-gate-supersession-triage.md
     blockedFiles:
       - .env*
       - src/**
@@ -127,69 +132,74 @@ tasks:
       - .next/**
       - D:/tiku-local-private/**
       - D:\tiku-local-private\**
-    archiveMovementPlan:
-      archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-      sourceDiagnostic: Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      activeQueueTaskCountBefore: 30
-      activeQueueTerminalCountBefore: 27
-      activeQueueNonTerminalCountBefore: 3
-      terminalRecoveryWindow: 8
-      plannedArchivedTaskCount: 19
-      activeQueueTaskCountAfterMove: 12
-      activeQueueTerminalCountAfterMove: 8
-      activeQueueNonTerminalCountAfterMove: 4
-      archiveCandidateCountAfterMove: 0
-      activeQueueTaskCountAfterClose: 12
+    triageDecision:
+      blockedTaskCountBefore: 3
+      blockedTaskClosedAsSuperseded: 2
+      blockedTaskRetained: 1
+      retainedBlockedTaskId: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
+      archivedTaskCount: 3
+      activeQueueTaskCountBefore: 12
+      activeQueueTaskCountAfterArchive: 10
+      activeQueueNonTerminalCountAfterArchive: 2
+      activeQueueTerminalCountAfterArchive: 8
+      archiveCandidateCountAfterArchive: 0
+      activeQueueTaskCountAfterClose: 10
+      activeQueueNonTerminalCountAfterClose: 1
       activeQueueTerminalCountAfterClose: 9
-      activeQueueNonTerminalCountAfterClose: 3
       archiveCandidateCountAfterClose: 0
+    archivedTaskIds:
+      - local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+      - organization-analytics-local-browser-smoke-validation-approval-2026-06-27
+      - acceptance-l5-standard-role-flow-run-2026-06-23
     validationCommands:
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/01-requirements/traceability/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/task-plans/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/acceptance/2026-06-28-local-blocked-gate-supersession-triage.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/01-requirements/traceability/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/task-plans/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md docs/05-execution-logs/acceptance/2026-06-28-local-blocked-gate-supersession-triage.md
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28 -SkipRemoteAheadCheck
-    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-blocked-gate-supersession-triage-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-blocked-gate-supersession-triage-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-blocked-gate-supersession-triage.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-blocked-gate-supersession-triage.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-blocked-gate-supersession-triage.md
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+        approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
       fastForwardMerge:
         approved: true
         targetBranch: master
-        approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+        approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
       push:
         approved: true
         target: origin/master
-        approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+        approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
       cleanup:
         deleteShortBranch: true
-        approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+        approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
     validationSummary:
       taskPlanPrepared: true
       traceabilityPrepared: true
       evidencePrepared: true
       auditReviewPrepared: true
       acceptancePrepared: true
+      blockedTasksTriaged: 2
+      stagingGateRetainedBlocked: true
       archiveIndexMovementExecuted: true
-      movedTaskCount: 19
-      activeQueueTaskCountAfterMove: 12
-      archiveCandidateCountAfterMove: 0
-      activeQueueTaskCountAfterClose: 12
+      archivedTaskCount: 3
+      activeQueueTaskCountAfterClose: 10
+      activeQueueNonTerminalCountAfterClose: 1
       activeQueueTerminalCountAfterClose: 9
-      activeQueueNonTerminalCountAfterClose: 3
       archiveCandidateCountAfterClose: 0
       sourceOrTestChanged: false
       schemaOrMigrationFileChanged: false
       packageOrLockfileChanged: false
       envFileChanged: false
+      browserRuntimeExecuted: false
+      e2eRuntimeExecuted: false
+      devServerStartedByCodex: false
       providerCallOrConfigurationExecuted: false
       costCalibrationExecuted: false
       releaseReadinessClaimed: false
@@ -198,11 +208,10 @@ tasks:
       prettierScoped: pass
       gitDiffCheck: pass
       queueSlimmingDiagnostic: pass_clean_archive_candidate_count_0
-      projectStatusDiagnostic: pass_current_task_closed_no_unblocked_pending_task
+      projectStatusDiagnostic: pass_idle_one_blocked_nonterminal_staging_only
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_before_commit
-    nextRecommendedTask: none_active_queue_contains_only_blocked_gates_and_closed_recovery_window
-
+    nextRecommendedTask: staging_target_registration_or_new_local_work_requires_fresh_instruction
   - id: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
     title: Layer 3 staging pre-release redacted execution after target materialization
     phase: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
@@ -319,197 +328,6 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-27-layer-3-staging-pre-release-redacted-execution-after-target-materialization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-layer-3-staging-pre-release-redacted-execution-after-target-materialization.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-27-layer-3-staging-pre-release-redacted-execution-after-target-materialization.md
-
-  - id: organization-analytics-local-browser-smoke-validation-approval-2026-06-27
-    title: Organization analytics local browser smoke validation approval
-    phase: organization-analytics-ux-design-first-package-2026-06-27
-    sourceStory: current_user_serial_batch_queue_2026_06_27
-    dependencies:
-      - organization-analytics-admin-ui-implementation-local-validation-approval-2026-06-27
-    taskKind: browser_validation_followup_blocked
-    moduleRunVersion: 2
-    executionProfile: blocked_local_browser_smoke_validation_scope
-    evidenceMode: redacted_browser_scope_only
-    validationPolicy: blocked_requires_fresh_dev_server_browser_approval
-    status: blocked
-    result: blocked_pending_fresh_local_browser_smoke_approval
-    nextApprovalRequired: dev_server_local_account_seed_or_fixture_and_browser_scope
-    boundary: local_only_browser_smoke_after_source_ui_exist_no_staging_prod
-    blockedCapabilities:
-      - browserRuntime
-      - devServer
-      - e2eRuntime
-      - databaseConnection
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-      - docs/05-execution-logs/evidence/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-      - docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-      - docs/05-execution-logs/acceptance/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-    validationCommands:
-      - blocked_pending_fresh_dev_server_browser_scope_approval
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-    closeoutPolicy:
-      localCommit:
-        approved: false
-        approvalSource: fresh_dev_server_browser_scope_approval_required
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-        approvalSource: fresh_dev_server_browser_scope_approval_required
-      push:
-        approved: false
-        target: origin/master
-        approvalSource: fresh_dev_server_browser_scope_approval_required
-      cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_dev_server_browser_scope_approval_required
-    evidencePath: docs/05-execution-logs/evidence/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-27-organization-analytics-local-browser-smoke-validation.md
-
-  - id: acceptance-l5-standard-role-flow-run-2026-06-23
-    title: Run Standard MVP L5 local role flow evidence
-    phase: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
-    sourceStory: user-request-2026-06-23-runtime-blocker-evidence-batch
-    dependencies:
-      - acceptance-l5-browser-runtime-scope-approval-2026-06-23
-    taskKind: acceptance_local_runtime_role_flow
-    moduleRunVersion: 2
-    executionProfile: acceptance_runtime_l5_standard_role_flow
-    evidenceMode: full
-    validationPolicy: local_runtime_l5_requires_fresh_approval
-    queueSelectionMode: serial_runtime_blocker_batch_child_2
-    targetClosureItem: Standard MVP L5 local role flow evidence
-    behaviorBoundary: acceptance_execution::standard_l5_local_only_no_provider_no_staging
-    serialBatchId: standard-advanced-mvp-runtime-blocker-evidence-batch-2026-06-23
-    serialBatchRole: child
-    serialBatchOrder: 2
-    requiredOutcome: >-
-      Execute only the Standard MVP local L5/browser surfaces approved by the previous task and record redacted
-      role-flow evidence, defects, blocked gates, and decision impact.
-    freshApprovalRequiredBeforeExecution:
-      - browser_e2e_runtime_or_dev_server
-      - l5_role_walkthrough_execution
-    freshApprovalStatus: current_user_fresh_approval_materialized
-    approvalPackageId: L5_LOCAL_BROWSER_RUNTIME_SCOPE_2026_06_23
-    approvedAt: "2026-06-22T23:46:23-07:00"
-    capabilities:
-      localBrowserRuntime: approved_local_only
-      devServer: approved_existing_project_script_only
-      localE2EValidation: approved_local_only_existing_specs
-      localE2ESmokeTier: safe_smoke_task_specific_all_allowlisted_specs
-      providerCall: blocked
-      envSecretAccess: blocked
-      schemaMigration: blocked
-      databaseConnectionOrSeed: blocked
-      dependencyIntroduction: blocked
-      stagingProdDeploy: blocked
-      paymentExternalService: blocked
-      costCalibrationGate: blocked
-    validationProfile: L5-local-e2e
-    localFullLoopGate: L5
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-standard-role-flow-run.md
-      - docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md
-      - docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/sop/local-human-verification.md
-      - docs/04-agent-system/sop/local-first-validation-governance.md
-      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
-      - docs/04-agent-system/sop/task-lifecycle-governance.md
-      - docs/05-execution-logs/acceptance/2026-06-23-runtime-blocker-evidence-batch-plan.md
-      - docs/05-execution-logs/acceptance/2026-06-23-l5-browser-runtime-scope-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-22-acceptance-final-decision-review.md
-      - package.json
-      - playwright.config.ts
-      - e2e/home.spec.ts
-      - e2e/local-auth-route-guard.spec.ts
-      - e2e/admin-role-denial-browser.spec.ts
-      - src/app/**
-      - src/components/**
-      - src/features/**
-      - src/server/**
-    blockedFiles:
-      - .env.local
-      - .env.example
-      - .env.*
-      - package.json
-      - pnpm-lock.yaml
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - scripts/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-    validationCommands:
-      - npm.cmd run test:e2e -- --list
-      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/home.spec.ts
-      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts
-      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd run test:e2e -- e2e/admin-role-denial-browser.spec.ts
-      - npx.cmd prettier --check --ignore-unknown docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-standard-role-flow-run.md docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId acceptance-l5-standard-role-flow-run-2026-06-23
-    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-l5-standard-role-flow-run.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-l5-standard-role-flow-run.md
-    planPath: docs/05-execution-logs/task-plans/2026-06-23-acceptance-l5-standard-role-flow-run.md
-    closeoutPolicy:
-      localCommit:
-        approved: false
-        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
-      push:
-        approved: false
-        target: origin/master
-        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
-      cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_l5_runtime_execution_closeout_approval_required
-    blockedWithoutFreshApproval:
-      - provider_model_call_or_provider_enablement
-      - env_secret_access_or_env_file_change
-      - schema_migration_seed_database_connection_or_data_change
-      - staging_prod_cloud_deploy
-      - dependency_package_lockfile_change
-      - payment_external_service
-      - production_or_staging_data_access
-      - cost_calibration_gate
-    status: blocked
-    result: blocked_partial_l5_standard_safe_smoke_passed_credentialed_role_flow_not_executed
-    claimedAt: "2026-06-22T23:46:23-07:00"
-    validatedAt: "2026-06-22T23:50:17-07:00"
-    blockedAt: "2026-06-22T23:50:17-07:00"
-    blockingReason: credentialed_standard_role_flow_requires_safe_local_role_credentials_or_separate_fixture_seed_scope_approval
-    retryCount: 0
-    lastFailurePath: null
 
   - id: learner-org-employee-ai-direct-route-guard-post-repair-browser-rerun-2026-06-25
     title: Rerun learner/org employee AI direct route guard in real browser

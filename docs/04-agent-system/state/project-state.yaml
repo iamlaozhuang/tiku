@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
-updatedAt: "2026-06-28T09:27:51-07:00"
+currentPhase: local-blocked-gate-supersession-triage-2026-06-28
+updatedAt: "2026-06-28T09:45:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -504,30 +504,29 @@ repository:
   lastKnownMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
   lastKnownOriginMasterSha: 3132f67b0a492a8061082b51447b86fb9b3e75f4
 currentTask:
-  id: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+  id: local-blocked-gate-supersession-triage-2026-06-28
   status: closed
-  result: pass_active_queue_slimming_after_post_provider_rollup
-  approvedAt: "2026-06-28T09:21:48-07:00"
+  result: pass_local_blocked_gate_supersession_triage_staging_remains_blocked
+  approvedAt: "2026-06-28T09:39:13-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
-  claimedAt: "2026-06-28T09:21:48-07:00"
-  plannedAt: "2026-06-28T09:21:48-07:00"
-  implementedAt: "2026-06-28T09:27:51-07:00"
-  validatedAt: "2026-06-28T09:27:51-07:00"
-  reviewedAt: "2026-06-28T09:27:51-07:00"
-  closedAt: "2026-06-28T09:27:51-07:00"
-  sourceStory: local-full-loop-post-provider-rollup-evidence-2026-06-28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-active-queue-slimming-after-post-provider-rollup.md
-  branch: codex/local-full-loop-queue-slimming-20260628
+  approvalConsumed: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
+  claimedAt: "2026-06-28T09:39:13-07:00"
+  plannedAt: "2026-06-28T09:39:13-07:00"
+  implementedAt: "2026-06-28T09:45:54-07:00"
+  validatedAt: "2026-06-28T09:45:54-07:00"
+  reviewedAt: "2026-06-28T09:45:54-07:00"
+  closedAt: "2026-06-28T09:45:54-07:00"
+  sourceStory: local-full-loop-active-queue-slimming-after-post-provider-rollup-2026-06-28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-blocked-gate-supersession-triage.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-blocked-gate-supersession-triage.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-blocked-gate-supersession-triage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md
+  branch: codex/local-blocked-gate-triage-20260628
   scope:
     docsStateEvidenceAudit: true
+    blockedGateTriage: true
     archiveIndexMovement: true
-    traceabilityWrite: true
-    queueReseeding: false
     sourceOrTestChange: false
     schemaOrMigrationFileChanged: false
     packageOrLockfileChanged: false
@@ -544,54 +543,49 @@ currentTask:
     ocrExportExecution: false
     releaseReadinessClaim: false
     finalPassClaim: false
-  activeQueueSlimmingAfterPostProviderRollup:
-    approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
-    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    sourceDiagnostic: Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-    activeQueueTaskCountBefore: 30
-    activeQueueTerminalCountBefore: 27
-    activeQueueNonTerminalCountBefore: 3
-    terminalRecoveryWindow: 8
-    plannedArchivedTaskCount: 19
-    currentTaskRetainedInActiveQueue: true
-    archiveIndexMovementExecuted: true
-    activeQueueTaskCountAfterMove: 12
-    activeQueueTerminalCountAfterMove: 8
-    activeQueueNonTerminalCountAfterMove: 4
-    archiveCandidateCountAfterMove: 0
-    activeQueueTaskCountAfterClose: 12
+  triageDecision:
+    blockedTaskCountBefore: 3
+    blockedTaskClosedAsSuperseded: 2
+    blockedTaskRetained: 1
+    retainedBlockedTaskId: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
+    archivedTaskCount: 3
+    activeQueueTaskCountBefore: 12
+    activeQueueTaskCountAfterArchive: 10
+    activeQueueNonTerminalCountAfterArchive: 2
+    activeQueueTerminalCountAfterArchive: 8
+    archiveCandidateCountAfterArchive: 0
+    activeQueueTaskCountAfterClose: 10
+    activeQueueNonTerminalCountAfterClose: 1
     activeQueueTerminalCountAfterClose: 9
-    activeQueueNonTerminalCountAfterClose: 3
     archiveCandidateCountAfterClose: 0
   decision:
-    overallDecision: pass_active_queue_slimming_after_post_provider_rollup
-    sourceChangeDecision: docs_state_archive_index_only
-    archiveIndexDecision: approved_current_user_queue_hygiene
+    overallDecision: pass_local_blocked_gate_supersession_triage_staging_remains_blocked
+    organizationAnalyticsBlockedGateDecision: closed_superseded_by_later_local_evidence
+    standardL5BlockedGateDecision: closed_superseded_for_active_recovery_no_final_pass
+    stagingGateDecision: blocked_pending_concrete_isolated_staging_target
     providerDecision: blocked_not_executed
     envSecretDecision: blocked_not_executed
     runtimeDecision: blocked_not_executed
     schemaMigrationDecision: blocked_not_required_no_drizzle_push
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
-    stagingExecutionDecision: blocked_pending_fresh_explicit_approval
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: none_active_queue_contains_only_blocked_gates_and_closed_recovery_window
+    nextRecommendedTask: staging_target_registration_or_new_local_work_requires_fresh_instruction
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+      approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+      approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+      approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_active_queue_slimming_after_post_provider_rollup_2026_06_28
+      approvalSource: current_user_approved_local_blocked_gate_supersession_triage_2026_06_28
   commitSha: pending_local_commit_at_state_close
   prUrl: null
   retryCount: 0
@@ -602,13 +596,13 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
+    blockedTasksTriaged: 2
+    stagingGateRetainedBlocked: true
     archiveIndexMovementExecuted: true
-    movedTaskCount: 19
-    activeQueueTaskCountAfterMove: 12
-    archiveCandidateCountAfterMove: 0
-    activeQueueTaskCountAfterClose: 12
+    archivedTaskCount: 3
+    activeQueueTaskCountAfterClose: 10
+    activeQueueNonTerminalCountAfterClose: 1
     activeQueueTerminalCountAfterClose: 9
-    activeQueueNonTerminalCountAfterClose: 3
     archiveCandidateCountAfterClose: 0
     sourceOrTestChanged: false
     schemaOrMigrationFileChanged: false
@@ -619,17 +613,16 @@ currentTask:
     devServerStartedByCodex: false
     providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
-    stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
     queueSlimmingDiagnostic: pass_clean_archive_candidate_count_0
-    projectStatusDiagnostic: pass_current_task_closed_no_unblocked_pending_task
+    projectStatusDiagnostic: pass_idle_one_blocked_nonterminal_staging_only
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_before_commit
-  nextRecommendedTask: none_active_queue_contains_only_blocked_gates_and_closed_recovery_window
+  nextRecommendedTask: staging_target_registration_or_new_local_work_requires_fresh_instruction
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
