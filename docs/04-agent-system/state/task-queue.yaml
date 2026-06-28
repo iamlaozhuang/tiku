@@ -1219,6 +1219,606 @@ tasks:
       - release_readiness_or_final_pass
     retryCount: 0
     lastFailurePath: null
+  - id: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    title: Standard and advanced next organization backend UX polish queue planning
+    phase: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    sourceStory: current_user_approved_standard_advanced_next_ux_polish_queue_planning_2026_06_28
+    dependencies:
+      - standard-advanced-backend-role-browser-validation-2026-06-27
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved docs/state-only task standard-advanced-next-ux-polish-queue-planning-2026-06-28.
+      This task may update only project-state.yaml, task-queue.yaml, docs/01-requirements/**, and this task's
+      task plan/evidence/audit/acceptance documents. Its goal is to split organization backend standard/advanced UX
+      polish into follow-up low-risk source-only UI, permission contract, and local browser validation tasks. It must
+      not modify source, tests, e2e, schema, migration, seed, package files, lockfiles, or .env* files; run DB,
+      Provider, Cost Calibration, staging/prod/deploy, payment, external-service, browser/dev-server/e2e work; create
+      PRs or force push; or claim release readiness/final Pass.
+    targetClosureItem: Organization backend standard/advanced UX polish follow-up task split, risk boundary, and approval text
+    behaviorBoundary: docs_state::standard_advanced_next_ux_polish_queue_planning_no_runtime_no_final_pass
+    executionProfile: docs_state_planning
+    evidenceMode: redacted_docs_state_only
+    validationPolicy: scoped_prettier_diff_check_project_status_precommit
+    taskKind: docs_state_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_standard_advanced_next_ux_polish_queue_planning_docs_state_only_no_runtime_no_final_pass
+    approvedAt: "2026-06-28T00:56:21-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approval_standard_advanced_next_ux_polish_queue_planning_2026_06_28
+    claimedAt: "2026-06-28T00:56:21-07:00"
+    plannedAt: "2026-06-28T00:56:21-07:00"
+    implementedAt: "2026-06-28T00:56:21-07:00"
+    validatedAt: "2026-06-28T01:01:11-07:00"
+    reviewedAt: "2026-06-28T01:01:11-07:00"
+    closedAt: "2026-06-28T01:01:11-07:00"
+    branch: codex/standard-advanced-next-ux-polish-planning-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      requirementsTraceabilityUpdate: approved
+      taskQueueFollowupPlanning: approved
+      copyableApprovalText: approved
+      localCommit: approved
+      futureSourceOnlyUiExecution: blocked
+      futurePermissionContractExecution: blocked
+      futureLocalBrowserValidationExecution: blocked
+      sourceOrTestChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      envSecretRead: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      costCalibrationGate: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/task-plans/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/evidence/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/evidence/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+      - docs/05-execution-logs/evidence/2026-06-27-backend-workspace-role-guard-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-admin-standard-advanced-workspace-source-contract.md
+      - docs/05-execution-logs/evidence/2026-06-28-standard-advanced-backend-role-browser-validation.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceOrTestChangedByThisTask: 0
+      runtimeMutationsByThisTask: 0
+      providerCallsByThisTask: 0
+      providerConfigurationsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      browserRunsByThisTask: 0
+      e2eRunsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    localFullLoopGate: L0_docs_state_queue_planning_only
+    threadRolloverGate: resume_from_this_task_plan_evidence_project_state_and_task_queue
+    automationHandoffPolicy: future_source_contract_browser_tasks_blocked_until_fresh_user_approval
+    proposedFollowupTaskOrder:
+      - organization-workspace-state-polish-source-only-2026-06-28
+      - organization-workspace-polish-permission-contract-tdd-2026-06-28
+      - organization-workspace-polish-local-browser-validation-2026-06-28
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/task-plans/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/evidence/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/acceptance/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/task-plans/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/evidence/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md docs/05-execution-logs/acceptance/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_docs_state_planning_task_approval_2026_06_28
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required_after_docs_state_planning
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required_after_docs_state_planning
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required_after_docs_state_planning
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    validationSummary:
+      taskPlanPrepared: true
+      requirementTraceabilityPrepared: true
+      requirementsIndexUpdated: true
+      advancedRequirementsIndexUpdated: true
+      followupSourceOnlyTaskQueuedBlocked: true
+      followupPermissionContractTaskQueuedBlocked: true
+      followupLocalBrowserValidationTaskQueuedBlocked: true
+      docsOnly: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task
+      activeQueueNonTerminalCountAfterTask: 6
+      archiveCandidateCountAfterTask: 9
+      highRiskRepairBlockedCountAfterTask: 0
+      projectStatusRequiresHumanAfterTask: true
+      costCalibrationGate: blocked_pending_fresh_explicit_approval
+      moduleRunV2PreCommitHardening: pass
+    blockedWithoutFreshApproval:
+      - future_source_only_ui_execution
+      - future_permission_contract_execution
+      - future_local_browser_validation_execution
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - merge_push_cleanup_without_fresh_closeout_approval
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: organization-workspace-state-polish-source-only-2026-06-28
+    title: Organization workspace standard and advanced state polish source-only UI
+    phase: organization-workspace-state-polish-source-only-2026-06-28
+    sourceStory: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    dependencies:
+      - standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    taskPlanPolicy: required_before_source_or_test_edit
+    humanApprovalBoundary: >-
+      This follow-up is only queued by the docs/state planning task. It is blocked until fresh user approval. When
+      approved, it may polish organization portal, training, analytics, and AI generation entry UI states and focused
+      unit tests listed in allowedFiles only. It must preserve service-side effectiveEdition and capability summary
+      boundaries and must not become an authorization boundary.
+    targetClosureItem: Organization backend standard/advanced state, empty, unavailable, loading, error, and disabled-control polish
+    behaviorBoundary: source_only::organization_workspace_state_polish_no_browser_no_db_no_provider_no_final_pass
+    executionProfile: local_low_risk_source_only_ui
+    evidenceMode: redacted_source_only_unit_static
+    validationPolicy: focused_unit_lint_typecheck_scoped_prettier_diff_check_project_status_module_run_v2
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_source_only_ui_approval
+    approvedAt: null
+    approvedBy: null
+    capabilities:
+      localSourceChange: blocked_pending_fresh_source_only_ui_approval
+      focusedUnitTest: blocked_pending_fresh_source_only_ui_approval
+      docsStateEvidenceAudit: blocked_pending_fresh_source_only_ui_approval
+      permissionContract: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      databaseConnection: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/organization-workspace/admin-organization-workspace-access.ts
+      - tests/unit/organization-portal-admin-entry-surface.test.ts
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-state-polish-source-only.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-state-polish-source-only.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-state-polish-source-only.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+      - docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/evidence/2026-06-28-standard-advanced-backend-role-browser-validation.md
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceFilesChangedMax: 5
+      testFilesChangedMax: 5
+      runtimeMutationsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      providerCallsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      browserRunsByThisTask: 0
+      e2eRunsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-workspace/admin-organization-workspace-access.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-state-polish-source-only.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-workspace/admin-organization-workspace-access.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-state-polish-source-only.md docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-state-polish-source-only.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-workspace-state-polish-source-only-2026-06-28
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_source_only_ui_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_source_only_ui_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_source_only_ui_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_source_only_ui_approval_required
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-state-polish-source-only.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-state-polish-source-only.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-state-polish-source-only.md
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
+  - id: organization-workspace-polish-permission-contract-tdd-2026-06-28
+    title: Organization workspace polish permission contract TDD
+    phase: organization-workspace-polish-permission-contract-tdd-2026-06-28
+    sourceStory: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    dependencies:
+      - organization-workspace-state-polish-source-only-2026-06-28
+    taskPlanPolicy: required_before_contract_or_test_edit
+    humanApprovalBoundary: >-
+      This follow-up is only queued by the docs/state planning task. It is blocked until fresh permission contract
+      approval. It must keep effectiveEdition service-computed and keep UI outside the authorization boundary.
+    targetClosureItem: Organization workspace polish direct-route and capability summary contract coverage
+    behaviorBoundary: permission_contract::organization_workspace_polish_no_db_no_provider_no_browser_no_final_pass
+    executionProfile: local_permission_contract_tdd
+    evidenceMode: redacted_contract_unit_static
+    validationPolicy: focused_unit_lint_typecheck_scoped_prettier_diff_check_project_status_module_run_v2
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_permission_contract_approval
+    approvedAt: null
+    approvedBy: null
+    capabilities:
+      permissionContract: blocked_pending_fresh_permission_contract_approval
+      focusedUnitTest: blocked_pending_fresh_permission_contract_approval
+      localSourceChange: blocked_pending_fresh_permission_contract_approval
+      docsStateEvidenceAudit: blocked_pending_fresh_permission_contract_approval
+      databaseConnection: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/server/contracts/admin-workspace-role-guard-contract.ts
+      - src/server/services/admin-workspace-role-guard-service.ts
+      - src/features/admin/organization-workspace/admin-organization-workspace-access.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/mappers/auth-mapper.ts
+      - tests/unit/admin-workspace-role-guard-contract.test.ts
+      - tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+      - docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/evidence/2026-06-27-backend-workspace-role-guard-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-admin-standard-advanced-workspace-source-contract.md
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceFilesChangedMax: 5
+      testFilesChangedMax: 3
+      dbConnectionsByThisTask: 0
+      providerCallsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      browserRunsByThisTask: 0
+      e2eRunsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml src/server/contracts/admin-workspace-role-guard-contract.ts src/server/services/admin-workspace-role-guard-service.ts src/features/admin/organization-workspace/admin-organization-workspace-access.ts src/server/contracts/auth-contract.ts src/server/mappers/auth-mapper.ts tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-permission-contract-tdd.md docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-permission-contract-tdd.md docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-workspace-polish-permission-contract-tdd-2026-06-28
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_permission_contract_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_permission_contract_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_permission_contract_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_permission_contract_approval_required
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    blockedWithoutFreshApproval:
+      - contract_source_or_test_change
+      - database_connection_read_write_migration_or_seed
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - provider_call_or_provider_configuration
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
+  - id: organization-workspace-polish-local-browser-validation-2026-06-28
+    title: Organization workspace polish local browser validation
+    phase: organization-workspace-polish-local-browser-validation-2026-06-28
+    sourceStory: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    dependencies:
+      - organization-workspace-state-polish-source-only-2026-06-28
+      - organization-workspace-polish-permission-contract-tdd-2026-06-28
+    taskPlanPolicy: required_before_browser_runtime
+    humanApprovalBoundary: >-
+      This follow-up is only queued by the docs/state planning task. It is blocked until fresh local browser approval
+      and may run only against existing localhost/127.0.0.1 targets and task-queue-listed organization backend roles
+      and routes. Evidence must be redacted to role, route, state, count, and pass/fail summaries only.
+    targetClosureItem: Redacted localhost browser observation after organization workspace UX polish and permission contract tasks
+    behaviorBoundary: local_browser_validation::organization_workspace_polish_existing_localhost_no_db_no_e2e_no_final_pass
+    executionProfile: local_browser_validation_existing_target_redacted
+    evidenceMode: redacted_role_route_state_count_only
+    validationPolicy: existing_localhost_browser_matrix_docs_prettier_diff_project_status_precommit
+    taskKind: local_browser_validation
+    moduleRunVersion: 2
+    status: blocked
+    result: blocked_pending_fresh_local_browser_validation_approval
+    approvedAt: null
+    approvedBy: null
+    capabilities:
+      docsStateEvidenceAudit: blocked_pending_fresh_local_browser_validation_approval
+      localBrowserRuntime: blocked_pending_fresh_local_browser_validation_approval
+      localTargetHttpCheck: blocked_pending_fresh_local_browser_validation_approval
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      e2eRuntime: blocked
+      devServerStart: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      costCalibrationGate: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-local-browser-validation.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/01-requirements/traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+      - package.json
+      - playwright.config.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/organization-workspace/admin-organization-workspace-access.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/local-auth-route-guard.spec.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    caps:
+      sourceOrTestChangedByThisTask: 0
+      runtimeMutationsByThisTask: 0
+      dbConnectionsByThisTask: 0
+      dbWritesByThisTask: 0
+      providerCallsByThisTask: 0
+      providerConfigurationsByThisTask: 0
+      costCalibrationExecutionsByThisTask: 0
+      devServerStartsByThisTask: 0
+      e2eRunsByThisTask: 0
+      releaseReadinessClaims: 0
+      finalPassClaims: 0
+    validationCommands:
+      - powershell.exe -NoProfile -Command "try { $r = Invoke-WebRequest -Uri http://127.0.0.1:3000 -Method Head -TimeoutSec 3 -UseBasicParsing; \"pass:$($r.StatusCode)\" } catch { \"fail\"; exit 1 }"
+      - inline_node_playwright_headless_browser_validation_existing_localhost_sanitized_stdout_only
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-local-browser-validation.md docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-local-browser-validation.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-workspace-polish-local-browser-validation-2026-06-28
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: fresh_local_browser_validation_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_local_browser_validation_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_local_browser_validation_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_local_browser_validation_approval_required
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - non_localhost_target
+      - dev_server_start
+      - source_test_e2e_script_change
+      - credentials_token_cookie_local_storage_raw_dom_screenshot_trace_evidence
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
   - id: standard-advanced-edition-experience-optimization-planning-2026-06-27
     title: Standard and advanced edition experience optimization planning
     phase: standard-advanced-edition-experience-optimization-planning-2026-06-27
