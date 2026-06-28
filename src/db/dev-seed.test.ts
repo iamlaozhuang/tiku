@@ -240,6 +240,20 @@ describe("dev seed dataset", () => {
       providerKey: "mock",
       publicId: devSeedPublicIds.modelProvider,
     });
+    expect(seedDataset.knowledgeBases).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          isEnabled: true,
+          profession: "marketing",
+          publicId: devSeedPublicIds.marketingKnowledgeBase,
+        }),
+        expect.objectContaining({
+          isEnabled: true,
+          profession: "monopoly",
+          publicId: devSeedPublicIds.monopolyKnowledgeBase,
+        }),
+      ]),
+    );
     expect(seedDataset.modelConfig).toMatchObject({
       aiFuncType: "learning_suggestion",
       isEnabled: true,
@@ -290,6 +304,8 @@ describe("dev seed dataset", () => {
       "paper-question-dev-single-choice",
       "practice-dev-student-resume",
       "answer-record-dev-student-resume",
+      "knowledge-base-dev-marketing",
+      "knowledge-base-dev-monopoly",
       "model-provider-dev-mock",
       "model-config-dev-learning-suggestion",
       "prompt-template-dev-learning-suggestion",

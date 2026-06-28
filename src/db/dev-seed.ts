@@ -57,6 +57,8 @@ export const devSeedPublicIds = {
   paperQuestion: "paper-question-dev-single-choice",
   practice: "practice-dev-student-resume",
   practiceAnswerRecord: "answer-record-dev-student-resume",
+  marketingKnowledgeBase: "knowledge-base-dev-marketing",
+  monopolyKnowledgeBase: "knowledge-base-dev-monopoly",
   modelProvider: "model-provider-dev-mock",
   modelConfig: "model-config-dev-learning-suggestion",
   promptTemplate: "prompt-template-dev-learning-suggestion",
@@ -327,6 +329,22 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       providerKey: "mock",
       publicId: devSeedPublicIds.modelProvider,
     },
+    knowledgeBases: [
+      {
+        description: "Local dev marketing knowledge base for RAG smoke.",
+        displayName: "本地营销知识库",
+        isEnabled: true,
+        profession: "marketing",
+        publicId: devSeedPublicIds.marketingKnowledgeBase,
+      },
+      {
+        description: "Local dev monopoly knowledge base for RAG smoke.",
+        displayName: "本地专卖知识库",
+        isEnabled: true,
+        profession: "monopoly",
+        publicId: devSeedPublicIds.monopolyKnowledgeBase,
+      },
+    ],
     organization: {
       contactName: null,
       contactPhone: null,
@@ -1442,6 +1460,54 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       "model provider",
     );
 
+    const [marketingKnowledgeBase, monopolyKnowledgeBase] =
+      seedDataset.knowledgeBases;
+
+    if (
+      marketingKnowledgeBase === undefined ||
+      monopolyKnowledgeBase === undefined
+    ) {
+      throw new Error("dev seed knowledge_base baseline is incomplete.");
+    }
+
+    await sql`
+      insert into knowledge_base (
+        public_id,
+        profession,
+        display_name,
+        description,
+        is_enabled,
+        created_at,
+        updated_at
+      )
+      values
+        (
+          ${marketingKnowledgeBase.publicId},
+          ${marketingKnowledgeBase.profession},
+          ${marketingKnowledgeBase.displayName},
+          ${marketingKnowledgeBase.description},
+          ${marketingKnowledgeBase.isEnabled},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        ),
+        (
+          ${monopolyKnowledgeBase.publicId},
+          ${monopolyKnowledgeBase.profession},
+          ${monopolyKnowledgeBase.displayName},
+          ${monopolyKnowledgeBase.description},
+          ${monopolyKnowledgeBase.isEnabled},
+          ${baseIssuedAt},
+          ${baseIssuedAt}
+        )
+      on conflict (profession) do update set
+        public_id = excluded.public_id,
+        profession = excluded.profession,
+        display_name = excluded.display_name,
+        description = excluded.description,
+        is_enabled = excluded.is_enabled,
+        updated_at = excluded.updated_at
+    `;
+
     await sql`
       insert into model_config (
         public_id,
@@ -1536,6 +1602,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
         (select count(*)::int from personal_auth where public_id = ${devSeedPublicIds.personalAuth}) as personal_auth_count,
         (select count(*)::int from paper where public_id = ${devSeedPublicIds.paper}) as paper_count,
         (select count(*)::int from paper_question where public_id = ${devSeedPublicIds.paperQuestion}) as paper_question_count,
+        (select count(*)::int from knowledge_base where public_id in (${devSeedPublicIds.marketingKnowledgeBase}, ${devSeedPublicIds.monopolyKnowledgeBase})) as knowledge_base_count,
         (select count(*)::int from model_config where public_id = ${devSeedPublicIds.modelConfig}) as model_config_count
     `;
 
