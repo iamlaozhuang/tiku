@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: archive-staging-infrastructure-readiness-planning-2026-06-27
-  updatedAt: "2026-06-27T21:24:00-07:00"
+  updatedByTask: active-queue-slimming-archive-after-organization-workspace-ux-2026-06-28
+  updatedAt: "2026-06-28T03:42:28-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -15111,3 +15111,174 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-27"
+  - id: standard-advanced-backend-ux-design-first-contract-2026-06-27
+    phase: standard-advanced-backend-ux-design-first-contract-2026-06-27
+    status: closed
+    taskKind: docs_state_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: backend-workspace-shell-source-only-2026-06-27
+    phase: backend-workspace-shell-source-only-2026-06-27
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-backend-workspace-shell-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-backend-workspace-shell-source-only.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: content-ops-organization-nav-entry-source-only-2026-06-27
+    phase: content-ops-organization-nav-entry-source-only-2026-06-27
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-content-ops-organization-nav-entry-source-only.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: backend-workspace-role-guard-contract-tdd-2026-06-27
+    phase: backend-workspace-role-guard-contract-tdd-2026-06-27
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-backend-workspace-role-guard-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-backend-workspace-role-guard-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: organization-admin-standard-advanced-workspace-source-contract-2026-06-27
+    phase: organization-admin-standard-advanced-workspace-source-contract-2026-06-27
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-admin-standard-advanced-workspace-source-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-admin-standard-advanced-workspace-source-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: standard-advanced-backend-role-browser-validation-2026-06-27
+    phase: standard-advanced-backend-role-browser-validation-2026-06-27
+    status: closed
+    taskKind: local_browser_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-standard-advanced-backend-role-browser-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-backend-role-browser-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    phase: standard-advanced-next-ux-polish-queue-planning-2026-06-28
+    status: closed
+    taskKind: docs_state_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-state-polish-source-only-2026-06-28
+    phase: organization-workspace-state-polish-source-only-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-state-polish-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-state-polish-source-only.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-polish-permission-contract-tdd-2026-06-28
+    phase: organization-workspace-polish-permission-contract-tdd-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-permission-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-polish-local-browser-validation-2026-06-28
+    phase: organization-workspace-polish-local-browser-validation-2026-06-28
+    status: closed
+    taskKind: local_browser_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-polish-local-browser-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: standard-advanced-ux-polish-queue-planning-2026-06-28
+    phase: standard-advanced-ux-polish-queue-planning-2026-06-28
+    status: closed
+    taskKind: docs_state_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-standard-advanced-ux-polish-queue-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-standard-advanced-ux-polish-queue-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-backend-shell-nav-gated-copy-polish-source-only-2026-06-28
+    phase: organization-backend-shell-nav-gated-copy-polish-source-only-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-backend-shell-nav-gated-copy-polish-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-backend-shell-nav-gated-copy-polish-source-only.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-page-states-polish-source-only-2026-06-28
+    phase: organization-workspace-page-states-polish-source-only-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-page-states-polish-source-only.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-page-states-polish-source-only.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-ux-polish-permission-contract-tdd-2026-06-28
+    phase: organization-workspace-ux-polish-permission-contract-tdd-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-ux-polish-permission-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-ux-polish-permission-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: organization-workspace-ux-polish-local-browser-validation-2026-06-28
+    phase: organization-workspace-ux-polish-local-browser-validation-2026-06-28
+    status: closed
+    taskKind: local_browser_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28"
+  - id: standard-advanced-edition-experience-optimization-planning-2026-06-27
+    phase: standard-advanced-edition-experience-optimization-planning-2026-06-27
+    status: closed
+    taskKind: docs_state_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-standard-advanced-edition-experience-optimization-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: archive-staging-infrastructure-readiness-planning-2026-06-27
+    phase: archive-staging-infrastructure-readiness-planning-2026-06-27
+    status: closed
+    taskKind: docs_state_archive_index_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-archive-staging-infrastructure-readiness-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-archive-staging-infrastructure-readiness-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: residual-active-queue-archive-index-cleanup-after-staging-infra-planning-2026-06-27
+    phase: residual-active-queue-archive-index-cleanup-after-staging-infra-planning-2026-06-27
+    status: closed
+    taskKind: docs_state_archive_index_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-27-residual-active-queue-archive-index-cleanup-after-staging-infra-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-27-residual-active-queue-archive-index-cleanup-after-staging-infra-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-27"
+  - id: acceptance-role-separated-account-local-account-runtime-rerun-scope-approval-2026-06-23
+    phase: standard-advanced-mvp-role-separated-account-coverage-batch-2026-06-23
+    status: closed
+    taskKind: acceptance_scope_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-23-acceptance-role-separated-account-local-account-runtime-rerun-scope-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-23"
