@@ -2038,3 +2038,187 @@ tasks:
       moduleRunV2PreCommitHardening: pass
     retryCount: 0
     lastFailurePath: null
+
+  - id: organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
+    title: Organization auth test-owned DB schema alignment planning
+    phase: organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
+    sourceStory: current_user_approved_test_owned_db_schema_alignment_planning_after_org_auth_db_proof_gap_2026_06_28
+    dependencies:
+      - organization-auth-db-backed-proof-local-2026-06-28
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved executing the recommended local test-owned DB/schema alignment planning task and approved
+      local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after completion.
+      This task is docs/state planning only. It may prepare future approval text for local test-owned DB/schema
+      alignment, but it must not execute schema, migration, seed, DB connection/read/write, browser, dev server, e2e,
+      Provider, Cost Calibration, staging/prod/deploy, payment/OCR/export/external-service, PR, force push, release
+      readiness, or final Pass.
+    targetClosureItem: Planning package for local test-owned organization authorization DB/schema alignment
+    behaviorBoundary: docs_state::db_schema_alignment_planning_only_execution_blocked_pending_fresh_approval
+    executionProfile: docs_state_alignment_planning_only
+    evidenceMode: redacted_docs_state_gate_names_and_copyable_approval_text_only
+    validationPolicy: scoped_prettier_diff_project_status_precommit_closeout
+    taskKind: docs_state_alignment_planning
+    moduleRunVersion: 2
+    status: closed
+    result: pass_planning_package_prepared_execution_blocked_pending_fresh_approval
+    approvedAt: "2026-06-28T04:45:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_option_1_planning_and_closeout_2026_06_28
+    claimedAt: "2026-06-28T04:45:00-07:00"
+    plannedAt: "2026-06-28T04:45:00-07:00"
+    implementedAt: "2026-06-28T04:45:00-07:00"
+    validatedAt: "2026-06-28T04:45:00-07:00"
+    reviewedAt: "2026-06-28T04:45:00-07:00"
+    closedAt: "2026-06-28T04:45:00-07:00"
+    branch: codex/org-auth-db-alignment-plan-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityPlanningWrite: approved
+      copyableApprovalTextPreparation: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExport: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/db/schema/auth.ts
+      - src/server/services/**
+      - src/server/repositories/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - db_schema_alignment_planning
+      - copyable_approval_text_only
+      - no_runtime_execution
+      - no_final_pass
+      - cost_calibration_blocked
+    planningPackage:
+      previousProofTaskId: organization-auth-db-backed-proof-local-2026-06-28
+      previousProofResult: partial_blocked_by_local_schema_gap
+      blockedGap:
+        orgAuthEditionColumn: missing_in_current_local_db_target
+        authUpgradeTable: missing_in_current_local_db_target
+      sourceScan:
+        orgAuthEditionDefinedInSourceSchema: true
+        authUpgradeDefinedInSourceSchema: true
+      futureExecutionTaskId: organization-auth-test-owned-db-schema-alignment-execution-2026-06-28
+      futureExecutionApprovalStatus: blocked_pending_fresh_approval
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-auth-test-owned-db-schema-alignment-planning-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-auth-test-owned-db-schema-alignment-planning.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_option_1_planning_and_closeout_2026_06_28
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPlanningPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      copyableFutureApprovalTextPrepared: true
+      sourceSchemaReadOnlyScan: pass_org_auth_edition_and_auth_upgrade_defined
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_four
+      moduleRunV2PreCommitHardening: pass
+    retryCount: 0
+    lastFailurePath: null
