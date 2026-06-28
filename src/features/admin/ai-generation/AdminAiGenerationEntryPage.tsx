@@ -177,12 +177,32 @@ function AdminAiGenerationTaskHistoryPanel({
       ? {
           eyebrow: "组织草稿池",
           empty:
-            "组织草稿池暂无任务记录。Provider 仍保持阻断，不会生成正式 question 或 paper。",
+            "组织草稿池暂无任务记录。模型服务仍待审批，不会生成正式题目或试卷。",
         }
       : {
           eyebrow: "Provider-disabled 状态",
           empty:
             "暂无任务记录。提交后将显示等待生成、Provider 阻断和正式写入阻断状态。",
+        };
+  const boundaryCopy =
+    workspace === "organization"
+      ? {
+          serviceLabel: "模型服务",
+          serviceStatus: "待审批",
+          costLabel: "用量规则",
+          costStatus: "待审批",
+          formalStatus: "需后续评审",
+          historyError:
+            "当前仅显示入口状态。历史接口失败不会启用模型服务，也不会写入正式题目或试卷。",
+        }
+      : {
+          serviceLabel: "Provider",
+          serviceStatus: "Provider 已阻断",
+          costLabel: "成本校准",
+          costStatus: "Cost Calibration 已阻断",
+          formalStatus: "正式写入已阻断",
+          historyError:
+            "当前仅显示入口状态。历史接口失败不会启用 Provider，也不会写入正式题目或试卷。",
         };
 
   return (
@@ -224,8 +244,7 @@ function AdminAiGenerationTaskHistoryPanel({
             任务历史暂不可用
           </h3>
           <p className="text-text-secondary mt-1 text-sm leading-6">
-            当前仅显示入口状态。历史接口失败不会启用
-            Provider，也不会写入正式题目或试卷。
+            {boundaryCopy.historyError}
           </p>
         </div>
       ) : null}
@@ -268,18 +287,26 @@ function AdminAiGenerationTaskHistoryPanel({
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-text-secondary">Provider</dt>
-                  <dd className="text-text-primary mt-1">Provider 已阻断</dd>
+                  <dt className="text-text-secondary">
+                    {boundaryCopy.serviceLabel}
+                  </dt>
+                  <dd className="text-text-primary mt-1">
+                    {boundaryCopy.serviceStatus}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-text-secondary">成本校准</dt>
+                  <dt className="text-text-secondary">
+                    {boundaryCopy.costLabel}
+                  </dt>
                   <dd className="text-text-primary mt-1">
-                    Cost Calibration 已阻断
+                    {boundaryCopy.costStatus}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-text-secondary">正式内容</dt>
-                  <dd className="text-text-primary mt-1">正式写入已阻断</dd>
+                  <dd className="text-text-primary mt-1">
+                    {boundaryCopy.formalStatus}
+                  </dd>
                 </div>
               </dl>
 
@@ -459,6 +486,20 @@ export function AdminAiGenerationEntryPage({
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
   const pageCopy = getPageCopy(workspace, generationKind);
+  const providerExecutionCopy =
+    workspace === "organization"
+      ? {
+          label: "模型服务",
+          blocked: "待审批",
+          error:
+            "请求未执行模型服务，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。",
+        }
+      : {
+          label: "Provider",
+          blocked: "已阻断",
+          error:
+            "请求未执行 Provider，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。",
+        };
 
   const refreshTaskHistory = useCallback(
     async (sessionToken: string | null) => {
@@ -690,8 +731,7 @@ export function AdminAiGenerationEntryPage({
             本地合约请求暂不可用
           </h2>
           <p className="text-text-secondary mt-2 text-sm leading-6">
-            请求未执行
-            Provider，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。
+            {providerExecutionCopy.error}
           </p>
         </section>
       ) : null}
@@ -737,11 +777,13 @@ export function AdminAiGenerationEntryPage({
               </dd>
             </div>
             <div>
-              <dt className="text-text-secondary">Provider</dt>
+              <dt className="text-text-secondary">
+                {providerExecutionCopy.label}
+              </dt>
               <dd className="text-text-primary mt-1">
                 {localContractSummary.runtimeBridge.providerCallExecuted
                   ? "已执行"
-                  : "已阻断"}
+                  : providerExecutionCopy.blocked}
               </dd>
             </div>
           </dl>

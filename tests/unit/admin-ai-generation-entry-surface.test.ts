@@ -491,6 +491,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-local-contract-summary"),
     ).toHaveTextContent("summary_only");
+    expect(document.body.textContent).not.toContain("Provider");
+    expect(document.body.textContent).not.toContain("provider_call_blocked");
   });
 
   it("does not render a submit action for organization standard admins", async () => {
@@ -774,6 +776,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("redacted_snapshot");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).not.toHaveTextContent("Provider");
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
   });
@@ -837,10 +842,19 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("组织草稿池暂无任务记录");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("Provider 仍保持阻断");
+    ).toHaveTextContent("模型服务仍待审批");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("不会生成正式 question 或 paper");
+    ).toHaveTextContent("不会生成正式题目或试卷");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).not.toHaveTextContent("Provider");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).not.toHaveTextContent("question");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).not.toHaveTextContent("paper");
   });
 
   it("shows a redacted history error state when metadata history loading fails", async () => {

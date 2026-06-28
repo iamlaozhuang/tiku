@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-organization-analytics-load-state-2026-06-28
-updatedAt: "2026-06-28T13:49:49-07:00"
+currentPhase: fix-organization-ai-provider-copy-2026-06-28
+updatedAt: "2026-06-28T14:21:29-07:00"
 fullAcceptanceMatrixUnitBaselineRepairRequirements20260628:
   taskId: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
   phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
@@ -832,6 +832,131 @@ fixOrganizationAnalyticsLoadState20260628:
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     packageOrLockfileChanged: false
+fixOrganizationAiProviderCopy20260628:
+  taskId: fix-organization-ai-provider-copy-2026-06-28
+  phase: fix-organization-ai-provider-copy-2026-06-28
+  status: closed
+  result: pass_organization_ai_provider_copy_repaired
+  branch: codex/fix-organization-ai-provider-copy-20260628
+  executionProfile: local_source_test_repair
+  taskKind: implementation_tdd
+  createdAt: "2026-06-28T14:08:32-07:00"
+  approvedAt: "2026-06-28T14:08:32-07:00"
+  claimedAt: "2026-06-28T14:08:32-07:00"
+  plannedAt: "2026-06-28T14:08:32-07:00"
+  implementedAt: "2026-06-28T14:17:56-07:00"
+  validatedAt: "2026-06-28T14:17:56-07:00"
+  reviewedAt: "2026-06-28T14:21:29-07:00"
+  closedAt: "2026-06-28T14:21:29-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
+  promptMaterializationRule: >-
+    Before source, test, browser, DB, AI, or further docs execution, this task's goal, authorization,
+    allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, account credential boundary, evidence redaction rules,
+    and closeoutPolicy are materialized here, in task-queue.yaml, and in the task plan. Later execution must use repository
+    governance files as source of truth and must not expand scope from chat memory.
+  goal: >-
+    Repair organization AI owner-facing pages so they avoid Provider-facing implementation copy while preserving redacted
+    evidence states and without executing Provider calls or exposing prompt/payload/raw AI content.
+  sourceGapId: full-matrix-gap-organization-ai-provider-copy-2026-06-28
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - src/features/admin/organization-ai-generation/**
+    - src/app/(admin)/organization/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - src/ai/**
+    - src/rag/**
+    - src/server/ai/**
+    - src/server/providers/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  dbBoundary:
+    currentTask: no_direct_database_connection_read_write_migration_seed_or_schema_change
+  aiProviderBoundary:
+    currentTask: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io
+    costCalibrationGate: blocked
+  credentialBoundary:
+    currentTask: no_credential_or_session_capture
+  evidenceRedaction:
+    allowed:
+      - command_name
+      - test_counts
+      - failure_class
+      - redacted_copy_gap_summary
+      - pass_fail
+      - commit_sha
+    forbidden:
+      - credentials_tokens_cookies_sessions_localStorage_Authorization_headers
+      - env_file_content
+      - database_url_api_key_connection_string
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_or_chunk_content
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+  blockedWithoutFreshApproval:
+    - provider_call_or_provider_configuration_or_credential_read
+    - prompt_provider_payload_raw_ai_input_or_output
+    - direct_database_connection_read_write_migration_or_seed
+    - package_or_lockfile_change
+    - schema_migration_or_drizzle_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
+  validationSummary:
+    taskPlanPrepared: pass
+    redEvidence: pass_organization_provider_copy_exposed_before_fix
+    focusedGreen: pass_1_file_12_tests
+    fullUnitGreen: pass_317_files_1430_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    directDatabaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    packageOrLockfileChanged: false
 ownerFacingLocalExperienceBatch20260628:
   taskId: owner-facing-local-experience-batch-2026-06-28
   phase: owner-facing-local-experience-batch-2026-06-28
@@ -1499,29 +1624,29 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
-  lastKnownOriginMasterSha: 54f153b8971830ab1aca892c1b4d55319740e097
+  lastKnownMasterSha: 79caead7ee8f4bc484dab23875381eb395260071
+  lastKnownOriginMasterSha: 79caead7ee8f4bc484dab23875381eb395260071
 currentTask:
-  id: fix-organization-analytics-load-state-2026-06-28
+  id: fix-organization-ai-provider-copy-2026-06-28
   status: closed
-  result: pass_analytics_load_state_error_state_repaired
+  result: pass_organization_ai_provider_copy_repaired
   taskKind: implementation_tdd
   executionProfile: local_source_test_repair
-  approvedAt: "2026-06-28T13:49:49-07:00"
+  approvedAt: "2026-06-28T14:08:32-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
-  claimedAt: "2026-06-28T13:49:49-07:00"
-  plannedAt: "2026-06-28T13:49:49-07:00"
-  implementedAt: "2026-06-28T13:57:43-07:00"
-  validatedAt: "2026-06-28T14:02:26-07:00"
-  reviewedAt: "2026-06-28T14:02:26-07:00"
-  closedAt: "2026-06-28T14:02:26-07:00"
-  sourceStory: full_matrix_gap_organization_analytics_load_state_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md
-  branch: codex/fix-organization-analytics-load-state-20260628
+  claimedAt: "2026-06-28T14:08:32-07:00"
+  plannedAt: "2026-06-28T14:08:32-07:00"
+  implementedAt: "2026-06-28T14:17:56-07:00"
+  validatedAt: "2026-06-28T14:17:56-07:00"
+  reviewedAt: "2026-06-28T14:21:29-07:00"
+  closedAt: "2026-06-28T14:21:29-07:00"
+  sourceStory: full_matrix_gap_organization_ai_provider_copy_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
+  branch: codex/fix-organization-ai-provider-copy-20260628
   promptMaterializationRule: >-
     Current prompt scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan. Subsequent
     source, test, browser, DB, AI, docs, validation, and closeout execution must use those repository governance files as
@@ -1558,15 +1683,14 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md
-    - docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md
-    - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md
-    - src/features/admin/organization-analytics/**
-    - src/server/contracts/organization-analytics-contract.ts
-    - src/server/mappers/organization-analytics-mapper.ts
+    - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+    - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - src/features/admin/organization-ai-generation/**
+    - src/app/(admin)/organization/**
     - tests/unit/**
-    - src/server/**/*.test.ts
   blockedFiles:
     - .env*
     - package.json
@@ -1584,6 +1708,13 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
+  dbBoundary:
+    currentTask: no_direct_database_connection_read_write_migration_seed_or_schema_change
+  aiProviderBoundary:
+    currentTask: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io
+    costCalibrationGate: blocked
+  credentialBoundary:
+    currentTask: no_credential_or_session_capture
   closeoutPolicy:
     localCommit:
       approved: true
@@ -1601,15 +1732,21 @@ currentTask:
       approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
   validationSummary:
     taskPlanPrepared: pass
-    redEvidence: pass_missing_explicit_employee_statistics_error_state
-    focusedGreen: pass_1_file_5_tests
+    redEvidence: pass_organization_provider_copy_exposed_before_fix
+    focusedGreen: pass_1_file_12_tests
     fullUnitGreen: pass_317_files_1430_tests
     lint: pass
     typecheck: pass
+    prettierScoped: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     sourceOrTestChanged: true
-  nextRecommendedTask: fix-organization-ai-provider-copy-2026-06-28
+  nextRecommendedTask: continue_full_acceptance_matrix_after_provider_copy_repair
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed
