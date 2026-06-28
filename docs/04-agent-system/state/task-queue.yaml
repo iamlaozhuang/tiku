@@ -1687,3 +1687,162 @@ tasks:
       moduleRunV2PreCommitHardening: pass
     retryCount: 0
     lastFailurePath: null
+
+  - id: high-risk-gate-decision-approval-package-after-organization-workspace-ux-2026-06-28
+    title: High-risk gate decision approval package after organization workspace UX
+    phase: high-risk-gate-decision-approval-package-after-organization-workspace-ux-2026-06-28
+    sourceStory: current_user_serial_batch_next_work_item_3_high_risk_gate_decision_package_2026_06_28
+    dependencies:
+      - organization-workspace-ux-local-closure-rollup-2026-06-28
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved serial batch item 3 as a local low-risk docs/state high-risk gate decision package and
+      explicitly approved local commit, fast-forward merge to master, push to origin/master, and branch cleanup after
+      completion. This task may prepare copyable approval text only. Scope excludes source, tests, e2e, schema,
+      migration, seed, package files, lockfiles, .env files, browser, dev server, DB, Provider, Cost Calibration,
+      staging/prod/deploy, payment, OCR, export, external service, PR, force push, release readiness, and final Pass.
+    targetClosureItem: high-risk gate decision package after organization workspace UX local closure
+    behaviorBoundary: docs_state::high_risk_gate_approval_package_only_no_execution_no_final_pass
+    executionProfile: docs_state_approval_package_only
+    evidenceMode: redacted_docs_state_gate_names_and_copyable_approval_text_only
+    validationPolicy: scoped_prettier_diff_project_status_precommit_closeout
+    taskKind: blocked_gate_approval_package
+    moduleRunVersion: 2
+    status: closed
+    result: pass_high_risk_gate_decision_package_prepared_execution_blocked_pending_fresh_approval
+    approvedAt: "2026-06-28T04:02:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_serial_batch_item_3_high_risk_gate_package_commit_merge_push_cleanup_2026_06_28
+    claimedAt: "2026-06-28T04:02:35-07:00"
+    plannedAt: "2026-06-28T04:02:35-07:00"
+    implementedAt: "2026-06-28T04:02:35-07:00"
+    validatedAt: "2026-06-28T04:02:35-07:00"
+    reviewedAt: "2026-06-28T04:02:35-07:00"
+    closedAt: "2026-06-28T04:02:35-07:00"
+    branch: codex/high-risk-gate-decision-package-org-ux-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityApprovalPackageWrite: approved
+      copyableApprovalTextPreparation: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExport: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - docs/05-execution-logs/task-plans/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - docs/05-execution-logs/evidence/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - docs/05-execution-logs/acceptance/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - high_risk_gate_decision_package
+      - copyable_approval_text_only
+      - no_runtime_execution
+      - no_final_pass
+      - cost_calibration_blocked
+    gateDecisionPackage:
+      dbBackedOrganizationAuthorizationProof: option_a_requires_fresh_approval
+      providerAndCostCalibration: option_b_requires_fresh_approval_cost_calibration_blocked
+      isolatedStagingSmoke: option_c_requires_fresh_approval_and_concrete_target
+      paymentOcrExportExternalService: option_d_keep_blocked_until_product_scope_selected
+      releaseReadinessFinalPass: blocked_not_claimed
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/task-plans/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/evidence/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/audits-reviews/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/acceptance/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/task-plans/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/evidence/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/audits-reviews/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md docs/05-execution-logs/acceptance/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId high-risk-gate-decision-approval-package-after-organization-workspace-ux-2026-06-28
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-high-risk-gate-decision-approval-package-after-organization-workspace-ux.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_serial_batch_item_3_high_risk_gate_package_commit_merge_push_cleanup_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_serial_batch_item_3_high_risk_gate_package_commit_merge_push_cleanup_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_serial_batch_item_3_high_risk_gate_package_commit_merge_push_cleanup_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_serial_batch_item_3_high_risk_gate_package_commit_merge_push_cleanup_2026_06_28
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityApprovalPackagePrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_two
+      moduleRunV2PreCommitHardening: pass
+    retryCount: 0
+    lastFailurePath: null
