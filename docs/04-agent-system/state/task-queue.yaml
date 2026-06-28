@@ -80,6 +80,15 @@ standingApprovals:
       Future staged tasks may consume this approval only after each task materializes allowedFiles, blockedFiles, DB
       boundary, AI/Provider boundary, account credential boundary, evidence redaction rules, and closeoutPolicy in
       project-state.yaml, task-queue.yaml, and its task plan.
+    mandatoryOwnerFacingRoleChecklist:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      sourceTaskId: owner-facing-role-gap-capture-scope-2026-06-28
+      rule: >-
+        Every future full-acceptance stage task must include this checklist in its SSOT Read List and map scoped
+        execution rows back to the relevant role checklist items. The durable goal is not complete until every
+        applicable role and workflow item in this checklist has redacted coverage evidence and no unresolved required
+        failure remains.
+      completionGate: all_applicable_owner_facing_role_checklist_rows_covered_and_passed_no_final_pass_without_fresh_approval
     localPrivateInputs:
       ownerFacingFixturesRoot:
         path: D:\tiku-local-private\owner-facing-fixtures
@@ -1634,6 +1643,218 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+    title: Full acceptance AI generation detail control gap capture
+    phase: full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+    sourceStory: current_user_question_requested_ai_generation_detail_acceptance_clarification_and_active_durable_goal_2026_06_28
+    dependencies:
+      - full-acceptance-option-a-session-coverage-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes the durable staged local execution approval and the current user concern about AI question
+      generation and AI paper generation detail controls. It may perform localhost/127.0.0.1 read-only browser
+      observation of visible route/control/status surfaces only. Evidence may record only role labels, route labels,
+      visible control category labels, workflow/status labels, counts, and redacted pass/fail summaries. It must not
+      record credentials, cookies, tokens, sessions, localStorage, Authorization headers, env contents, raw DOM,
+      screenshots, traces, raw DB rows, internal ids, PII, Provider payloads, prompts, raw AI input/output, or complete
+      question/paper/material/resource/chunk content.
+    targetClosureItem: Redacted gap capture for AI question and AI paper generation detail controls
+    behaviorBoundary: local_browser_ai_generation_detail_controls::read_only_no_provider_no_write_no_sensitive_evidence_no_final_pass
+    executionProfile: local_browser_ai_generation_detail_control_gap_capture
+    evidenceMode: redacted_route_control_category_status_only_no_dom_no_screenshot_no_trace_no_content
+    validationPolicy: browser_detail_gap_capture_scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    status: claimed
+    result: pending_redacted_browser_detail_control_gap_capture
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - org_advanced_admin.organization_ai_question_generation
+        - org_advanced_admin.organization_ai_paper_generation
+        - org_standard_admin.advanced_ai_denial
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+        - personal_advanced_student.learner_ai_generation
+        - personal_standard_student.advanced_ai_denial
+        - org_advanced_employee.employee_ai_generation
+        - org_standard_employee.advanced_ai_denial
+      completionRule: >-
+        This task may capture only a scoped gap. It cannot move the durable goal to complete unless every applicable
+        checklist item has later redacted pass evidence.
+    approvedAt: "2026-06-28T16:06:24-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_question_requested_ai_generation_detail_acceptance_clarification_and_active_durable_goal_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T16:06:24-07:00"
+    plannedAt: "2026-06-28T16:06:24-07:00"
+    branch: codex/full-acceptance-ai-generation-detail-gap-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_read_only_visible_control_status_only
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      localUiApiMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      localSourceChange: blocked
+      testChange: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    expectedDetailControls:
+      aiQuestionGeneration:
+        - profession
+        - level
+        - subject
+        - question_type
+        - quantity
+        - difficulty
+        - knowledge_node_or_tag
+        - material_or_resource_context_optional
+        - draft_review_boundary
+      aiPaperGeneration:
+        - profession
+        - level
+        - subject
+        - paper_type
+        - paper_section_structure
+        - question_type_distribution
+        - quantity_or_total_score
+        - difficulty_distribution
+        - knowledge_node_or_tag_coverage
+        - draft_review_boundary
+    allowedTargets:
+      - http://localhost:3000/content/ai-question-generation
+      - http://localhost:3000/content/ai-paper-generation
+      - http://localhost:3000/organization/ai-question-generation
+      - http://localhost:3000/organization/ai-paper-generation
+      - http://127.0.0.1:3000/content/ai-question-generation
+      - http://127.0.0.1:3000/content/ai-paper-generation
+      - http://127.0.0.1:3000/organization/ai-question-generation
+      - http://127.0.0.1:3000/organization/ai-paper-generation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/2026-06-27-standard-advanced-backend-ux-design-first-contract.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_or_127_0_0_1_read_only_visible_ui_control_presence_and_route_status_only
+    dbBoundary: blocked_no_direct_database_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    accountCredentialBoundary: use_existing_browser_state_only_no_credential_recording_no_session_material_capture
+    evidenceRedaction: route_control_category_workflow_status_only_no_sensitive_payloads
+    validationCommands:
+      - browser-ai-generation-detail-gap-capture
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-gap-capture-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - local_ui_api_mutation_or_write_flow_execution
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - source_or_test_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    validationSummary:
+      taskPlanPrepared: pending
+      traceabilityDetailCriteriaPrepared: pending
+      browserDetailControlCapture: pending
+      evidencePrepared: pending
+      auditReviewPrepared: pending
+      acceptancePrepared: pending
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: pending
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
     retryCount: 0
     lastFailurePath: null
 
