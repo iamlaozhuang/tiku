@@ -43,6 +43,49 @@ validationCommands: &low_risk_validation_commands
   - git diff --check
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+standingApprovals:
+  durableFullAcceptanceStagedLocalExecutionApproval20260628:
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_staged_local_execution_for_full_acceptance_matrix_and_full_unit_baseline_repair_2026_06_28
+    durableGoal: full_acceptance_matrix_plus_full_unit_baseline_repair
+    commonScope:
+      localOnly:
+        - http://localhost:3000
+        - http://127.0.0.1:3000
+        - D:\tiku
+      evidenceMode: redacted_role_route_workflow_status_count_summaries_only
+      forbiddenEvidence:
+        - credentials
+        - cookies_tokens_sessions_localStorage_Authorization_headers
+        - env_file_contents
+        - raw_dom_screenshots_traces
+        - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_input_output
+        - complete_question_paper_material_resource_or_chunk_content
+      stillBlockedUnlessSeparatelyFreshApproved:
+        - staging_prod_deploy
+        - pr
+        - force_push
+        - release_readiness
+        - final_pass
+        - cost_calibration_gate
+    stages:
+      stageA: approved_test_owned_local_account_session_switching_including_ops_admin_continuation_no_sensitive_evidence
+      stageB: approved_localhost_only_test_owned_write_flow_acceptance_no_provider_no_direct_db_no_schema_seed_with_owner_facing_fixtures_root_prepared_by_user_for_later_task
+      stageC: approved_task_queued_source_test_documentation_repairs_with_per_task_materialization_validation_closeout
+      stageD: approved_read_only_local_db_proof_only_when_needed_aggregate_counts_status_only_no_raw_rows_or_pii
+      stageE: approved_dependency_gate_only_if_necessary_after_separate_reasoned_task_isolated_commit
+    executionRule: >-
+      Future staged tasks may consume this approval only after each task materializes allowedFiles, blockedFiles, DB
+      boundary, AI/Provider boundary, account credential boundary, evidence redaction rules, and closeoutPolicy in
+      project-state.yaml, task-queue.yaml, and its task plan.
+    localPrivateInputs:
+      ownerFacingFixturesRoot:
+        path: D:\tiku-local-private\owner-facing-fixtures
+        status: prepared_by_user_for_later_stage_b_test_owned_material_input
+        currentOptionATaskUsage: blocked_not_read
+        evidenceMode: redacted_status_count_summary_only_no_raw_fixture_content
 tasks:
   - id: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
     title: Full acceptance matrix and full unit baseline repair requirements
@@ -1404,6 +1447,191 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-acceptance-option-a-session-coverage-2026-06-28
+    title: Full acceptance Option A session coverage
+    phase: full-acceptance-option-a-session-coverage-2026-06-28
+    sourceStory: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
+    browserResult:
+      status: blocked_pending_closeout_validation
+      passRoles: 7
+      blockedRoles: 1
+      blockedRole: ops_admin
+      blockedReason: approved_acceptance_account_input_lacks_usable_ops_admin_login_fields
+      forbiddenEvidenceRecorded: false
+      providerOrAiExecuted: false
+      directDbExecuted: false
+      mutationExecuted: false
+    dependencies:
+      - full-acceptance-remaining-execution-approval-package-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user fresh approved task-level execution for test-owned local account/session switching only. Scope is
+      limited to localhost or 127.0.0.1, test-owned acceptance accounts or an approved safe role-switching method, and
+      redacted role/route/status evidence only for org_advanced_admin, org_standard_admin, org_advanced_employee,
+      org_standard_employee, ops_admin, content_admin, personal_advanced_student, and personal_standard_student.
+      Forbidden: recording credentials, cookies, tokens, sessions, localStorage, Authorization headers, env files, raw
+      DOM, screenshots, traces, raw DB rows, Provider payloads, prompts, raw AI input/output, complete
+      question/paper/material/resource/chunk content, direct DB changes, schema/migration/seed, dependency changes,
+      staging/prod/deploy, PR, force-push, release readiness, final Pass, and Cost Calibration Gate.
+    targetClosureItem: Redacted Option A role/session coverage for all eight required roles
+    behaviorBoundary: local_browser_session_coverage::test_owned_sessions_only_no_sensitive_evidence_no_mutation_no_provider_no_final_pass
+    executionProfile: local_browser_test_owned_session_role_coverage
+    evidenceMode: redacted_role_route_status_only_no_dom_no_screenshot_no_trace_no_session_material
+    validationPolicy: browser_session_coverage_scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: local_browser_session_coverage
+    moduleRunVersion: 2
+    status: in_progress
+    result: running
+    approvedAt: "2026-06-28T15:28:05-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
+    stageAContinuationApprovalConsumed: current_user_fresh_approved_staged_local_execution_for_full_acceptance_matrix_and_full_unit_baseline_repair_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T15:28:05-07:00"
+    plannedAt: "2026-06-28T15:28:05-07:00"
+    branch: codex/full-acceptance-option-a-session-coverage-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_test_owned_session_switching_only
+      safeRoleSwitching: approved_if_no_session_material_capture
+      stageAContinuation: approved_test_owned_ops_admin_login_or_safe_role_switching_no_sensitive_evidence
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      localUiApiMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      localSourceChange: blocked
+      testChange: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedRoles:
+      - org_advanced_admin
+      - org_standard_admin
+      - org_advanced_employee
+      - org_standard_employee
+      - ops_admin
+      - content_admin
+      - personal_advanced_student
+      - personal_standard_student
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-option-a-session-coverage.md
+    readOnlyAllowedFiles:
+      - D:/tiku-local-private/acceptance/**
+      - D:\tiku-local-private\acceptance\**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/owner-facing-fixtures/**
+      - D:\tiku-local-private\owner-facing-fixtures\**
+    browserBoundary: localhost_or_127_0_0_1_only_test_owned_session_switching_and_role_route_status_checks
+    dbBoundary: blocked_no_direct_database_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    accountCredentialBoundary: test_owned_account_or_safe_role_switching_only_no_credential_recording_no_session_material_capture
+    localPrivateResources:
+      acceptanceAccountsPath: D:\tiku-local-private\acceptance
+      mode: read_only_input_only_no_evidence_no_copy_no_commit
+      evidenceForbidden:
+        - credentials
+        - cookies_tokens_sessions_localStorage_Authorization_headers
+        - raw_account_file_content
+    evidenceRedaction: role_route_workflow_status_only_no_sensitive_payloads
+    validationCommands:
+      - browser-option-a-redacted-session-role-coverage
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-option-a-session-coverage.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-option-a-session-coverage.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-option-a-session-coverage-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-option-a-session-coverage.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-option-a-session-coverage.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-option-a-session-coverage.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-option-a-session-coverage.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_option_a_test_owned_local_account_session_switching_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - local_ui_api_mutation_or_write_flow_execution
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - source_or_test_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    validationSummary:
+      taskPlanPrepared: pass
+      traceabilitySessionCoveragePrepared: pass
+      browserSessionCoverage: blocked_7_pass_1_blocked_ops_admin_missing_usable_login_fields
+      evidencePrepared: pass
+      auditReviewPrepared: pass_blocked_closeout_approved
+      acceptancePrepared: pass_blocked_closeout_recorded
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: true
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
     retryCount: 0
     lastFailurePath: null
 
