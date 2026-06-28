@@ -3,7 +3,7 @@
 - Task id: `full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28`
 - Branch: `codex/full-acceptance-matrix-unit-baseline-20260628`
 - Evidence status: closed
-- Updated at: `2026-06-28T12:24:00-07:00`
+- Updated at: `2026-06-28T12:28:00-07:00`
 
 ## Boundary Confirmation
 
@@ -29,6 +29,16 @@
 
 ## Validation Commands
 
+- Batch range: requirements materialization only.
+- RED: initial Module Run v2 module-closeout readiness failed on missing closeout evidence anchors for this docs-only task.
+- GREEN: closeout evidence anchors were added without changing source/test/runtime scope; pre-commit hardening passed before this normalization.
+- Commit: `f6f6307e12`
+- localFullLoopGate: not executed for this docs-only requirements task; next executable task is the local full unit baseline repair.
+- threadRolloverGate: no new thread required; continue in the current thread under the materialized goal and queue.
+- nextModuleRunCandidate: `full-unit-baseline-repair-2026-06-28`
+- Cost Calibration Gate remains blocked.
+- Blocked remainder: full unit baseline repair, full acceptance matrix execution, Provider calls, Provider configuration, DB writes/migrations/seeds, dependency changes, staging/prod/deploy, PR, force-push, release readiness, and final Pass remain blocked unless the relevant queued task and fresh approval allow them.
+
 - `npx.cmd prettier --write --ignore-unknown <task-scoped docs/state files>`
   - Result: pass.
 - `npx.cmd prettier --check --ignore-unknown <task-scoped docs/state files>`
@@ -39,6 +49,10 @@
   - Result: pass diagnostic. After closeout it identified `full-unit-baseline-repair-2026-06-28` as the next executable task and reported a dirty worktree advisory for the current uncommitted requirements changes.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28`
   - Result: pass after SSOT read list and requirement mapping result were added.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28`
+  - Result: pass after closeout evidence anchor normalization.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28 -SkipRemoteAheadCheck`
+  - Result: pass.
 
 ## Closeout Status
 
