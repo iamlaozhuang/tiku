@@ -5,8 +5,8 @@
 
 ## Review Checklist
 
-- Task plan exists: pending validation.
-- allowedFiles/blockedFiles are explicit: pending validation.
+- Task plan exists: pass.
+- allowedFiles/blockedFiles are explicit for current task and materialized follow-up tasks: pass.
 - Full unit baseline precondition is green: pass.
 - Browser/dev-server use stays local-only: pass for executed rows.
 - Evidence stays redacted: pass for executed rows.
@@ -24,3 +24,7 @@
 - `full-matrix-gap-organization-ai-provider-copy-2026-06-28`: organization AI question/paper surfaces expose Provider-facing
   copy on owner-facing pages.
 - All-role completion is blocked by credential/session boundary; write-flow completion is blocked by local mutation boundary.
+- Public login/register surfaces were available, and unauthenticated student home guard redirected to login without
+  credential entry.
+- Follow-up task queue entries now materialize credential/session boundary, local mutation boundary, organization analytics
+  repair, and organization AI owner-facing Provider-copy repair.

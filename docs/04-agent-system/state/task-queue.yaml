@@ -549,6 +549,370 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-acceptance-session-fixture-boundary-2026-06-28
+    title: Full acceptance session fixture boundary approval package
+    phase: full-acceptance-session-fixture-boundary-2026-06-28
+    sourceStory: full_acceptance_matrix_execution_blocked_by_all_role_session_switching_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-execution-2026-06-28
+    taskPlanPolicy: required_before_account_or_session_fixture_access
+    humanApprovalBoundary: >-
+      Current user approved continuing the full acceptance goal and per-task local commit, fast-forward merge to master,
+      push origin/master, and merged short-branch cleanup. This task may only prepare a docs/state approval package for
+      future test-owned local account/session switching. It must not read, enter, store, echo, or capture credentials,
+      cookies, tokens, sessions, localStorage values, Authorization headers, or environment secrets. Any actual credential
+      entry or session fixture access remains blocked pending fresh explicit approval and task-level materialization.
+    targetClosureItem: Materialized approval boundary for test-owned local account/session switching
+    behaviorBoundary: docs_approval_package::no_credential_read_no_login_no_storage_capture
+    executionProfile: docs_state_approval_package
+    evidenceMode: redacted_boundary_decision_only
+    validationPolicy: scoped_prettier_diff_precommit
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    capabilities:
+      docsStateEvidenceAudit: approved
+      accountCredentialAccess: blocked_fresh_approval_required
+      sessionStorageCookieTokenRead: blocked
+      localCommit: approved
+      mergeToMaster: blocked_until_task_closeout
+      pushOriginMaster: blocked_until_task_closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-session-fixture-boundary.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-session-fixture-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-session-fixture-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-session-fixture-boundary.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-session-fixture-boundary.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: blocked_no_connection_read_write_migration_seed_or_destructive_operation
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_or_raw_ai_io
+    accountCredentialBoundary: blocked_no_credential_entry_read_storage_cookie_token_session_or_localStorage_capture
+    evidenceRedaction: boundary_decision_only_no_secret_no_dom_no_storage_no_raw_payload
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - credential_read_or_entry
+      - cookie_token_session_localStorage_capture
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - source_or_test_change
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-acceptance-local-mutation-boundary-2026-06-28
+    title: Full acceptance local test-owned mutation boundary approval package
+    phase: full-acceptance-local-mutation-boundary-2026-06-28
+    sourceStory: full_acceptance_matrix_execution_blocked_by_write_flow_local_mutation_boundary_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-execution-2026-06-28
+    taskPlanPolicy: required_before_local_ui_or_api_mutation
+    humanApprovalBoundary: >-
+      Current user approved continuing the full acceptance goal and per-task local commit, fast-forward merge to master,
+      push origin/master, and merged short-branch cleanup. This task may only prepare a docs/state approval package for
+      future localhost UI/API mutations against explicitly test-owned local fixture data. It must not execute direct DB
+      access, schema changes, migrations, seed commands, Provider/AI calls, dependency changes, or mutations against
+      unmarked or non-test-owned data.
+    targetClosureItem: Materialized boundary for localhost UI/API mutations against explicitly test-owned local fixture data
+    behaviorBoundary: docs_approval_package::no_db_direct_no_schema_no_seed_no_provider
+    executionProfile: docs_state_approval_package
+    evidenceMode: redacted_boundary_decision_only
+    validationPolicy: scoped_prettier_diff_precommit
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localUiApiMutation: blocked_fresh_approval_required
+      directDatabaseConnection: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      localCommit: approved
+      mergeToMaster: blocked_until_task_closeout
+      pushOriginMaster: blocked_until_task_closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-local-mutation-boundary.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-local-mutation-boundary.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: blocked_no_direct_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_or_raw_ai_io
+    accountCredentialBoundary: no_credential_or_session_access_in_this_docs_package
+    evidenceRedaction: boundary_decision_only_no_raw_data_no_dom_no_storage_no_payload
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - direct_database_connection_read_write_migration_or_seed
+      - unmarked_or_non_test_owned_data_mutation
+      - provider_call_or_provider_configuration_or_credential_read
+      - package_or_lockfile_change
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: fix-organization-analytics-load-state-2026-06-28
+    title: Fix organization analytics load state gap
+    phase: fix-organization-analytics-load-state-2026-06-28
+    sourceStory: full_matrix_gap_organization_analytics_load_state_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-execution-2026-06-28
+    taskPlanPolicy: required_before_source_or_test_edit
+    humanApprovalBoundary: >-
+      Current user approved continuing the full acceptance goal and per-task local commit, fast-forward merge to master,
+      push origin/master, and merged short-branch cleanup. Source/test edits are allowed only after this task is claimed and
+      its task plan is created. Direct DB access, schema/migration/seed, Provider/AI calls, dependency/package changes,
+      credentials/session capture, Cost Calibration Gate, deployment, PR, force-push, release readiness, and final Pass
+      remain blocked.
+    targetClosureItem: Organization analytics load action shows expected redacted summary or explicit empty/error state
+    behaviorBoundary: source_test_repair::no_db_direct_no_provider_no_schema_no_dependency
+    executionProfile: local_source_test_repair
+    evidenceMode: redacted_command_status_test_counts_failure_classes_only
+    validationPolicy: tdd_focused_green_full_unit_lint_typecheck_precommit
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    capabilities:
+      localSourceChange: approved_after_task_materialization
+      testChange: approved_after_task_materialization
+      focusedUnitTest: approved
+      fullUnitRuntime: approved
+      browserRuntime: approved_localhost_only
+      databaseConnection: blocked
+      providerCall: blocked
+      dependencyIntroduction: blocked
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-analytics-load-state.md
+      - docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md
+      - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-analytics-load-state.md
+      - src/features/admin/organization-analytics/**
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - tests/unit/**
+      - src/server/**/*.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - src/ai/**
+      - src/rag/**
+      - src/server/ai/**
+      - src/server/providers/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: blocked_no_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_or_raw_ai_io
+    accountCredentialBoundary: blocked_no_credential_entry_read_storage_cookie_token_session_or_localStorage_capture
+    evidenceRedaction: command_status_test_counts_and_gap_class_only_no_dom_no_raw_payload
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: fix-organization-ai-provider-copy-2026-06-28
+    title: Fix organization AI owner-facing provider copy
+    phase: fix-organization-ai-provider-copy-2026-06-28
+    sourceStory: full_matrix_gap_organization_ai_provider_copy_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-execution-2026-06-28
+    taskPlanPolicy: required_before_source_or_test_edit
+    humanApprovalBoundary: >-
+      Current user approved continuing the full acceptance goal and per-task local commit, fast-forward merge to master,
+      push origin/master, and merged short-branch cleanup. Source/test edits are allowed only after this task is claimed and
+      its task plan is created. This repair may change owner-facing copy and focused tests only; Provider execution,
+      Provider configuration, credentials, prompt/payload capture, raw AI input/output, direct DB access, dependency changes,
+      deployment, PR, force-push, release readiness, and final Pass remain blocked.
+    targetClosureItem: Organization AI owner-facing pages avoid Provider-facing copy while preserving redacted evidence states
+    behaviorBoundary: source_test_repair::copy_only_no_provider_call_no_ai_payload
+    executionProfile: local_source_test_repair
+    evidenceMode: redacted_command_status_test_counts_failure_classes_only
+    validationPolicy: tdd_focused_green_full_unit_lint_typecheck_precommit
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    capabilities:
+      localSourceChange: approved_after_task_materialization
+      testChange: approved_after_task_materialization
+      focusedUnitTest: approved
+      fullUnitRuntime: approved
+      browserRuntime: approved_localhost_only
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
+      - docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+      - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
+      - src/features/admin/organization-ai-generation/**
+      - src/app/(admin)/organization/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - src/ai/**
+      - src/rag/**
+      - src/server/ai/**
+      - src/server/providers/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: blocked_no_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_or_raw_ai_io
+    accountCredentialBoundary: blocked_no_credential_entry_read_storage_cookie_token_session_or_localStorage_capture
+    evidenceRedaction: command_status_test_counts_and_copy_gap_class_only_no_dom_no_prompt_no_raw_ai_io
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - direct_database_connection_read_write_migration_or_seed
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28

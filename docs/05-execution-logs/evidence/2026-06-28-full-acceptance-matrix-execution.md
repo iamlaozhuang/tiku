@@ -3,7 +3,7 @@
 - Task id: `full-acceptance-matrix-execution-2026-06-28`
 - Branch: `codex/full-acceptance-matrix-execution-20260628`
 - Evidence status: in progress
-- Updated at: `2026-06-28T13:18:00-07:00`
+- Updated at: `2026-06-28T13:24:10-07:00`
 
 ## Boundary Confirmation
 
@@ -68,6 +68,29 @@
 - Ops admin entry:
   - Result: pass for cross-role denial under current organization admin session; blocked for ops workflow coverage.
   - Evidence summary: ops user entry displayed no-access state and a safe return path to organization workspace.
+- Public/root entry:
+  - Result: pass for public navigation surface.
+  - Evidence summary: root route exposed student, content admin, and ops admin entry links without credential prompts.
+- Login:
+  - Result: pass for public login surface availability.
+  - Evidence summary: login route displayed phone/password inputs and login action; no credential was entered.
+- Register:
+  - Result: pass for public registration surface availability.
+  - Evidence summary: register route displayed phone/name/password inputs and registration action; no form was submitted.
+- Student home unauthenticated redirect:
+  - Result: pass for unauthenticated guard; blocked for student workflow coverage.
+  - Evidence summary: student home route resolved to the login surface when no student session was available.
+
+## Validation Commands Executed
+
+- GREEN: `npm.cmd run lint`
+  - Result: passed.
+- GREEN: `npm.cmd run typecheck`
+  - Result: passed.
+- GREEN: `npm.cmd run test:unit`
+  - Result: passed on the acceptance matrix branch.
+  - Test files: 317 passed.
+  - Tests: 1429 passed.
 
 ## Blocked Completion Requirements
 
@@ -75,11 +98,34 @@
   local account/session fixtures or an approved safe role-switching method.
 - To complete write workflows, a follow-up materialized boundary is required for localhost UI/API mutations against explicitly
   test-owned local fixture data.
+- To fix discovered gaps, follow-up source/test repair tasks must be materialized separately from this browser-only acceptance
+  task.
 - Direct DB reads/writes, Provider calls, Provider configuration/credential reads, and Cost Calibration Gate remain blocked.
 
-## Validation Commands
+## Follow-up Tasks Materialized
 
-Pending:
+- `full-acceptance-session-fixture-boundary-2026-06-28`: pending docs/state approval package for test-owned local account/session
+  switching; actual credential/session fixture access remains blocked pending fresh explicit approval.
+- `full-acceptance-local-mutation-boundary-2026-06-28`: pending docs/state approval package for localhost UI/API mutations against
+  explicitly test-owned local fixture data; direct DB/schema/seed/Provider remain blocked.
+- `fix-organization-analytics-load-state-2026-06-28`: pending source/test repair task with allowedFiles/blockedFiles,
+  DB/Provider/account boundaries, evidence redaction, and closeoutPolicy materialized.
+- `fix-organization-ai-provider-copy-2026-06-28`: pending source/test repair task with allowedFiles/blockedFiles,
+  DB/Provider/account boundaries, evidence redaction, and closeoutPolicy materialized.
+
+## Follow-up Materialization Validation
+
+- GREEN: `npx.cmd prettier --write --ignore-unknown` scoped to the changed governance/evidence files.
+  - Result: passed; files unchanged.
+- GREEN: `npx.cmd prettier --check --ignore-unknown` scoped to the changed governance/evidence files.
+  - Result: passed.
+- GREEN: `git diff --check`
+  - Result: passed.
+- GREEN:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-matrix-execution-2026-06-28`
+  - Result: passed.
+
+## Required Closeout Commands
 
 - `npm.cmd run test:unit`
 - local browser/dev-server checks after materialization
@@ -92,4 +138,5 @@ Pending:
 
 ## Closeout Status
 
-Pending matrix execution.
+Partial acceptance evidence recorded. Current task is not closable as full acceptance because all-role session switching and
+write-flow mutation coverage remain blocked by explicit boundaries.
