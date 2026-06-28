@@ -501,46 +501,46 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5fc6a29a5ba9a4dd34876e0aef092d8326255a7e
-  lastKnownOriginMasterSha: 5fc6a29a5ba9a4dd34876e0aef092d8326255a7e
+  lastKnownMasterSha: 2d8c0b65c2c6284e36aeb387aec4694be88f78d4
+  lastKnownOriginMasterSha: 2d8c0b65c2c6284e36aeb387aec4694be88f78d4
 currentTask:
-  id: local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+  id: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
   status: closed
-  result: pass_local_full_loop_ai_generation_paper_provider_gate_smoke
+  result: pass_local_full_loop_student_answer_ai_explanation_smoke
   approvedAt: "2026-06-28T05:25:00-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
-  claimedAt: "2026-06-28T06:10:00-07:00"
-  plannedAt: "2026-06-28T06:13:00-07:00"
-  implementedAt: "2026-06-28T06:15:00-07:00"
-  validatedAt: "2026-06-28T06:16:00-07:00"
-  reviewedAt: "2026-06-28T06:17:00-07:00"
-  closedAt: "2026-06-28T06:17:00-07:00"
+  claimedAt: "2026-06-28T06:18:00-07:00"
+  plannedAt: "2026-06-28T06:21:00-07:00"
+  implementedAt: "2026-06-28T06:27:00-07:00"
+  validatedAt: "2026-06-28T06:29:00-07:00"
+  reviewedAt: "2026-06-28T06:30:00-07:00"
+  closedAt: "2026-06-28T06:30:00-07:00"
   sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
-  branch: codex/local-full-loop-ai-generation-20260628
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+  branch: codex/local-full-loop-student-ai-20260628
   scope:
     docsStateEvidenceAudit: true
     traceabilityWrite: true
     queueReseeding: false
     localDockerDatabase: true
     localDatabaseConnectionExecuted: true
-    localDatabaseMutationExecuted: local_dev_seed_fixture_only
+    localDatabaseMutationExecuted: local_dev_answer_and_report_fixture_only
     localRagPipelineExecuted: false
-    providerSmokeGateExecuted: dry_run_pass_execute_missing_env_safe_block
-    providerCredentialLookupExecuted: current_process_env_only_missing
+    providerSmokeGateExecuted: not_required
+    providerCredentialLookupExecuted: false
     schemaMigrationExecuted: false
     migrationGenerationExecuted: false
     schemaOrMigrationFileChanged: false
-    sourceOrTestChange: true
+    sourceOrTestChange: e2e_only
     browserRuntime: playwright_api_request_only
     devServer: existing_localhost_server_reused
     e2eRuntime: true
-    providerCall: false_missing_current_process_credential
+    providerCall: false
     providerConfiguration: false
     costCalibrationExecution: false
     stagingExecution: false
@@ -557,7 +557,8 @@ currentTask:
       - local-full-loop-baseline-accounts-auth-db-2026-06-28
       - local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
       - local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
-    nextExecutableTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+      - local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+    nextExecutableTask: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
     requiredRoles:
       - student
       - content_admin
@@ -573,21 +574,21 @@ currentTask:
       - local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
       - local-full-loop-rollup-evidence-2026-06-28
   decision:
-    overallDecision: pass_local_full_loop_ai_generation_paper_provider_gate_smoke
-    localFullLoopGate: local_ai_generation_question_paper_request_ready
-    nextExecutableTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
-    sourceChangeDecision: allowed_and_executed_for_localhost_ai_generation_e2e_smoke
+    overallDecision: pass_local_full_loop_student_answer_ai_explanation_smoke
+    localFullLoopGate: local_student_answer_ai_explanation_report_ready
+    nextExecutableTask: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+    sourceChangeDecision: allowed_and_executed_for_localhost_student_answer_e2e_smoke
     browserRuntimeDecision: pass_playwright_api_request_localhost_only
-    databaseDecision: pass_existing_local_generated_task_persistence_redacted
-    providerSmokeDecision: pass_dry_run_and_execute_gate_blocked_missing_current_process_credential
+    databaseDecision: pass_existing_local_student_answer_mistake_book_report_runtime_redacted
+    providerSmokeDecision: not_required_existing_local_deterministic_ai_runtime_used
     schemaMigrationDecision: blocked_not_required_no_drizzle_push
-    providerDecision: no_provider_call_executed_missing_current_process_credential
+    providerDecision: no_provider_call_executed
     costCalibrationGateDecision: blocked_pending_fresh_explicit_approval
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
-  localFullLoopGate: local_ai_generation_question_paper_request_ready
+    nextRecommendedTask: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+  localFullLoopGate: local_student_answer_ai_explanation_report_ready
   threadRolloverGate: resume_from_this_task_plan_traceability_evidence_project_state_and_task_queue
   automationHandoffPolicy: local_commit_merge_push_cleanup_approved_by_current_user_after_validation
   closeoutPolicy:
@@ -615,13 +616,11 @@ currentTask:
     evidencePrepared: true
     auditReviewPrepared: true
     acceptancePrepared: true
-    localAiGenerationFocusedUnit: pass_4_files_36_tests
-    localFullLoopAiGenerationE2e: pass_1_test
-    providerSmokeDryRun: pass_request_count_0
-    providerSmokeExecuteGate: pass_safe_block_missing_current_process_credential
-    localFullLoopPriority: pass_ai_generation_question_paper_request_ready
+    localStudentAiFocusedUnit: pass_6_files_55_tests
+    localFullLoopStudentAnswerAiE2e: pass_1_test
+    localFullLoopPriority: pass_student_answer_ai_explanation_report_ready
     redactionBoundaryRecorded: true
-    sourceOrTestChanged: true
+    sourceOrTestChanged: e2e_only
     schemaOrMigrationFileChanged: false
     localDockerDatabaseHealthy: true
     localDevSeedExecuted: not_required_existing_seed_reused
@@ -630,7 +629,7 @@ currentTask:
     browserRuntimeExecuted: playwright_api_request_only_no_dom_screenshot_trace
     e2eRuntimeExecuted: true
     devServerStartedByCodex: false_existing_localhost_server_reused
-    providerCallOrConfigurationExecuted: false_missing_current_process_credential_no_configuration_change
+    providerCallOrConfigurationExecuted: false
     costCalibrationExecuted: false
     stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
     releaseReadinessClaimed: false
@@ -640,10 +639,10 @@ currentTask:
     lint: pass
     typecheck: pass
     gitDiffCheck: pass
-    projectStatusDiagnostic: pass_next_executable_task_local_full_loop_student_answer_ai_explanation_dirty_worktree_advisory_cost_calibration_blocked
+    projectStatusDiagnostic: pass_next_executable_task_local_full_loop_org_role_dirty_worktree_advisory_cost_calibration_blocked
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  nextRecommendedTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+  nextRecommendedTask: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed
