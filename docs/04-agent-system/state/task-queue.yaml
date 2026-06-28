@@ -1242,29 +1242,35 @@ tasks:
       credentials, token, cookie, localStorage, Authorization header, connection string, raw DB row, screenshot, trace,
       raw DOM, pricing/quota defaults, or Cost Calibration data.
     targetClosureItem: Redacted localhost Provider smoke for AI generation and explanation experience
-    behaviorBoundary: blocked_provider_smoke_pending_fresh_approval_no_cost_calibration
-    executionProfile: local_provider_smoke_blocked_until_fresh_approval
+    behaviorBoundary: approved_tiny_local_provider_smoke_no_cost_calibration
+    executionProfile: local_provider_smoke_approved_current_process_or_localhost_only
     evidenceMode: redacted_role_route_service_status_count_only
-    validationPolicy: blocked_pending_fresh_provider_execution_approval
-    taskKind: provider_smoke_blocked
+    validationPolicy: active_local_provider_smoke_redacted
+    taskKind: provider_smoke_execution
     moduleRunVersion: 2
-    status: blocked
-    result: blocked_pending_fresh_provider_smoke_execution_approval
-    approvedAt: null
-    approvedBy: null
+    status: closed
+    result: closed_safe_block_missing_current_process_provider_credential_e2e_pass
+    approvedAt: "2026-06-28T08:30:07-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-28T08:30:07-07:00"
+    plannedAt: "2026-06-28T08:30:07-07:00"
+    implementedAt: "2026-06-28T08:33:01-07:00"
+    validatedAt: "2026-06-28T08:36:07-07:00"
+    reviewedAt: "2026-06-28T08:36:07-07:00"
+    closedAt: "2026-06-28T08:36:07-07:00"
     capabilities:
-      providerCall: blocked_pending_fresh_explicit_approval
+      providerCall: approved_tiny_local_provider_smoke_redacted
       providerConfigurationChange: blocked
-      providerCredentialRead: blocked
+      providerCredentialRead: approved_current_process_lookup_only_no_value_output_no_env_file
       rawPromptEvidence: blocked
       providerPayloadEvidence: blocked
       rawAiOutputEvidence: blocked
-      envSecretAccess: blocked
-      localBrowserRuntime: blocked_until_fresh_approval_if_needed
-      devServer: blocked_until_fresh_approval_if_needed
-      localE2EValidation: blocked_until_fresh_approval_if_needed
-      localDatabaseConnection: blocked_unless_app_runtime_only_after_approval
-      localDatabaseMutation: blocked_unless_existing_app_generated_task_only_after_approval
+      envSecretAccess: approved_current_process_lookup_only_no_value_output_no_env_file
+      localBrowserRuntime: approved_localhost_only_if_needed
+      devServer: approved_localhost_only_if_needed
+      localE2EValidation: approved_localhost_redacted
+      localDatabaseConnection: approved_app_runtime_only
+      localDatabaseMutation: approved_existing_app_generated_task_only
       schemaMigration: blocked
       dependencyIntroduction: blocked
       stagingProdDeploy: blocked
@@ -1326,24 +1332,61 @@ tasks:
         禁止 Cost Calibration、成本测量、定价、quota 默认值、release/final Pass、staging/prod/deploy、payment/OCR/export/external-service、package/lockfile、schema/migration、drizzle-kit push、PR、force push。
         完成后允许本地提交、fast-forward 合入 master、推送 origin/master 并清理短分支。
     validationCommands:
-      - blocked_pending_fresh_provider_smoke_execution_approval
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - powershell.exe -NoProfile -Command "<redacted wrapper setting TIKU_PROVIDER_SMOKE_APPROVED=1 and filtering Provider smoke JSON output>"
+      - npm.cmd run test:e2e -- e2e/local-full-loop-ai-generation-paper-provider-smoke.spec.ts e2e/local-full-loop-student-answer-ai-explanation-smoke.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-experience-smoke-execution.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-experience-smoke-execution.md
+      - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-ai-provider-experience-smoke-execution-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-ai-provider-experience-smoke-execution-2026-06-28 -SkipRemoteAheadCheck
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalSource: fresh_provider_smoke_execution_approval_required
+        approved: true
+        approvalSource: current_user_approved_next_task_local_ai_provider_smoke_2026_06_28
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: fresh_provider_smoke_execution_approval_required
+        approvalSource: current_user_approved_next_task_local_ai_provider_smoke_2026_06_28
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: fresh_provider_smoke_execution_approval_required
+        approvalSource: current_user_approved_next_task_local_ai_provider_smoke_2026_06_28
       cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_provider_smoke_execution_approval_required
-    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_if_provider_smoke_approved_and_executed
+        deleteShortBranch: true
+        approvalSource: current_user_approved_next_task_local_ai_provider_smoke_2026_06_28
+    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_after_redacted_provider_smoke_closeout
+    executionResult:
+      providerDryRun: pass_request_count_0_redaction_passed
+      providerExecute: safe_block_missing_current_process_credential_no_real_provider_request
+      providerCallExecuted: false
+      envFileAccessedOrChanged: false
+      providerConfigurationChanged: false
+      focusedLocalE2E: pass_3_specs_3_tests
+      transientPlaywrightArtifacts: cleaned_test_results_after_e2e
+      postProviderRollupUnblocked: false_real_provider_success_evidence_missing
+    validationSummary:
+      providerDryRun: pass
+      providerExecuteWrapper: pass_safe_block_missing_current_process_credential
+      focusedLocalE2E: pass_3_specs_3_tests
+      redactionBoundaryRecorded: true
+      sourceOrTestChanged: false
+      schemaOrMigrationFileChanged: false
+      packageOrLockfileChanged: false
+      envFileChanged: false
+      providerConfigurationChanged: false
+      providerCallExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_high_risk_repair_diagnostic_only_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
   - id: local-full-loop-post-provider-rollup-evidence-2026-06-28
     title: Local full loop post Provider rollup evidence
@@ -1365,7 +1408,7 @@ tasks:
     taskKind: rollup_blocked
     moduleRunVersion: 2
     status: blocked
-    result: blocked_waiting_for_local_provider_smoke_evidence
+    result: blocked_waiting_for_successful_local_provider_smoke_evidence_current_attempt_safe_blocked_missing_credential
     approvedAt: null
     approvedBy: null
     capabilities:
