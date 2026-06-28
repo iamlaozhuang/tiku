@@ -44,6 +44,774 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 tasks:
+  - id: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    title: Local full loop acceleration planning state queue
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    dependencies: []
+    taskPlanPolicy: required_before_state_queue_edit
+    humanApprovalBoundary: >-
+      Current user fresh-approved starting the local-full-loop-acceleration-2026-06-28 sprint. This planning task may
+      update state, queue, traceability, execution-log evidence, audit, and acceptance documents only. It must not touch
+      source, tests, e2e, scripts, schema, migrations, seed data, package files, lockfiles, .env files, DB/runtime,
+      Provider, browser, staging/prod/deploy, payment, OCR/export, external service, PR, force push, release readiness,
+      final Pass, pricing, quota defaults, or Cost Calibration.
+    targetClosureItem: Local full-loop sprint task queue and state seeded
+    behaviorBoundary: docs_state_queue_planning_only
+    executionProfile: local_full_loop_docs_state_planning
+    evidenceMode: redacted_metadata_only
+    validationPolicy: docs_state_queue_scoped_gates
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_full_loop_sprint_queue_seeded
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    claimedAt: "2026-06-28T05:25:00-07:00"
+    plannedAt: "2026-06-28T05:25:00-07:00"
+    implementedAt: "2026-06-28T05:25:00-07:00"
+    validatedAt: "2026-06-28T05:31:00-07:00"
+    reviewedAt: "2026-06-28T05:31:00-07:00"
+    closedAt: "2026-06-28T05:31:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    branch: codex/local-full-loop-acceleration-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      queueReseeding: approved
+      traceabilityWrite: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-acceleration-planning-state-queue.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-acceleration-planning-state-queue.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-acceleration-planning-state-queue.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-acceleration-planning-state-queue.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-acceleration-planning-state-queue.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-acceleration-planning-state-queue-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-acceleration-planning-state-queue-2026-06-28 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: true
+      traceabilityPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      acceptancePrepared: true
+      successorTasksSeeded: 6
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      envFileChanged: false
+      runtimeExecuted: false
+      databaseExecuted: false
+      providerExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_next_executable_task_local_full_loop_baseline_dirty_worktree_advisory_only
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    nextRecommendedTask: local-full-loop-baseline-accounts-auth-db-2026-06-28
+
+  - id: local-full-loop-baseline-accounts-auth-db-2026-06-28
+    title: Local full loop baseline accounts auth DB
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-acceleration-planning-state-queue-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Fresh-approved local-only baseline task. It may use local Docker dev DB, existing local schema/migration/seed or
+      fixture commands, focused unit tests, localhost/127.0.0.1 login input using local private acceptance credentials,
+      and redacted evidence to prove role/account/authorization/DB baseline for student, content_admin, ops_admin,
+      org_standard_admin, org_advanced_admin, and employee. It must not record credential values or sensitive runtime
+      artifacts and must not touch staging/prod/deploy, Provider, Cost Calibration, payment, OCR/export, external
+      service, package/lockfile, .env files, PR, or force push.
+    targetClosureItem: Local accounts roles authorization DB baseline ready for full-loop runtime
+    behaviorBoundary: local_dev_role_account_authorization_baseline
+    executionProfile: local_full_loop_local_db_browser_baseline
+    evidenceMode: redacted_metadata_only
+    validationPolicy: local_db_browser_focused_gates
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+    branch: codex/local-full-loop-baseline-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: approved_if_needed_for_baseline_repairs
+      focusedUnitTest: approved
+      localDockerDatabase: approved
+      localSeedFixture: approved_local_dev_only
+      localDatabaseConnection: approved_local_dev_redacted
+      localDatabaseMutation: approved_local_dev_seed_fixture_only
+      localAcceptanceCredentialRead: approved_input_only_no_recording
+      browserRuntime: approved_localhost_only
+      devServer: approved_localhost_only
+      e2eRuntime: approved_existing_or_scoped_local_only
+      providerCall: blocked
+      envSecretAccess: blocked_except_acceptance_credentials_input_only
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    coveredRoles:
+      - student
+      - content_admin
+      - ops_admin
+      - org_standard_admin
+      - org_advanced_admin
+      - employee
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-baseline-accounts-auth-db.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/local/**
+      - scripts/db/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - focused local DB and role baseline validation command recorded with redacted output
+      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-baseline-accounts-auth-db-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-baseline-accounts-auth-db-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
+
+  - id: local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
+    title: Local full loop knowledge RAG maintenance smoke
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-baseline-accounts-auth-db-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Fresh-approved local-only knowledge/RAG task. It may maintain or upload local knowledge data through existing
+      app/service paths, run local DB and RAG smoke validation, and capture redacted counts/status/pass-fail evidence.
+      It must not record raw resource content, full chunks, embeddings, Provider payloads, prompts, raw generated output,
+      credentials, DB rows, internal ids, screenshots, traces, raw DOM, or any production/staging data.
+    targetClosureItem: Local knowledge node, knowledge base, resource, chunk, citation, and retrieval loop smoke
+    behaviorBoundary: local_dev_knowledge_rag_maintenance_smoke
+    executionProfile: local_full_loop_local_db_rag_smoke
+    evidenceMode: redacted_metadata_only
+    validationPolicy: local_db_rag_focused_gates
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+    branch: codex/local-full-loop-rag-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: approved_if_needed_for_rag_repairs
+      focusedUnitTest: approved
+      localDockerDatabase: approved
+      localDatabaseConnection: approved_local_dev_redacted
+      localDatabaseMutation: approved_local_dev_seed_fixture_only
+      localRagPipeline: approved_local_dev_redacted
+      browserRuntime: approved_localhost_only
+      devServer: approved_localhost_only
+      e2eRuntime: approved_existing_or_scoped_local_only
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-knowledge-rag-maintenance-smoke.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/local/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - focused local RAG/unit validation command recorded with redacted output
+      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+
+  - id: local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+    title: Local full loop AI generation paper Provider smoke
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-knowledge-rag-maintenance-smoke-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Fresh-approved local-only AI question and AI paper generation smoke. It may execute a small number of real Provider
+      local calls only through existing app/service paths and only to prove local visible generation. Evidence must be
+      redacted metadata, route/service/status/count/pass-fail summaries, and must not record prompts, Provider payloads,
+      raw generated output, full question content, full paper content, credentials, tokens, or cost calibration data.
+      Formal `question`/`paper` adoption and student-visible publish remain blocked unless separately approved.
+    targetClosureItem: Local AI question generation and AI paper composition smoke through existing governed paths
+    behaviorBoundary: local_dev_ai_generation_provider_smoke_no_formal_adoption
+    executionProfile: local_full_loop_provider_smoke_redacted
+    evidenceMode: redacted_metadata_only
+    validationPolicy: local_provider_smoke_focused_gates
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+    branch: codex/local-full-loop-ai-generation-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: approved_if_needed_for_generation_repairs
+      focusedUnitTest: approved
+      localDockerDatabase: approved
+      localDatabaseConnection: approved_local_dev_redacted
+      localDatabaseMutation: approved_local_dev_generated_task_only
+      providerCall: approved_small_local_smoke_redacted
+      providerConfigurationChange: blocked
+      providerPayloadEvidence: blocked
+      rawPromptEvidence: blocked
+      rawAiOutputEvidence: blocked
+      formalQuestionPaperWrite: blocked
+      formalPublish: blocked
+      browserRuntime: approved_localhost_only
+      devServer: approved_localhost_only
+      e2eRuntime: approved_existing_or_scoped_local_only
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-ai-generation-paper-provider-smoke.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/ai/**
+      - scripts/local/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - focused AI generation/provider smoke command recorded with redacted output
+      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-ai-generation-paper-provider-smoke-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+
+  - id: local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+    title: Local full loop student answer AI explanation smoke
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-ai-generation-paper-provider-smoke-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Fresh-approved local-only student answer and AI explanation/hint/scoring smoke. It may run local DB-backed student
+      practice or mock routes, focused tests, localhost browser/e2e validation, and small redacted Provider smoke only if
+      the existing explanation path requires it. Evidence must not record full question/paper content, raw student
+      answers, employee subjective answers, prompts, Provider payloads, raw AI output, screenshots, traces, raw DOM,
+      credentials, DB rows, or internal ids.
+    targetClosureItem: Local student answer, AI scoring, AI explanation, AI hint, report or mistake-book loop smoke
+    behaviorBoundary: local_dev_student_answer_ai_explanation_smoke
+    executionProfile: local_full_loop_student_ai_smoke
+    evidenceMode: redacted_metadata_only
+    validationPolicy: local_student_ai_focused_gates
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+    branch: codex/local-full-loop-student-ai-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: approved_if_needed_for_student_ai_repairs
+      focusedUnitTest: approved
+      localDockerDatabase: approved
+      localDatabaseConnection: approved_local_dev_redacted
+      localDatabaseMutation: approved_local_dev_answer_fixture_only
+      providerCall: approved_small_local_smoke_redacted_if_required
+      providerConfigurationChange: blocked
+      providerPayloadEvidence: blocked
+      rawPromptEvidence: blocked
+      rawAiOutputEvidence: blocked
+      browserRuntime: approved_localhost_only
+      devServer: approved_localhost_only
+      e2eRuntime: approved_existing_or_scoped_local_only
+      envSecretAccess: blocked_except_acceptance_credentials_input_only
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-student-answer-ai-explanation-smoke.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/local/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - focused student answer and AI explanation validation recorded with redacted output
+      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-student-answer-ai-explanation-smoke-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+
+  - id: local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+    title: Local full loop organization training analytics AI generation role flow
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-student-answer-ai-explanation-smoke-2026-06-28
+    taskPlanPolicy: required_before_business_logic
+    humanApprovalBoundary: >-
+      Fresh-approved local-only organization training, analytics, and organization AI generation multi-role flow. It may
+      use local DB, dev server, localhost browser/e2e, local acceptance credentials as input only, focused tests, and
+      small redacted Provider smoke for organization AI generation if required. Evidence must keep employee answers,
+      prompts, Provider payloads, raw AI output, full generated content, screenshots, traces, raw DOM, credentials,
+      cookies, localStorage, DB rows, internal ids, emails, phones, and redeem codes out of logs.
+    targetClosureItem: Local organization standard/advanced admin and employee training analytics AI generation role loop
+    behaviorBoundary: local_dev_organization_training_analytics_ai_generation_role_flow
+    executionProfile: local_full_loop_organization_role_browser_smoke
+    evidenceMode: redacted_metadata_only
+    validationPolicy: local_org_role_browser_focused_gates
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+    branch: codex/local-full-loop-org-role-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: approved_if_needed_for_org_role_repairs
+      focusedUnitTest: approved
+      localDockerDatabase: approved
+      localDatabaseConnection: approved_local_dev_redacted
+      localDatabaseMutation: approved_local_dev_training_fixture_only
+      localAcceptanceCredentialRead: approved_input_only_no_recording
+      providerCall: approved_small_local_smoke_redacted_if_required
+      providerConfigurationChange: blocked
+      providerPayloadEvidence: blocked
+      rawPromptEvidence: blocked
+      rawAiOutputEvidence: blocked
+      employeeSubjectiveAnswerEvidence: blocked
+      browserRuntime: approved_localhost_only
+      devServer: approved_localhost_only
+      e2eRuntime: approved_existing_or_scoped_local_only
+      envSecretAccess: blocked_except_acceptance_credentials_input_only
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    coveredRoles:
+      - org_standard_admin
+      - org_advanced_admin
+      - employee
+      - ops_admin
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-organization-training-analytics-ai-generation-role-flow.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/local/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - focused organization role/training/analytics/AI generation validation recorded with redacted output
+      - scoped localhost/127.0.0.1 browser or e2e validation recorded with redacted output
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: local-full-loop-rollup-evidence-2026-06-28
+
+  - id: local-full-loop-rollup-evidence-2026-06-28
+    title: Local full loop rollup evidence
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-full-loop-acceleration-planning-state-queue-2026-06-28
+    dependencies:
+      - local-full-loop-organization-training-analytics-ai-generation-role-flow-2026-06-28
+    taskPlanPolicy: required_before_rollup
+    humanApprovalBoundary: >-
+      Fresh-approved local-only rollup task. It may summarize the completed local full-loop evidence, update state,
+      traceability, audits, and acceptance documents, and record residual gaps. It must not execute new runtime, DB,
+      Provider, staging/prod/deploy, payment, OCR/export, external service, PR, force push, release readiness, final
+      Pass, quota default, pricing, or Cost Calibration work.
+    targetClosureItem: Local full-loop sprint rollup with residual gates explicitly blocked
+    behaviorBoundary: local_full_loop_rollup_docs_state_only
+    executionProfile: local_full_loop_rollup_evidence
+    evidenceMode: redacted_metadata_only
+    validationPolicy: docs_state_queue_scoped_gates
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: pending
+    approvedAt: "2026-06-28T05:25:00-07:00"
+    approvedBy: laozhuang
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-rollup-evidence.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-full-loop-rollup-evidence.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-rollup-evidence.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-full-loop-rollup-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-rollup-evidence.md
+    branch: codex/local-full-loop-rollup-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      traceabilityWrite: approved
+      localSourceChange: blocked
+      focusedUnitTest: approved_for_gate_only
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-full-loop-rollup-evidence.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-rollup-evidence.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-full-loop-rollup-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-rollup-evidence.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-rollup-evidence.md
+    blockedFiles:
+      - .env*
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_full_loop_acceleration_2026_06_28
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-full-loop-rollup-evidence.md docs/05-execution-logs/task-plans/2026-06-28-local-full-loop-rollup-evidence.md docs/05-execution-logs/evidence/2026-06-28-local-full-loop-rollup-evidence.md docs/05-execution-logs/audits-reviews/2026-06-28-local-full-loop-rollup-evidence.md docs/05-execution-logs/acceptance/2026-06-28-local-full-loop-rollup-evidence.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-full-loop-rollup-evidence-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-full-loop-rollup-evidence-2026-06-28 -SkipRemoteAheadCheck
+    nextRecommendedTask: blocked_cost_calibration_release_final_pass_until_fresh_approval
+
   - id: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
     title: Layer 3 staging pre-release redacted execution after target materialization
     phase: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
