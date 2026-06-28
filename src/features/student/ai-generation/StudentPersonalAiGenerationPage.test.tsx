@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StudentPersonalAiGenerationPage } from "./StudentPersonalAiGenerationPage";
 
 const studentRuntimeApiMock = vi.hoisted(() => ({
+  COOKIE_BACKED_SESSION_MARKER: "__cookie_backed_session__",
   fetchCurrentStudentSession: vi.fn(),
   fetchPersonalAiGenerationRequestHistory: vi.fn(),
   fetchStudentApi: vi.fn(),
@@ -72,6 +73,41 @@ function createRequestHistoryPayload() {
   ];
 }
 
+function createAdvancedAuthorizationListPayload() {
+  return {
+    authorizations: [],
+    effectiveAuthorizations: [],
+    authorizationContexts: [
+      {
+        profession: "monopoly",
+        level: 3,
+        contextDisplayStatus: "display_only",
+        edition: "advanced",
+        effectiveEdition: "advanced",
+        upgradeStatus: "none",
+        expiresAt: "2027-06-14T00:00:00.000Z",
+        displayStatus: "active",
+        authorizationSource: "personal_auth",
+        authorizationPublicId: "authorization_context_ui_501",
+        ownerType: "personal",
+        ownerPublicId: "student_public_ui_501",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "student_public_ui_501",
+        blockedReason: null,
+        capabilities: {
+          canGenerateAiQuestion: true,
+          canGenerateAiPaper: true,
+          canCreateOrganizationTraining: false,
+          canAnswerOrganizationTraining: false,
+          canViewOrganizationTrainingSummary: false,
+          canManageAuthorizationQuota: false,
+        },
+      },
+    ],
+  };
+}
+
 function createResultDetailPayload(
   unsafeEchoFields: Record<string, string> = {},
 ) {
@@ -93,6 +129,49 @@ function createResultDetailPayload(
   };
 }
 
+function mockAuthorizationAndResultHistoryResponse(
+  resultResponse: {
+    code: number;
+    message: string;
+    data: unknown;
+  },
+  requestHistoryResponse: {
+    code: number;
+    message: string;
+    data: unknown;
+  } = {
+    code: 0,
+    message: "ok",
+    data: [],
+  },
+) {
+  studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+    async (url: string) => {
+      if (url === "/api/v1/authorizations") {
+        return {
+          code: 0,
+          message: "ok",
+          data: createAdvancedAuthorizationListPayload(),
+        };
+      }
+
+      if (url === "/api/v1/personal-ai-generation-requests") {
+        return requestHistoryResponse;
+      }
+
+      if (url === "/api/v1/personal-ai-generation-results") {
+        return resultResponse;
+      }
+
+      return {
+        code: 500019,
+        message: "Unexpected student API request.",
+        data: null,
+      };
+    },
+  );
+}
+
 function mockResultHistoryAndDetailResponses({
   detailResponse,
 }: {
@@ -106,6 +185,22 @@ function mockResultHistoryAndDetailResponses({
 }) {
   studentRuntimeApiMock.fetchStudentApi.mockImplementation(
     async (url: string) => {
+      if (url === "/api/v1/authorizations") {
+        return {
+          code: 0,
+          message: "ok",
+          data: createAdvancedAuthorizationListPayload(),
+        };
+      }
+
+      if (url === "/api/v1/personal-ai-generation-requests") {
+        return {
+          code: 0,
+          message: "ok",
+          data: [],
+        };
+      }
+
       if (url === "/api/v1/personal-ai-generation-results") {
         return {
           code: 0,
@@ -147,7 +242,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         data: [],
       },
     );
-    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
+    mockAuthorizationAndResultHistoryResponse({
       code: 0,
       message: "ok",
       data: {
@@ -169,7 +264,7 @@ describe("StudentPersonalAiGenerationPage", () => {
   });
 
   it("loads and renders redacted personal AI generation result history", async () => {
-    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
+    mockAuthorizationAndResultHistoryResponse({
       code: 0,
       message: "ok",
       data: createResultHistoryPayload(),
@@ -204,25 +299,29 @@ describe("StudentPersonalAiGenerationPage", () => {
   });
 
   it("renders request history metadata without public identifier text", async () => {
-    studentRuntimeApiMock.fetchPersonalAiGenerationRequestHistory.mockResolvedValue(
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: createResultHistoryPayload(),
+      },
       {
         code: 0,
         message: "ok",
         data: createRequestHistoryPayload(),
       },
     );
-    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
-      code: 0,
-      message: "ok",
-      data: createResultHistoryPayload(),
-    });
 
     render(<StudentPersonalAiGenerationPage />);
 
     await waitFor(() => {
-      expect(
-        studentRuntimeApiMock.fetchPersonalAiGenerationRequestHistory,
-      ).toHaveBeenCalledWith("local-session-token");
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-requests",
+        "local-session-token",
+        {
+          method: "GET",
+        },
+      );
     });
     expect(
       await screen.findByText("2026-06-14T09:00:00.000Z"),
@@ -245,7 +344,7 @@ describe("StudentPersonalAiGenerationPage", () => {
   });
 
   it("renders the result history error state without hiding request history", async () => {
-    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
+    mockAuthorizationAndResultHistoryResponse({
       code: 500019,
       message:
         "Personal AI generation result history is temporarily unavailable.",

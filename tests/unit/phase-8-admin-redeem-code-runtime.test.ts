@@ -386,6 +386,10 @@ describe("phase 8 admin redeem code runtime", () => {
       }
     ).POST(
       new Request("http://localhost/api/v1/redeem-codes", {
+        body: JSON.stringify({
+          profession: "monopoly",
+          level: 3,
+        }),
         method: "POST",
         headers: { authorization: "Bearer admin-session-token" },
       }),

@@ -52,6 +52,26 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+function expectFetchRequestWithAuthorization(
+  fetchMock: ReturnType<typeof vi.fn>,
+  path: string,
+  authorization: string,
+) {
+  const matchedCall = fetchMock.mock.calls.find(
+    ([requestUrl]) => String(requestUrl) === path,
+  );
+
+  expect(matchedCall).toBeDefined();
+  expect(matchedCall?.[1]).toEqual(
+    expect.objectContaining({
+      credentials: "same-origin",
+    }),
+  );
+  expect(new Headers(matchedCall?.[1]?.headers).get("authorization")).toBe(
+    authorization,
+  );
+}
+
 function createCookieRequest(path: string) {
   return new Request(`http://localhost${path}`, {
     headers: {
@@ -97,14 +117,10 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
 
     expect(response.code).toBe(0);
     expect(sessionToken).toBe(cookieBackedSessionToken);
-    expect(fetchMock).toHaveBeenCalledWith(
+    expectFetchRequestWithAuthorization(
+      fetchMock,
       "/api/v1/sessions",
-      expect.objectContaining({
-        credentials: "same-origin",
-        headers: {
-          authorization: `Bearer ${cookieBackedSessionToken}`,
-        },
-      }),
+      `Bearer ${cookieBackedSessionToken}`,
     );
   });
 
@@ -118,14 +134,10 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
     const sessionToken = getStoredSessionToken();
     await fetchAdminApi("/api/v1/sessions", sessionToken);
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expectFetchRequestWithAuthorization(
+      fetchMock,
       "/api/v1/sessions",
-      expect.objectContaining({
-        credentials: "same-origin",
-        headers: {
-          authorization: "Bearer local-bearer-token",
-        },
-      }),
+      "Bearer local-bearer-token",
     );
   });
 

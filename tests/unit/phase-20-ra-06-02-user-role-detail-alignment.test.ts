@@ -491,7 +491,8 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(screen.getByText("5 次 / 15 分钟")).toBeInTheDocument();
     expect(screen.getByText("8 小时")).toBeInTheDocument();
     expect(screen.getByText("后台账号独立")).toBeInTheDocument();
-    expect(screen.getByText("super_admin")).toBeInTheDocument();
+    expect(screen.getByText("超级管理员")).toBeInTheDocument();
+    expect(screen.queryByText("super_admin")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
 
@@ -503,8 +504,10 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(detailPanel).not.toHaveAttribute("data-id");
     expect(within(detailPanel).getByText("授权列表")).toBeInTheDocument();
     expect(within(detailPanel).getByText("企业绑定")).toBeInTheDocument();
-    expect(within(detailPanel).getByText("personal_auth")).toBeInTheDocument();
-    expect(within(detailPanel).getByText("org_auth")).toBeInTheDocument();
+    expect(within(detailPanel).getByText("个人授权")).toBeInTheDocument();
+    expect(within(detailPanel).getByText("组织授权")).toBeInTheDocument();
+    expect(within(detailPanel).queryByText("personal_auth")).toBeNull();
+    expect(within(detailPanel).queryByText("org_auth")).toBeNull();
     expect(
       within(detailPanel).getAllByText("organization-public-001").length,
     ).toBeGreaterThan(0);

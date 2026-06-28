@@ -269,6 +269,7 @@ describe("organization auth layering and lifecycle repair", () => {
       service.createOrgAuth({
         accountQuota: 10,
         authScopeType: "specified_nodes",
+        edition: "standard",
         expiresAt: "2026-11-01T00:00:00.000Z",
         level: 3,
         name: "Overlap Coverage",

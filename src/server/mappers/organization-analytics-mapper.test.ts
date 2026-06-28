@@ -14,6 +14,12 @@ type MapperExports = typeof organizationAnalyticsMapper & {
   ) => unknown;
 };
 
+const redactedStatisticsBoundary = {
+  visibilityScope: "organization_admin_own_scope",
+  trainingStatisticsPolicy: "summary_counts_score_time_only",
+  employeeStatisticsPolicy: "status_score_time_only",
+};
+
 describe("organization analytics route mapper", () => {
   it("maps dashboard summaries without scoped organization identifier arrays", () => {
     const mapperExports = organizationAnalyticsMapper as MapperExports;
@@ -48,6 +54,7 @@ describe("organization analytics route mapper", () => {
           },
           formalLearningSummary: null,
           quotaSummary: null,
+          redactedStatisticsBoundary,
           redactionStatus: "aggregate_only",
           updatedAt: "2026-06-16T10:30:00Z",
         },
@@ -74,6 +81,7 @@ describe("organization analytics route mapper", () => {
         },
         formalLearningSummary: null,
         quotaSummary: null,
+        redactedStatisticsBoundary,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
       },
@@ -122,6 +130,7 @@ describe("organization analytics route mapper", () => {
               redactionStatus: "summary_only",
             },
           ],
+          redactedStatisticsBoundary,
           redactionStatus: "summary_only",
           updatedAt: "2026-06-16T10:30:00Z",
         },
@@ -153,6 +162,7 @@ describe("organization analytics route mapper", () => {
             redactionStatus: "summary_only",
           },
         ],
+        redactedStatisticsBoundary,
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:30:00Z",
       },

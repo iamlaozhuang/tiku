@@ -501,6 +501,20 @@ function readJsonRequestBody(
   return JSON.parse(String(requestBody)) as Record<string, unknown>;
 }
 
+function expectAdminFetchAuthorization(
+  fetchMock: ReturnType<typeof vi.fn>,
+  path: string,
+) {
+  const matchedCall = fetchMock.mock.calls.find(
+    ([requestUrl]) => String(requestUrl) === path,
+  );
+
+  expect(matchedCall).toBeDefined();
+  expect(new Headers(matchedCall?.[1]?.headers).get("authorization")).toBe(
+    "Bearer unit-test-admin-token",
+  );
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -580,11 +594,9 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toHaveAttribute("data-public-id", "question-marketing-001");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain('"id"');
-    expect(fetchMock).toHaveBeenCalledWith(
+    expectAdminFetchAuthorization(
+      fetchMock,
       "/api/v1/questions?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
-      expect.objectContaining({
-        headers: { authorization: "Bearer unit-test-admin-token" },
-      }),
     );
   });
 
