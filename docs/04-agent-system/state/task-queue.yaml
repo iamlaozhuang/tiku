@@ -1356,7 +1356,7 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current_user_approved_next_task_local_ai_provider_smoke_2026_06_28
-    nextRecommendedTask: local-full-loop-post-provider-rollup-evidence-2026-06-28_after_redacted_provider_smoke_closeout
+    nextRecommendedTask: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28_if_owner_approves_env_local_readonly_key_lookup
     executionResult:
       providerDryRun: pass_request_count_0_redaction_passed
       providerExecute: safe_block_missing_current_process_credential_no_real_provider_request
@@ -1388,12 +1388,159 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
+  - id: local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+    title: Local AI Provider env local readonly smoke retry
+    phase: local-full-loop-acceleration-2026-06-28
+    sourceStory: local-ai-provider-experience-smoke-execution-2026-06-28
+    dependencies:
+      - local-ai-provider-experience-smoke-execution-2026-06-28
+    taskPlanPolicy: required_before_env_local_provider_smoke_retry
+    humanApprovalBoundary: >-
+      The user fresh-approved readonly access to D:\tiku\.env.local for ALIBABA_API_KEY only, current-command-process
+      injection only, at most one real Provider smoke request, existing localhost e2e rerun, and local closeout through
+      commit, fast-forward merge, push, and short-branch cleanup. The task must not output, record, copy, commit, or
+      modify the key; must not modify .env files; must not change Provider configuration; must not record prompts,
+      Provider payloads, raw AI output, raw answers, or full question/paper/resource/chunk content; and must not execute
+      Cost Calibration, pricing, quota defaults, release/final Pass, staging/prod/deploy, payment/OCR/export, external
+      service, package/lockfile, schema/migration, drizzle-kit push, PR, or force push.
+    targetClosureItem: Successful redacted local Provider smoke retry using owner-approved readonly .env.local key lookup
+    behaviorBoundary: approved_env_local_readonly_single_provider_smoke_no_cost_calibration
+    executionProfile: local_provider_smoke_env_local_readonly_single_request
+    evidenceMode: redacted_provider_status_and_localhost_e2e_counts_only
+    validationPolicy: active_local_provider_smoke_redacted
+    taskKind: provider_smoke_execution
+    moduleRunVersion: 2
+    status: closed
+    result: closed_provider_request_executed_failed_redacted_provider_error_e2e_pass
+    approvedAt: "2026-06-28T08:43:00-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-06-28T08:43:00-07:00"
+    plannedAt: "2026-06-28T08:43:00-07:00"
+    implementedAt: "2026-06-28T08:45:43-07:00"
+    validatedAt: "2026-06-28T08:47:20-07:00"
+    reviewedAt: "2026-06-28T08:47:20-07:00"
+    closedAt: "2026-06-28T08:47:20-07:00"
+    capabilities:
+      providerCall: approved_single_redacted_local_smoke
+      providerConfigurationChange: blocked
+      providerCredentialRead: approved_env_local_alibaba_api_key_readonly_no_value_output
+      rawPromptEvidence: blocked
+      providerPayloadEvidence: blocked
+      rawAiOutputEvidence: blocked
+      envSecretAccess: approved_env_local_alibaba_api_key_readonly_no_value_output
+      envFileModification: blocked
+      localBrowserRuntime: approved_localhost_only_if_needed
+      devServer: approved_localhost_only_if_needed
+      localE2EValidation: approved_localhost_redacted
+      localDatabaseConnection: approved_app_runtime_only
+      localDatabaseMutation: approved_existing_app_generated_task_only
+      schemaMigration: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      paymentExternalService: blocked
+      ocrExportExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+    readOnlySecretFiles:
+      - D:\tiku\.env.local:ALIBABA_API_KEY
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - powershell.exe -NoProfile -Command "read ALIBABA_API_KEY from .env.local without output; set TIKU_PROVIDER_SMOKE_APPROVED=1; run one Provider smoke; output redacted status only"
+      - npm.cmd run test:e2e -- e2e/local-full-loop-ai-generation-paper-provider-smoke.spec.ts e2e/local-full-loop-student-answer-ai-explanation-smoke.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/task-plans/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/evidence/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/audits-reviews/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md docs/05-execution-logs/acceptance/2026-06-28-local-ai-provider-env-local-readonly-smoke-retry.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-ai-provider-env-local-readonly-smoke-retry-2026-06-28 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_env_local_readonly_provider_smoke_retry_2026_06_28
+    nextRecommendedTask: provider_error_diagnostic_requires_fresh_approval_no_more_provider_calls
+    executionResult:
+      envLocalRead: approved_alibaba_api_key_only_no_value_output
+      envFileChanged: false
+      providerDryRun: pass_request_count_0_redaction_passed
+      providerExecute: fail_redacted_provider_error_request_count_1
+      providerCallExecuted: true
+      providerRetryAttempted: false
+      providerConfigurationChanged: false
+      focusedLocalE2E: pass_3_specs_3_tests
+      transientPlaywrightArtifacts: cleaned_test_results_after_e2e
+      postProviderRollupUnblocked: false_provider_smoke_failed
+    validationSummary:
+      providerDryRun: pass
+      providerExecuteWrapper: fail_redacted_provider_error_request_count_1
+      focusedLocalE2E: pass_3_specs_3_tests
+      redactionBoundaryRecorded: true
+      envFileChanged: false
+      providerConfigurationChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      projectStatusDiagnostic: pass_idle_no_pending_task_prior_high_risk_repair_diagnostic_only_cost_calibration_blocked
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+
   - id: local-full-loop-post-provider-rollup-evidence-2026-06-28
     title: Local full loop post Provider rollup evidence
     phase: local-full-loop-acceleration-2026-06-28
     sourceStory: local-full-loop-gap-reseed-after-ui-action-smoke-2026-06-28
     dependencies:
-      - local-ai-provider-experience-smoke-execution-2026-06-28
+      - local-ai-provider-env-local-readonly-smoke-retry-2026-06-28
     taskPlanPolicy: required_after_provider_smoke_evidence
     humanApprovalBoundary: >-
       This rollup is blocked until redacted local Provider smoke evidence exists. It may summarize local evidence only
@@ -1408,7 +1555,7 @@ tasks:
     taskKind: rollup_blocked
     moduleRunVersion: 2
     status: blocked
-    result: blocked_waiting_for_successful_local_provider_smoke_evidence_current_attempt_safe_blocked_missing_credential
+    result: blocked_waiting_for_successful_local_provider_smoke_evidence_retry_failed_redacted_provider_error
     approvedAt: null
     approvedBy: null
     capabilities:
