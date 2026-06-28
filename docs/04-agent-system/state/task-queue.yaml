@@ -1093,6 +1093,158 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-acceptance-post-repair-current-session-rerun-2026-06-28
+    title: Full acceptance post-repair current session rerun
+    phase: full-acceptance-post-repair-current-session-rerun-2026-06-28
+    sourceStory: full_matrix_post_repair_current_session_rerun_after_gap_repairs_2026_06_28
+    dependencies:
+      - full-acceptance-matrix-execution-2026-06-28
+      - fix-organization-analytics-load-state-2026-06-28
+      - fix-organization-ai-provider-copy-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user approved continuing the full acceptance goal and per-task local commit, fast-forward merge to master,
+      push origin/master, and merged short-branch cleanup. This task may use only the already-open localhost in-app browser
+      current organization-admin session for read-only route/status checks after the two source/test repairs. It must not
+      read or enter credentials, capture cookies/tokens/session/localStorage/Authorization headers, execute role switching,
+      submit forms that mutate data, call Provider/AI generation, read Provider config, connect directly to DB, change
+      source/tests/dependencies/schema/migrations/seeds/env, deploy, create PRs, force-push, claim release readiness, claim
+      final Pass, or execute Cost Calibration Gate.
+    targetClosureItem: Redacted browser evidence that current organization-session post-repair analytics and organization AI gaps are closed
+    behaviorBoundary: local_browser_current_session_read_only::no_credentials_no_mutations_no_provider_no_final_pass
+    executionProfile: local_browser_current_session_read_only
+    evidenceMode: redacted_route_status_gap_summary_only_no_dom_no_screenshot_no_trace
+    validationPolicy: browser_current_session_rerun_full_unit_lint_typecheck_precommit_closeout_prepush
+    taskKind: browser_runtime_evidence
+    moduleRunVersion: 2
+    status: closed
+    result: partial_blocked_by_current_session_authorization
+    approvedAt: "2026-06-28T14:27:50-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
+    claimedAt: "2026-06-28T14:27:50-07:00"
+    plannedAt: "2026-06-28T14:27:50-07:00"
+    implementedAt: "2026-06-28T14:37:30-07:00"
+    validatedAt: "2026-06-28T14:37:30-07:00"
+    reviewedAt: "2026-06-28T14:37:30-07:00"
+    closedAt: "2026-06-28T14:37:30-07:00"
+    branch: codex/full-acceptance-post-repair-current-session-rerun-20260628
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_current_in_app_browser_session_read_only
+      fullUnitRuntime: approved
+      lintTypecheck: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      credentialEntryOrRead: blocked
+      sessionCookieTokenLocalStorageCapture: blocked
+      roleSwitching: blocked
+      localSourceChange: blocked
+      testChange: blocked
+      localUiApiMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_current_in_app_browser_session_read_only_route_status_checks_only
+    dbBoundary: blocked_no_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_or_raw_ai_io
+    accountCredentialBoundary: blocked_no_credential_entry_read_storage_cookie_token_session_or_localStorage_capture
+    evidenceRedaction: command_status_route_label_gap_class_only_no_dom_no_screenshot_no_trace_no_raw_payload
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - credential_or_session_fixture_access_or_role_switching
+      - local_ui_api_mutation_or_write_flow_execution
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationCommands:
+      - browser-current-session-redacted-checks
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-post-repair-current-session-rerun-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-post-repair-current-session-rerun-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-post-repair-current-session-rerun-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    validationSummary:
+      taskPlanPrepared: pass
+      browserCurrentSessionRerun: partial_analytics_pass_ai_positive_blocked_by_current_session_authorization
+      fullUnitGreen: pass_317_files_1430_tests
+      lint: pass
+      typecheck: pass
+      prettierScoped: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      directDatabaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      packageOrLockfileChanged: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28

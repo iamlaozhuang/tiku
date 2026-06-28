@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-organization-ai-provider-copy-2026-06-28
-updatedAt: "2026-06-28T14:21:29-07:00"
+currentPhase: full-acceptance-post-repair-current-session-rerun-2026-06-28
+updatedAt: "2026-06-28T14:27:50-07:00"
 fullAcceptanceMatrixUnitBaselineRepairRequirements20260628:
   taskId: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
   phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
@@ -957,6 +957,142 @@ fixOrganizationAiProviderCopy20260628:
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     packageOrLockfileChanged: false
+fullAcceptancePostRepairCurrentSessionRerun20260628:
+  taskId: full-acceptance-post-repair-current-session-rerun-2026-06-28
+  phase: full-acceptance-post-repair-current-session-rerun-2026-06-28
+  status: closed
+  result: partial_blocked_by_current_session_authorization
+  branch: codex/full-acceptance-post-repair-current-session-rerun-20260628
+  executionProfile: local_browser_current_session_read_only
+  taskKind: browser_runtime_evidence
+  createdAt: "2026-06-28T14:27:50-07:00"
+  approvedAt: "2026-06-28T14:27:50-07:00"
+  claimedAt: "2026-06-28T14:27:50-07:00"
+  plannedAt: "2026-06-28T14:27:50-07:00"
+  implementedAt: "2026-06-28T14:37:30-07:00"
+  validatedAt: "2026-06-28T14:37:30-07:00"
+  reviewedAt: "2026-06-28T14:37:30-07:00"
+  closedAt: "2026-06-28T14:37:30-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
+  promptMaterializationRule: >-
+    Before browser, DB, AI, source, test, or further docs execution, this task's goal, authorization,
+    allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, account credential boundary, evidence redaction rules,
+    and closeoutPolicy are materialized here, in task-queue.yaml, and in the task plan. Later execution must use repository
+    governance files as source of truth and must not expand scope from chat memory.
+  goal: >-
+    Rerun the currently authenticated organization-admin localhost browser surfaces after the analytics load-state and
+    organization AI provider-copy repairs, recording only redacted route/status/pass-fail evidence.
+  sourceGapIds:
+    - full-matrix-gap-organization-analytics-load-state-2026-06-28
+    - full-matrix-gap-organization-ai-provider-copy-2026-06-28
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  browserBoundary:
+    currentTask: localhost_current_in_app_browser_session_read_only_route_status_checks_only
+    allowedRoutes:
+      - http://localhost:3000/organization/organization-analytics
+      - http://localhost:3000/organization/ai-question-generation
+      - http://localhost:3000/organization/ai-paper-generation
+    forbidden:
+      - credential_entry_or_read
+      - cookie_token_session_localStorage_or_Authorization_header_capture
+      - raw_dom_screenshot_trace_html_report_evidence
+      - form_submit_that_creates_or_mutates_data
+      - provider_ai_generation_submit
+  dbBoundary:
+    currentTask: no_direct_database_connection_read_write_migration_seed_or_schema_change
+  aiProviderBoundary:
+    currentTask: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io
+    costCalibrationGate: blocked
+  credentialBoundary:
+    currentTask: use_existing_browser_state_only_no_credential_or_session_capture
+  evidenceRedaction:
+    allowed:
+      - command_name
+      - route_label
+      - role_surface_label
+      - pass_fail
+      - redacted_gap_status_summary
+      - test_counts
+      - commit_sha
+    forbidden:
+      - credentials_tokens_cookies_sessions_localStorage_Authorization_headers
+      - env_file_content
+      - database_url_api_key_connection_string
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_or_chunk_content
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_inherited_per_task_closeout_authorization_2026_06_28
+  blockedWithoutFreshApproval:
+    - credential_or_session_fixture_access_or_role_switching
+    - local_ui_api_mutation_or_write_flow_execution
+    - direct_database_connection_read_write_migration_or_seed
+    - provider_call_or_provider_configuration_or_credential_read
+    - prompt_provider_payload_raw_ai_input_or_output
+    - package_or_lockfile_change
+    - schema_migration_or_drizzle_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  validationSummary:
+    taskPlanPrepared: pass
+    browserCurrentSessionRerun: partial_analytics_pass_ai_positive_blocked_by_current_session_authorization
+    fullUnitGreen: pass_317_files_1430_tests
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    directDatabaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    credentialOrSessionCaptureExecuted: false
+    packageOrLockfileChanged: false
 ownerFacingLocalExperienceBatch20260628:
   taskId: owner-facing-local-experience-batch-2026-06-28
   phase: owner-facing-local-experience-batch-2026-06-28
@@ -1624,38 +1760,38 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 79caead7ee8f4bc484dab23875381eb395260071
-  lastKnownOriginMasterSha: 79caead7ee8f4bc484dab23875381eb395260071
+  lastKnownMasterSha: 967501db7c89286470f743451a67a75dbfe12a91
+  lastKnownOriginMasterSha: 967501db7c89286470f743451a67a75dbfe12a91
 currentTask:
-  id: fix-organization-ai-provider-copy-2026-06-28
+  id: full-acceptance-post-repair-current-session-rerun-2026-06-28
   status: closed
-  result: pass_organization_ai_provider_copy_repaired
-  taskKind: implementation_tdd
-  executionProfile: local_source_test_repair
-  approvedAt: "2026-06-28T14:08:32-07:00"
+  result: partial_blocked_by_current_session_authorization
+  taskKind: browser_runtime_evidence
+  executionProfile: local_browser_current_session_read_only
+  approvedAt: "2026-06-28T14:27:50-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_inherited_full_acceptance_goal_and_per_task_closeout_2026_06_28
-  claimedAt: "2026-06-28T14:08:32-07:00"
-  plannedAt: "2026-06-28T14:08:32-07:00"
-  implementedAt: "2026-06-28T14:17:56-07:00"
-  validatedAt: "2026-06-28T14:17:56-07:00"
-  reviewedAt: "2026-06-28T14:21:29-07:00"
-  closedAt: "2026-06-28T14:21:29-07:00"
-  sourceStory: full_matrix_gap_organization_ai_provider_copy_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
-  branch: codex/fix-organization-ai-provider-copy-20260628
+  claimedAt: "2026-06-28T14:27:50-07:00"
+  plannedAt: "2026-06-28T14:27:50-07:00"
+  implementedAt: "2026-06-28T14:37:30-07:00"
+  validatedAt: "2026-06-28T14:37:30-07:00"
+  reviewedAt: "2026-06-28T14:37:30-07:00"
+  closedAt: "2026-06-28T14:37:30-07:00"
+  sourceStory: full_matrix_post_repair_current_session_rerun_after_gap_repairs_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+  branch: codex/full-acceptance-post-repair-current-session-rerun-20260628
   promptMaterializationRule: >-
     Current prompt scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan. Subsequent
     source, test, browser, DB, AI, docs, validation, and closeout execution must use those repository governance files as
     source of truth and must not expand scope from chat memory.
   scope:
     docsStateEvidenceAudit: true
-    localSourceChange: true
-    testChange: true
-    focusedUnitTest: true
+    localSourceChange: false
+    testChange: false
+    focusedUnitTest: false
     fullUnitRuntime: true
     lintTypecheck: true
     localCommit: true
@@ -1663,7 +1799,7 @@ currentTask:
     pushOriginMaster: true
     branchCleanup: true
     sourceOrTestChanged: false
-    browserRuntimeExecuted: false
+    browserRuntimeExecuted: true
     devServerStartedByCodex: false
     e2eRuntimeExecuted: false
     databaseConnectionOrMutationExecuted: false
@@ -1683,20 +1819,20 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-06-28-fix-organization-ai-provider-copy.md
-    - docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
-    - docs/05-execution-logs/acceptance/2026-06-28-fix-organization-ai-provider-copy.md
-    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-    - src/features/admin/organization-ai-generation/**
-    - src/app/(admin)/organization/**
-    - tests/unit/**
+    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
   blockedFiles:
     - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - scripts/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -1708,13 +1844,15 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
+  browserBoundary:
+    currentTask: localhost_current_in_app_browser_session_read_only_route_status_checks_only
   dbBoundary:
     currentTask: no_direct_database_connection_read_write_migration_seed_or_schema_change
   aiProviderBoundary:
     currentTask: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io
     costCalibrationGate: blocked
   credentialBoundary:
-    currentTask: no_credential_or_session_capture
+    currentTask: use_existing_browser_state_only_no_credential_or_session_capture
   closeoutPolicy:
     localCommit:
       approved: true
@@ -1732,8 +1870,7 @@ currentTask:
       approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
   validationSummary:
     taskPlanPrepared: pass
-    redEvidence: pass_organization_provider_copy_exposed_before_fix
-    focusedGreen: pass_1_file_12_tests
+    browserCurrentSessionRerun: partial_analytics_pass_ai_positive_blocked_by_current_session_authorization
     fullUnitGreen: pass_317_files_1430_tests
     lint: pass
     typecheck: pass
@@ -1745,8 +1882,9 @@ currentTask:
     moduleRunV2PrePushReadiness: pass
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
-    sourceOrTestChanged: true
-  nextRecommendedTask: continue_full_acceptance_matrix_after_provider_copy_repair
+    credentialOrSessionCaptureExecuted: false
+    sourceOrTestChanged: false
+  nextRecommendedTask: full_acceptance_session_fixture_or_local_mutation_execution_requires_fresh_approval
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed
