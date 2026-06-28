@@ -2551,17 +2551,16 @@ tasks:
     taskKind: local_browser_validation
     moduleRunVersion: 2
     status: closed
-    result: blocked_existing_authenticated_local_role_session_unavailable_no_credentials_used
-    approvedAt: "2026-06-28T03:01:13-07:00"
+    result: pass_credential_assisted_local_browser_role_matrix_standard_gated_advanced_rendered_no_final_pass
+    approvedAt: "2026-06-28T03:19:26-07:00"
     approvedBy: laozhuang
-    approvalConsumed: current_user_batch_serial_local_low_risk_ux_polish_tasks_2026_06_28
-    claimedAt: "2026-06-28T03:01:13-07:00"
-    plannedAt: "2026-06-28T03:01:13-07:00"
-    observedAt: "2026-06-28T03:03:33-07:00"
-    reviewedAt: "2026-06-28T03:03:33-07:00"
-    blockedAt: "2026-06-28T03:03:33-07:00"
-    closedAt: "2026-06-28T03:10:54-07:00"
-    branch: codex/organization-workspace-browser-validation-20260628
+    approvalConsumed: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
+    claimedAt: "2026-06-28T03:19:26-07:00"
+    plannedAt: "2026-06-28T03:19:26-07:00"
+    observedAt: "2026-06-28T03:23:19-07:00"
+    reviewedAt: "2026-06-28T03:23:19-07:00"
+    closedAt: "2026-06-28T03:23:19-07:00"
+    branch: codex/organization-workspace-browser-validation-credential-rerun-20260628
     capabilities:
       docsStateEvidenceAudit: approved
       localBrowserRuntime: approved_existing_localhost_redacted_only
@@ -2642,10 +2641,17 @@ tasks:
     validationSummary:
       taskPlanPrepared: true
       existingLocalTargetHttpCheck: pass_127_0_0_1_3000_status_200_text_html
-      browserRuntimeExecuted: partial_localhost_route_observation_login_required
+      browserRuntimeExecuted: pass_credential_assisted_localhost_role_matrix
       redactedObservationEvidence: pass_counts_routes_states_only
-      authenticatedStandardOrgAdminSession: blocked_not_available_no_credentials_used
-      authenticatedAdvancedOrgAdminSession: blocked_not_available_no_credentials_used
+      authenticatedStandardOrgAdminSession: pass_login_accepted_standard_advanced_routes_gated
+      authenticatedAdvancedOrgAdminSession: pass_login_accepted_advanced_routes_rendered
+      credentialReadApproved: true
+      credentialValuesRecorded: false
+      standardOrganizationAdminPortalSummaryCount: 2
+      standardOrganizationAdminAdvancedDestinationCount: 0
+      standardOrganizationAdminGatedRouteCount: 4
+      advancedOrganizationAdminPortalAdvancedDestinationCount: 4
+      advancedOrganizationAdminRenderedRouteCount: 5
       sourceOrTestChanged: false
       focusedUnit: not_applicable
       lint: not_applicable
@@ -2668,6 +2674,31 @@ tasks:
       stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
       releaseReadinessClaimed: false
       finalPassClaimed: false
+    credentialAssistedRerun:
+      status: closed
+      approvedAt: "2026-06-28T03:19:26-07:00"
+      approvedBy: laozhuang
+      approvalConsumed: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
+      observedAt: "2026-06-28T03:23:19-07:00"
+      reviewedAt: "2026-06-28T03:23:19-07:00"
+      closedAt: "2026-06-28T03:23:19-07:00"
+      branch: codex/organization-workspace-browser-validation-credential-rerun-20260628
+      localTargetOnly: true
+      credentialReadApproved: true
+      credentialValuesRecorded: false
+      result: pass_standard_gated_advanced_rendered
+      standardOrganizationAdminLogin: pass
+      standardOrganizationAdminAdvancedRoutes: pass_gated
+      advancedOrganizationAdminLogin: pass
+      advancedOrganizationAdminRoutes: pass_rendered
+      credentialEvidenceRecording: blocked
+      screenshotsTracesRawDomStorageEvidence: blocked
+      databaseConnectionOrMutation: blocked
+      providerCallOrConfiguration: blocked
+      costCalibrationGate: blocked
+      stagingProdDeployPaymentExternalServiceOcrExport: blocked
+      releaseReadinessClaim: blocked
+      finalPassClaim: blocked
 
   - id: standard-advanced-edition-experience-optimization-planning-2026-06-27
     title: Standard and advanced edition experience optimization planning

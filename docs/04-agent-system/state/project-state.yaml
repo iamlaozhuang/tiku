@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: organization-workspace-ux-polish-local-browser-validation-2026-06-28
-updatedAt: "2026-06-28T03:10:54-07:00"
+updatedAt: "2026-06-28T03:19:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -506,23 +506,22 @@ repository:
 currentTask:
   id: organization-workspace-ux-polish-local-browser-validation-2026-06-28
   status: closed
-  result: blocked_existing_authenticated_local_role_session_unavailable_no_credentials_used
-  approvedAt: "2026-06-28T03:01:13-07:00"
+  result: pass_credential_assisted_local_browser_role_matrix_standard_gated_advanced_rendered_no_final_pass
+  approvedAt: "2026-06-28T03:19:26-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_batch_serial_local_low_risk_ux_polish_tasks_2026_06_28
-  claimedAt: "2026-06-28T03:01:13-07:00"
-  plannedAt: "2026-06-28T03:01:13-07:00"
-  observedAt: "2026-06-28T03:03:33-07:00"
-  reviewedAt: "2026-06-28T03:03:33-07:00"
-  blockedAt: "2026-06-28T03:03:33-07:00"
-  closedAt: "2026-06-28T03:10:54-07:00"
+  approvalConsumed: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
+  claimedAt: "2026-06-28T03:19:26-07:00"
+  plannedAt: "2026-06-28T03:19:26-07:00"
+  observedAt: "2026-06-28T03:23:19-07:00"
+  reviewedAt: "2026-06-28T03:23:19-07:00"
+  closedAt: "2026-06-28T03:23:19-07:00"
   sourceStory: standard-advanced-ux-polish-queue-planning-2026-06-28
   approvalSource: current_user_batch_serial_local_low_risk_ux_polish_tasks_2026_06_28
   planPath: docs/05-execution-logs/task-plans/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
   acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-organization-workspace-ux-polish-local-browser-validation.md
-  branch: codex/organization-workspace-browser-validation-20260628
+  branch: codex/organization-workspace-browser-validation-credential-rerun-20260628
   scope:
     docsStateEvidenceAudit: true
     sourceOrTestChange: false
@@ -542,9 +541,9 @@ currentTask:
     releaseReadinessClaim: false
     finalPassClaim: false
   decision:
-    overallDecision: blocked_existing_authenticated_local_role_session_unavailable_no_credentials_used
+    overallDecision: pass_credential_assisted_local_browser_role_matrix_standard_gated_advanced_rendered_no_final_pass
     refreshedUxPolishContract: docs/01-requirements/traceability/2026-06-28-standard-advanced-ux-polish-queue-planning.md
-    localBrowserValidationDecision: approved_by_current_user_batch_scope_after_first_three_tasks_passed
+    localBrowserValidationDecision: approved_by_current_user_credential_assisted_rerun_existing_localhost
     localSourceChangeDecision: blocked_by_current_user_browser_validation_scope
     focusedUnitTestDecision: blocked_by_current_user_browser_validation_scope
     browserRuntimeDecision: approved_existing_localhost_redacted_only
@@ -554,7 +553,7 @@ currentTask:
     stagingExecutionDecision: blocked_pending_fresh_explicit_approval_and_concrete_isolated_target
     releaseReadinessDecision: blocked_not_evaluated
     finalPassDecision: blocked_not_claimed
-    nextRecommendedTask: user_login_or_fresh_credential_handoff_for_local_role_browser_validation
+    nextRecommendedTask: no_pending_task_cost_calibration_and_environment_gates_still_blocked
   localFullLoopGate: L5_local_browser_redacted_existing_localhost_no_db_no_provider_no_e2e
   threadRolloverGate: resume_from_this_task_plan_evidence_project_state_and_task_queue
   automationHandoffPolicy: serial_batch_approval_allows_task_scoped_local_commit_merge_push_cleanup_no_pr_no_force_push
@@ -580,10 +579,17 @@ currentTask:
   validationSummary:
     taskPlanPrepared: true
     existingLocalTargetHttpCheck: pass_127_0_0_1_3000_status_200_text_html
-    browserRuntimeExecuted: partial_localhost_route_observation_login_required
+    browserRuntimeExecuted: pass_credential_assisted_localhost_role_matrix
     redactedObservationEvidence: pass_counts_routes_states_only
-    authenticatedStandardOrgAdminSession: blocked_not_available_no_credentials_used
-    authenticatedAdvancedOrgAdminSession: blocked_not_available_no_credentials_used
+    authenticatedStandardOrgAdminSession: pass_login_accepted_standard_advanced_routes_gated
+    authenticatedAdvancedOrgAdminSession: pass_login_accepted_advanced_routes_rendered
+    credentialReadApproved: true
+    credentialValuesRecorded: false
+    standardOrganizationAdminPortalSummaryCount: 2
+    standardOrganizationAdminAdvancedDestinationCount: 0
+    standardOrganizationAdminGatedRouteCount: 4
+    advancedOrganizationAdminPortalAdvancedDestinationCount: 4
+    advancedOrganizationAdminRenderedRouteCount: 5
     sourceOrTestChanged: false
     focusedUnit: not_applicable
     lint: not_applicable
@@ -606,7 +612,32 @@ currentTask:
     stagingProdDeployPaymentExternalServiceOcrExportExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-  nextRecommendedTask: user_login_or_fresh_credential_handoff_for_local_role_browser_validation
+  credentialAssistedRerun:
+    status: closed
+    approvedAt: "2026-06-28T03:19:26-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_credential_assisted_local_browser_rerun_2026_06_28
+    observedAt: "2026-06-28T03:23:19-07:00"
+    reviewedAt: "2026-06-28T03:23:19-07:00"
+    closedAt: "2026-06-28T03:23:19-07:00"
+    branch: codex/organization-workspace-browser-validation-credential-rerun-20260628
+    localTargetOnly: true
+    credentialReadApproved: true
+    credentialValuesRecorded: false
+    result: pass_standard_gated_advanced_rendered
+    standardOrganizationAdminLogin: pass
+    standardOrganizationAdminAdvancedRoutes: pass_gated
+    advancedOrganizationAdminLogin: pass
+    advancedOrganizationAdminRoutes: pass_rendered
+    credentialEvidenceRecording: blocked
+    screenshotsTracesRawDomStorageEvidence: blocked
+    databaseConnectionOrMutation: blocked
+    providerCallOrConfiguration: blocked
+    costCalibrationGate: blocked
+    stagingProdDeployPaymentExternalServiceOcrExport: blocked
+    releaseReadinessClaim: blocked
+    finalPassClaim: blocked
+  nextRecommendedTask: no_pending_task_cost_calibration_and_environment_gates_still_blocked
 previousTask:
   id: layer-2-business-closure-evidence-rollup-refresh-after-postgres-test-owned-target-smoke-2026-06-27
   status: closed

@@ -2,7 +2,7 @@
 
 Task id: `organization-workspace-ux-polish-local-browser-validation-2026-06-28`
 
-Branch: `codex/organization-workspace-browser-validation-20260628`
+Branch: `codex/organization-workspace-browser-validation-credential-rerun-20260628`
 
 Task kind: `local_browser_validation`
 
@@ -27,11 +27,18 @@ Task kind: `local_browser_validation`
 - `docs/05-execution-logs/evidence/2026-06-28-organization-workspace-ux-polish-permission-contract-tdd.md`
 - `browser:control-in-app-browser` skill
 
+## Credential-Assisted Rerun Approval
+
+Fresh approval received on `2026-06-28T03:19:26-07:00` allows reading local role credentials and entering them into the in-app browser for this localhost-only rerun. This approval is limited to `org_standard_admin` and `org_advanced_admin` login against an existing `localhost` or `127.0.0.1` target.
+
+Credential values may be read and typed only; they must not be printed, echoed, logged, copied into docs/state/evidence, stored in generated files, or summarized beyond `credentialReadApproved: true` and `credentialValuesRecorded: false`.
+
 ## Scope
 
 Allowed:
 
 - use the in-app browser against an existing `localhost` or `127.0.0.1` target only;
+- read local role credentials and type them into the in-app browser for `org_standard_admin` and `org_advanced_admin`;
 - record only role label, route, observed state label, element/control count, and pass/fail summary;
 - update this task plan, evidence, audit, acceptance, `project-state.yaml`, and `task-queue.yaml`.
 
@@ -48,16 +55,18 @@ Forbidden:
 
 1. Confirm the current in-app browser target or one explicit local URL is `localhost` or `127.0.0.1`.
 2. Do not start a dev server. If no existing local target responds, record `blocked_existing_local_target_unavailable`.
-3. Do not request, read, print, or record credentials, cookies, tokens, storage, screenshots, traces, or raw DOM.
-4. If an existing authenticated local session is already present, observe the smallest route/state matrix possible:
+3. Read only the minimum local credentials needed for the two approved role logins. Do not print, record, or echo credential values.
+4. Do not record cookies, tokens, storage, screenshots, traces, raw DOM, or raw page text.
+5. Observe the smallest route/state matrix possible after each role login:
    - standard organization admin: organization portal and advanced-only route gated state;
    - advanced organization admin: organization portal and advanced organization entry/rendered state.
-5. If only one role is available without credentials, record partial evidence and mark the unavailable role rows blocked.
-6. Evidence must be summarized as counts and labels only, for example `advancedEntryCount=4`, `standardAdvancedEntryCount=0`, `state=standard-unavailable`, without raw text dumps.
+6. If only one role can be validated, record partial evidence and mark the unavailable role rows blocked.
+7. Evidence must be summarized as counts and labels only, for example `advancedEntryCount=4`, `standardAdvancedEntryCount=0`, `state=standard-unavailable`, without raw text dumps.
 
 ## Validation Commands
 
 - existing local target HTTP check only after approval;
+- approved credential-assisted login through the in-app browser only;
 - approved redacted local browser observation only after approval;
 - scoped Prettier write/check on docs/state/evidence files;
 - `git diff --check`;
@@ -73,6 +82,7 @@ Forbidden:
 ## Stop Conditions
 
 - No existing local target is available.
-- Authentication requires credentials that are not already entered by the user in the browser.
+- Approved local role credentials cannot be located without printing or recording values.
+- Login requires CAPTCHA, MFA, password reset, or any external account/security side effect not covered by the approval.
 - Any observation would require recording sensitive data or raw browser artifacts.
 - Any source/test/runtime/server/DB/Provider/deploy/payment/external-service action becomes necessary.
