@@ -62,25 +62,34 @@
   - Result: passed.
 - SKIPPED: `npx.cmd vitest run "<focused failing unit files if current recheck fails>"`
   - Result: skipped because the current full unit recheck produced no failing files.
-- Pending: `git diff --check`.
-- Pending: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28`.
-- Pending: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28`.
-- Pending: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28 -SkipRemoteAheadCheck`.
+- GREEN: `git diff --check`
+  - Result: passed.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28`
+  - Result: passed before first commit and in commit hook.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28`
+  - Result: passed after commit evidence update.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-unit-baseline-current-recheck-and-repair-2026-06-28 -SkipRemoteAheadCheck`
+  - Result: passed before closeout commit.
 
 ## Batch Commit Evidence
 
-- Commit: pending.
+- Commit: `9d9bb7726`
 - Commit scope: governance state, task queue, task plan, evidence, audit review, and acceptance files for this task.
+- Commit message: `test(unit): recheck full unit baseline`.
 - Source/test changes: none.
 
 ## Local Full Loop Gate
 
+- localFullLoopGate: passed for current full unit baseline, lint, typecheck, formatting, diff check, Module Run v2
+  pre-commit, and pre-push readiness; module closeout rerun is pending after commit evidence update.
 - Current full unit baseline: pass.
 - Focused repair: skipped because current full unit baseline was green.
 - Lint: pass.
 - Typecheck: pass.
-- Formatting and diff checks: pending.
-- Module Run v2 pre-commit, module closeout, and pre-push readiness: pending.
+- Formatting and diff checks: pass.
+- Module Run v2 pre-commit: pass.
+- Module Run v2 pre-push readiness: pass before closeout commit.
+- Module Run v2 module closeout: pass.
 
 ## Thread Rollover Decision
 
@@ -102,4 +111,4 @@
 
 ## Closeout Status
 
-- Current full unit baseline is green. Closeout gates are pending.
+- Current full unit baseline is green. Commit evidence, module closeout readiness, and pre-push readiness are recorded.

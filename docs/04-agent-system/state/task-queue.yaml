@@ -637,7 +637,11 @@ tasks:
       lint: pass
       typecheck: pass
       fullUnitGreen: pass
-      formatAndDiff: pending
+      formatAndDiff: pass
+      firstCommit: 9d9bb7726
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
       sourceOrTestChanged: false
     retryCount: 0
     lastFailurePath: null
