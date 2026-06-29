@@ -2258,7 +2258,7 @@ tasks:
     validationPolicy: tdd_focused_unit_full_unit_lint_typecheck_precommit_closeout_prepush
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
     result: pass_source_unit_repair_browser_role_rerun_required
     approvedAt: "2026-06-28T17:02:43-07:00"
     approvedBy: laozhuang
@@ -2269,6 +2269,8 @@ tasks:
     implementedAt: "2026-06-28T17:27:00-07:00"
     validatedAt: "2026-06-28T17:27:00-07:00"
     reviewedAt: "2026-06-28T17:27:00-07:00"
+    closedAt: "2026-06-28T17:31:00-07:00"
+    implementationCommitSha: 68a2963bb5448633ebe3abb025383b025495a9a7
     branch: codex/ai-generation-detail-controls-repair-20260628
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -2428,6 +2430,9 @@ tasks:
       typecheck: pass
       formatCheck: pass
       gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pending_clean_branch_run_after_closeout_commit
       browserControlPresence: attempted_not_pass_evidence_current_local_browser_dev_state_unavailable_deferred_to_role_rerun
       evidencePrepared: pass
       auditReviewPrepared: pass

@@ -8,7 +8,7 @@
 - Result: pass_source_unit_repair_browser_role_rerun_required
 - Batch range: AI question and AI paper generation detail-control source repair
 - Pre-task master checkpoint: `66e23e229f544dad69d41258010ec04c7c38045c`
-- Commit: pending_initial_commit
+- Commit: `68a2963bb5448633ebe3abb025383b025495a9a7`
 
 ## RED
 
@@ -88,6 +88,10 @@ AI input/output, employee subjective answers, and complete question/paper/materi
   - Result: passed.
   - Scope scan: 9 changed task-scoped files.
   - Sensitive evidence scan: passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-detail-controls-source-repair-2026-06-28`
+  - Result: passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-detail-controls-source-repair-2026-06-28 -SkipRemoteAheadCheck`
+  - Result: pending clean-branch prepush run after closeout commit.
 - `npm.cmd run test:unit`
   - Final full baseline result after formatting: passed.
   - Test count: 317 files, 1432 tests passed.

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ai-generation-detail-controls-source-repair-2026-06-28
-updatedAt: "2026-06-28T17:27:00-07:00"
+updatedAt: "2026-06-28T17:31:00-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2652,7 +2652,7 @@ repository:
   lastKnownOriginMasterSha: dc3b46ee02b8bff22aea12be545e368382497506
 currentTask:
   id: ai-generation-detail-controls-source-repair-2026-06-28
-  status: ready_for_closeout
+  status: closed
   result: pass_source_unit_repair_browser_role_rerun_required
   taskKind: implementation_tdd
   executionProfile: local_source_test_repair_ai_generation_detail_controls
@@ -2665,6 +2665,8 @@ currentTask:
   implementedAt: "2026-06-28T17:27:00-07:00"
   validatedAt: "2026-06-28T17:27:00-07:00"
   reviewedAt: "2026-06-28T17:27:00-07:00"
+  closedAt: "2026-06-28T17:31:00-07:00"
+  implementationCommitSha: 68a2963bb5448633ebe3abb025383b025495a9a7
   sourceStory: active_goal_continue_after_ops_admin_coverage_to_repair_ai_generation_detail_controls_2026_06_28
   planPath: docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
@@ -2795,6 +2797,9 @@ currentTask:
     typecheck: pass
     formatCheck: pass
     gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pending_clean_branch_run_after_closeout_commit
     browserControlPresence: attempted_not_pass_evidence_current_local_browser_dev_state_unavailable_deferred_to_role_rerun
     evidencePrepared: pass
     auditReviewPrepared: pass
