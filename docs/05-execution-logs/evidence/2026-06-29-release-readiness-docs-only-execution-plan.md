@@ -5,7 +5,7 @@
 - Evidence status: pass
 - Result: pass
 - Detailed result: pass_docs_only_release_readiness_execution_plan_no_release_claim
-- Updated at: `2026-06-29T06:26:39-07:00`
+- Updated at: `2026-06-29T06:30:27-07:00`
 
 ## Boundary Confirmation
 
@@ -39,6 +39,8 @@
 - GREEN: next recommended task is identified without executing or approving runtime gates.
 - GREEN: release readiness, final Pass, Cost Calibration, staging/prod/deploy, Provider, DB, browser/runtime, source
   /test, dependency, schema/migration/seed, PR, force-push, and sensitive evidence capture remain blocked.
+- GREEN: post-closeout reconcile initially hard-blocked on an unrecognized `currentTask.commitSha` placeholder; the
+  short branch now records the primary plan commit as an accepted ancestor checkpoint before final cleanup.
 
 ## Gate Summary
 
@@ -63,6 +65,7 @@
 ## Batch Commit Evidence
 
 - Commit: `5ac3b0dc4` (pre-task base commit for this docs/state plan).
+- Primary plan commit: `879153fd1`.
 - Commit scope: governance state, task queue, traceability, plan, evidence, audit review, and acceptance files.
 - Commit command will be executed only after scoped closeout and pre-push readiness gates pass.
 
