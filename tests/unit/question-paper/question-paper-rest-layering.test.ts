@@ -22,6 +22,14 @@ function expectAllowedSourceExists(sourcePath: string) {
   return absoluteSourcePath;
 }
 
+async function resolveRouteResponse(routeCall: () => Promise<Response>) {
+  try {
+    return await routeCall();
+  } catch {
+    return undefined;
+  }
+}
+
 describe("unified repair question paper REST layering", () => {
   it("exposes exam paper REST adapters through the scoped question-paper layer", async () => {
     const routeSourcePath = expectAllowedSourceExists(
@@ -87,6 +95,46 @@ describe("unified repair question paper REST layering", () => {
         sortOrder: "desc",
         total: 1,
       },
+    });
+  });
+
+  it("returns generic 500 envelope when exam paper repository throws", async () => {
+    const routeHandlersSourcePath = expectAllowedSourceExists(
+      "src/server/services/question-paper/route-handlers.ts",
+    );
+    const { createQuestionPaperRouteHandlers } = await import(
+      pathToFileURL(routeHandlersSourcePath).href
+    );
+    const thrownDetail = "synthetic question paper route failure detail";
+    const handlers = createQuestionPaperRouteHandlers({
+      repository: {
+        async listExamPapers() {
+          throw new Error(thrownDetail);
+        },
+      },
+    });
+
+    const response = await resolveRouteResponse(() =>
+      handlers.examPapers.collection.GET(
+        new Request("http://localhost/api/v1/exam-papers?page=1&pageSize=10"),
+      ),
+    );
+
+    expect(response).toBeInstanceOf(Response);
+
+    if (response === undefined) {
+      return;
+    }
+
+    expect(response.status).toBe(500);
+
+    const responseText = await response.text();
+
+    expect(responseText).not.toContain(thrownDetail);
+    expect(JSON.parse(responseText)).toEqual({
+      code: 500001,
+      data: null,
+      message: "Unexpected runtime error.",
     });
   });
 

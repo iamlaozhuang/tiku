@@ -9,6 +9,7 @@ import {
   mapExamPaperRecord,
   type QuestionPaperRepository,
 } from "@/server/repositories/question-paper/question-paper-repository";
+import { createRouteHandlersWithErrorEnvelope } from "@/server/services/route-error-response";
 import {
   parseExamPaperListQuery,
   validateExamPaperPublicId,
@@ -87,7 +88,7 @@ export function createQuestionPaperRouteHandlers(
     return validationResult;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     examPapers: {
       collection: {
         async GET(request: Request) {
@@ -248,5 +249,5 @@ export function createQuestionPaperRouteHandlers(
         },
       },
     },
-  };
+  });
 }

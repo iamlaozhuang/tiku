@@ -29,6 +29,14 @@ function createRouteContext(publicId: string) {
   };
 }
 
+async function resolveRouteResponse(routeCall: () => Promise<Response>) {
+  try {
+    return await routeCall();
+  } catch {
+    return undefined;
+  }
+}
+
 describe("unified repair student experience layering and mistake book scope", () => {
   it(
     "routes student APIs through the scoped student-experience layer",
@@ -142,6 +150,49 @@ describe("unified repair student experience layering and mistake book scope", ()
     },
     STUDENT_EXPERIENCE_LAYERING_TEST_TIMEOUT_MS,
   );
+
+  it("returns generic 500 envelope when student experience repository throws", async () => {
+    const routeHandlersSourcePath = expectAllowedSourceExists(
+      "src/server/services/student-experience/route-handlers.ts",
+    );
+    const { createStudentExperienceRouteHandlers } = await import(
+      pathToFileURL(routeHandlersSourcePath).href
+    );
+    const thrownDetail = "synthetic student experience route failure detail";
+    const handlers = createStudentExperienceRouteHandlers({
+      repository: {
+        async listMistakeBooks() {
+          throw new Error(thrownDetail);
+        },
+      },
+      resolveUserContext: async () => ({
+        userPublicId: "user-public-001",
+      }),
+    });
+
+    const response = await resolveRouteResponse(() =>
+      handlers.mistakeBooks.collection.GET(
+        new Request("http://localhost/api/v1/mistake-books?page=1&pageSize=10"),
+      ),
+    );
+
+    expect(response).toBeInstanceOf(Response);
+
+    if (response === undefined) {
+      return;
+    }
+
+    expect(response.status).toBe(500);
+
+    const responseText = await response.text();
+
+    expect(responseText).not.toContain(thrownDetail);
+    expect(JSON.parse(responseText)).toEqual({
+      code: 500001,
+      data: null,
+      message: "Unexpected runtime error.",
+    });
+  });
 
   it("keeps mistake_book entries objective-question scoped", async () => {
     const validatorSourcePath = expectAllowedSourceExists(

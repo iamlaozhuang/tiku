@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-data-redaction-log-boundary-inventory-2026-06-29
-updatedAt: "2026-06-29T07:32:49-07:00"
+currentPhase: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+updatedAt: "2026-06-29T07:53:54-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2955,18 +2955,18 @@ repository:
   lastKnownMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
   lastKnownOriginMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
 currentTask:
-  id: security-data-redaction-log-boundary-inventory-2026-06-29
-  status: in_progress
-  result: pending_source_read_only_redaction_log_inventory
-  source: securityDataRedactionLogBoundaryInventory20260629
-  branch: codex/security-redaction-log-inventory-20260629
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
-  commitSha: 1a4f9ed00
-  updatedAt: "2026-06-29T07:25:03-07:00"
+  id: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+  status: closed
+  result: pass_route_error_envelope_fix_with_focused_regression_no_release_gate
+  source: fixRouteErrorEnvelopeQuestionPaperStudentExperience20260629
+  branch: codex/fix-route-error-envelope-20260629
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  commitSha: 5decaf86b101
+  updatedAt: "2026-06-29T07:53:54-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
@@ -4801,6 +4801,184 @@ securityDataRedactionLogBoundaryInventory20260629:
       approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
   blockedWithoutFreshApproval:
     - source_or_test_change
+    - package_or_lockfile_change
+    - dependency_introduction_upgrade_or_removal
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - account_fixture_read_or_session_switching
+    - database_connection_read_write_migration_or_seed
+    - schema_migration_or_drizzle_push
+    - provider_call_or_provider_configuration_or_credential_read
+    - env_secret_access_or_env_file_change
+    - staging_prod_cloud_deploy_payment_ocr_export_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - sensitive_evidence_capture
+fixRouteErrorEnvelopeQuestionPaperStudentExperience20260629:
+  taskId: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+  phase: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+  status: closed
+  result: pass_route_error_envelope_fix_with_focused_regression_no_release_gate
+  sourceStory: sec-redlog-001_from_security_data_redaction_log_boundary_inventory_2026_06_29
+  dependsOn:
+    - security-data-redaction-log-boundary-inventory-2026-06-29
+  taskKind: security_fix
+  moduleRunVersion: 2
+  approvedAt: "2026-06-29T07:44:19-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: active_thread_goal_continuation_next_recommended_security_fix_materialization_2026_06_29
+  claimedAt: "2026-06-29T07:44:19-07:00"
+  plannedAt: "2026-06-29T07:44:19-07:00"
+  validatedAt: "2026-06-29T07:53:54-07:00"
+  reviewedAt: "2026-06-29T07:53:54-07:00"
+  closedAt: "2026-06-29T07:53:54-07:00"
+  branch: codex/fix-route-error-envelope-20260629
+  goal: >-
+    Add focused regression coverage and minimal shared route-error-response envelope coverage for question_paper and
+    student_experience handler factories so unexpected runtime exceptions return the standard `{ code, message, data }`
+    error envelope without leaking raw exception text.
+  allowedFiles:
+    - src/server/services/question-paper/route-handlers.ts
+    - src/server/services/student-experience/route-handlers.ts
+    - tests/unit/question-paper/question-paper-rest-layering.test.ts
+    - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+    - src/server/services/route-error-response.ts
+    - src/server/contracts/api-response.ts
+    - src/server/contracts/question-paper/exam-paper-contract.ts
+    - src/server/contracts/student-experience/student-experience-contract.ts
+    - src/server/repositories/question-paper/question-paper-repository.ts
+    - src/server/repositories/student-experience/student-experience-repository.ts
+    - src/server/mappers/student-experience/student-experience-mapper.ts
+    - src/server/validators/question-paper/exam-paper-validator.ts
+    - src/server/validators/student-experience/student-experience-query.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary:
+    currentTask: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    allowedEvidence: test_file_paths_status_counts_only_no_db_content
+  aiProviderBoundary:
+    currentTask: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write
+    providerBudget: zero
+    costCalibrationGate: blocked
+  browserBoundary:
+    currentTask: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary:
+    currentTask: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+  evidenceRedaction:
+    allowed:
+      - file_paths
+      - test_names
+      - command_names
+      - pass_fail
+      - counts
+      - redacted_expected_observed_summary
+      - commit_summaries
+    forbidden:
+      - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - employee_subjective_answers
+      - complete_question_paper_material_resource_or_chunk_content
+      - env_file_contents
+      - raw_exception_payload_or_stack_trace
+  tddPlan:
+    redTests:
+      - tests/unit/question-paper/question-paper-rest-layering.test.ts::returns_generic_500_envelope_when_exam_paper_repository_throws
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts::returns_generic_500_envelope_when_student_experience_repository_throws
+    greenImplementation:
+      - wrap_createQuestionPaperRouteHandlers_return_tree_with_createRouteHandlersWithErrorEnvelope
+      - wrap_createStudentExperienceRouteHandlers_return_tree_with_createRouteHandlersWithErrorEnvelope
+    invariant:
+      - unexpected_exceptions_return_code_500001_message_Unexpected_runtime_error_data_null
+      - raw_exception_message_is_not_serialized
+      - existing_success_and_blocked_provider_contracts_remain_unchanged
+  tddResult:
+    red:
+      status: pass_expected_failure_observed
+      command: npm run test:unit -- tests/unit/question-paper/question-paper-rest-layering.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      result: two_new_tests_failed_before_fix_without_raw_exception_payload_or_stack_trace
+    green:
+      status: pass
+      command: npm run test:unit -- tests/unit/question-paper/question-paper-rest-layering.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      result: two_files_ten_tests_passed_after_fix
+  validationSummary:
+    status: pass
+    focusedUnit: pass_two_files_ten_tests
+    lint: pass
+    typecheck: pass
+    evidenceMode: redacted_command_status_count_and_file_path_summary_only
+  nextRecommendedTaskId: verify-ai-provider-error-snapshot-redaction-2026-06-29
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown src/server/services/question-paper/route-handlers.ts src/server/services/student-experience/route-handlers.ts tests/unit/question-paper/question-paper-rest-layering.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - npx.cmd prettier --check --ignore-unknown src/server/services/question-paper/route-handlers.ts src/server/services/student-experience/route-handlers.ts tests/unit/question-paper/question-paper-rest-layering.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    - npm run test:unit -- tests/unit/question-paper/question-paper-rest-layering.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+    - npm run lint
+    - npm run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-route-error-envelope-question-paper-student-experience-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: active_thread_goal_continuation_next_recommended_security_fix_materialization_2026_06_29
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: active_thread_goal_continuation_next_recommended_security_fix_materialization_2026_06_29
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: active_thread_goal_continuation_next_recommended_security_fix_materialization_2026_06_29
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: active_thread_goal_continuation_next_recommended_security_fix_materialization_2026_06_29
+  blockedWithoutFreshApproval:
     - package_or_lockfile_change
     - dependency_introduction_upgrade_or_removal
     - browser_or_playwright_runtime

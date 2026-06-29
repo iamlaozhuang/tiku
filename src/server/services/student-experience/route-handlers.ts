@@ -11,6 +11,7 @@ import {
   type StudentExperienceRepository,
 } from "@/server/repositories/student-experience/student-experience-repository";
 import { mapMistakeBookRecord } from "@/server/mappers/student-experience/student-experience-mapper";
+import { createRouteHandlersWithErrorEnvelope } from "@/server/services/route-error-response";
 import { parseMistakeBookListQuery } from "@/server/validators/student-experience/student-experience-query";
 
 type RouteContext = {
@@ -114,7 +115,7 @@ export function createStudentExperienceRouteHandlers(
     return legacyMistakeBookRouteHandlers;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     examReports: {
       collection: {
         GET: (request: Request) =>
@@ -277,5 +278,5 @@ export function createStudentExperienceRouteHandlers(
           ),
       },
     },
-  };
+  });
 }
