@@ -7,6 +7,7 @@
 
 ## Findings
 
+- APPROVE: no blocking findings for this scoped `ops_admin.employee_import` rerun.
 - No code defect found. The import button is disabled in the empty state by design and becomes enabled after valid
   synthetic CSV content is entered.
 - The browser rerun reached preview, confirmation, and result states with aggregate-only evidence.
