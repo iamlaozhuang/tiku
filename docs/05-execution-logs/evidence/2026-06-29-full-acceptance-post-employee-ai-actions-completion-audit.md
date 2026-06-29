@@ -44,6 +44,8 @@
   release readiness, Cost Calibration, or sensitive evidence was introduced by this audit.
 - GREEN: first pre-push readiness run blocked on repository SHA checkpoint drift; project-state checkpoints were aligned
   to current local `master` and `origin/master`, then pre-push readiness passed.
+- GREEN: post-merge closeout reconcile identified missing currentTask evidence/audit path fields; the short branch is
+  carrying a governance-only path checkpoint repair before final push.
 
 ## Audit Inputs
 
@@ -98,8 +100,9 @@
 ## Batch Commit Evidence
 
 - Commit: `9a66801f8` (pre-task base commit for this docs/state batch).
-- Commit scope: governance state, task queue, traceability, plan, evidence, audit review, and acceptance files.
-- Commit command will be executed only after scoped closeout and pre-push readiness gates pass.
+- Closeout commit: `4cba0fa75` for the primary docs/state audit.
+- Commit scope: governance state, task queue, traceability, plan, evidence, audit review, acceptance files, and
+  post-merge closeout path checkpoint repair.
 
 ## Local Full Loop Gate
 
