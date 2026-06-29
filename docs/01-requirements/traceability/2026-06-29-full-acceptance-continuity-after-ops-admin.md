@@ -2,7 +2,7 @@
 
 - Task id: `full-acceptance-continuity-after-ops-admin-2026-06-29`
 - Branch: `codex/full-acceptance-continuity-after-ops-admin-20260629`
-- Status: in progress
+- Status: closed
 - Date: `2026-06-29`
 
 ## Objective
@@ -57,3 +57,9 @@ Blocked in this task:
 - AI/Provider execution, Provider configuration, prompt/payload/raw AI IO.
 - Source/test/dependency/package/lockfile changes.
 - Staging/prod/deploy, PR, force-push, release readiness, final Pass, Cost Calibration.
+
+## Closure
+
+- Result: pass, queue continuity restored.
+- First implementation commit: `425ae927f`.
+- Seeded next task status: pending after this task closes.

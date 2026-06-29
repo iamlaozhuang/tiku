@@ -2,7 +2,7 @@
 
 - Task id: `full-acceptance-continuity-after-ops-admin-2026-06-29`
 - Branch: `codex/full-acceptance-continuity-after-ops-admin-20260629`
-- Review status: in progress
+- Review status: approved
 - Date: `2026-06-29`
 
 ## Scope Review
@@ -20,4 +20,8 @@
 
 ## Decision
 
-Pending validation.
+APPROVED.
+
+- Queue continuity repair is scoped to docs/state files.
+- Next task was seeded with local-only and redaction boundaries.
+- No sensitive evidence or blocked runtime action was recorded.

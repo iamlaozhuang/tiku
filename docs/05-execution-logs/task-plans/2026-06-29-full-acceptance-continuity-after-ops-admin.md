@@ -2,7 +2,7 @@
 
 - Task id: `full-acceptance-continuity-after-ops-admin-2026-06-29`
 - Branch: `codex/full-acceptance-continuity-after-ops-admin-20260629`
-- Plan status: in progress
+- Plan status: implemented
 - Date: `2026-06-29`
 
 ## Read Requirements
