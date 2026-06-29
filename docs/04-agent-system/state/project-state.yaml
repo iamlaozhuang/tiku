@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-continuity-after-org-employee-repair-2026-06-29
-updatedAt: "2026-06-29T02:16:00-07:00"
+currentPhase: full-acceptance-ops-admin-workflow-2026-06-29
+updatedAt: "2026-06-29T02:30:00-07:00"
 orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628:
   approvedAt: "2026-06-28T22:56:09-07:00"
   approvedBy: laozhuang
@@ -2918,15 +2918,15 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fa32c3698cde00fb1619c241e3b4c5aaf7f524d6
-  lastKnownOriginMasterSha: fa32c3698cde00fb1619c241e3b4c5aaf7f524d6
+  lastKnownMasterSha: 714a1675d11c854bf8373e0fa9def4f2a5cde966
+  lastKnownOriginMasterSha: 714a1675d11c854bf8373e0fa9def4f2a5cde966
 currentTask:
-  id: full-acceptance-continuity-after-org-employee-repair-2026-06-29
+  id: full-acceptance-ops-admin-workflow-2026-06-29
   status: closed
-  result: pass_queue_continuity_repaired_next_ops_admin_task_seeded_no_final_pass
-  source: fullAcceptanceContinuityAfterOrgEmployeeRepair20260629
-  branch: codex/full-acceptance-continuity-seed-20260629
-  updatedAt: "2026-06-29T02:22:00-07:00"
+  result: pass_ops_admin_workflow_coverage_recorded_employee_import_followup_seeded_no_final_pass
+  source: fullAcceptanceOpsAdminWorkflow20260629
+  branch: codex/full-acceptance-ops-admin-workflow-20260629
+  updatedAt: "2026-06-29T03:18:00-07:00"
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
@@ -4044,8 +4044,8 @@ fullAcceptanceContinuityAfterOrgEmployeeRepair20260629:
 fullAcceptanceOpsAdminWorkflow20260629:
   taskId: full-acceptance-ops-admin-workflow-2026-06-29
   phase: full-acceptance-ops-admin-workflow-2026-06-29
-  status: pending
-  result: pending_ops_admin_owner_facing_workflow_redacted_acceptance
+  status: closed
+  result: pass_ops_admin_workflow_coverage_recorded_employee_import_followup_seeded_no_final_pass
   sourceStory: seeded_by_full_acceptance_continuity_after_org_employee_repair_2026_06_29
   dependencies:
     - full-acceptance-continuity-after-org-employee-repair-2026-06-29
@@ -4058,6 +4058,12 @@ fullAcceptanceOpsAdminWorkflow20260629:
   approvedBy: laozhuang
   approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  claimedAt: "2026-06-29T02:30:00-07:00"
+  plannedAt: "2026-06-29T02:30:00-07:00"
+  implementedAt: "2026-06-29T03:18:00-07:00"
+  validatedAt: "2026-06-29T03:18:00-07:00"
+  reviewedAt: "2026-06-29T03:18:00-07:00"
+  closedAt: "2026-06-29T03:18:00-07:00"
   goal: >-
     Execute localhost-only owner-facing acceptance for `ops_admin`: operations workspace, user/organization/employee
     operations, enterprise authorization and atomic scope visibility, employee import entry/status, `redeem_code`
@@ -4205,6 +4211,44 @@ fullAcceptanceOpsAdminWorkflow20260629:
   evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-ops-admin-workflow.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-ops-admin-workflow.md
   acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-ops-admin-workflow.md
+  observedCoverage:
+    workspaceAndDenials: pass
+    userOrganizationEmployeeOperations: pass_surface_counts_recorded
+    enterpriseAuthorizationAndAtomicScope: pass_surface_counts_recorded
+    employeeImport: partial_import_entry_present_action_disabled_upload_status_unproven
+    redeemCode: pass_generate_action_clicked_no_plaintext_pattern
+    resourceKnowledgeAndLogs: pass_no_raw_payload_or_secret_value_pattern
+    promptGovernanceDenialOrSafeSummary: pass_safe_summary_counts_only
+  seededNextTaskCandidate:
+    taskId: fix-ops-admin-employee-import-entry-state-2026-06-29
+    status: pending
+    reason: employee_import_entry_present_but_action_disabled_and_upload_status_workflow_unproven
+  validationSummary:
+    taskPlanPrepared: pass
+    browserWorkflowEvidence: partial_employee_import_execution_unproven
+    sourceOrTestChanged: false
+    databaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    committedEvidenceSensitiveCapture: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+fixOpsAdminEmployeeImportEntryState20260629:
+  taskId: fix-ops-admin-employee-import-entry-state-2026-06-29
+  phase: fix-ops-admin-employee-import-entry-state-2026-06-29
+  status: pending
+  result: pending_employee_import_repair_or_rerun
+  sourceStory: follow_up_from_full_acceptance_ops_admin_workflow_employee_import_partial_2026_06_29
+  dependency: full-acceptance-ops-admin-workflow-2026-06-29
+  branch: codex/fix-ops-admin-employee-import-entry-state-20260629
+  approvalConsumed: durable_stage_b_stage_c_local_execution_and_per_task_closeout_2026_06_28
+  stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  targetClosureItem: ops_admin_employee_import_upload_status_workflow_proven_or_repaired_with_redacted_evidence
+  boundary: local_source_test_or_browser_repair_no_direct_db_no_schema_migration_seed_no_provider_no_final_pass
+  evidenceMode: redacted_role_route_workflow_status_count_summary_only
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-fix-ops-admin-employee-import-entry-state.md
 orgAdvancedAnalyticsDbAlignmentRepair20260628:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
   status: closed

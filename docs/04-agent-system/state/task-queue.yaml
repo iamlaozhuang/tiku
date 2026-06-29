@@ -2116,12 +2116,18 @@ tasks:
     validationPolicy: task_plan_then_browser_acceptance_scoped_prettier_diff_module_run_v2_closeout
     taskKind: local_browser_acceptance
     moduleRunVersion: 2
-    status: pending
-    result: pending_ops_admin_owner_facing_workflow_redacted_acceptance
+    status: closed
+    result: pass_ops_admin_workflow_coverage_recorded_employee_import_followup_seeded_no_final_pass
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T02:30:00-07:00"
+    plannedAt: "2026-06-29T02:30:00-07:00"
+    implementedAt: "2026-06-29T03:18:00-07:00"
+    validatedAt: "2026-06-29T03:18:00-07:00"
+    reviewedAt: "2026-06-29T03:18:00-07:00"
+    closedAt: "2026-06-29T03:18:00-07:00"
     branch: codex/full-acceptance-ops-admin-workflow-20260629
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -2252,6 +2258,149 @@ tasks:
       - release_readiness_or_final_pass
       - cost_calibration_gate
       - sensitive_evidence_capture
+    validationSummary:
+      taskPlanPrepared: pass
+      browserWorkflowEvidence: partial_employee_import_execution_unproven
+      sourceOrTestChanged: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      committedEvidenceSensitiveCapture: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+
+  - id: fix-ops-admin-employee-import-entry-state-2026-06-29
+    title: Fix ops admin employee import entry state
+    phase: fix-ops-admin-employee-import-entry-state-2026-06-29
+    sourceStory: follow_up_from_full_acceptance_ops_admin_workflow_employee_import_partial_2026_06_29
+    dependencies:
+      - full-acceptance-ops-admin-workflow-2026-06-29
+    taskPlanPolicy: required_before_source_test_browser_or_docs_execution
+    humanApprovalBoundary: >-
+      Follow-up task for the `ops_admin.employee_import` row. It may first reproduce the localhost-only disabled import
+      action with redacted route/workflow/status/count evidence, then perform a scoped source/test repair only if needed
+      to make the employee import entry discoverable and executable for test-owned acceptance data. It must reuse
+      existing operations organization/employee import patterns if present. It must not record raw upload rows,
+      credentials, cookies, tokens, sessions, localStorage, Authorization headers, raw DOM, screenshots, traces, raw DB
+      rows, internal ids, PII, email, phone, plaintext redeem_code, Provider payloads, prompts, raw AI IO, or complete
+      content. Direct DB access, schema/migration/seed, dependency changes, staging/prod/deploy, PR, force-push,
+      release readiness, final Pass, and Cost Calibration remain blocked.
+    targetClosureItem: ops_admin_employee_import_upload_status_workflow_proven_or_repaired_with_redacted_evidence
+    behaviorBoundary: local_source_test_or_browser_repair::ops_admin_employee_import_no_db_no_provider_no_final_pass
+    executionProfile: local_acceptance_repair_ops_admin_employee_import
+    evidenceMode: redacted_role_route_workflow_status_count_summary_only
+    validationPolicy: task_plan_then_reproduce_then_focused_repair_if_needed_then_scoped_validation
+    taskKind: local_acceptance_repair
+    moduleRunVersion: 2
+    status: pending
+    result: pending_employee_import_repair_or_rerun
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: durable_stage_b_stage_c_local_execution_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    branch: codex/fix-ops-admin-employee-import-entry-state-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - ops_admin.employee_import
+      completionRule: employee_import_row_requires_redacted_upload_or_status_workflow_pass_evidence
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost
+      accountFixtureRead: approved_read_only_login_input_no_evidence_if_role_session_required
+      localUiApiMutation: approved_test_owned_acceptance_data_if_app_normally_performs_it
+      localSourceChange: approved_if_required_for_employee_import_entry_state
+      testChange: approved_if_required_for_employee_import_entry_state
+      focusedUnitTest: approved
+      localCommit: approved_after_validation
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      directDatabaseAccess: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      dependencyIntroduction: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      finalPassClaim: blocked
+      releaseReadinessDecision: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+      - docs/05-execution-logs/task-plans/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+      - docs/05-execution-logs/evidence/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+      - docs/05-execution-logs/acceptance/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+      - src/app/(admin)/ops/organizations/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_trace_raw_dom_or_session_material_evidence
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    accountCredentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_stage_b_stage_c_and_per_task_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_stage_b_stage_c_and_per_task_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_stage_b_stage_c_and_per_task_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_stage_b_stage_c_and_per_task_closeout_2026_06_28
+    blockedWithoutFreshApproval:
+      - direct_database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - sensitive_evidence_capture
+    validationSummary:
+      seededBy: full-acceptance-ops-admin-workflow-2026-06-29
+      status: pending
 
   - id: full-acceptance-matrix-execution-2026-06-28
     title: Full all-role acceptance matrix execution
