@@ -63,16 +63,41 @@
 
 - Browser workflow evidence: pass.
   Command: `browser_org_standard_admin_boundary_workflow_redacted`.
-- Scoped Prettier check: pending.
-- `git diff --check`: pending.
-- Module Run v2 pre-commit hardening: pending.
-- Module Run v2 module closeout readiness: pending.
-- Module Run v2 pre-push readiness: pending.
+- Scoped Prettier check: pass.
+  Command:
+  `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md`.
+- `git diff --check`: pass.
+- Module Run v2 pre-commit hardening: pass.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29`.
+- Module Run v2 module closeout readiness: pass after commit evidence update.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29`.
+- Module Run v2 pre-push readiness: pass after state SHA ancestor check.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29 -SkipRemoteAheadCheck`.
+- Commit hook lint/typecheck: pass.
+
+## Batch Commit Evidence
+
+- Commit: `3efdb62a0`.
+- Commit scope: scoped organization standard admin browser acceptance evidence and governance state only.
 
 ## Local Full Loop Gate
 
-- localFullLoopGate: pending validation for scoped `org_standard_admin` evidence only.
+- localFullLoopGate: pass for scoped `org_standard_admin` browser evidence, scoped formatting, diff, Module Run v2
+  pre-commit, closeout, and pre-push readiness.
 - Current full unit baseline: pass, 318 files and 1437 tests.
+
+## Thread Rollover Decision
+
+- threadRolloverGate: not required before this scoped task closes; recovery sources are project state, task queue, this
+  evidence, and the mandatory owner-facing checklist.
+
+## Next Module Run Candidate
+
+- nextModuleRunCandidate: seed or claim the next remaining full acceptance row after this scoped task is merged, pushed,
+  and cleaned up.
 
 ## Blocked Remainder
 

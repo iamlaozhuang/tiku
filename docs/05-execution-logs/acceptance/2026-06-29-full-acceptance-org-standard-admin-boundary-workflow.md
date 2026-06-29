@@ -15,7 +15,7 @@
 | Advanced organization routes return permission denied, standard-unavailable, redirect, or another safe blocked state                                                     | pass    |
 | Evidence records no credentials, raw DOM, screenshots, DB rows, Provider payloads, raw AI IO, internal ids, PII, or complete content                                     | pass    |
 | No direct DB, Provider, source/test, dependency, schema/migration/seed, staging/prod, final Pass, release readiness, PR, force-push, or Cost Calibration action executed | pass    |
-| Scoped formatting, diff, and Module Run v2 gates pass                                                                                                                    | pending |
+| Scoped formatting, diff, and Module Run v2 gates pass                                                                                                                    | pass    |
 | Commit, fast-forward merge, push, and cleanup complete                                                                                                                   | pending |
 
 ## Acceptance Notes

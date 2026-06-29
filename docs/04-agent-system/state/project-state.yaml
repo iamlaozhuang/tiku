@@ -3419,6 +3419,14 @@ fullAcceptanceOrgStandardAdminBoundaryWorkflow20260629:
     organizationPortal: pass_context_authorization_employee_summary_no_advanced_links
     advancedRouteBoundary: pass_four_routes_blocked_or_unavailable_no_advanced_actions
     consoleErrors: pass_zero
+    prettierScoped: pass
+    gitDiffCheck: pass
+    lint: pass_via_commit_hook
+    typecheck: pass_via_commit_hook
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_commit_evidence_update
+    moduleRunV2PrePushReadiness: pass_after_state_sha_ancestor_check
+    firstCommit: 3efdb62a0
     sourceOrTestChanged: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false

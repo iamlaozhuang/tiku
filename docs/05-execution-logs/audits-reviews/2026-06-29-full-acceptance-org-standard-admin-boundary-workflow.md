@@ -19,7 +19,7 @@ boundaries.
 
 ## Findings
 
-- No blocking finding for the scoped acceptance rows.
+- No blocking findings for the scoped acceptance rows.
 - The organization portal exposed organization, authorization/status, and employee context for `org_standard_admin`.
 - The organization portal did not expose advanced organization route links.
 - Direct access to the four advanced organization routes returned blocked/unavailable status summaries with no advanced
