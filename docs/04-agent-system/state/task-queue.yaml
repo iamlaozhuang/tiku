@@ -4690,8 +4690,8 @@ tasks:
     validationPolicy: focused_unit_local_db_runtime_browser_module_run_v2
     taskKind: local_db_schema_test_owned_data_alignment_repair
     moduleRunVersion: 2
-    status: in_progress
-    result: pending
+    status: closed
+    result: pass
     approvedAt: "2026-06-28T22:56:09-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
@@ -4827,6 +4827,7 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
       sensitiveEvidenceCaptured: false
+    commit: 69749ee89
 
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch

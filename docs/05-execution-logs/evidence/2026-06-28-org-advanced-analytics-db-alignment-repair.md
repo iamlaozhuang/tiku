@@ -4,12 +4,12 @@
 
 - Task: `org-advanced-analytics-db-alignment-repair-2026-06-28`
 - Branch: `codex/org-advanced-analytics-db-alignment-repair-20260628`
-- Status: in progress
+- Status: closed
 - Result: pass
 - Scoped row: `org_advanced_admin.organization_analytics`
 - Pre-task master checkpoint: `84d7a006843e84446b487fd0108183de695aaed9`
 - Batch range: single task, `org-advanced-analytics-db-alignment-repair-2026-06-28`
-- Commit: pending
+- Commit: `69749ee89`
 
 ## Boundary Confirmation
 
@@ -112,12 +112,18 @@ GREEN: pass.
 - Module Run v2 precommit hardening: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28`.
-- Module Run v2 closeout readiness: pending final post-commit rerun.
+- Module Run v2 closeout readiness: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28`.
-- Module Run v2 prepush readiness: pending final post-commit rerun.
+- Module Run v2 prepush readiness: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28 -SkipRemoteAheadCheck`.
+
+## Commit Evidence
+
+- implementationCommit: `69749ee89` (`test(acceptance): align org analytics local db fixture`).
+- batchCommitEvidence: single-task scoped local DB alignment evidence committed.
+- closeoutEvidenceCommit: pending after this evidence update.
 
 ## Evidence Boundary
 

@@ -2706,15 +2706,15 @@ repository:
   lastKnownOriginMasterSha: 84d7a006843e84446b487fd0108183de695aaed9
 currentTask:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass
   source: orgAdvancedAnalyticsDbAlignmentRepair20260628
   branch: codex/org-advanced-analytics-db-alignment-repair-20260628
   updatedAt: "2026-06-28T22:56:09-07:00"
 orgAdvancedAnalyticsDbAlignmentRepair20260628:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass
   branch: codex/org-advanced-analytics-db-alignment-repair-20260628
   taskKind: local_db_schema_test_owned_data_alignment_repair
   executionProfile: local_schema_migration_seed_source_repair_if_required
@@ -2886,6 +2886,7 @@ orgAdvancedAnalyticsDbAlignmentRepair20260628:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
+  commit: 69749ee89
 previousTaskSnapshotOrgAdvancedAnalyticsBrowserRerunAfterSummaryRepair:
   id: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
   status: closed

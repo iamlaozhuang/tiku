@@ -15,7 +15,7 @@ and count summaries only.
 
 ## Current Status
 
-- Task status: repaired and validated, pending closeout commit.
+- Task status: closed.
 - Acceptance result: pass for scoped `org_advanced_admin.organization_analytics` runtime summary load repair.
 - Full matrix result: incomplete.
 - Final Pass: not claimed.
