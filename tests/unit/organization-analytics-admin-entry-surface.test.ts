@@ -1,7 +1,6 @@
 import { createElement } from "react";
 import {
   cleanup,
-  fireEvent,
   render,
   screen,
   waitFor,
@@ -285,6 +284,55 @@ describe("AdminOrganizationAnalyticsPage", () => {
     ]);
   });
 
+  it("automatically loads scoped summary and redacted employee statistics for advanced organization admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
+      ) {
+        return createJsonResponse(dashboardSummaryPayload);
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
+      ) {
+        return createJsonResponse(employeeStatisticsPayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationAnalyticsPage));
+
+    expect(
+      await screen.findByTestId("organization-analytics-scope-context"),
+    ).toHaveTextContent("organization-analytics-scope-001");
+    expect(
+      await screen.findByTestId(
+        "organization-analytics-summary-organization-analytics-scope-001",
+      ),
+    ).toHaveTextContent("12 可参与员工");
+    expect(
+      await screen.findByTestId("organization-analytics-employee-statistics"),
+    ).toHaveTextContent("员工甲");
+    expect(screen.queryByText("统计摘要加载失败。")).toBeNull();
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  });
+
   it("loads scoped summary and employee statistics without manual organization id entry or hidden details", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
@@ -324,10 +372,6 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(
       screen.getByText("仅展示汇总趋势和脱敏员工统计"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/加载统计摘要后显示脱敏员工统计/u),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/导出仍需单独审批/u)).toBeInTheDocument();
 
     const scopeContext = await screen.findByTestId(
       "organization-analytics-scope-context",
@@ -336,19 +380,6 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(
       screen.queryByDisplayValue("organization-analytics-scope-001"),
     ).toBeNull();
-
-    const summaryForm = within(
-      screen.getByRole("form", {
-        name: "组织统计摘要表单",
-      }),
-    );
-    fireEvent.change(summaryForm.getByLabelText("开始时间"), {
-      target: { value: "2026-06-01T00:00:00.000Z" },
-    });
-    fireEvent.change(summaryForm.getByLabelText("结束时间"), {
-      target: { value: "2026-06-16T00:00:00.000Z" },
-    });
-    fireEvent.click(summaryForm.getByRole("button", { name: "加载统计摘要" }));
 
     const summaryCard = await screen.findByTestId(
       "organization-analytics-summary-organization-analytics-scope-001",
@@ -460,13 +491,6 @@ describe("AdminOrganizationAnalyticsPage", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(AdminOrganizationAnalyticsPage));
-
-    const summaryForm = within(
-      await screen.findByRole("form", {
-        name: "组织统计摘要表单",
-      }),
-    );
-    fireEvent.click(summaryForm.getByRole("button", { name: "加载统计摘要" }));
 
     expect(
       await screen.findByTestId(

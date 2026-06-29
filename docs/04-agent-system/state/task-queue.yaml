@@ -4065,7 +4065,203 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2CloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass
-    nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
+    nextRecommendedTask: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+
+  - id: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+    title: Org advanced analytics summary load failure Stage C repair
+    phase: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+    sourceStory: follow_up_major_gap_org_adv_analytics_001_from_owner_facing_local_experience_batch_2026_06_28
+    dependencies:
+      - full-acceptance-content-admin-formal-content-readonly-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes durable staged local execution approval Stage C for task-queued source, test, and documentation
+      repairs. It may repair only the local advanced organization analytics summary/status surface for recorded gap
+      `ORG-ADV-ANALYTICS-001`, run focused local validation, write redacted evidence, commit, fast-forward merge to
+      master, push origin/master, and clean up. It must not access credentials, cookies, tokens, sessions, localStorage,
+      Authorization headers, env files, raw DOM, screenshots, traces, raw DB rows, Provider payloads, prompts, raw AI
+      input/output, complete content, direct DB changes, schema/migration/seed, dependency changes, staging/prod/deploy,
+      PR, force push, release readiness, final Pass, or Cost Calibration.
+    targetClosureItem: Repair recorded major organization analytics summary gap for org_advanced_admin
+    behaviorBoundary: local_source_test_repair_org_advanced_analytics_summary::no_provider_no_db_no_sensitive_evidence
+    executionProfile: local_source_test_repair_org_advanced_analytics_summary
+    evidenceMode: redacted_role_route_workflow_category_status_count_test_count_failure_class_commit_sha_only
+    validationPolicy: tdd_red_green_focused_unit_lint_typecheck_precommit_closeout_prepush
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: validated
+    result: pass_local_validation_pending_commit
+    approvedAt: "2026-06-28T22:10:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_durable_staged_local_execution_approval_stage_c_source_test_repair_and_active_goal_continuation_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T22:10:00-07:00"
+    plannedAt: "2026-06-28T22:10:00-07:00"
+    branch: codex/org-advanced-analytics-summary-repair-20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - org_advanced_admin.organization_analytics
+      recordedGapIds:
+        - ORG-ADV-ANALYTICS-001
+      completionRule: >-
+        This task may repair only the recorded `ORG-ADV-ANALYTICS-001` gap. The durable goal remains incomplete until
+        every applicable owner-facing checklist row has redacted pass evidence and the full unit baseline is green.
+    aiGenerationReusePolicy: >-
+      No AI generation source changes are expected in this task. If analytics repair touches shared admin workspace or
+      AI-adjacent code, reuse existing contracts, services, UI primitives, and validation patterns; do not create
+      role-specific duplicate implementations.
+    capabilities:
+      docsStateEvidenceAudit: approved
+      sourceOrTestChange: approved_task_scoped
+      focusedUnitTest: approved
+      lintTypecheck: approved
+      browserRuntime: approved_read_only_localhost_or_127_0_0_1_after_source_repair_if_needed
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      testOwnedLocalAccountSessionSwitching: blocked_current_task
+      localUiApiMutation: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - src/features/admin/organization-analytics/**
+      - src/app/(admin)/organization/organization-analytics/page.tsx
+      - tests/unit/organization-analytics-admin-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - src/app/(admin)/organization/**
+      - src/features/admin/organization-training/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/admin-workspace-role-guard-contract.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_or_127_0_0_1_read_only_after_source_repair_if_needed_no_screenshot_no_trace_no_raw_dom_no_mutation_no_provider
+    accountCredentialBoundary: no_private_account_material_read_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    evidenceRedaction: role_route_workflow_category_status_count_failure_class_command_test_count_commit_sha_only_no_sensitive_payloads
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_runtime_outside_localhost_or_127_0_0_1
+      - dev_server_start_if_existing_localhost_is_unavailable
+      - account_session_switching_or_private_account_material_read
+      - ui_api_mutation_create_update_submit_delete_disable_publish_archive_upload_import
+      - ai_generation_submit_or_provider_execution
+      - database_connection_read_write_migration_seed_or_destructive_operation
+      - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - source_or_test_change_outside_allowed_files
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      taskPlanPrepared: pass
+      mandatoryChecklistRead: pass
+      codeTasteAndAdrRead: pass
+      redFocusedUnit: pass_1_new_regression_failed_5_existing_passed_before_repair
+      implementation: pass_auto_load_scoped_summary_after_advanced_org_scope_resolved
+      focusedUnitOrganizationAnalytics: pass_1_file_6_tests
+      lint: pass
+      typecheck: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      sourceOrTestChanged: true_allowed_files_only
+      browserRuntimeExecuted: false_current_source_test_repair
+      uiApiMutationExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      prettierScoped: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pending_post_commit_rerun
+      moduleRunV2PrePushReadiness: pass
+    nextRecommendedTask: browser_rerun_or_next_full_acceptance_matrix_row_after_closeout
 
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   Download,
@@ -127,6 +127,73 @@ export function AdminOrganizationAnalyticsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasAutoLoadedScopedSummaryRef = useRef(false);
+
+  const handleLoadDashboardSummary = useCallback(
+    async (values: DashboardSummaryFormValues) => {
+      const sessionToken = getStoredSessionToken();
+
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setMessage(null);
+      setEmployeeStatistics(null);
+      setEmployeeStatisticsLoadState("loading");
+
+      try {
+        const [summaryResponse, employeeStatisticsResponse] = await Promise.all(
+          [
+            fetchAdminApi<OrganizationAnalyticsDashboardRouteDto>(
+              createDashboardSummaryPath(values),
+              sessionToken,
+            ),
+            fetchAdminApi<OrganizationAnalyticsEmployeeStatisticsRouteDto>(
+              createEmployeeStatisticsPath(values),
+              sessionToken,
+            ),
+          ],
+        );
+
+        if (
+          isUnauthorizedResponse(summaryResponse) ||
+          isUnauthorizedResponse(employeeStatisticsResponse)
+        ) {
+          setLoadState("unauthorized");
+          return;
+        }
+
+        if (summaryResponse.code !== 0 || summaryResponse.data === null) {
+          setSummary(null);
+          setEmployeeStatisticsLoadState("error");
+          setErrorMessage("统计摘要加载失败。");
+          return;
+        }
+
+        if (
+          employeeStatisticsResponse.code !== 0 ||
+          employeeStatisticsResponse.data === null
+        ) {
+          setSummary(summaryResponse.data);
+          setEmployeeStatistics(null);
+          setEmployeeStatisticsLoadState("error");
+          setErrorMessage("员工统计加载失败。");
+          return;
+        }
+
+        setSummary(summaryResponse.data);
+        setEmployeeStatistics(employeeStatisticsResponse.data);
+        setEmployeeStatisticsLoadState("ready");
+        setMessage("统计摘要已加载。");
+      } catch {
+        setSummary(null);
+        setEmployeeStatistics(null);
+        setEmployeeStatisticsLoadState("error");
+        setErrorMessage("统计摘要加载失败。");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -182,6 +249,19 @@ export function AdminOrganizationAnalyticsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (
+      loadState !== "ready" ||
+      hasAutoLoadedScopedSummaryRef.current ||
+      formValues.organizationPublicId.trim().length === 0
+    ) {
+      return;
+    }
+
+    hasAutoLoadedScopedSummaryRef.current = true;
+    void handleLoadDashboardSummary(formValues);
+  }, [formValues, handleLoadDashboardSummary, loadState]);
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载组织统计" />;
   }
@@ -208,69 +288,6 @@ export function AdminOrganizationAnalyticsPage() {
         description="请刷新页面，或重新登录后再进入组织统计。"
       />
     );
-  }
-
-  async function handleLoadDashboardSummary(
-    values: DashboardSummaryFormValues,
-  ) {
-    const sessionToken = getStoredSessionToken();
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setMessage(null);
-    setEmployeeStatistics(null);
-    setEmployeeStatisticsLoadState("loading");
-
-    try {
-      const [summaryResponse, employeeStatisticsResponse] = await Promise.all([
-        fetchAdminApi<OrganizationAnalyticsDashboardRouteDto>(
-          createDashboardSummaryPath(values),
-          sessionToken,
-        ),
-        fetchAdminApi<OrganizationAnalyticsEmployeeStatisticsRouteDto>(
-          createEmployeeStatisticsPath(values),
-          sessionToken,
-        ),
-      ]);
-
-      if (
-        isUnauthorizedResponse(summaryResponse) ||
-        isUnauthorizedResponse(employeeStatisticsResponse)
-      ) {
-        setLoadState("unauthorized");
-        return;
-      }
-
-      if (summaryResponse.code !== 0 || summaryResponse.data === null) {
-        setSummary(null);
-        setEmployeeStatisticsLoadState("error");
-        setErrorMessage("统计摘要加载失败。");
-        return;
-      }
-
-      if (
-        employeeStatisticsResponse.code !== 0 ||
-        employeeStatisticsResponse.data === null
-      ) {
-        setSummary(summaryResponse.data);
-        setEmployeeStatistics(null);
-        setEmployeeStatisticsLoadState("error");
-        setErrorMessage("员工统计加载失败。");
-        return;
-      }
-
-      setSummary(summaryResponse.data);
-      setEmployeeStatistics(employeeStatisticsResponse.data);
-      setEmployeeStatisticsLoadState("ready");
-      setMessage("统计摘要已加载。");
-    } catch {
-      setSummary(null);
-      setEmployeeStatistics(null);
-      setEmployeeStatisticsLoadState("error");
-      setErrorMessage("统计摘要加载失败。");
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   return (

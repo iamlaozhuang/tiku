@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-content-admin-formal-content-readonly-2026-06-28
-updatedAt: "2026-06-28T20:51:11-07:00"
+currentPhase: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+updatedAt: "2026-06-28T22:25:00-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2668,30 +2668,27 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8ba071091ceafe3ff7d281dc1f741da3681013f4
-  lastKnownOriginMasterSha: 8ba071091ceafe3ff7d281dc1f741da3681013f4
+  lastKnownMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
+  lastKnownOriginMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
 currentTask:
-  id: full-acceptance-content-admin-formal-content-readonly-2026-06-28
-  status: closed
-  result: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded
-  taskKind: local_acceptance_runtime
-  executionProfile: local_browser_content_admin_formal_content_readonly
-  approvedAt: "2026-06-28T20:46:43-07:00"
+  id: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+  status: validated
+  result: pass_local_validation_pending_commit
+  taskKind: implementation_tdd
+  executionProfile: local_source_test_repair_org_advanced_analytics_summary
+  approvedAt: "2026-06-28T22:10:00-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_localhost_browser_and_active_goal_continuation_2026_06_28
+  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_c_source_test_repair_and_active_goal_continuation_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
-  claimedAt: "2026-06-28T20:46:43-07:00"
-  plannedAt: "2026-06-28T20:46:43-07:00"
-  validatedAt: "2026-06-28T21:55:24-07:00"
-  reviewedAt: "2026-06-28T21:55:24-07:00"
-  closedAt: "2026-06-28T21:55:24-07:00"
-  sourceStory: continue_full_acceptance_matrix_after_content_admin_ai_generation_rows_closed_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-  branch: codex/content-admin-formal-content-readonly-20260628
+  claimedAt: "2026-06-28T22:10:00-07:00"
+  plannedAt: "2026-06-28T22:10:00-07:00"
+  sourceStory: follow_up_major_gap_org_adv_analytics_001_from_owner_facing_local_experience_batch_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+  branch: codex/org-advanced-analytics-summary-repair-20260628
   promptMaterializationRule: >-
     Current task scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan before browser,
     DB, AI, account-material, source, test, or further documentation execution. Subsequent execution must use these
@@ -2699,32 +2696,30 @@ currentTask:
   mandatoryOwnerFacingRoleChecklist:
     path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
     relevantRows:
-      - content_admin.formal_content
+      - org_advanced_admin.organization_analytics
     completionRule: >-
-      This task may close only the scoped `content_admin.formal_content` row. The durable goal remains incomplete
-      until every applicable owner-facing checklist row has redacted pass evidence.
+      This task may repair only the recorded `ORG-ADV-ANALYTICS-001` major gap for the scoped
+      `org_advanced_admin.organization_analytics` row. The durable goal remains incomplete until every applicable
+      owner-facing checklist row has redacted pass evidence and the full unit baseline is green.
   aiGenerationReusePolicy: >-
-    No AI generation source changes are allowed in this task. Future multi-role `AI出题` and `AI组卷` repairs must reuse
-    existing shared contracts, services, UI primitives, and validation patterns unless a task records a concrete product
-    or authorization reason for a scoped exception.
+    No AI generation source changes are expected in this task. If analytics repair touches shared admin workspace or
+    AI-adjacent code, reuse existing contracts, services, UI primitives, and validation patterns; do not create
+    role-specific duplicate implementations.
   targetWorkflows:
-    - local safe bootstrap POST /api/v1/local-acceptance-sessions role content_admin
-    - /api/v1/sessions redacted status/count proof
-    - /content/questions read-only route/control check
-    - /content/materials read-only route/control check
-    - /content/papers read-only route/control check
-    - /content/knowledge-nodes read-only route/control check
+    - reproduce ORG-ADV-ANALYTICS-001 in focused organization analytics unit coverage
+    - repair organization analytics summary/status surface
+    - validate focused organization analytics unit and local quality gates
   scope:
     docsStateEvidenceAudit: true
-    browserRuntime: approved_localhost_or_127_0_0_1_only
-    testOwnedLocalAccountSessionSwitching: approved_via_local_safe_bootstrap_no_credential_capture
-    localUiApiMutation: false_current_task_except_in_memory_session_bootstrap
+    browserRuntime: approved_read_only_localhost_or_127_0_0_1_after_source_repair_if_needed
+    testOwnedLocalAccountSessionSwitching: false_current_task
+    localUiApiMutation: false_current_task
     localDbReadOnlyAggregateProof: false_current_task
     focusedUnitTest: approved
     fullUnitRuntime: false_current_task
-    localSourceChange: false
-    testChange: false
-    readOnlySourceDiscovery: approved_routes_and_existing_ai_generation_contract_only
+    localSourceChange: approved
+    testChange: approved
+    readOnlySourceDiscovery: approved_org_analytics_surface_and_existing_contracts_only
     directDatabaseAccess: false
     directDatabaseMutation: false
     providerCallOrConfiguration: false
@@ -2745,29 +2740,26 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
-    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - src/features/admin/organization-analytics/**
+    - src/app/(admin)/organization/organization-analytics/page.tsx
+    - tests/unit/organization-analytics-admin-entry-surface.test.ts
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
     - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
-    - src/app/api/v1/local-acceptance-sessions/route.ts
-    - src/app/api/v1/sessions/route.ts
-    - src/server/services/local-acceptance-session-service.ts
-    - src/app/(admin)/content/**
-    - src/features/admin/question-material-management/**
-    - src/features/admin/paper-management/**
-    - src/features/admin/knowledge-node-management/**
-    - src/server/services/admin-workspace-role-guard-service.ts
-    - src/server/contracts/admin-workspace-role-guard-contract.ts
-    - tests/unit/admin-question-material-ui.test.ts
-    - tests/unit/admin-paper-ui.test.ts
-    - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+    - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    - src/app/(admin)/organization/**
+    - src/features/admin/organization-training/**
+    - src/server/contracts/**
+    - src/server/services/**
+    - tests/unit/organization-training-admin-entry-surface.test.ts
     - tests/unit/admin-workspace-role-guard-contract.test.ts
   blockedFiles:
     - .env*
@@ -2790,9 +2782,9 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
-  browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_no_trace_no_raw_dom_no_content_mutation_no_provider
+  browserBoundary: localhost_or_127_0_0_1_read_only_after_source_repair_if_needed_no_screenshot_no_trace_no_raw_dom_no_mutation_no_provider
   accountCredentialBoundary:
-    currentTask: no_private_account_material_read_use_local_safe_bootstrap_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    currentTask: no_private_account_material_read_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
   dbBoundary:
     currentTask: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
   aiProviderBoundary:
@@ -2826,7 +2818,7 @@ currentTask:
   blockedWithoutFreshApproval:
     - browser_runtime_outside_localhost_or_127_0_0_1
     - dev_server_start_if_existing_localhost_is_unavailable
-    - content_mutation_create_update_submit_delete_disable_copy_publish_archive_upload_import
+    - ui_api_mutation_create_update_submit_delete_disable_publish_archive_upload_import
     - ai_generation_submit_or_provider_execution
     - database_connection_read_write_migration_seed_or_destructive_operation
     - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
@@ -2842,18 +2834,19 @@ currentTask:
     - evidence_sensitive_data_exposure
   validationSummary:
     taskPlanPrepared: pass
-    localSafeBootstrap: pass_http_200_code_0_session_role_count_1
-    formalContentRoutes: pass_browser_visible_counts_http_content_admin_route_status_cookie_injection_limitation_recorded
-    focusedUnitQuestionMaterial: pass_1_file_28_tests
-    focusedUnitPaper: pass_1_file_6_tests
-    focusedUnitKnowledgeResource: pass_1_file_16_tests
-    focusedUnitWorkspaceRoleGuard: pass_1_file_7_tests
+    mandatoryChecklistRead: pass
+    codeTasteAndAdrRead: pass
+    redFocusedUnit: pass_1_new_regression_failed_5_existing_passed_before_repair
+    implementation: pass_auto_load_scoped_summary_after_advanced_org_scope_resolved
+    focusedUnitOrganizationAnalytics: pass_1_file_6_tests
+    lint: pass
+    typecheck: pass
     evidencePrepared: pass
     auditReviewPrepared: pass
     acceptancePrepared: pass
-    sourceOrTestChanged: false
-    browserRuntimeExecuted: true_read_only_no_mutation_cookie_injection_limited
-    contentMutationExecuted: false
+    sourceOrTestChanged: true_allowed_files_only
+    browserRuntimeExecuted: false_current_source_test_repair
+    uiApiMutationExecuted: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
     credentialOrSessionCaptureExecuted: false
@@ -2864,9 +2857,19 @@ currentTask:
     prettierScoped: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pass
+    moduleRunV2CloseoutReadiness: pending_post_commit_rerun
     moduleRunV2PrePushReadiness: pass
-  nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
+  nextRecommendedTask: browser_rerun_or_next_full_acceptance_matrix_row_after_closeout
+previousTaskSnapshotContentAdminFormalContentReadonly:
+  id: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+  status: closed
+  result: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded
+  branch: codex/content-admin-formal-content-readonly-20260628
+  finalMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+  nextRecommendedTask: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
 previousTaskSnapshotContentAdminAiGenerationDetailRerunAfterSessionBridge:
   id: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
   status: closed
