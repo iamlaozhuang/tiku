@@ -89,7 +89,7 @@ Inherited from `full-acceptance-content-admin-formal-content-workflow-2026-06-29
 - `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/task-plans/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/acceptance/2026-06-29-repair-content-admin-formal-content-workflow-actions.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts`: pass.
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29`: pass.
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29`: pending rerun after evidence anchor repair.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29`: pass after evidence anchor repair.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29 -SkipRemoteAheadCheck`: pass.
 
 ## Implementation Evidence
@@ -147,13 +147,13 @@ Inherited from `full-acceptance-content-admin-formal-content-workflow-2026-06-29
 ## Closeout Validation
 
 - Module Run v2 pre-commit hardening: pass.
-- Module Run v2 closeout readiness: pending rerun after evidence anchor repair.
+- Module Run v2 closeout readiness: pass after evidence anchor repair.
 - Module Run v2 pre-push readiness: pass with `-SkipRemoteAheadCheck`.
-- Batch Commit Evidence: commit pending after closeout gates.
-- Task commit: pending.
+- Batch Commit Evidence: task implementation commit recorded below.
+- Task implementation commit: `197b881d391229bb44074a26b7646dc151608604`.
 
 ## Batch Commit Evidence
 
-- Commit: `c9abe691ca89`.
-- Commit note: this is the pre-closeout branch head used only to satisfy the strict evidence anchor before final task
-  commit creation; the final task commit will be reported after commit and push.
+- Commit: `197b881d391229bb44074a26b7646dc151608604`.
+- Commit note: task implementation commit merged to `master` and pushed to `origin/master`; this evidence-only correction
+  records the completed closeout rerun without changing source/test behavior.
