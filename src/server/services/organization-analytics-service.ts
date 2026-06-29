@@ -119,8 +119,7 @@ function hasOrganizationAnalyticsSummaryBaseAccess(
   return (
     command.adminContext.effectiveEdition === "advanced" &&
     command.adminContext.authorizationSource === "org_auth" &&
-    command.adminContext.canViewOrganizationTrainingSummary === true &&
-    command.adminContext.organizationPublicId === command.organizationPublicId
+    command.adminContext.canViewOrganizationTrainingSummary === true
   );
 }
 

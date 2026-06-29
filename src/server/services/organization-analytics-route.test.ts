@@ -9,6 +9,7 @@ import {
 } from "../contracts/organization-analytics-contract";
 import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
 import type { RuntimeDatabase } from "../repositories/runtime-database";
+import type { AdminRole } from "../models/auth";
 import type { OrganizationAnalyticsAdminContext } from "./organization-analytics-service";
 import type { SessionService } from "./session-service";
 import { GET as dashboardSummaryGET } from "../../app/api/v1/organization-analytics/dashboard-summary/route";
@@ -313,6 +314,8 @@ type FakeSelectCall = {
   innerJoin: ReturnType<typeof vi.fn>;
   where: ReturnType<typeof vi.fn>;
 };
+const organizationAdvancedAdminRoles: AdminRole[] = ["org_advanced_admin"];
+const organizationStandardAdminRoles: AdminRole[] = ["org_standard_admin"];
 
 function createAdminAuthContext(
   overrides: Partial<NonNullable<CurrentSessionResult["data"]>["user"]> = {},
@@ -328,9 +331,15 @@ function createAdminAuthContext(
       employeePublicId: null,
       organizationPublicId: null,
       adminPublicId: "organization_analytics_admin_public_001",
-      adminRoles: ["org_advanced_admin"] as unknown as NonNullable<
-        CurrentSessionResult["data"]
-      >["user"]["adminRoles"],
+      adminRoles: organizationAdvancedAdminRoles,
+      adminWorkspaceCapability: {
+        adminRoles: organizationAdvancedAdminRoles,
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        organizationEffectiveEdition: "advanced",
+        organizationAuthorizationSource: "org_auth",
+        capabilitySource: "service_computed",
+        canUseOrganizationAdvancedWorkspace: true,
+      },
       ...overrides,
     },
     session: {
@@ -790,9 +799,53 @@ describe("organization analytics dashboard summary route handlers", () => {
     const sessionService = createCurrentSessionService(
       createSuccessResponse(
         createAdminAuthContext({
-          adminRoles: ["org_standard_admin"] as unknown as NonNullable<
-            CurrentSessionResult["data"]
-          >["user"]["adminRoles"],
+          adminRoles: organizationStandardAdminRoles,
+          adminWorkspaceCapability: {
+            adminRoles: organizationStandardAdminRoles,
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationEffectiveEdition: "standard",
+            organizationAuthorizationSource: "org_auth",
+            capabilitySource: "service_computed",
+            canUseOrganizationAdvancedWorkspace: false,
+          },
+        }),
+      ),
+    );
+    const observedReads: Array<{
+      readName?: string;
+      adminPublicId?: string;
+      organizationPublicId?: string;
+      scopeOrganizationPublicIds?: readonly string[];
+      dateRange?: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const { dashboardSummary } =
+      createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers({
+        repository:
+          createRepositoryBackedDashboardSummaryRepository(observedReads),
+        sessionService,
+      });
+
+    const response = await dashboardSummary.GET(
+      createDashboardSummaryRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403186,
+      message:
+        "Organization analytics dashboard summary admin context is unavailable.",
+      data: null,
+    });
+    expect(sessionService.requests).toHaveLength(1);
+    expect(observedReads).toEqual([]);
+  });
+
+  it("rejects advanced role sessions without service-computed organization capability before dashboard reads", async () => {
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(
+        createAdminAuthContext({
+          adminWorkspaceCapability: undefined,
         }),
       ),
     );
@@ -1184,6 +1237,50 @@ describe("organization analytics employee statistics route handlers", () => {
     ]);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
     expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
+  });
+
+  it("rejects advanced role sessions with false service-computed capability before employee statistics reads", async () => {
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(
+        createAdminAuthContext({
+          adminWorkspaceCapability: {
+            adminRoles: organizationAdvancedAdminRoles,
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationEffectiveEdition: "advanced",
+            organizationAuthorizationSource: "org_auth",
+            capabilitySource: "service_computed",
+            canUseOrganizationAdvancedWorkspace: false,
+          },
+        }),
+      ),
+    );
+    const observedReads: Array<{
+      adminPublicId?: string;
+      organizationPublicId?: string;
+      scopeOrganizationPublicIds?: readonly string[];
+      dateRange?: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const { employeeStatistics } =
+      createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers({
+        repository:
+          createRepositoryBackedEmployeeStatisticsRepository(observedReads),
+        sessionService,
+      });
+
+    const response = await employeeStatistics.GET(
+      createEmployeeStatisticsRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403188,
+      message:
+        "Organization analytics employee statistics admin context is unavailable.",
+      data: null,
+    });
+    expect(sessionService.requests).toHaveLength(1);
+    expect(observedReads).toEqual([]);
   });
 
   it("exports an employee statistics GET route from the App Router entrypoint", () => {

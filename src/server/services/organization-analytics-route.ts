@@ -6,6 +6,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { OrganizationAnalyticsDashboardSummaryDto } from "../contracts/organization-analytics-contract";
 import type { OrganizationAnalyticsEmployeeStatisticsSummaryDto } from "../contracts/organization-analytics-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import {
   mapOrganizationAnalyticsDashboardRouteResponse,
   mapOrganizationAnalyticsEmployeeStatisticsRouteResponse,
@@ -151,6 +152,25 @@ function isOrganizationAnalyticsDashboardSummaryRuntimeAdminRole(
   return role === "super_admin" || role === "org_advanced_admin";
 }
 
+function canUseServiceComputedOrganizationAnalyticsCapability(
+  capabilitySummary: AdminWorkspaceCapabilitySummary | undefined,
+): capabilitySummary is AdminWorkspaceCapabilitySummary & {
+  organizationPublicId: string;
+  organizationEffectiveEdition: "advanced";
+  organizationAuthorizationSource: "org_auth";
+  capabilitySource: "service_computed";
+  canUseOrganizationAdvancedWorkspace: true;
+} {
+  return (
+    capabilitySummary !== undefined &&
+    capabilitySummary.capabilitySource === "service_computed" &&
+    capabilitySummary.organizationAuthorizationSource === "org_auth" &&
+    capabilitySummary.organizationPublicId !== null &&
+    capabilitySummary.organizationEffectiveEdition === "advanced" &&
+    capabilitySummary.canUseOrganizationAdvancedWorkspace === true
+  );
+}
+
 async function readUnavailableDashboardSummary(): Promise<ApiResponse<null>> {
   return createErrorResponse(
     ORGANIZATION_ANALYTICS_DASHBOARD_RUNTIME_NOT_CONFIGURED_CODE,
@@ -214,7 +234,7 @@ function createSessionBackedOrganizationAnalyticsAdminContextResolver(
 ):
   | OrganizationAnalyticsDashboardSummaryAdminContextResolver
   | OrganizationAnalyticsEmployeeStatisticsAdminContextResolver {
-  return async ({ request, routeQuery }) => {
+  return async ({ request }) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
     });
@@ -232,17 +252,27 @@ function createSessionBackedOrganizationAnalyticsAdminContextResolver(
       (adminRole) =>
         isOrganizationAnalyticsDashboardSummaryRuntimeAdminRole(adminRole),
     );
+    const adminWorkspaceCapability =
+      sessionResponse.data.user.adminWorkspaceCapability;
 
-    if (adminPublicId === null || !hasAdminRole) {
+    if (
+      adminPublicId === null ||
+      !hasAdminRole ||
+      !canUseServiceComputedOrganizationAnalyticsCapability(
+        adminWorkspaceCapability,
+      )
+    ) {
       return null;
     }
 
     return {
       adminPublicId,
-      effectiveEdition: "advanced",
-      authorizationSource: "org_auth",
-      canViewOrganizationTrainingSummary: true,
-      organizationPublicId: routeQuery.organizationPublicId,
+      effectiveEdition: adminWorkspaceCapability.organizationEffectiveEdition,
+      authorizationSource:
+        adminWorkspaceCapability.organizationAuthorizationSource,
+      canViewOrganizationTrainingSummary:
+        adminWorkspaceCapability.canUseOrganizationAdvancedWorkspace,
+      organizationPublicId: adminWorkspaceCapability.organizationPublicId,
     };
   };
 }
