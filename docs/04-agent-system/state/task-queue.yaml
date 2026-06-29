@@ -3669,6 +3669,201 @@ tasks:
       moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
 
+  - id: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+    title: Content admin AI generation detail rerun after session bridge repair
+    phase: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+    sourceStory: follow_up_after_local_acceptance_session_runtime_bridge_stage_c_repair_2026_06_28
+    dependencies:
+      - local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes durable staged local execution approval Stage A for localhost test-owned session switching and
+      the merged local acceptance session runtime bridge repair. It may use localhost/127.0.0.1 browser runtime to
+      establish an in-memory `content_admin` acceptance session via `/api/v1/local-acceptance-sessions`, then inspect
+      only `/content/ai-question-generation` and `/content/ai-paper-generation` for role/route/control/status/count
+      evidence. It must not submit AI generation, call Provider, read private account fixtures, record
+      credentials/session/token material, capture screenshots/traces/raw DOM, or modify source/test files.
+    targetClosureItem: Redacted route/control/status evidence for the two content_admin AI generation checklist rows
+    behaviorBoundary: local_browser_content_admin_ai_generation_detail_rerun::localhost_only_no_ai_submit_no_provider_no_sensitive_evidence
+    executionProfile: local_browser_content_admin_ai_generation_detail_rerun_after_session_bridge_repair
+    evidenceMode: redacted_role_route_control_category_status_count_only_no_raw_dom_no_screenshot_no_session_material
+    validationPolicy: task_plan_materialization_local_bootstrap_browser_readonly_routes_focused_units_precommit_closeout_prepush
+    taskKind: local_acceptance_runtime
+    moduleRunVersion: 2
+    status: in_progress
+    result: pending
+    approvedAt: "2026-06-28T20:28:21-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_localhost_browser_and_active_goal_continuation_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T20:28:21-07:00"
+    plannedAt: "2026-06-28T20:28:21-07:00"
+    branch: codex/content-admin-ai-rerun-session-bridge-20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+      completionRule: >-
+        This task may close only the two scoped `content_admin` AI generation rows. The durable goal remains incomplete
+        until every applicable owner-facing checklist row has redacted pass evidence.
+    aiGenerationReusePolicy:
+      rule: >-
+        This browser rerun inspects the existing shared AI generation entry surface only. Multi-role `AI出题` and
+        `AI组卷` repairs must reuse shared AI generation contracts, services, UI primitives, and validation patterns;
+        no role-specific duplicate implementation is allowed in this task.
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only
+      testOwnedLocalAccountSessionSwitching: approved_via_local_safe_bootstrap_no_credential_capture
+      localUiApiMutation: approved_in_memory_session_bootstrap_only_no_db_persistence
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      sourceOrTestChange: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+      - docs/01-requirements/traceability/2026-06-28-local-acceptance-session-runtime-bridge-stage-c-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+      - docs/05-execution-logs/evidence/2026-06-28-local-acceptance-session-runtime-bridge-stage-c-repair.md
+      - src/app/api/v1/local-acceptance-sessions/route.ts
+      - src/app/api/v1/sessions/route.ts
+      - src/server/services/local-acceptance-session-service.ts
+      - src/features/admin/ai-generation/**
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - tests/unit/local-acceptance-session-bootstrap.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_no_trace_no_raw_dom_no_ai_submit_no_provider
+    accountCredentialBoundary: no_private_account_material_read_use_local_safe_bootstrap_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    dbBoundary: no_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    evidenceRedaction: role_route_control_category_status_count_failure_class_only_no_sensitive_payloads
+    validationCommands:
+      - browser-local-safe-bootstrap-content-admin-redacted
+      - browser-content-admin-ai-question-generation-detail-controls-redacted
+      - browser-content-admin-ai-paper-generation-detail-controls-redacted
+      - npm.cmd run test:unit -- tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_runtime_outside_localhost_or_127_0_0_1
+      - dev_server_start_if_existing_localhost_is_unavailable
+      - ai_generation_submit_or_provider_execution
+      - database_connection_read_write_migration_seed_or_destructive_operation
+      - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - source_or_test_change
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    validationSummary:
+      taskPlanPrepared: pass
+      localSafeBootstrap: pass_http_200_code_0_session_role_count_1
+      contentAiQuestionGenerationRoute: pass_route_reachable_controls_9_of_9
+      contentAiPaperGenerationRoute: pass_route_reachable_controls_10_of_10
+      contentAdminReviewActions: pass_enabled_adopt_reject_count_0
+      focusedUnitBootstrap: pass_1_file_4_tests
+      focusedUnitAiSurface: pass_1_file_14_tests
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: true
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      prettierScoped: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
+    nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28
