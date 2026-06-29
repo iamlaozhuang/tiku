@@ -1541,6 +1541,14 @@ tasks:
       learnerHome: pass_home_learning_context_standard_learning_links_no_ai_or_training_entry
       advancedRouteBoundary: pass_ai_routes_unavailable_and_org_advanced_routes_login_blocked_no_advanced_actions
       consoleErrors: pass_zero
+      prettierScoped: pass
+      gitDiffCheck: pass
+      lint: pass_via_commit_hook
+      typecheck: pass_via_commit_hook
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_commit_evidence_update
+      moduleRunV2PrePushReadiness: pass_after_state_sha_ancestor_check
+      firstCommit: d66ec9159
       sourceOrTestChanged: false
       databaseConnectionOrMutationExecuted: false
       providerCallOrConfigurationExecuted: false
