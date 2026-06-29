@@ -4,11 +4,11 @@
 
 - Task: `local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28`
 - Branch: `codex/local-acceptance-session-bridge-20260628`
-- Status: in_progress
-- Result: pass_prerequisite_repair_browser_rerun_required
+- Status: closed
+- Result: pass prerequisite_repair_browser_rerun_required
 - Batch range: local acceptance session runtime bridge repair.
 - Pre-task master checkpoint: `9eaa441ca3ae3625289a5b51422dd37d8877f981`
-- Commit: pending
+- Commit: `6cd3d4945`
 
 ## Boundary Confirmation
 
@@ -47,8 +47,8 @@ module instances. Focused bootstrap test passed 1 file / 4 tests; shared AI gene
 - Prettier scoped check: pass.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+- Module Run v2 closeout readiness: pass.
+- Module Run v2 prepush readiness: pass.
 
 ## Validation Command Ledger
 
@@ -65,9 +65,9 @@ module instances. Focused bootstrap test passed 1 file / 4 tests; shared AI gene
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28`:
   pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28`:
-  pending.
+  pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28 -SkipRemoteAheadCheck`:
-  pending.
+  pass.
 
 ## Closeout Controls
 
