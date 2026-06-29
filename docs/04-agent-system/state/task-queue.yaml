@@ -2439,6 +2439,320 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-ops-admin-employee-import-entry-state-2026-06-29
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-ops-admin-employee-import-entry-state-2026-06-29 -SkipRemoteAheadCheck
 
+  - id: full-acceptance-continuity-after-ops-admin-2026-06-29
+    title: Full acceptance continuity after ops admin
+    phase: full-acceptance-continuity-after-ops-admin-2026-06-29
+    sourceStory: active_goal_continue_after_ops_admin_employee_import_closure_2026_06_29
+    dependencies:
+      - fix-ops-admin-employee-import-entry-state-2026-06-29
+    taskPlanPolicy: required_before_docs_state_or_next_task_seed
+    humanApprovalBoundary: >-
+      This docs/state-only continuity task consumes the active durable goal and existing staged local execution approval
+      only to repair the queue gap where no pending task exists while the mandatory owner-facing checklist remains
+      incomplete. It may read governance, requirements, and redacted evidence, write scoped docs/state files, and seed
+      the next pending `content_admin` acceptance task. It must not execute browser, account fixture, DB, AI/Provider,
+      source/test, dependency, schema/migration/seed, staging/prod, deploy, PR, force-push, release readiness, final
+      Pass, or Cost Calibration actions.
+    targetClosureItem: Queue continuity restored and next `content_admin` workflow acceptance task seeded
+    behaviorBoundary: docs_state::acceptance_queue_continuity_after_ops_admin_no_runtime_no_final_pass
+    executionProfile: docs_state_acceptance_queue_continuity_repair_and_next_task_seed
+    evidenceMode: role_workflow_status_count_gap_summary_only_no_sensitive_evidence
+    validationPolicy: scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: docs_state_alignment
+    moduleRunVersion: 2
+    status: in_progress
+    result: pending_queue_continuity_after_ops_admin
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_active_goal_and_staged_local_execution_per_task_closeout_authorization_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T04:05:00-07:00"
+    plannedAt: "2026-06-29T04:05:00-07:00"
+    branch: codex/full-acceptance-continuity-after-ops-admin-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      remainingRowsAfterOpsAdmin:
+        - content_admin.formal_content_lifecycle_mutation_review
+        - content_admin.ai_draft_review_adoption_boundary
+        - personal_standard_student.standard_learning_and_advanced_ai_denial
+        - personal_advanced_student.learner_ai_detail_and_practice_feedback_boundary
+      completionRule: durable_goal_incomplete_until_all_rows_have_pass_or_approved_blocked_evidence
+    capabilities:
+      docsStateEvidenceAudit: approved
+      seedNextTask: approved
+      localCommit: approved_after_validation
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      browserRuntime: blocked
+      accountFixtureRead: blocked
+      directDatabaseAccess: blocked
+      providerCall: blocked
+      dependencyIntroduction: blocked
+      sourceOrTestChange: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      finalPassClaim: blocked
+      releaseReadinessDecision: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: no_database_connection_read_write_seed_migration_or_schema_change
+    aiProviderBoundary: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+    accountCredentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+    evidenceRedaction: role_workflow_route_status_count_gap_id_task_id_commit_sha_only_no_sensitive_payloads
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - account_fixture_read_or_session_switching
+      - direct_database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - source_or_test_change
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - sensitive_evidence_capture
+    seededNextTaskCandidate:
+      taskId: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+      status: pending_after_continuity_closeout
+      scope: content_admin_formal_content_lifecycle_and_ai_draft_review_boundary_localhost_browser_no_provider_no_direct_db
+    validationSummary:
+      taskPlanPrepared: pending
+      queueContinuityRepaired: pending
+      nextTaskSeeded: pending
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sensitiveEvidenceCaptured: false
+    retryCount: 0
+    lastFailurePath: null
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-continuity-after-ops-admin.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-continuity-after-ops-admin.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-continuity-after-ops-admin-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-continuity-after-ops-admin-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-continuity-after-ops-admin-2026-06-29 -SkipRemoteAheadCheck
+
+  - id: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    title: Full acceptance content admin formal content workflow
+    phase: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    sourceStory: seeded_by_full_acceptance_continuity_after_ops_admin_2026_06_29
+    dependencies:
+      - full-acceptance-continuity-after-ops-admin-2026-06-29
+    taskPlanPolicy: required_before_browser_account_runtime_mutation_or_docs_execution
+    humanApprovalBoundary: >-
+      This future task consumes Stage A and Stage B of the durable staged local execution approval only after it
+      materializes its own task plan, allowedFiles/blockedFiles, browser/dev-server boundary, DB boundary, AI/Provider
+      boundary, credential boundary, evidence redaction, and closeoutPolicy. It may use `content_admin` test-owned local
+      session switching, localhost/127.0.0.1 browser runtime, and app-normal local UI/API mutations for test-owned formal
+      content workflow data, including draft/create/update/submit/reject/delete/cleanup where the app normally performs
+      them. It must not record sensitive evidence, execute Provider calls, use direct DB access, change
+      source/tests/dependencies/schema/migrations/seeds, touch staging/prod, create PRs, force-push, claim release
+      readiness/final Pass, or execute Cost Calibration.
+    targetClosureItem: Redacted workflow/status/count evidence for scoped `content_admin` formal content and AI draft review rows
+    behaviorBoundary: local_browser_acceptance::content_admin_formal_content_workflow_no_provider_no_direct_db_no_final_pass
+    executionProfile: local_browser_acceptance_content_admin_readwrite_when_app_performs_it
+    evidenceMode: redacted_role_route_workflow_status_count_summary_only_no_sensitive_evidence
+    validationPolicy: task_plan_then_browser_acceptance_scoped_prettier_diff_module_run_v2_closeout
+    taskKind: local_browser_acceptance
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - content_admin.formal_content_lifecycle_mutation_review
+        - content_admin.ai_draft_review_adoption_boundary
+      completionRule: durable_goal_incomplete_until_all_rows_have_pass_or_approved_blocked_evidence
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost
+      accountFixtureRead: approved_read_only_login_input_no_evidence_if_role_session_required
+      ownerFacingFixtureRead: approved_read_only_test_owned_input_no_raw_fixture_content_evidence
+      localUiApiMutation: approved_test_owned_acceptance_data_if_app_normally_performs_it
+      focusedUnitTest: approved
+      localCommit: approved_after_validation
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      directDatabaseAccess: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      sourceOrTestChange: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      finalPassClaim: blocked
+      releaseReadinessDecision: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - D:/tiku-local-private/owner-facing-fixtures/**
+      - D:\tiku-local-private\owner-facing-fixtures\**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    browserBoundary:
+      currentTask: localhost_or_127_0_0_1_only_in_app_browser_no_screenshot_no_trace_no_raw_dom_evidence
+      allowedActions:
+        - safe_test_owned_content_admin_session_switching
+        - route_navigation_visible_status_control_count_checks
+        - app_normal_local_ui_api_mutation_only_for_test_owned_acceptance_data_if_visible_ui_requires_it
+        - cleanup_actions_only_when_app_normally_provides_them
+      forbidden:
+        - screenshot_trace_raw_dom_evidence
+        - browser_storage_or_session_material_inspection
+        - non_localhost_navigation
+        - provider_or_external_service_execution
+        - raw_question_paper_material_resource_chunk_content_evidence
+    devServerBoundary: use_existing_localhost_if_available_start_local_dev_server_only_if_required_no_env_output
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    accountCredentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    evidenceRedaction: route_workflow_status_count_summary_only_no_sensitive_payloads_no_complete_content
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    blockedWithoutFreshApproval:
+      - direct_database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - source_or_test_change
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - sensitive_evidence_capture
+    validationCommands:
+      - browser_content_admin_formal_content_workflow_redacted
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29 -SkipRemoteAheadCheck
+
   - id: full-acceptance-matrix-execution-2026-06-28
     title: Full all-role acceptance matrix execution
     phase: full-acceptance-matrix-execution-2026-06-28

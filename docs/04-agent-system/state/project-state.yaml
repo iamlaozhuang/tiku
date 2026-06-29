@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-ops-admin-employee-import-entry-state-2026-06-29
-updatedAt: "2026-06-29T03:40:00-07:00"
+currentPhase: full-acceptance-continuity-after-ops-admin-2026-06-29
+updatedAt: "2026-06-29T04:05:00-07:00"
 orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628:
   approvedAt: "2026-06-28T22:56:09-07:00"
   approvedBy: laozhuang
@@ -2921,12 +2921,12 @@ repository:
   lastKnownMasterSha: 287144be69edd301986c077f7dc2daaf23521dd1
   lastKnownOriginMasterSha: 287144be69edd301986c077f7dc2daaf23521dd1
 currentTask:
-  id: fix-ops-admin-employee-import-entry-state-2026-06-29
-  status: closed
-  result: pass_employee_import_workflow_reproven_no_source_change
-  source: fixOpsAdminEmployeeImportEntryState20260629
-  branch: codex/fix-ops-admin-employee-import-entry-state-20260629
-  updatedAt: "2026-06-29T03:40:00-07:00"
+  id: full-acceptance-continuity-after-ops-admin-2026-06-29
+  status: in_progress
+  result: pending
+  source: fullAcceptanceContinuityAfterOpsAdmin20260629
+  branch: codex/full-acceptance-continuity-after-ops-admin-20260629
+  updatedAt: "2026-06-29T04:05:00-07:00"
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
@@ -4275,6 +4275,109 @@ fixOpsAdminEmployeeImportEntryState20260629:
     directDatabaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
     committedEvidenceSensitiveCapture: false
+fullAcceptanceContinuityAfterOpsAdmin20260629:
+  taskId: full-acceptance-continuity-after-ops-admin-2026-06-29
+  phase: full-acceptance-continuity-after-ops-admin-2026-06-29
+  status: in_progress
+  result: pending_queue_continuity_after_ops_admin
+  sourceStory: active_goal_continue_after_ops_admin_employee_import_closure_2026_06_29
+  dependency: fix-ops-admin-employee-import-entry-state-2026-06-29
+  branch: codex/full-acceptance-continuity-after-ops-admin-20260629
+  claimedAt: "2026-06-29T04:05:00-07:00"
+  plannedAt: "2026-06-29T04:05:00-07:00"
+  approvalConsumed: durable_stage_a_stage_b_stage_c_and_per_task_closeout_2026_06_28
+  stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  targetClosureItem: queue_continuity_restored_and_next_content_admin_workflow_task_seeded
+  behaviorBoundary: docs_state::acceptance_queue_continuity_after_ops_admin_no_runtime_no_final_pass
+  executionProfile: docs_state_acceptance_queue_continuity_repair_and_next_task_seed
+  evidenceMode: role_workflow_status_count_gap_summary_only_no_sensitive_evidence
+  mandatoryOwnerFacingRoleChecklist:
+    path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    remainingRowsAfterOpsAdmin:
+      - content_admin.formal_content_lifecycle_mutation_review
+      - content_admin.ai_draft_review_adoption_boundary
+      - personal_standard_student.standard_learning_and_advanced_ai_denial
+      - personal_advanced_student.learner_ai_detail_and_practice_feedback_boundary
+    completionRule: >-
+      The durable goal remains incomplete until every applicable row in the mandatory owner-facing checklist has
+      redacted pass evidence or an approved blocked-gate record. This task may only seed the next task and cannot claim
+      final Pass.
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  dbBoundary: no_database_connection_read_write_seed_migration_or_schema_change
+  aiProviderBoundary: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+  accountCredentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+  evidenceRedaction: role_workflow_route_status_count_gap_id_task_id_commit_sha_only_no_sensitive_payloads
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_staged_local_execution_per_task_closeout_authorization_2026_06_28
+  seededNextTaskCandidate:
+    taskId: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    status: pending_after_continuity_closeout
+    scope: content_admin_formal_content_lifecycle_and_ai_draft_review_boundary_localhost_browser_no_provider_no_direct_db
+  validationSummary:
+    taskPlanPrepared: pending
+    queueContinuityRepaired: pending
+    nextTaskSeeded: pending
+    sourceOrTestChanged: false
+    browserRuntimeExecuted: false
+    databaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    sensitiveEvidenceCaptured: false
 orgAdvancedAnalyticsDbAlignmentRepair20260628:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
   status: closed
