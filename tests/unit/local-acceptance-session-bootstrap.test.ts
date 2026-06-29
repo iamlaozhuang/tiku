@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   COOKIE_BACKED_SESSION_AUTHORIZATION,
@@ -9,6 +9,10 @@ import {
   createLocalAcceptanceSessionRouteHandlers,
   createLocalAcceptanceSessionService,
 } from "@/server/services/local-acceptance-session-service";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 function createUnusedCredentialAdapter() {
   return {
@@ -59,6 +63,11 @@ describe("local acceptance session bootstrap", () => {
         sessionMode: "cookie",
       },
     });
+    expect(Object.keys(body.data)).toEqual([
+      "role",
+      "sessionMode",
+      "expiresAt",
+    ]);
     expect(JSON.stringify(body)).not.toContain(
       "local-acceptance-token-content-admin",
     );
@@ -159,6 +168,31 @@ describe("local acceptance session bootstrap", () => {
 
     expect(sessionResponse.code).toBe(0);
     expect(sessionResponse.data?.user.adminRoles).toEqual(["content_admin"]);
+  });
+
+  it("rejects local acceptance bootstrap when the runtime is production-disabled", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const routeHandlers = createLocalAcceptanceSessionRouteHandlers({
+      service: {
+        createSession() {
+          throw new Error(
+            "production-disabled local acceptance route must reject before service execution",
+          );
+        },
+      },
+    });
+    const response = await routeHandlers.POST(
+      new Request("http://localhost:3000/api/v1/local-acceptance-sessions", {
+        method: "POST",
+        body: JSON.stringify({ role: "content_admin" }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({
+      code: 403901,
+      data: null,
+    });
   });
 
   it("rejects non-local hosts and unsupported roles", async () => {
