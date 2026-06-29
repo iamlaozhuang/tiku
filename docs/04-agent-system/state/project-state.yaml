@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-db-runtime-connection-boundary-hardening-2026-06-29
-updatedAt: "2026-06-29T12:55:47-07:00"
+currentPhase: security-db-repository-query-construction-review-2026-06-29
+updatedAt: "2026-06-29T13:00:45-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -2988,9 +2988,197 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7107e79a5ac9e91b9e9e51410664009c7feb8eba
-  lastKnownOriginMasterSha: 7107e79a5ac9e91b9e9e51410664009c7feb8eba
+  lastKnownMasterSha: 957858a3effdf1abbef2269c942e5712090c7683
+  lastKnownOriginMasterSha: 957858a3effdf1abbef2269c942e5712090c7683
 currentTask:
+  id: security-db-repository-query-construction-review-2026-06-29
+  status: closed
+  result: pass_repository_query_construction_review_task_split_no_db_execution
+  sourceStory: seeded_by_security_db_schema_migration_risk_inventory_2026_06_29
+  targetClosureItem: Focused repository query construction and unbounded query review before any source repair
+  behaviorBoundary: docs_source_read_only::query_construction_review_no_db_connection_no_raw_rows_no_source_fix
+  executionProfile: source_read_only_security_review
+  taskKind: security_review
+  moduleRunVersion: 2
+  priority: p1
+  severity: medium
+  branch: codex/security-db-query-review-20260629
+  approvedAt: "2026-06-29T13:00:45-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  claimedAt: "2026-06-29T13:00:45-07:00"
+  plannedAt: "2026-06-29T13:00:45-07:00"
+  materializedAt: "2026-06-29T13:00:45-07:00"
+  implementedAt: "2026-06-29T13:08:20-07:00"
+  validatedAt: "2026-06-29T13:08:20-07:00"
+  reviewedAt: "2026-06-29T13:08:20-07:00"
+  closedAt: "2026-06-29T13:08:20-07:00"
+  predecessorClosureEvidence:
+    dbRuntimeBoundaryTask: security-db-runtime-connection-boundary-hardening-2026-06-29
+    dbRuntimeBoundaryResult: closed_pushed_to_origin_master
+    dbRuntimeBoundaryCommit: 957858a3effdf1abbef2269c942e5712090c7683
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - src/server/repositories/**
+    - src/server/services/**
+    - src/server/validators/**
+    - src/server/contracts/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - src/db/**
+    - src/db/dev-seed.ts
+    - drizzle.config.ts
+    - e2e/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_runtime_model_config_read_write_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+  browserBoundary: no_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary: no_env_secret_connection_string_value_read_no_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: file_path_module_label_query_pattern_risk_category_severity_status_count_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credential_cookie_token_session_auth_header_values
+      - env_file_contents_or_connection_strings
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_chunk_answer_content
+      - raw_exception_payload_or_stack_trace
+      - private_fixture_or_account_material
+  reviewScope:
+    sourceOrTestChangeAllowed: false
+    dbConnectionAllowed: false
+    envValueReadAllowed: false
+    browserOrE2eRuntimeAllowed: false
+    devServerAllowed: false
+    providerRuntimeBudget: zero
+    packageOrLockfileChangeAllowed: false
+    objective:
+      - inventory repository SQL template and query builder construction paths
+      - classify dynamic order/filter/pagination/query execution patterns by risk
+      - identify N+1 and unbounded query candidates as follow-up tasks only
+      - avoid source repair unless a later task materializes exact source/test allowedFiles
+  reviewFindings:
+    - findingId: db-query-001
+      riskFamily: repository_sql_template_and_dynamic_order_filter_construction
+      severity: medium
+      status: no_confirmed_injection_finding
+      evidenceSummary: parameterized_drizzle_templates_and_fixed_sort_order_branches_observed_on_reviewed_high_match_paths
+    - findingId: db-query-002
+      riskFamily: unbounded_model_config_fallback_reorder_loop
+      severity: medium
+      status: follow_up_repair_required
+      followUpTaskId: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    - findingId: db-query-003
+      riskFamily: unbounded_employee_import_bulk_input
+      severity: medium
+      status: follow_up_repair_required
+      followUpTaskId: security-employee-import-bulk-limit-repair-2026-06-29
+    - findingId: db-query-004
+      riskFamily: query_size_guardrail
+      severity: low
+      status: monitor
+      evidenceSummary: common_page_size_guards_and_personal_ai_history_repository_limit_clamp_observed
+    - findingId: db-query-005
+      riskFamily: n_plus_one_or_loop_performance_watch
+      severity: low
+      status: monitor
+      evidenceSummary: bounded_depth_hierarchy_traversal_observed_quota_refresh_remains_future_performance_watch
+  seededFollowUpTasks:
+    nextRecommendedTaskId: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    alternateTaskId: security-employee-import-bulk-limit-repair-2026-06-29
+  validationCommands:
+    - rg -n "sql`|execute<|\.execute\(|orderBy\(|limit\(|offset\(|ilike\(|inArray\(" src/server/repositories
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-db-repository-query-construction-review-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-db-repository-query-construction-review-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-db-repository-query-construction-review-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-db-repository-query-construction-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  validationSummary:
+    taskPlanPrepared: true
+    traceabilityPrepared: true
+    evidencePrepared: true
+    auditReviewPrepared: true
+    acceptancePrepared: true
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    browserRuntimeExecuted: false
+    databaseConnectionOrMutationExecuted: false
+    schemaMigrationSeedExecuted: false
+    providerCallOrConfigurationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    repositoryQueryPatternScan: pass
+    sqlInjectionConfirmedFindingCount: 0
+    mediumBulkBoundaryFollowUpTaskCount: 2
+    prettierWriteScoped: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    validationStatus: pass_docs_source_read_only_query_review
+  updatedAt: "2026-06-29T13:08:20-07:00"
+previousSecurityDbRuntimeConnectionBoundaryHardeningTask:
   id: security-db-runtime-connection-boundary-hardening-2026-06-29
   status: closed
   result: pass_db_runtime_connection_boundary_hardened_no_db_execution
