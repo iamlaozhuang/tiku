@@ -2865,7 +2865,7 @@ currentTask:
     sensitiveEvidenceCaptured: false
     moduleRunV2PreCommitHardening: pass
     moduleRunV2CloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2PrePushReadiness: pass
   nextRecommendedTask: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap
 previousTaskSnapshotContentAdminAccountStageB:
   id: content-admin-test-owned-account-stage-b-repair-2026-06-28

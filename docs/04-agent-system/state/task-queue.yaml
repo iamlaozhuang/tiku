@@ -3279,7 +3279,7 @@ tasks:
       sensitiveEvidenceCaptured: false
       moduleRunV2PreCommitHardening: pass
       moduleRunV2CloseoutReadiness: pass
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap
 
   - id: owner-facing-local-experience-batch-2026-06-28
