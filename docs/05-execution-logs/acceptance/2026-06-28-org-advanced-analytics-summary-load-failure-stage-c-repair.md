@@ -3,7 +3,7 @@
 ## Status
 
 - Task: `org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28`
-- Status: ready_for_closeout
+- Status: closed
 - Result: pass_local_source_test_repair_pending_browser_rerun
 
 ## Scoped Row
