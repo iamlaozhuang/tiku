@@ -4089,8 +4089,8 @@ tasks:
     validationPolicy: tdd_red_green_focused_unit_lint_typecheck_precommit_closeout_prepush
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: validated
-    result: pass_local_validation_pending_commit
+    status: ready_for_closeout
+    result: pass_local_validation_ready_for_closeout
     approvedAt: "2026-06-28T22:10:00-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_durable_staged_local_execution_approval_stage_c_source_test_repair_and_active_goal_continuation_2026_06_28
@@ -4259,7 +4259,7 @@ tasks:
       prettierScoped: pass
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2CloseoutReadiness: pending_post_commit_rerun
+      moduleRunV2CloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: browser_rerun_or_next_full_acceptance_matrix_row_after_closeout
 

@@ -4,11 +4,12 @@
 
 - Task: `org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28`
 - Branch: `codex/org-advanced-analytics-summary-repair-20260628`
-- Status: validated_pending_commit
-- Result: pass_local_validation_pending_commit
+- Status: ready_for_closeout
+- Result: pass
 - Gap: `ORG-ADV-ANALYTICS-001`
 - Pre-task master checkpoint: `585b94390da722b325ea7099244840f19b1bcc4e`
-- Commit: pending
+- Batch range: single task, `org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28`
+- Commit: `b5de28c04`
 
 ## Boundary Confirmation
 
@@ -53,7 +54,7 @@ GREEN: pass.
 - Module Run v2 precommit hardening: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28`.
-- Module Run v2 closeout readiness: pending post-evidence/post-commit rerun.
+- Module Run v2 closeout readiness: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28`.
 - Module Run v2 prepush readiness: pass.
