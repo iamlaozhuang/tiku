@@ -3052,7 +3052,7 @@ tasks:
       prettierScoped: pass
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2CloseoutReadiness: pending
+      moduleRunV2CloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pending
     nextRecommendedTask: content-admin-test-owned-admin-account-bootstrap-repair-planning-or-stage-c-source-repair
 

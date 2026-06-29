@@ -8,7 +8,7 @@
 - Result: blocked_no_existing_localhost_ui_api_admin_account_creation_or_role_assignment
 - Batch range: local Stage B account repair and two content AI detail-control rerun rows
 - Pre-task master checkpoint: `3d311ede4ab32713da7a2b684f8bab1d96819984`
-- Commit: pending
+- Commit: `1e34b9636`
 
 ## Acceptance Mapping Result
 
@@ -98,7 +98,8 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - Scoped Prettier check: pass.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Closeout and prepush gates: pending at this evidence checkpoint.
+- Module Run v2 closeout readiness: pass.
+- Module Run v2 prepush readiness: pending at this evidence checkpoint.
 
 ## Validation Command Results
 
@@ -110,7 +111,8 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - `npx.cmd prettier --check --ignore-unknown ...`: pass.
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-test-owned-account-stage-b-repair-2026-06-28`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-test-owned-account-stage-b-repair-2026-06-28`: pass.
 
 ## Batch Commit Evidence
 
-- Commit: pending.
+- Commit: `1e34b9636`.
