@@ -7,15 +7,15 @@
 
 ## Acceptance Criteria
 
-| Criterion                                                                                                                                           | Status             |
-| --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| Mandatory owner-facing checklist read and used as completion gate                                                                                   | pass               |
-| Existing redacted evidence reconciled into pass and remaining-unproven classes                                                                      | pass               |
-| Next executable acceptance task seeded                                                                                                              | pass               |
-| No runtime, account, DB, AI, source/test, dependency, schema/migration/seed, staging/prod, release, final Pass, or Cost Calibration action executed | pass               |
-| Scoped Prettier, diff, and Module Run v2 pre-commit gates pass                                                                                      | pass               |
-| Module Run v2 closeout and pre-push gates pass                                                                                                      | pending final gate |
-| Commit, fast-forward merge, push, and cleanup complete                                                                                              | pending closeout   |
+| Criterion                                                                                                                                           | Status           |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Mandatory owner-facing checklist read and used as completion gate                                                                                   | pass             |
+| Existing redacted evidence reconciled into pass and remaining-unproven classes                                                                      | pass             |
+| Next executable acceptance task seeded                                                                                                              | pass             |
+| No runtime, account, DB, AI, source/test, dependency, schema/migration/seed, staging/prod, release, final Pass, or Cost Calibration action executed | pass             |
+| Scoped Prettier, diff, and Module Run v2 pre-commit gates pass                                                                                      | pass             |
+| Module Run v2 closeout and pre-push gates pass                                                                                                      | pass             |
+| Commit, fast-forward merge, push, and cleanup complete                                                                                              | pending closeout |
 
 ## Acceptance Notes
 

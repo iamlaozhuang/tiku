@@ -980,9 +980,10 @@ tasks:
       coverageAuditPrepared: pass
       nextTaskSeeded: pass
       formatAndDiff: pass
+      firstCommit: 64ec9c44f
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2ModuleCloseoutReadiness: pending
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
       sourceOrTestChanged: false
       browserRuntimeExecuted: false
       databaseConnectionOrMutationExecuted: false

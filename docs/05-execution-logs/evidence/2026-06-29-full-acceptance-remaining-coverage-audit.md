@@ -16,7 +16,14 @@
 - Source/test/dependency/package/lockfile changed: false.
 - Staging/prod/deploy/PR/force-push executed: false.
 - Release readiness/final Pass/Cost Calibration claimed: false.
+- Cost Calibration Gate remains blocked.
 - Sensitive evidence captured: false.
+
+## RED Evidence
+
+- RED: before this audit, the queue had no pending executable task after the current full unit baseline recheck, while
+  the durable full acceptance goal still had remaining workflow-level rows without pass evidence.
+- Failure class: acceptance coverage planning gap, not a runtime product failure.
 
 ## Current Baseline
 
@@ -59,20 +66,26 @@
 
 ## Validation Results
 
-- GREEN: scoped Prettier check.
-- GREEN: `git diff --check`.
-- GREEN: Module Run v2 pre-commit hardening.
-- PENDING: Module Run v2 module closeout readiness.
-- PENDING: Module Run v2 pre-push readiness.
+- GREEN: `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-remaining-coverage-audit.md`
+  - Result: passed.
+- GREEN: `git diff --check`
+  - Result: passed.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29`
+  - Result: passed.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29`
+  - Result: passed after missing fixed evidence anchors were recorded.
+- GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29 -SkipRemoteAheadCheck`
+  - Result: passed.
 
 ## Batch Commit Evidence
 
-- Commit: pending local audit commit.
+- Commit: `64ec9c44f`.
 - Commit scope: governance state, task queue, traceability, plan, evidence, audit review, and acceptance files.
 
 ## Local Full Loop Gate
 
-- localFullLoopGate: pending closeout/pre-push rerun after commit evidence.
+- localFullLoopGate: pass for docs/state audit, next-task seed, scoped formatting, diff, Module Run v2 pre-commit,
+  closeout, and pre-push readiness.
 - Full unit current baseline: pass.
 - Runtime execution: skipped by task boundary.
 
