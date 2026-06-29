@@ -5,7 +5,7 @@
 - Evidence status: pass
 - Result: pass
 - Detailed result: pass_docs_only_owner_handoff_approval_package_no_release_claim
-- Updated at: `2026-06-29T06:12:45-07:00`
+- Updated at: `2026-06-29T06:16:38-07:00`
 
 ## Boundary Confirmation
 
@@ -39,6 +39,8 @@
   into separate copyable fresh-approval texts.
 - GREEN: the package preserves blocked gates and does not execute any runtime, DB, AI, source, dependency, schema,
   migration, seed, deploy, PR, force-push, release readiness, final Pass, or Cost Calibration action.
+- GREEN: post-closeout reconcile initially hard-blocked on an unrecognized `currentTask.commitSha` placeholder; the
+  short branch now records the primary package commit as an accepted ancestor checkpoint before final cleanup.
 
 ## Owner Handoff Summary
 
@@ -71,6 +73,7 @@
 ## Batch Commit Evidence
 
 - Commit: `116fea2cb` (pre-task base commit for this docs/state package).
+- Primary package commit: `b0cd4571d`.
 - Commit scope: governance state, task queue, traceability, plan, evidence, audit review, and acceptance files.
 - Commit command will be executed only after scoped closeout and pre-push readiness gates pass.
 
