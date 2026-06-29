@@ -113,6 +113,15 @@ function createRunner(
   return vi.fn(async () => result);
 }
 
+function expectNoSensitiveMarkerLeaks(
+  serializedValue: string,
+  markers: string[],
+): void {
+  expect(markers.map((marker) => serializedValue.includes(marker))).toEqual(
+    markers.map(() => false),
+  );
+}
+
 describe("knowledge recommendation service", () => {
   it("recommends up to five active recommendable knowledge nodes and locks snapshots", async () => {
     const runner = createRunner({
@@ -267,12 +276,20 @@ describe("knowledge recommendation service", () => {
   });
 
   it("returns a non-blocking failed result and redacted error when the runner fails", async () => {
+    const sensitiveContext = {
+      ...context,
+      questionText: "kn sensitive question marker 3fb7",
+      analysis: "kn sensitive analysis marker 67de",
+      standardAnswer: "kn sensitive standard answer marker e2a9",
+    };
+    const providerErrorMarker = "provider recommendation error marker b4d1";
     const runner: KnowledgeRecommendationRunner = vi.fn(async () => {
-      throw new Error("provider failed with raw question text");
+      throw new Error(providerErrorMarker);
     });
     const service = createKnowledgeRecommendationService({ runner });
 
-    const result = await service.recommendKnowledgeNodes(context);
+    const result = await service.recommendKnowledgeNodes(sensitiveContext);
+    const serializedCallLogDraft = JSON.stringify(result.aiCallLogDraft);
 
     expect(result).toMatchObject({
       recommendationStatus: "recommendation_failed",
@@ -282,11 +299,33 @@ describe("knowledge recommendation service", () => {
         callStatus: "failed",
       },
     });
-    expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
-      "provider failed with raw question text",
-    );
-    expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
-      context.standardAnswer,
-    );
+    expect(result.aiCallLogDraft?.requestRedactedSnapshot).toMatchObject({
+      prompt: {
+        redactionStatus: "redacted",
+        reason: "prompt",
+      },
+      question: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      providerRequestPayload: {
+        redactionStatus: "redacted",
+        reason: "provider_payload",
+      },
+    });
+    expect(result.aiCallLogDraft?.responseRedactedSnapshot).toBeNull();
+    expect(result.aiCallLogDraft?.errorRedactedSnapshot).toMatchObject({
+      providerErrorPayload: {
+        redactionStatus: "redacted",
+        reason: "provider_payload",
+      },
+    });
+    expectNoSensitiveMarkerLeaks(serializedCallLogDraft, [
+      sensitiveContext.questionText,
+      sensitiveContext.analysis,
+      sensitiveContext.standardAnswer,
+      activeKnowledgeNode.pathName,
+      providerErrorMarker,
+    ]);
   });
 });

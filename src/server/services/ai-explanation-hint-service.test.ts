@@ -118,6 +118,15 @@ function createHintRunner(
   return vi.fn(async () => result);
 }
 
+function expectNoSensitiveMarkerLeaks(
+  serializedValue: string,
+  markers: string[],
+): void {
+  expect(markers.map((marker) => serializedValue.includes(marker))).toEqual(
+    markers.map(() => false),
+  );
+}
+
 describe("ai explanation and hint service", () => {
   it("generates automatic explanation for a wrong objective answer and locks snapshots", async () => {
     const explanationRunner = createExplanationRunner({
@@ -276,8 +285,16 @@ describe("ai explanation and hint service", () => {
   });
 
   it("returns non-blocking unavailable explanation result when the runner fails", async () => {
+    const sensitiveContext = {
+      ...explanationContext,
+      questionText: "explanation sensitive question marker 2f4d",
+      standardAnswer: "explanation sensitive standard answer marker 45e9",
+      analysis: "explanation sensitive analysis marker c9a1",
+      learnerAnswer: "explanation sensitive learner answer marker 676b",
+    };
+    const providerErrorMarker = "provider explanation error marker 7e38";
     const explanationRunner: AiExplanationRunner = vi.fn(async () => {
-      throw new Error("provider timeout with raw learner answer");
+      throw new Error(providerErrorMarker);
     });
     const service = createAiExplanationHintService({
       explanationRunner,
@@ -289,8 +306,8 @@ describe("ai explanation and hint service", () => {
       }),
     });
 
-    const result =
-      await service.generateObjectiveExplanation(explanationContext);
+    const result = await service.generateObjectiveExplanation(sensitiveContext);
+    const serializedCallLogDraft = JSON.stringify(result.aiCallLogDraft);
 
     expect(result).toMatchObject({
       explanationStatus: "explanation_unavailable",
@@ -300,9 +317,42 @@ describe("ai explanation and hint service", () => {
         callStatus: "failed",
       },
     });
-    expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
-      "provider timeout with raw learner answer",
-    );
+    expect(result.aiCallLogDraft?.requestRedactedSnapshot).toMatchObject({
+      prompt: {
+        redactionStatus: "redacted",
+        reason: "prompt",
+      },
+      userAnswer: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      requestContext: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      providerRequestPayload: {
+        requestBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expect(result.aiCallLogDraft?.responseRedactedSnapshot).toBeNull();
+    expect(result.aiCallLogDraft?.errorRedactedSnapshot).toMatchObject({
+      providerErrorPayload: {
+        errorBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expectNoSensitiveMarkerLeaks(serializedCallLogDraft, [
+      sensitiveContext.questionText,
+      sensitiveContext.standardAnswer,
+      sensitiveContext.analysis,
+      sensitiveContext.learnerAnswer,
+      providerErrorMarker,
+    ]);
   });
 
   it("generates subjective hints without directly revealing the standard answer", async () => {
@@ -353,8 +403,15 @@ describe("ai explanation and hint service", () => {
   });
 
   it("returns non-blocking unavailable hint result when the runner fails", async () => {
+    const sensitiveContext = {
+      ...hintContext,
+      questionText: "hint sensitive question marker 4a1c",
+      standardAnswer: "hint sensitive standard answer marker d8c0",
+      studentAnswer: "hint sensitive student answer marker b907",
+    };
+    const providerErrorMarker = "provider hint error marker 90fb";
     const hintRunner: AiHintRunner = vi.fn(async () => {
-      throw new Error("provider failed with raw standard answer");
+      throw new Error(providerErrorMarker);
     });
     const service = createAiExplanationHintService({
       explanationRunner: createExplanationRunner({
@@ -367,7 +424,8 @@ describe("ai explanation and hint service", () => {
       hintRunner,
     });
 
-    const result = await service.generateSubjectiveHint(hintContext);
+    const result = await service.generateSubjectiveHint(sensitiveContext);
+    const serializedCallLogDraft = JSON.stringify(result.aiCallLogDraft);
 
     expect(result).toMatchObject({
       hintStatus: "hint_unavailable",
@@ -377,8 +435,40 @@ describe("ai explanation and hint service", () => {
         callStatus: "failed",
       },
     });
-    expect(JSON.stringify(result.aiCallLogDraft)).not.toContain(
-      hintContext.standardAnswer,
-    );
+    expect(result.aiCallLogDraft?.requestRedactedSnapshot).toMatchObject({
+      prompt: {
+        redactionStatus: "redacted",
+        reason: "prompt",
+      },
+      userAnswer: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      requestContext: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      providerRequestPayload: {
+        requestBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expect(result.aiCallLogDraft?.responseRedactedSnapshot).toBeNull();
+    expect(result.aiCallLogDraft?.errorRedactedSnapshot).toMatchObject({
+      providerErrorPayload: {
+        errorBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expectNoSensitiveMarkerLeaks(serializedCallLogDraft, [
+      sensitiveContext.questionText,
+      sensitiveContext.standardAnswer,
+      sensitiveContext.studentAnswer,
+      providerErrorMarker,
+    ]);
   });
 });

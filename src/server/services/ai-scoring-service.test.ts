@@ -90,6 +90,15 @@ function createRunner(
   return vi.fn(async () => result);
 }
 
+function expectNoSensitiveMarkerLeaks(
+  serializedValue: string,
+  markers: string[],
+): void {
+  expect(markers.map((marker) => serializedValue.includes(marker))).toEqual(
+    markers.map(() => false),
+  );
+}
+
 describe("ai scoring service", () => {
   it("returns zero for unanswered subjective answers without calling the runner", async () => {
     const runner = createRunner({
@@ -349,12 +358,20 @@ describe("ai scoring service", () => {
   });
 
   it("creates redaction-safe attempt drafts without raw prompt, answer, or provider payload", async () => {
+    const sensitiveContext = {
+      ...context,
+      questionText: "scoring sensitive question marker 4c7d",
+      standardAnswer: "scoring sensitive standard answer marker c351",
+      studentAnswer: "scoring sensitive student answer marker a8f2",
+    };
+    const providerErrorMarker = "provider scoring error marker 19ba";
     const failingRunner: AiScoringRunner = vi.fn(async () => {
-      throw new Error("provider timeout includes raw answer detail 7c2a");
+      throw new Error(providerErrorMarker);
     });
     const service = createAiScoringService({ runner: failingRunner });
-    const result = await service.scoreSubjectiveAnswer(context);
+    const result = await service.scoreSubjectiveAnswer(sensitiveContext);
     const serializedDraft = JSON.stringify(result.aiScoringAttemptDraft);
+    const serializedCallLogDraft = JSON.stringify(result.aiCallLogDraft);
 
     expect(result.aiScoringAttemptDraft).toMatchObject({
       status: "failed",
@@ -370,10 +387,47 @@ describe("ai scoring service", () => {
         scoringStatus: "scoring_failed",
       },
     });
-    expect(serializedDraft).not.toContain(context.questionText);
-    expect(serializedDraft).not.toContain(context.standardAnswer);
-    expect(serializedDraft).not.toContain(context.studentAnswer);
-    expect(serializedDraft).not.toContain("provider timeout includes");
+    expect(result.aiCallLogDraft?.requestRedactedSnapshot).toMatchObject({
+      prompt: {
+        redactionStatus: "redacted",
+        reason: "prompt",
+      },
+      userAnswer: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      requestContext: {
+        redactionStatus: "redacted",
+        reason: "user_answer",
+      },
+      providerRequestPayload: {
+        requestBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expect(result.aiCallLogDraft?.responseRedactedSnapshot).toBeNull();
+    expect(result.aiCallLogDraft?.errorRedactedSnapshot).toMatchObject({
+      providerErrorPayload: {
+        errorBody: {
+          redactionStatus: "redacted",
+          reason: "provider_payload",
+        },
+      },
+    });
+    expectNoSensitiveMarkerLeaks(serializedDraft, [
+      sensitiveContext.questionText,
+      sensitiveContext.standardAnswer,
+      sensitiveContext.studentAnswer,
+      providerErrorMarker,
+    ]);
+    expectNoSensitiveMarkerLeaks(serializedCallLogDraft, [
+      sensitiveContext.questionText,
+      sensitiveContext.standardAnswer,
+      sensitiveContext.studentAnswer,
+      providerErrorMarker,
+    ]);
   });
 
   it("rejects scoring fallback model configs to preserve scoring consistency", async () => {

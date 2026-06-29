@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-route-error-envelope-question-paper-student-experience-2026-06-29
-updatedAt: "2026-06-29T07:53:54-07:00"
+currentPhase: verify-ai-provider-error-snapshot-redaction-2026-06-29
+updatedAt: "2026-06-29T08:15:21-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2952,21 +2952,21 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
-  lastKnownOriginMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
+  lastKnownMasterSha: 500e67e2c46dee018e0fc14b1aab12b70af75859
+  lastKnownOriginMasterSha: 500e67e2c46dee018e0fc14b1aab12b70af75859
 currentTask:
-  id: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+  id: verify-ai-provider-error-snapshot-redaction-2026-06-29
   status: closed
-  result: pass_route_error_envelope_fix_with_focused_regression_no_release_gate
-  source: fixRouteErrorEnvelopeQuestionPaperStudentExperience20260629
-  branch: codex/fix-route-error-envelope-20260629
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
-  commitSha: 5decaf86b101
-  updatedAt: "2026-06-29T07:53:54-07:00"
+  result: pass_ai_provider_error_snapshot_redaction_regression_no_provider_db_browser_release_gate
+  source: verifyAiProviderErrorSnapshotRedaction20260629
+  branch: codex/verify-ai-provider-redaction-20260629
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  commitSha: pending_local_closeout_commit
+  updatedAt: "2026-06-29T08:15:21-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
@@ -4801,6 +4801,192 @@ securityDataRedactionLogBoundaryInventory20260629:
       approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
   blockedWithoutFreshApproval:
     - source_or_test_change
+    - package_or_lockfile_change
+    - dependency_introduction_upgrade_or_removal
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - account_fixture_read_or_session_switching
+    - database_connection_read_write_migration_or_seed
+    - schema_migration_or_drizzle_push
+    - provider_call_or_provider_configuration_or_credential_read
+    - env_secret_access_or_env_file_change
+    - staging_prod_cloud_deploy_payment_ocr_export_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - sensitive_evidence_capture
+verifyAiProviderErrorSnapshotRedaction20260629:
+  taskId: verify-ai-provider-error-snapshot-redaction-2026-06-29
+  phase: verify-ai-provider-error-snapshot-redaction-2026-06-29
+  status: closed
+  result: pass_ai_provider_error_snapshot_redaction_regression_no_provider_db_browser_release_gate
+  sourceStory: sec-redlog-002_from_security_data_redaction_log_boundary_inventory_2026_06_29
+  dependsOn:
+    - security-data-redaction-log-boundary-inventory-2026-06-29
+  taskKind: security_fix_or_regression
+  moduleRunVersion: 2
+  approvedAt: "2026-06-29T08:09:43-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: active_thread_goal_continuation_next_recommended_security_regression_materialization_2026_06_29
+  claimedAt: "2026-06-29T08:09:43-07:00"
+  plannedAt: "2026-06-29T08:09:43-07:00"
+  validatedAt: "2026-06-29T08:15:21-07:00"
+  reviewedAt: "2026-06-29T08:15:21-07:00"
+  closedAt: "2026-06-29T08:15:21-07:00"
+  branch: codex/verify-ai-provider-redaction-20260629
+  goal: >-
+    Prove AI scoring, AI explanation, AI hint, and knowledge recommendation failure-path AI call log snapshots redact
+    provider errors, prompts, answers, provider payloads, generated outputs, and complete business content without
+    executing any Provider/AI calls.
+  allowedFiles:
+    - src/server/models/ai-rag.ts
+    - src/server/services/ai-scoring-service.ts
+    - src/server/services/ai-explanation-hint-service.ts
+    - src/server/services/knowledge-recommendation-service.ts
+    - src/server/models/ai-rag.test.ts
+    - src/server/services/ai-scoring-service.test.ts
+    - src/server/services/ai-explanation-hint-service.test.ts
+    - src/server/services/knowledge-recommendation-service.test.ts
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - docs/05-execution-logs/task-plans/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - docs/05-execution-logs/acceptance/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+    - src/server/models/ai-rag.ts
+    - src/server/services/ai-scoring-service.ts
+    - src/server/services/ai-explanation-hint-service.ts
+    - src/server/services/knowledge-recommendation-service.ts
+    - src/server/models/ai-rag.test.ts
+    - src/server/services/ai-scoring-service.test.ts
+    - src/server/services/ai-explanation-hint-service.test.ts
+    - src/server/services/knowledge-recommendation-service.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary:
+    currentTask: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    allowedEvidence: test_file_paths_status_counts_and_redacted_assertion_summary_only_no_db_content
+  aiProviderBoundary:
+    currentTask: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write
+    providerBudget: zero
+    costCalibrationGate: blocked
+  browserBoundary:
+    currentTask: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary:
+    currentTask: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+  evidenceRedaction:
+    allowed:
+      - file_paths
+      - test_names
+      - command_names
+      - pass_fail
+      - counts
+      - redacted_assertion_summary
+      - commit_summaries
+    forbidden:
+      - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - provider_error_payload_raw_message_or_stack_trace
+      - generated_output_full_text
+      - complete_question_paper_material_resource_or_chunk_content
+      - env_file_contents
+  regressionPlan:
+    targetPaths:
+      - ai_scoring_failure_path
+      - ai_explanation_failure_path
+      - ai_hint_failure_path
+      - kn_recommendation_failure_path
+    assertions:
+      - request_snapshots_redact_prompt_and_answer_or_question_context
+      - response_snapshots_do_not_store_raw_generated_output
+      - provider_error_snapshots_store_redacted_or_hashed_envelopes
+      - serialized_ai_call_log_drafts_omit_synthetic_sensitive_markers
+      - model_layer_provider_error_payload_helper_preserves_only_safe_metadata_values
+    implementationRule: prefer_test_regression_only_no_source_change_unless_regression_proves_current_leak
+  regressionResult:
+    status: pass
+    sourceChangeRequired: false
+    focusedUnit: pass_four_files_thirty_tests
+    coveredFailurePaths:
+      - ai_scoring_provider_error_snapshot
+      - ai_explanation_provider_error_snapshot
+      - ai_hint_provider_error_snapshot
+      - kn_recommendation_provider_error_snapshot
+  validationSummary:
+    status: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    focusedUnit: pass_four_files_thirty_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    evidenceMode: redacted_command_status_count_and_assertion_summary_only
+  nextRecommendedTaskId: verify-local-acceptance-session-boundary-2026-06-29
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown src/server/models/ai-rag.ts src/server/services/ai-scoring-service.ts src/server/services/ai-explanation-hint-service.ts src/server/services/knowledge-recommendation-service.ts src/server/models/ai-rag.test.ts src/server/services/ai-scoring-service.test.ts src/server/services/ai-explanation-hint-service.test.ts src/server/services/knowledge-recommendation-service.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/task-plans/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/acceptance/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - npx.cmd prettier --check --ignore-unknown src/server/models/ai-rag.ts src/server/services/ai-scoring-service.ts src/server/services/ai-explanation-hint-service.ts src/server/services/knowledge-recommendation-service.ts src/server/models/ai-rag.test.ts src/server/services/ai-scoring-service.test.ts src/server/services/ai-explanation-hint-service.test.ts src/server/services/knowledge-recommendation-service.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/task-plans/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md docs/05-execution-logs/acceptance/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    - npm run test:unit -- src/server/models/ai-rag.test.ts src/server/services/ai-scoring-service.test.ts src/server/services/ai-explanation-hint-service.test.ts src/server/services/knowledge-recommendation-service.test.ts
+    - npm run lint
+    - npm run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId verify-ai-provider-error-snapshot-redaction-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId verify-ai-provider-error-snapshot-redaction-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId verify-ai-provider-error-snapshot-redaction-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: active_thread_goal_continuation_next_recommended_security_regression_materialization_2026_06_29
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: active_thread_goal_continuation_next_recommended_security_regression_materialization_2026_06_29
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: active_thread_goal_continuation_next_recommended_security_regression_materialization_2026_06_29
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: active_thread_goal_continuation_next_recommended_security_regression_materialization_2026_06_29
+  blockedWithoutFreshApproval:
     - package_or_lockfile_change
     - dependency_introduction_upgrade_or_removal
     - browser_or_playwright_runtime
