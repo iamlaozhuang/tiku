@@ -47,6 +47,7 @@ function createAdminSessionService(
 
 function createRepositories(input: {
   auditInputs: unknown[];
+  importInputs?: unknown[];
 }): AdminOrganizationOrgAuthRuntimeRepositories {
   return {
     async listOrganizations(query) {
@@ -90,6 +91,17 @@ function createRepositories(input: {
         input.auditInputs.push(auditLogInput);
       },
     },
+    importEmployees:
+      input.importInputs === undefined
+        ? undefined
+        : async (importInput) => {
+            input.importInputs?.push(importInput);
+
+            return {
+              importedEmployees: [],
+              rejectedRows: [],
+            };
+          },
   };
 }
 
@@ -336,5 +348,86 @@ describe("phase 20 RA-01-04 employee import", () => {
     ]);
     expect(JSON.stringify(auditInputs)).not.toContain("scope-public-001");
     expect(JSON.stringify(auditInputs)).not.toContain("abc12345");
+  });
+
+  it("rejects oversized existing employee binding arrays before repository import", async () => {
+    const auditInputs: unknown[] = [];
+    const importInputs: unknown[] = [];
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService: createEmployeeAccountService({
+        serviceInputs: [],
+      }),
+      repositories: createRepositories({ auditInputs, importInputs }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+    const employees = Array.from({ length: 101 }, (_, index) => ({
+      userPublicId: `user-public-${String(index + 1).padStart(3, "0")}`,
+      organizationPublicId: "organization-public-001",
+    }));
+
+    const response = await handlers.employees.importBatch.POST(
+      new Request("http://localhost/api/v1/employees/import", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({ employees }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 422601,
+      message: "Employee input is invalid.",
+      data: null,
+    });
+    expect(importInputs).toEqual([]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "employee.import",
+        resultStatus: "failed",
+        metadataSummary: "redacted employee invalid input metadata",
+      }),
+    ]);
+  });
+
+  it("rejects oversized employee account CSV rows before account creation", async () => {
+    const auditInputs: unknown[] = [];
+    const serviceInputs: unknown[] = [];
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService: createEmployeeAccountService({ serviceInputs }),
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+    const content = [
+      "phone,name,initialPassword,organizationPublicId",
+      ...Array.from({ length: 101 }, (_, index) => {
+        const suffix = String(index + 1).padStart(4, "0");
+
+        return `1390000${suffix},Employee ${suffix},abc12345,organization-public-001`;
+      }),
+    ].join("\n");
+
+    const response = await handlers.employees.importBatch.POST(
+      new Request("http://localhost/api/v1/employees/import", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          sourceFormat: "csv",
+          content,
+        }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 422601,
+      message: "Employee input is invalid.",
+      data: null,
+    });
+    expect(serviceInputs).toEqual([]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "employee.import",
+        resultStatus: "failed",
+        metadataSummary: "redacted employee invalid input metadata",
+      }),
+    ]);
   });
 });

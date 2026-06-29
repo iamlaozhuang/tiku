@@ -5626,26 +5626,159 @@ tasks:
     behaviorBoundary: local_source_test_repair::employee_import_bulk_limit_no_db_provider_browser_dependency
     executionProfile: local_source_test_repair
     evidenceMode: redacted_path_count_status_only
-    taskKind: security_repair_candidate
+    taskKind: security_repair
     moduleRunVersion: 2
-    status: pending_requires_fresh_materialization
-    result: pending_after_fallback_order_limit_repair_or_owner_selection
-    nextRecommended: true
+    status: closed
+    result: pass_employee_import_bulk_limit_repair_local_source_test_validation
+    nextRecommended: false
     recommendedAfter: security-ai-model-config-fallback-order-limit-repair-2026-06-29
     priority: p1
     severity: medium
     findingId: db-query-003
-    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
-    candidateSourceScope:
+    approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    branch: codex/security-employee-import-bulk-limit-20260629
+    claimedAt: "2026-06-29T13:33:19-07:00"
+    plannedAt: "2026-06-29T13:33:19-07:00"
+    materializedAt: "2026-06-29T13:33:19-07:00"
+    validatedAt: "2026-06-29T13:42:30-07:00"
+    reviewedAt: "2026-06-29T13:42:30-07:00"
+    closedAt: "2026-06-29T13:42:30-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-employee-import-bulk-limit-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-employee-import-bulk-limit-repair.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-employee-import-bulk-limit-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-employee-import-bulk-limit-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-employee-import-bulk-limit-repair.md
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
       - src/server/services/admin-organization-org-auth-runtime.ts
       - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
       - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - src/db/**
+      - src/db/dev-seed.ts
+      - drizzle.config.ts
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_env_secret_connection_string_value_read_no_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: file_path_module_label_risk_category_severity_status_count_test_result_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - env_file_contents_or_connection_strings
+        - raw_dom_screenshots_traces_html_reports
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_chunk_answer_content
+        - raw_exception_payload_or_stack_trace
+        - private_fixture_or_account_material
+    repairScope:
+      sourceOrTestChangeAllowed: true
+      dbConnectionAllowed: false
+      envValueReadAllowed: false
+      browserOrE2eRuntimeAllowed: false
+      devServerAllowed: false
+      providerRuntimeBudget: zero
+      packageOrLockfileChangeAllowed: false
+      objective:
+        - add RED regression coverage for oversized employee import JSON arrays
+        - add RED regression coverage for oversized CSV/TSV import content or row count
+        - enforce explicit service-level limits before repository import or account creation work
+        - preserve accepted legitimate employee import behavior
+        - avoid DB Provider browser dependency schema migration seed and package changes
     expectedValidation:
       - focused_unit_tests_for_employee_import_array_row_and_content_limits
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - module_run_v2_precommit_closeout_prepush
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/evidence/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-employee-import-bulk-limit-repair.md src/server/services/admin-organization-org-auth-runtime.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/evidence/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-employee-import-bulk-limit-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-employee-import-bulk-limit-repair.md src/server/services/admin-organization-org-auth-runtime.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-employee-import-bulk-limit-repair-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-employee-import-bulk-limit-repair-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-employee-import-bulk-limit-repair-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-employee-import-bulk-limit-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-employee-import-bulk-limit-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-employee-import-bulk-limit-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-employee-import-bulk-limit-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-employee-import-bulk-limit-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    validationSummary:
+      validationStatus: pass
+      redTest: pass_expected_failure_1_file_5_tests_2_failed_3_passed
+      focusedUnit: pass_1_file_5_tests
+      lint: pass
+      typecheck: pass
+      prettierWriteScoped: pass
+      prettierCheckScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      packageOrLockfileChanged: false
+      browserRuntimeExecuted: false
+      directDatabaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      schemaMigrationSeedExecuted: false
+      releaseReadinessFinalPassOrCostCalibrationClaimed: false
+      evidenceRedaction: pass
+      nextRecommendedTaskId: security-db-migration-replay-guard-review-2026-06-29
     blockedWithoutFreshMaterialization:
       - source_or_test_change_before_task_plan_state_queue_materialization
       - database_connection_read_write_migration_or_seed
@@ -5669,7 +5802,7 @@ tasks:
     moduleRunVersion: 2
     status: pending_requires_fresh_materialization
     result: pending_owner_selection_or_queue_claim
-    nextRecommended: false
+    nextRecommended: true
     recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
     priority: p2
     severity: medium

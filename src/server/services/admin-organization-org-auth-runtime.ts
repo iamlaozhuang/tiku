@@ -71,6 +71,8 @@ type AdminOrganizationOrgAuthActor = {
   roles: [AdminOrganizationOrgAuthRole, ...AdminOrganizationOrgAuthRole[]];
 };
 
+const EMPLOYEE_IMPORT_ROW_LIMIT = 100;
+
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -312,7 +314,11 @@ function normalizeEmployeeImportInput(
     });
   }
 
-  if (!Array.isArray(value.employees) || value.employees.length === 0) {
+  if (
+    !Array.isArray(value.employees) ||
+    value.employees.length === 0 ||
+    value.employees.length > EMPLOYEE_IMPORT_ROW_LIMIT
+  ) {
     return null;
   }
 
@@ -464,6 +470,11 @@ function parseEmployeeAccountImportContent(input: {
       : [],
   );
   const dataRows = hasHeader ? parsedRows.slice(1) : parsedRows;
+
+  if (dataRows.length === 0 || dataRows.length > EMPLOYEE_IMPORT_ROW_LIMIT) {
+    return null;
+  }
+
   const rawAccounts = dataRows.map((row) => ({
     rowNumber: row.rowNumber,
     phone: readEmployeeAccountCell({
