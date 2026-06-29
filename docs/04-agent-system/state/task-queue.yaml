@@ -3867,6 +3867,203 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2CloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass
+    nextRecommendedTask: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+
+  - id: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+    title: Content admin formal content read-only acceptance
+    phase: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+    sourceStory: continue_full_acceptance_matrix_after_content_admin_ai_generation_rows_closed_2026_06_28
+    dependencies:
+      - full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes durable staged local execution approval Stage A for localhost test-owned session switching and
+      performs read-only formal content route/control validation for `content_admin`. It may use localhost/127.0.0.1
+      browser runtime to establish an in-memory `content_admin` acceptance session via
+      `/api/v1/local-acceptance-sessions`, then inspect formal content routes for redacted role/route/workflow/status
+      and count evidence. It must not execute create/update/submit/delete/disable/copy/publish/archive/upload/import
+      actions, call Provider, read private account fixtures, record credentials/session/token material, capture
+      screenshots/traces/raw DOM, or modify source/test files.
+    targetClosureItem: Redacted route/control/status evidence for the content_admin formal content checklist row
+    behaviorBoundary: local_browser_content_admin_formal_content_readonly::localhost_only_no_mutation_no_provider_no_sensitive_evidence
+    executionProfile: local_browser_content_admin_formal_content_readonly
+    evidenceMode: redacted_role_route_workflow_category_status_count_only_no_raw_dom_no_screenshot_no_session_material
+    validationPolicy: task_plan_materialization_local_bootstrap_browser_readonly_routes_focused_units_precommit_closeout_prepush
+    taskKind: local_acceptance_runtime
+    moduleRunVersion: 2
+    status: validated
+    result: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded
+    approvedAt: "2026-06-28T20:46:43-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_localhost_browser_and_active_goal_continuation_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T20:46:43-07:00"
+    plannedAt: "2026-06-28T20:46:43-07:00"
+    validatedAt: "2026-06-28T21:55:24-07:00"
+    reviewedAt: "2026-06-28T21:55:24-07:00"
+    branch: codex/content-admin-formal-content-readonly-20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - content_admin.formal_content
+      completionRule: >-
+        This task may close only the scoped `content_admin.formal_content` row. The durable goal remains incomplete
+        until every applicable owner-facing checklist row has redacted pass evidence.
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only
+      testOwnedLocalAccountSessionSwitching: approved_via_local_safe_bootstrap_no_credential_capture
+      localUiApiMutation: blocked_no_content_mutation_current_task
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      sourceOrTestChange: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+      - src/app/api/v1/local-acceptance-sessions/route.ts
+      - src/app/api/v1/sessions/route.ts
+      - src/server/services/local-acceptance-session-service.ts
+      - src/app/(admin)/content/**
+      - src/features/admin/question-material-management/**
+      - src/features/admin/paper-management/**
+      - src/features/admin/knowledge-node-management/**
+      - src/server/services/admin-workspace-role-guard-service.ts
+      - src/server/contracts/admin-workspace-role-guard-contract.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/admin-workspace-role-guard-contract.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_no_trace_no_raw_dom_no_content_mutation_no_provider
+    accountCredentialBoundary: no_private_account_material_read_use_local_safe_bootstrap_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    evidenceRedaction: role_route_workflow_category_status_count_failure_class_only_no_sensitive_payloads
+    validationCommands:
+      - browser-local-safe-bootstrap-content-admin-redacted
+      - browser-content-admin-formal-content-readonly-redacted
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run test:unit -- tests/unit/admin-paper-ui.test.ts
+      - npm.cmd run test:unit -- tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - npm.cmd run test:unit -- tests/unit/admin-workspace-role-guard-contract.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_runtime_outside_localhost_or_127_0_0_1
+      - dev_server_start_if_existing_localhost_is_unavailable
+      - content_mutation_create_update_submit_delete_disable_copy_publish_archive_upload_import
+      - ai_generation_submit_or_provider_execution
+      - database_connection_read_write_migration_seed_or_destructive_operation
+      - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - source_or_test_change
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    retryCount: 0
+    lastFailurePath: null
+    validationSummary:
+      taskPlanPrepared: pass
+      localSafeBootstrap: pass_http_200_code_0_session_role_count_1
+      formalContentRoutes: pass_browser_visible_counts_http_content_admin_route_status_cookie_injection_limitation_recorded
+      focusedUnitQuestionMaterial: pass_1_file_28_tests
+      focusedUnitPaper: pass_1_file_6_tests
+      focusedUnitKnowledgeResource: pass_1_file_16_tests
+      focusedUnitWorkspaceRoleGuard: pass_1_file_7_tests
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: true_read_only_no_mutation_cookie_injection_limited
+      contentMutationExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      prettierScoped: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
     nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
 
   - id: owner-facing-local-experience-batch-2026-06-28
