@@ -19,11 +19,11 @@
 
 ## Validation Mapping
 
-| Validation                                             | Result                   |
-| ------------------------------------------------------ | ------------------------ |
-| Focused Vitest for route and entry surface             | pass: 2 files, 35 tests  |
-| TypeScript typecheck                                   | pass                     |
-| Scoped formatting, diff check, and Module Run v2 gates | pending final validation |
+| Validation                                             | Result                  |
+| ------------------------------------------------------ | ----------------------- |
+| Focused Vitest for route and entry surface             | pass: 2 files, 35 tests |
+| TypeScript typecheck                                   | pass                    |
+| Scoped formatting, diff check, and Module Run v2 gates | pass                    |
 
 ## Follow-Up
 

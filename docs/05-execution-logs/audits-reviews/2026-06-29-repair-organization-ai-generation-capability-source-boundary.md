@@ -1,11 +1,13 @@
 # Repair Organization AI Generation Capability Source Boundary Audit Review
 
-## Finding
+## Review Result
 
 - Finding id: `role-inv-003`
 - Severity: medium
 - Category: authorization source-of-truth boundary
-- Status: repaired pending final closeout validation
+- Verdict: `approved_closed`
+- Source/test repair executed: true
+- APPROVE: focused repair and current evidence are approved as closed; no blocking findings remain within this task scope.
 
 ## Review Summary
 
@@ -26,11 +28,21 @@ This remains a local-contract boundary repair. It does not prove or execute any 
 | Provider-disabled local contract preserved     | pass          |
 | Sensitive evidence redaction                   | pass          |
 
+## Requirement Mapping Result
+
+| Requirement                                                                       | Status | Evidence                                                                                                             |
+| --------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| Require service-computed organization capability source for AI generation.        | pass   | Runtime route validation in `src/server/services/admin-ai-generation-local-contract-route.ts`.                       |
+| Use capability metadata as the organization owner/history source.                 | pass   | Organization task creation and history listing resolve organization public id from service-computed capability data. |
+| Reject role-present sessions when service-computed capability is absent or false. | pass   | Focused route tests cover missing and false capability metadata before repository use.                               |
+| Preserve Provider-disabled local-contract behavior.                               | pass   | Focused route and entry-surface validation passed.                                                                   |
+
 ## Residual Risk
 
 - This task only covers the local-contract route and focused entry-surface tests in its allowed files.
-- Other queued role/API/logging findings remain separate tasks and require their own materialized scope before execution.
+- Other queued UI/UX, AI/Provider, DB/schema, dependency, and regression inventory items remain separate tasks and require their own materialized scope before execution.
+- No DB, Provider, browser, release, dependency, package, lockfile, schema, migration, or seed action was performed.
 
 ## Audit Decision
 
-- Decision: acceptable for task closeout after final scoped formatting, diff check, focused tests, and Module Run v2 readiness gates pass.
+- Decision: approved for task closeout after the closeout state commit, fast-forward merge, push, and short-branch cleanup complete under the materialized local repair-loop policy.

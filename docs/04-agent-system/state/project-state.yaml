@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: repair-organization-ai-generation-capability-source-boundary-2026-06-29
-updatedAt: "2026-06-29T10:46:01-07:00"
+updatedAt: "2026-06-29T11:00:42-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -2992,7 +2992,8 @@ repository:
   lastKnownOriginMasterSha: 8c164b270640c8d179f8eee59ee40b0835087643
 currentTask:
   id: repair-organization-ai-generation-capability-source-boundary-2026-06-29
-  status: in_progress_materialized_source_test_repair
+  status: closed
+  result: pass_require_service_computed_organization_ai_generation_capability_ready_for_local_closeout
   sourceStory: seeded_by_security_permission_role_boundary_inventory_2026_06_29
   targetClosureItem: Ensure organization AI generation local contract access derives from service-computed organization capability metadata instead of route-synthesized role/session context
   behaviorBoundary: source_test_scoped::organization_ai_generation_capability_source_repair_no_db_no_real_provider_no_browser_no_release
@@ -3010,6 +3011,9 @@ currentTask:
   claimedAt: "2026-06-29T10:46:01-07:00"
   plannedAt: "2026-06-29T10:46:01-07:00"
   materializedAt: "2026-06-29T10:46:01-07:00"
+  implementedAt: "2026-06-29T10:52:47-07:00"
+  validatedAt: "2026-06-29T10:54:30-07:00"
+  closedAt: "2026-06-29T11:00:42-07:00"
   predecessorClosureEvidence:
     securityInventoryTask: security-permission-role-boundary-inventory-2026-06-29
     sessionCredentialBoundaryTask: verify-session-login-response-credential-boundary-2026-06-29
@@ -3117,9 +3121,9 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
-  commitSha: pending_local_closeout_commit
+  commitSha: caa61f3fdde71e3cc1860cf7155986e1a135c5ee
   validationSummary:
-    sourceOrTestChanged: pending
+    sourceOrTestChanged: true
     packageOrLockfileChanged: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -3128,7 +3132,15 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-  updatedAt: "2026-06-29T10:46:01-07:00"
+    focusedTests: pass_2_files_35_tests
+    typecheck: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+  updatedAt: "2026-06-29T11:00:42-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
