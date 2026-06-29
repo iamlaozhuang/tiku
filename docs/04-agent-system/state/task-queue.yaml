@@ -2473,7 +2473,7 @@ tasks:
     taskKind: acceptance_runtime_walkthrough
     moduleRunVersion: 2
     status: closed
-    result: partial_blocked_content_admin_session_material_auth_failure
+    result: blocked_validation_failure_content_admin_session_material_auth_failure
     approvedAt: "2026-06-28T17:44:05-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_durable_staged_local_execution_approval_and_active_goal_continuation_2026_06_28

@@ -2653,7 +2653,7 @@ repository:
 currentTask:
   id: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
   status: closed
-  result: partial_blocked_content_admin_session_material_auth_failure
+  result: blocked_validation_failure_content_admin_session_material_auth_failure
   taskKind: acceptance_runtime_walkthrough
   executionProfile: local_browser_read_only_acceptance_rerun
   approvedAt: "2026-06-28T17:44:05-07:00"

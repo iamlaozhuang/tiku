@@ -22,6 +22,10 @@ material remain forbidden.
 
 ## Current Decision
 
+APPROVE_BLOCKED_EVIDENCE_CLOSEOUT: The blocked evidence closeout is approved for this task only because the blocker is
+scoped to current `content_admin` test-owned session material authentication and a smallest follow-up task is queued.
+This approval does not mark the `content_admin` rows as passed and does not complete the durable full acceptance goal.
+
 The task may close only as a partial blocked rerun:
 
 - `org_advanced_admin` AI question and AI paper detail-control rows passed with redacted browser evidence.

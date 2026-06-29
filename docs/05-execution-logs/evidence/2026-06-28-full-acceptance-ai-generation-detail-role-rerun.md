@@ -5,10 +5,10 @@
 - Task: `full-acceptance-ai-generation-detail-role-rerun-2026-06-28`
 - Branch: `codex/full-acceptance-ai-generation-detail-rerun-20260628`
 - Status: evidence_recorded
-- Result: partial_blocked_content_admin_session_material_auth_failure
+- Result: blocked_validation_failure_content_admin_session_material_auth_failure
 - Batch range: AI generation detail controls role browser rerun
 - Pre-task master checkpoint: `e1da5030dc497e9f263e6f0dd53151b1cab6c2f5`
-- Commit: pending
+- Commit: `da314607d`
 
 ## Acceptance Mapping Result
 
@@ -47,6 +47,16 @@ controls:
 Both organization rows stayed on the intended local route, had organization context cues, and showed no login prompt,
 denied/unavailable cue, Provider credential/config cue, Prompt cue, or raw AI output cue.
 
+## Runtime Failure Summary
+
+The current task is closed as blocked evidence because the `content_admin` session proof did not authenticate with the
+current approved test-owned local account material. The failure is limited to session material/auth validation for the
+two scoped content AI generation rows. It does not prove a product UI regression in the repaired detail controls, and it
+does not count the content rows as passed.
+
+Recommended smallest follow-up task / nextModuleRunCandidate:
+`full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28`.
+
 ## Boundary Materialization
 
 - Goal materialized: full acceptance matrix plus full unit baseline repair.
@@ -76,7 +86,32 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28`:
   pass.
+- `git commit -m "docs(acceptance): record ai generation role rerun"`: pass; commit `da314607d`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28`:
+  initial run blocked until this closeout evidence recorded blocked-evidence approval, batch commit, localFullLoopGate,
+  threadRolloverGate, and nextModuleRunCandidate anchors.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28 -SkipRemoteAheadCheck`:
+  pass before this closeout evidence update.
 - No Provider execution, AI generation submit, direct DB access, source/test change, dependency change, schema/migration,
   seed, screenshot, trace, raw DOM evidence, raw response payload evidence, release readiness, final Pass, or Cost
   Calibration action was executed.
 - Follow-up required: `full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28`.
+
+## Gate Results
+
+- localFullLoopGate: blocked for the two `content_admin` rows by current session-material auth validation; pass for the
+  two `org_advanced_admin` detail-control rows.
+- threadRolloverGate: pass; recover from `project-state.yaml`, `task-queue.yaml`, this evidence, and the mandatory
+  owner-facing checklist.
+- blocked remainder: `content_admin.content_ai_question_generation`, `content_admin.content_ai_paper_generation`, and
+  all other owner-facing checklist rows not yet covered by redacted pass evidence.
+- nextModuleRunCandidate: `full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28`.
+- Cost Calibration Gate remains blocked.
+- Release readiness: blocked.
+- Final Pass: blocked.
+
+## Batch Commit Evidence
+
+- Commit: `da314607d`
+- Commit scope: seven task-scoped governance, traceability, plan, evidence, audit, and acceptance files only.
+- Commit message: `docs(acceptance): record ai generation role rerun`.
