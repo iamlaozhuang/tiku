@@ -4,12 +4,12 @@
 
 - Task: `full-acceptance-content-admin-formal-content-readonly-2026-06-28`
 - Branch: `codex/content-admin-formal-content-readonly-20260628`
-- Status: validated
+- Status: closed
 - Result: pass
 - Result detail: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded
 - Batch range: `content_admin.formal_content` read-only route/control coverage.
 - Pre-task master checkpoint: `8ba071091ceafe3ff7d281dc1f741da3681013f4`
-- Commit: pending closeout
+- Commit: `e0ae235f2`
 
 ## Boundary Confirmation
 
@@ -69,8 +69,8 @@ ops, and organization workspaces remain separated.
 - Prettier scoped check: pending.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+- Module Run v2 closeout readiness: pass.
+- Module Run v2 prepush readiness: pass.
 
 ## Validation Command Log
 
@@ -89,9 +89,9 @@ ops, and organization workspaces remain separated.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28`:
   pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28`:
-  pending after first commit evidence.
+  pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-readonly-2026-06-28 -SkipRemoteAheadCheck`:
-  pending after closeout readiness.
+  pass.
 
 ## Evidence Boundary
 

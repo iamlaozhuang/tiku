@@ -3,7 +3,7 @@
 ## Status
 
 - Task: `full-acceptance-content-admin-formal-content-readonly-2026-06-28`
-- Status: validated.
+- Status: closed.
 - Runtime claim: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded.
 - Implementation claim: none.
 - Durable goal impact: covers the `content_admin.formal_content` checklist slice only; no final Pass.

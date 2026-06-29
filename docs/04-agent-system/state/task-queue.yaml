@@ -3891,7 +3891,7 @@ tasks:
     validationPolicy: task_plan_materialization_local_bootstrap_browser_readonly_routes_focused_units_precommit_closeout_prepush
     taskKind: local_acceptance_runtime
     moduleRunVersion: 2
-    status: validated
+    status: closed
     result: pass_content_admin_formal_content_readonly_with_browser_cookie_injection_limitation_recorded
     approvedAt: "2026-06-28T20:46:43-07:00"
     approvedBy: laozhuang
@@ -3901,6 +3901,7 @@ tasks:
     plannedAt: "2026-06-28T20:46:43-07:00"
     validatedAt: "2026-06-28T21:55:24-07:00"
     reviewedAt: "2026-06-28T21:55:24-07:00"
+    closedAt: "2026-06-28T21:55:24-07:00"
     branch: codex/content-admin-formal-content-readonly-20260628
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -4062,8 +4063,8 @@ tasks:
       prettierScoped: pass
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2CloseoutReadiness: pending
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2CloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
 
   - id: owner-facing-local-experience-batch-2026-06-28
