@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
-updatedAt: "2026-06-28T18:28:27-07:00"
+currentPhase: content-admin-test-owned-account-stage-b-repair-2026-06-28
+updatedAt: "2026-06-28T18:47:25-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2648,31 +2648,31 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7d53fac5dc7e717661232c235297d70a184c43e9
-  lastKnownOriginMasterSha: 7d53fac5dc7e717661232c235297d70a184c43e9
+  lastKnownMasterSha: 3d311ede4ab32713da7a2b684f8bab1d96819984
+  lastKnownOriginMasterSha: 3d311ede4ab32713da7a2b684f8bab1d96819984
 currentTask:
-  id: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+  id: content-admin-test-owned-account-stage-b-repair-2026-06-28
   status: closed
-  result: blocked_content_admin_account_absent_from_local_db
-  taskKind: acceptance_runtime_walkthrough
-  executionProfile: local_browser_read_only_acceptance_rerun
-  approvedAt: "2026-06-28T18:14:44-07:00"
+  result: blocked_no_existing_localhost_ui_api_admin_account_creation_or_role_assignment
+  taskKind: local_write_flow_acceptance_setup
+  executionProfile: local_stage_b_ui_api_account_repair_then_read_only_route_rerun
+  approvedAt: "2026-06-28T18:38:54-07:00"
   approvedBy: laozhuang
   approvalConsumed: current_user_durable_staged_local_execution_approval_and_active_goal_continuation_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
-  claimedAt: "2026-06-28T18:14:44-07:00"
-  plannedAt: "2026-06-28T18:14:44-07:00"
-  implementedAt: "2026-06-28T18:28:27-07:00"
-  validatedAt: "2026-06-28T18:28:27-07:00"
-  reviewedAt: "2026-06-28T18:28:27-07:00"
-  closedAt: "2026-06-28T18:28:27-07:00"
-  sourceStory: follow_up_after_content_admin_session_material_auth_failure_in_ai_generation_detail_role_rerun_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-  branch: codex/content-admin-ai-generation-session-proof-20260628
+  claimedAt: "2026-06-28T18:38:54-07:00"
+  plannedAt: "2026-06-28T18:38:54-07:00"
+  completedAt: "2026-06-28T18:47:25-07:00"
+  validatedAt: "2026-06-28T18:49:31-07:00"
+  reviewedAt: "2026-06-28T18:47:25-07:00"
+  closedAt: "2026-06-28T18:47:25-07:00"
+  sourceStory: follow_up_after_content_admin_account_absent_from_local_db_session_proof_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+  branch: codex/content-admin-account-stage-b-repair-20260628
   promptMaterializationRule: >-
     Current task scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan before browser,
     DB, AI, account-material, source, test, or further documentation execution. Subsequent execution must use these
@@ -2683,23 +2683,26 @@ currentTask:
       - content_admin.content_ai_question_generation
       - content_admin.content_ai_paper_generation
     completionRule: >-
-      This task covers only the two scoped content admin AI generation detail-control rows. The durable goal remains
-      incomplete until every applicable owner-facing checklist row has redacted pass evidence.
-  targetRoutes:
+      This task may repair the test-owned local `content_admin` account path and then rerun only the two scoped content
+      admin AI generation detail-control rows. The durable goal remains incomplete until every applicable owner-facing
+      checklist row has redacted pass evidence.
+  targetWorkflows:
+    - local test-owned `content_admin` account creation or repair through localhost UI/API only
     - role: content_admin
       route: /content/ai-question-generation
     - role: content_admin
       route: /content/ai-paper-generation
   scope:
     docsStateEvidenceAudit: true
-    browserRuntime: approved_read_only_localhost_control_presence_only
+    browserRuntime: approved_localhost_ui_api_session_and_route_checks
     testOwnedLocalAccountSessionSwitching: approved
-    localDbReadOnlyAggregateProof: approved_only_if_session_proof_needs_stage_d_classification
+    localUiApiMutation: approved_stage_b_test_owned_account_create_or_repair_only
+    localDbReadOnlyAggregateProof: approved_stage_d_aggregate_status_before_after_only
     focusedUnitTest: approved
     localSourceChange: false
     testChange: false
-    localUiApiMutation: false
-    directDatabaseAccess: read_only_aggregate_status_only_if_needed
+    readOnlySourceDiscovery: approved_for_existing_local_ui_api_account_flow_only
+    directDatabaseAccess: read_only_aggregate_status_only
     directDatabaseMutation: false
     providerCallOrConfiguration: false
     dependencyChange: false
@@ -2719,11 +2722,11 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
-    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    - docs/01-requirements/traceability/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/01-requirements/00-index.md
@@ -2737,6 +2740,13 @@ currentTask:
     - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
     - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
     - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    - src/app/api/v1/**
+    - src/app/(auth)/**
+    - src/server/**
+    - src/lib/**
     - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
     - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
     - package.json
@@ -2750,6 +2760,7 @@ currentTask:
     - src/**
     - tests/**
     - src/db/schema/**
+    - src/**
     - drizzle/**
     - migrations/**
     - seed/**
@@ -2762,11 +2773,11 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**_except_acceptance_role_accounts_file
     - D:\tiku-local-private\**_except_acceptance_role_accounts_file
-  browserBoundary: localhost_or_127_0_0_1_read_only_content_admin_control_presence_only_no_submit_no_provider_no_sensitive_evidence
+  browserBoundary: localhost_or_127_0_0_1_stage_b_test_owned_account_ui_api_mutation_then_read_only_content_ai_route_rerun_no_provider_no_sensitive_evidence
   accountCredentialBoundary:
-    currentTask: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    currentTask: test_owned_ops_admin_and_content_admin_account_inputs_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
   dbBoundary:
-    currentTask: local_db_read_only_aggregate_status_only_if_session_proof_needs_classification_no_raw_rows_no_ids_no_pii_no_write
+    currentTask: local_db_read_only_aggregate_status_before_after_only_no_raw_rows_no_ids_no_pii_no_write
   aiProviderBoundary:
     currentTask: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
     costCalibrationGate: blocked
@@ -2796,7 +2807,6 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
   blockedWithoutFreshApproval:
-    - local_ui_api_mutation_or_write_flow_execution
     - ai_generation_submit_or_provider_execution
     - database_write_migration_seed_or_destructive_operation
     - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
@@ -2812,25 +2822,46 @@ currentTask:
     - evidence_sensitive_data_exposure
   validationSummary:
     taskPlanPrepared: pass
+    accountRepairViaLocalUiApi: blocked_no_existing_localhost_ui_api_admin_account_creation_or_role_assignment
+    contentAdminSessionProof: not_run_blocked_by_missing_content_admin_admin_account_path
+    browserRoleRerun: not_run_blocked_by_missing_content_admin_admin_account_path
+    localDbReadOnlyAggregateProof: previous_session_proof_consumed_no_new_db_connection_in_this_task
     focusedUnit: pass_1_file_14_tests
-    browserRoleRerun: blocked_content_admin_session_proof_failed_before_route_rerun
-    localDbReadOnlyAggregateProof: pass_zero_matching_admin_user_auth_account_session_and_no_content_admin_role_status
-    evidencePrepared: pass_blocked
-    auditReviewPrepared: pass_blocked_closeout
-    acceptancePrepared: pass_blocked_not_passed
+    evidencePrepared: pass
+    auditReviewPrepared: pass
+    acceptancePrepared: pass_blocked
     sourceOrTestChanged: false
-    browserRuntimeExecuted: true_localhost_page_probe_and_session_api_proof_no_sensitive_evidence
-    directDatabaseAccessExecuted: true_read_only_aggregate_status_only
+    browserRuntimeExecuted: false
+    directDatabaseAccessExecuted: false_previous_read_only_aggregate_proof_reused
+    localUiApiMutationExecuted: false_no_safe_existing_localhost_ui_api_account_path
     providerCallOrConfigurationExecuted: false
     credentialOrSessionCaptureExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pass
+    moduleRunV2CloseoutReadiness: pending
+    moduleRunV2PrePushReadiness: pending
+  nextRecommendedTask: content-admin-test-owned-admin-account-bootstrap-repair-planning-or-stage-c-source-repair
+previousTaskSnapshotContentAdminSessionProof:
+  id: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+  status: closed
+  result: blocked_content_admin_account_absent_from_local_db
+  branch: codex/content-admin-ai-generation-session-proof-20260628
+  finalMasterSha: 3d311ede4ab32713da7a2b684f8bab1d96819984
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+  outcome:
+    contentAdminAccountSpecificAggregate: zero_matching_admin_user_auth_account_active_session
+    globalAdminRoleStatusAggregate: org_advanced_admin_active_1_org_standard_admin_active_1_super_admin_active_1_no_content_admin
+    remainingRows:
+      - content_admin.content_ai_question_generation
+      - content_admin.content_ai_paper_generation
   nextRecommendedTask: content-admin-test-owned-account-stage-b-repair-2026-06-28
 previousTaskSnapshotFullAcceptanceAiGenerationDetailRoleRerun:
   id: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
