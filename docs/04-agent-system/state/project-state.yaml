@@ -2847,8 +2847,8 @@ currentTask:
     prettierScoped: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2CloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
   nextRecommendedTask: stage_c_or_stage_d_diagnostic_for_runtime_summary_load_failure_after_browser_rerun
 previousTaskSnapshotContentAdminFormalContentReadonly:
   id: full-acceptance-content-admin-formal-content-readonly-2026-06-28

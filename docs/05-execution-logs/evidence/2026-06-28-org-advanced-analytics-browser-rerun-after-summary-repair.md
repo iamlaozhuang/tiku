@@ -9,7 +9,7 @@
 - Scoped row: `org_advanced_admin.organization_analytics`
 - Pre-task master checkpoint: `f24e9a7e9bf79878aa9ca5c81df759677f4b8ef4`
 - Batch range: single task, `org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28`
-- Commit: pending
+- Commit: `90aceaa51`
 
 ## Boundary Confirmation
 
@@ -51,15 +51,28 @@
 
 ## Validation Results
 
+- RED: prior browser evidence and this rerun both expose the same runtime summary load failure class for the scoped row.
+- GREEN: focused unit validation and governance gates pass for the evidence-only rerun record; the scoped browser
+  acceptance row is not green.
+- blocked remainder: `org_advanced_admin.organization_analytics` remains blocked by runtime summary load failure; next
+  repair candidate is `stage_c_or_stage_d_diagnostic_for_runtime_summary_load_failure_after_browser_rerun`.
 - Focused organization analytics unit: pass, 1 file, 6 tests.
   Command: `npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts`.
 - Browser rerun: blocked, visible route/status/count evidence only.
   Command: `browser-org-advanced-analytics-rerun-read-only`.
 - Scoped prettier check: pass.
+  Command:
+  `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md`.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass after SSOT/mapping anchor remediation.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28`.
+- Module Run v2 closeout readiness: pass after strict evidence anchor remediation.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28`.
+- Module Run v2 prepush readiness: pass with remote-ahead check skipped before merge.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28 -SkipRemoteAheadCheck`.
 
 ## Evidence Boundary
 
@@ -76,3 +89,4 @@ raw AI input/output, and complete question/paper/material/resource/chunk content
 - nextModuleRunCandidate: stage_c_or_stage_d_diagnostic_for_runtime_summary_load_failure_after_browser_rerun.
 - localFullLoopGate: scoped browser rerun only; no final Pass, release readiness, Provider execution, Cost Calibration
   Gate, or durable-goal completion is claimed.
+- Cost Calibration Gate remains blocked.
