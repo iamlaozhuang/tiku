@@ -48,7 +48,30 @@ export type LocalAcceptanceSessionRouteOptions = {
 const LOCAL_ACCEPTANCE_SESSION_DURATION_HOUR = 8;
 const LOCAL_ACCEPTANCE_AUTH_USER_ID_PREFIX = "local-acceptance-auth-user";
 const AUTH_SESSION_CREDENTIAL_FIELD = "token";
-const localAcceptanceSessions = new Map<string, LocalAcceptanceSessionRecord>();
+const LOCAL_ACCEPTANCE_SESSION_STORE_KEY = "__tikuLocalAcceptanceSessions";
+
+type LocalAcceptanceSessionGlobalStore = typeof globalThis & {
+  [LOCAL_ACCEPTANCE_SESSION_STORE_KEY]?: Map<
+    string,
+    LocalAcceptanceSessionRecord
+  >;
+};
+
+function getLocalAcceptanceSessions(): Map<
+  string,
+  LocalAcceptanceSessionRecord
+> {
+  const globalStore = globalThis as LocalAcceptanceSessionGlobalStore;
+
+  // Next dev/runtime chunks can evaluate this module more than once; keep the
+  // local-only acceptance store process-scoped so route and session resolvers share it.
+  globalStore[LOCAL_ACCEPTANCE_SESSION_STORE_KEY] ??= new Map<
+    string,
+    LocalAcceptanceSessionRecord
+  >();
+
+  return globalStore[LOCAL_ACCEPTANCE_SESSION_STORE_KEY];
+}
 
 function addHours(value: Date, hourCount: number): Date {
   return new Date(value.getTime() + hourCount * 60 * 60 * 1000);
@@ -114,6 +137,8 @@ function isLocalAcceptanceRequestAllowed(request: Request): boolean {
 }
 
 function pruneExpiredSessions(now: Date): void {
+  const localAcceptanceSessions = getLocalAcceptanceSessions();
+
   for (const [token, session] of localAcceptanceSessions) {
     if (session.expiresAt <= now) {
       localAcceptanceSessions.delete(token);
@@ -131,7 +156,7 @@ function findLocalAcceptanceSessionRecord(
 
   pruneExpiredSessions(now);
 
-  return localAcceptanceSessions.get(token) ?? null;
+  return getLocalAcceptanceSessions().get(token) ?? null;
 }
 
 async function readRequestJson(request: Request): Promise<unknown> {
@@ -185,7 +210,7 @@ export function createLocalAcceptanceSessionService(
       const authUser = createContentAdminUser();
 
       pruneExpiredSessions(now);
-      localAcceptanceSessions.set(sessionCredential, {
+      getLocalAcceptanceSessions().set(sessionCredential, {
         authUser,
         expiresAt,
         role: input.role,
@@ -232,7 +257,7 @@ export function findLocalAcceptanceUserByAuthUserId(
 
   pruneExpiredSessions(now);
 
-  for (const session of localAcceptanceSessions.values()) {
+  for (const session of getLocalAcceptanceSessions().values()) {
     if (session.authUser.auth_user_id === authUserId) {
       return session.authUser;
     }

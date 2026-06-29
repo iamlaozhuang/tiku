@@ -117,6 +117,50 @@ describe("local acceptance session bootstrap", () => {
     expect(sessionResponse.data?.user.adminRoles).toEqual(["content_admin"]);
   });
 
+  it("resolves local acceptance sessions across independent route and runtime module instances", async () => {
+    const bootstrapServiceModulePath =
+      "@/server/services/local-acceptance-session-service?acceptance-bootstrap-instance";
+    const runtimeModulePath =
+      "@/server/auth/local-session-runtime?acceptance-runtime-instance";
+    const bootstrapServiceModule = await import(bootstrapServiceModulePath);
+    const runtimeModule = await import(runtimeModulePath);
+    const now = new Date("2026-06-28T12:00:00.000Z");
+    const routeHandlers =
+      bootstrapServiceModule.createLocalAcceptanceSessionRouteHandlers({
+        service: bootstrapServiceModule.createLocalAcceptanceSessionService({
+          createToken: () => "local-acceptance-token-module-bridge",
+          now: () => now,
+        }),
+      });
+    const response = await routeHandlers.POST(
+      new Request("http://localhost:3000/api/v1/local-acceptance-sessions", {
+        method: "POST",
+        body: JSON.stringify({ role: "content_admin" }),
+      }),
+    );
+    const setCookie = response.headers.get("set-cookie") ?? "";
+    const cookiePair = setCookie.split(";")[0];
+    const authorization = getRequestAuthorization(
+      new Request("http://localhost:3000/api/v1/sessions", {
+        headers: {
+          authorization: COOKIE_BACKED_SESSION_AUTHORIZATION,
+          cookie: cookiePair,
+        },
+      }),
+    );
+    const sessionRuntime = runtimeModule.createLocalSessionRuntime({
+      authUserRepository: createUnusedAuthUserRepository(),
+      credentialAdapter: createUnusedCredentialAdapter(),
+      now: () => now,
+    });
+    const sessionResponse = await sessionRuntime.getCurrentSession({
+      authorization,
+    });
+
+    expect(sessionResponse.code).toBe(0);
+    expect(sessionResponse.data?.user.adminRoles).toEqual(["content_admin"]);
+  });
+
   it("rejects non-local hosts and unsupported roles", async () => {
     const routeHandlers = createLocalAcceptanceSessionRouteHandlers({
       service: createLocalAcceptanceSessionService({
