@@ -5167,20 +5167,273 @@ tasks:
     evidenceMode: redacted_package_name_area_risk_status_count_summary_only
     taskKind: security_inventory
     moduleRunVersion: 2
-    status: pending_after_redaction_inventory_or_fresh_owner_selection
+    status: closed
+    result: pass_dependency_supply_chain_inventory_task_split_no_dependency_change
+    nextRecommended: true
+    recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
+    priority: p1
+    severity: medium
+    approvedAt: "2026-06-29T11:58:03-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: active_thread_goal_continuation_dependency_inventory_materialization_2026_06_29
+    claimedAt: "2026-06-29T11:58:03-07:00"
+    plannedAt: "2026-06-29T11:58:03-07:00"
+    materializedAt: "2026-06-29T11:58:03-07:00"
+    closedAt: "2026-06-29T12:06:26-07:00"
+    branch: codex/security-dependency-supply-chain-inventory-20260629
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-supply-chain-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/open-source-introduction.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - package-lock.json
+      - package-lock.yaml
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dependencyBoundary: offline_manifest_lockfile_inventory_no_package_or_lockfile_change_no_install_no_update_no_audit_fix
+    networkBoundary: no_network_advisory_lookup_no_registry_metadata_lookup_no_package_download
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_prompt_payload_or_raw_ai_io_evidence
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: package_name_dependency_area_manifest_lockfile_presence_direct_transitive_count_gate_status_risk_category_severity_status_follow_up_task_id_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - registry_tokens_private_registry_urls_tokenized_install_logs
+        - raw_advisory_payloads_or_network_audit_json
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
     readOnlyCandidateSurfaces:
       - package.json
       - package-lock.json
       - package-lock.yaml
       - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
       - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/03-standards/open-source-introduction.md
+    inventorySummary:
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      dependencyInstallUpdateRemoveExecuted: false
+      networkAdvisoryLookupExecuted: false
+      providerRuntimeBudget: zero
+      databaseRuntimeBudget: zero
+      surfaceCounts:
+        packageJson: present
+        pnpmLockYaml: present
+        pnpmWorkspaceYaml: present
+        packageLockJson: absent
+        packageLockYaml: absent
+        npmrc: absent
+        pnpmfileCjs: absent
+        patchesDirectory: absent
+        directRuntimeDependencies: 17
+        directDevDependencies: 20
+        directDependencyTotal: 37
+        lockfilePackageEntries: 1163
+        lockfileSnapshotEntries: 1054
+        lockfileHasBinEntries: 47
+        lockfileRequiresBuildEntries: 0
+        lockfileDeprecatedEntries: 3
+        ignoredBuiltDependencyEntries: 2
+      findings:
+        - findingId: dep-inv-001
+          riskFamily: package_manager_consistency
+          severity: low
+          status: covered_watch
+          followUp: continue_package_manager_consistency_checks
+        - findingId: dep-inv-002
+          riskFamily: transitive_dependency_volume
+          severity: medium
+          status: needs_scoped_review
+          followUp: security-dependency-public-advisory-lookup-2026-06-29
+        - findingId: dep-inv-003
+          riskFamily: deprecated_transitive_packages
+          severity: medium
+          status: needs_scoped_review
+          followUp: security-dependency-deprecated-transitive-review-2026-06-29
+        - findingId: dep-inv-004
+          riskFamily: cli_binary_execution_surface
+          severity: medium
+          status: monitor
+          followUp: security-dependency-install-script-binary-surface-review-2026-06-29
+        - findingId: dep-inv-005
+          riskFamily: installed_provider_ai_runtime_package_boundary
+          severity: medium
+          status: covered_watch
+          followUp: monitor_through_future_ai_runtime_tasks
+        - findingId: dep-inv-006
+          riskFamily: deferred_dependency_gate
+          severity: medium
+          status: covered_watch
+          followUp: none_until_owner_selects_rag_or_rich_text_task
+        - findingId: dep-inv-007
+          riskFamily: dependency_freshness_advisory_currency
+          severity: medium
+          status: blocked_by_current_task
+          followUp: security-dependency-public-advisory-lookup-2026-06-29
+      nextRecommendedTaskId: test-acceptance-regression-risk-inventory-2026-06-29
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-dependency-supply-chain-inventory.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-dependency-supply-chain-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-supply-chain-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-supply-chain-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-supply-chain-inventory-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-dependency-supply-chain-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-dependency-supply-chain-inventory.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_thread_goal_continuation_dependency_inventory_materialization_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: active_thread_goal_continuation_dependency_inventory_materialization_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_thread_goal_continuation_dependency_inventory_materialization_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_thread_goal_continuation_dependency_inventory_materialization_2026_06_29
     blockedWithoutFreshMaterialization:
       - package_or_lockfile_change
       - dependency_install_update_remove
       - network_audit_without_explicit_scope
       - provider_call_or_configuration
       - release_readiness_or_final_pass
+
+  - id: security-dependency-public-advisory-lookup-2026-06-29
+    title: Security dependency public advisory lookup
+    phase: security-dependency-public-advisory-lookup-2026-06-29
+    sourceStory: seeded_by_security_dependency_supply_chain_inventory_2026_06_29
+    dependencies:
+      - security-dependency-supply-chain-inventory-2026-06-29
+    taskPlanPolicy: required_before_network_advisory_lookup
+    targetClosureItem: current public CVE/GHSA/advisory status lookup without install, fix, package, or lockfile change
+    behaviorBoundary: docs_read_only_or_network_read_only::public_advisory_lookup_no_install_no_fix_no_lockfile_change
+    executionProfile: public_advisory_read_only_security_review
+    evidenceMode: redacted_package_name_advisory_status_severity_count_summary_only
+    taskKind: security_review_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-dependency-supply-chain-inventory-2026-06-29
+    priority: p1
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_network_read_only_materialization
+    allowedFilesPolicy: must_materialize_exact_docs_state_files_and_network_boundary_before_execution
+    blockedWithoutFreshMaterialization:
+      - package_or_lockfile_change
+      - dependency_install_update_remove_or_audit_fix
+      - registry_metadata_download_without_explicit_scope
+      - raw_advisory_payload_evidence
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
+
+  - id: security-dependency-deprecated-transitive-review-2026-06-29
+    title: Security dependency deprecated transitive review
+    phase: security-dependency-deprecated-transitive-review-2026-06-29
+    sourceStory: seeded_by_security_dependency_supply_chain_inventory_2026_06_29
+    dependencies:
+      - security-dependency-supply-chain-inventory-2026-06-29
+    taskPlanPolicy: required_before_dependency_deprecated_transitive_review
+    targetClosureItem: review deprecated transitive package implications and split any dependency change into a separate gate task
+    behaviorBoundary: docs_manifest_lock_read_only::deprecated_transitive_review_no_install_no_fix
+    executionProfile: dependency_review_then_optional_gate_package
+    evidenceMode: redacted_package_name_version_status_risk_summary_only
+    taskKind: security_review_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-dependency-supply-chain-inventory-2026-06-29
+    priority: p2
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    allowedFilesPolicy: must_materialize_exact_docs_state_files_before_execution
+    blockedWithoutFreshMaterialization:
+      - package_or_lockfile_change
+      - dependency_install_update_remove_or_audit_fix
+      - network_lookup_without_explicit_scope
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
+
+  - id: security-dependency-install-script-binary-surface-review-2026-06-29
+    title: Security dependency install script and binary surface review
+    phase: security-dependency-install-script-binary-surface-review-2026-06-29
+    sourceStory: seeded_by_security_dependency_supply_chain_inventory_2026_06_29
+    dependencies:
+      - security-dependency-supply-chain-inventory-2026-06-29
+    taskPlanPolicy: required_before_install_script_or_binary_surface_review
+    targetClosureItem: review lockfile CLI/bin and built dependency policy without executing package manager mutation
+    behaviorBoundary: docs_manifest_lock_read_only::install_script_binary_surface_review_no_install_no_fix
+    executionProfile: dependency_review_then_optional_gate_package
+    evidenceMode: redacted_package_name_surface_count_policy_summary_only
+    taskKind: security_review_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-dependency-supply-chain-inventory-2026-06-29
+    priority: p2
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    allowedFilesPolicy: must_materialize_exact_docs_state_files_before_execution
+    blockedWithoutFreshMaterialization:
+      - package_or_lockfile_change
+      - dependency_install_update_remove_or_audit_fix
+      - script_execution_without_explicit_scope
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
 
   - id: test-acceptance-regression-risk-inventory-2026-06-29
     title: Test and acceptance regression risk inventory
