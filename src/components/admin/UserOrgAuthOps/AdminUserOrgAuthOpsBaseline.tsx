@@ -3,6 +3,7 @@
 import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { adminFilterGridPanelClassName } from "@/components/admin/admin-layout-primitives";
 import { Button } from "@/components/ui/button";
 import {
   ADMIN_CONFLICT_MESSAGE,
@@ -128,7 +129,7 @@ export function AdminUserOrgAuthOpsBaseline({
         </div>
       </header>
 
-      <div className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm lg:grid-cols-[12rem_12rem_1fr]">
+      <div className={adminFilterGridPanelClassName}>
         <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">每页条数</span>
           <select

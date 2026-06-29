@@ -9,6 +9,7 @@ import {
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { adminFilterGridPanelClassName } from "@/components/admin/admin-layout-primitives";
 import {
   ADMIN_CONFLICT_MESSAGE,
   ADMIN_DEFAULT_PAGE_SIZE,
@@ -139,7 +140,7 @@ export function AdminCommonInteractionBaseline({
         </div>
       </header>
 
-      <div className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm lg:grid-cols-[12rem_12rem_1fr]">
+      <div className={adminFilterGridPanelClassName}>
         <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">每页条数</span>
           <select
