@@ -1178,6 +1178,186 @@ tasks:
       providerCallOrConfigurationExecuted: false
       sensitiveEvidenceCaptured: false
 
+  - id: full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+    title: Full acceptance org standard admin organization boundary workflow
+    phase: full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+    sourceStory: active_goal_continue_after_org_advanced_admin_training_workflow_2026_06_29
+    dependencies:
+      - full-acceptance-org-advanced-admin-training-workflow-2026-06-29
+    taskPlanPolicy: required_before_browser_account_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes the durable staged local execution approval only for localhost/127.0.0.1 browser verification,
+      test-owned `org_standard_admin` session switching, and read-only organization workspace plus advanced-denial
+      boundary checks. It must not mutate app data, call Provider, inspect browser storage/session material, record
+      credentials, use direct DB access, change source/tests/dependencies/schema/migrations/seeds, deploy, create PRs,
+      force-push, claim release readiness/final Pass, or execute Cost Calibration.
+    targetClosureItem: Redacted workflow/status/count evidence for `org_standard_admin` organization basics and advanced-denial boundaries
+    behaviorBoundary: local_browser_acceptance::org_standard_admin_workspace_and_advanced_denial_no_provider_no_db_no_sensitive_evidence
+    executionProfile: local_browser_acceptance_readonly_boundary
+    evidenceMode: redacted_role_route_workflow_status_count_summary_only
+    validationPolicy: task_plan_then_browser_acceptance_scoped_prettier_diff_module_run_v2_closeout
+    taskKind: local_browser_acceptance
+    moduleRunVersion: 2
+    status: closed
+    result: pass_org_standard_admin_boundary_browser_evidence_no_final_pass
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_staged_local_execution_stage_a_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T00:15:00-07:00"
+    plannedAt: "2026-06-29T00:15:00-07:00"
+    implementedAt: "2026-06-29T00:20:00-07:00"
+    validatedAt: "2026-06-29T00:20:00-07:00"
+    reviewedAt: "2026-06-29T00:20:00-07:00"
+    closedAt: "2026-06-29T00:20:00-07:00"
+    branch: codex/org-standard-admin-boundary-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - org_standard_admin.organization_basics
+        - org_standard_admin.advanced_capability_denial
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only_after_task_plan
+      devServer: approved_localhost_only_if_existing_server_unavailable_after_task_plan
+      testOwnedSessionSwitching: approved_after_task_plan_no_sensitive_evidence
+      localUiApiMutation: blocked_current_task_readonly_boundary_only
+      sourceOrTestChange: blocked_split_to_repair_task_if_needed
+      directDatabaseAccess: blocked_unless_later_stage_d_task
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      localCommit: approved_after_validation
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      finalPassClaim: blocked
+      releaseReadinessDecision: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - src/app/api/v1/sessions/route.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_no_trace_no_raw_dom_evidence_local_session_reset_allowed_without_cookie_or_storage_inspection_for_role_switching
+    devServerBoundary: use_existing_localhost_if_available_start_local_dev_server_only_if_required_no_env_output
+    accountCredentialBoundary:
+      currentTask: test_owned_org_standard_admin_login_input_only_no_sensitive_evidence
+      privateAccountFile: D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      allowedUse: read_only_login_input_for_org_standard_admin_only
+      forbiddenEvidence:
+        - credential_values
+        - account_identifier
+        - cookies_tokens_sessions_localStorage_Authorization_headers
+        - raw_private_file_content
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    evidenceRedaction:
+      allowed:
+        - role_label
+        - route_label
+        - workflow_label
+        - status_label
+        - count_summary
+        - failure_class
+        - command_name
+        - commit_sha
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+    validationCommands:
+      - browser_org_standard_admin_boundary_workflow_redacted
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-org-standard-admin-boundary-workflow-2026-06-29 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    blockedWithoutFreshApproval:
+      - direct_database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - source_or_test_change
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - sensitive_evidence_capture
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    validationSummary:
+      taskPlanPrepared: pass
+      browserWorkflowEvidence: pass_role_route_denial_count_summary
+      targetRoleProof: pass_http_200_code_0_role_label_org_standard_admin_cookie_set_marker_true_no_cookie_value_recorded
+      organizationPortal: pass_context_authorization_employee_summary_no_advanced_links
+      advancedRouteBoundary: pass_four_routes_blocked_or_unavailable_no_advanced_actions
+      consoleErrors: pass_zero
+      sourceOrTestChanged: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sensitiveEvidenceCaptured: false
+
   - id: full-acceptance-matrix-execution-2026-06-28
     title: Full all-role acceptance matrix execution
     phase: full-acceptance-matrix-execution-2026-06-28
