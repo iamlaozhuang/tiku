@@ -4733,25 +4733,157 @@ tasks:
     dependencies:
       - detail-optimization-security-review-kickoff-2026-06-29
     taskPlanPolicy: required_before_source_or_docs_inventory
+    humanApprovalBoundary: >-
+      Active thread goal continuation selected this queued AI/Provider boundary inventory after redaction, permission,
+      API validation, and UI inventory lanes closed. This task may read only the scoped AI/Provider source, route, service,
+      and AI unit-test surfaces after state, queue, and task plan materialization. It may write only scoped governance,
+      traceability, evidence, audit, and acceptance files. It must not execute Provider/AI calls, read runtime
+      Provider/model configuration values, read env/secrets, record prompts or Provider payloads, change source/tests,
+      connect DB, start browser/dev server, change dependencies, run deployment, declare release readiness/final Pass, or
+      execute Cost Calibration.
     targetClosureItem: AI/Provider boundary findings inventory with Provider budget fixed at zero
     behaviorBoundary: docs_source_read_only::ai_provider_inventory_no_provider_execution_no_config_change_no_fix
     executionProfile: source_read_only_security_inventory
-    evidenceMode: redacted_file_path_boundary_risk_status_count_summary_only
+    evidenceMode: redacted_file_path_module_boundary_risk_severity_status_count_summary_only
+    validationPolicy: task_scoped_prettier_diff_module_run_v2
     taskKind: security_inventory
     moduleRunVersion: 2
-    status: pending_after_redaction_inventory_or_fresh_owner_selection
-    readOnlyCandidateSurfaces:
+    status: closed
+    result: pass_ai_provider_boundary_inventory_existing_gates_reconciled_no_provider_execution
+    nextRecommended: false
+    priority: p1
+    severity: medium
+    approvedAt: "2026-06-29T11:26:40-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: active_thread_goal_continuation_ai_provider_inventory_materialization_2026_06_29
+    claimedAt: "2026-06-29T11:26:40-07:00"
+    plannedAt: "2026-06-29T11:26:40-07:00"
+    materializedAt: "2026-06-29T11:26:40-07:00"
+    closedAt: "2026-06-29T11:37:11-07:00"
+    branch: codex/security-ai-provider-boundary-inventory-20260629
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-ai-provider-boundary-inventory.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-ai-provider-boundary-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-ai-provider-boundary-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-provider-boundary-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-ai-provider-boundary-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
       - src/ai/**
       - src/rag/**
+      - src/server/models/ai-rag.ts
+      - src/server/contracts/ai/**
       - src/server/services/**
       - src/app/api/v1/**
       - tests/unit/ai/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_runtime_model_config_read_write_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: file_path_module_boundary_risk_category_severity_status_count_follow_up_task_id_validation_command_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
+        - model_config_runtime_values
+        - prompt_template_text
+        - provider_error_raw_message_or_stack
+    readOnlyCandidateSurfaces:
+      - src/ai/**
+      - src/rag/**
+      - src/server/models/ai-rag.ts
+      - src/server/contracts/ai/**
+      - src/server/services/**
+      - src/app/api/v1/**
+      - tests/unit/ai/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-ai-provider-boundary-inventory.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-provider-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-ai-provider-boundary-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-ai-provider-boundary-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-ai-provider-boundary-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-ai-provider-boundary-inventory-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-ai-provider-boundary-inventory.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-ai-provider-boundary-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-ai-provider-boundary-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-provider-boundary-inventory.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-ai-provider-boundary-inventory.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_thread_goal_continuation_ai_provider_inventory_materialization_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: active_thread_goal_continuation_ai_provider_inventory_materialization_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_thread_goal_continuation_ai_provider_inventory_materialization_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_thread_goal_continuation_ai_provider_inventory_materialization_2026_06_29
     blockedWithoutFreshMaterialization:
       - provider_call_or_provider_configuration_or_credential_read
       - prompt_or_provider_payload_evidence
       - source_or_test_change
       - cost_calibration_gate
       - release_readiness_or_final_pass
+    inventorySummary:
+      surfaceCounts:
+        srcAi: 3
+        srcRag: 4
+        srcServerServices: 260
+        srcAppApiV1: 116
+        testsUnitAi: 1
+        controlledRunnerPathMatches: 10
+      findings:
+        mediumCoveredWatch: 2
+        mediumClosedExistingRegression: 1
+        mediumBlockedByCurrentGoal: 1
+        lowMonitor: 1
+        newImmediateRepairTasksSeeded: 0
+      nextRecommendedTaskId: security-db-schema-migration-risk-inventory-2026-06-29
 
   - id: security-db-schema-migration-risk-inventory-2026-06-29
     title: Security DB schema and migration risk inventory
@@ -4767,6 +4899,8 @@ tasks:
     taskKind: security_inventory
     moduleRunVersion: 2
     status: pending_after_redaction_inventory_or_fresh_owner_selection
+    nextRecommended: true
+    recommendedAfter: security-ai-provider-boundary-inventory-2026-06-29
     readOnlyCandidateSurfaces:
       - src/db/schema/**
       - drizzle/**
