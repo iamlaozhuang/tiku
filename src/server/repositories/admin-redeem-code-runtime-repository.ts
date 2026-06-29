@@ -1,6 +1,4 @@
 import { createHash, randomInt, randomUUID } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
 import {
   and,
@@ -15,7 +13,7 @@ import {
   or,
   type SQL,
 } from "drizzle-orm";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
@@ -27,7 +25,7 @@ import type {
   RedeemCodeListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { Profession, RedeemCodeStatus } from "../models/auth";
-import { getSharedRuntimePostgresClient } from "./runtime-database";
+import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
@@ -495,49 +493,8 @@ function maskRedeemCodeDisplay(codeDisplay: string): string {
 }
 
 function createLocalRuntimeDatabase(): AdminRedeemCodeRuntimeDatabase {
-  loadLocalEnv();
-
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for admin redeem code runtime.");
-  }
-
-  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
-    schema: databaseSchema,
-  });
-}
-
-function loadLocalEnv(): void {
-  const localEnvPath = resolve(process.cwd(), ".env.local");
-
-  if (!existsSync(localEnvPath)) {
-    return;
-  }
-
-  const localEnvContent = readFileSync(localEnvPath, "utf8");
-
-  for (const line of localEnvContent.split(/\r?\n/u)) {
-    const trimmedLine = line.trim();
-
-    if (trimmedLine.length === 0 || trimmedLine.startsWith("#")) {
-      continue;
-    }
-
-    const separatorIndex = trimmedLine.indexOf("=");
-
-    if (separatorIndex <= 0) {
-      continue;
-    }
-
-    const key = trimmedLine.slice(0, separatorIndex).trim();
-    const value = trimmedLine
-      .slice(separatorIndex + 1)
-      .trim()
-      .replace(/^["']|["']$/gu, "");
-
-    if (process.env[key] === undefined) {
-      process.env[key] = value;
-    }
-  }
+  return createRuntimeDatabaseForSchema(
+    databaseSchema,
+    "DATABASE_URL is required for admin redeem code runtime.",
+  );
 }

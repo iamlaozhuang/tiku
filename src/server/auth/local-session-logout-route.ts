@@ -1,9 +1,9 @@
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as authSchema from "@/db/schema/auth";
 import type { ApiResponse } from "../contracts/api-response";
 import { createPostgresSessionLogoutRepository } from "../repositories/session-logout-repository";
-import { getSharedRuntimePostgresClient } from "../repositories/runtime-database";
+import { createRuntimeDatabaseForSchema } from "../repositories/runtime-database";
 import { createSessionLogoutService } from "../services/session-logout-service";
 import {
   createExpiredSessionCookieHeader,
@@ -20,17 +20,10 @@ function createJsonResponse<TData>(
 }
 
 function createLocalSessionLogoutDatabase(): LocalSessionLogoutDatabase {
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for session logout.");
-  }
-
-  const client = getSharedRuntimePostgresClient(databaseUrl);
-
-  return drizzle(client, {
-    schema: authSchema,
-  });
+  return createRuntimeDatabaseForSchema(
+    authSchema,
+    "DATABASE_URL is required for session logout.",
+  );
 }
 
 export function createLocalSessionLogoutRouteHandler() {

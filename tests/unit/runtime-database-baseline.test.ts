@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  createLazyRuntimeDatabaseGetter,
   getSharedRuntimePostgresClient,
   resetSharedRuntimePostgresClientsForTest,
+  type RuntimeDatabase,
   type RuntimePostgresClient,
 } from "@/server/repositories/runtime-database";
 import { createRouteHandlerWithErrorEnvelope } from "@/server/services/route-error-response";
@@ -21,19 +23,32 @@ describe("runtime database baseline", () => {
         }) as unknown as RuntimePostgresClient,
     );
 
-    const firstClient = getSharedRuntimePostgresClient("postgres://local", {
+    const firstClient = getSharedRuntimePostgresClient("runtime-key-local", {
       createClient,
     });
-    const secondClient = getSharedRuntimePostgresClient("postgres://local", {
+    const secondClient = getSharedRuntimePostgresClient("runtime-key-local", {
       createClient,
     });
-    const thirdClient = getSharedRuntimePostgresClient("postgres://other", {
+    const thirdClient = getSharedRuntimePostgresClient("runtime-key-other", {
       createClient,
     });
 
     expect(secondClient).toBe(firstClient);
     expect(thirdClient).not.toBe(firstClient);
     expect(createClient).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses an injected database without resolving runtime database url", () => {
+    const database = { marker: "injected" } as unknown as RuntimeDatabase;
+    const createDatabase = vi.fn(() => database);
+    const getDatabase = createLazyRuntimeDatabaseGetter(
+      { createDatabase },
+      "DATABASE_URL is required for test runtime.",
+    );
+
+    expect(getDatabase()).toBe(database);
+    expect(getDatabase()).toBe(database);
+    expect(createDatabase).toHaveBeenCalledTimes(1);
   });
 
   it("returns a standard json envelope when a route handler throws", async () => {

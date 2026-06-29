@@ -1,9 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
 import { and, asc, eq, isNotNull } from "drizzle-orm";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 
 import * as authSchema from "@/db/schema/auth";
@@ -35,7 +33,7 @@ import type {
   SessionUserRepository,
 } from "../repositories/session-repository";
 import type { UserRegistrationRepository } from "../repositories/user-registration-repository";
-import { getSharedRuntimePostgresClient } from "../repositories/runtime-database";
+import { createRuntimeDatabaseForSchema } from "../repositories/runtime-database";
 import { createAuthService } from "../services/auth-service";
 import {
   createSessionService,
@@ -841,19 +839,10 @@ function mapAdminAccountRow(row: {
 }
 
 function createLocalRuntimeDatabase(): LocalSessionRuntimeDatabase {
-  loadLocalEnv();
-
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for session runtime.");
-  }
-
-  const client = getSharedRuntimePostgresClient(databaseUrl);
-
-  return drizzle(client, {
-    schema: authSchema,
-  });
+  return createRuntimeDatabaseForSchema(
+    authSchema,
+    "DATABASE_URL is required for session runtime.",
+  );
 }
 
 function isRuntimeConfigurationError(error: unknown): boolean {
@@ -861,38 +850,4 @@ function isRuntimeConfigurationError(error: unknown): boolean {
     error instanceof Error &&
     error.message === "DATABASE_URL is required for session runtime."
   );
-}
-
-function loadLocalEnv(): void {
-  const localEnvPath = resolve(process.cwd(), ".env.local");
-
-  if (!existsSync(localEnvPath)) {
-    return;
-  }
-
-  const localEnvContent = readFileSync(localEnvPath, "utf8");
-
-  for (const line of localEnvContent.split(/\r?\n/u)) {
-    const trimmedLine = line.trim();
-
-    if (trimmedLine.length === 0 || trimmedLine.startsWith("#")) {
-      continue;
-    }
-
-    const separatorIndex = trimmedLine.indexOf("=");
-
-    if (separatorIndex <= 0) {
-      continue;
-    }
-
-    const key = trimmedLine.slice(0, separatorIndex).trim();
-    const value = trimmedLine
-      .slice(separatorIndex + 1)
-      .trim()
-      .replace(/^["']|["']$/gu, "");
-
-    if (process.env[key] === undefined) {
-      process.env[key] = value;
-    }
-  }
 }

@@ -1,6 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
-
 import {
   and,
   asc,
@@ -15,7 +12,7 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
@@ -35,7 +32,7 @@ import type {
   PracticeRepository,
   PracticeRow,
 } from "./practice-repository";
-import { getSharedRuntimePostgresClient } from "./runtime-database";
+import { createRuntimeDatabaseForSchema } from "./runtime-database";
 import type {
   StudentPaperAuthorizationScopeRow,
   StudentPaperRepository,
@@ -90,17 +87,10 @@ function getNow(options: StudentFlowRuntimeRepositoryOptions): Date {
 }
 
 function createLocalRuntimeDatabase(): StudentFlowRuntimeDatabase {
-  loadLocalEnv();
-
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for student flow runtime.");
-  }
-
-  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
-    schema: databaseSchema,
-  });
+  return createRuntimeDatabaseForSchema(
+    databaseSchema,
+    "DATABASE_URL is required for student flow runtime.",
+  );
 }
 
 export function createPostgresStudentFlowRepositories(
@@ -1704,38 +1694,4 @@ function getStringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
-}
-
-function loadLocalEnv(): void {
-  const localEnvPath = resolve(process.cwd(), ".env.local");
-
-  if (!existsSync(localEnvPath)) {
-    return;
-  }
-
-  const localEnvContent = readFileSync(localEnvPath, "utf8");
-
-  for (const line of localEnvContent.split(/\r?\n/u)) {
-    const trimmedLine = line.trim();
-
-    if (trimmedLine.length === 0 || trimmedLine.startsWith("#")) {
-      continue;
-    }
-
-    const separatorIndex = trimmedLine.indexOf("=");
-
-    if (separatorIndex <= 0) {
-      continue;
-    }
-
-    const key = trimmedLine.slice(0, separatorIndex).trim();
-    const value = trimmedLine
-      .slice(separatorIndex + 1)
-      .trim()
-      .replace(/^["']|["']$/gu, "");
-
-    if (process.env[key] === undefined) {
-      process.env[key] = value;
-    }
-  }
 }

@@ -7,6 +7,7 @@ import postgres from "postgres";
 import * as databaseSchema from "@/db/schema";
 
 export type RuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
+export type RuntimeDatabaseSchema = Record<string, unknown>;
 export type RuntimePostgresClient = ReturnType<typeof postgres>;
 export type RuntimePostgresClientFactory = (
   databaseUrl: string,
@@ -21,6 +22,19 @@ type SharedRuntimePostgresState = {
 };
 
 const sharedRuntimePostgresStateKey = Symbol.for("tiku.runtimePostgresState");
+
+export function createRuntimeDatabaseForSchema<
+  TSchema extends RuntimeDatabaseSchema,
+>(
+  schema: TSchema,
+  missingDatabaseUrlMessage: string,
+): PostgresJsDatabase<TSchema> {
+  const databaseUrl = resolveRuntimeDatabaseUrl(missingDatabaseUrlMessage);
+
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
+    schema,
+  });
+}
 
 export function createLazyRuntimeDatabaseGetter(
   options: RuntimeDatabaseOptions,
@@ -60,9 +74,7 @@ export function resetSharedRuntimePostgresClientsForTest(): void {
   getSharedRuntimePostgresState().clients.clear();
 }
 
-function createLocalRuntimeDatabase(
-  missingDatabaseUrlMessage: string,
-): RuntimeDatabase {
+function resolveRuntimeDatabaseUrl(missingDatabaseUrlMessage: string): string {
   loadLocalEnv();
 
   const databaseUrl = process.env.DATABASE_URL;
@@ -71,9 +83,16 @@ function createLocalRuntimeDatabase(
     throw new Error(missingDatabaseUrlMessage);
   }
 
-  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
-    schema: databaseSchema,
-  });
+  return databaseUrl;
+}
+
+function createLocalRuntimeDatabase(
+  missingDatabaseUrlMessage: string,
+): RuntimeDatabase {
+  return createRuntimeDatabaseForSchema(
+    databaseSchema,
+    missingDatabaseUrlMessage,
+  );
 }
 
 function createRuntimePostgresClient(

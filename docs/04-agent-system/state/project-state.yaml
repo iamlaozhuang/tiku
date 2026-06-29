@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: test-acceptance-evidence-status-reconciliation-2026-06-29
-updatedAt: "2026-06-29T12:29:40-07:00"
+currentPhase: security-db-runtime-connection-boundary-hardening-2026-06-29
+updatedAt: "2026-06-29T12:55:47-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -2988,9 +2988,180 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 69184558a60cfe4689b82ab393fde679bf2241e2
-  lastKnownOriginMasterSha: 69184558a60cfe4689b82ab393fde679bf2241e2
+  lastKnownMasterSha: 7107e79a5ac9e91b9e9e51410664009c7feb8eba
+  lastKnownOriginMasterSha: 7107e79a5ac9e91b9e9e51410664009c7feb8eba
 currentTask:
+  id: security-db-runtime-connection-boundary-hardening-2026-06-29
+  status: closed
+  result: pass_db_runtime_connection_boundary_hardened_no_db_execution
+  sourceStory: seeded_by_security_db_schema_migration_risk_inventory_2026_06_29
+  targetClosureItem: Reduce duplicated local env and DB connection boundary logic without reading env or connecting DB
+  behaviorBoundary: source_test_scoped::db_runtime_connection_boundary_no_db_connection_no_env_read
+  executionProfile: local_source_test_repair
+  taskKind: security_repair
+  moduleRunVersion: 2
+  priority: p1
+  severity: medium
+  branch: codex/security-db-runtime-boundary-20260629
+  approvedAt: "2026-06-29T12:43:05-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  claimedAt: "2026-06-29T12:43:05-07:00"
+  plannedAt: "2026-06-29T12:43:05-07:00"
+  materializedAt: "2026-06-29T12:43:05-07:00"
+  implementedAt: "2026-06-29T12:53:44-07:00"
+  validatedAt: "2026-06-29T12:53:44-07:00"
+  reviewedAt: "2026-06-29T12:53:44-07:00"
+  closedAt: "2026-06-29T12:53:44-07:00"
+  predecessorClosureEvidence:
+    dbSchemaMigrationInventoryTask: security-db-schema-migration-risk-inventory-2026-06-29
+    dbSchemaMigrationInventoryResult: closed_pushed_to_origin_master
+    dbSchemaMigrationInventoryCommit: 208a4e117523a6e1fb8437529b9b5c5eda0e8769
+    evidenceStatusReconciliationTask: test-acceptance-evidence-status-reconciliation-2026-06-29
+    evidenceStatusReconciliationResult: closed_pushed_to_origin_master
+    evidenceStatusReconciliationCommit: 7107e79a5ac9e91b9e9e51410664009c7feb8eba
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    - src/server/repositories/runtime-database.ts
+    - tests/unit/runtime-database-baseline.test.ts
+    - src/server/auth/local-session-runtime.ts
+    - src/server/auth/local-session-logout-route.ts
+    - src/server/repositories/admin-flow-runtime-repository.ts
+    - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+    - src/server/repositories/admin-redeem-code-runtime-repository.ts
+    - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+    - src/server/repositories/mistake-book-repository.ts
+    - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+    - src/server/repositories/student-flow-runtime-repository.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-test-acceptance-evidence-status-reconciliation.md
+    - src/server/repositories/**
+    - src/server/auth/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - src/db/**
+    - src/db/dev-seed.ts
+    - drizzle.config.ts
+    - e2e/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_runtime_model_config_read_write_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+  browserBoundary: no_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary: no_env_secret_connection_string_value_read_no_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: file_path_module_label_contract_label_validation_command_test_count_status_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credential_cookie_token_session_auth_header_values
+      - env_file_contents_or_connection_strings
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_chunk_answer_content
+      - raw_exception_payload_or_stack_trace
+      - private_fixture_or_account_material
+  repairScope:
+    sourceOrTestChangeAllowed: true
+    dbConnectionAllowed: false
+    envValueReadAllowed: false
+    browserOrE2eRuntimeAllowed: false
+    devServerAllowed: false
+    providerRuntimeBudget: zero
+    packageOrLockfileChangeAllowed: false
+    objective:
+      - centralize runtime database URL and local-env loading behavior behind runtime-database helper
+      - remove duplicate loadLocalEnv implementations from scoped runtime files
+      - keep missing DATABASE_URL messages behaviorally stable
+      - add focused no-env-read unit coverage through injected createDatabase path
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/runtime-database-baseline.test.ts src/server/auth/local-session-runtime.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/task-plans/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/acceptance/2026-06-29-security-db-runtime-connection-boundary-hardening.md src/server/repositories/runtime-database.ts tests/unit/runtime-database-baseline.test.ts src/server/auth/local-session-runtime.ts src/server/auth/local-session-logout-route.ts src/server/repositories/admin-flow-runtime-repository.ts src/server/repositories/admin-ai-audit-log-runtime-repository.ts src/server/repositories/admin-redeem-code-runtime-repository.ts src/server/repositories/admin-organization-org-auth-runtime-repository.ts src/server/repositories/mistake-book-repository.ts src/server/repositories/student-authorization-redeem-runtime-repository.ts src/server/repositories/student-flow-runtime-repository.ts
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/task-plans/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md docs/05-execution-logs/acceptance/2026-06-29-security-db-runtime-connection-boundary-hardening.md src/server/repositories/runtime-database.ts tests/unit/runtime-database-baseline.test.ts src/server/auth/local-session-runtime.ts src/server/auth/local-session-logout-route.ts src/server/repositories/admin-flow-runtime-repository.ts src/server/repositories/admin-ai-audit-log-runtime-repository.ts src/server/repositories/admin-redeem-code-runtime-repository.ts src/server/repositories/admin-organization-org-auth-runtime-repository.ts src/server/repositories/mistake-book-repository.ts src/server/repositories/student-authorization-redeem-runtime-repository.ts src/server/repositories/student-flow-runtime-repository.ts
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-db-runtime-connection-boundary-hardening-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-db-runtime-connection-boundary-hardening-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-db-runtime-connection-boundary-hardening-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  validationSummary:
+    sourceOrTestChanged: true
+    packageOrLockfileChanged: false
+    databaseAccessExecuted: false
+    schemaMigrationSeedExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    devServerExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
+    duplicateRuntimeEnvLoadersRemoved: true
+    centralRuntimeDatabaseHelperAdded: true
+    injectedDatabaseNoEnvReadCoverage: pass
+    focusedUnit: pass_2_files_9_tests
+    lint: pass
+    typecheck: pass
+    staticBoundarySearch: pass_only_central_runtime_database_retains_env_loading
+    prettierWriteScoped: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    validationStatus: pass_task_scoped_local_security_repair
+    nextRecommendedTaskId: security-db-repository-query-construction-review-2026-06-29
+  updatedAt: "2026-06-29T12:55:47-07:00"
+previousTestAcceptanceEvidenceStatusReconciliationTask:
   id: test-acceptance-evidence-status-reconciliation-2026-06-29
   status: closed
   result: pass_acceptance_evidence_status_reconciled_no_runtime_no_final_pass
