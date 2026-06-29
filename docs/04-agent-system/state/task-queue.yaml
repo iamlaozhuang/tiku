@@ -2632,12 +2632,19 @@ tasks:
     validationPolicy: task_plan_then_browser_acceptance_scoped_prettier_diff_module_run_v2_closeout
     taskKind: local_browser_acceptance
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: blocked_content_admin_formal_content_workflow_requires_stage_c_repair
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T04:35:00-07:00"
+    plannedAt: "2026-06-29T04:35:00-07:00"
+    implementedAt: "2026-06-29T06:20:00-07:00"
+    validatedAt: "2026-06-29T06:20:00-07:00"
+    reviewedAt: "2026-06-29T06:20:00-07:00"
+    closedAt: "2026-06-29T06:20:00-07:00"
+    branch: codex/full-acceptance-content-admin-workflow-20260629
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
       rows:
@@ -2765,6 +2772,121 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-formal-content-workflow-2026-06-29 -SkipRemoteAheadCheck
+    validationSummary:
+      taskPlanPrepared: pass
+      browserWorkflowEvidence: blocked_evidence_captured
+      contentAdminSessionEstablished: pass
+      formalContentRoutesReached: pass
+      nonMutatingCreateFormChecks: pass_question_and_material_forms_opened_without_save
+      formalLifecycleMutationCoverage: blocked_no_safe_test_owned_cleanup_or_publish_target
+      aiDraftReviewAdoptionBoundary: blocked_adopt_reject_visible_but_disabled_follow_up_marker
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_blocked_evidence_closeout_approved
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sensitiveEvidenceCaptured: false
+
+  - id: repair-content-admin-formal-content-workflow-actions-2026-06-29
+    title: Repair content admin formal content workflow actions
+    phase: repair-content-admin-formal-content-workflow-actions-2026-06-29
+    sourceStory: seeded_by_full_acceptance_content_admin_formal_content_workflow_blocked_evidence_2026_06_29
+    dependencies:
+      - full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    taskPlanPolicy: required_before_source_test_browser_or_docs_execution
+    humanApprovalBoundary: >-
+      This Stage C task consumes the user's staged local source/test repair approval for full acceptance findings. It may
+      repair source, tests, and documentation needed to provide a safe test-owned `content_admin` formal content
+      lifecycle workflow and AI draft review/adoption boundary, then rerun redacted localhost browser acceptance. It must
+      not change dependencies, package/lockfiles, schema, migrations, seeds, direct DB data, Provider configuration, or
+      execute Provider calls. Evidence remains route/workflow/status/count/test-count summaries only.
+    targetClosureItem: Safe test-owned content_admin formal content lifecycle and AI draft review boundary repair
+    behaviorBoundary: stage_c_source_test_repair_no_provider_no_direct_db_no_final_pass
+    executionProfile: local_source_test_repair_then_browser_rerun
+    evidenceMode: redacted_role_route_workflow_status_count_test_count_commit_only
+    validationPolicy: tdd_focused_unit_browser_rerun_prettier_diff_module_run_v2
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: pending
+    result: pending_stage_c_source_test_repair
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    branch: codex/repair-content-admin-formal-content-workflow-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - content_admin.formal_content_lifecycle_mutation_review
+        - content_admin.ai_draft_review_adoption_boundary
+      completionRule: durable_goal_incomplete_until_all_rows_have_pass_or_approved_blocked_evidence
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+      - docs/05-execution-logs/task-plans/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+      - docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+      - docs/05-execution-logs/acceptance/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+      - src/app/content/**
+      - src/features/admin/**
+      - src/components/**
+      - src/hooks/**
+      - src/lib/**
+      - src/server/**
+      - tests/unit/**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - D:/tiku-local-private/owner-facing-fixtures/**
+      - D:\tiku-local-private\owner-facing-fixtures\**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    browserBoundary:
+      currentTask: localhost_or_127_0_0_1_only_redacted_rerun_after_source_test_repair
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    credentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
 
   - id: full-acceptance-matrix-execution-2026-06-28
     title: Full all-role acceptance matrix execution

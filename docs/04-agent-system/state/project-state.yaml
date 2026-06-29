@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-advanced-analytics-runtime-reverification-repair-2026-06-29
-updatedAt: "2026-06-29T05:20:00-07:00"
+currentPhase: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+updatedAt: "2026-06-29T06:20:00-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2952,15 +2952,15 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cdff2c218eaa29537d8d13a9f9155243c10274b2
-  lastKnownOriginMasterSha: cdff2c218eaa29537d8d13a9f9155243c10274b2
+  lastKnownMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
+  lastKnownOriginMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
 currentTask:
-  id: org-advanced-analytics-runtime-reverification-repair-2026-06-29
+  id: full-acceptance-content-admin-formal-content-workflow-2026-06-29
   status: closed
-  result: pass_runtime_reverified_after_existing_local_seed_alignment
-  source: orgAdvancedAnalyticsRuntimeReverificationRepair20260629
-  branch: codex/org-analytics-runtime-reverification-20260629
-  updatedAt: "2026-06-29T05:20:00-07:00"
+  result: blocked_content_admin_formal_content_workflow_requires_stage_c_repair
+  source: fullAcceptanceContentAdminFormalContentWorkflow20260629
+  branch: codex/full-acceptance-content-admin-workflow-20260629
+  updatedAt: "2026-06-29T06:20:00-07:00"
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
@@ -4424,6 +4424,208 @@ fullAcceptanceContinuityAfterOpsAdmin20260629:
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
     sensitiveEvidenceCaptured: false
+fullAcceptanceContentAdminFormalContentWorkflow20260629:
+  taskId: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+  phase: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+  status: closed
+  result: blocked_content_admin_formal_content_workflow_requires_stage_c_repair
+  sourceStory: seeded_by_full_acceptance_continuity_after_ops_admin_2026_06_29
+  dependency: full-acceptance-continuity-after-ops-admin-2026-06-29
+  branch: codex/full-acceptance-content-admin-workflow-20260629
+  claimedAt: "2026-06-29T04:35:00-07:00"
+  plannedAt: "2026-06-29T04:35:00-07:00"
+  implementedAt: "2026-06-29T06:20:00-07:00"
+  validatedAt: "2026-06-29T06:20:00-07:00"
+  reviewedAt: "2026-06-29T06:20:00-07:00"
+  closedAt: "2026-06-29T06:20:00-07:00"
+  approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+  stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  targetClosureItem: content_admin_formal_content_lifecycle_and_ai_draft_review_boundary_redacted_evidence
+  behaviorBoundary: local_browser_acceptance_content_admin_formal_content_workflow_no_provider_no_direct_db_no_final_pass
+  executionProfile: local_browser_acceptance_content_admin_readwrite_when_app_performs_it
+  evidenceMode: redacted_role_route_workflow_status_count_summary_only_no_sensitive_evidence
+  mandatoryOwnerFacingRoleChecklist:
+    path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    rows:
+      - content_admin.formal_content_lifecycle_mutation_review
+      - content_admin.ai_draft_review_adoption_boundary
+    completionRule: >-
+      This task may close only the scoped `content_admin` formal content workflow rows. The durable goal remains
+      incomplete until every applicable checklist row has redacted pass evidence or an approved blocked-gate record.
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+    - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - D:/tiku-local-private/owner-facing-fixtures/**
+    - D:\tiku-local-private\owner-facing-fixtures\**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  browserBoundary:
+    currentTask: localhost_or_127_0_0_1_only_in_app_browser_no_screenshot_no_trace_no_raw_dom_evidence
+    allowedActions:
+      - safe_test_owned_content_admin_session_switching
+      - route_navigation_visible_status_control_count_checks
+      - app_normal_local_ui_api_mutation_only_for_test_owned_acceptance_data_if_visible_ui_requires_it
+      - cleanup_actions_only_when_app_normally_provides_them
+    forbidden:
+      - screenshot_trace_raw_dom_evidence
+      - browser_storage_or_session_material_inspection
+      - non_localhost_navigation
+      - provider_or_external_service_execution
+      - raw_question_paper_material_resource_chunk_content_evidence
+  devServerBoundary: use_existing_localhost_if_available_start_local_dev_server_only_if_required_no_env_output
+  dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+  aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+  accountCredentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+  evidenceRedaction: route_workflow_status_count_summary_only_no_sensitive_payloads_no_complete_content
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+  validationSummary:
+    taskPlanPrepared: pass
+    browserWorkflowEvidence: blocked_evidence_captured
+    contentAdminSessionEstablished: pass
+    formalContentRoutesReached: pass
+    nonMutatingCreateFormChecks: pass_question_and_material_forms_opened_without_save
+    formalLifecycleMutationCoverage: blocked_no_safe_test_owned_cleanup_or_publish_target
+    aiDraftReviewAdoptionBoundary: blocked_adopt_reject_visible_but_disabled_follow_up_marker
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_blocked_evidence_closeout_approved
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    directDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    sensitiveEvidenceCaptured: false
+  seededNextTaskCandidate:
+    taskId: repair-content-admin-formal-content-workflow-actions-2026-06-29
+    status: pending_after_blocked_evidence_closeout
+    scope: stage_c_source_test_repair_for_safe_test_owned_formal_content_lifecycle_and_ai_draft_review_boundary_no_provider_no_direct_db
+repairContentAdminFormalContentWorkflowActions20260629:
+  taskId: repair-content-admin-formal-content-workflow-actions-2026-06-29
+  phase: repair-content-admin-formal-content-workflow-actions-2026-06-29
+  status: pending
+  result: pending_stage_c_source_test_repair
+  sourceStory: seeded_by_full_acceptance_content_admin_formal_content_workflow_blocked_evidence_2026_06_29
+  dependsOn:
+    - full-acceptance-content-admin-formal-content-workflow-2026-06-29
+  branch: codex/repair-content-admin-formal-content-workflow-20260629
+  approvalConsumed: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+  stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  targetClosureItem: safe_test_owned_content_admin_formal_content_lifecycle_and_ai_draft_review_boundary_repair
+  behaviorBoundary: stage_c_source_test_repair_no_provider_no_direct_db_no_final_pass
+  executionProfile: local_source_test_repair_then_browser_rerun
+  evidenceMode: redacted_role_route_workflow_status_count_test_count_commit_only
+  mandatoryOwnerFacingRoleChecklist:
+    path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    rows:
+      - content_admin.formal_content_lifecycle_mutation_review
+      - content_admin.ai_draft_review_adoption_boundary
+    completionRule: >-
+      This repair may close only the scoped content_admin rows after focused source/test validation and redacted browser
+      rerun. The durable goal remains incomplete until every applicable checklist row has redacted pass evidence or an
+      approved blocked-gate record.
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - docs/05-execution-logs/task-plans/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - docs/05-execution-logs/acceptance/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - src/app/content/**
+    - src/features/admin/**
+    - src/components/**
+    - src/hooks/**
+    - src/lib/**
+    - src/server/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  browserBoundary:
+    currentTask: localhost_or_127_0_0_1_only_redacted_rerun_after_source_test_repair
+  dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+  aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+  credentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
 orgAdvancedAnalyticsDbAlignmentRepair20260628:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
   status: closed
