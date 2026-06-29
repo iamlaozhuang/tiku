@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-dependency-install-script-binary-surface-review-2026-06-29
-updatedAt: "2026-06-29T14:38:24-07:00"
+currentPhase: security-dependency-public-advisory-lookup-2026-06-29
+updatedAt: "2026-06-29T14:55:44-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -2990,9 +2990,205 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: df8f3322f2d558d568971307df7c405b81f6a55b
-  lastKnownOriginMasterSha: df8f3322f2d558d568971307df7c405b81f6a55b
+  lastKnownMasterSha: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
+  lastKnownOriginMasterSha: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
 currentTask:
+  id: security-dependency-public-advisory-lookup-2026-06-29
+  status: closed
+  result: pass_public_advisory_lookup_task_split_no_dependency_change
+  sourceStory: seeded_by_security_dependency_supply_chain_inventory_2026_06_29
+  targetClosureItem: current public CVE/GHSA/advisory status lookup without install fix package or lockfile change
+  behaviorBoundary: network_read_only::public_advisory_lookup_no_install_no_fix_no_lockfile_change
+  executionProfile: public_advisory_read_only_security_review
+  taskKind: security_review_candidate
+  moduleRunVersion: 2
+  priority: p1
+  severity: medium
+  branch: codex/security-dependency-public-advisory-lookup-20260629
+  approvedAt: "2026-06-29T14:55:44-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: localSecurityRepairLoopApproval20260629_after_task_scoped_network_read_only_materialization
+  claimedAt: "2026-06-29T14:55:44-07:00"
+  plannedAt: "2026-06-29T14:55:44-07:00"
+  materializedAt: "2026-06-29T14:55:44-07:00"
+  validatedAt: "2026-06-29T15:06:50-07:00"
+  reviewedAt: "2026-06-29T15:06:50-07:00"
+  closedAt: "2026-06-29T15:06:50-07:00"
+  predecessorClosureEvidence:
+    dependencySupplyChainInventoryTask: security-dependency-supply-chain-inventory-2026-06-29
+    dependencySupplyChainInventoryResult: pass_dependency_supply_chain_inventory_task_split_no_dependency_change
+    dependencySupplyChainInventoryEvidence: docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+    deprecatedTransitiveReviewTask: security-dependency-deprecated-transitive-review-2026-06-29
+    deprecatedTransitiveReviewCommit: df8f3322f2d558d568971307df7c405b81f6a55b
+    deprecatedTransitiveReviewEvidence: docs/05-execution-logs/evidence/2026-06-29-security-dependency-deprecated-transitive-review.md
+    installScriptBinarySurfaceReviewTask: security-dependency-install-script-binary-surface-review-2026-06-29
+    installScriptBinarySurfaceReviewCommit: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
+    installScriptBinarySurfaceReviewEvidence: docs/05-execution-logs/evidence/2026-06-29-security-dependency-install-script-binary-surface-review.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-dependency-public-advisory-lookup.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-public-advisory-lookup.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-public-advisory-lookup.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-public-advisory-lookup.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/open-source-introduction.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/dependency-introduction-gate.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/sop/**
+    - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-supply-chain-inventory.md
+    - docs/01-requirements/traceability/2026-06-29-security-dependency-supply-chain-inventory.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-deprecated-transitive-review.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-dependency-deprecated-transitive-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-deprecated-transitive-review.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-deprecated-transitive-review.md
+    - docs/01-requirements/traceability/2026-06-29-security-dependency-deprecated-transitive-review.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    - docs/01-requirements/traceability/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    - package.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - scripts/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - src/db/**
+    - src/db/dev-seed.ts
+    - drizzle.config.ts
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  dependencyBoundary: public_advisory_read_only_no_package_or_lockfile_change_no_install_no_update_no_remove_no_audit_fix_no_lockfile_refresh
+  networkBoundary: official_public_advisory_lookup_only_for_scoped_package_name_version_status_no_package_download_no_registry_token_no_private_registry_no_provider_or_browser_runtime
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+  browserBoundary: no_in_app_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: package_name_version_advisory_id_public_source_link_severity_status_count_risk_category_follow_up_task_id_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credential_cookie_token_session_auth_header_values
+      - env_file_contents_or_connection_strings_or_database_urls
+      - registry_tokens_private_registry_urls_tokenized_install_logs
+      - raw_advisory_payloads_or_network_audit_json
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_chunk_answer_content
+      - raw_exception_payload_or_stack_trace
+      - private_fixture_or_account_material
+  reviewScope:
+    sourceOrTestChangeAllowed: false
+    migrationFileModificationAllowed: false
+    dbConnectionAllowed: false
+    migrationReplayAllowed: false
+    schemaMigrationSeedAllowed: false
+    envValueReadAllowed: false
+    browserOrE2eRuntimeAllowed: false
+    devServerAllowed: false
+    providerRuntimeBudget: zero
+    packageOrLockfileChangeAllowed: false
+    dependencyInstallUpdateRemoveAuditFixAllowed: false
+    dependencyScriptExecutionAllowed: false
+    publicAdvisoryNetworkLookupAllowed: true
+    advisorySourcesAllowed:
+      - OSV_public_advisory_database
+      - GitHub_Advisory_Database_public_pages
+      - NVD_public_pages_for_CVE_cross_reference_only
+    advisoryScopePackageSet:
+      - direct_runtime_dependencies_from_package_json
+      - direct_dev_dependencies_from_package_json
+      - prior_flagged_deprecated_transitive_packages
+      - prior_flagged_install_script_binary_surface_packages
+    objective:
+      - check current public advisory status for the scoped package/version set without dependency mutation
+      - record only package names versions advisory ids severity statuses source links and count summaries
+      - avoid package manager audit commands install update remove audit fix lockfile refresh and package downloads
+      - split any remediation into separately materialized dependency gate tasks requiring fresh approval
+  validationCommands:
+    - rg -n "OSV|GitHub Advisory|NVD|GHSA|CVE|advisory" docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md docs/01-requirements/traceability/2026-06-29-security-dependency-public-advisory-lookup.md
+    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/task-plans/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/acceptance/2026-06-29-security-dependency-public-advisory-lookup.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/task-plans/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-public-advisory-lookup.md docs/05-execution-logs/acceptance/2026-06-29-security-dependency-public-advisory-lookup.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-public-advisory-lookup-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-public-advisory-lookup-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-public-advisory-lookup-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-dependency-public-advisory-lookup.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-dependency-public-advisory-lookup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-public-advisory-lookup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-dependency-public-advisory-lookup.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_network_read_only_materialization
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_network_read_only_materialization
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_network_read_only_materialization
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_network_read_only_materialization
+  validationSummary:
+    validationStatus: pass
+    scopedPackageVersionChecks: 57
+    matchedAdvisoryRecords: 18
+    directRuntimeDependencyAdvisories: 0
+    directDevDependencyAdvisories: 0
+    packageManagerAdvisories: 14
+    packageManagerHighAdvisories: 8
+    packageManagerModerateAdvisories: 6
+    viteAdvisories: 2
+    esbuildAdvisories: 2
+    packageLockfileWorkspaceChanges: 0
+    dependencyInstallUpdateRemoveAuditFixExecuted: false
+    packageDownloadPrivateRegistryOrRegistryTokenUseExecuted: false
+    dependencyScriptBinaryExecutionExecuted: false
+    sourceTestSchemaMigrationChanges: 0
+    dbProviderBrowserRuntimeExecuted: false
+    releaseReadinessFinalPassCostCalibrationExecuted: false
+    scopedAdvisoryEvidenceGrep: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    remediationGateTasksSeeded:
+      - security-package-manager-advisory-remediation-gate-2026-06-29
+      - security-dev-toolchain-advisory-remediation-gate-2026-06-29
+    nextRecommendedTaskId: security-package-manager-advisory-remediation-gate-2026-06-29_requires_fresh_dependency_package_manager_approval
+  updatedAt: "2026-06-29T15:06:50-07:00"
+previousSecurityDependencyInstallScriptBinarySurfaceReviewTask:
   id: security-dependency-install-script-binary-surface-review-2026-06-29
   status: closed
   result: pass_dependency_install_script_binary_surface_review_task_split_no_dependency_change
@@ -3015,7 +3211,7 @@ currentTask:
   validatedAt: "2026-06-29T14:48:30-07:00"
   reviewedAt: "2026-06-29T14:48:30-07:00"
   closedAt: "2026-06-29T14:48:30-07:00"
-  commitSha: pending_local_closeout_commit
+  commitSha: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
   predecessorClosureEvidence:
     dependencySupplyChainInventoryTask: security-dependency-supply-chain-inventory-2026-06-29
     dependencySupplyChainInventoryResult: pass_dependency_supply_chain_inventory_task_split_no_dependency_change
