@@ -1175,11 +1175,20 @@ tasks:
     validationPolicy: task_plan_then_browser_rerun_scoped_prettier_diff_module_run_v2
     taskKind: local_browser_acceptance
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    status: closed
+    result: pass_org_advanced_employee_ai_actions_rerun_no_final_pass
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    freshExecutionAcknowledgementAt: "2026-06-29T04:57:04-07:00"
+    freshExecutionAcknowledgement: current_user_approved_execution_2026_06_29_for_seeded_org_advanced_employee_ai_actions_rerun
+    claimedAt: "2026-06-29T04:57:04-07:00"
+    plannedAt: "2026-06-29T04:57:04-07:00"
+    implementedAt: "2026-06-29T05:04:20-07:00"
+    validatedAt: "2026-06-29T05:04:20-07:00"
+    reviewedAt: "2026-06-29T05:04:20-07:00"
+    closedAt: "2026-06-29T05:04:20-07:00"
+    branch: codex/org-advanced-employee-ai-actions-rerun-20260629
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -1229,6 +1238,7 @@ tasks:
       - test-results/**
       - .next/**
     browserBoundary: localhost_or_127_0_0_1_only_no_raw_dom_no_screenshot_no_trace_no_browser_storage_evidence
+    devServerBoundary: use_existing_localhost_if_available_start_local_dev_server_only_if_required_no_env_output
     dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
     aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
     credentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
@@ -1260,6 +1270,24 @@ tasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    runtimeEvidenceSummary:
+      browserCommand: browser_org_advanced_employee_ai_actions_rerun_redacted
+      loginRouteStatus: pass_home_ai_training_1_org_training_1_login_prompt_0
+      aiQuestionAction: pass_enabled_actions_start_submit_feedback_retry_1_each_failure_0_provider_leak_0
+      aiPaperAction: pass_summary_labels_21_enabled_actions_start_submit_feedback_retry_1_each_failure_0_provider_leak_0
+      generatedPracticeFeedback: pass_start_submit_feedback_cues_9_6_7_failure_0_provider_leak_0
+      detailCueSummary: pass_profession_5_level_4_subject_2_knowledge_node_2_question_type_5_count_2_difficulty_2_goal_5_paper_structure_19
+      sensitiveEvidenceCaptured: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+    validationSummary:
+      browserOrgAdvancedEmployeeAiActionsRerun: pass
+      scopedPrettier: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
 
   - id: full-unit-baseline-current-recheck-and-repair-2026-06-28
     title: Full unit baseline current recheck and repair
