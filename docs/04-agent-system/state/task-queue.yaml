@@ -1705,6 +1705,158 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
 
+  - id: isolated-staging-target-package-2026-06-29
+    title: Isolated staging target package
+    phase: isolated-staging-target-package-2026-06-29
+    sourceStory: current_user_approved_docs_only_isolated_staging_target_package_2026_06_29
+    dependencies:
+      - release-readiness-docs-only-execution-plan-2026-06-29
+    taskPlanPolicy: required_before_docs_state_staging_target_package
+    humanApprovalBoundary: >-
+      Current user approved execution of the recommended docs-only isolated staging target package. This task may read
+      governance, requirements, ADRs, project-state, task-queue, owner handoff, release-readiness plan, and redacted
+      evidence/acceptance/audit/task-plan/traceability docs; write only scoped docs/state, task-plan, evidence,
+      audit-review, acceptance, and traceability files listed below; record only staging target labels, owner labels,
+      gate names, approval requirements, stop conditions, status, count, and commit summaries; run local formatting,
+      diff, and Module Run v2 governance checks; then commit, fast-forward merge to master, push origin/master, and
+      clean up the short branch if validation passes. It must not execute browser/runtime, DB access or mutation,
+      AI/Provider execution or configuration, source/test changes, dependency/package/lockfile changes,
+      schema/migration/seed changes, creating or modifying cloud resources, staging/prod connection, deployment, PR,
+      force-push, release readiness claim, final Pass, or Cost Calibration Gate work.
+    targetClosureItem: Isolated staging target decision package and future staging smoke stop conditions
+    behaviorBoundary: docs_state::isolated_staging_target_package_no_runtime_no_source_no_db_no_provider_no_deploy_no_release_claim
+    executionProfile: docs_state_staging_target_materialization_package_only
+    evidenceMode: redacted_staging_target_owner_gate_status_count_commit_summary_only
+    validationPolicy: scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: docs_state_completion_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_only_staging_target_package_prepared_smoke_blocked_pending_concrete_target
+    approvedAt: "2026-06-29T06:44:38-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_approved_execute_recommended_isolated_staging_target_package_2026_06_29
+    claimedAt: "2026-06-29T06:44:38-07:00"
+    plannedAt: "2026-06-29T06:44:38-07:00"
+    implementedAt: "2026-06-29T06:48:41-07:00"
+    validatedAt: "2026-06-29T06:48:41-07:00"
+    reviewedAt: "2026-06-29T06:48:41-07:00"
+    closedAt: "2026-06-29T06:48:41-07:00"
+    branch: codex/isolated-staging-target-package-20260629
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-isolated-staging-target-package.md
+      - docs/05-execution-logs/task-plans/2026-06-29-isolated-staging-target-package.md
+      - docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
+      - docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_access_or_mutation_no_schema_migration_seed_no_raw_rows
+    aiProviderBoundary: no_provider_execution_no_provider_configuration_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_account_session_switching_no_dev_server_action
+    credentialBoundary: no_credentials_cookies_tokens_sessions_localStorage_or_Authorization_header_access_no_private_fixture_reads
+    evidenceRedaction:
+      allowed: staging_target_label_owner_gate_status_count_commit_approval_requirement_stop_condition_summary_only
+      forbidden:
+        - credentials_cookies_tokens_sessions_localStorage_Authorization_headers
+        - env_file_contents_connection_strings
+        - raw_dom_screenshots_traces
+        - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_input_output
+        - complete_question_paper_material_resource_chunk_content
+        - production_resource_identifiers_not_explicitly_owner_approved_for_evidence
+    stagingTargetPackage:
+      targetStatus: pending_owner_supplied_exact_staging_url_or_deploy_target_label
+      nextGateBlockedUntil:
+        - exact_staging_url_or_deploy_target_label_recorded
+        - environment_owner_recorded
+        - account_source_or_safe_role_switching_method_recorded
+        - secret_env_boundary_recorded
+        - data_source_boundary_recorded
+        - evidence_redaction_rules_recorded
+        - rollback_or_stop_decision_owner_recorded
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/task-plans/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/task-plans/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId isolated-staging-target-package-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId isolated-staging-target-package-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId isolated-staging-target-package-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-isolated-staging-target-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-isolated-staging-target-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_recommended_isolated_staging_target_package_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_recommended_isolated_staging_target_package_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_recommended_isolated_staging_target_package_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_recommended_isolated_staging_target_package_2026_06_29
+    validationSummary:
+      taskPlanPrepared: pass
+      traceabilityPackagePrepared: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      scopedPrettierWrite: pass
+      scopedPrettier: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pass_after_evidence_result_class_repair
+      moduleRunV2PrePushReadiness: pass
+      sensitiveEvidenceCaptured: false
+      exactStagingTargetRecorded: false
+      nextStagingSmokeBlocked: true
+      browserRuntimeExecuted: false
+      databaseAccessExecuted: false
+      providerExecutionOrConfigurationExecuted: false
+      sourceTestDependencySchemaMigrationSeedChanged: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+
   - id: full-unit-baseline-current-recheck-and-repair-2026-06-28
     title: Full unit baseline current recheck and repair
     phase: full-unit-baseline-current-recheck-and-repair-2026-06-28
