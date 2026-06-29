@@ -88,10 +88,11 @@ AI input/output, employee subjective answers, and complete question/paper/materi
   pass.
 - `git commit -m "docs(acceptance): record ai generation role rerun"`: pass; commit `da314607d`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28`:
-  initial run blocked until this closeout evidence recorded blocked-evidence approval, batch commit, localFullLoopGate,
-  threadRolloverGate, and nextModuleRunCandidate anchors.
+  pass after closeout evidence commit `99727daeadf0518936dd6263364c3673ded1da76`; initial run blocked until this
+  closeout evidence recorded blocked-evidence approval, batch commit, localFullLoopGate, threadRolloverGate, and
+  nextModuleRunCandidate anchors.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28 -SkipRemoteAheadCheck`:
-  pass before this closeout evidence update.
+  pass after closeout evidence commit `99727daeadf0518936dd6263364c3673ded1da76`.
 - No Provider execution, AI generation submit, direct DB access, source/test change, dependency change, schema/migration,
   seed, screenshot, trace, raw DOM evidence, raw response payload evidence, release readiness, final Pass, or Cost
   Calibration action was executed.
@@ -115,3 +116,5 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - Commit: `da314607d`
 - Commit scope: seven task-scoped governance, traceability, plan, evidence, audit, and acceptance files only.
 - Commit message: `docs(acceptance): record ai generation role rerun`.
+- Closeout evidence commit: `99727daeadf0518936dd6263364c3673ded1da76`
+- Closeout commit message: `docs(acceptance): close ai generation role rerun`.
