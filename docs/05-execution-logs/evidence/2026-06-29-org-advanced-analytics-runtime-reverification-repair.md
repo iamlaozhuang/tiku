@@ -49,6 +49,9 @@
 
 - RED: current local DB had the required table but zero submitted/default-window training answers.
 - GREEN: after existing seed alignment, focused unit validation passed and browser summary loaded for `org_advanced_admin`.
+- Task commit: `3ec14ac78`.
+- Post-merge master gate: `Test-ModuleRunV2PrePushReadiness.ps1 -SkipRemoteAheadCheck` passed on `master` after fast-forward merge.
+- Post-merge evidence commit: recorded in final handoff; this line intentionally avoids a self-referential commit SHA.
 - Local DB mutation: non-destructive seed alignment only.
 - Source/test changes: false.
 - Provider/config/prompt/raw AI IO executed: false.
