@@ -2856,9 +2856,9 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-    moduleRunV2PreCommitHardening: pending
-    moduleRunV2CloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2CloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
   nextRecommendedTask: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
 previousTaskSnapshotContentAdminSafeRoleBootstrap:
   id: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28

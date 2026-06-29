@@ -3466,9 +3466,9 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
       sensitiveEvidenceCaptured: false
-      moduleRunV2PreCommitHardening: pending
-      moduleRunV2CloseoutReadiness: pending
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
 
   - id: owner-facing-local-experience-batch-2026-06-28

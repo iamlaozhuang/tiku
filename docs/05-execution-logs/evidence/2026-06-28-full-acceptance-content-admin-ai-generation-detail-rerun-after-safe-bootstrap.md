@@ -8,7 +8,7 @@
 - Result: blocked_local_safe_bootstrap_runtime_session_not_recognized
 - Batch range: two `content_admin` AI generation detail-control rows.
 - Pre-task master checkpoint: `b2bfdd1e1fe5ba77895bcb2ee6d6503b93c5f9c1`
-- Commit: pending
+- Commit: `82c2b54e3`
 
 ## Boundary Confirmation
 
@@ -90,7 +90,7 @@ evidence closeout, not an acceptance pass for either row.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28`:
   pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28`:
-  initial fail because blocked-evidence closeout metadata was incomplete; rerun pending after this evidence update.
+  pass after blocked-evidence closeout metadata update.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28 -SkipRemoteAheadCheck`:
   pass.
 
