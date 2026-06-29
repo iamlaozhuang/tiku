@@ -99,7 +99,7 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
 - Module Run v2 closeout readiness: pass.
-- Module Run v2 prepush readiness: pending at this evidence checkpoint.
+- Module Run v2 prepush readiness: pass.
 
 ## Validation Command Results
 
@@ -112,6 +112,7 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-test-owned-account-stage-b-repair-2026-06-28`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-test-owned-account-stage-b-repair-2026-06-28`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-test-owned-account-stage-b-repair-2026-06-28 -SkipRemoteAheadCheck`: pass.
 
 ## Batch Commit Evidence
 

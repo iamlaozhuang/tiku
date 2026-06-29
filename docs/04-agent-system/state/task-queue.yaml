@@ -3053,7 +3053,7 @@ tasks:
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2CloseoutReadiness: pass
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: content-admin-test-owned-admin-account-bootstrap-repair-planning-or-stage-c-source-repair
 
   - id: owner-facing-local-experience-batch-2026-06-28
