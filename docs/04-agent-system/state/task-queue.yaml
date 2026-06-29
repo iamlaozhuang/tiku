@@ -4451,6 +4451,218 @@ tasks:
       moduleRunV2PrePushReadiness: pass
     nextRecommendedTask: stage_c_or_stage_d_diagnostic_for_runtime_summary_load_failure_after_browser_rerun
 
+  - id: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+    title: Org advanced analytics runtime summary load diagnostic
+    phase: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+    sourceStory: durable_full_acceptance_goal_follow_up_after_org_advanced_analytics_browser_rerun_blocker_2026_06_28
+    dependencies:
+      - org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user approved staged local execution for the durable goal. This diagnostic task may use localhost-only
+      read-only browser status/count checks, source read-only tracing, focused unit tests, and local DB read-only
+      aggregate proof only when needed. It must not change source/tests, mutate UI/API data, write DB rows, change
+      schema/migrations/seeds, read or record credentials/tokens/sessions/env secrets, call Provider/model services,
+      change dependencies, deploy, create PRs, force-push, claim release readiness/final Pass, or execute Cost
+      Calibration.
+    targetClosureItem: Root-cause evidence for org advanced analytics summary load failure after browser rerun
+    behaviorBoundary: local_runtime_diagnostic::read_only_browser_source_db_aggregate_no_fix_no_final_pass
+    executionProfile: local_read_only_browser_source_db_aggregate_diagnostic
+    evidenceMode: redacted_role_route_workflow_status_count_failure_class_only
+    validationPolicy: focused_unit_optional_readonly_runtime_proof_scoped_prettier_diff_module_run_v2
+    taskKind: local_runtime_diagnostic
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_by_local_db_schema_gap_organization_training_answer_source_missing
+    approvedAt: "2026-06-28T23:05:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: durable_full_acceptance_staged_local_execution_stage_c_stage_d_current_thread_2026_06_28
+    claimedAt: "2026-06-28T23:05:00-07:00"
+    plannedAt: "2026-06-28T23:05:00-07:00"
+    branch: codex/org-advanced-analytics-runtime-summary-diagnostic-20260628
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+      - src/app/api/v1/organization-analytics/**
+      - src/features/admin/organization-analytics/**
+      - src/server/contracts/organization-analytics*
+      - src/server/models/organization-analytics*
+      - src/server/repositories/organization-analytics*
+      - src/server/services/organization-analytics*
+      - src/server/services/*authorization*
+      - src/server/validators/organization-analytics*
+      - tests/unit/organization-analytics*
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localBrowserRuntime: approved_read_only_localhost_status_count_only
+      localDbReadOnlyProof: approved_if_needed_aggregate_counts_status_only
+      sourceReadOnlyDiagnostic: approved
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked_current_task_diagnostic_only
+      localTestChange: blocked_current_task_diagnostic_only
+      uiApiMutation: blocked
+      dependencyIntroduction: blocked
+      schemaMigrationSeed: blocked
+      providerCall: blocked
+      stagingProdDeploy: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessOrFinalPass: blocked
+      costCalibrationGate: blocked
+    localDbBoundary:
+      currentTask: local_read_only_aggregate_status_count_only_if_needed_for_authorization_or_summary_state
+      forbidden:
+        - raw_rows
+        - internal_ids
+        - pii
+        - email_phone_plaintext_redeem_code
+        - credentials_tokens_sessions
+        - direct_data_change
+        - schema_migration_seed
+        - destructive_operation
+    aiProviderBoundary:
+      currentTask: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+      forbidden:
+        - provider_key_endpoint_model_config_or_fallback_config_read_or_write
+        - env_secret_read
+        - prompt_provider_payload_raw_ai_input_or_output_evidence
+        - complete_generated_question_or_paper_evidence
+        - cost_calibration_pricing_or_quota_default_decision
+    credentialBoundary:
+      currentTask: no_new_credential_evidence_no_cookie_token_session_localStorage_or_Authorization_header_capture
+      allowedUse: existing_localhost_test_owned_session_or_safe_role_switching_if_needed_without_evidence
+      forbiddenEvidence:
+        - password_cookie_token_session_localStorage_Authorization_header
+        - email_phone_plaintext_redeem_code
+        - secret_database_url_api_key_connection_string
+        - env_file_content
+    evidenceRedaction:
+      allowed:
+        - role_labels
+        - route_labels
+        - workflow_or_control_category_labels
+        - status_labels
+        - counts
+        - command_names
+        - test_counts
+        - failure_classes
+        - redacted_root_cause_summary
+        - commit_sha
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_dom_screenshots_traces_html_reports
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts
+      - browser-org-advanced-analytics-runtime-summary-diagnostic-read-only
+      - optional-local-db-read-only-aggregate-proof-if-needed
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: durable_full_acceptance_staged_local_execution_stage_c_stage_d_current_thread_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_per_task_commit_merge_push_cleanup_and_continue_2026_06_28
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - ui_api_mutation
+      - direct_db_write_schema_migration_seed_destructive_operation
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - sensitive_evidence_capture
+    validationSummary:
+      taskPlanPrepared: pass
+      requirementAlignmentPrepared: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      ssotReadList: pass
+      codeTasteAndAdrRead: pass
+      sourceReadOnlyTrace: pass_route_service_repository_expects_organization_training_answer_source
+      browserRuntimeExecuted: true_read_only_localhost_route_status_count_check
+      browserDiagnostic: blocked_route_reached_scope_context_1_summary_card_0_employee_stats_0_load_failed_visible
+      localDbReadOnlyExecuted: pass_aggregate_metadata_only
+      localDbReadOnlyProof: blocked_organization_training_answer_table_present_0_candidate_table_count_0_answer_record_present_1
+      focusedUnitOrganizationAnalytics: pass_1_file_6_tests
+      prettierScoped: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
+      sourceOrTestChanged: false
+      providerCallOrConfigurationExecuted: false
+      uiApiMutationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+    nextRecommendedTask: >-
+      stage_d_schema_seed_alignment_approval_or_stage_c_empty_state_repair_planning_for_organization_analytics_runtime_source_gap
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28
