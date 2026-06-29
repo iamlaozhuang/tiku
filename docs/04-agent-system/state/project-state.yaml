@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
-updatedAt: "2026-06-29T01:34:00-07:00"
+updatedAt: "2026-06-29T02:06:00-07:00"
 orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628:
   approvedAt: "2026-06-28T22:56:09-07:00"
   approvedBy: laozhuang
@@ -2918,15 +2918,15 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3308fd1cc26be6004e0581487135f4038161db6d
-  lastKnownOriginMasterSha: 3308fd1cc26be6004e0581487135f4038161db6d
+  lastKnownMasterSha: cd85f7e8a35290e9f45195ea85108db6d58a2373
+  lastKnownOriginMasterSha: cd85f7e8a35290e9f45195ea85108db6d58a2373
 currentTask:
   id: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
-  status: implemented
+  status: closed
   result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
   source: repairOrgAdvancedEmployeeAiGenerationDetailControls20260629
   branch: codex/org-advanced-employee-ai-detail-controls-20260629
-  updatedAt: "2026-06-29T01:34:00-07:00"
+  updatedAt: "2026-06-29T02:06:00-07:00"
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
@@ -3806,7 +3806,7 @@ fullAcceptanceOrgAdvancedEmployeeWorkflow20260629:
 repairOrgAdvancedEmployeeAiGenerationDetailControls20260629:
   taskId: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
   phase: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
-  status: implemented
+  status: closed
   result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
   sourceBlockedTaskId: full-acceptance-org-advanced-employee-workflow-2026-06-29
   branch: codex/org-advanced-employee-ai-detail-controls-20260629
@@ -3819,6 +3819,10 @@ repairOrgAdvancedEmployeeAiGenerationDetailControls20260629:
   plannedAt: "2026-06-29T01:08:00-07:00"
   claimedAt: "2026-06-29T01:34:00-07:00"
   implementedAt: "2026-06-29T01:52:00-07:00"
+  validatedAt: "2026-06-29T02:06:00-07:00"
+  reviewedAt: "2026-06-29T02:06:00-07:00"
+  closedAt: "2026-06-29T02:06:00-07:00"
+  implementationCommitSha: c0a252c81
   goal: >-
     Repair the learner AI question and AI paper detail-control workflow for `org_advanced_employee`, reusing existing
     personal AI generation contracts/services and preserving no-Provider validation.
@@ -3877,8 +3881,8 @@ repairOrgAdvancedEmployeeAiGenerationDetailControls20260629:
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: true
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false

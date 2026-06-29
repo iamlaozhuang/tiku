@@ -1773,7 +1773,7 @@ tasks:
     validationPolicy: task_plan_then_tdd_focused_unit_browser_control_rerun_precommit_closeout_prepush
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: implemented
+    status: closed
     result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
@@ -1782,6 +1782,11 @@ tasks:
     plannedAt: "2026-06-29T01:08:00-07:00"
     claimedAt: "2026-06-29T01:34:00-07:00"
     implementedAt: "2026-06-29T01:52:00-07:00"
+    validatedAt: "2026-06-29T02:06:00-07:00"
+    reviewedAt: "2026-06-29T02:06:00-07:00"
+    closedAt: "2026-06-29T02:06:00-07:00"
+    implementationCommitSha: c0a252c81
+    firstCommit: c0a252c81
     branch: codex/org-advanced-employee-ai-detail-controls-20260629
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -1905,8 +1910,8 @@ tasks:
       prettierScoped: pass
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
-      moduleRunV2ModuleCloseoutReadiness: pending
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
       sourceOrTestChanged: true
       databaseConnectionOrMutationExecuted: false
       providerCallOrConfigurationExecuted: false

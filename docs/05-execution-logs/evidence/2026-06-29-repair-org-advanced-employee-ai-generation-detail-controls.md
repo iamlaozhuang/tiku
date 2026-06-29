@@ -2,11 +2,12 @@
 
 - Task id: `repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29`
 - Branch: `codex/org-advanced-employee-ai-detail-controls-20260629`
-- Evidence status: implemented
-- Result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
-- Updated at: `2026-06-29T01:52:00-07:00`
+- Evidence status: closed
+- Result: pass
+- Detailed result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
+- Updated at: `2026-06-29T02:06:00-07:00`
 - Batch range: single scoped source/test repair task.
-- Commit: pending.
+- Commit: `c0a252c81`.
 
 ## Boundary Confirmation
 
@@ -57,10 +58,10 @@ GREEN: pass.
 - Module Run v2 precommit hardening: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29`.
-- Module Run v2 closeout readiness: pending.
+- Module Run v2 closeout readiness: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29`.
-- Module Run v2 prepush readiness: pending.
+- Module Run v2 prepush readiness: pass.
   Command:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29 -SkipRemoteAheadCheck`.
 
