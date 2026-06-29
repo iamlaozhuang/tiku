@@ -2965,8 +2965,8 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
   acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
-  commitSha: pending-closeout-commit
-  updatedAt: "2026-06-29T06:51:30-07:00"
+  commitSha: 227c768f0
+  updatedAt: "2026-06-29T06:54:56-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
@@ -4289,6 +4289,7 @@ isolatedStagingTargetPackage20260629:
   evidencePath: docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
   acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+  commitSha: 227c768f0
   closeoutPolicy:
     localCommit:
       approved: true
@@ -4316,6 +4317,7 @@ isolatedStagingTargetPackage20260629:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2CloseoutReadiness: pass_after_evidence_result_class_repair
     moduleRunV2PrePushReadiness: pass
+    closeoutCommitShaRecorded: 227c768f0
     sensitiveEvidenceCaptured: false
     exactStagingTargetRecorded: false
     nextStagingSmokeBlocked: true

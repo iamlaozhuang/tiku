@@ -6,7 +6,7 @@
 - Evidence status: pass
 - Result: pass
 - Detailed result: pass_docs_only_staging_target_package_prepared_smoke_blocked_pending_concrete_target
-- Updated at: `2026-06-29T06:51:30-07:00`
+- Updated at: `2026-06-29T06:54:56-07:00`
 
 ## Boundary Confirmation
 
@@ -71,9 +71,10 @@
 ## Batch Commit Evidence
 
 - Base commit: `889ac0b5b`.
-- Primary package commit: pending.
+- Primary package commit: `227c768f0`.
 - Commit scope: governance state, task queue, traceability, plan, evidence, audit review, and acceptance files.
-- Commit command will be executed only after scoped closeout and pre-push readiness gates pass.
+- Closeout state repair: current task commit SHA recorded after the primary package commit to avoid pending closeout
+  placeholders in post-merge reconciliation.
 
 ## Local Full Loop Gate
 

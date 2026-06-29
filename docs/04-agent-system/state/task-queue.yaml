@@ -1818,6 +1818,7 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-isolated-staging-target-package.md
+    commitSha: 227c768f0
     closeoutPolicy:
       localCommit:
         approved: true
@@ -1845,6 +1846,7 @@ tasks:
       moduleRunV2PreCommitHardening: pass
       moduleRunV2CloseoutReadiness: pass_after_evidence_result_class_repair
       moduleRunV2PrePushReadiness: pass
+      closeoutCommitShaRecorded: 227c768f0
       sensitiveEvidenceCaptured: false
       exactStagingTargetRecorded: false
       nextStagingSmokeBlocked: true
