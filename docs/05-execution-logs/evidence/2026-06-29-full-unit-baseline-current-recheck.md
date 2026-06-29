@@ -79,12 +79,14 @@
 - FIRST RUN BLOCKED: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29`
   - Result: blocked by missing closeout evidence sections; this evidence update remediates the missing records before
     rerun.
+- GREEN RERUN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29`
+  - Result: passed after commit SHA and closeout evidence were recorded.
 - GREEN: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29 -SkipRemoteAheadCheck`
   - Result: passed.
 
 ## Batch Commit Evidence
 
-- Commit: pending local validation commit.
+- Commit: `ff89f0729`.
 - Commit scope: governance state, task queue, task plan, traceability, evidence, audit review, and acceptance files for
   this task.
 - Source/test changes: none.
@@ -92,7 +94,7 @@
 ## Local Full Loop Gate
 
 - localFullLoopGate: passed for current full unit baseline, lint, typecheck, scoped formatting, diff check, Module Run v2
-  pre-commit, and pre-push readiness; module closeout rerun is pending after commit evidence update.
+  pre-commit, module closeout readiness, and pre-push readiness.
 - Current full unit baseline: pass.
 - Focused repair: skipped because current full unit baseline was green.
 - Lint: pass.
@@ -100,7 +102,7 @@
 - Formatting and diff checks: pass.
 - Module Run v2 pre-commit: pass.
 - Module Run v2 pre-push readiness: pass before closeout commit.
-- Module Run v2 module closeout: pending rerun after commit evidence update.
+- Module Run v2 module closeout: pass.
 
 ## Thread Rollover Decision
 

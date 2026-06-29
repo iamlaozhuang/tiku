@@ -905,10 +905,11 @@ fullUnitBaselineCurrentRecheck20260629:
     lint: pass
     typecheck: pass
     fullUnitGreen: pass
-    formatAndDiff: pending
-    moduleRunV2PreCommitHardening: pending
-    moduleRunV2ModuleCloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    formatAndDiff: pass
+    firstCommit: ff89f0729
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: false
 fullAcceptanceMatrixExecution20260628:
   taskId: full-acceptance-matrix-execution-2026-06-28
