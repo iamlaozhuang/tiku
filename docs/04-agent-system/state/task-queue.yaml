@@ -2271,6 +2271,7 @@ tasks:
     reviewedAt: "2026-06-28T17:27:00-07:00"
     closedAt: "2026-06-28T17:31:00-07:00"
     implementationCommitSha: 68a2963bb5448633ebe3abb025383b025495a9a7
+    closeoutCommitSha: d0c53a93efbcf64c7cf7d5fb49d5b11115666f6b
     branch: codex/ai-generation-detail-controls-repair-20260628
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -2432,7 +2433,7 @@ tasks:
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass
-      moduleRunV2PrePushReadiness: pending_clean_branch_run_after_closeout_commit
+      moduleRunV2PrePushReadiness: pass
       browserControlPresence: attempted_not_pass_evidence_current_local_browser_dev_state_unavailable_deferred_to_role_rerun
       evidencePrepared: pass
       auditReviewPrepared: pass
