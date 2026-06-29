@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-permission-role-boundary-inventory-2026-06-29
-updatedAt: "2026-06-29T09:40:00-07:00"
+currentPhase: security-api-contract-input-validation-inventory-2026-06-29
+updatedAt: "2026-06-29T09:03:52-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2952,36 +2952,36 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cddf8ad05fea70f4da52a1896a9199c483df6f92
-  lastKnownOriginMasterSha: cddf8ad05fea70f4da52a1896a9199c483df6f92
+  lastKnownMasterSha: 208471707b6da97d830ef4bb2b457156be8ab296
+  lastKnownOriginMasterSha: 208471707b6da97d830ef4bb2b457156be8ab296
 currentTask:
-  id: security-permission-role-boundary-inventory-2026-06-29
+  id: security-api-contract-input-validation-inventory-2026-06-29
   status: closed
-  result: pass_security_permission_role_boundary_inventory_task_split_no_runtime_no_release_claim
+  result: pass_security_api_contract_input_validation_inventory_task_split_no_runtime_no_release_claim
   sourceStory: seeded_by_detail_optimization_security_review_kickoff_2026_06_29
-  targetClosureItem: Authorization and role-boundary findings inventory with scoped fix-task split
-  behaviorBoundary: docs_source_read_only::authorization_inventory_no_runtime_no_db_no_provider_no_fix
+  targetClosureItem: API contract and validation findings inventory with route-level fix-task split
+  behaviorBoundary: docs_source_read_only::api_validation_inventory_no_runtime_no_db_no_provider_no_fix
   executionProfile: source_read_only_security_inventory
   taskKind: security_inventory
   moduleRunVersion: 2
-  branch: codex/security-role-boundary-inventory-20260629
-  approvedAt: "2026-06-29T08:36:41-07:00"
+  branch: codex/security-api-validation-inventory-20260629
+  approvedAt: "2026-06-29T08:55:08-07:00"
   approvedBy: laozhuang
-  approvalConsumed: active_thread_goal_continuation_security_inventory_materialization_2026_06_29
-  claimedAt: "2026-06-29T08:36:41-07:00"
-  plannedAt: "2026-06-29T08:36:41-07:00"
-  implementedAt: "2026-06-29T09:40:00-07:00"
-  validatedAt: "2026-06-29T09:40:00-07:00"
-  reviewedAt: "2026-06-29T09:40:00-07:00"
-  closedAt: "2026-06-29T09:40:00-07:00"
+  approvalConsumed: active_thread_goal_continuation_api_contract_input_validation_inventory_materialization_2026_06_29
+  claimedAt: "2026-06-29T08:55:08-07:00"
+  plannedAt: "2026-06-29T08:55:08-07:00"
+  implementedAt: "2026-06-29T09:00:55-07:00"
+  validatedAt: "2026-06-29T09:03:52-07:00"
+  reviewedAt: "2026-06-29T09:00:55-07:00"
+  closedAt: "2026-06-29T09:03:52-07:00"
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-29-security-permission-role-boundary-inventory.md
-    - docs/05-execution-logs/task-plans/2026-06-29-security-permission-role-boundary-inventory.md
-    - docs/05-execution-logs/evidence/2026-06-29-security-permission-role-boundary-inventory.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-security-permission-role-boundary-inventory.md
-    - docs/05-execution-logs/acceptance/2026-06-29-security-permission-role-boundary-inventory.md
+    - docs/01-requirements/traceability/2026-06-29-security-api-contract-input-validation-inventory.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-api-contract-input-validation-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-api-contract-input-validation-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-api-contract-input-validation-inventory.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-api-contract-input-validation-inventory.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
@@ -2996,16 +2996,12 @@ currentTask:
     - docs/05-execution-logs/audits-reviews/**
     - docs/05-execution-logs/acceptance/**
     - package.json
-    - src/server/auth/**
-    - src/server/services/**
-    - src/server/repositories/**
-    - src/server/contracts/**
-    - src/server/validators/**
-    - src/server/mappers/**
     - src/app/api/v1/**
-    - tests/unit/auth/**
-    - tests/unit/*authorization*
-    - tests/unit/*session*
+    - src/server/validators/**
+    - src/server/contracts/**
+    - src/server/mappers/**
+    - src/server/services/**
+    - tests/unit/**
   blockedFiles:
     - .env*
     - package.json
@@ -3032,7 +3028,7 @@ currentTask:
   browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
   credentialBoundary: no_account_fixture_read_no_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
   evidenceRedaction:
-    allowed: file_path_role_boundary_risk_category_severity_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
+    allowed: file_path_route_contract_validator_mapper_risk_category_severity_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
     forbidden:
       - credential_cookie_session_auth_header_values
       - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
@@ -3042,26 +3038,29 @@ currentTask:
       - env_file_contents_or_connection_strings
       - raw_exception_payload_or_stack_trace
   validationCommands:
-    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-permission-role-boundary-inventory.md
-    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-permission-role-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-permission-role-boundary-inventory.md
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-api-contract-input-validation-inventory.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-api-contract-input-validation-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-api-contract-input-validation-inventory.md
     - git diff --check
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-permission-role-boundary-inventory-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-permission-role-boundary-inventory-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-permission-role-boundary-inventory-2026-06-29 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-permission-role-boundary-inventory.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-permission-role-boundary-inventory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-permission-role-boundary-inventory.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-permission-role-boundary-inventory.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-permission-role-boundary-inventory.md
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-api-contract-input-validation-inventory-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-api-contract-input-validation-inventory-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-api-contract-input-validation-inventory-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-api-contract-input-validation-inventory.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-api-contract-input-validation-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-api-contract-input-validation-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-api-contract-input-validation-inventory.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-api-contract-input-validation-inventory.md
   inventorySummary:
-    sourceReadOnlyPathInventoryCount: 834
-    authSurfaceFileCount: 11
-    apiRouteFileCount: 116
-    relevantUnitSurfaceCount: 54
+    routeFileCount: 116
+    validatorFileCount: 139
+    contractFileCount: 104
+    mapperFileCount: 40
+    serviceFileCount: 260
+    relevantUnitSurfaceCount: 98
     findings:
-      high: 1
-      medium: 2
-      low: 0
+      high: 0
+      medium: 1
+      low: 4
+      pending: false
     sourceOrTestChanged: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -3070,19 +3069,33 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
   seededFollowUpTasks:
-    - verify-session-login-response-credential-boundary-2026-06-29
-    - verify-organization-analytics-admin-capability-source-boundary-2026-06-29
-    - verify-organization-ai-generation-capability-source-boundary-2026-06-29
+    - verify-api-list-sort-by-validation-boundary-2026-06-29
   seededNextTaskCandidate:
-    taskId: verify-session-login-response-credential-boundary-2026-06-29
+    taskId: verify-api-list-sort-by-validation-boundary-2026-06-29
     status: pending_fresh_materialization
-    reason: high_severity_login_response_credential_boundary_first
+    reason: medium_severity_sort_field_boundary_inconsistency_after_response_and_public_id_coverage
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: active_thread_goal_continuation_api_contract_input_validation_inventory_materialization_2026_06_29
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: active_thread_goal_continuation_api_contract_input_validation_inventory_materialization_2026_06_29
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: active_thread_goal_continuation_api_contract_input_validation_inventory_materialization_2026_06_29
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: active_thread_goal_continuation_api_contract_input_validation_inventory_materialization_2026_06_29
+  commitSha: pending_local_closeout_commit
   validationSummary:
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pass_after_evidence_anchor_repair
+    moduleRunV2CloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
@@ -3093,23 +3106,7 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-  closeoutPolicy:
-    localCommit:
-      approved: true
-      approvalSource: active_thread_goal_continuation_security_inventory_materialization_2026_06_29
-    fastForwardMerge:
-      approved: true
-      targetBranch: master
-      approvalSource: active_thread_goal_continuation_security_inventory_materialization_2026_06_29
-    push:
-      approved: true
-      target: origin/master
-      approvalSource: active_thread_goal_continuation_security_inventory_materialization_2026_06_29
-    cleanup:
-      deleteShortBranch: true
-      approvalSource: active_thread_goal_continuation_security_inventory_materialization_2026_06_29
-  commitSha: pending_local_closeout_commit
-  updatedAt: "2026-06-29T09:40:00-07:00"
+  updatedAt: "2026-06-29T09:03:52-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
