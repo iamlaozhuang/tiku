@@ -5969,14 +5969,140 @@ tasks:
     evidenceMode: redacted_policy_path_status_summary_only
     taskKind: docs_policy_reconciliation
     moduleRunVersion: 2
-    status: pending_requires_fresh_materialization
-    result: pending_owner_selection_or_queue_claim
-    nextRecommended: true
+    status: closed
+    result: pass_db_migration_policy_reconciliation_no_db_execution
+    nextRecommended: false
     recommendedAfter: security-db-migration-replay-guard-review-2026-06-29
     priority: p2
     severity: medium
-    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    findingId: db-mig-005
+    approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    branch: codex/security-db-migration-policy-reconciliation-20260629
+    claimedAt: "2026-06-29T14:06:15-07:00"
+    plannedAt: "2026-06-29T14:06:15-07:00"
+    materializedAt: "2026-06-29T14:06:15-07:00"
+    validatedAt: "2026-06-29T14:13:27-07:00"
+    reviewedAt: "2026-06-29T14:13:27-07:00"
+    closedAt: "2026-06-29T14:13:27-07:00"
+    commitSha: pending_local_closeout_commit
     allowedFilesPolicy: must_materialize_exact_docs_policy_state_files_before_execution
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/adr/adr-001-tech-stack-selection.md
+      - docs/01-requirements/traceability/2026-06-29-security-db-migration-policy-reconciliation.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-policy-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-db-migration-policy-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-policy-reconciliation.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-policy-reconciliation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-replay-guard-review.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-db-migration-replay-guard-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-replay-guard-review.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-replay-guard-review.md
+      - docs/01-requirements/traceability/2026-06-29-security-db-migration-replay-guard-review.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - src/db/**
+      - src/db/dev-seed.ts
+      - drizzle.config.ts
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_migration_replay_no_schema_migration_seed_no_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_env_secret_connection_string_value_read_no_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: policy_file_path_policy_topic_status_risk_category_severity_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - env_file_contents_or_connection_strings_or_database_urls
+        - raw_dom_screenshots_traces_html_reports
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_chunk_answer_content
+        - raw_exception_payload_or_stack_trace
+        - migration_execution_output_or_raw_sql_output
+        - private_fixture_or_account_material
+    reviewScope:
+      sourceOrTestChangeAllowed: false
+      migrationFileModificationAllowed: false
+      dbConnectionAllowed: false
+      migrationReplayAllowed: false
+      schemaMigrationSeedAllowed: false
+      envValueReadAllowed: false
+      browserOrE2eRuntimeAllowed: false
+      devServerAllowed: false
+      providerRuntimeBudget: zero
+      packageOrLockfileChangeAllowed: false
+      objective:
+        - update ADR-001 to remove or supersede historical dev drizzle-kit push allowance
+        - reconcile ADR-001 wording with ADR-004 ADR-005 code taste and current governance no-push policy
+        - record that generate and migrate remain the approved migration path while push remains forbidden
+        - keep executable migration command guard implementation blocked unless separately approved
+    validationCommands:
+      - rg -n "drizzle-kit push|drizzle-kit generate|drizzle-kit migrate|Migration Boundary|forbidden" docs/02-architecture/adr/adr-001-tech-stack-selection.md docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md docs/03-standards/code-taste-ten-commandments.md
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/02-architecture/adr/adr-001-tech-stack-selection.md docs/01-requirements/traceability/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/evidence/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-policy-reconciliation.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/02-architecture/adr/adr-001-tech-stack-selection.md docs/01-requirements/traceability/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/evidence/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-policy-reconciliation.md docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-policy-reconciliation.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-db-migration-policy-reconciliation-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-db-migration-policy-reconciliation-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-db-migration-policy-reconciliation-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-policy-reconciliation.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-db-migration-policy-reconciliation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-migration-policy-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-policy-reconciliation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-policy-reconciliation.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    validationSummary:
+      validationStatus: pass
+      scopedPolicyGrep: pass
+      scopedPrettier: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceTestSchemaMigrationChanges: 0
+      dbConnectionOrMigrationExecution: 0
+      providerOrBrowserRuntime: 0
+      nextRecommendedTaskId: security-dependency-deprecated-transitive-review-2026-06-29
     blockedWithoutFreshMaterialization:
       - adr_or_sop_policy_edit_before_task_plan_state_queue_materialization
       - database_connection_read_write_migration_or_seed
@@ -6032,7 +6158,7 @@ tasks:
     moduleRunVersion: 2
     status: closed
     result: pass_dependency_supply_chain_inventory_task_split_no_dependency_change
-    nextRecommended: true
+    nextRecommended: false
     recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
     priority: p1
     severity: medium
@@ -6257,7 +6383,7 @@ tasks:
     moduleRunVersion: 2
     status: pending_requires_fresh_materialization
     result: pending_owner_selection_or_queue_claim
-    nextRecommended: false
+    nextRecommended: true
     recommendedAfter: security-dependency-supply-chain-inventory-2026-06-29
     priority: p2
     severity: medium

@@ -181,7 +181,10 @@ export default defineConfig({
 **注意事项**:
 
 - Schema 定义采用 TypeScript 文件（非 DSL），按业务模块拆分至 `src/db/schema/` 目录
-- 使用 `drizzle-kit push` 开发阶段快速同步；`drizzle-kit generate` + `drizzle-kit migrate` 生产阶段正式迁移
+- `drizzle-kit push` 开发快速同步做法已被 ADR-004/ADR-005 与当前代码品味规则废止，所有环境均禁止使用
+  `drizzle-kit push`
+- 库表变更必须先通过 `drizzle-kit generate` 生成可审查迁移，再按环境边界使用 `drizzle-kit migrate` 执行；本地
+  `dev` 迁移、`staging` 迁移和 `prod` 迁移均必须遵守对应任务计划、备份/回滚和人工审批门禁
 - 数据库连接实例必须在模块顶层初始化（避免 Serverless 重复建连）
 - 生产环境**必须**配置连接池代理（PgBouncer 或云数据库内置 Pooler）
 - Drizzle 不提供类似 Prisma Studio 的可视化工具，开发阶段可用 pgAdmin 或 DBeaver 替代
