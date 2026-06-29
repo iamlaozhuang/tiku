@@ -3632,6 +3632,7 @@ fullAcceptanceOrgAdvancedEmployeeWorkflow20260629:
   validatedAt: "2026-06-29T01:08:00-07:00"
   reviewedAt: "2026-06-29T01:08:00-07:00"
   closedAt: "2026-06-29T01:08:00-07:00"
+  implementationCommitSha: a8a3e0935
   goal: >-
     Execute a localhost-only owner-facing acceptance check for the `org_advanced_employee` learner enterprise training
     surface and learner AI question/paper generation detail controls. Record redacted role/route/workflow/status/count
@@ -3794,9 +3795,10 @@ fullAcceptanceOrgAdvancedEmployeeWorkflow20260629:
     prettierWriteScoped: pass
     prettierScoped: pass
     gitDiffCheck: pass
+    firstCommit: a8a3e0935
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false

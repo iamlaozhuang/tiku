@@ -6,7 +6,7 @@
 - Result: blocked_org_advanced_employee_ai_detail_controls_missing_enterprise_training_pass_no_final_pass
 - Updated at: `2026-06-29T01:08:00-07:00`
 - Batch range: single scoped acceptance task.
-- Commit: pending_first_evidence_commit.
+- Commit: `a8a3e0935`.
 
 ## Boundary Confirmation
 
@@ -81,10 +81,19 @@ All runtime evidence below is redacted to role/route/workflow/status/count summa
 - Browser workflow evidence: pass_blocked; command anchor `browser_org_advanced_employee_workflow_redacted`.
 - Scoped prettier write: pass.
 - Scoped prettier check: pass.
+  Command:
+  `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-employee-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-employee-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-employee-workflow.md`.
 - `git diff --check`: pass.
+  Command: `git diff --check`.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-org-advanced-employee-workflow-2026-06-29`.
+- Module Run v2 closeout readiness: pass.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-org-advanced-employee-workflow-2026-06-29`.
+- Module Run v2 prepush readiness: pass.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-org-advanced-employee-workflow-2026-06-29 -SkipRemoteAheadCheck`.
 
 ## Blocked Remainder
 
