@@ -8,7 +8,7 @@
 - Result: blocked_content_admin_account_absent_from_local_db
 - Batch range: content admin AI generation detail controls session proof and rerun
 - Pre-task master checkpoint: `7d53fac5dc7e717661232c235297d70a184c43e9`
-- Commit: pending
+- Commit: `23a78a00c`
 
 ## Acceptance Mapping Result
 
@@ -24,6 +24,12 @@ RED:
 Previous role rerun blocked both `content_admin` rows because current test-owned local session material did not
 authenticate. The `org_advanced_admin` rows passed, so the remaining gap is scoped to `content_admin` session proof and
 content-route rerun.
+
+## Runtime Failure Summary
+
+The failure is limited to current local acceptance account/session material for `content_admin`. The local DB aggregate
+proof shows the provided login material has no matching local account record, so browser route rerun cannot safely
+proceed under the scoped role.
 
 ## GREEN
 
@@ -86,10 +92,38 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - `npx.cmd prettier --check --ignore-unknown ...`: pass.
 - `git diff --check`: pass.
 - `Test-ModuleRunV2PreCommitHardening.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28`:
+  pass after closeout metadata recorded commit evidence, `localFullLoopGate`, `threadRolloverGate`, and
+  `nextModuleRunCandidate`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28 -SkipRemoteAheadCheck`:
+  pending until closeout readiness passes.
 - No source, test, package, lockfile, schema, migration, seed, Provider, AI submit, staging/prod, PR, force-push, final
   Pass, or Cost Calibration action executed.
 
+## Gate Results
+
+- localFullLoopGate: blocked by current `content_admin` account/session material mismatch; focused unit and redacted
+  local DB aggregate proof passed.
+- threadRolloverGate: pass; recover from `project-state.yaml`, `task-queue.yaml`, this evidence, and the mandatory
+  owner-facing checklist.
+- blocked remainder: `content_admin.content_ai_question_generation`, `content_admin.content_ai_paper_generation`, and
+  all other owner-facing checklist rows not yet covered by redacted pass evidence.
+- nextModuleRunCandidate: `content-admin-test-owned-account-stage-b-repair-2026-06-28`.
+- Cost Calibration Gate remains blocked.
+- Release readiness: blocked.
+- Final Pass: blocked.
+
+## Batch Commit Evidence
+
+- Commit: `23a78a00c`
+- Commit scope: seven task-scoped governance, traceability, plan, evidence, audit, and acceptance files only.
+- Commit message: `docs(acceptance): record content admin session proof`.
+
 ## Next Action
+
+Recommended smallest follow-up task / nextModuleRunCandidate:
+
+`content-admin-test-owned-account-stage-b-repair-2026-06-28`.
 
 Queue a separate Stage B task to create or repair a test-owned local `content_admin` account through approved localhost
 UI/API flows or another approved safe role-switching method. Direct DB writes, seed changes, schema changes, and

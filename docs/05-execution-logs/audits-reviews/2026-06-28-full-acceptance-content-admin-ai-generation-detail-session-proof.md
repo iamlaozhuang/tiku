@@ -24,6 +24,9 @@ account/session material, PII, and raw DB rows remain forbidden.
 
 The task is closed as blocked evidence, not as acceptance pass.
 
+APPROVE_BLOCKED_EVIDENCE_CLOSEOUT: approved for this task-scoped blocked evidence because the blocker is isolated to
+missing local `content_admin` account material and the two scoped rows remain explicitly incomplete.
+
 Findings:
 
 - The approved private account file contains a `content_admin` section and login field shape, but the localhost session

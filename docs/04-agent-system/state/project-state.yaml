@@ -2829,7 +2829,7 @@ currentTask:
     prettierScoped: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pending
+    moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pending
   nextRecommendedTask: content-admin-test-owned-account-stage-b-repair-2026-06-28
 previousTaskSnapshotFullAcceptanceAiGenerationDetailRoleRerun:
