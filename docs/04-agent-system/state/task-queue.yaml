@@ -2234,6 +2234,214 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: ai-generation-detail-controls-source-repair-2026-06-28
+    title: AI generation detail controls source repair
+    phase: ai-generation-detail-controls-source-repair-2026-06-28
+    sourceStory: active_goal_continue_after_ops_admin_coverage_to_repair_ai_generation_detail_controls_2026_06_28
+    dependencies:
+      - full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+      - full-acceptance-ops-admin-session-material-completion-2026-06-28
+      - full-unit-baseline-current-recheck-and-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes Stage C of the durable staged local execution approval. It may modify only the shared admin AI
+      generation entry source and its focused unit test, plus task-scoped governance/evidence docs, to repair missing AI
+      question and AI paper generation detail controls recorded by prior acceptance evidence. It may run local focused
+      tests, full unit baseline, lint, typecheck, formatting, and read-only localhost control-presence verification. It
+      must not execute Provider calls, read Provider/env credentials, submit generation requests, perform DB read/write,
+      mutate UI/API data, change schema/migrations/seeds/dependencies, record sensitive evidence, touch staging/prod,
+      create PRs, force push, claim release readiness, final Pass, or Cost Calibration.
+    targetClosureItem: Shared admin AI generation detail controls visible and unit-covered
+    behaviorBoundary: local_source_test_repair::ai_generation_detail_controls_no_provider_no_db_no_mutation_no_final_pass
+    executionProfile: local_source_test_repair_ai_generation_detail_controls
+    evidenceMode: redacted_route_control_category_status_count_only_no_dom_no_screenshot_no_trace_no_content
+    validationPolicy: tdd_focused_unit_full_unit_lint_typecheck_precommit_closeout_prepush
+    taskKind: implementation_tdd
+    moduleRunVersion: 2
+    status: ready_for_closeout
+    result: pass_source_unit_repair_browser_role_rerun_required
+    approvedAt: "2026-06-28T17:02:43-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_active_goal_and_staged_local_stage_c_source_test_repair_approval_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T17:02:43-07:00"
+    plannedAt: "2026-06-28T17:02:43-07:00"
+    implementedAt: "2026-06-28T17:27:00-07:00"
+    validatedAt: "2026-06-28T17:27:00-07:00"
+    reviewedAt: "2026-06-28T17:27:00-07:00"
+    branch: codex/ai-generation-detail-controls-repair-20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+        - org_advanced_admin.organization_ai_question_generation
+        - org_advanced_admin.organization_ai_paper_generation
+      completionRule: >-
+        This task repairs only the shared admin AI generation detail-control source surface. The durable goal remains
+        incomplete until browser role reruns and every applicable checklist item have redacted pass evidence.
+    expectedDetailControls:
+      aiQuestionGeneration:
+        - profession
+        - level
+        - subject
+        - knowledge_node
+        - question_type
+        - count
+        - difficulty_or_learning_objective
+        - draft_review_boundary
+      aiPaperGeneration:
+        - profession
+        - level
+        - subject
+        - question_count
+        - question_type_distribution
+        - difficulty
+        - knowledge_node_coverage
+        - paper_section_structure
+        - objective
+        - draft_review_boundary
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      testChange: approved
+      focusedUnitTest: approved
+      fullUnitRuntime: approved_local_only
+      lintTypecheck: approved
+      browserRuntime: approved_read_only_localhost_control_presence_only
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      localUiApiMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - src/app/(admin)/organization/ai-question-generation/page.tsx
+      - src/app/(admin)/organization/ai-paper-generation/page.tsx
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    browserBoundary: localhost_or_127_0_0_1_read_only_control_presence_only_no_submit_no_provider_no_sensitive_evidence
+    dbBoundary: blocked_no_direct_database_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    accountCredentialBoundary: no_account_login_no_credential_or_session_material_capture
+    evidenceRedaction: route_control_category_status_count_summary_only_no_sensitive_payloads
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - browser-ai-generation-detail-control-presence-read-only
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-detail-controls-source-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-detail-controls-source-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-detail-controls-source-repair-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - local_ui_api_mutation_or_write_flow_execution
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    validationSummary:
+      taskPlanPrepared: pass
+      redUnit: pass_1_file_14_tests_2_expected_failures_before_implementation
+      implementation: pass_shared_detail_controls_added
+      focusedUnit: pass_1_file_14_tests
+      fullUnitBaseline: pass_317_files_1432_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      gitDiffCheck: pass
+      browserControlPresence: attempted_not_pass_evidence_current_local_browser_dev_state_unavailable_deferred_to_role_rerun
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      sourceOrTestChanged: true
+      browserRuntimeExecuted: read_only_attempt_no_submit_no_mutation_no_screenshot_no_raw_dom
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28

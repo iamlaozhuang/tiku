@@ -42,6 +42,12 @@ type AdminAiGenerationRequestState =
   | "accepted"
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
+type AdminAiGenerationDetailControl = {
+  inputMode: "select" | "number" | "text";
+  label: string;
+  options?: readonly string[];
+  value: string;
+};
 
 function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
   return expectedRoles.some((expectedRole) =>
@@ -161,6 +167,185 @@ const contentAdminReviewLocalValidationItems = [
     validationMode: "read_only",
   },
 ] as const;
+
+const baseAiGenerationDetailControls = [
+  {
+    inputMode: "select",
+    label: "专业",
+    options: ["专卖管理", "市场营销", "物流管理"],
+    value: "市场营销",
+  },
+  {
+    inputMode: "select",
+    label: "等级",
+    options: ["中级工", "高级工", "技师"],
+    value: "高级工",
+  },
+  {
+    inputMode: "select",
+    label: "科目",
+    options: ["理论知识", "技能实操"],
+    value: "理论知识",
+  },
+] satisfies readonly AdminAiGenerationDetailControl[];
+
+const questionGenerationDetailControls = [
+  ...baseAiGenerationDetailControls,
+  {
+    inputMode: "text",
+    label: "知识点",
+    value: "卷烟营销基础",
+  },
+  {
+    inputMode: "select",
+    label: "题型",
+    options: ["单选题", "多选题", "判断题", "案例分析题"],
+    value: "单选题",
+  },
+  {
+    inputMode: "number",
+    label: "出题数量",
+    value: "10",
+  },
+  {
+    inputMode: "select",
+    label: "难度",
+    options: ["基础", "中等", "进阶"],
+    value: "中等",
+  },
+  {
+    inputMode: "text",
+    label: "学习目标",
+    value: "弱项巩固",
+  },
+] satisfies readonly AdminAiGenerationDetailControl[];
+
+const paperGenerationDetailControls = [
+  ...baseAiGenerationDetailControls,
+  {
+    inputMode: "number",
+    label: "题目数量",
+    value: "50",
+  },
+  {
+    inputMode: "select",
+    label: "题型分布",
+    options: [
+      "单选 40% / 多选 30% / 判断 30%",
+      "单选 50% / 多选 25% / 判断 25%",
+      "按薄弱项动态分配",
+    ],
+    value: "单选 40% / 多选 30% / 判断 30%",
+  },
+  {
+    inputMode: "select",
+    label: "难度",
+    options: ["基础", "中等", "进阶"],
+    value: "中等",
+  },
+  {
+    inputMode: "text",
+    label: "知识点覆盖",
+    value: "覆盖薄弱知识点",
+  },
+  {
+    inputMode: "select",
+    label: "试卷结构",
+    options: ["按 paper_section 组织", "按知识点模块组织"],
+    value: "按 paper_section 组织",
+  },
+  {
+    inputMode: "text",
+    label: "组卷目标",
+    value: "阶段自测",
+  },
+] satisfies readonly AdminAiGenerationDetailControl[];
+
+const aiGenerationDetailControlClassName =
+  "border-input bg-background text-text-primary mt-1 h-9 w-full rounded-md border px-3 text-sm";
+
+function getAiGenerationDetailControls(
+  generationKind: AdminAiGenerationKind,
+): readonly AdminAiGenerationDetailControl[] {
+  return generationKind === "question"
+    ? questionGenerationDetailControls
+    : paperGenerationDetailControls;
+}
+
+function AdminAiGenerationDetailControls({
+  generationKind,
+  workspace,
+}: {
+  generationKind: AdminAiGenerationKind;
+  workspace: AdminAiGenerationWorkspace;
+}) {
+  const controls = getAiGenerationDetailControls(generationKind);
+  const draftBoundaryLabel =
+    workspace === "organization" ? "组织草稿" : "草稿评审";
+  const title = generationKind === "question" ? "出题细节" : "组卷细节";
+
+  return (
+    <section
+      aria-labelledby="admin-ai-generation-detail-controls-title"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="admin-ai-generation-detail-controls"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">生成条件</p>
+          <h2
+            className="text-text-primary mt-1 text-base font-semibold"
+            id="admin-ai-generation-detail-controls-title"
+          >
+            {title}
+          </h2>
+        </div>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          {draftBoundaryLabel}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {controls.map((control) => (
+          <label className="block" key={control.label}>
+            <span className="text-text-secondary text-xs font-medium">
+              {control.label}
+            </span>
+            {control.inputMode === "select" ? (
+              <select
+                aria-label={control.label}
+                className={aiGenerationDetailControlClassName}
+                defaultValue={control.value}
+              >
+                {control.options?.map((optionLabel) => (
+                  <option key={optionLabel} value={optionLabel}>
+                    {optionLabel}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                aria-label={control.label}
+                className={aiGenerationDetailControlClassName}
+                defaultValue={control.value}
+                inputMode={
+                  control.inputMode === "number" ? "numeric" : undefined
+                }
+                min={control.inputMode === "number" ? 1 : undefined}
+                type={control.inputMode === "number" ? "number" : "text"}
+              />
+            )}
+          </label>
+        ))}
+      </div>
+
+      <p className="text-text-secondary mt-3 text-xs leading-5">
+        当前仅准备本地生成条件和{draftBoundaryLabel}
+        入口，不触发模型服务或正式题库写入。
+      </p>
+    </section>
+  );
+}
 
 function AdminAiGenerationTaskHistoryPanel({
   state,
@@ -673,6 +858,11 @@ export function AdminAiGenerationEntryPage({
           <ShieldCheck aria-hidden="true" className="size-5" />
         </div>
       </header>
+
+      <AdminAiGenerationDetailControls
+        generationKind={generationKind}
+        workspace={workspace}
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">

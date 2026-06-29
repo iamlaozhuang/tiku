@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-ops-admin-session-material-completion-2026-06-28
-updatedAt: "2026-06-28T16:57:39-07:00"
+currentPhase: ai-generation-detail-controls-source-repair-2026-06-28
+updatedAt: "2026-06-28T17:27:00-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2651,51 +2651,48 @@ repository:
   lastKnownMasterSha: dc3b46ee02b8bff22aea12be545e368382497506
   lastKnownOriginMasterSha: dc3b46ee02b8bff22aea12be545e368382497506
 currentTask:
-  id: full-acceptance-ops-admin-session-material-completion-2026-06-28
-  status: closed
-  result: pass_ops_admin_current_session_coverage_no_final_pass
-  taskKind: local_browser_session_coverage
-  executionProfile: local_browser_test_owned_ops_admin_session_completion
-  approvedAt: "2026-06-28T16:44:56-07:00"
+  id: ai-generation-detail-controls-source-repair-2026-06-28
+  status: ready_for_closeout
+  result: pass_source_unit_repair_browser_role_rerun_required
+  taskKind: implementation_tdd
+  executionProfile: local_source_test_repair_ai_generation_detail_controls
+  approvedAt: "2026-06-28T17:02:43-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_identified_ops_admin_test_owned_login_material_2026_06_28
+  approvalConsumed: current_user_active_goal_and_staged_local_stage_c_source_test_repair_approval_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
-  claimedAt: "2026-06-28T16:44:56-07:00"
-  plannedAt: "2026-06-28T16:44:56-07:00"
-  validatedAt: "2026-06-28T16:57:39-07:00"
-  reviewedAt: "2026-06-28T16:57:39-07:00"
-  closedAt: "2026-06-28T16:57:39-07:00"
-  sourceStory: current_user_identified_ops_admin_test_owned_login_material_and_active_goal_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-  branch: codex/full-acceptance-ops-admin-session-coverage-20260628
+  claimedAt: "2026-06-28T17:02:43-07:00"
+  plannedAt: "2026-06-28T17:02:43-07:00"
+  implementedAt: "2026-06-28T17:27:00-07:00"
+  validatedAt: "2026-06-28T17:27:00-07:00"
+  reviewedAt: "2026-06-28T17:27:00-07:00"
+  sourceStory: active_goal_continue_after_ops_admin_coverage_to_repair_ai_generation_detail_controls_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md
+  branch: codex/ai-generation-detail-controls-repair-20260628
   promptMaterializationRule: >-
     Current prompt scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan before
-    browser, DB, AI, source, account-material, or further documentation execution. Subsequent execution must use these
-    repository governance files as source of truth and must not expand scope from chat memory.
+    source, test, browser, DB, AI, account-material, or further documentation execution. Subsequent execution must use
+    these repository governance files as source of truth and must not expand scope from chat memory.
   mandatoryOwnerFacingRoleChecklist:
     path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
     relevantRows:
-      - ops_admin.workspace_and_denials
-      - ops_admin.user_organization_employee_operations
-      - ops_admin.enterprise_authorization_and_atomic_scope
-      - ops_admin.employee_import
-      - ops_admin.redeem_code
-      - ops_admin.resource_knowledge_and_logs
+      - content_admin.content_ai_question_generation
+      - content_admin.content_ai_paper_generation
+      - org_advanced_admin.organization_ai_question_generation
+      - org_advanced_admin.organization_ai_paper_generation
     completionRule: >-
-      This task can only complete the previously blocked ops_admin current-session row. The durable goal remains
-      incomplete until every applicable checklist item has redacted coverage evidence and no unresolved required
-      failure remains.
+      This task can repair the shared admin AI generation detail-control surface only. The durable goal remains
+      incomplete until browser role reruns and every applicable checklist item have redacted pass evidence.
   scope:
     docsStateEvidenceAudit: true
-    browserRuntime: approved_localhost_or_127_0_0_1_test_owned_ops_admin_session_only
-    localPrivateAcceptanceAccountRead: approved_read_only_specific_file_no_evidence
-    localSourceRead: approved_only_if_needed_to_locate_safe_ops_routes
-    localSourceChange: false
-    testChange: false
+    localSourceChange: approved
+    testChange: approved
+    focusedUnitTest: approved
+    lintTypecheck: true
+    browserRuntime: approved_read_only_localhost_control_presence_after_source_repair
     localUiApiMutation: false
     directDatabaseAccess: false
     providerCallOrConfiguration: false
@@ -2716,58 +2713,58 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
-    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
+    - docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - tests/unit/admin-ai-generation-entry-surface.test.ts
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
     - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
-    - docs/01-requirements/traceability/2026-06-28-full-acceptance-option-a-session-coverage.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md
-    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-option-a-session-coverage.md
-    - src/app/**
-    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
+    - src/app/(admin)/content/ai-question-generation/page.tsx
+    - src/app/(admin)/content/ai-paper-generation/page.tsx
+    - src/app/(admin)/organization/ai-question-generation/page.tsx
+    - src/app/(admin)/organization/ai-paper-generation/page.tsx
+    - package.json
   blockedFiles:
     - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
-    - src/**
-    - tests/**
-    - e2e/**
-    - scripts/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
     - seed/**
+    - e2e/**
+    - scripts/**
     - docs/04-agent-system/state/archive/**
     - docs/04-agent-system/state/task-history-index.yaml
     - playwright-report/**
     - test-results/**
     - .next/**
-    - D:/tiku-local-private/owner-facing-fixtures/**
-    - D:\tiku-local-private\owner-facing-fixtures\**
-  browserBoundary: localhost_or_127_0_0_1_only_ops_admin_session_route_status_checks_no_mutation
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  browserBoundary: localhost_or_127_0_0_1_read_only_control_presence_only_no_submit_no_provider_no_sensitive_evidence
   dbBoundary:
     currentTask: no_direct_database_connection_read_write_migration_seed_or_schema_change
-    stageDReadOnlyProof: blocked_for_this_task_unless_new_material_gap_is_recorded_first
   aiProviderBoundary:
     currentTask: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
     costCalibrationGate: blocked
   credentialBoundary:
-    currentTask: >-
-      may_use_test_owned_ops_admin_login_material_from_approved_private_file_as_input_only_no_credential_recording_no_cookie_token_session_localStorage_or_Authorization_header_capture
+    currentTask: no_account_login_no_credential_or_session_material_capture
   evidenceRedaction:
-    allowed: role_route_workflow_status_count_summary_only
+    allowed: role_route_control_category_status_count_summary_only
     forbidden:
       - credentials
       - cookies_tokens_sessions_localStorage_Authorization_headers
-      - raw_account_file_content
       - env_file_contents
       - raw_dom_screenshots_traces
       - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
@@ -2790,26 +2787,23 @@ currentTask:
       approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
   validationSummary:
     taskPlanPrepared: pass
-    privateCredentialMaterialRead: pass_no_sensitive_output
-    browserOpsAdminSessionCoverage: pass_ops_admin_current_session
-    combinedOptionASessionCoverage: pass_8_roles
-    allowedOpsRouteSamples: pass_6
-    deniedRouteSamples: pass_4
+    redUnit: pass_1_file_14_tests_2_expected_failures_before_implementation
+    implementation: pass_shared_detail_controls_added
+    focusedUnit: pass_1_file_14_tests
+    fullUnitBaseline: pass_317_files_1432_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    browserControlPresence: attempted_not_pass_evidence_current_local_browser_dev_state_unavailable_deferred_to_role_rerun
     evidencePrepared: pass
     auditReviewPrepared: pass
     acceptancePrepared: pass
-    firstCommit: b56582c35
-    hookLint: pass
-    hookTypecheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pass_after_state_checkpoint_update
-    browserRuntimeExecuted: true
-    credentialOrSessionCaptureExecuted: false
+    browserRuntimeExecuted: read_only_attempt_no_submit_no_mutation_no_screenshot_no_raw_dom
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
-    sourceOrTestChanged: false
-  nextRecommendedTask: ai_generation_detail_controls_source_repair_or_role_matrix_rerun_after_all_role_session_coverage
+    credentialOrSessionCaptureExecuted: false
+  nextRecommendedTask: full_acceptance_role_matrix_rerun_for_ai_generation_detail_controls_after_source_repair
 previousTaskSnapshotOwnerFacingLocalExperienceBatch:
   id: owner-facing-local-experience-batch-2026-06-28
   status: closed

@@ -352,6 +352,113 @@ describe("admin AI generation entry surfaces", () => {
     expect(sharedSurfaceSource).not.toContain("/content/ai-paper-generation");
   });
 
+  it("renders content AI question generation detail controls before any local contract request", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const detailControls = await screen.findByTestId(
+      "admin-ai-generation-detail-controls",
+    );
+
+    expect(detailControls).toHaveTextContent("专业");
+    expect(detailControls).toHaveTextContent("等级");
+    expect(detailControls).toHaveTextContent("科目");
+    expect(detailControls).toHaveTextContent("知识点");
+    expect(detailControls).toHaveTextContent("题型");
+    expect(detailControls).toHaveTextContent("出题数量");
+    expect(detailControls).toHaveTextContent("难度");
+    expect(detailControls).toHaveTextContent("学习目标");
+    expect(detailControls).toHaveTextContent("草稿评审");
+    expect(screen.getByLabelText("专业")).toHaveDisplayValue("市场营销");
+    expect(screen.getByLabelText("等级")).toHaveDisplayValue("高级工");
+    expect(screen.getByLabelText("科目")).toHaveDisplayValue("理论知识");
+    expect(screen.getByLabelText("题型")).toHaveDisplayValue("单选题");
+    fireEvent.change(screen.getByLabelText("专业"), {
+      target: { value: "物流管理" },
+    });
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "多选题" },
+    });
+    expect(screen.getByLabelText("专业")).toHaveDisplayValue("物流管理");
+    expect(screen.getByLabelText("题型")).toHaveDisplayValue("多选题");
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+      "/api/v1/content-ai-generation-requests",
+    ]);
+  });
+
+  it("renders organization AI paper generation detail controls before Provider execution", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "paper",
+      }),
+    );
+
+    const detailControls = await screen.findByTestId(
+      "admin-ai-generation-detail-controls",
+    );
+
+    expect(detailControls).toHaveTextContent("专业");
+    expect(detailControls).toHaveTextContent("等级");
+    expect(detailControls).toHaveTextContent("科目");
+    expect(detailControls).toHaveTextContent("题目数量");
+    expect(detailControls).toHaveTextContent("题型分布");
+    expect(detailControls).toHaveTextContent("难度");
+    expect(detailControls).toHaveTextContent("知识点覆盖");
+    expect(detailControls).toHaveTextContent("试卷结构");
+    expect(detailControls).toHaveTextContent("组卷目标");
+    expect(detailControls).toHaveTextContent("组织草稿");
+    expect(screen.getByLabelText("试卷结构")).toHaveDisplayValue(
+      "按 paper_section 组织",
+    );
+    expect(screen.getByLabelText("题型分布")).toHaveDisplayValue(
+      "单选 40% / 多选 30% / 判断 30%",
+    );
+    expect(document.body.textContent).not.toContain("providerPayload");
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+      "/api/v1/organization-ai-generation-requests",
+    ]);
+  });
+
   it("submits content admin local contract requests and renders a redacted summary", async () => {
     globalThis.localStorage?.setItem(
       "tiku.localSessionToken",
