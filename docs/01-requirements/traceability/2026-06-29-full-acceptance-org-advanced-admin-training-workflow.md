@@ -2,7 +2,7 @@
 
 - Task id: `full-acceptance-org-advanced-admin-training-workflow-2026-06-29`
 - Branch: `codex/org-advanced-training-workflow-20260629`
-- Status: browser evidence pass, closeout validation pending
+- Status: pass for scoped row
 - Date: `2026-06-29`
 
 ## Objective

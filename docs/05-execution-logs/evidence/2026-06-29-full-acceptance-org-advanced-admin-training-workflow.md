@@ -2,9 +2,9 @@
 
 - Task id: `full-acceptance-org-advanced-admin-training-workflow-2026-06-29`
 - Branch: `codex/org-advanced-training-workflow-20260629`
-- Evidence status: in progress
-- Result: pending
-- Updated at: `2026-06-29T01:20:00-07:00`
+- Evidence status: closed
+- Result: pass
+- Updated at: `2026-06-29T02:05:00-07:00`
 - Batch range: single scoped acceptance task.
 
 ## Boundary Confirmation
@@ -62,20 +62,30 @@
 ## Validation Results
 
 - Browser workflow evidence: pass.
-- PENDING: scoped Prettier check.
-- PENDING: `git diff --check`.
-- PENDING: Module Run v2 pre-commit hardening.
-- PENDING: Module Run v2 module closeout readiness.
-- PENDING: Module Run v2 pre-push readiness.
+  Command: `browser_org_advanced_admin_training_workflow_redacted`.
+- Scoped Prettier check: pass.
+  Command:
+  `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md`.
+- `git diff --check`: pass.
+- Module Run v2 pre-commit hardening: pass.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-org-advanced-admin-training-workflow-2026-06-29`.
+- Module Run v2 module closeout readiness: pass after commit evidence update.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-org-advanced-admin-training-workflow-2026-06-29`.
+- Module Run v2 pre-push readiness: pass after state SHA alignment.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-org-advanced-admin-training-workflow-2026-06-29 -SkipRemoteAheadCheck`.
+- Commit hook lint/typecheck: pass.
 
 ## Batch Commit Evidence
 
-- Commit: pending.
-- Commit scope: pending.
+- Commit: `04610e95c`.
+- Commit scope: scoped organization training browser acceptance evidence and governance state only.
 
 ## Local Full Loop Gate
 
-- localFullLoopGate: pending browser evidence and docs/state gates.
+- localFullLoopGate: pass for scoped `org_advanced_admin.organization_training` evidence only.
 - Current full unit baseline: pass, 318 files and 1437 tests.
 
 ## Thread Rollover Decision
@@ -85,7 +95,7 @@
 
 ## Next Module Run Candidate
 
-- Pending terminal task result.
+- Continue the full acceptance matrix with the next queued row after this scoped task is merged, pushed, and cleaned up.
 
 ## Blocked Remainder
 
