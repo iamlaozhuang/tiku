@@ -6,7 +6,7 @@
 - Branch: `codex/repair-session-login-response-boundary-20260629`
 - Base branch state: `master` and `origin/master` aligned at `489012ef52549a27e676185dd31b7456794dcf9e`
 - Evidence mode: redacted status, file paths, counts, and contract summaries only.
-- Result: pass - source/test repair implemented; focused tests, formatting, diff check, precommit hardening, closeout readiness, and prepush readiness passed.
+- Result: pass - source/test repair implemented, merged to `master`, pushed to `origin/master`, and short branch cleaned up; focused tests, formatting, diff check, precommit hardening, closeout readiness, and prepush readiness passed.
 - localFullLoopGate: local source/test security repair under centralized local repair-loop authorization; release, deploy, final Pass, and Cost Calibration remain blocked.
 - Cost Calibration Gate remains blocked.
 - threadRolloverGate: if interrupted, resume from `project-state.yaml`, `task-queue.yaml`, this evidence file, and the task plan; do not continue from memory.
@@ -80,10 +80,10 @@
 
 ## Batch Commit Evidence
 
-- batchCommitEvidence: local closeout commit is pending until validation gates pass.
-- Batch commit evidence: pending local closeout commit after Module Run v2 closeout readiness.
-- Batch commit: pending local closeout commit.
-- Commit: `489012ef52549a27e676185dd31b7456794dcf9e` pre-closeout branch base; final closeout commit is reported after validation, merge, and push.
+- batchCommitEvidence: repair commit was fast-forward merged to `master`, pushed to `origin/master`, and the short branch was deleted.
+- Batch commit evidence: `7128249123e6e3b3e3fe64416a4815e3a1f8665b` on `master` and `origin/master`.
+- Batch commit: `7128249123e6e3b3e3fe64416a4815e3a1f8665b`.
+- Commit: `7128249123e6e3b3e3fe64416a4815e3a1f8665b`.
 
 ## Next Module Run Candidate
 

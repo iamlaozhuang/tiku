@@ -4,9 +4,9 @@
 
 - Finding id: `role-inv-001`
 - Severity: high
-- Verdict: `approved_ready_for_closeout`
+- Verdict: `approved_closed`
 - Source/test repair executed: true
-- APPROVE: focused repair and current evidence are approved for local closeout; no blocking findings remain within this task scope.
+- APPROVE: focused repair and current evidence are approved as closed; no blocking findings remain within this task scope.
 
 ## Review Notes
 
@@ -30,4 +30,4 @@ The focused route test now covers both required behaviors: legitimate cookie per
 
 ## Required Follow-Up
 
-- Commit, fast-forward merge to `master`, push `origin/master`, and clean up the short branch under the task closeout policy.
+- Continue with the next separately materialized repair task under the centralized local repair-loop authorization.

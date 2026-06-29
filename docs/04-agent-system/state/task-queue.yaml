@@ -3096,7 +3096,8 @@ tasks:
     evidenceMode: redacted_test_result_contract_status_only_no_token_values
     taskKind: security_fix
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
+    result: pass_sanitized_session_login_response_pushed_to_origin_master
     priority: p1
     severity: high
     findingId: role-inv-001
@@ -3112,6 +3113,8 @@ tasks:
     materializedAt: "2026-06-29T10:12:18-07:00"
     implementedAt: "2026-06-29T10:19:11-07:00"
     validatedAt: "2026-06-29T10:23:20-07:00"
+    closedAt: "2026-06-29T10:26:47-07:00"
+    commitSha: 7128249123e6e3b3e3fe64416a4815e3a1f8665b
     approvalConsumed: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
     sourceTestChangeApproval: granted_by_localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
     repairIntent:

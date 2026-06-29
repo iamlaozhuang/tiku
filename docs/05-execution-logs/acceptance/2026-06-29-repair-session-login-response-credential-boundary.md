@@ -3,9 +3,9 @@
 ## Decision
 
 - Task id: `repair-session-login-response-credential-boundary-2026-06-29`
-- Acceptance status: accepted_ready_for_closeout
+- Acceptance status: accepted_closed
 - Finding id: `role-inv-001`
-- Verdict: `accepted_ready_for_closeout`
+- Verdict: `accepted_closed`
 
 ## Accepted Outcomes
 
@@ -33,6 +33,9 @@
 - Module Run v2 precommit readiness: pass
 - Module Run v2 closeout readiness: pass
 - Module Run v2 prepush readiness: pass
+- Fast-forward merge to `master`: pass
+- Push to `origin/master`: pass
+- Short branch cleanup: pass
 
 ## Next Recommended Task
 
