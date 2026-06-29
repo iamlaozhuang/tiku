@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28
-updatedAt: "2026-06-28T19:06:36-07:00"
+currentPhase: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28
+updatedAt: "2026-06-28T19:49:38-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2668,31 +2668,27 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fe0769ca263c261b1327e5a7b34555ad65b9a10f
-  lastKnownOriginMasterSha: fe0769ca263c261b1327e5a7b34555ad65b9a10f
+  lastKnownMasterSha: b2bfdd1e1fe5ba77895bcb2ee6d6503b93c5f9c1
+  lastKnownOriginMasterSha: b2bfdd1e1fe5ba77895bcb2ee6d6503b93c5f9c1
 currentTask:
-  id: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28
+  id: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28
   status: closed
-  result: pass_local_safe_role_bootstrap_source_unit
-  taskKind: implementation_tdd
-  executionProfile: local_source_test_repair_acceptance_session_bootstrap
-  approvedAt: "2026-06-28T19:02:27-07:00"
+  result: blocked_local_safe_bootstrap_runtime_session_not_recognized
+  taskKind: local_acceptance_runtime
+  executionProfile: local_browser_content_admin_ai_generation_detail_rerun_after_safe_bootstrap
+  approvedAt: "2026-06-28T19:39:12-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_stage_c_and_active_goal_continuation_2026_06_28
+  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_localhost_browser_and_active_goal_continuation_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
-  claimedAt: "2026-06-28T19:02:27-07:00"
-  plannedAt: "2026-06-28T19:02:27-07:00"
-  implementedAt: "2026-06-28T19:16:27-07:00"
-  validatedAt: "2026-06-28T19:16:27-07:00"
-  reviewedAt: "2026-06-28T19:16:27-07:00"
-  closedAt: "2026-06-28T19:16:27-07:00"
-  sourceStory: follow_up_after_content_admin_stage_b_blocked_by_absent_localhost_ui_api_admin_account_path_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-  branch: codex/content-admin-safe-role-bootstrap-20260628
+  claimedAt: "2026-06-28T19:39:12-07:00"
+  plannedAt: "2026-06-28T19:39:12-07:00"
+  sourceStory: follow_up_after_local_safe_content_admin_bootstrap_source_repair_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+  branch: codex/content-admin-ai-rerun-after-bootstrap-20260628
   promptMaterializationRule: >-
     Current task scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan before browser,
     DB, AI, account-material, source, test, or further documentation execution. Subsequent execution must use these
@@ -2703,25 +2699,24 @@ currentTask:
       - content_admin.content_ai_question_generation
       - content_admin.content_ai_paper_generation
     completionRule: >-
-      This task may repair only the local/dev/test safe role bootstrap needed to establish a test-owned `content_admin`
-      session for later localhost acceptance. The two content AI rows remain incomplete until a later browser task reruns
-      them with redacted evidence. The durable goal remains incomplete until every applicable owner-facing checklist row
-      has redacted pass evidence.
+      This task may rerun only the two scoped `content_admin` AI generation detail-control rows after safe local
+      bootstrap. It cannot claim final Pass or complete the durable goal until every applicable owner-facing checklist
+      row has redacted pass evidence.
   targetWorkflows:
-    - local dev/test safe role bootstrap for `content_admin` acceptance session
-    - follow-up route: /content/ai-question-generation
-    - follow-up route: /content/ai-paper-generation
+    - local safe bootstrap POST /api/v1/local-acceptance-sessions role content_admin
+    - content_admin /content/ai-question-generation read-only control/state verification
+    - content_admin /content/ai-paper-generation read-only control/state verification
   scope:
     docsStateEvidenceAudit: true
-    browserRuntime: false_current_task_source_unit_only
-    testOwnedLocalAccountSessionSwitching: approved_source_support_only_no_runtime_browser_execution
-    localUiApiMutation: false_current_task_source_unit_only
+    browserRuntime: approved_localhost_or_127_0_0_1_only
+    testOwnedLocalAccountSessionSwitching: approved_via_local_safe_bootstrap_no_credential_capture
+    localUiApiMutation: approved_in_memory_session_bootstrap_only_no_db_persistence
     localDbReadOnlyAggregateProof: false_current_task
     focusedUnitTest: approved
-    fullUnitRuntime: approved_after_repair
-    localSourceChange: approved_safe_localhost_dev_test_role_bootstrap_only
-    testChange: approved_for_safe_role_bootstrap_unit_coverage
-    readOnlySourceDiscovery: approved_auth_session_route_contract_only
+    fullUnitRuntime: false_current_task_uses_recent_green_and_focused_units
+    localSourceChange: false
+    testChange: false
+    readOnlySourceDiscovery: approved_routes_and_existing_ai_generation_contract_only
     directDatabaseAccess: false
     directDatabaseMutation: false
     providerCallOrConfiguration: false
@@ -2742,16 +2737,11 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-    - docs/05-execution-logs/task-plans/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-    - docs/05-execution-logs/evidence/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-    - docs/05-execution-logs/acceptance/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
-    - src/server/auth/local-session-runtime.ts
-    - src/server/contracts/local-acceptance-session-contract.ts
-    - src/server/services/local-acceptance-session-service.ts
-    - src/app/api/v1/local-acceptance-sessions/route.ts
-    - tests/unit/local-acceptance-session-bootstrap.test.ts
+    - docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/01-requirements/00-index.md
@@ -2769,6 +2759,7 @@ currentTask:
     - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
     - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
     - docs/05-execution-logs/evidence/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
     - src/app/api/v1/**
     - src/app/(auth)/**
     - src/server/**
@@ -2781,6 +2772,8 @@ currentTask:
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
+    - src/**
+    - tests/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -2794,9 +2787,9 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
-  browserBoundary: no_browser_runtime_current_task_followup_may_use_localhost_or_127_0_0_1_only
+  browserBoundary: localhost_or_127_0_0_1_only_no_screenshot_no_trace_no_raw_dom_no_ai_submit_no_provider
   accountCredentialBoundary:
-    currentTask: no_private_account_material_read_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    currentTask: no_private_account_material_read_use_local_safe_bootstrap_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
   dbBoundary:
     currentTask: no_database_connection_read_write_seed_migration_or_schema_change
   aiProviderBoundary:
@@ -2828,15 +2821,15 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
   blockedWithoutFreshApproval:
-    - browser_or_playwright_runtime
-    - dev_server_start
+    - browser_runtime_outside_localhost_or_127_0_0_1
+    - dev_server_start_if_existing_localhost_is_unavailable
     - ai_generation_submit_or_provider_execution
     - database_connection_read_write_migration_seed_or_destructive_operation
     - database_write_migration_seed_or_destructive_operation
     - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
     - provider_call_or_provider_configuration_or_credential_read
     - prompt_provider_payload_raw_ai_input_or_output
-    - source_or_test_change_outside_allowed_safe_bootstrap_files
+    - source_or_test_change
     - package_or_lockfile_change
     - schema_migration_or_drizzle_push
     - staging_prod_deploy_payment_ocr_export_external_service
@@ -2846,16 +2839,16 @@ currentTask:
     - evidence_sensitive_data_exposure
   validationSummary:
     taskPlanPrepared: pass
-    redSourceInspection: pass_missing_local_acceptance_session_bootstrap_service
-    focusedUnit: pass_1_file_3_tests
-    fullUnit: pass_318_files_1435_tests
-    lint: pass
-    typecheck: pass
+    localSafeBootstrap: fail_runtime_session_unrecognized_after_bootstrap_acceptance
+    contentAiQuestionGenerationRoute: blocked_redirected_to_login_detail_controls_0_of_9
+    contentAiPaperGenerationRoute: blocked_redirected_to_login_detail_controls_0_of_10
+    focusedUnitBootstrap: pass_1_file_3_tests
+    focusedUnitAiSurface: pass_1_file_14_tests
     evidencePrepared: pass
     auditReviewPrepared: pass
-    acceptancePrepared: pass_prerequisite_only
-    sourceOrTestChanged: true
-    browserRuntimeExecuted: false
+    acceptancePrepared: pass_blocked_rows_remain_open
+    sourceOrTestChanged: false
+    browserRuntimeExecuted: true
     directDatabaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     credentialOrSessionCaptureExecuted: false
@@ -2863,9 +2856,19 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pass
+    moduleRunV2PreCommitHardening: pending
+    moduleRunV2CloseoutReadiness: pending
+    moduleRunV2PrePushReadiness: pending
+  nextRecommendedTask: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
+previousTaskSnapshotContentAdminSafeRoleBootstrap:
+  id: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28
+  status: closed
+  result: pass_local_safe_role_bootstrap_source_unit
+  branch: codex/content-admin-safe-role-bootstrap-20260628
+  finalMasterSha: b2bfdd1e1fe5ba77895bcb2ee6d6503b93c5f9c1
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
   nextRecommendedTask: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap
 previousTaskSnapshotContentAdminAccountStageB:
   id: content-admin-test-owned-account-stage-b-repair-2026-06-28
