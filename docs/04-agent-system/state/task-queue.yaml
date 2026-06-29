@@ -3824,11 +3824,11 @@ tasks:
     taskPlanPolicy: required_before_source_or_test_change
     targetClosureItem: Ensure organization AI generation local contract access derives from service-computed organization capability metadata instead of route-synthesized role/session context
     behaviorBoundary: source_test_scoped::organization_ai_generation_capability_source_repair_no_db_no_real_provider_no_browser_no_release
-    executionProfile: focused_tdd_repair_under_central_local_security_repair_authorization_pending_materialization
+    executionProfile: focused_tdd_repair_under_central_local_security_repair_authorization
     evidenceMode: redacted_test_result_provider_disabled_capability_status_only
     taskKind: security_fix
     moduleRunVersion: 2
-    status: pending_task_materialization_under_central_local_security_repair_authorization
+    status: in_progress_materialized_source_test_repair
     priority: p2
     severity: medium
     findingId: role-inv-003
@@ -3847,6 +3847,13 @@ tasks:
         - package_lockfile_dependency_changes
         - raw_dom_screenshots_traces
         - pr_creation_or_force_push
+    branch: codex/org-ai-generation-capability-repair-20260629
+    claimedAt: "2026-06-29T10:46:01-07:00"
+    plannedAt: "2026-06-29T10:46:01-07:00"
+    materializedAt: "2026-06-29T10:46:01-07:00"
+    commitSha: pending_local_closeout_commit
+    approvalConsumed: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
+    sourceTestChangeApproval: granted_by_localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
     repairIntent:
       - derive_or_validate_organization_ai_generation_access_from_service_computed_admin_workspace_capability_metadata
       - preserve_default_provider_disabled_local_contract_behavior
@@ -3857,7 +3864,7 @@ tasks:
       blockedFilesMustBeDefined: true
       humanApprovalSatisfiedByCentralLocalRepairLoopAuthorization: true
       perTaskMaterializationStillRequired: true
-    candidateAllowedFiles:
+    allowedFiles:
       - src/server/services/admin-ai-generation-local-contract-route.ts
       - src/server/services/admin-ai-generation-local-contract-route.test.ts
       - tests/unit/admin-ai-generation-entry-surface.test.ts
@@ -3868,6 +3875,45 @@ tasks:
       - docs/05-execution-logs/evidence/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
       - docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
       - docs/05-execution-logs/acceptance/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     blockedWithoutFreshMaterialization:
       - database_connection_or_mutation
       - real_provider_call_or_configuration_or_execution
@@ -3876,6 +3922,48 @@ tasks:
       - release_readiness_or_final_pass
       - cost_calibration_gate
       - credential_cookie_token_session_localStorage_or_Authorization_header_evidence
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_real_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero_local_pure_fake_provider_unit_tests_allowed
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_real_account_fixture_read_no_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence_no_literal_test_credential_values_in_evidence
+    evidenceRedaction:
+      allowed: file_path_route_service_contract_test_risk_category_severity_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - npx.cmd vitest run src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-organization-ai-generation-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-organization-ai-generation-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-organization-ai-generation-capability-source-boundary-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
 
   - id: security-api-contract-input-validation-inventory-2026-06-29
     title: Security API contract and input validation inventory

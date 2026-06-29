@@ -28,6 +28,7 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   CreateAdminAiGenerationResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type {
   AdminAiGenerationRouteIntegratedProviderExecutionControl,
   AdminAiGenerationRuntimeBridgeDto,
@@ -65,10 +66,19 @@ export type AdminAiGenerationLocalContractRouteOptions = {
 };
 
 type AdminAiGenerationActor = {
+  adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary;
   publicId: string;
   roles: AdminRole[];
-  organizationPublicId: string | null;
 };
+
+type ServiceComputedOrganizationAiGenerationCapability =
+  AdminWorkspaceCapabilitySummary & {
+    organizationPublicId: string;
+    organizationEffectiveEdition: "advanced";
+    organizationAuthorizationSource: "org_auth";
+    capabilitySource: "service_computed";
+    canUseOrganizationAdvancedWorkspace: true;
+  };
 
 type AdminAiGenerationRuntimeBridgeControlInput =
   AdminAiGenerationRuntimeBridgeInput;
@@ -137,6 +147,34 @@ function hasRole(actor: AdminAiGenerationActor, role: AdminRole): boolean {
   return actor.roles.includes(role);
 }
 
+function resolveServiceComputedOrganizationAiGenerationCapability(
+  actor: AdminAiGenerationActor,
+): ServiceComputedOrganizationAiGenerationCapability | null {
+  const capabilitySummary = actor.adminWorkspaceCapability;
+
+  if (
+    capabilitySummary === undefined ||
+    capabilitySummary.capabilitySource !== "service_computed" ||
+    capabilitySummary.organizationAuthorizationSource !== "org_auth" ||
+    capabilitySummary.organizationPublicId === null ||
+    capabilitySummary.organizationEffectiveEdition !== "advanced" ||
+    capabilitySummary.canUseOrganizationAdvancedWorkspace !== true
+  ) {
+    return null;
+  }
+
+  return capabilitySummary as ServiceComputedOrganizationAiGenerationCapability;
+}
+
+function canUseOrganizationAdminAiGeneration(
+  actor: AdminAiGenerationActor,
+): boolean {
+  return (
+    (hasRole(actor, "org_advanced_admin") || hasRole(actor, "super_admin")) &&
+    resolveServiceComputedOrganizationAiGenerationCapability(actor) !== null
+  );
+}
+
 function canUseAdminAiGeneration(
   workspace: AdminAiGenerationWorkspace,
   actor: AdminAiGenerationActor,
@@ -145,10 +183,7 @@ function canUseAdminAiGeneration(
     return hasRole(actor, "super_admin") || hasRole(actor, "content_admin");
   }
 
-  return (
-    (hasRole(actor, "org_advanced_admin") || hasRole(actor, "super_admin")) &&
-    actor.organizationPublicId !== null
-  );
+  return canUseOrganizationAdminAiGeneration(actor);
 }
 
 function resolveTaskType(
@@ -224,7 +259,9 @@ function createAdminAiGenerationPolicyInput(input: {
     };
   }
 
-  const organizationPublicId = input.actor.organizationPublicId;
+  const organizationPublicId =
+    resolveServiceComputedOrganizationAiGenerationCapability(input.actor)
+      ?.organizationPublicId ?? null;
 
   return {
     taskPublicId,
@@ -266,14 +303,17 @@ function resolveAdminAiGenerationTaskHistoryQuery(input: {
     };
   }
 
-  if (input.actor.organizationPublicId === null) {
+  const organizationCapability =
+    resolveServiceComputedOrganizationAiGenerationCapability(input.actor);
+
+  if (organizationCapability === null) {
     return null;
   }
 
   return {
     workspace: "organization",
     ownerType: "organization",
-    ownerPublicId: input.actor.organizationPublicId,
+    ownerPublicId: organizationCapability.organizationPublicId,
     limit: ADMIN_AI_GENERATION_HISTORY_LIMIT,
   };
 }
@@ -807,9 +847,10 @@ async function resolveAdminAiGenerationActor(
   }
 
   return {
+    adminWorkspaceCapability:
+      sessionResponse.data.user.adminWorkspaceCapability,
     publicId,
     roles,
-    organizationPublicId: sessionResponse.data.user.organizationPublicId,
   };
 }
 

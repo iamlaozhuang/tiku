@@ -6,6 +6,7 @@ import {
   type AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract-route";
 import type { AdminAiGenerationRuntimeBridgeExecutionSummaryDto } from "../contracts/admin-ai-generation-local-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type {
   AdminAiGenerationResultDto,
   AdminAiGenerationResultHistoryQuery,
@@ -39,11 +40,50 @@ const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionS
     redactionStatus: "redacted",
   };
 
+function createDefaultAdminWorkspaceCapability(input: {
+  adminRoles: AdminRole[];
+  organizationPublicId: string | null;
+}): AdminWorkspaceCapabilitySummary | undefined {
+  const isOrganizationAdvancedRole =
+    input.adminRoles.includes("org_advanced_admin") ||
+    input.adminRoles.includes("super_admin");
+  const isOrganizationStandardRole =
+    input.adminRoles.includes("org_standard_admin");
+
+  if (!isOrganizationAdvancedRole && !isOrganizationStandardRole) {
+    return undefined;
+  }
+
+  return {
+    adminRoles: input.adminRoles,
+    organizationPublicId: input.organizationPublicId,
+    organizationEffectiveEdition: isOrganizationAdvancedRole
+      ? "advanced"
+      : "standard",
+    organizationAuthorizationSource: "org_auth",
+    capabilitySource: "service_computed",
+    canUseOrganizationAdvancedWorkspace:
+      isOrganizationAdvancedRole && input.organizationPublicId !== null,
+  };
+}
+
 function createAdminSessionService(input: {
   adminPublicId?: string | null;
   adminRoles?: AdminRole[];
+  adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary | null;
   organizationPublicId?: string | null;
 }): Pick<SessionService, "getCurrentSession"> {
+  const adminRoles = input.adminRoles ?? [];
+  const organizationPublicId = input.organizationPublicId ?? null;
+  const adminWorkspaceCapability =
+    input.adminWorkspaceCapability === null
+      ? undefined
+      : (input.adminWorkspaceCapability ??
+        createDefaultAdminWorkspaceCapability({
+          adminRoles,
+          organizationPublicId,
+        }));
+
   return {
     async getCurrentSession() {
       return {
@@ -58,9 +98,12 @@ function createAdminSessionService(input: {
             status: "active",
             lockedUntilAt: null,
             employeePublicId: null,
-            organizationPublicId: input.organizationPublicId ?? null,
+            organizationPublicId,
             adminPublicId: input.adminPublicId ?? "admin_public_123",
-            adminRoles: input.adminRoles ?? [],
+            adminRoles,
+            ...(adminWorkspaceCapability === undefined
+              ? {}
+              : { adminWorkspaceCapability }),
           },
           session: {
             expiresAt: "2026-06-26T20:00:00.000Z",
@@ -103,6 +146,7 @@ function createGetRequest(workspace: AdminAiGenerationWorkspace): Request {
 async function postLocalContractRequest(input: {
   workspace: AdminAiGenerationWorkspace;
   adminRoles: AdminRole[];
+  adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary | null;
   organizationPublicId?: string | null;
   body: Record<string, unknown>;
   requestPublicId?: string;
@@ -120,6 +164,7 @@ async function postLocalContractRequest(input: {
   const routeOptions = {
     sessionService: createAdminSessionService({
       adminRoles: input.adminRoles,
+      adminWorkspaceCapability: input.adminWorkspaceCapability,
       organizationPublicId: input.organizationPublicId,
     }),
     taskPersistenceRepository: taskPersistence,
@@ -179,6 +224,7 @@ function createFakeProviderRuntimeBridgeControl(
 async function getLocalContractHistory(input: {
   workspace: AdminAiGenerationWorkspace;
   adminRoles: AdminRole[];
+  adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary | null;
   organizationPublicId?: string | null;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
@@ -194,6 +240,7 @@ async function getLocalContractHistory(input: {
     {
       sessionService: createAdminSessionService({
         adminRoles: input.adminRoles,
+        adminWorkspaceCapability: input.adminWorkspaceCapability,
         organizationPublicId: input.organizationPublicId,
       }),
       resultPersistenceRepository: resultPersistence,
@@ -1155,6 +1202,57 @@ describe("admin AI generation local contract route handlers", () => {
       expect(serializedPayload).not.toMatch(/"id":/);
     },
   );
+
+  it("denies organization advanced admin direct POST when service-computed capability is absent", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      adminWorkspaceCapability: null,
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        clientOnlyFixtureL: "OMITTED_FIXTURE_L",
+      },
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 403011,
+      message: "Admin AI generation is not available for this role.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.calls).toEqual([]);
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_L");
+  });
+
+  it("denies organization advanced admin direct GET when service-computed capability is false", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await getLocalContractHistory({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      adminWorkspaceCapability: {
+        adminRoles: ["org_advanced_admin"],
+        organizationPublicId: "organization_public_123",
+        organizationEffectiveEdition: "advanced",
+        organizationAuthorizationSource: "org_auth",
+        capabilitySource: "service_computed",
+        canUseOrganizationAdvancedWorkspace: false,
+      },
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 403011,
+      message: "Admin AI generation is not available for this role.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.historyQueries).toEqual([]);
+  });
 
   it("denies organization standard admin direct POST without creating a task contract", async () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
