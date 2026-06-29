@@ -4226,6 +4226,12 @@ fullAcceptanceOpsAdminWorkflow20260629:
   validationSummary:
     taskPlanPrepared: pass
     browserWorkflowEvidence: partial_employee_import_execution_unproven
+    evidenceCommit: a695ddfea
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false

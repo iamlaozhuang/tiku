@@ -3,10 +3,11 @@
 - Task id: `full-acceptance-ops-admin-workflow-2026-06-29`
 - Branch: `codex/full-acceptance-ops-admin-workflow-20260629`
 - Evidence status: recorded
-- Result: pass_ops_admin_workflow_coverage_recorded_employee_import_followup_seeded_no_final_pass
+- Result: pass
+- Outcome: pass_ops_admin_workflow_coverage_recorded_employee_import_followup_seeded_no_final_pass
 - Updated at: `2026-06-29T03:18:00-07:00`
 - Batch range: single scoped local browser acceptance task.
-- Commit: pending.
+- Commit: `a695ddfea`.
 
 ## Boundary Confirmation
 
@@ -94,11 +95,11 @@ scoped product surfaces.
 ## Validation Results
 
 - Browser workflow evidence: partial; command anchor `browser_ops_admin_workflow_redacted`.
-- Scoped prettier check: pending.
-- `git diff --check`: pending.
-- Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+- `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-ops-admin-workflow.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-ops-admin-workflow.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-ops-admin-workflow.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-ops-admin-workflow.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-ops-admin-workflow.md`: pass.
+- `git diff --check`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ops-admin-workflow-2026-06-29`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ops-admin-workflow-2026-06-29`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ops-admin-workflow-2026-06-29 -SkipRemoteAheadCheck`: pass.
 
 ## Thread Rollover Decision
 
