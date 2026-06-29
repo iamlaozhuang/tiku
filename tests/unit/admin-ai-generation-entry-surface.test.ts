@@ -746,12 +746,13 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
-  it("renders content admin review traceability for a single persisted generated result without enabling mutations", async () => {
+  it("submits content admin review adoption for a single persisted generated result without exposing sensitive content", async () => {
     const taskPublicId =
       "admin_ai_generation_task_content_question_review_hidden_456";
     const resultPublicId =
       "admin_ai_generation_result_content_question_review_hidden_456";
-    const fetchMock = vi.fn(async (url: string | URL) => {
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
       if (String(url) === "/api/v1/sessions") {
         return Response.json(
           createSessionResponse({ adminRoles: ["content_admin"] }),
@@ -771,6 +772,37 @@ describe("admin AI generation entry surfaces", () => {
             },
           }),
         );
+      }
+
+      if (String(url) === adoptionUrl && init?.method === "POST") {
+        const adoptionRequestBody = JSON.parse(String(init.body));
+
+        expect(adoptionRequestBody).toMatchObject({
+          reviewDecision: "approved",
+          reviewerConfirmed: true,
+          targetType: "question",
+        });
+        expect(adoptionRequestBody.reviewedDraft).toMatchObject({
+          profession: "marketing",
+          questionType: "single_choice",
+          subject: "theory",
+        });
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
+          "providerPayload",
+        );
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              redactionStatus: "redacted",
+            },
+          },
+        });
       }
 
       throw new Error(`Unexpected fetch: ${String(url)}`);
@@ -808,20 +840,34 @@ describe("admin AI generation entry surfaces", () => {
     expect(localValidationPanel).toHaveTextContent("not_executed");
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
-    ).toBeDisabled();
+    ).toBeEnabled();
+    expect(
+      screen.getByTestId("content-admin-review-reject-action"),
+    ).toBeEnabled();
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
-    ).toHaveTextContent("采用需后续任务");
+    ).toHaveTextContent("采用草稿");
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
-    ).toBeDisabled();
+    ).toHaveTextContent("驳回草稿");
+
+    fireEvent.click(screen.getByTestId("content-admin-review-adopt-action"));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
     expect(
-      screen.getByTestId("content-admin-review-reject-action"),
-    ).toHaveTextContent("驳回需后续任务");
+      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+    ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("adopt_disabled");
     expect(document.body.textContent).not.toContain("reject_disabled");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
+      "/api/v1/content-ai-generation-requests",
+      adoptionUrl,
       "/api/v1/content-ai-generation-requests",
     ]);
     expect(document.body.textContent).not.toContain(taskPublicId);

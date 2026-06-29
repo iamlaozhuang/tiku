@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-content-admin-formal-content-workflow-2026-06-29
-updatedAt: "2026-06-29T06:20:00-07:00"
+currentPhase: repair-content-admin-formal-content-workflow-actions-2026-06-29
+updatedAt: "2026-06-29T07:20:00-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2955,12 +2955,12 @@ repository:
   lastKnownMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
   lastKnownOriginMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
 currentTask:
-  id: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+  id: repair-content-admin-formal-content-workflow-actions-2026-06-29
   status: closed
-  result: blocked_content_admin_formal_content_workflow_requires_stage_c_repair
-  source: fullAcceptanceContentAdminFormalContentWorkflow20260629
-  branch: codex/full-acceptance-content-admin-workflow-20260629
-  updatedAt: "2026-06-29T06:20:00-07:00"
+  result: pass_scoped_content_admin_formal_workflow_and_ai_draft_review_repair
+  source: repairContentAdminFormalContentWorkflowActions20260629
+  branch: codex/repair-content-admin-formal-content-workflow-20260629
+  updatedAt: "2026-06-29T07:20:00-07:00"
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
@@ -4555,18 +4555,35 @@ fullAcceptanceContentAdminFormalContentWorkflow20260629:
 repairContentAdminFormalContentWorkflowActions20260629:
   taskId: repair-content-admin-formal-content-workflow-actions-2026-06-29
   phase: repair-content-admin-formal-content-workflow-actions-2026-06-29
-  status: pending
-  result: pending_stage_c_source_test_repair
+  status: closed
+  result: pass_scoped_content_admin_formal_workflow_and_ai_draft_review_repair
   sourceStory: seeded_by_full_acceptance_content_admin_formal_content_workflow_blocked_evidence_2026_06_29
   dependsOn:
     - full-acceptance-content-admin-formal-content-workflow-2026-06-29
   branch: codex/repair-content-admin-formal-content-workflow-20260629
+  claimedAt: "2026-06-29T06:45:00-07:00"
+  plannedAt: "2026-06-29T06:45:00-07:00"
+  implementedAt: "2026-06-29T07:20:00-07:00"
+  validatedAt: "2026-06-29T07:20:00-07:00"
+  reviewedAt: "2026-06-29T07:20:00-07:00"
+  closedAt: "2026-06-29T07:20:00-07:00"
   approvalConsumed: current_user_staged_local_execution_stage_c_source_test_repair_and_per_task_closeout_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
   targetClosureItem: safe_test_owned_content_admin_formal_content_lifecycle_and_ai_draft_review_boundary_repair
   behaviorBoundary: stage_c_source_test_repair_no_provider_no_direct_db_no_final_pass
   executionProfile: local_source_test_repair_then_browser_rerun
   evidenceMode: redacted_role_route_workflow_status_count_test_count_commit_only
+  requiredStandardsRead:
+    codeTasteTenCommandments: docs/03-standards/code-taste-ten-commandments.md
+    adrDirectory: docs/02-architecture/adr/
+    adrFiles:
+      - docs/02-architecture/adr/adr-001-tech-stack-selection.md
+      - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+      - docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
   mandatoryOwnerFacingRoleChecklist:
     path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
     rows:
@@ -4591,6 +4608,20 @@ repairContentAdminFormalContentWorkflowActions20260629:
     - src/lib/**
     - src/server/**
     - tests/unit/**
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+    - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - D:/tiku-local-private/owner-facing-fixtures/**
+    - D:\tiku-local-private\owner-facing-fixtures\**
   blockedFiles:
     - .env*
     - package.json
@@ -4608,9 +4639,80 @@ repairContentAdminFormalContentWorkflowActions20260629:
     - .next/**
   browserBoundary:
     currentTask: localhost_or_127_0_0_1_only_redacted_rerun_after_source_test_repair
+    allowedActions:
+      - safe_test_owned_content_admin_session_switching_for_browser_rerun
+      - route_navigation_visible_status_control_count_checks
+      - app_normal_local_ui_api_mutation_only_for_test_owned_acceptance_data_after_source_repair
+      - cleanup_actions_only_when_app_normally_provides_them
+    forbidden:
+      - screenshot_trace_raw_dom_evidence
+      - browser_storage_or_session_material_inspection
+      - non_localhost_navigation
+      - provider_or_external_service_execution
+      - raw_question_paper_material_resource_chunk_content_evidence
   dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
   aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
   credentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+  localPrivateInputBoundary:
+    roleSeparatedAccounts: read_only_login_input_for_browser_rerun_only_no_values_or_session_evidence
+    ownerFacingFixtures: read_only_test_owned_input_only_if_needed_no_raw_fixture_content_evidence_no_copy_no_commit
+  evidenceRedaction:
+    allowed:
+      - role_labels
+      - route_labels
+      - workflow_labels
+      - status_labels
+      - control_counts
+      - test_counts
+      - failure_classes
+      - commit_shas
+      - redacted_repair_summary
+    forbidden:
+      - credentials_cookies_tokens_sessions_localStorage_Authorization_headers
+      - env_file_contents_or_connection_strings
+      - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces
+      - provider_payloads_prompts_raw_ai_input_output
+      - complete_question_paper_material_resource_chunk_content
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/services/admin-ai-generation-formal-adoption-service.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/services/admin-ai-generation-formal-adoption-service.test.ts
+    - npm.cmd run test:unit
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/task-plans/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md docs/05-execution-logs/acceptance/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-content-admin-formal-content-workflow-actions-2026-06-29 -SkipRemoteAheadCheck
+  validationSummary:
+    taskPlanPrepared: pass
+    redUnit: pass_1_file_14_tests_1_expected_failure_before_implementation
+    focusedUnit: pass_5_files_55_tests
+    aiFormalAdoptionFocusedUnitAfterReviewedDraftPayload: pass_3_files_21_tests
+    fullUnitBaseline: pass_318_files_1438_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    browserRerun: pass_content_admin_ai_question_adopt_ai_paper_reject_question_material_create_disable_paper_controls
+    sourceChanged: true
+    testsChanged: true
+    directDatabaseAccessExecuted: false
+    browserNormalLocalUiApiMutationExecuted: true
+    schemaMigrationSeedDependencyChanged: false
+    providerCallOrConfigurationExecuted: false
+    credentialOrSessionCaptureExecuted: false
+    sensitiveEvidenceCaptured: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
   closeoutPolicy:
     localCommit:
       approved: true

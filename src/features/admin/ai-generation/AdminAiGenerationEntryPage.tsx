@@ -9,6 +9,11 @@ import {
   WandSparkles,
 } from "lucide-react";
 
+import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
+import type {
+  AdminAiGenerationFormalPaperDraftPayload,
+  AdminAiGenerationFormalQuestionDraftPayload,
+} from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type {
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationTaskHistoryDto,
@@ -42,6 +47,19 @@ type AdminAiGenerationRequestState =
   | "accepted"
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
+type ContentAdminReviewDecision = "approved" | "rejected";
+type ContentAdminReviewActionState =
+  | "idle"
+  | "adopting"
+  | "rejecting"
+  | "adopted"
+  | "rejected"
+  | "error";
+type ContentAdminReviewActionInput = {
+  generationKind: AdminAiGenerationKind;
+  resultPublicId: string;
+  reviewDecision: ContentAdminReviewDecision;
+};
 type AdminAiGenerationDetailControl = {
   inputMode: "select" | "number" | "text";
   label: string;
@@ -115,6 +133,70 @@ function getAdminAiGenerationRequestPath(
   return workspace === "content"
     ? "/api/v1/content-ai-generation-requests"
     : "/api/v1/organization-ai-generation-requests";
+}
+
+function getContentAiGenerationFormalAdoptionPath(
+  resultPublicId: string,
+): string {
+  return `/api/v1/content-ai-generation-results/${encodeURIComponent(
+    resultPublicId,
+  )}/formal-adoptions`;
+}
+
+function createContentAdminReviewedQuestionDraftPayload(): AdminAiGenerationFormalQuestionDraftPayload {
+  return {
+    questionType: "single_choice",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    stemRichText: "内容 AI 评审后题干草稿",
+    analysisRichText: "内容 AI 评审后老师解析草稿",
+    standardAnswerRichText: "A",
+    multiChoiceRule: "all_correct_only",
+    scoringMethod: "auto_match",
+    materialPublicId: null,
+    questionOptions: [
+      {
+        label: "A",
+        contentRichText: "评审后选项 A",
+        isCorrect: true,
+        sortOrder: 1,
+      },
+      {
+        label: "B",
+        contentRichText: "评审后选项 B",
+        isCorrect: false,
+        sortOrder: 2,
+      },
+    ],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: [],
+  };
+}
+
+function createContentAdminReviewedPaperDraftPayload(): AdminAiGenerationFormalPaperDraftPayload {
+  return {
+    name: "内容 AI 评审后试卷草稿",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    paperType: "mock_paper",
+    year: null,
+    source: "内容 AI 草稿评审",
+    durationMinute: 120,
+    totalScore: "100.0",
+    paperSections: [],
+  };
+}
+
+function createContentAdminReviewedDraftPayload(
+  generationKind: AdminAiGenerationKind,
+) {
+  return generationKind === "question"
+    ? createContentAdminReviewedQuestionDraftPayload()
+    : createContentAdminReviewedPaperDraftPayload();
 }
 
 function getGenerationKindLabel(generationKind: AdminAiGenerationKind): string {
@@ -348,10 +430,17 @@ function AdminAiGenerationDetailControls({
 }
 
 function AdminAiGenerationTaskHistoryPanel({
+  onReviewContentDraft,
+  reviewActionStateByResultPublicId,
   state,
   taskHistory,
   workspace,
 }: {
+  onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
+  reviewActionStateByResultPublicId: Record<
+    string,
+    ContentAdminReviewActionState
+  >;
   state: AdminAiGenerationHistoryState;
   taskHistory: AdminAiGenerationTaskHistoryDto | null;
   workspace: AdminAiGenerationWorkspace;
@@ -533,7 +622,16 @@ function AdminAiGenerationTaskHistoryPanel({
                     </div>
                   </dl>
                   {workspace === "content" ? (
-                    <ContentAdminReviewTraceabilityPanel />
+                    <ContentAdminReviewTraceabilityPanel
+                      actionState={
+                        reviewActionStateByResultPublicId[
+                          taskItem.generatedResult.resultPublicId
+                        ] ?? "idle"
+                      }
+                      generationKind={taskItem.generationKind}
+                      resultPublicId={taskItem.generatedResult.resultPublicId}
+                      onReviewContentDraft={onReviewContentDraft}
+                    />
                   ) : null}
                 </div>
               ) : null}
@@ -545,7 +643,49 @@ function AdminAiGenerationTaskHistoryPanel({
   );
 }
 
-function ContentAdminReviewTraceabilityPanel() {
+function resolveContentAdminReviewActionMessage(
+  actionState: ContentAdminReviewActionState,
+): string | null {
+  if (actionState === "adopting") {
+    return "正在提交采用评审";
+  }
+
+  if (actionState === "rejecting") {
+    return "正在提交驳回评审";
+  }
+
+  if (actionState === "adopted") {
+    return "草稿采用已提交；正式发布仍需单独校验。";
+  }
+
+  if (actionState === "rejected") {
+    return "草稿驳回已提交；生成结果不会写入正式内容。";
+  }
+
+  if (actionState === "error") {
+    return "草稿评审提交失败，请刷新后重试。";
+  }
+
+  return null;
+}
+
+function ContentAdminReviewTraceabilityPanel({
+  actionState,
+  generationKind,
+  resultPublicId,
+  onReviewContentDraft,
+}: {
+  actionState: ContentAdminReviewActionState;
+  generationKind: AdminAiGenerationKind;
+  resultPublicId: string;
+  onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
+}) {
+  const isSubmitting =
+    actionState === "adopting" || actionState === "rejecting";
+  const isCompleted = actionState === "adopted" || actionState === "rejected";
+  const actionMessage = resolveContentAdminReviewActionMessage(actionState);
+  const isActionDisabled = isSubmitting || isCompleted;
+
   return (
     <section
       className="border-border bg-background mt-3 rounded-md border p-3"
@@ -633,22 +773,49 @@ function ContentAdminReviewTraceabilityPanel() {
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
-          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="content-admin-review-adopt-action"
-          disabled
+          disabled={isActionDisabled}
           type="button"
+          onClick={() =>
+            onReviewContentDraft({
+              generationKind,
+              resultPublicId,
+              reviewDecision: "approved",
+            })
+          }
         >
-          采用需后续任务
+          {actionState === "adopted" ? "已提交采用" : "采用草稿"}
         </button>
         <button
-          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="content-admin-review-reject-action"
-          disabled
+          disabled={isActionDisabled}
           type="button"
+          onClick={() =>
+            onReviewContentDraft({
+              generationKind,
+              resultPublicId,
+              reviewDecision: "rejected",
+            })
+          }
         >
-          驳回需后续任务
+          {actionState === "rejected" ? "已提交驳回" : "驳回草稿"}
         </button>
       </div>
+      {actionMessage === null ? null : (
+        <p
+          className={
+            actionState === "error"
+              ? "text-destructive mt-2 text-xs"
+              : "text-brand-primary mt-2 text-xs"
+          }
+          data-testid="content-admin-review-action-status"
+          role={actionState === "error" ? "alert" : "status"}
+        >
+          {actionMessage}
+        </p>
+      )}
     </section>
   );
 }
@@ -670,6 +837,10 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationLocalContractDto | null>(null);
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
+  const [
+    reviewActionStateByResultPublicId,
+    setReviewActionStateByResultPublicId,
+  ] = useState<Record<string, ContentAdminReviewActionState>>({});
   const pageCopy = getPageCopy(workspace, generationKind);
   const providerExecutionCopy =
     workspace === "organization"
@@ -810,6 +981,67 @@ export function AdminAiGenerationEntryPage({
     }
   }
 
+  async function handleReviewContentDraft(
+    input: ContentAdminReviewActionInput,
+  ) {
+    const sessionToken = getStoredSessionToken();
+    const pendingState =
+      input.reviewDecision === "approved" ? "adopting" : "rejecting";
+
+    setReviewActionStateByResultPublicId((currentState) => ({
+      ...currentState,
+      [input.resultPublicId]: pendingState,
+    }));
+
+    try {
+      const reviewResponse =
+        await fetchAdminApi<AdminAiGenerationFormalAdoptionResult>(
+          getContentAiGenerationFormalAdoptionPath(input.resultPublicId),
+          sessionToken,
+          {
+            body: JSON.stringify({
+              reviewDecision: input.reviewDecision,
+              reviewerConfirmed: true,
+              reviewedDraft:
+                input.reviewDecision === "approved"
+                  ? createContentAdminReviewedDraftPayload(input.generationKind)
+                  : undefined,
+              targetType: input.generationKind,
+            }),
+            headers: {
+              "content-type": "application/json",
+            },
+            method: "POST",
+          },
+        );
+
+      if (isUnauthorizedResponse(reviewResponse)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (reviewResponse.code !== 0 || reviewResponse.data === null) {
+        setReviewActionStateByResultPublicId((currentState) => ({
+          ...currentState,
+          [input.resultPublicId]: "error",
+        }));
+        return;
+      }
+
+      setReviewActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [input.resultPublicId]:
+          input.reviewDecision === "approved" ? "adopted" : "rejected",
+      }));
+      await refreshTaskHistory(sessionToken);
+    } catch {
+      setReviewActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [input.resultPublicId]: "error",
+      }));
+    }
+  }
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载 AI 入口" />;
   }
@@ -906,9 +1138,11 @@ export function AdminAiGenerationEntryPage({
       </div>
 
       <AdminAiGenerationTaskHistoryPanel
+        reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
         state={historyState}
         taskHistory={taskHistory}
         workspace={workspace}
+        onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
       />
 
       {requestState === "error" ? (
