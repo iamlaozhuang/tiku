@@ -3497,7 +3497,8 @@ tasks:
     evidenceMode: redacted_test_result_capability_status_only_no_raw_rows
     taskKind: security_fix
     moduleRunVersion: 2
-    status: ready_for_closeout
+    status: closed
+    result: pass_require_service_computed_organization_analytics_capability_pushed_to_origin_master
     priority: p2
     severity: medium
     findingId: role-inv-002
@@ -3513,6 +3514,8 @@ tasks:
     materializedAt: "2026-06-29T10:30:45-07:00"
     implementedAt: "2026-06-29T10:34:30-07:00"
     validatedAt: "2026-06-29T10:36:38-07:00"
+    closedAt: "2026-06-29T10:41:14-07:00"
+    commitSha: 2a3ba2f591ddd51c8fe040a7d3b30a8663e5f0f2
     approvalConsumed: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
     sourceTestChangeApproval: granted_by_localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
     repairIntent:

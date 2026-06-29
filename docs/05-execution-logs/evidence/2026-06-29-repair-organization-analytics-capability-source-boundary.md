@@ -6,7 +6,7 @@
 - Branch: `codex/org-analytics-capability-repair-20260629`
 - Base branch state: `master` and `origin/master` aligned at `c8e4a2ea1f27c9a200287785786dc1142db48601`
 - Evidence mode: redacted status, file paths, counts, and capability-source summaries only.
-- Result: pass - source/test repair implemented; focused tests, formatting, diff check, precommit hardening, closeout readiness, and prepush readiness passed.
+- Result: pass - source/test repair implemented, ready for fast-forward merge to `master`, push to `origin/master`, and short branch cleanup; focused tests, formatting, diff check, precommit hardening, closeout readiness, and prepush readiness passed.
 - localFullLoopGate: local source/test security repair under centralized local repair-loop authorization; release, deploy, final Pass, and Cost Calibration remain blocked.
 - Cost Calibration Gate remains blocked.
 - threadRolloverGate: if interrupted, resume from `project-state.yaml`, `task-queue.yaml`, this evidence file, and the task plan; do not continue from memory.
@@ -79,10 +79,10 @@
 
 ## Batch Commit Evidence
 
-- batchCommitEvidence: local closeout commit is pending until validation gates pass.
-- Batch commit evidence: pending local closeout commit after Module Run v2 closeout readiness.
-- Batch commit: pending local closeout commit.
-- Commit: `c8e4a2ea1f27c9a200287785786dc1142db48601` pre-closeout branch base; final closeout commit is reported after validation, merge, and push.
+- batchCommitEvidence: repair commit is ready for fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup.
+- Batch commit evidence: `2a3ba2f591ddd51c8fe040a7d3b30a8663e5f0f2` on `codex/org-analytics-capability-repair-20260629`.
+- Batch commit: `2a3ba2f591ddd51c8fe040a7d3b30a8663e5f0f2`.
+- Commit: `2a3ba2f591ddd51c8fe040a7d3b30a8663e5f0f2`.
 
 ## Next Module Run Candidate
 

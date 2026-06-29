@@ -3,9 +3,9 @@
 ## Decision
 
 - Task id: `repair-organization-analytics-capability-source-boundary-2026-06-29`
-- Acceptance status: accepted_ready_for_closeout
+- Acceptance status: accepted_closed
 - Finding id: `role-inv-002`
-- Verdict: `accepted_ready_for_closeout`
+- Verdict: `accepted_closed`
 
 ## Accepted Outcomes
 
