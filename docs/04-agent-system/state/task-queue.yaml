@@ -2054,8 +2054,83 @@ tasks:
     validationPolicy: task_scoped_prettier_diff_module_run_v2
     taskKind: security_inventory
     moduleRunVersion: 2
-    status: pending
-    nextRecommended: true
+    status: closed
+    result: pass_redacted_log_boundary_inventory_three_followups_seeded_no_source_fix
+    nextRecommended: false
+    approvedAt: "2026-06-29T07:25:03-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+    claimedAt: "2026-06-29T07:25:03-07:00"
+    plannedAt: "2026-06-29T07:25:03-07:00"
+    reviewedAt: "2026-06-29T07:32:49-07:00"
+    validatedAt: "2026-06-29T07:32:49-07:00"
+    closedAt: "2026-06-29T07:32:49-07:00"
+    branch: codex/security-redaction-log-inventory-20260629
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - docs/01-requirements/traceability/**
+      - package.json
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/app/api/v1/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+    evidenceRedaction:
+      allowed: file_path_module_risk_category_severity_status_count_follow_up_task_summary_only
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - employee_subjective_answers
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents
+        - source_code_snippets_containing_sensitive_terms
     readOnlyCandidateSurfaces:
       - src/server/services/**
       - src/server/repositories/**
@@ -2065,6 +2140,57 @@ tasks:
       - tests/unit/**
       - docs/05-execution-logs/evidence/**
       - docs/05-execution-logs/audits-reviews/**
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+    completionSummary:
+      sourceReadOnlyFileCount: 683
+      redactedFindingCount: 4
+      followUpTaskCount: 3
+      nextRecommendedTaskId: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+      noSourceTestFixesPerformed: true
+      noBrowserDbProviderDependencyReleaseActionsPerformed: true
+    redactedFindings:
+      - id: sec-redlog-001
+        severity: medium
+        status: follow_up_task_required
+        followUpTaskId: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+      - id: sec-redlog-002
+        severity: medium
+        status: follow_up_task_required
+        followUpTaskId: verify-ai-provider-error-snapshot-redaction-2026-06-29
+      - id: sec-redlog-003
+        severity: low
+        status: follow_up_task_required
+        followUpTaskId: verify-local-acceptance-session-boundary-2026-06-29
+      - id: sec-redlog-004
+        severity: low
+        status: covered_watch
+        followUpTaskId: none_currently_required
     blockedWithoutFreshMaterialization:
       - source_or_test_change
       - browser_or_playwright_runtime
@@ -2076,6 +2202,118 @@ tasks:
       - env_secret_access_or_env_file_change
       - staging_prod_deploy
       - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
+  - id: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    title: Fix route error envelope coverage for question_paper and student_experience handlers
+    phase: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    sourceStory: sec-redlog-001_from_security_data_redaction_log_boundary_inventory_2026_06_29
+    dependencies:
+      - security-data-redaction-log-boundary-inventory-2026-06-29
+    taskPlanPolicy: required_before_source_or_test_change
+    targetClosureItem: >-
+      Add or prove shared route-error-response envelope coverage for question_paper and student_experience handler
+      factories, with focused unit coverage and no API response contract regression.
+    behaviorBoundary: source_test_fix_requires_fresh_materialized_allowedFiles_blockedFiles_no_runtime_db_provider_release
+    executionProfile: targeted_source_test_security_fix
+    evidenceMode: redacted_test_command_status_count_and_file_path_summary_only
+    taskKind: security_fix
+    moduleRunVersion: 2
+    status: pending_requires_fresh_owner_selection_and_task_materialization
+    nextRecommended: true
+    priority: p1
+    severity: medium
+    readOnlyCandidateSurfaces:
+      - src/server/services/question-paper/route-handlers.ts
+      - src/server/services/student-experience/route-handlers.ts
+      - src/server/services/route-error-response.ts
+      - tests/unit/**
+    likelyAllowedFilesAfterFreshApproval:
+      - src/server/services/question-paper/route-handlers.ts
+      - src/server/services/student-experience/route-handlers.ts
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - docs/01-requirements/traceability/**
+    blockedWithoutFreshMaterialization:
+      - any_source_or_test_change
+      - browser_runtime_or_dev_server
+      - database_connection_or_mutation
+      - provider_call_or_configuration
+      - package_or_lockfile_change
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
+  - id: verify-ai-provider-error-snapshot-redaction-2026-06-29
+    title: Verify AI provider error snapshot redaction
+    phase: verify-ai-provider-error-snapshot-redaction-2026-06-29
+    sourceStory: sec-redlog-002_from_security_data_redaction_log_boundary_inventory_2026_06_29
+    dependencies:
+      - security-data-redaction-log-boundary-inventory-2026-06-29
+    taskPlanPolicy: required_before_source_or_test_change
+    targetClosureItem: >-
+      Prove provider error, prompt, answer, payload, and generated output snapshots remain redacted or hashed across
+      AI scoring, explanation, hint, and knowledge recommendation paths.
+    behaviorBoundary: source_test_fix_or_regression_requires_fresh_materialized_allowedFiles_blockedFiles_no_provider_execution
+    executionProfile: targeted_unit_security_regression
+    evidenceMode: redacted_test_command_status_count_and_assertion_summary_only
+    taskKind: security_fix_or_regression
+    moduleRunVersion: 2
+    status: pending_requires_fresh_owner_selection_and_task_materialization
+    nextRecommended: false
+    priority: p1
+    severity: medium
+    readOnlyCandidateSurfaces:
+      - src/server/models/ai-rag.ts
+      - src/server/services/ai-explanation-hint-service.ts
+      - src/server/services/ai-scoring-service.ts
+      - src/server/services/knowledge-recommendation-service.ts
+      - tests/unit/**
+    blockedWithoutFreshMaterialization:
+      - any_source_or_test_change
+      - provider_call_or_provider_configuration
+      - env_secret_access_or_env_file_change
+      - database_connection_or_mutation
+      - package_or_lockfile_change
+      - raw_prompt_payload_ai_io_or_generated_content_evidence
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+
+  - id: verify-local-acceptance-session-boundary-2026-06-29
+    title: Verify local acceptance session boundary
+    phase: verify-local-acceptance-session-boundary-2026-06-29
+    sourceStory: sec-redlog-003_from_security_data_redaction_log_boundary_inventory_2026_06_29
+    dependencies:
+      - security-data-redaction-log-boundary-inventory-2026-06-29
+    taskPlanPolicy: required_before_source_or_test_change
+    targetClosureItem: >-
+      Prove local acceptance session creation remains production-disabled, localhost-only, cookie-only for credentials,
+      and free of token/session exposure in response bodies or evidence.
+    behaviorBoundary: local_unit_security_regression_requires_fresh_materialized_allowedFiles_blockedFiles_no_browser_db_provider
+    executionProfile: targeted_unit_security_regression
+    evidenceMode: redacted_test_command_status_count_and_assertion_summary_only
+    taskKind: security_fix_or_regression
+    moduleRunVersion: 2
+    status: pending_requires_fresh_owner_selection_and_task_materialization
+    nextRecommended: false
+    priority: p2
+    severity: low
+    readOnlyCandidateSurfaces:
+      - src/app/api/v1/local-acceptance-sessions/route.ts
+      - src/server/services/local-acceptance-session-service.ts
+      - tests/unit/**
+    blockedWithoutFreshMaterialization:
+      - any_source_or_test_change
+      - account_fixture_read_or_session_switching
+      - browser_runtime_or_dev_server
+      - database_connection_or_mutation
+      - provider_call_or_configuration
+      - credentials_cookies_tokens_sessions_or_Authorization_header_evidence
       - release_readiness_or_final_pass
       - cost_calibration_gate
 

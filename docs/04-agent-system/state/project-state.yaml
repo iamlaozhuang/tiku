@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: detail-optimization-security-review-kickoff-2026-06-29
-updatedAt: "2026-06-29T07:18:31-07:00"
+currentPhase: security-data-redaction-log-boundary-inventory-2026-06-29
+updatedAt: "2026-06-29T07:32:49-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2955,18 +2955,18 @@ repository:
   lastKnownMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
   lastKnownOriginMasterSha: 5ac3b0dc482939f895c8903c6468a5f472b5e585
 currentTask:
-  id: detail-optimization-security-review-kickoff-2026-06-29
-  status: closed
-  result: pass_docs_state_security_review_kickoff_matrix_task_split_no_release_claim
-  source: detailOptimizationSecurityReviewKickoff20260629
-  branch: codex/detail-optimization-security-review-kickoff-20260629
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-optimization-security-review-kickoff.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-optimization-security-review-kickoff.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-optimization-security-review-kickoff.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-optimization-security-review-kickoff.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-optimization-security-review-kickoff.md
-  commitSha: 31e13b861
-  updatedAt: "2026-06-29T07:18:31-07:00"
+  id: security-data-redaction-log-boundary-inventory-2026-06-29
+  status: in_progress
+  result: pending_source_read_only_redaction_log_inventory
+  source: securityDataRedactionLogBoundaryInventory20260629
+  branch: codex/security-redaction-log-inventory-20260629
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  commitSha: 1a4f9ed00
+  updatedAt: "2026-06-29T07:25:03-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
@@ -4539,6 +4539,266 @@ detailOptimizationSecurityReviewKickoff20260629:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
+  blockedWithoutFreshApproval:
+    - source_or_test_change
+    - package_or_lockfile_change
+    - dependency_introduction_upgrade_or_removal
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - account_fixture_read_or_session_switching
+    - database_connection_read_write_migration_or_seed
+    - schema_migration_or_drizzle_push
+    - provider_call_or_provider_configuration_or_credential_read
+    - env_secret_access_or_env_file_change
+    - staging_prod_cloud_deploy_payment_ocr_export_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - sensitive_evidence_capture
+securityDataRedactionLogBoundaryInventory20260629:
+  taskId: security-data-redaction-log-boundary-inventory-2026-06-29
+  phase: security-data-redaction-log-boundary-inventory-2026-06-29
+  status: closed
+  result: pass_redacted_log_boundary_inventory_three_followups_seeded_no_source_fix
+  sourceStory: seeded_by_detail_optimization_security_review_kickoff_2026_06_29
+  dependsOn:
+    - detail-optimization-security-review-kickoff-2026-06-29
+  taskKind: security_inventory
+  moduleRunVersion: 2
+  approvedAt: "2026-06-29T07:25:03-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+  claimedAt: "2026-06-29T07:25:03-07:00"
+  plannedAt: "2026-06-29T07:25:03-07:00"
+  reviewedAt: "2026-06-29T07:32:49-07:00"
+  validatedAt: "2026-06-29T07:32:49-07:00"
+  closedAt: "2026-06-29T07:32:49-07:00"
+  branch: codex/security-redaction-log-inventory-20260629
+  goal: >-
+    Inventory data redaction and logging boundaries using scoped source/test read-only review plus governance docs,
+    produce redacted findings and one-finding-per-fix-task split, and keep all implementation, runtime, DB, Provider,
+    dependency, schema/migration/seed, release, PR, force-push, and Cost Calibration gates blocked.
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - docs/01-requirements/traceability/**
+    - package.json
+    - src/server/services/**
+    - src/server/repositories/**
+    - src/server/mappers/**
+    - src/server/contracts/**
+    - src/app/api/v1/**
+    - tests/unit/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary:
+    currentTask: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    allowedEvidence: file_path_risk_category_status_count_only_no_db_content
+  aiProviderBoundary:
+    currentTask: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write
+    providerBudget: zero
+    costCalibrationGate: blocked
+  browserBoundary:
+    currentTask: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary:
+    currentTask: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+  evidenceRedaction:
+    allowed:
+      - file_paths
+      - module_labels
+      - risk_categories
+      - severity
+      - status
+      - counts
+      - redacted_expected_observed_summary
+      - follow_up_task_ids
+      - validation_command_names
+      - commit_summaries
+    forbidden:
+      - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - employee_subjective_answers
+      - complete_question_paper_material_resource_or_chunk_content
+      - env_file_contents
+      - source_code_snippets_containing_sensitive_terms
+  inventoryScope:
+    sourceContentReadAllowedAfterPlanMaterialized: true
+    writeFixesAllowed: false
+    readOnlySurfaces:
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/app/api/v1/**
+      - tests/unit/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    riskFamilies:
+      - raw_error_or_stack_exposure
+      - raw_request_or_response_logging
+      - credential_session_token_header_exposure
+      - pii_or_plaintext_redeem_code_exposure
+      - internal_id_or_raw_db_row_exposure
+      - provider_prompt_payload_or_raw_ai_io_exposure
+      - complete_question_paper_material_resource_chunk_exposure
+      - evidence_audit_log_redaction_drift
+  inventorySummary:
+    sourceReadOnlyFileCount: 683
+    rootFileCounts:
+      src/server/services: 260
+      src/server/repositories: 65
+      src/server/mappers: 40
+      src/server/contracts: 104
+      src/app/api/v1: 116
+      tests/unit: 98
+    riskPatternFileCounts:
+      logging: 295
+      errorSurface: 90
+      credentialSurface: 391
+      piiRedeem: 191
+      providerAi: 265
+      contentExposure: 402
+      redactionBoundary: 293
+      auditLogBoundary: 248
+      apiResponseBoundary: 398
+      consoleOutput: 0
+      explicitErrorSurface: 8
+      rawPayloadFields: 203
+    highRiskBoundaryAssessment:
+      auditAndAiCallLogDtos: covered_by_summary_only_mappers_and_existing_unit_tests
+      providerPayloadBoundary: covered_by_redacted_snapshot_factory_but_provider_error_message_needs_targeted_verification
+      apiRouteErrorEnvelope: partial_gap_question_paper_and_student_experience_local_handlers_need_followup
+      localAcceptanceSessionBoundary: local_only_cookie_session_surface_needs_targeted_non_production_boundary_regression
+      evidenceSanitization: no_raw_evidence_recorded_in_this_task
+  redactedFindings:
+    - id: sec-redlog-001
+      title: question_paper_and_student_experience_handlers_missing_explicit_error_envelope
+      severity: medium
+      status: follow_up_task_required
+      impactedFiles:
+        - src/server/services/question-paper/route-handlers.ts
+        - src/server/services/student-experience/route-handlers.ts
+      redactedSummary: >-
+        Two route-handler factories own Response.json paths and async repository/service calls without the shared
+        route-error-response envelope in the inspected file. No raw data leak was recorded in this task; the risk is
+        future exception-surface drift and inconsistent 500 response handling.
+      followUpTaskId: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    - id: sec-redlog-002
+      title: provider_error_snapshot_message_redaction_needs_targeted_regression
+      severity: medium
+      status: follow_up_task_required
+      impactedFiles:
+        - src/server/models/ai-rag.ts
+        - src/server/services/ai-explanation-hint-service.ts
+        - src/server/services/ai-scoring-service.ts
+        - src/server/services/knowledge-recommendation-service.ts
+      redactedSummary: >-
+        AI service error paths pass provider error objects into redacted snapshot creation. Existing redaction logic
+        hashes sensitive string-like payloads, but a focused regression should prove provider error messages, prompts,
+        answers, payloads, and generated outputs cannot persist or appear in evidence as raw content.
+      followUpTaskId: verify-ai-provider-error-snapshot-redaction-2026-06-29
+    - id: sec-redlog-003
+      title: local_acceptance_session_cookie_boundary_needs_non_production_guard_regression
+      severity: low
+      status: follow_up_task_required
+      impactedFiles:
+        - src/app/api/v1/local-acceptance-sessions/route.ts
+        - src/server/services/local-acceptance-session-service.ts
+      redactedSummary: >-
+        Local acceptance session creation is intentionally non-production scoped and sets a session cookie. A focused
+        regression should keep production-disabled behavior, localhost-only access, cookie safety attributes, and
+        no-token response exposure explicit.
+      followUpTaskId: verify-local-acceptance-session-boundary-2026-06-29
+    - id: sec-redlog-004
+      title: audit_log_and_ai_call_log_summary_only_boundaries_have_existing_baseline
+      severity: low
+      status: covered_watch
+      impactedFiles:
+        - src/server/contracts/audit-log/log-governance-contract.ts
+        - src/server/contracts/ai-call-log/log-governance-contract.ts
+        - src/server/mappers/audit-log/audit-log-mapper.ts
+        - src/server/mappers/ai-call-log/ai-call-log-mapper.ts
+        - src/server/services/audit-log/route-handlers.ts
+        - src/server/services/ai-call-log/route-handlers.ts
+        - tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+      redactedSummary: >-
+        DTO mappers and admin log tests already assert summary-only visibility and absence of raw sensitive markers.
+        Keep this as a watch item for future changes to audit_log or ai_call_log exports, raw viewers, or retention
+        controls.
+      followUpTaskId: none_currently_required
+  followUpTaskSplit:
+    nextRecommendedTaskId: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    queuedTaskIds:
+      - fix-route-error-envelope-question-paper-student-experience-2026-06-29
+      - verify-ai-provider-error-snapshot-redaction-2026-06-29
+      - verify-local-acceptance-session-boundary-2026-06-29
+    sourceFixPermission: not_granted_in_this_task_each_followup_must_materialize_allowedFiles_blockedFiles_and_receive_fresh_execution_approval
+  validationCommands:
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-data-redaction-log-boundary-inventory-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-data-redaction-log-boundary-inventory.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_goal_continuation_and_seeded_next_smallest_safe_task_2026_06_29
   blockedWithoutFreshApproval:
     - source_or_test_change
     - package_or_lockfile_change
