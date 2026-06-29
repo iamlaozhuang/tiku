@@ -3,7 +3,7 @@
 ## Status
 
 - Task: `full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28`
-- Status: in_progress
+- Status: closed
 - Result: pass content_admin_ai_generation_detail_rows_after_session_bridge_repair
 
 ## Scope Review

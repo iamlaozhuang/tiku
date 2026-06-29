@@ -4,11 +4,11 @@
 
 - Task: `full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28`
 - Branch: `codex/content-admin-ai-rerun-session-bridge-20260628`
-- Status: in_progress
+- Status: closed
 - Result: pass content_admin_ai_generation_detail_rows_after_session_bridge_repair
 - Batch range: two `content_admin` AI generation detail-control rows.
 - Pre-task master checkpoint: `5dccd83fd48d06296e986d0fb81a89c3e30edea0`
-- Commit: pending
+- Commit: `766d3952d`
 
 ## Boundary Confirmation
 
@@ -21,6 +21,17 @@
 - Private account material read: false.
 - Sensitive evidence captured: false.
 - Cost Calibration Gate remains blocked.
+
+## RED
+
+RED: predecessor rerun was blocked because local safe bootstrap accepted the request but the live runtime did not
+recognize the `content_admin` session; both scoped content AI routes were unreachable behind the login boundary.
+
+## GREEN
+
+GREEN: after the session bridge repair, local safe bootstrap and `/api/v1/sessions` resolve `content_admin`, and both
+scoped content AI generation routes render the shared entry/detail-control surface with expected control-category
+counts.
 
 ## Runtime Evidence
 
@@ -44,8 +55,8 @@
 - Prettier scoped check: pass.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+- Module Run v2 closeout readiness: pass.
+- Module Run v2 prepush readiness: pass.
 
 ## Evidence Boundary
 
@@ -76,6 +87,6 @@ prompts, raw AI input/output, employee subjective answers, and complete question
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28`:
   pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28`:
-  pending.
+  pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28 -SkipRemoteAheadCheck`:
-  pending.
+  pass.

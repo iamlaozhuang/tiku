@@ -2672,8 +2672,8 @@ repository:
   lastKnownOriginMasterSha: 5dccd83fd48d06296e986d0fb81a89c3e30edea0
 currentTask:
   id: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
-  status: in_progress
-  result: pending
+  status: closed
+  result: pass_content_admin_ai_generation_detail_rows_after_session_bridge_repair
   taskKind: local_acceptance_runtime
   executionProfile: local_browser_content_admin_ai_generation_detail_rerun_after_session_bridge_repair
   approvedAt: "2026-06-28T20:28:21-07:00"
@@ -2682,6 +2682,10 @@ currentTask:
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
   claimedAt: "2026-06-28T20:28:21-07:00"
   plannedAt: "2026-06-28T20:28:21-07:00"
+  implementedAt: "2026-06-28T20:40:03-07:00"
+  validatedAt: "2026-06-28T20:40:03-07:00"
+  reviewedAt: "2026-06-28T20:40:03-07:00"
+  closedAt: "2026-06-28T20:40:03-07:00"
   sourceStory: follow_up_after_local_acceptance_session_runtime_bridge_stage_c_repair_2026_06_28
   planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
@@ -2853,9 +2857,10 @@ currentTask:
     sensitiveEvidenceCaptured: false
     prettierScoped: pass
     diffCheck: pass
+    firstCommit: 766d3952d
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2CloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
   nextRecommendedTask: continue_full_acceptance_matrix_next_pending_row
 previousTaskSnapshotLocalAcceptanceSessionRuntimeBridge:
   id: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
