@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
-updatedAt: "2026-06-28T22:34:00-07:00"
+currentPhase: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
+updatedAt: "2026-06-28T22:52:00-07:00"
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2671,25 +2671,25 @@ repository:
   lastKnownMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
   lastKnownOriginMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
 currentTask:
-  id: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+  id: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
   status: closed
-  result: pass_org_advanced_analytics_summary_auto_load_source_test_repair_browser_rerun_required
-  taskKind: implementation_tdd
-  executionProfile: local_source_test_repair_org_advanced_analytics_summary
-  approvedAt: "2026-06-28T22:10:00-07:00"
+  result: blocked_runtime_summary_load_failure_after_source_repair
+  taskKind: acceptance_runtime_walkthrough
+  executionProfile: local_browser_read_only_acceptance_rerun
+  approvedAt: "2026-06-28T22:40:00-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_c_source_test_repair_and_active_goal_continuation_2026_06_28
+  approvalConsumed: current_user_durable_staged_local_execution_approval_stage_a_read_only_browser_rerun_and_active_goal_continuation_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
-  claimedAt: "2026-06-28T22:10:00-07:00"
-  plannedAt: "2026-06-28T22:10:00-07:00"
-  closedAt: "2026-06-28T22:34:00-07:00"
-  sourceStory: follow_up_major_gap_org_adv_analytics_001_from_owner_facing_local_experience_batch_2026_06_28
-  planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-  branch: codex/org-advanced-analytics-summary-repair-20260628
+  claimedAt: "2026-06-28T22:40:00-07:00"
+  plannedAt: "2026-06-28T22:40:00-07:00"
+  closedAt: "2026-06-28T22:52:00-07:00"
+  sourceStory: browser_rerun_after_org_advanced_analytics_summary_auto_load_source_repair_2026_06_28
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+  branch: codex/org-advanced-analytics-browser-rerun-20260628
   promptMaterializationRule: >-
     Current task scope has been materialized into project-state.yaml, task-queue.yaml, and the task plan before browser,
     DB, AI, account-material, source, test, or further documentation execution. Subsequent execution must use these
@@ -2699,27 +2699,22 @@ currentTask:
     relevantRows:
       - org_advanced_admin.organization_analytics
     completionRule: >-
-      This task may repair only the recorded `ORG-ADV-ANALYTICS-001` major gap for the scoped
-      `org_advanced_admin.organization_analytics` row. The durable goal remains incomplete until every applicable
-      owner-facing checklist row has redacted pass evidence and the full unit baseline is green.
-  aiGenerationReusePolicy: >-
-    No AI generation source changes are expected in this task. If analytics repair touches shared admin workspace or
-    AI-adjacent code, reuse existing contracts, services, UI primitives, and validation patterns; do not create
-    role-specific duplicate implementations.
+      This task may rerun only the scoped `org_advanced_admin.organization_analytics` browser acceptance check after the
+      `ORG-ADV-ANALYTICS-001` source repair. The durable goal remains incomplete until every applicable owner-facing
+      checklist row has redacted pass evidence and the full unit baseline is green.
   targetWorkflows:
-    - reproduce ORG-ADV-ANALYTICS-001 in focused organization analytics unit coverage
-    - repair organization analytics summary/status surface
-    - validate focused organization analytics unit and local quality gates
+    - rerun organization analytics browser acceptance after source repair
+    - validate focused organization analytics unit and local governance gates
   scope:
     docsStateEvidenceAudit: true
-    browserRuntime: approved_read_only_localhost_or_127_0_0_1_after_source_repair_if_needed
-    testOwnedLocalAccountSessionSwitching: false_current_task
+    browserRuntime: approved_read_only_localhost_or_127_0_0_1
+    testOwnedLocalAccountSessionSwitching: true_test_owned_login_input_or_safe_local_acceptance_session_only
     localUiApiMutation: false_current_task
     localDbReadOnlyAggregateProof: false_current_task
     focusedUnitTest: approved
     fullUnitRuntime: false_current_task
-    localSourceChange: approved
-    testChange: approved
+    localSourceChange: false_current_task
+    testChange: false_current_task
     readOnlySourceDiscovery: approved_org_analytics_surface_and_existing_contracts_only
     directDatabaseAccess: false
     directDatabaseMutation: false
@@ -2741,27 +2736,24 @@ currentTask:
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-    - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-    - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
-    - src/features/admin/organization-analytics/**
-    - src/app/(admin)/organization/organization-analytics/page.tsx
-    - tests/unit/organization-analytics-admin-entry-surface.test.ts
+    - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
     - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
     - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
-    - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
-    - src/app/(admin)/organization/**
-    - src/features/admin/organization-training/**
-    - src/server/contracts/**
-    - src/server/services/**
-    - tests/unit/organization-training-admin-entry-surface.test.ts
-    - tests/unit/admin-workspace-role-guard-contract.test.ts
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - src/app/api/v1/local-acceptance-sessions/route.ts
+    - src/server/services/local-acceptance-session-service.ts
+    - tests/unit/local-acceptance-session-bootstrap.test.ts
+    - tests/unit/organization-analytics-admin-entry-surface.test.ts
   blockedFiles:
     - .env*
     - package.json
@@ -2783,9 +2775,9 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
-  browserBoundary: localhost_or_127_0_0_1_read_only_after_source_repair_if_needed_no_screenshot_no_trace_no_raw_dom_no_mutation_no_provider
+  browserBoundary: localhost_or_127_0_0_1_read_only_no_screenshot_no_trace_no_raw_dom_no_mutation_no_provider
   accountCredentialBoundary:
-    currentTask: no_private_account_material_read_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    currentTask: test_owned_login_input_or_safe_local_acceptance_session_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
   dbBoundary:
     currentTask: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
   aiProviderBoundary:
@@ -2837,16 +2829,13 @@ currentTask:
     taskPlanPrepared: pass
     mandatoryChecklistRead: pass
     codeTasteAndAdrRead: pass
-    redFocusedUnit: pass_1_new_regression_failed_5_existing_passed_before_repair
-    implementation: pass_auto_load_scoped_summary_after_advanced_org_scope_resolved
+    browserRerun: blocked_route_reached_scope_context_1_export_disabled_1_summary_card_0_employee_stats_0_load_failed_visible
     focusedUnitOrganizationAnalytics: pass_1_file_6_tests
-    lint: pass
-    typecheck: pass
     evidencePrepared: pass
     auditReviewPrepared: pass
     acceptancePrepared: pass
-    sourceOrTestChanged: true_allowed_files_only
-    browserRuntimeExecuted: false_current_source_test_repair
+    sourceOrTestChanged: false
+    browserRuntimeExecuted: true_read_only_localhost_route_status_count_check
     uiApiMutationExecuted: false
     databaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -2858,10 +2847,9 @@ currentTask:
     prettierScoped: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pass
-    localCommit: pass_b5de28c04_and_63f93f180
-  nextRecommendedTask: browser_rerun_or_next_full_acceptance_matrix_row_after_closeout
+    moduleRunV2CloseoutReadiness: pending
+    moduleRunV2PrePushReadiness: pending
+  nextRecommendedTask: stage_c_or_stage_d_diagnostic_for_runtime_summary_load_failure_after_browser_rerun
 previousTaskSnapshotContentAdminFormalContentReadonly:
   id: full-acceptance-content-admin-formal-content-readonly-2026-06-28
   status: closed
