@@ -45,6 +45,11 @@ import {
   createUserRegistrationService,
   type UserRegistrationService,
 } from "../services/user-registration-service";
+import {
+  findLocalAcceptanceSessionByToken,
+  findLocalAcceptanceUserByAuthUserId,
+  isLocalAcceptanceRuntimeEnabled,
+} from "../services/local-acceptance-session-service";
 
 type LocalSessionRuntimeDatabase = PostgresJsDatabase<typeof authSchema>;
 
@@ -469,7 +474,7 @@ function createRuntimeService(
   const getDatabase = createLazyDatabaseGetter(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
-  const credentialAdapter =
+  const baseCredentialAdapter =
     options.credentialAdapter ??
     createPostgresSessionCredentialAdapter(getDatabase, {
       createSessionId: options.createSessionId ?? createDefaultSessionId,
@@ -482,8 +487,39 @@ function createRuntimeService(
             [PASSWORD_FIELD]: input.password,
           })),
     });
-  const authUserRepository =
+  const credentialAdapter = isLocalAcceptanceRuntimeEnabled()
+    ? {
+        ...baseCredentialAdapter,
+        async findSessionByToken(sessionToken: string) {
+          const localAcceptanceSession = findLocalAcceptanceSessionByToken(
+            sessionToken,
+            options.now?.() ?? new Date(),
+          );
+
+          return (
+            localAcceptanceSession ??
+            baseCredentialAdapter.findSessionByToken(sessionToken)
+          );
+        },
+      }
+    : baseCredentialAdapter;
+  const baseAuthUserRepository =
     options.authUserRepository ?? createPostgresAuthUserRepository(getDatabase);
+  const authUserRepository = isLocalAcceptanceRuntimeEnabled()
+    ? {
+        async findActiveUserByAuthUserId(authUserId: string) {
+          const localAcceptanceUser = findLocalAcceptanceUserByAuthUserId(
+            authUserId,
+            options.now?.() ?? new Date(),
+          );
+
+          return (
+            localAcceptanceUser ??
+            baseAuthUserRepository.findActiveUserByAuthUserId(authUserId)
+          );
+        },
+      }
+    : baseAuthUserRepository;
   const sessionUserRepository =
     options.sessionUserRepository ??
     createPostgresSessionUserRepository(getDatabase);
