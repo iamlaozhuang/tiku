@@ -96,7 +96,7 @@ AI input/output, employee subjective answers, and complete question/paper/materi
   pass after closeout metadata recorded commit evidence, `localFullLoopGate`, `threadRolloverGate`, and
   `nextModuleRunCandidate`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28 -SkipRemoteAheadCheck`:
-  pending until closeout readiness passes.
+  pass after closeout evidence commit `23b63a44c`.
 - No source, test, package, lockfile, schema, migration, seed, Provider, AI submit, staging/prod, PR, force-push, final
   Pass, or Cost Calibration action executed.
 
@@ -118,6 +118,8 @@ AI input/output, employee subjective answers, and complete question/paper/materi
 - Commit: `23a78a00c`
 - Commit scope: seven task-scoped governance, traceability, plan, evidence, audit, and acceptance files only.
 - Commit message: `docs(acceptance): record content admin session proof`.
+- Closeout evidence commit: `23b63a44c`
+- Closeout commit message: `docs(acceptance): close content admin session proof`.
 
 ## Next Action
 

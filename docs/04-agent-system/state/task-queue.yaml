@@ -2831,7 +2831,7 @@ tasks:
       gitDiffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass
-      moduleRunV2PrePushReadiness: pending
+      moduleRunV2PrePushReadiness: pass
     followUpTaskIds:
       - content-admin-test-owned-account-stage-b-repair-2026-06-28
     retryCount: 0
