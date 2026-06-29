@@ -879,11 +879,18 @@ tasks:
     validationPolicy: focused_unit_browser_rerun_scoped_prettier_diff_module_run_v2
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass_personal_advanced_ai_generation_actions_repaired
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_staged_local_execution_stage_c_and_per_task_closeout_2026_06_28
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T03:56:17-07:00"
+    plannedAt: "2026-06-29T03:56:17-07:00"
+    implementedAt: "2026-06-29T04:08:00-07:00"
+    validatedAt: "2026-06-29T04:08:00-07:00"
+    reviewedAt: "2026-06-29T04:08:00-07:00"
+    closedAt: "2026-06-29T04:08:00-07:00"
     branch: codex/repair-personal-advanced-ai-generation-actions-20260629
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -901,6 +908,7 @@ tasks:
       - docs/05-execution-logs/acceptance/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md
       - src/app/(student)/ai-generation/page.tsx
       - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
       - tests/unit/student-personal-ai-generation-ui.test.ts
     readOnlyAllowedFiles:
       - AGENTS.md
@@ -916,6 +924,7 @@ tasks:
       - package.json
       - src/app/(student)/ai-generation/page.tsx
       - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
       - tests/unit/student-personal-ai-generation-ui.test.ts
     blockedFiles:
       - .env*
@@ -949,7 +958,8 @@ tasks:
         - provider_payloads_prompts_raw_ai_input_output
         - complete_question_paper_material_resource_chunk_answer_generated_content
     validationCommands:
-      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - npm.cmd run test:unit
       - redacted_browser_personal_advanced_student_ai_generation_rerun
       - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md docs/05-execution-logs/task-plans/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md docs/05-execution-logs/evidence/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md docs/05-execution-logs/acceptance/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md src/app/(student)/ai-generation/page.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx tests/unit/student-personal-ai-generation-ui.test.ts
       - git diff --check
@@ -987,6 +997,19 @@ tasks:
       - release_readiness_or_final_pass
       - cost_calibration_gate
       - sensitive_evidence_capture
+    validationSummary:
+      taskPlanPrepared: pass
+      focusedUnitRedGreen: pass_2_files_25_tests
+      fullUnitBaseline: pass_318_files_1438_tests
+      browserRuntimeEvidence: pass_route_action_status_count_summary_no_screenshot
+      aiQuestionAction: pass
+      aiPaperActionAndStructureCue: pass
+      generatedPracticeFeedbackActions: pass
+      providerDbDependencySchemaGatesPreserved: pass
+      sensitiveEvidenceCaptured: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
 
   - id: full-unit-baseline-current-recheck-and-repair-2026-06-28
     title: Full unit baseline current recheck and repair

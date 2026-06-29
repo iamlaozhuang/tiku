@@ -16,8 +16,8 @@ import type {
 } from "@/server/contracts/effective-authorization-contract";
 
 const pageTitle = "AI训练";
-const requestButtonLabel = "AI出题";
-const paperButtonLabel = "AI组卷";
+const requestButtonLabel = "AI出题：生成练习题";
+const paperButtonLabel = "AI组卷：生成自测试卷";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const unavailableTitle =
@@ -743,6 +743,17 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("仅摘要")).toBeInTheDocument();
     expect(screen.getByText("是否阻断正式入库")).toBeInTheDocument();
     expect(screen.getByText("是")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "开始练习" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "提交作答" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "重试生成" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    expect(screen.getByText("生成练习已就绪")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    expect(screen.getByText("作答已提交")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "查看学习反馈" }));
+    expect(screen.getByText("学习反馈可查看")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
@@ -1002,6 +1013,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷题型分布")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷知识点覆盖")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷大题结构")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷难度")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷学习目标")).toBeInTheDocument();
@@ -1011,6 +1023,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByRole("button", { name: paperButtonLabel }),
     ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
       "GET",

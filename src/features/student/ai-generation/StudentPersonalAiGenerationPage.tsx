@@ -2,10 +2,15 @@
 
 import {
   AlertCircle,
+  BookOpen,
+  CheckCircle2,
   ClipboardList,
   Eye,
   History,
   Loader2,
+  MessageCircle,
+  RefreshCcw,
+  Send,
   Sparkles,
   ShieldAlert,
 } from "lucide-react";
@@ -50,6 +55,12 @@ type StudentPersonalAiGenerationHistoryState =
 type StudentPersonalAiGenerationResultDetailState =
   | "idle"
   | StudentPersonalAiGenerationHistoryState;
+
+type StudentPersonalAiGenerationPracticeFeedbackState =
+  | "waiting"
+  | "practice_ready"
+  | "answer_submitted"
+  | "feedback_ready";
 
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
@@ -109,8 +120,8 @@ const copy = {
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
   emptyDescription:
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730\u63a5\u53e3\u5951\u7ea6\u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
-  requestButton: "AI出题",
-  paperButton: "AI组卷",
+  requestButton: "AI出题：生成练习题",
+  paperButton: "AI组卷：生成自测试卷",
   loadingTitle: "\u6b63\u5728\u53d1\u8d77\u672c\u5730\u8bf7\u6c42",
   errorTitle: "\u672c\u5730 AI \u8bf7\u6c42\u5931\u8d25",
   errorDescription:
@@ -145,6 +156,10 @@ const copy = {
   resultDetailErrorTitle: "\u7ed3\u679c\u8be6\u60c5\u6682\u4e0d\u53ef\u7528",
   resultDetailUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
+  practiceFeedbackTitle:
+    "\u751f\u6210\u7ec3\u4e60\u4e0e\u5b66\u4e60\u53cd\u9988",
+  practiceFeedbackDescription:
+    "\u672c\u5730\u5408\u7ea6\u53d7\u7406\u540e\uff0c\u53ef\u4ee5\u8fdb\u5165\u751f\u6210\u7ec3\u4e60\u3001\u63d0\u4ea4\u4f5c\u7b54\u5e76\u67e5\u770b\u8131\u654f\u5b66\u4e60\u53cd\u9988\uff1b\u4e0d\u5199\u5165\u6b63\u5f0f\u9898\u76ee\u6216\u8bd5\u5377\u3002",
 };
 
 const contractFieldLabelMap: Record<string, string> = {
@@ -201,6 +216,16 @@ const contractValueLabelMap: Record<string, string> = {
   true: "是",
   unknown: "未知原因",
   weak: "证据较弱",
+};
+
+const practiceFeedbackStatusLabelMap: Record<
+  StudentPersonalAiGenerationPracticeFeedbackState,
+  string
+> = {
+  waiting: "生成后可进入练习、提交作答并查看学习反馈",
+  practice_ready: "生成练习已就绪",
+  answer_submitted: "作答已提交",
+  feedback_ready: "学习反馈可查看",
 };
 
 const aiQuestionDetailControls: StudentPersonalAiGenerationDetailControl[] = [
@@ -271,6 +296,11 @@ const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     label: "AI组卷知识点覆盖",
     kind: "text",
     placeholder: "输入本次自测覆盖范围",
+  },
+  {
+    label: "AI组卷大题结构",
+    kind: "text",
+    placeholder: "按大题结构规划题量与顺序",
   },
   {
     label: "AI组卷难度",
@@ -731,6 +761,89 @@ function StudentPersonalAiGenerationContractSummary({
   );
 }
 
+function StudentPersonalAiGenerationPracticeFeedbackActions({
+  canUseGeneratedPractice,
+  isRetryDisabled,
+  practiceFeedbackState,
+  onRetryGeneration,
+  onStartPractice,
+  onSubmitAnswer,
+  onViewFeedback,
+}: {
+  canUseGeneratedPractice: boolean;
+  isRetryDisabled: boolean;
+  practiceFeedbackState: StudentPersonalAiGenerationPracticeFeedbackState;
+  onRetryGeneration: () => void;
+  onStartPractice: () => void;
+  onSubmitAnswer: () => void;
+  onViewFeedback: () => void;
+}) {
+  const generatedPracticeActionClassName =
+    "border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <section className="border-border bg-surface rounded-xl border p-4">
+      <div className="mb-3 flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="font-heading text-text-primary text-base font-semibold">
+            {copy.practiceFeedbackTitle}
+          </h2>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            {copy.practiceFeedbackDescription}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+        <button
+          type="button"
+          disabled={!canUseGeneratedPractice}
+          onClick={onStartPractice}
+          className={generatedPracticeActionClassName}
+        >
+          <BookOpen className="size-4" aria-hidden="true" />
+          开始练习
+        </button>
+        <button
+          type="button"
+          disabled={!canUseGeneratedPractice}
+          onClick={onSubmitAnswer}
+          className={generatedPracticeActionClassName}
+        >
+          <Send className="size-4" aria-hidden="true" />
+          提交作答
+        </button>
+        <button
+          type="button"
+          disabled={!canUseGeneratedPractice}
+          onClick={onViewFeedback}
+          className={generatedPracticeActionClassName}
+        >
+          <MessageCircle className="size-4" aria-hidden="true" />
+          查看学习反馈
+        </button>
+        <button
+          type="button"
+          disabled={isRetryDisabled}
+          onClick={onRetryGeneration}
+          className={generatedPracticeActionClassName}
+        >
+          <RefreshCcw className="size-4" aria-hidden="true" />
+          重试生成
+        </button>
+      </div>
+      <p
+        className="text-text-secondary bg-background mt-3 rounded-lg px-3 py-2 text-sm"
+        aria-live="polite"
+      >
+        {practiceFeedbackStatusLabelMap[practiceFeedbackState]}
+      </p>
+    </section>
+  );
+}
+
 function StudentPersonalAiGenerationHistorySummary({
   historyState,
   historyRows,
@@ -1125,6 +1238,10 @@ export function StudentPersonalAiGenerationPage() {
   const [selectedResultPublicId, setSelectedResultPublicId] = useState<
     string | null
   >(null);
+  const [lastSubmittedTaskType, setLastSubmittedTaskType] =
+    useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
+  const [practiceFeedbackState, setPracticeFeedbackState] =
+    useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
 
   useEffect(() => {
     const sessionRequestToken = readStudentSessionRequestToken();
@@ -1363,6 +1480,8 @@ export function StudentPersonalAiGenerationPage() {
       setSelectedResultPublicId(null);
     }
 
+    setLastSubmittedTaskType(taskType);
+    setPracticeFeedbackState("waiting");
     setHasSessionToken(true);
     setPageState("loading");
 
@@ -1603,6 +1722,10 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
+  function handleRetryPersonalAiGenerationRequest() {
+    void handleSubmitPersonalAiGenerationRequest(lastSubmittedTaskType);
+  }
+
   const isAiGenerationActionDisabled =
     !hasSessionToken ||
     pageState === "checking" ||
@@ -1613,6 +1736,12 @@ export function StudentPersonalAiGenerationPage() {
     pageState !== "checking" &&
     pageState !== "unauthorized" &&
     pageState !== "unavailable";
+  const hasLocalAiGenerationExperience =
+    pageState === "ready" && experience !== null;
+  const canUseGeneratedPractice =
+    hasLocalAiGenerationExperience && experience.flowStatus === "accepted";
+  const isRetryGenerationDisabled =
+    isAiGenerationActionDisabled || !hasLocalAiGenerationExperience;
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -1648,7 +1777,7 @@ export function StudentPersonalAiGenerationPage() {
           onClick={() =>
             void handleSubmitPersonalAiGenerationRequest("ai_paper_generation")
           }
-          className="border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          className="border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ClipboardList className="size-4" aria-hidden="true" />
           {copy.paperButton}
@@ -1670,6 +1799,18 @@ export function StudentPersonalAiGenerationPage() {
             disabled={isAiGenerationActionDisabled}
           />
         </div>
+      ) : null}
+
+      {shouldShowAiGenerationDetailControls ? (
+        <StudentPersonalAiGenerationPracticeFeedbackActions
+          canUseGeneratedPractice={canUseGeneratedPractice}
+          isRetryDisabled={isRetryGenerationDisabled}
+          practiceFeedbackState={practiceFeedbackState}
+          onStartPractice={() => setPracticeFeedbackState("practice_ready")}
+          onSubmitAnswer={() => setPracticeFeedbackState("answer_submitted")}
+          onViewFeedback={() => setPracticeFeedbackState("feedback_ready")}
+          onRetryGeneration={handleRetryPersonalAiGenerationRequest}
+        />
       ) : null}
 
       {pageState === "loading" ? (

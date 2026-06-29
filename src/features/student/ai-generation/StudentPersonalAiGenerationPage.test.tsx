@@ -259,8 +259,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(<StudentPersonalAiGenerationPage />);
 
     expect(screen.getByRole("heading", { name: "AI训练" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "AI出题" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "AI组卷" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "AI出题：生成练习题" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "AI组卷：生成自测试卷" }),
+    ).toBeInTheDocument();
   });
 
   it("loads and renders redacted personal AI generation result history", async () => {

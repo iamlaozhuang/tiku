@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-acceptance-personal-advanced-student-workflow-2026-06-29
-updatedAt: "2026-06-29T03:41:51-07:00"
+currentPhase: repair-personal-advanced-student-ai-generation-actions-2026-06-29
+updatedAt: "2026-06-29T03:56:17-07:00"
 orgAdvancedAnalyticsRuntimeRepairApproval20260629:
   approvedAt: "2026-06-29T04:50:00-07:00"
   approvedBy: laozhuang
@@ -2955,12 +2955,12 @@ repository:
   lastKnownMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
   lastKnownOriginMasterSha: 1f965ea7a6464f7d29f70ba84747c9454d7dd5e0
 currentTask:
-  id: full-acceptance-personal-advanced-student-workflow-2026-06-29
+  id: repair-personal-advanced-student-ai-generation-actions-2026-06-29
   status: closed
-  result: blocked_ai_generation_actions_and_generated_practice_feedback_missing
-  source: fullAcceptancePersonalAdvancedStudentWorkflow20260629
-  branch: codex/personal-advanced-student-acceptance-20260629
-  updatedAt: "2026-06-29T03:49:09-07:00"
+  result: pass_personal_advanced_ai_generation_actions_repaired
+  source: repairPersonalAdvancedStudentAiGenerationActions20260629
+  branch: codex/repair-personal-advanced-ai-generation-actions-20260629
+  updatedAt: "2026-06-29T04:08:00-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
@@ -3339,12 +3339,18 @@ fullAcceptancePersonalAdvancedStudentWorkflow20260629:
 repairPersonalAdvancedStudentAiGenerationActions20260629:
   taskId: repair-personal-advanced-student-ai-generation-actions-2026-06-29
   phase: repair-personal-advanced-student-ai-generation-actions-2026-06-29
-  status: pending
-  result: pending
+  status: closed
+  result: pass_personal_advanced_ai_generation_actions_repaired
   sourceStory: seeded_by_full_acceptance_personal_advanced_student_workflow_2026_06_29
   dependsOn:
     - full-acceptance-personal-advanced-student-workflow-2026-06-29
   branch: codex/repair-personal-advanced-ai-generation-actions-20260629
+  claimedAt: "2026-06-29T03:56:17-07:00"
+  plannedAt: "2026-06-29T03:56:17-07:00"
+  implementedAt: "2026-06-29T04:08:00-07:00"
+  validatedAt: "2026-06-29T04:08:00-07:00"
+  reviewedAt: "2026-06-29T04:08:00-07:00"
+  closedAt: "2026-06-29T04:08:00-07:00"
   approvalConsumed: current_user_staged_local_execution_stage_c_and_per_task_closeout_2026_06_28
   stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
   targetClosureItem: personal_advanced_student_ai_generation_actions_and_generated_content_practice_feedback_repaired
@@ -3367,6 +3373,7 @@ repairPersonalAdvancedStudentAiGenerationActions20260629:
     - docs/05-execution-logs/acceptance/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md
     - src/app/(student)/ai-generation/page.tsx
     - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
     - tests/unit/student-personal-ai-generation-ui.test.ts
   readOnlyAllowedFiles:
     - AGENTS.md
@@ -3382,6 +3389,7 @@ repairPersonalAdvancedStudentAiGenerationActions20260629:
     - package.json
     - src/app/(student)/ai-generation/page.tsx
     - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
     - tests/unit/student-personal-ai-generation-ui.test.ts
   blockedFiles:
     - .env*
@@ -3440,6 +3448,19 @@ repairPersonalAdvancedStudentAiGenerationActions20260629:
     - release_readiness_or_final_pass
     - cost_calibration_gate
     - sensitive_evidence_capture
+  validationSummary:
+    taskPlanPrepared: pass
+    focusedUnitRedGreen: pass_2_files_25_tests
+    fullUnitBaseline: pass_318_files_1438_tests
+    browserRuntimeEvidence: pass_route_action_status_count_summary_no_screenshot
+    aiQuestionAction: pass
+    aiPaperActionAndStructureCue: pass
+    generatedPracticeFeedbackActions: pass
+    providerDbDependencySchemaGatesPreserved: pass
+    sensitiveEvidenceCaptured: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
 fullAcceptanceRemainingCoverageAudit20260629:
   taskId: full-acceptance-remaining-coverage-audit-2026-06-29
   phase: full-acceptance-remaining-coverage-audit-2026-06-29
