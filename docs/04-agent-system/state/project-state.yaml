@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-advanced-analytics-db-alignment-repair-2026-06-28
-updatedAt: "2026-06-28T22:56:09-07:00"
+currentPhase: full-unit-baseline-current-recheck-2026-06-29
+updatedAt: "2026-06-29T00:32:00-07:00"
 orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628:
   approvedAt: "2026-06-28T22:56:09-07:00"
   approvedBy: laozhuang
@@ -694,6 +694,221 @@ fullUnitBaselineCurrentRecheckAndRepair20260628:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: false
+fullUnitBaselineCurrentRecheck20260629:
+  taskId: full-unit-baseline-current-recheck-2026-06-29
+  phase: full-unit-baseline-current-recheck-2026-06-29
+  status: closed
+  result: pass_current_full_unit_baseline_green_no_source_test_repair
+  branch: codex/full-unit-current-recheck-20260629
+  executionProfile: local_unit_baseline_current_recheck_and_repair_if_red
+  taskKind: implementation_tdd
+  moduleRunVersion: 2
+  createdAt: "2026-06-29T00:05:00-07:00"
+  approvedAt: "2026-06-29T00:05:00-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_active_goal_and_staged_local_stage_c_closeout_authorization_2026_06_28
+  stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+  claimedAt: "2026-06-29T00:05:00-07:00"
+  plannedAt: "2026-06-29T00:05:00-07:00"
+  validatedAt: "2026-06-29T00:32:00-07:00"
+  reviewedAt: "2026-06-29T00:32:00-07:00"
+  closedAt: "2026-06-29T00:32:00-07:00"
+  promptMaterializationRule: >-
+    Before source, test, docs, browser, DB, AI, or Provider execution in this continuation, the current goal,
+    authorization, allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, account credential boundary, evidence
+    redaction rules, and closeoutPolicy are materialized in project-state.yaml, task-queue.yaml, and the task plan.
+    Later execution must use these repository governance files as source of truth and must not expand scope from chat
+    memory.
+  goal: >-
+    Re-prove the current master full unit baseline after the latest organization analytics local repair closeout. Run
+    `npm.cmd run test:unit`; if it fails, perform narrow source/test repairs only inside the approved unit baseline
+    scope until the command is green.
+  requiredStandardsRead:
+    codeTasteTenCommandments: docs/03-standards/code-taste-ten-commandments.md
+    adrDirectory: docs/02-architecture/adr/
+    adrFiles:
+      - docs/02-architecture/adr/adr-001-tech-stack-selection.md
+      - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+      - docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
+  mandatoryOwnerFacingRoleChecklist:
+    path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    rule: >-
+      This current unit recheck does not execute browser role rows, but it preserves the checklist as the durable
+      acceptance completion gate. The overall goal remains incomplete until every applicable owner-facing role/workflow
+      row is covered and passed or recorded as an approved blocked gap.
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-full-unit-baseline-current-recheck.md
+    - docs/05-execution-logs/task-plans/2026-06-29-full-unit-baseline-current-recheck.md
+    - docs/05-execution-logs/evidence/2026-06-29-full-unit-baseline-current-recheck.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-full-unit-baseline-current-recheck.md
+    - docs/05-execution-logs/acceptance/2026-06-29-full-unit-baseline-current-recheck.md
+    - src/app/**
+    - src/components/**
+    - src/features/**
+    - src/hooks/**
+    - src/lib/**
+    - src/server/**
+    - tests/unit/**
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved_only_if_current_full_unit_recheck_fails
+    testChange: approved_only_if_current_full_unit_recheck_fails
+    focusedUnitTest: approved_if_repair_needed
+    fullUnitRuntime: approved_local_only
+    lintTypecheck: approved
+    localCommit: approved
+    mergeToMaster: approved_fast_forward_only
+    pushOriginMaster: approved_origin_master
+    branchCleanup: approved_delete_merged_short_branch
+    browserRuntime: blocked
+    devServer: blocked
+    e2eRuntime: blocked
+    localDatabaseConnection: blocked
+    localDatabaseMutation: blocked
+    schemaMigration: blocked
+    seedExecution: blocked
+    providerCall: blocked
+    providerConfiguration: blocked
+    providerCredentialRead: blocked
+    costCalibrationGate: blocked
+    dependencyIntroduction: blocked
+    stagingProdDeploy: blocked
+    paymentExternalService: blocked
+    ocrExportExecution: blocked
+    releaseReadinessDecision: blocked
+    finalPassClaim: blocked
+    pr: blocked
+    forcePush: blocked
+  localDbBoundary:
+    currentTask: no_database_connection_read_write_seed_migration_or_schema_change
+    forbidden:
+      - env_secret_read
+      - staging_prod_cloud_or_customer_database
+      - raw_db_rows_or_internal_ids
+      - email_phone_plaintext_redeem_code
+      - schema_migration_drizzle_push_seed_change
+      - drop_truncate_reset_or_destructive_operation
+      - non_task_marked_data_update_or_delete
+  aiProviderBoundary:
+    currentTask: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+    forbidden:
+      - provider_key_endpoint_model_config_or_fallback_config_read_or_write
+      - env_secret_read
+      - prompt_provider_payload_raw_ai_input_or_output_evidence
+      - complete_generated_question_or_paper_evidence
+      - cost_calibration_pricing_or_quota_default_decision
+  credentialBoundary:
+    currentTask: no_account_login_no_cookie_token_session_localStorage_or_Authorization_header_access
+    forbiddenEvidence:
+      - password_cookie_token_session_localStorage_Authorization_header
+      - secret_database_url_api_key_connection_string
+      - env_file_content
+  evidenceRedaction:
+    allowed:
+      - command_name
+      - test_file_path
+      - test_counts
+      - failure_classes
+      - redacted_assertion_summary
+      - pass_fail
+      - commit_sha
+    forbidden:
+      - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - employee_subjective_answers
+      - complete_question_paper_material_resource_or_chunk_content
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+  blockedWithoutFreshApproval:
+    - browser_or_playwright_runtime
+    - dev_server_start
+    - database_connection_read_write_migration_or_seed
+    - provider_call_or_provider_configuration_or_credential_read
+    - ai_budget
+    - package_or_lockfile_change
+    - schema_migration_or_drizzle_push
+    - staging_prod_deploy_payment_ocr_export_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+  validationCommands:
+    - npm.cmd run test:unit
+    - npx.cmd vitest run "<focused failing unit files if current recheck fails>"
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd run test:unit
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-unit-baseline-current-recheck.md docs/05-execution-logs/task-plans/2026-06-29-full-unit-baseline-current-recheck.md docs/05-execution-logs/evidence/2026-06-29-full-unit-baseline-current-recheck.md docs/05-execution-logs/audits-reviews/2026-06-29-full-unit-baseline-current-recheck.md docs/05-execution-logs/acceptance/2026-06-29-full-unit-baseline-current-recheck.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-unit-baseline-current-recheck-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-full-unit-baseline-current-recheck.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-unit-baseline-current-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-unit-baseline-current-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-unit-baseline-current-recheck.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-unit-baseline-current-recheck.md
+  validationSummary:
+    taskPlanPrepared: pass
+    currentFullUnitRecheck: pass_318_files_1437_tests
+    focusedRepair: skipped_current_full_unit_green
+    lint: pass
+    typecheck: pass
+    fullUnitGreen: pass
+    formatAndDiff: pending
+    moduleRunV2PreCommitHardening: pending
+    moduleRunV2ModuleCloseoutReadiness: pending
+    moduleRunV2PrePushReadiness: pending
     sourceOrTestChanged: false
 fullAcceptanceMatrixExecution20260628:
   taskId: full-acceptance-matrix-execution-2026-06-28
@@ -2702,15 +2917,15 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 84d7a006843e84446b487fd0108183de695aaed9
-  lastKnownOriginMasterSha: 84d7a006843e84446b487fd0108183de695aaed9
+  lastKnownMasterSha: 5e48f760c4bf14b76a5a72e3b6eebb6b3937f23e
+  lastKnownOriginMasterSha: 5e48f760c4bf14b76a5a72e3b6eebb6b3937f23e
 currentTask:
-  id: org-advanced-analytics-db-alignment-repair-2026-06-28
+  id: full-unit-baseline-current-recheck-2026-06-29
   status: closed
-  result: pass
-  source: orgAdvancedAnalyticsDbAlignmentRepair20260628
-  branch: codex/org-advanced-analytics-db-alignment-repair-20260628
-  updatedAt: "2026-06-28T22:56:09-07:00"
+  result: pass_current_full_unit_baseline_green_no_source_test_repair
+  source: fullUnitBaselineCurrentRecheck20260629
+  branch: codex/full-unit-current-recheck-20260629
+  updatedAt: "2026-06-29T00:32:00-07:00"
 orgAdvancedAnalyticsDbAlignmentRepair20260628:
   id: org-advanced-analytics-db-alignment-repair-2026-06-28
   status: closed
