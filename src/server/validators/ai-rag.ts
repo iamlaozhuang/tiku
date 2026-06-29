@@ -61,6 +61,7 @@ const aiFuncTypeSet = new Set<AiFuncType>([
   "kn_recommendation",
   "learning_suggestion",
 ]);
+const MODEL_CONFIG_FALLBACK_ORDER_ITEM_LIMIT = 100;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -118,13 +119,13 @@ function normalizeAiFuncType(value: unknown): AiFuncType | null {
 }
 
 function normalizeApiKeyLastFour(value: unknown): string | null {
-  const apiKey = normalizeOptionalString(value);
+  const credentialValue = normalizeOptionalString(value);
 
-  if (apiKey === null || apiKey.length < 4) {
+  if (credentialValue === null || credentialValue.length < 4) {
     return null;
   }
 
-  return apiKey.slice(-4);
+  return credentialValue.slice(-4);
 }
 
 function createMaskedSecret(lastFour: string | null): string | null {
@@ -310,6 +311,13 @@ export function normalizeModelConfigFallbackOrderInput(
     return null;
   }
 
+  if (
+    input.items.length === 0 ||
+    input.items.length > MODEL_CONFIG_FALLBACK_ORDER_ITEM_LIMIT
+  ) {
+    return null;
+  }
+
   const items = input.items
     .map((item) => {
       if (!isRecord(item)) {
@@ -334,9 +342,7 @@ export function normalizeModelConfigFallbackOrderInput(
       } => item !== null,
     );
 
-  return items.length === input.items.length && items.length > 0
-    ? { items }
-    : null;
+  return items.length === input.items.length ? { items } : null;
 }
 
 export function normalizeModelConfigListQuery(

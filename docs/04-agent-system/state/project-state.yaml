@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-db-repository-query-construction-review-2026-06-29
-updatedAt: "2026-06-29T13:00:45-07:00"
+currentPhase: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+updatedAt: "2026-06-29T13:28:29-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -12,6 +12,8 @@ localSecurityRepairLoopApproval20260629:
   appliesToConfirmedRepairTasks:
     - repair-session-login-response-credential-boundary-2026-06-29
     - repair-organization-analytics-capability-source-boundary-2026-06-29
+    - security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    - security-employee-import-bulk-limit-repair-2026-06-29
   appliesToFutureRepairTasksIfConfirmedAndMaterialized:
     - repair-organization-ai-generation-capability-source-boundary-2026-06-29
   allowedActions:
@@ -2988,9 +2990,167 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 957858a3effdf1abbef2269c942e5712090c7683
-  lastKnownOriginMasterSha: 957858a3effdf1abbef2269c942e5712090c7683
+  lastKnownMasterSha: 3fafb32bea26ac3f4f94cadf02436cc622b3b701
+  lastKnownOriginMasterSha: 3fafb32bea26ac3f4f94cadf02436cc622b3b701
 currentTask:
+  id: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+  status: closed
+  result: pass_fallback_order_limit_repair_local_source_test_validation
+  sourceStory: seeded_by_security_db_repository_query_construction_review_2026_06_29
+  targetClosureItem: Enforce a bounded `model_config.reorder_fallback` payload before repository update loops
+  behaviorBoundary: local_source_test_repair::fallback_order_limit_no_db_provider_browser_dependency
+  executionProfile: local_source_test_repair
+  taskKind: security_repair
+  moduleRunVersion: 2
+  priority: p1
+  severity: medium
+  findingId: db-query-002
+  branch: codex/security-ai-fallback-order-limit-20260629
+  approvedAt: "2026-06-29T13:15:41-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  claimedAt: "2026-06-29T13:15:41-07:00"
+  plannedAt: "2026-06-29T13:15:41-07:00"
+  materializedAt: "2026-06-29T13:15:41-07:00"
+  implementedAt: "2026-06-29T13:23:48-07:00"
+  validatedAt: "2026-06-29T13:28:29-07:00"
+  reviewedAt: "2026-06-29T13:28:29-07:00"
+  closedAt: "2026-06-29T13:28:29-07:00"
+  predecessorClosureEvidence:
+    repositoryQueryReviewTask: security-db-repository-query-construction-review-2026-06-29
+    repositoryQueryReviewResult: closed_pushed_to_origin_master
+    repositoryQueryReviewCommit: 3fafb32bea26ac3f4f94cadf02436cc622b3b701
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    - src/server/validators/ai-rag.ts
+    - src/server/validators/ai-rag.test.ts
+    - tests/unit/phase-12-model-config-server-runtime.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-db-repository-query-construction-review.md
+    - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+    - src/server/services/admin-ai-audit-log-runtime.ts
+    - src/server/validators/ai-rag.ts
+    - src/server/validators/ai-rag.test.ts
+    - tests/unit/phase-12-model-config-server-runtime.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - src/db/**
+    - src/db/dev-seed.ts
+    - drizzle.config.ts
+    - e2e/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_runtime_model_config_read_write_no_prompt_payload_or_raw_ai_io_evidence_provider_budget_zero
+  browserBoundary: no_browser_runtime_no_e2e_execution_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+  credentialBoundary: no_env_secret_connection_string_value_read_no_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: file_path_module_label_risk_category_severity_status_count_test_result_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credential_cookie_token_session_auth_header_values
+      - env_file_contents_or_connection_strings
+      - raw_dom_screenshots_traces_html_reports
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_chunk_answer_content
+      - raw_exception_payload_or_stack_trace
+      - private_fixture_or_account_material
+  repairScope:
+    sourceOrTestChangeAllowed: true
+    dbConnectionAllowed: false
+    envValueReadAllowed: false
+    browserOrE2eRuntimeAllowed: false
+    devServerAllowed: false
+    providerRuntimeBudget: zero
+    packageOrLockfileChangeAllowed: false
+    objective:
+      - add RED regression coverage for oversized model_config fallback reorder payloads
+      - enforce an explicit validator-level item limit before repository update loops
+      - preserve accepted legitimate fallback reorder payload behavior
+      - keep the repair local to validator and focused route/runtime unit coverage
+      - avoid DB Provider browser dependency schema migration seed and package changes
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/validators/ai-rag.test.ts tests/unit/phase-12-model-config-server-runtime.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md src/server/validators/ai-rag.ts src/server/validators/ai-rag.test.ts tests/unit/phase-12-model-config-server-runtime.test.ts
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md src/server/validators/ai-rag.ts src/server/validators/ai-rag.test.ts tests/unit/phase-12-model-config-server-runtime.test.ts
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-ai-model-config-fallback-order-limit-repair-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: localSecurityRepairLoopApproval20260629_after_task_scoped_materialization
+  validationSummary:
+    validationStatus: pass
+    redTest: pass_expected_failure_2_files_9_tests_2_failed_7_passed
+    focusedUnit: pass_2_files_9_tests
+    lint: pass
+    typecheck: pass
+    prettierWriteScoped: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: true
+    packageOrLockfileChanged: false
+    browserRuntimeExecuted: false
+    databaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    schemaMigrationSeedExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    nextRecommendedTaskId: security-employee-import-bulk-limit-repair-2026-06-29
+  updatedAt: "2026-06-29T13:28:29-07:00"
+previousSecurityDbRepositoryQueryConstructionReviewTask:
   id: security-db-repository-query-construction-review-2026-06-29
   status: closed
   result: pass_repository_query_construction_review_task_split_no_db_execution

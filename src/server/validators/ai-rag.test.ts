@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   normalizeModelConfigInput,
+  normalizeModelConfigFallbackOrderInput,
   normalizeModelProviderInput,
   normalizePromptTemplateInput,
 } from "./ai-rag";
@@ -96,5 +97,29 @@ describe("AI/RAG model config and prompt template validators", () => {
       status: "active",
       isActive: true,
     });
+  });
+
+  it("rejects oversized fallback reorder payloads before repository work", () => {
+    const validItems = Array.from({ length: 100 }, (_, index) => ({
+      publicId: `model-config-public-${String(index + 1).padStart(3, "0")}`,
+      fallbackPriority: index,
+    }));
+
+    expect(
+      normalizeModelConfigFallbackOrderInput({ items: validItems }),
+    ).toEqual({
+      items: validItems,
+    });
+    expect(
+      normalizeModelConfigFallbackOrderInput({
+        items: [
+          ...validItems,
+          {
+            publicId: "model-config-public-101",
+            fallbackPriority: 100,
+          },
+        ],
+      }),
+    ).toBeNull();
   });
 });

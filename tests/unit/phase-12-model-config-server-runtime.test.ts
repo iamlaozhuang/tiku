@@ -58,7 +58,7 @@ describe("phase 12 model config server runtime", () => {
   it("creates model providers with short-lived secret input and returns masked metadata only", async () => {
     const mutationCalls: unknown[] = [];
     const auditLogEntries: unknown[] = [];
-    const syntheticSecret = "sk-test-synthetic-123456";
+    const syntheticSecret = "credential-synthetic-123456";
     const handlers = createAdminAiAuditLogRuntimeRouteHandlers({
       repositories: {
         async listModelProviders() {
@@ -375,6 +375,63 @@ describe("phase 12 model config server runtime", () => {
     ]);
   });
 
+  it("rejects oversized model config fallback reorder payloads before repository mutation", async () => {
+    const mutationCalls: unknown[] = [];
+    const auditLogEntries: unknown[] = [];
+    const handlers = createAdminAiAuditLogRuntimeRouteHandlers({
+      repositories: {
+        async listModelProviders() {
+          return createPage({ modelProviders: [] });
+        },
+        async listModelConfigs() {
+          return createPage({ modelConfigs: [] });
+        },
+        async reorderModelConfigFallback(input) {
+          mutationCalls.push(input);
+          return true;
+        },
+        async listPromptTemplates() {
+          return createPage({ promptTemplates: [] });
+        },
+        async listAiCallLogs() {
+          return createPage({ aiCallLogs: [] });
+        },
+        async summarizeAiCallLogs() {
+          return createPage({ dailySummaries: [] });
+        },
+        async appendAiCallLog() {
+          throw new Error("not used");
+        },
+        async appendAuditLog(input) {
+          auditLogEntries.push(input);
+        },
+      },
+      sessionService: createAdminSessionService("super_admin"),
+    });
+    const oversizedItems = Array.from({ length: 101 }, (_, index) => ({
+      publicId: `model-config-public-${String(index + 1).padStart(3, "0")}`,
+      fallbackPriority: index,
+    }));
+
+    const response = await handlers.modelConfigs.reorderFallback.POST(
+      new Request("http://localhost/api/v1/model-configs/reorder-fallback", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          items: oversizedItems,
+        }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 422641,
+      message: "Request validation failed.",
+      data: null,
+    });
+    expect(mutationCalls).toEqual([]);
+    expect(auditLogEntries).toEqual([]);
+  });
+
   it("keeps prompt template metadata read-only without returning raw prompt bodies", async () => {
     const mutationCalls: unknown[] = [];
     const auditLogEntries: unknown[] = [];
@@ -537,7 +594,7 @@ describe("phase 12 model config server runtime", () => {
         body: JSON.stringify({
           providerKey: "local_mock",
           displayName: "Local Mock",
-          secretValue: "sk-test-synthetic-denied",
+          secretValue: "credential-synthetic-denied",
           isEnabled: true,
         }),
       }),
