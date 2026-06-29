@@ -445,8 +445,8 @@ function AdminModelConfigTab({
       aria-selected={activeTab === tab}
       className={
         activeTab === tab
-          ? "bg-brand-primary text-brand-foreground rounded-md px-3 py-2 text-sm font-medium"
-          : "text-text-secondary hover:bg-muted rounded-md px-3 py-2 text-sm font-medium"
+          ? "bg-brand-primary text-brand-foreground rounded-md px-3 py-2 text-sm font-medium active:scale-[0.98]"
+          : "text-text-secondary hover:bg-muted rounded-md px-3 py-2 text-sm font-medium active:scale-[0.98]"
       }
       onClick={() => onSelect(tab)}
       role="tab"

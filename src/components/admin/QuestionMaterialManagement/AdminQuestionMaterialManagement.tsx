@@ -665,7 +665,7 @@ function formatScope(profession: Profession, level: number, subject: Subject) {
 
 function tabClassName(isActive: boolean) {
   const base =
-    "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors";
+    "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors active:scale-[0.98]";
 
   if (isActive) {
     return `${base} bg-primary text-primary-foreground`;

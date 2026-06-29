@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { AdminQuestionMaterialManagement as AdminQuestionMaterialManagementBaseline } from "@/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement";
 import { AdminQuestionMaterialManagement } from "@/features/admin/question-material-management/AdminQuestionMaterialManagement";
 
 const adminSessionPayload = {
@@ -569,6 +570,12 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
+    expect(screen.getByRole("tab", { name: "题目" })).toHaveClass(
+      "active:scale-[0.98]",
+    );
+    expect(screen.getByRole("tab", { name: "材料" })).toHaveClass(
+      "active:scale-[0.98]",
+    );
     expect(screen.getByRole("button", { name: "新建题目" })).toBeEnabled();
     expect(
       screen.getByTestId("content-action-runtime-ready"),
@@ -597,6 +604,17 @@ describe("AdminQuestionMaterialManagement", () => {
     expectAdminFetchAuthorization(
       fetchMock,
       "/api/v1/questions?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+    );
+  });
+
+  it("keeps baseline question and material tabs on the approved active press feedback", () => {
+    render(createElement(AdminQuestionMaterialManagementBaseline));
+
+    expect(screen.getByRole("tab", { name: "题目" })).toHaveClass(
+      "active:scale-[0.98]",
+    );
+    expect(screen.getByRole("tab", { name: "材料" })).toHaveClass(
+      "active:scale-[0.98]",
     );
   });
 

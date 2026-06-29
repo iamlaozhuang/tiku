@@ -117,7 +117,13 @@ describe("admin model config management UI", () => {
       }),
     );
 
+    expect(screen.getByRole("tab", { name: "模型供应商" })).toHaveClass(
+      "active:scale-[0.98]",
+    );
     fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
+    expect(screen.getByRole("tab", { name: "模型配置" })).toHaveClass(
+      "active:scale-[0.98]",
+    );
     const configRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );

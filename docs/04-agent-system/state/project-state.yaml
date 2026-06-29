@@ -2988,32 +2988,33 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8c164b270640c8d179f8eee59ee40b0835087643
-  lastKnownOriginMasterSha: 8c164b270640c8d179f8eee59ee40b0835087643
+  lastKnownMasterSha: 343f6d7408be6747f8cc75234c1fdab25433b42d
+  lastKnownOriginMasterSha: 343f6d7408be6747f8cc75234c1fdab25433b42d
 currentTask:
-  id: detail-ui-ux-token-state-inventory-2026-06-29
+  id: detail-ui-tab-feedback-consistency-candidates-2026-06-29
   status: closed
-  result: pass_ui_ux_token_state_inventory_followup_tasks_seeded_no_source_change
-  sourceStory: seeded_by_detail_optimization_security_review_kickoff_2026_06_29
-  targetClosureItem: UI/UX token usage, loading/empty/error state, and interaction detail findings inventory
-  behaviorBoundary: docs_source_read_only::ui_ux_inventory_no_runtime_no_browser_no_fix
-  executionProfile: source_read_only_detail_inventory
-  taskKind: detail_optimization_inventory
+  result: pass_ui_tab_active_press_feedback_consistency_repaired
+  sourceStory: seeded_by_detail_ui_ux_token_state_inventory_2026_06_29
+  targetClosureItem: Align custom admin tab buttons with shared active press feedback behavior
+  behaviorBoundary: source_test_scoped::ui_interaction_feedback_consistency_no_browser_no_release
+  executionProfile: focused_tdd_ui_repair_under_local_repair_loop
+  taskKind: detail_optimization_fix
   moduleRunVersion: 2
   priority: p2
   severity: low
-  branch: codex/detail-ui-ux-token-state-inventory-20260629
-  approvedAt: "2026-06-29T11:02:10-07:00"
+  findingId: ui-inv-002
+  branch: codex/ui-tab-feedback-consistency-20260629
+  approvedAt: "2026-06-29T11:13:09-07:00"
   approvedBy: laozhuang
-  approvalConsumed: current_thread_goal_continuation_detail_inventory_materialization_2026_06_29
-  sourceTestChangeApproval: not_granted_current_task_source_read_only_inventory
-  claimedAt: "2026-06-29T11:02:10-07:00"
-  plannedAt: "2026-06-29T11:02:10-07:00"
-  materializedAt: "2026-06-29T11:02:10-07:00"
-  implementedAt: "2026-06-29T11:06:51-07:00"
-  validatedAt: "2026-06-29T11:06:51-07:00"
-  reviewedAt: "2026-06-29T11:06:51-07:00"
-  closedAt: "2026-06-29T11:06:51-07:00"
+  approvalConsumed: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+  sourceTestChangeApproval: granted_task_scoped_to_named_ui_tab_files_and_focused_unit_tests
+  claimedAt: "2026-06-29T11:13:09-07:00"
+  plannedAt: "2026-06-29T11:13:09-07:00"
+  materializedAt: "2026-06-29T11:13:09-07:00"
+  implementedAt: "2026-06-29T11:18:47-07:00"
+  validatedAt: "2026-06-29T11:18:47-07:00"
+  reviewedAt: "2026-06-29T11:18:47-07:00"
+  closedAt: "2026-06-29T11:18:47-07:00"
   predecessorClosureEvidence:
     sessionCredentialRepairTask: repair-session-login-response-credential-boundary-2026-06-29
     sessionCredentialRepairResult: closed_pushed_to_origin_master
@@ -3026,14 +3027,21 @@ currentTask:
     organizationAiGenerationRepairCommit: caa61f3fdde71e3cc1860cf7155986e1a135c5ee
     kickoffTask: detail-optimization-security-review-kickoff-2026-06-29
     kickoffResult: closed_docs_state_only_task_split
+    uiInventoryTask: detail-ui-ux-token-state-inventory-2026-06-29
+    uiInventoryResult: closed_pushed_to_origin_master
+    uiInventoryCommit: 343f6d7408be6747f8cc75234c1fdab25433b42d
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-29-detail-ui-ux-token-state-inventory.md
-    - docs/05-execution-logs/task-plans/2026-06-29-detail-ui-ux-token-state-inventory.md
-    - docs/05-execution-logs/evidence/2026-06-29-detail-ui-ux-token-state-inventory.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-ux-token-state-inventory.md
-    - docs/05-execution-logs/acceptance/2026-06-29-detail-ui-ux-token-state-inventory.md
+    - docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    - docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    - docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    - docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    - src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx
+    - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+    - tests/unit/admin-question-material-ui.test.ts
+    - tests/unit/admin-model-config-management-ui.test.ts
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/01-requirements/00-index.md
@@ -3052,21 +3060,21 @@ currentTask:
     - docs/05-execution-logs/audits-reviews/**
     - docs/05-execution-logs/acceptance/**
     - package.json
-    - src/app/(admin)/**
-    - src/app/(student)/**
-    - src/features/admin/**
-    - src/features/student/**
-    - src/components/**
-    - src/app/globals.css
-    - tests/unit/*ui*
+    - src/components/ui/button.tsx
+    - src/features/admin/question-material-management/AdminQuestionMaterialManagement.ts
+    - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+    - src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx
+    - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+    - tests/unit/admin-question-material-ui.test.ts
+    - tests/unit/admin-model-config-management-ui.test.ts
   blockedFiles:
     - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
-    - src/**
-    - tests/**
+    - src/**_except_allowed_ui_tab_files
+    - tests/**_except_allowed_focused_ui_tests
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -3085,7 +3093,7 @@ currentTask:
   browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
   credentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
   evidenceRedaction:
-    allowed: file_path_component_path_token_category_state_category_risk_category_status_count_redacted_summary_commit_branch_merge_push_cleanup_only
+    allowed: file_path_interaction_pattern_category_test_name_command_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
     forbidden:
       - credential_cookie_token_session_auth_header_values
       - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
@@ -3095,53 +3103,40 @@ currentTask:
       - env_file_contents_or_connection_strings
       - raw_exception_payload_or_stack_trace
   validationCommands:
-    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-ux-token-state-inventory.md
-    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-ux-token-state-inventory.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-ux-token-state-inventory.md
+    - npx.cmd vitest run tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx src/features/admin/model-config-management/AdminModelConfigManagement.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx src/features/admin/model-config-management/AdminModelConfigManagement.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
     - git diff --check
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-ui-ux-token-state-inventory-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-ui-ux-token-state-inventory-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-ui-ux-token-state-inventory-2026-06-29 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-ui-ux-token-state-inventory.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-ui-ux-token-state-inventory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-ux-token-state-inventory.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-ux-token-state-inventory.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-ui-ux-token-state-inventory.md
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_thread_goal_continuation_detail_inventory_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_thread_goal_continuation_detail_inventory_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
     push:
       approved: true
       target: origin/master
-      approvalSource: current_thread_goal_continuation_detail_inventory_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_thread_goal_continuation_detail_inventory_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
   commitSha: pending_local_closeout_commit
-  inventoryFindings:
-    uiInv001:
-      severity: low
-      category: tokenized_layout_consistency
-      result: repeated_arbitrary_tailwind_layout_values_found
-      staticScanMatchCount: 33
-      staticScanFileCount: 21
-      followUpTaskId: detail-ui-tokenized-layout-primitive-candidates-2026-06-29
-    uiInv002:
-      severity: low
-      category: interaction_physical_feedback
-      result: direct_custom_tab_buttons_without_local_press_feedback_pattern
-      directButtonFileCount: 14
-      affectedFileCount: 2
-      followUpTaskId: detail-ui-tab-feedback-consistency-candidates-2026-06-29
-  followUpTaskIds:
-    - detail-ui-tokenized-layout-primitive-candidates-2026-06-29
-    - detail-ui-tab-feedback-consistency-candidates-2026-06-29
   validationSummary:
-    sourceOrTestChanged: false
+    tddRedObserved: pass_2_failed_tests_missing_active_scale_feedback
+    focusedUnitValidation: pass_2_files_32_tests
+    sourceOrTestChanged: true
     packageOrLockfileChanged: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -3150,18 +3145,16 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-    scopedUiFileCount: 76
-    businessForbiddenVisualPatternMatches: 0
-    arbitraryTailwindLayoutValueMatches: 33
-    directButtonFilesWithoutLocalFeedbackPattern: 2
-    uiRelatedUnitTestCandidateFiles: 40
+    browserValidationSkippedByBoundary: true
+    typecheck: pass
+    lint: pass
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass
-  updatedAt: "2026-06-29T11:06:51-07:00"
+  updatedAt: "2026-06-29T11:18:47-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29

@@ -4589,19 +4589,67 @@ tasks:
     evidenceMode: redacted_file_path_interaction_pattern_validation_summary_only
     taskKind: detail_optimization_candidate
     moduleRunVersion: 2
-    status: pending_fresh_materialization
+    status: closed
+    result: pass_ui_tab_active_press_feedback_consistency_repaired
     priority: p2
     severity: low
     seededAt: "2026-06-29T11:06:51-07:00"
     seededBy: detail-ui-ux-token-state-inventory-2026-06-29
     findingId: ui-inv-002
     recommendedAsNextSafeTask: true
-    readOnlyCandidateSurfaces:
-      - src/components/ui/button.tsx
+    approvedAt: "2026-06-29T11:13:09-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+    branch: codex/ui-tab-feedback-consistency-20260629
+    claimedAt: "2026-06-29T11:13:09-07:00"
+    plannedAt: "2026-06-29T11:13:09-07:00"
+    materializedAt: "2026-06-29T11:13:09-07:00"
+    implementedAt: "2026-06-29T11:18:47-07:00"
+    validatedAt: "2026-06-29T11:18:47-07:00"
+    reviewedAt: "2026-06-29T11:18:47-07:00"
+    closedAt: "2026-06-29T11:18:47-07:00"
+    sourceTestChangeApproval: granted_task_scoped_to_named_ui_tab_files_and_focused_unit_tests
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+      - docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+      - docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+      - docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
       - src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx
       - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
       - tests/unit/admin-question-material-ui.test.ts
       - tests/unit/admin-model-config-management-ui.test.ts
+    readOnlyCandidateSurfaces:
+      - src/components/ui/button.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagement.ts
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx
+      - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-model-config-management-ui.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**_except_allowed_ui_tab_files
+      - tests/**_except_allowed_focused_ui_tests
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     blockedWithoutFreshMaterialization:
       - source_or_test_change
       - design_token_change
@@ -4612,6 +4660,71 @@ tasks:
       - release_readiness_or_final_pass
       - cost_calibration_gate
       - credential_cookie_token_session_localStorage_or_Authorization_header_evidence
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: file_path_interaction_pattern_category_test_name_command_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
+    validationCommands:
+      - npx.cmd vitest run tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx src/features/admin/model-config-management/AdminModelConfigManagement.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx src/features/admin/model-config-management/AdminModelConfigManagement.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-model-config-management-ui.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-ui-tab-feedback-consistency-candidates-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_thread_central_authorization_items_1_to_5_local_repair_loop_only_after_materialization
+    validationSummary:
+      tddRedObserved: pass_2_failed_tests_missing_active_scale_feedback
+      focusedUnitValidation: pass_2_files_32_tests
+      sourceOrTestChanged: true
+      packageOrLockfileChanged: false
+      databaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserRuntimeExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      browserValidationSkippedByBoundary: true
+      typecheck: pass
+      lint: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
 
   - id: security-ai-provider-boundary-inventory-2026-06-29
     title: Security AI Provider boundary inventory
