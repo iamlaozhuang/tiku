@@ -4663,6 +4663,171 @@ tasks:
     nextRecommendedTask: >-
       stage_d_schema_seed_alignment_approval_or_stage_c_empty_state_repair_planning_for_organization_analytics_runtime_source_gap
 
+  - id: org-advanced-analytics-db-alignment-repair-2026-06-28
+    title: Org advanced analytics local DB schema and test-owned data alignment repair
+    phase: org-advanced-analytics-db-alignment-repair-2026-06-28
+    sourceStory: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    dependencies:
+      - org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      Current user fresh-approved local-only DB/schema/test-owned data alignment for the
+      `org_advanced_admin.organization_analytics` runtime summary load failure. Scope is limited to local repository
+      `D:\tiku` and the localhost/127.0.0.1 Docker dev database. The task may inspect local schema/migration state,
+      add or repair source/schema/migration/test-owned seed fixtures only if required for organization analytics
+      runtime, run non-destructive local migration/seed against the local dev DB, use only test-owned synthetic
+      organization training answer data, run focused unit and relevant local runtime checks, record redacted
+      role/route/status/count evidence, commit, fast-forward merge to `master`, push `origin/master`, and clean up the
+      short branch. It must not record raw rows, internal ids, PII, credentials, env contents, connection strings, raw
+      DOM, screenshots, traces, Provider payloads, prompts, raw AI input/output, or complete content. It must not use
+      staging/prod/cloud/deploy, PR, force-push, release readiness/final Pass, Cost Calibration, Provider execution or
+      Provider configuration, production-like data, or destructive DB drop/truncate/reset without separate fresh
+      approval with exact target and rollback plan.
+    targetClosureItem: Local organization analytics runtime summary load repair with redacted browser status proof
+    behaviorBoundary: local_db_schema_test_owned_data_alignment::non_destructive_local_only_no_provider_no_final_pass
+    executionProfile: local_schema_migration_seed_source_repair_if_required
+    evidenceMode: redacted_role_route_status_count_failure_class_command_test_count_commit_only
+    validationPolicy: focused_unit_local_db_runtime_browser_module_run_v2
+    taskKind: local_db_schema_test_owned_data_alignment_repair
+    moduleRunVersion: 2
+    status: in_progress
+    result: pending
+    approvedAt: "2026-06-28T22:56:09-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    claimedAt: "2026-06-28T22:56:09-07:00"
+    plannedAt: "2026-06-28T22:56:09-07:00"
+    branch: codex/org-advanced-analytics-db-alignment-repair-20260628
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/contracts/organization-analytics.ts
+      - src/server/models/organization-analytics.ts
+      - src/server/validators/organization-analytics.ts
+      - src/app/api/v1/organization-analytics/**
+      - src/db/schema/**
+      - src/db/seed/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/seed/**
+      - tests/unit/organization-analytics*
+      - tests/integration/organization-analytics*
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+      - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+      - package.json
+      - docker-compose.yml
+      - src/**
+      - tests/**
+      - scripts/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary:
+      currentTask: local_docker_dev_db_only_schema_migration_seed_allowed_if_required_no_destructive_drop_truncate_reset
+      allowedEvidence:
+        - table_presence_counts
+        - migration_status_labels
+        - aggregate_counts
+        - role_route_status_labels
+        - test_counts
+      forbiddenEvidence:
+        - raw_rows
+        - internal_ids
+        - pii_email_phone_plaintext_redeem_code
+        - credentials_tokens_sessions_connection_strings
+        - env_file_contents
+      destructiveOperations: blocked_without_separate_fresh_approval_exact_target_and_rollback_plan
+    aiProviderBoundary:
+      currentTask: no_provider_execution_no_provider_configuration_no_prompt_payload_no_raw_ai_io
+      costCalibrationGate: blocked
+    credentialBoundary:
+      currentTask: no_credential_cookie_token_session_localStorage_or_Authorization_header_capture
+      accountFixtureRead: blocked_current_task_unless_browser_session_reverification_requires_test_owned_login_input_without_evidence
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    blockedWithoutFreshApproval:
+      - staging_prod_cloud_deploy
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - provider_execution_or_provider_configuration
+      - dependency_package_lockfile_change
+      - production_like_data
+      - destructive_db_drop_truncate_reset
+      - sensitive_evidence_capture
+    validationCommands:
+      - local_db_schema_migration_and_test_owned_seed_alignment_redacted_counts
+      - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts src/server/repositories/organization-analytics-repository.test.ts src/server/services/organization-analytics-route.test.ts src/server/services/organization-analytics-service.test.ts src/db/schema/organization-training.test.ts
+      - redacted_browser_org_advanced_admin_organization_analytics_runtime_verification
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    validationSummary:
+      taskPlanPrepared: pass
+      requirementAlignmentPrepared: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass
+      ssotReadList: pass
+      codeTasteAndAdrRead: pass
+      schemaMigrationSourceRepair: pass
+      localDbExecution: pass
+      focusedUnitOrganizationAnalytics: pass
+      redactedBrowserVerification: pass
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28

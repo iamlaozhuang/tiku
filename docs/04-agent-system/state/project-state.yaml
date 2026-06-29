@@ -1,8 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
-updatedAt: "2026-06-28T23:05:00-07:00"
+currentPhase: org-advanced-analytics-db-alignment-repair-2026-06-28
+updatedAt: "2026-06-28T22:56:09-07:00"
+orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628:
+  approvedAt: "2026-06-28T22:56:09-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+  purpose: repair_org_advanced_admin_organization_analytics_runtime_summary_load_failure_caused_by_missing_training_analytics_source_table_or_data
+  scope:
+    localRepositoryOnly: D:\tiku
+    localDbOnly: localhost_127_0_0_1_docker_dev_database
+    allowedActions:
+      - inspect_local_schema_and_migration_state
+      - add_or_repair_source_schema_migration_test_owned_seed_fixtures_only_if_required_for_organization_analytics_runtime
+      - run_local_migration_seed_against_local_dev_db_only
+      - use_test_owned_synthetic_organization_training_answer_data_only
+      - run_local_focused_unit_tests_relevant_local_integration_runtime_checks_and_redacted_browser_verification
+      - record_role_route_status_count_summaries_only
+      - commit_fast_forward_merge_to_master_push_origin_master_and_cleanup_short_branch
+    evidenceRestrictions:
+      - no_raw_db_rows
+      - no_internal_ids
+      - no_pii_email_phone_plaintext_redeem_code
+      - no_credentials_cookies_tokens_sessions_localStorage_Authorization_headers
+      - no_env_file_contents_or_connection_strings
+      - no_raw_dom_screenshots_traces
+      - no_provider_payloads_prompts_raw_ai_input_output
+      - no_complete_question_paper_material_resource_chunk_content
+    stillForbidden:
+      - staging_prod_cloud_deploy
+      - pr
+      - force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - provider_execution_or_provider_configuration
+      - production_like_data
+      - destructive_db_drop_truncate_reset_without_separate_fresh_approval_exact_target_and_rollback_plan
 durableFullAcceptanceStagedLocalExecutionApproval20260628:
   approvedAt: "2026-06-28T15:43:35-07:00"
   approvedBy: laozhuang
@@ -2668,15 +2702,190 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
-  lastKnownOriginMasterSha: 585b94390da722b325ea7099244840f19b1bcc4e
+  lastKnownMasterSha: 84d7a006843e84446b487fd0108183de695aaed9
+  lastKnownOriginMasterSha: 84d7a006843e84446b487fd0108183de695aaed9
 currentTask:
-  id: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
-  status: closed
-  result: blocked_by_local_db_schema_gap_organization_training_answer_source_missing
-  source: orgAdvancedAnalyticsRuntimeSummaryLoadDiagnostic20260628
-  branch: codex/org-advanced-analytics-runtime-summary-diagnostic-20260628
-  updatedAt: "2026-06-28T23:12:00-07:00"
+  id: org-advanced-analytics-db-alignment-repair-2026-06-28
+  status: in_progress
+  result: pending
+  source: orgAdvancedAnalyticsDbAlignmentRepair20260628
+  branch: codex/org-advanced-analytics-db-alignment-repair-20260628
+  updatedAt: "2026-06-28T22:56:09-07:00"
+orgAdvancedAnalyticsDbAlignmentRepair20260628:
+  id: org-advanced-analytics-db-alignment-repair-2026-06-28
+  status: in_progress
+  result: pending
+  branch: codex/org-advanced-analytics-db-alignment-repair-20260628
+  taskKind: local_db_schema_test_owned_data_alignment_repair
+  executionProfile: local_schema_migration_seed_source_repair_if_required
+  approvedAt: "2026-06-28T22:56:09-07:00"
+  approvedBy: laozhuang
+  approvalConsumed: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+  approvalReference: orgAdvancedAnalyticsLocalDbSchemaTestOwnedDataAlignmentApproval20260628
+  sourceBlockedTaskId: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+  goal: >-
+    Repair the local-only `org_advanced_admin.organization_analytics` runtime summary load failure by aligning the
+    missing organization training analytics source schema/data and any required source/test fixtures, using only local
+    Docker dev DB and test-owned synthetic data.
+  planPath: docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - src/server/repositories/organization-analytics-repository.ts
+    - src/server/services/organization-analytics-service.ts
+    - src/server/contracts/organization-analytics.ts
+    - src/server/models/organization-analytics.ts
+    - src/server/validators/organization-analytics.ts
+    - src/app/api/v1/organization-analytics/**
+    - src/db/schema/**
+    - src/db/seed/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/seed/**
+    - tests/unit/organization-analytics*
+    - tests/integration/organization-analytics*
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    - docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    - package.json
+    - docker-compose.yml
+    - src/**
+    - tests/**
+    - scripts/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary:
+    currentTask: local_docker_dev_db_only_schema_migration_seed_allowed_if_required_no_destructive_drop_truncate_reset
+    allowedEvidence:
+      - table_presence_counts
+      - migration_status_labels
+      - aggregate_counts
+      - role_route_status_labels
+      - test_counts
+    forbiddenEvidence:
+      - raw_rows
+      - internal_ids
+      - pii_email_phone_plaintext_redeem_code
+      - credentials_tokens_sessions_connection_strings
+      - env_file_contents
+    destructiveOperations: blocked_without_separate_fresh_approval_exact_target_and_rollback_plan
+  aiProviderBoundary:
+    currentTask: no_provider_execution_no_provider_configuration_no_prompt_payload_no_raw_ai_io
+    costCalibrationGate: blocked
+  credentialBoundary:
+    currentTask: no_credential_cookie_token_session_localStorage_or_Authorization_header_capture
+    accountFixtureRead: blocked_current_task_unless_browser_session_reverification_requires_test_owned_login_input_without_evidence
+  evidenceRedaction:
+    allowed: role_route_workflow_status_count_failure_class_command_test_count_commit_sha_only
+    forbidden:
+      - credentials_cookies_tokens_sessions_localStorage_Authorization_headers
+      - env_file_contents_connection_strings
+      - raw_dom_screenshots_traces
+      - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_input_output
+      - complete_question_paper_material_resource_or_chunk_content
+  capabilities:
+    docsStateEvidenceAudit: approved
+    sourceSchemaMigrationSeedRepair: approved_if_required_for_organization_analytics_runtime
+    localDbSchemaInspection: approved_local_docker_dev_db_only
+    localMigrationSeedExecution: approved_local_docker_dev_db_only_non_destructive
+    testOwnedSyntheticTrainingAnswerData: approved
+    focusedUnitTest: approved
+    relevantLocalRuntimeChecks: approved
+    redactedBrowserVerification: approved_localhost_or_127_0_0_1_only
+    localCommit: approved
+    mergeToMaster: approved_fast_forward_only
+    pushOriginMaster: approved
+    branchCleanup: approved
+    dependencyIntroduction: blocked_unless_separate_stage_e_task
+    providerCall: blocked
+    providerConfiguration: blocked
+    stagingProdDeploy: blocked
+    pr: blocked
+    forcePush: blocked
+    releaseReadinessOrFinalPass: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - local_db_schema_migration_and_test_owned_seed_alignment_redacted_counts
+    - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts src/server/repositories/organization-analytics-repository.test.ts src/server/services/organization-analytics-route.test.ts src/server/services/organization-analytics-service.test.ts src/db/schema/organization-training.test.ts
+    - redacted_browser_org_advanced_admin_organization_analytics_runtime_verification
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/task-plans/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md docs/05-execution-logs/acceptance/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-db-alignment-repair-2026-06-28 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approved_local_only_db_schema_test_owned_data_alignment_for_org_analytics_runtime_repair_2026_06_28
+  blockedWithoutFreshApproval:
+    - staging_prod_cloud_deploy
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - provider_execution_or_provider_configuration
+    - dependency_package_lockfile_change
+    - production_like_data
+    - destructive_db_drop_truncate_reset
+    - sensitive_evidence_capture
+  validationSummary:
+    taskPlanPrepared: pass
+    requirementAlignmentPrepared: pass
+    evidencePrepared: pass
+    auditReviewPrepared: pass
+    acceptancePrepared: pass
+    ssotReadList: pass
+    codeTasteAndAdrRead: pass
+    schemaMigrationSourceRepair: pass
+    localDbExecution: pass
+    focusedUnitOrganizationAnalytics: pass
+    redactedBrowserVerification: pass
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
 previousTaskSnapshotOrgAdvancedAnalyticsBrowserRerunAfterSummaryRepair:
   id: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
   status: closed
