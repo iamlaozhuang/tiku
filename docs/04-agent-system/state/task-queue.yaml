@@ -4898,21 +4898,261 @@ tasks:
     evidenceMode: redacted_schema_file_path_risk_status_count_summary_only
     taskKind: security_inventory
     moduleRunVersion: 2
-    status: pending_after_redaction_inventory_or_fresh_owner_selection
+    status: closed
+    result: pass_db_schema_migration_risk_inventory_task_split_no_db_execution
     nextRecommended: true
     recommendedAfter: security-ai-provider-boundary-inventory-2026-06-29
+    priority: p1
+    severity: medium
+    approvedAt: "2026-06-29T11:43:22-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: active_thread_goal_continuation_db_schema_migration_inventory_materialization_2026_06_29
+    claimedAt: "2026-06-29T11:43:22-07:00"
+    plannedAt: "2026-06-29T11:43:22-07:00"
+    materializedAt: "2026-06-29T11:43:22-07:00"
+    closedAt: "2026-06-29T11:50:39-07:00"
+    branch: codex/security-db-schema-migration-inventory-20260629
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/sop/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - drizzle.config.ts
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - src/server/repositories/**
+      - tests/unit/*repository*
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_prompt_payload_or_raw_ai_io_evidence
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
+    credentialBoundary: no_env_secret_connection_string_account_login_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    evidenceRedaction:
+      allowed: file_path_module_boundary_schema_area_migration_label_repository_area_risk_category_severity_status_count_follow_up_task_id_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
+        - destructive_sql_or_raw_migration_execution_output
     readOnlyCandidateSurfaces:
       - src/db/schema/**
       - drizzle/**
       - migrations/**
       - src/server/repositories/**
       - tests/unit/*repository*
+      - drizzle.config.ts
+    inventorySummary:
+      sourceOrTestChanged: false
+      databaseRuntimeBudget: zero
+      migrationExecutionBudget: zero
+      surfaceCounts:
+        srcDbSchema: 13
+        drizzleFiles: 39
+        drizzleSqlMigrations: 19
+        drizzleJournalEntries: 19
+        migrationsDirectoryFiles: 0
+        repositoryFiles: 65
+        repositoryUnitTestFiles: 2
+        envDatabaseUrlPathHits: 24
+        sqlTemplatePathHits: 10
+        executeRawUnsafePathHits: 10
+        destructiveMigrationPatternMatches: 2
+      findings:
+        - findingId: db-inv-001
+          riskFamily: db_env_connection_boundary_drift
+          severity: medium
+          status: needs_scoped_review
+          followUp: security-db-runtime-connection-boundary-hardening-2026-06-29
+        - findingId: db-inv-002
+          riskFamily: destructive_migration_replay_risk
+          severity: medium
+          status: guarded_watch
+          followUp: security-db-migration-replay-guard-review-2026-06-29
+        - findingId: db-inv-003
+          riskFamily: raw_sql_query_construction_review_surface
+          severity: medium
+          status: needs_scoped_review
+          followUp: security-db-repository-query-construction-review-2026-06-29
+        - findingId: db-inv-004
+          riskFamily: repository_internal_id_exposure_boundary
+          severity: low
+          status: monitor
+          followUp: future_api_contract_security_review
+        - findingId: db-inv-005
+          riskFamily: unbounded_or_n_plus_one_repository_query_risk
+          severity: medium
+          status: needs_performance_scan
+          followUp: security-db-repository-query-construction-review-2026-06-29
+        - findingId: db-inv-006
+          riskFamily: schema_drift_or_missing_migration_journal
+          severity: low
+          status: covered_watch
+          followUp: continue_journal_count_check_in_future_schema_task
+        - findingId: db-inv-007
+          riskFamily: migration_seed_evidence_boundary_drift
+          severity: medium
+          status: blocked_by_current_goal
+          followUp: none_without_fresh_db_seed_authorization
+      nextRecommendedTaskId: security-dependency-supply-chain-inventory-2026-06-29
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-db-schema-migration-risk-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-db-schema-migration-risk-inventory-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-db-schema-migration-risk-inventory-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-db-schema-migration-risk-inventory.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-db-schema-migration-risk-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-db-schema-migration-risk-inventory.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_thread_goal_continuation_db_schema_migration_inventory_materialization_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: active_thread_goal_continuation_db_schema_migration_inventory_materialization_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_thread_goal_continuation_db_schema_migration_inventory_materialization_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_thread_goal_continuation_db_schema_migration_inventory_materialization_2026_06_29
     blockedWithoutFreshMaterialization:
       - database_connection_read_write_migration_or_seed
       - schema_migration_or_drizzle_push
       - destructive_db_operation
       - source_or_test_change
       - release_readiness_or_final_pass
+
+  - id: security-db-runtime-connection-boundary-hardening-2026-06-29
+    title: Security DB runtime connection boundary hardening
+    phase: security-db-runtime-connection-boundary-hardening-2026-06-29
+    sourceStory: seeded_by_security_db_schema_migration_risk_inventory_2026_06_29
+    dependencies:
+      - security-db-schema-migration-risk-inventory-2026-06-29
+    taskPlanPolicy: required_before_source_or_test_change
+    targetClosureItem: reduce duplicated local env and DB connection boundary logic without reading env or connecting DB
+    behaviorBoundary: source_test_scoped::db_runtime_connection_boundary_no_db_connection_no_env_read
+    executionProfile: local_source_test_repair
+    evidenceMode: redacted_path_contract_validation_summary_only
+    taskKind: security_repair_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
+    priority: p1
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    allowedFilesPolicy: must_materialize_exact_source_test_docs_state_files_before_execution
+    blockedWithoutFreshMaterialization:
+      - database_connection_read_write_migration_or_seed
+      - env_secret_connection_string_read_or_evidence
+      - package_or_lockfile_change
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
+
+  - id: security-db-repository-query-construction-review-2026-06-29
+    title: Security DB repository query construction focused review
+    phase: security-db-repository-query-construction-review-2026-06-29
+    sourceStory: seeded_by_security_db_schema_migration_risk_inventory_2026_06_29
+    dependencies:
+      - security-db-schema-migration-risk-inventory-2026-06-29
+    taskPlanPolicy: required_before_repository_query_review_or_fix
+    targetClosureItem: focused repository query construction and unbounded query review before any source repair
+    behaviorBoundary: source_read_only_or_source_test_scoped::query_review_no_db_connection_no_raw_rows
+    executionProfile: security_review_then_optional_local_source_test_repair_if_materialized
+    evidenceMode: redacted_path_contract_risk_status_count_summary_only
+    taskKind: security_review_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
+    priority: p1
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    allowedFilesPolicy: must_materialize_exact_repository_test_docs_state_files_before_execution
+    blockedWithoutFreshMaterialization:
+      - database_connection_read_write_migration_or_seed
+      - raw_db_row_or_internal_id_evidence
+      - package_or_lockfile_change
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
+
+  - id: security-db-migration-replay-guard-review-2026-06-29
+    title: Security DB migration replay guard review
+    phase: security-db-migration-replay-guard-review-2026-06-29
+    sourceStory: seeded_by_security_db_schema_migration_risk_inventory_2026_06_29
+    dependencies:
+      - security-db-schema-migration-risk-inventory-2026-06-29
+    taskPlanPolicy: required_before_migration_replay_or_schema_change
+    targetClosureItem: destructive-pattern migration replay guard review without migration execution
+    behaviorBoundary: docs_source_read_only::migration_guard_review_no_migration_execution_no_db_connection
+    executionProfile: source_read_only_security_review
+    evidenceMode: redacted_migration_label_risk_status_count_summary_only
+    taskKind: security_review_candidate
+    moduleRunVersion: 2
+    status: pending_requires_fresh_materialization
+    result: pending_owner_selection_or_queue_claim
+    nextRecommended: false
+    recommendedAfter: security-db-schema-migration-risk-inventory-2026-06-29
+    priority: p2
+    severity: medium
+    approvalSource: localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+    allowedFilesPolicy: must_materialize_exact_migration_docs_state_files_before_execution
+    blockedWithoutFreshMaterialization:
+      - database_connection_read_write_migration_or_seed
+      - destructive_db_operation
+      - raw_sql_execution_output_or_raw_db_rows
+      - package_or_lockfile_change
+      - provider_or_browser_runtime
+      - release_readiness_or_final_pass_or_cost_calibration
 
   - id: security-dependency-supply-chain-inventory-2026-06-29
     title: Security dependency and supply-chain inventory
