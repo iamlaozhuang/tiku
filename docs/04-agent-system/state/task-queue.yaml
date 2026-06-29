@@ -836,6 +836,244 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-acceptance-remaining-coverage-audit-2026-06-29
+    title: Full acceptance remaining coverage audit
+    phase: full-acceptance-remaining-coverage-audit-2026-06-29
+    sourceStory: active_goal_continue_after_current_full_unit_green_no_pending_task_2026_06_29
+    dependencies:
+      - full-unit-baseline-current-recheck-2026-06-29
+    taskPlanPolicy: required_before_docs_state_closeout
+    humanApprovalBoundary: >-
+      Current active goal and inherited per-task closeout approval allow a docs/state-only audit to reconcile existing
+      redacted evidence against the mandatory owner-facing role checklist and seed the next local acceptance task. This
+      audit must not execute browser, dev-server, DB, AI/Provider, account fixture reads, source/test/dependency changes,
+      schema/migration/seed, staging/prod/deploy, PR, force-push, release readiness, final Pass, or Cost Calibration.
+    targetClosureItem: Remaining full acceptance coverage status and next executable task seed
+    behaviorBoundary: docs_state::remaining_acceptance_coverage_audit_no_runtime_no_private_material_no_final_pass
+    executionProfile: docs_state_remaining_acceptance_coverage_audit_and_next_task_seed
+    evidenceMode: redacted_role_workflow_route_status_count_gap_id_task_id_only
+    validationPolicy: scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: docs_state_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: pass_remaining_coverage_audited_next_task_seeded_no_final_pass
+    approvedAt: "2026-06-29T00:55:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_active_goal_and_inherited_per_task_closeout_authorization_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-29T00:55:00-07:00"
+    plannedAt: "2026-06-29T00:55:00-07:00"
+    validatedAt: "2026-06-29T01:05:00-07:00"
+    reviewedAt: "2026-06-29T01:05:00-07:00"
+    closedAt: "2026-06-29T01:05:00-07:00"
+    branch: codex/full-acceptance-coverage-audit-20260629
+    capabilities:
+      docsStateEvidenceAudit: approved
+      nextTaskQueueSeed: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      browserRuntime: blocked
+      devServer: blocked
+      accountFixtureRead: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      sourceOrTestChange: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-remaining-coverage-audit.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-remaining-coverage-audit.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-remaining-coverage-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-remaining-coverage-audit.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dbBoundary: no_database_connection_read_write_seed_migration_or_schema_change
+    aiProviderBoundary: no_ai_or_provider_call_no_prompt_payload_no_model_config_read_write
+    credentialBoundary: no_account_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access
+    evidenceRedaction:
+      allowed:
+        - role_label
+        - workflow_label
+        - route_label
+        - status_label
+        - count_summary
+        - gap_id
+        - task_id
+        - commit_sha
+      forbidden:
+        - credentials_connection_strings_secrets_tokens_cookies_localStorage_Authorization_headers
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-remaining-coverage-audit.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-remaining-coverage-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-remaining-coverage-audit-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - account_fixture_read_or_session_switching
+      - database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - source_or_test_change
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: pass
+      coverageAuditPrepared: pass
+      nextTaskSeeded: pass
+      formatAndDiff: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-acceptance-org-advanced-admin-training-workflow-2026-06-29
+    title: Full acceptance org advanced admin organization training workflow
+    phase: full-acceptance-org-advanced-admin-training-workflow-2026-06-29
+    sourceStory: seeded_by_full_acceptance_remaining_coverage_audit_2026_06_29
+    dependencies:
+      - full-acceptance-remaining-coverage-audit-2026-06-29
+    taskPlanPolicy: required_before_browser_account_or_mutation_execution
+    humanApprovalBoundary: >-
+      Seeded next task only. Future execution may consume staged local approval Stage A and Stage B after it claims the
+      task and materializes its own task plan. It may use localhost/127.0.0.1 browser verification, test-owned
+      `org_advanced_admin` session switching, and app-normal local UI/API mutations needed to verify organization
+      training workflow rows. It must not call Provider, inspect browser storage/session material, record credentials,
+      use direct DB writes, change source/tests/dependencies/schema/migrations/seeds, deploy, create PRs, force-push,
+      claim release readiness/final Pass, or execute Cost Calibration.
+    targetClosureItem: Redacted workflow/status/count evidence for `org_advanced_admin.organization_training`
+    behaviorBoundary: local_browser_acceptance::org_advanced_admin_training_workflow_no_provider_no_direct_db_no_sensitive_evidence
+    executionProfile: local_browser_acceptance_write_flow_when_app_performs_it
+    evidenceMode: redacted_role_route_workflow_status_count_summary_only
+    validationPolicy: task_plan_then_browser_acceptance_scoped_prettier_diff_module_run_v2_closeout
+    taskKind: local_browser_acceptance
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-29T00:55:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    branch: codex/org-advanced-training-workflow-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - org_advanced_admin.organization_training
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_localhost_or_127_0_0_1_only_after_task_plan
+      testOwnedSessionSwitching: approved_after_task_plan_no_sensitive_evidence
+      localUiApiMutation: approved_only_app_normal_test_owned_training_workflow_after_task_plan
+      sourceOrTestChange: blocked_split_to_repair_task_if_needed
+      directDatabaseAccess: blocked_unless_later_stage_d_task
+      providerCall: blocked
+      providerConfiguration: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      localCommit: approved_after_validation
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      finalPassClaim: blocked
+      releaseReadinessDecision: blocked
+      pr: blocked
+      forcePush: blocked
+      costCalibrationGate: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+
   - id: full-acceptance-matrix-execution-2026-06-28
     title: Full all-role acceptance matrix execution
     phase: full-acceptance-matrix-execution-2026-06-28
