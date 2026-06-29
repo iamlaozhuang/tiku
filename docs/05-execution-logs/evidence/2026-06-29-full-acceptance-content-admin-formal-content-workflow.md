@@ -83,6 +83,10 @@ GREEN: partial browser surface evidence captured; full workflow remains blocked.
 - Browser route/form/control evidence: blocked evidence captured.
 - Scoped formatting and diff check: pass.
 - Module Run v2 pre-commit/closeout/pre-push readiness: pass.
+- Task commit after rebase: `5ce064bd7`.
+- Post-merge master gate: `Test-ModuleRunV2PrePushReadiness.ps1 -SkipRemoteAheadCheck` passed on `master` after
+  fast-forward merge.
+- Post-merge evidence commit: recorded in final handoff; this line intentionally avoids a self-referential commit SHA.
 - Source/test/dependency/schema/migration/seed changed: false.
 - Direct DB access or raw row evidence: false.
 - Provider call/config/prompt/raw AI IO: false.
