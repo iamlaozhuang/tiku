@@ -8,7 +8,7 @@
 - Result: pass_local_safe_role_bootstrap_source_unit
 - Batch range: safe local/dev/test `content_admin` role bootstrap source/test repair.
 - Pre-task master checkpoint: `fe0769ca263c261b1327e5a7b34555ad65b9a10f`
-- Commit: pending
+- Commit: `b10f2293c`
 
 ## Boundary Confirmation
 
@@ -82,17 +82,28 @@ prompts, raw AI input/output, employee subjective answers, and complete question
 - Prettier scoped check: pass after scoped write.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
+- Module Run v2 closeout readiness: pass.
 - Module Run v2 prepush readiness: pending.
+
+## Validation Command Results
+
+- `npm.cmd run test:unit -- tests/unit/local-acceptance-session-bootstrap.test.ts`: pass, 1 file / 3 tests.
+- `npm.cmd run test:unit`: pass, 318 files / 1435 tests.
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npx.cmd prettier --check --ignore-unknown ...`: pass.
+- `git diff --check`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28`: pass.
 
 ## Batch Commit Evidence
 
-- Commit: pending.
+- Commit: `b10f2293c`.
 
 ## Local Full Loop Gate
 
-- localFullLoopGate: pending closeout/prepush gates and commit evidence; focused unit, full unit, lint, typecheck,
-  formatting, diff checks, and Module Run v2 precommit hardening are green.
+- localFullLoopGate: pending prepush gate; focused unit, full unit, lint, typecheck, formatting, diff checks, Module Run
+  v2 precommit hardening, and module closeout readiness are green.
 
 ## Thread Rollover Decision
 
