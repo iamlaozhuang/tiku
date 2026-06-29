@@ -2448,6 +2448,284 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+    title: Full acceptance AI generation detail role rerun
+    phase: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+    sourceStory: next_recommended_task_after_ai_generation_detail_controls_source_repair_2026_06_28
+    dependencies:
+      - ai-generation-detail-controls-source-repair-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This task consumes the durable staged local execution approval Stage A for test-owned local account/session
+      switching and Stage C closeout policy for task-scoped docs/evidence. It may run read-only localhost browser checks
+      for content_admin and org_advanced_admin AI question/paper generation detail-control presence after the source
+      repair. It may read the approved test-owned local account file as login input only. It must not record credentials,
+      cookies, tokens, sessions, localStorage, Authorization headers, raw DOM, screenshots, traces, raw DB rows, internal
+      ids, PII, Provider payloads, prompts, raw AI IO, or complete generated/content material. It must not submit AI
+      generation requests, call Provider, perform DB access, mutate UI/API data, change source/tests, change
+      schema/migrations/seeds/dependencies, touch staging/prod, create PRs, force push, claim release readiness, final
+      Pass, or Cost Calibration.
+    targetClosureItem: Four scoped AI generation detail-control role browser rows rerun with redacted evidence
+    behaviorBoundary: local_browser_read_only::ai_generation_detail_controls_role_rerun_no_submit_no_provider_no_db_no_final_pass
+    executionProfile: local_browser_read_only_acceptance_rerun
+    evidenceMode: redacted_role_route_control_category_status_count_only_no_dom_no_screenshot_no_trace_no_content
+    validationPolicy: role_browser_rerun_focused_unit_scoped_prettier_diff_precommit_closeout_prepush
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    status: closed
+    result: partial_blocked_content_admin_session_material_auth_failure
+    approvedAt: "2026-06-28T17:44:05-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_durable_staged_local_execution_approval_and_active_goal_continuation_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    claimedAt: "2026-06-28T17:44:05-07:00"
+    plannedAt: "2026-06-28T17:44:05-07:00"
+    implementedAt: "2026-06-28T18:03:02-07:00"
+    validatedAt: "2026-06-28T18:03:02-07:00"
+    reviewedAt: "2026-06-28T18:03:02-07:00"
+    closedAt: "2026-06-28T18:03:02-07:00"
+    branch: codex/full-acceptance-ai-generation-detail-rerun-20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+        - org_advanced_admin.organization_ai_question_generation
+        - org_advanced_admin.organization_ai_paper_generation
+      completionRule: >-
+        This task covers only the four AI generation detail-control rerun rows. The durable goal remains incomplete
+        until every applicable role/workflow/function row in the owner-facing checklist has redacted pass evidence.
+    targetRoutes:
+      - role: content_admin
+        route: /content/ai-question-generation
+      - role: content_admin
+        route: /content/ai-paper-generation
+      - role: org_advanced_admin
+        route: /organization/ai-question-generation
+      - role: org_advanced_admin
+        route: /organization/ai-paper-generation
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_read_only_localhost_control_presence_only
+      testOwnedLocalAccountSessionSwitching: approved
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      localSourceChange: blocked
+      testChange: blocked
+      localUiApiMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - package.json
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - scripts/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**_except_acceptance_role_accounts_file
+      - D:\tiku-local-private\**_except_acceptance_role_accounts_file
+    browserBoundary: localhost_or_127_0_0_1_read_only_control_presence_only_no_submit_no_provider_no_sensitive_evidence
+    accountCredentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    dbBoundary: blocked_no_direct_database_connection_read_write_migration_seed_or_schema_change
+    aiProviderBoundary: blocked_no_provider_call_config_credential_prompt_payload_raw_ai_io_or_cost_calibration
+    evidenceRedaction: role_route_control_category_status_count_summary_only_no_sensitive_payloads
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts
+      - browser-ai-generation-detail-role-rerun-read-only
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-ai-generation-detail-role-rerun-2026-06-28 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_inherited_per_task_commit_merge_push_cleanup_authorization_2026_06_28
+    blockedWithoutFreshApproval:
+      - local_ui_api_mutation_or_write_flow_execution
+      - ai_generation_submit_or_provider_execution
+      - direct_database_connection_read_write_migration_or_seed
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - source_or_test_change
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    validationSummary:
+      taskPlanPrepared: pass
+      focusedUnit: pass_1_file_14_tests
+      browserRoleRerun: partial_2_pass_2_blocked_content_admin_session_material_auth_failure
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      acceptancePrepared: pass_partial_blocked
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: true_redacted_read_only_route_checks
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      credentialOrSessionCaptureExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    followUpTaskIds:
+      - full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+    retryCount: 0
+    lastFailurePath: content_admin_session_material_auth_validation_failure_no_sensitive_output
+
+  - id: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+    title: Full acceptance content admin AI generation detail session proof
+    phase: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+    sourceStory: follow_up_after_content_admin_session_material_auth_failure_in_ai_generation_detail_role_rerun_2026_06_28
+    dependencies:
+      - full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+    taskPlanPolicy: required_before_browser_db_ai_source_or_docs_execution
+    humanApprovalBoundary: >-
+      This follow-up may consume durable staged local execution approval Stage A to refresh or prove the test-owned
+      `content_admin` local account/session and rerun only `/content/ai-question-generation` and
+      `/content/ai-paper-generation` detail-control presence. If authentication state cannot be proven from the approved
+      account file, it may consume Stage D only after the task plan materializes a read-only local DB aggregate proof
+      boundary. Evidence must remain redacted role/route/status/count summaries only and must not record credentials,
+      cookies, tokens, sessions, localStorage, Authorization headers, raw DB rows, internal ids, PII, raw DOM,
+      screenshots, traces, Provider payloads, prompts, raw AI IO, or complete content.
+    targetClosureItem: content_admin AI question and AI paper detail-control browser rows rerun with redacted evidence
+    behaviorBoundary: local_browser_session_proof::content_admin_ai_generation_detail_controls_no_submit_no_provider_no_final_pass
+    executionProfile: local_browser_read_only_acceptance_rerun
+    evidenceMode: redacted_role_route_control_category_status_count_only_no_dom_no_screenshot_no_trace_no_content
+    validationPolicy: task_plan_materialization_browser_rerun_focused_unit_scoped_prettier_diff_precommit_closeout_prepush
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-28T18:03:02-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_durable_staged_local_execution_approval_and_active_goal_continuation_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      relevantRows:
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+      completionRule: >-
+        This task can cover only the two `content_admin` AI generation detail-control rows. The durable goal remains
+        incomplete until every applicable owner-facing checklist row has redacted pass evidence.
+    targetRoutes:
+      - role: content_admin
+        route: /content/ai-question-generation
+      - role: content_admin
+        route: /content/ai-paper-generation
+    capabilities:
+      docsStateEvidenceAudit: approved
+      browserRuntime: approved_read_only_localhost_control_presence_only
+      testOwnedLocalAccountSessionSwitching: approved
+      localDbReadOnlyAggregateProof: approved_only_if_task_plan_materializes_stage_d_boundary
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved_origin_master
+      branchCleanup: approved_delete_merged_short_branch
+      localSourceChange: blocked
+      testChange: blocked
+      localUiApiMutation: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    blockedWithoutFreshApproval:
+      - local_ui_api_mutation_or_write_flow_execution
+      - ai_generation_submit_or_provider_execution
+      - database_write_migration_seed_or_destructive_operation
+      - raw_db_rows_internal_ids_pii_or_plaintext_redeem_code
+      - provider_call_or_provider_configuration_or_credential_read
+      - prompt_provider_payload_raw_ai_input_or_output
+      - source_or_test_change
+      - package_or_lockfile_change
+      - schema_migration_or_drizzle_push
+      - staging_prod_deploy_payment_ocr_export_external_service
+      - pr_or_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - evidence_sensitive_data_exposure
+    retryCount: 0
+    lastFailurePath: null
+
   - id: owner-facing-local-experience-batch-2026-06-28
     title: Owner-facing local experience validation and small repair batch
     phase: owner-facing-local-experience-batch-2026-06-28
