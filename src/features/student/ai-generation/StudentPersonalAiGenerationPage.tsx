@@ -91,6 +91,13 @@ type StudentPersonalAiGenerationRequestDraft = {
   citationCount: number;
 };
 
+type StudentPersonalAiGenerationDetailControl = {
+  label: string;
+  kind: "number" | "select" | "text" | "textarea";
+  placeholder?: string;
+  options?: string[];
+};
+
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID =
   "org-auth-public-local-contract";
@@ -195,6 +202,92 @@ const contractValueLabelMap: Record<string, string> = {
   unknown: "未知原因",
   weak: "证据较弱",
 };
+
+const aiQuestionDetailControls: StudentPersonalAiGenerationDetailControl[] = [
+  {
+    label: "AI出题专业",
+    kind: "select",
+    options: ["按当前授权专业"],
+  },
+  {
+    label: "AI出题等级",
+    kind: "select",
+    options: ["按当前授权等级"],
+  },
+  {
+    label: "AI出题科目",
+    kind: "select",
+    options: ["理论", "技能"],
+  },
+  {
+    label: "AI出题知识点",
+    kind: "text",
+    placeholder: "输入或选择当前授权知识点",
+  },
+  {
+    label: "AI出题题型",
+    kind: "select",
+    options: ["单选题", "多选题", "判断题", "主观题"],
+  },
+  {
+    label: "AI出题题目数量",
+    kind: "number",
+    placeholder: "输入题目数量",
+  },
+  {
+    label: "AI出题难度",
+    kind: "select",
+    options: ["基础", "中等", "提高"],
+  },
+  {
+    label: "AI出题学习目标",
+    kind: "textarea",
+    placeholder: "描述本次练习目标",
+  },
+];
+
+const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
+  {
+    label: "AI组卷专业",
+    kind: "select",
+    options: ["按当前授权专业"],
+  },
+  {
+    label: "AI组卷等级",
+    kind: "select",
+    options: ["按当前授权等级"],
+  },
+  {
+    label: "AI组卷科目",
+    kind: "select",
+    options: ["理论", "技能"],
+  },
+  {
+    label: "AI组卷题型分布",
+    kind: "text",
+    placeholder: "例：单选、多选、判断按训练目标分配",
+  },
+  {
+    label: "AI组卷知识点覆盖",
+    kind: "text",
+    placeholder: "输入本次自测覆盖范围",
+  },
+  {
+    label: "AI组卷难度",
+    kind: "select",
+    options: ["基础", "中等", "提高"],
+  },
+  {
+    label: "AI组卷时长目标",
+    kind: "number",
+    placeholder: "输入建议分钟数",
+  },
+  {
+    label: "AI组卷学习目标",
+    kind: "textarea",
+    placeholder: "描述本次自测目标",
+  },
+];
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
   {
@@ -442,6 +535,98 @@ function StudentPersonalAiGenerationStateMessage({
         </div>
       </div>
     </section>
+  );
+}
+
+function StudentPersonalAiGenerationDetailField({
+  control,
+  disabled,
+}: {
+  control: StudentPersonalAiGenerationDetailControl;
+  disabled: boolean;
+}) {
+  const baseControlClass =
+    "border-border bg-background text-text-primary min-h-10 w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <label className="text-text-secondary flex flex-col gap-1 text-sm">
+      <span>{control.label}</span>
+      {control.kind === "select" ? (
+        <select
+          aria-label={control.label}
+          disabled={disabled}
+          className={baseControlClass}
+          defaultValue={control.options?.[0] ?? ""}
+        >
+          {(control.options ?? []).map((optionLabel) => (
+            <option key={optionLabel} value={optionLabel}>
+              {optionLabel}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      {control.kind === "number" ? (
+        <input
+          aria-label={control.label}
+          disabled={disabled}
+          min={1}
+          type="number"
+          inputMode="numeric"
+          placeholder={control.placeholder}
+          className={baseControlClass}
+        />
+      ) : null}
+      {control.kind === "text" ? (
+        <input
+          aria-label={control.label}
+          disabled={disabled}
+          type="text"
+          placeholder={control.placeholder}
+          className={baseControlClass}
+        />
+      ) : null}
+      {control.kind === "textarea" ? (
+        <textarea
+          aria-label={control.label}
+          disabled={disabled}
+          rows={3}
+          placeholder={control.placeholder}
+          className={baseControlClass}
+        />
+      ) : null}
+    </label>
+  );
+}
+
+function StudentPersonalAiGenerationDetailControlGroup({
+  controls,
+  description,
+  disabled,
+  title,
+}: {
+  controls: StudentPersonalAiGenerationDetailControl[];
+  description: string;
+  disabled: boolean;
+  title: string;
+}) {
+  return (
+    <fieldset className="border-border bg-surface rounded-lg border p-4">
+      <legend className="font-heading text-text-primary px-1 text-base font-semibold">
+        {title}
+      </legend>
+      <p className="text-text-secondary mt-1 text-sm leading-6">
+        {description}
+      </p>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {controls.map((control) => (
+          <StudentPersonalAiGenerationDetailField
+            key={control.label}
+            control={control}
+            disabled={disabled}
+          />
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -1423,6 +1608,11 @@ export function StudentPersonalAiGenerationPage() {
     pageState === "checking" ||
     pageState === "loading" ||
     pageState === "unavailable";
+  const shouldShowAiGenerationDetailControls =
+    hasSessionToken &&
+    pageState !== "checking" &&
+    pageState !== "unauthorized" &&
+    pageState !== "unavailable";
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -1464,6 +1654,23 @@ export function StudentPersonalAiGenerationPage() {
           {copy.paperButton}
         </button>
       </div>
+
+      {shouldShowAiGenerationDetailControls ? (
+        <div className="grid grid-cols-1 gap-3">
+          <StudentPersonalAiGenerationDetailControlGroup
+            title="AI出题参数"
+            description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
+            controls={aiQuestionDetailControls}
+            disabled={isAiGenerationActionDisabled}
+          />
+          <StudentPersonalAiGenerationDetailControlGroup
+            title="AI组卷参数"
+            description="用于个人或企业授权上下文下的自测组卷，不写入正式试卷。"
+            controls={aiPaperDetailControls}
+            disabled={isAiGenerationActionDisabled}
+          />
+        </div>
+      ) : null}
 
       {pageState === "loading" ? (
         <section

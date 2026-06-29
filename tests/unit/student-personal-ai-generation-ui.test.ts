@@ -929,6 +929,100 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
   });
 
+  it("renders learner AI detail controls for advanced organization employee before submitting", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                organizationPublicId: "organization-public-123",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-123",
+              }),
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyServerHistoryResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "AI出题参数" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "AI组卷参数" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题专业")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题等级")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题科目")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题知识点")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题题型")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题题目数量")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题难度")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题学习目标")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷专业")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷等级")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷题型分布")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷知识点覆盖")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷难度")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷学习目标")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: requestButtonLabel }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: paperButtonLabel }),
+    ).toBeEnabled();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
+      "GET",
+    ]);
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("generated content");
+  });
+
   it("posts an AI paper generation local route contract payload from the paper action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const submittedBodies: Record<string, unknown>[] = [];

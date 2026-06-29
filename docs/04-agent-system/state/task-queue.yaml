@@ -1773,13 +1773,15 @@ tasks:
     validationPolicy: task_plan_then_tdd_focused_unit_browser_control_rerun_precommit_closeout_prepush
     taskKind: implementation_tdd
     moduleRunVersion: 2
-    status: pending
-    result: pending_materialization
+    status: implemented
+    result: pass_org_advanced_employee_ai_detail_controls_repaired_no_final_pass
     approvedAt: "2026-06-28T15:43:35-07:00"
     approvedBy: laozhuang
     approvalConsumed: current_user_staged_local_execution_stage_c_and_per_task_closeout_2026_06_28
     stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
     plannedAt: "2026-06-29T01:08:00-07:00"
+    claimedAt: "2026-06-29T01:34:00-07:00"
+    implementedAt: "2026-06-29T01:52:00-07:00"
     branch: codex/org-advanced-employee-ai-detail-controls-20260629
     mandatoryChecklistGate:
       path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
@@ -1855,6 +1857,11 @@ tasks:
     aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
     accountCredentialBoundary: test_owned_login_input_only_for_browser_rerun_no_sensitive_evidence
     evidenceRedaction: route_control_category_status_count_summary_only_no_sensitive_payloads
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
     validationCommands:
       - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
       - browser_org_advanced_employee_ai_generation_detail_controls_redacted
@@ -1889,6 +1896,21 @@ tasks:
       - release_readiness_or_final_pass
       - cost_calibration_gate
       - sensitive_evidence_capture
+    validationSummary:
+      taskPlanPrepared: pass
+      redUnit: pass_1_file_17_tests_1_expected_failure_before_implementation
+      greenFocusedUnit: pass_1_file_17_tests
+      browserRerun: pass_controls_2_fieldsets_5_inputs_9_selects_2_textareas_no_provider_trigger
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pending
+      moduleRunV2PrePushReadiness: pending
+      sourceOrTestChanged: true
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sensitiveEvidenceCaptured: false
     retryCount: 0
     lastFailurePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-workflow.md
 
