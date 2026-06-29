@@ -61,6 +61,25 @@ function getLoginSessionExpiresAt(
   return Number.isNaN(expiresAt.getTime()) ? null : expiresAt.toUTCString();
 }
 
+function createClientSafeLoginResponse(
+  response: ApiResponse<unknown>,
+): ApiResponse<unknown> {
+  if (response.code !== 0 || !isRecord(response.data)) {
+    return response;
+  }
+
+  const clientData = Object.fromEntries(
+    Object.entries(response.data).filter(
+      ([fieldName]) => fieldName !== "token",
+    ),
+  );
+
+  return {
+    ...response,
+    data: clientData,
+  };
+}
+
 type SessionLogoutCapableService = SessionService & {
   logout?(input: AuthRequestInput): Promise<ApiResponse<null>>;
 };
@@ -73,12 +92,14 @@ export function createSessionRouteHandlers(
       const input = await readRequestJson(request);
       const loginResponse = await sessionService.login(input);
       const sessionToken = getLoginSessionToken(loginResponse);
+      const clientSafeLoginResponse =
+        createClientSafeLoginResponse(loginResponse);
 
       if (sessionToken === null) {
-        return createJsonResponse(loginResponse);
+        return createJsonResponse(clientSafeLoginResponse);
       }
 
-      return createJsonResponse(loginResponse, {
+      return createJsonResponse(clientSafeLoginResponse, {
         headers: {
           "Set-Cookie": createSessionCookieHeader(
             sessionToken,

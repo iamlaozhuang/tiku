@@ -10,7 +10,7 @@ const sessionCredentialField = "token";
 const credentialFieldName = "password";
 
 describe("session route handlers", () => {
-  it("passes login request JSON to the session service and returns the standard response", async () => {
+  it("persists login as an HttpOnly cookie without returning a client-visible credential", async () => {
     const sessionService = {
       async login(input) {
         const loginInput = input as { phone: string };
@@ -56,7 +56,6 @@ describe("session route handlers", () => {
       code: 0,
       message: "ok",
       data: {
-        [sessionCredentialField]: "token_for_13800000000",
         user: {
           publicId: "user_public_123",
           phone: "13800000000",

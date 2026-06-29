@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: verify-organization-ai-generation-capability-source-boundary-2026-06-29
-updatedAt: "2026-06-29T10:03:39-07:00"
+currentPhase: repair-session-login-response-credential-boundary-2026-06-29
+updatedAt: "2026-06-29T10:12:18-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -2988,48 +2988,52 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5c0797ade76d244e33e8abee7f891a09c8408279
-  lastKnownOriginMasterSha: 5c0797ade76d244e33e8abee7f891a09c8408279
+  lastKnownMasterSha: 489012ef52549a27e676185dd31b7456794dcf9e
+  lastKnownOriginMasterSha: 489012ef52549a27e676185dd31b7456794dcf9e
 currentTask:
-  id: verify-organization-ai-generation-capability-source-boundary-2026-06-29
-  status: closed
-  result: pass_verified_medium_capability_source_mismatch_task_split_no_source_test_write_central_local_repair_authorization_recorded
+  id: repair-session-login-response-credential-boundary-2026-06-29
+  status: ready_for_closeout
   sourceStory: seeded_by_security_permission_role_boundary_inventory_2026_06_29
-  targetClosureItem: Prove organization AI generation local contract cannot bypass service-computed organization capability source
-  behaviorBoundary: docs_state_source_read_only_verification::organization_ai_generation_capability_source_boundary_no_source_test_write_no_db_no_provider_no_browser_no_release
-  executionProfile: focused_static_verification_no_source_test_change
-  taskKind: security_fix_candidate_verification_only
+  targetClosureItem: Remove client-visible login response credential exposure while preserving server-session cookie persistence
+  behaviorBoundary: source_test_scoped::session_login_response_credential_repair_no_db_no_provider_no_browser_no_release
+  executionProfile: focused_tdd_repair_under_central_local_security_repair_authorization
+  taskKind: security_fix
   moduleRunVersion: 2
-  priority: p2
-  severity: medium
-  findingId: role-inv-003
-  branch: codex/org-ai-generation-capability-boundary-20260629
-  approvedAt: "2026-06-29T09:56:54-07:00"
+  priority: p1
+  severity: high
+  findingId: role-inv-001
+  branch: codex/repair-session-login-response-boundary-20260629
+  approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
-  approvalConsumed: active_thread_goal_continuation_organization_ai_generation_capability_boundary_verification_only_materialization_2026_06_29
-  sourceTestChangeApproval: not_granted_current_task_verification_only
-  claimedAt: "2026-06-29T09:56:54-07:00"
-  plannedAt: "2026-06-29T09:56:54-07:00"
-  materializedAt: "2026-06-29T09:56:54-07:00"
-  reviewedAt: "2026-06-29T10:03:39-07:00"
-  validatedAt: "2026-06-29T10:08:00-07:00"
-  closedAt: "2026-06-29T10:09:10-07:00"
+  approvalConsumed: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
+  sourceTestChangeApproval: granted_by_localSecurityRepairLoopApproval20260629_requires_task_scoped_materialization
+  claimedAt: "2026-06-29T10:12:18-07:00"
+  plannedAt: "2026-06-29T10:12:18-07:00"
+  materializedAt: "2026-06-29T10:12:18-07:00"
+  implementedAt: "2026-06-29T10:19:11-07:00"
+  validatedAt: "2026-06-29T10:23:20-07:00"
   predecessorClosureEvidence:
     securityInventoryTask: security-permission-role-boundary-inventory-2026-06-29
     sessionCredentialBoundaryTask: verify-session-login-response-credential-boundary-2026-06-29
     sessionCredentialBoundaryResult: confirmed_needs_repair_pending_fresh_source_test_approval
-    repairTaskStatus: repair_session_login_response_credential_boundary_central_local_repair_authorization_granted_pending_task_materialization_not_executed_current_task
-    organizationAnalyticsBoundaryTask: verify-organization-analytics-admin-capability-source-boundary-2026-06-29
-    organizationAnalyticsBoundaryResult: confirmed_capability_source_mismatch_needs_repair_pending_fresh_source_test_approval
-    organizationAnalyticsRepairTaskStatus: repair_organization_analytics_capability_source_boundary_central_local_repair_authorization_granted_pending_task_materialization_not_executed_current_task
+    centralLocalSecurityRepairAuthorization: localSecurityRepairLoopApproval20260629
+    organizationAnalyticsRepairTaskStatus: pending_task_materialization_under_central_local_security_repair_authorization_not_executed_current_task
+    organizationAiGenerationRepairTaskStatus: pending_task_materialization_under_central_local_security_repair_authorization_not_executed_current_task
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-    - docs/05-execution-logs/task-plans/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-    - docs/05-execution-logs/evidence/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-    - docs/05-execution-logs/acceptance/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
+    - docs/01-requirements/traceability/2026-06-29-repair-session-login-response-credential-boundary.md
+    - docs/05-execution-logs/task-plans/2026-06-29-repair-session-login-response-credential-boundary.md
+    - docs/05-execution-logs/evidence/2026-06-29-repair-session-login-response-credential-boundary.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-repair-session-login-response-credential-boundary.md
+    - docs/05-execution-logs/acceptance/2026-06-29-repair-session-login-response-credential-boundary.md
+    - src/server/auth/session-route.ts
+    - src/server/auth/session-route.test.ts
+    - src/server/services/session-service.ts
+    - src/server/services/session-service.test.ts
+    - src/server/contracts/user-auth/session-boundary.ts
+    - src/server/contracts/user-auth/session-boundary.test.ts
+    - tests/unit/auth/session-personal-auth-boundary.test.ts
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
@@ -3044,17 +3048,19 @@ currentTask:
     - docs/05-execution-logs/audits-reviews/**
     - docs/05-execution-logs/acceptance/**
     - package.json
-    - src/server/services/admin-ai-generation-local-contract-route.ts
-    - src/server/services/admin-ai-generation-local-contract-route.test.ts
-    - tests/unit/admin-ai-generation-entry-surface.test.ts
+    - src/server/auth/session-route.ts
+    - src/server/auth/session-route.test.ts
+    - src/server/services/session-service.ts
+    - src/server/services/session-service.test.ts
+    - src/server/contracts/user-auth/session-boundary.ts
+    - src/server/contracts/user-auth/session-boundary.test.ts
+    - tests/unit/auth/session-personal-auth-boundary.test.ts
   blockedFiles:
     - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
-    - src/**
-    - tests/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -3069,11 +3075,11 @@ currentTask:
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
-  aiProviderBoundary: no_real_ai_or_provider_call_no_real_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero_local_fake_provider_unit_test_allowed_by_central_repair_loop_authorization
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero
   browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action
-  credentialBoundary: no_account_fixture_read_no_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  credentialBoundary: no_real_account_fixture_read_no_login_no_private_account_read_no_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence_no_literal_test_credential_values_in_evidence
   evidenceRedaction:
-    allowed: file_path_route_contract_test_risk_category_severity_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
+    allowed: file_path_route_service_contract_test_risk_category_severity_status_count_redacted_expected_observed_summary_commit_branch_merge_push_cleanup_only
     forbidden:
       - credential_cookie_token_session_auth_header_values
       - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
@@ -3083,65 +3089,36 @@ currentTask:
       - env_file_contents_or_connection_strings
       - raw_exception_payload_or_stack_trace
   validationCommands:
-    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-session-login-response-credential-boundary.md src/server/auth/session-route.ts src/server/auth/session-route.test.ts src/server/services/session-service.ts src/server/services/session-service.test.ts src/server/contracts/user-auth/session-boundary.ts src/server/contracts/user-auth/session-boundary.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-session-login-response-credential-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-session-login-response-credential-boundary.md src/server/auth/session-route.ts src/server/auth/session-route.test.ts src/server/services/session-service.ts src/server/services/session-service.test.ts src/server/contracts/user-auth/session-boundary.ts src/server/contracts/user-auth/session-boundary.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
     - git diff --check
-    - npx.cmd vitest run src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId verify-organization-ai-generation-capability-source-boundary-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId verify-organization-ai-generation-capability-source-boundary-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId verify-organization-ai-generation-capability-source-boundary-2026-06-29 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
-  verificationSummary:
-    findingId: role-inv-003
-    verdict: confirmed_capability_source_mismatch_needs_repair_pending_task_materialization
-    staticSourceReview: fail_route_synthesizes_advanced_org_ai_generation_context_from_session_role_and_organization_binding_instead_of_service_computed_capability_metadata
-    providerDisabledGuard: pass_default_local_contract_provider_execution_remains_blocked
-    fakeProviderBranch: local_pure_fake_provider_unit_test_allowed_by_central_repair_loop_authorization_no_real_provider
-    focusedVitest: pass_2_files_33_tests_passed_full_local_unit_baseline_including_pure_fake_provider_branch_no_real_provider
-    nextRecommendedTaskForThisFinding: repair-organization-ai-generation-capability-source-boundary-2026-06-29
-    nextHighestPriorityRepair: repair-session-login-response-credential-boundary-2026-06-29
-    centralLocalSecurityRepairAuthorizationRecorded: true
-    sourceTestRepairRequiresPerTaskMaterialization: true
-    sourceOrTestChanged: false
-    databaseAccessExecuted: false
-    providerCallOrConfigurationExecuted: false
-    browserRuntimeExecuted: false
-    releaseReadinessClaimed: false
-    finalPassClaimed: false
-    costCalibrationExecuted: false
-  seededNextTaskCandidate:
-    taskId: repair-organization-ai-generation-capability-source-boundary-2026-06-29
-    status: pending_task_materialization_under_central_local_security_repair_authorization
-    reason: confirmed_medium_capability_source_mismatch_while_provider_disabled_guard_remains_present
+    - npx.cmd vitest run src/server/auth/session-route.test.ts src/server/services/session-service.test.ts src/server/contracts/user-auth/session-boundary.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-session-login-response-credential-boundary-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-session-login-response-credential-boundary-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-session-login-response-credential-boundary-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-session-login-response-credential-boundary.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-session-login-response-credential-boundary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-session-login-response-credential-boundary.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-session-login-response-credential-boundary.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-session-login-response-credential-boundary.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: active_thread_goal_continuation_organization_ai_generation_capability_boundary_verification_only_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: active_thread_goal_continuation_organization_ai_generation_capability_boundary_verification_only_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
     push:
       approved: true
       target: origin/master
-      approvalSource: active_thread_goal_continuation_organization_ai_generation_capability_boundary_verification_only_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
     cleanup:
       deleteShortBranch: true
-      approvalSource: active_thread_goal_continuation_organization_ai_generation_capability_boundary_verification_only_materialization_2026_06_29
+      approvalSource: current_thread_central_authorization_for_items_1_to_5_local_repair_loop_only
   commitSha: pending_local_closeout_commit
   validationSummary:
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
-    diffCheck: pass
-    focusedVitest: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pass
-    moduleRunV2PrePushReadiness: pass
-    sourceOrTestChanged: false
+    sourceOrTestChanged: true
     packageOrLockfileChanged: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
@@ -3150,7 +3127,14 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-  updatedAt: "2026-06-29T10:09:10-07:00"
+    focusedTests: pass_4_files_20_tests
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+  updatedAt: "2026-06-29T10:23:20-07:00"
 fullAcceptancePersonalStandardStudentWorkflow20260629:
   taskId: full-acceptance-personal-standard-student-workflow-2026-06-29
   phase: full-acceptance-personal-standard-student-workflow-2026-06-29
