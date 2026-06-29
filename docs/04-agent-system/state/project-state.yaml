@@ -3029,8 +3029,8 @@ orgAdvancedAnalyticsRuntimeSummaryLoadDiagnostic20260628:
     prettierScoped: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2CloseoutReadiness: pending
-    moduleRunV2PrePushReadiness: pending
+    moduleRunV2CloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
     sourceOrTestChanged: false
     providerCallOrConfigurationExecuted: false
     uiApiMutationExecuted: false

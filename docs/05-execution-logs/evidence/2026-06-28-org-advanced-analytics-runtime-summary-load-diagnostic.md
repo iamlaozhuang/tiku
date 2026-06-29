@@ -9,7 +9,7 @@
 - Scoped row: `org_advanced_admin.organization_analytics`
 - Pre-task master checkpoint: `76add72cd15afa32caa361a936d374a5fbd6ac02`
 - Batch range: single task, `org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28`
-- Commit: pending
+- Commit: `9ca731cf9`
 
 ## Boundary Confirmation
 
@@ -83,8 +83,14 @@
 - Scoped prettier check: pass.
 - `git diff --check`: pass.
 - Module Run v2 precommit hardening: pass.
-- Module Run v2 closeout readiness: pending.
-- Module Run v2 prepush readiness: pending.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28`.
+- Module Run v2 closeout readiness: pass after commit/evidence anchor repair.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28`.
+- Module Run v2 prepush readiness: pass.
+  Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28 -SkipRemoteAheadCheck`.
 
 ## Evidence Boundary
 
