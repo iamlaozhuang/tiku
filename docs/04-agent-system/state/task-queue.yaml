@@ -1011,6 +1011,256 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
 
+  - id: full-acceptance-completion-audit-rollup-2026-06-29
+    title: Full acceptance completion audit rollup
+    phase: full-acceptance-completion-audit-rollup-2026-06-29
+    sourceStory: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+    dependencies:
+      - repair-personal-advanced-student-ai-generation-actions-2026-06-29
+    taskPlanPolicy: required_before_docs_state_completion_audit_or_next_task_seed
+    humanApprovalBoundary: >-
+      Current user fresh-approved a local-only docs/state completion audit rollup for the durable goal: full acceptance
+      matrix plus full unit baseline repair. This task may read governance, requirements, the mandatory owner-facing role
+      checklist, project-state, task-queue, and redacted evidence/acceptance/task-plan/audit docs; write only scoped
+      docs/state/task-plan/evidence/audit/acceptance/traceability files; record only role/route/workflow/status/count,
+      test-count, and commit summaries; run local formatting, diff, and Module Run v2 governance checks; and commit,
+      fast-forward merge to master, push origin/master, and clean up the short branch if validation passes. It must not
+      execute browser/runtime, DB access or mutation, AI/Provider execution/configuration, source/test changes,
+      dependency/package/lockfile changes, schema/migration/seed changes, staging/prod/cloud/deploy, PR, force-push,
+      release readiness, final Pass, or Cost Calibration Gate work.
+    targetClosureItem: Requirement-by-requirement completion audit rollup or exact next pending task seed if any gap remains
+    behaviorBoundary: docs_state::completion_audit_rollup_no_runtime_no_source_no_db_no_provider_no_final_pass
+    executionProfile: docs_state_completion_audit_rollup_and_next_task_seed_if_gap
+    evidenceMode: redacted_role_route_workflow_status_count_test_count_commit_summary_only
+    validationPolicy: scoped_prettier_diff_module_run_v2_precommit_closeout_prepush
+    taskKind: docs_state_completion_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_completion_audit_gap_found_next_task_seeded_no_final_pass
+    approvedAt: "2026-06-29T04:40:45-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+    claimedAt: "2026-06-29T04:40:45-07:00"
+    plannedAt: "2026-06-29T04:40:45-07:00"
+    implementedAt: "2026-06-29T04:58:00-07:00"
+    validatedAt: "2026-06-29T04:58:00-07:00"
+    reviewedAt: "2026-06-29T04:58:00-07:00"
+    closedAt: "2026-06-29T04:58:00-07:00"
+    branch: codex/completion-audit-rollup-20260629
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      completionRule: >-
+        The durable local goal can be treated as complete only if every applicable role/workflow/function row has
+        current redacted pass evidence or an approved blocked-gate record, and the full unit baseline is green. This
+        rollup may not claim release readiness, final Pass, Provider readiness, Cost Calibration, staging, or production.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-completion-audit-rollup.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-completion-audit-rollup.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-completion-audit-rollup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-completion-audit-rollup.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-completion-audit-rollup.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_access_or_mutation_no_schema_migration_seed_no_raw_rows
+    aiProviderBoundary: no_provider_execution_no_provider_configuration_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: no_credentials_cookies_tokens_sessions_localStorage_or_Authorization_header_access
+    evidenceRedaction:
+      allowed: role_route_workflow_status_count_test_count_commit_summary_only
+      forbidden:
+        - credentials_cookies_tokens_sessions_localStorage_Authorization_headers
+        - env_file_contents_connection_strings
+        - raw_dom_screenshots_traces
+        - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_input_output
+        - complete_question_paper_material_resource_chunk_content
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-completion-audit-rollup.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-completion-audit-rollup.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-completion-audit-rollup.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-completion-audit-rollup.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-completion-audit-rollup.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-completion-audit-rollup-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-completion-audit-rollup-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-completion-audit-rollup-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-completion-audit-rollup.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-completion-audit-rollup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-completion-audit-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-completion-audit-rollup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-completion-audit-rollup.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_local_only_docs_state_completion_audit_rollup_2026_06_29
+    completionAuditDecision:
+      status: incomplete_gap_found
+      gapClass: org_advanced_employee_ai_actions_not_role_rerun_after_shared_student_ai_action_repair
+      fullUnitBaselineLatest: pass_318_files_1438_tests
+      durableGoalComplete: false
+      finalPassClaimed: false
+    seededNextTaskCandidate:
+      taskId: full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+      status: pending
+      scope: org_advanced_employee_learner_ai_question_paper_actions_and_generated_practice_feedback_rerun_no_provider_no_db
+    validationSummary:
+      scopedPrettier: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2CloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      sensitiveEvidenceCaptured: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+
+  - id: full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+    title: Full acceptance org advanced employee AI actions rerun
+    phase: full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+    sourceStory: seeded_by_full_acceptance_completion_audit_rollup_2026_06_29
+    dependencies:
+      - full-acceptance-completion-audit-rollup-2026-06-29
+    taskPlanPolicy: required_before_browser_account_or_docs_execution
+    humanApprovalBoundary: >-
+      Follow-up localhost-only acceptance task for the completion audit gap: `org_advanced_employee` had enterprise
+      training pass and AI detail controls repaired, but no role-specific browser rerun after the later shared learner AI
+      action/practice/feedback repair. This task may consume the standing staged local execution approval only after it
+      materializes its own plan, allowedFiles/blockedFiles, DB boundary, AI/Provider boundary, credential boundary,
+      evidence redaction, and closeoutPolicy. It must not call Provider, inspect or record credentials/session material,
+      use direct DB access, change source/tests/dependencies/schema/migrations/seeds, touch staging/prod, create PRs,
+      force-push, claim release readiness/final Pass, or execute Cost Calibration.
+    targetClosureItem: Redacted role-specific proof for org advanced employee learner AI actions and generated practice feedback after shared repair
+    behaviorBoundary: local_browser_acceptance::org_advanced_employee_ai_actions_rerun_no_provider_no_db_no_final_pass
+    executionProfile: local_browser_acceptance_role_specific_rerun
+    evidenceMode: redacted_role_route_workflow_status_count_summary_only
+    validationPolicy: task_plan_then_browser_rerun_scoped_prettier_diff_module_run_v2
+    taskKind: local_browser_acceptance
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    approvedAt: "2026-06-28T15:43:35-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+    stagedLocalExecutionApprovalReference: durableFullAcceptanceStagedLocalExecutionApproval20260628
+    mandatoryChecklistGate:
+      path: docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      rows:
+        - org_advanced_employee.employee_ai_question_generation
+        - org_advanced_employee.employee_ai_paper_generation
+        - org_advanced_employee.generated_content_practice_feedback
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+      - docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+      - docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+      - docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - package.json
+      - src/app/(student)/ai-generation/page.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    browserBoundary: localhost_or_127_0_0_1_only_no_raw_dom_no_screenshot_no_trace_no_browser_storage_evidence
+    dbBoundary: no_direct_database_connection_read_write_seed_migration_schema_change_or_raw_row_evidence
+    aiProviderBoundary: no_provider_call_no_provider_config_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    credentialBoundary: test_owned_login_input_only_no_credential_session_token_cookie_localStorage_or_auth_header_evidence
+    evidenceRedaction: role_route_workflow_status_count_summary_only_no_sensitive_payloads
+    validationCommands:
+      - browser_org_advanced_employee_ai_actions_rerun_redacted
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_staged_local_execution_stage_a_stage_b_and_per_task_closeout_2026_06_28
+
   - id: full-unit-baseline-current-recheck-and-repair-2026-06-28
     title: Full unit baseline current recheck and repair
     phase: full-unit-baseline-current-recheck-and-repair-2026-06-28
