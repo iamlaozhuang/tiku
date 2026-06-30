@@ -109,6 +109,257 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: security-unit-b-auth-role-boundary-static-review-2026-06-29
+    title: Security Unit B auth role boundary static review
+    phase: security-unit-b-auth-role-boundary-static-review-2026-06-29
+    sourceStory: current_user_start_unit_b_auth_role_boundary_static_review_and_first_minimal_repair_task_split_2026_06_29
+    dependencies:
+      - security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+    taskPlanPolicy: required_before_static_review_output
+    targetClosureItem: Perform bounded static review of permission and role boundaries and split the first minimal executable repair task
+    behaviorBoundary: docs_state_static_review_only::no_source_no_db_no_provider_no_browser_no_release
+    executionProfile: bounded_auth_role_boundary_static_review
+    evidenceMode: redacted_file_path_role_boundary_status_count_task_id_summary_only
+    taskKind: auth_role_boundary_static_review_and_repair_task_split
+    moduleRunVersion: 2
+    status: closed
+    result: pass_bounded_static_review_and_first_repair_task_split_no_source_changes
+    priority: p0
+    severity: high
+    approvedAt: "2026-06-29T20:25:14-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_message_start_unit_b_auth_role_boundary_static_review_and_first_minimal_repair_task_split
+    approvalConsumed: unit_b_auth_role_boundary_static_review_task_split_2026_06_29
+    branch: codex/unit-b-auth-boundary-review-20260629
+    claimedAt: "2026-06-29T20:25:14-07:00"
+    plannedAt: "2026-06-29T20:25:14-07:00"
+    materializedAt: "2026-06-29T20:25:14-07:00"
+    implementedAt: "2026-06-29T20:35:23-07:00"
+    validatedAt: "2026-06-29T20:35:23-07:00"
+    reviewedAt: "2026-06-29T20:35:23-07:00"
+    closedAt: "2026-06-29T20:35:23-07:00"
+    scanMode: parent_agent_bounded_static_review_not_exhaustive_codex_security_scan
+    codexSecurityPreflight:
+      profile: security_scan
+      status: incomplete_for_exhaustive_scan
+      reason: active_multi_agent_worker_slot_status_unknown
+      decision: proceed_only_as_bounded_static_review_no_exhaustive_coverage_claim
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - docs/01-requirements/**
+      - src/server/**
+      - src/app/api/**
+      - tests/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    reviewFocus:
+      - admin_session_and_role_mapping
+      - organization_workspace_capability_source
+      - content_admin_vs_organization_admin_boundaries
+      - super_admin_privileged_paths
+      - student_admin_separation
+      - route_handler_service_repository_authorization_placement
+    staticReviewSummary:
+      scanCoverage: bounded_parent_agent_static_review_no_exhaustive_scan_claim
+      routesReviewed:
+        - src/server/services/admin-workspace-role-guard-service.ts
+        - src/server/services/admin-ai-generation-local-contract-route.ts
+        - src/server/services/organization-analytics-route.ts
+        - src/server/services/organization-training-route.ts
+        - src/server/services/session-service.ts
+        - src/server/auth/local-session-runtime.ts
+        - src/server/mappers/auth-mapper.ts
+      priorRepairsConfirmed:
+        - repair-organization-analytics-capability-source-boundary-2026-06-29
+        - repair-organization-ai-generation-capability-source-boundary-2026-06-29
+      firstMinimalRepairCandidate: repair-organization-training-capability-source-boundary-2026-06-29
+      candidateRiskSummary: organization_training_runtime_admin_context_currently_role_gated_without_matching_service_computed_admin_workspace_capability_guard
+      candidateSeverity: medium
+      candidateStatus: blocked_pending_fresh_source_test_approval
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: file_path_function_route_role_boundary_status_count_validation_command_commit_branch_merge_push_cleanup_summary_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+    validationCommands:
+      - corepack pnpm exec prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/evidence/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - corepack pnpm exec prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/evidence/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-b-auth-role-boundary-static-review.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e drizzle migrations seed scripts playwright-report test-results .next .env
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-unit-b-auth-role-boundary-static-review-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-unit-b-auth-role-boundary-static-review-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-unit-b-auth-role-boundary-static-review-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: unit_b_auth_role_boundary_static_review_task_split_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: unit_b_auth_role_boundary_static_review_task_split_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: unit_b_auth_role_boundary_static_review_task_split_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: unit_b_auth_role_boundary_static_review_task_split_2026_06_29
+    validationStatus: pass_docs_state_static_review_prettier_diff_module_run_v2
+
+  - id: repair-organization-training-capability-source-boundary-2026-06-29
+    title: Repair organization training capability source boundary
+    phase: repair-organization-training-capability-source-boundary-2026-06-29
+    sourceStory: seeded_by_security_unit_b_auth_role_boundary_static_review_2026_06_29
+    dependencies:
+      - security-unit-b-auth-role-boundary-static-review-2026-06-29
+    taskPlanPolicy: required_before_source_or_test_edit
+    targetClosureItem: Require organization training runtime admin context to consume service-computed organization workspace capability metadata before training management operations
+    behaviorBoundary: source_test_repair_blocked_until_fresh_approval::no_source_edit_in_unit_b_static_review
+    executionProfile: focused_source_test_security_repair
+    evidenceMode: redacted_file_path_route_guard_test_status_count_validation_summary_only
+    taskKind: focused_source_test_security_repair
+    moduleRunVersion: 2
+    status: blocked_pending_fresh_source_test_approval
+    priority: p0
+    severity: medium
+    findingId: unit-b-auth-role-001
+    approvalRequired: fresh_user_approval_required_before_execution
+    plannedBranch: codex/org-training-capability-repair-20260629
+    allowedFiles:
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-repair-organization-training-capability-source-boundary.md
+      - docs/05-execution-logs/task-plans/2026-06-29-repair-organization-training-capability-source-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-29-repair-organization-training-capability-source-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-training-capability-source-boundary.md
+      - docs/05-execution-logs/acceptance/2026-06-29-repair-organization-training-capability-source-boundary.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - docs/01-requirements/**
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: file_path_route_guard_test_case_status_count_validation_command_commit_branch_merge_push_cleanup_summary_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_chunk_content
+        - env_file_contents_or_connection_strings
+    validationCommands:
+      - npx.cmd vitest run src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-organization-training-capability-source-boundary.md src/server/services/organization-training-route.ts src/server/services/organization-training-route.test.ts
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-training-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-organization-training-capability-source-boundary.md src/server/services/organization-training-route.ts src/server/services/organization-training-route.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-organization-training-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-organization-training-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-organization-training-capability-source-boundary-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-organization-training-capability-source-boundary.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-organization-training-capability-source-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-organization-training-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-training-capability-source-boundary.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-organization-training-capability-source-boundary.md
+    closeoutPolicy:
+      localCommit:
+        approved: false
+        approvalSource: blocked_until_fresh_source_test_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: blocked_until_fresh_source_test_approval
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: blocked_until_fresh_source_test_approval
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: blocked_until_fresh_source_test_approval
+    validationStatus: blocked_not_executed
+
   - id: security-unit-a-dependency-package-advisory-remediation-2026-06-29
     title: Security Unit A dependency package advisory remediation
     phase: security-unit-a-dependency-package-advisory-remediation-2026-06-29
