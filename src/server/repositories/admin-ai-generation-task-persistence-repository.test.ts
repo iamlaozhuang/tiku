@@ -18,6 +18,7 @@ import type {
   AdminAiGenerationLocalContractBaseDto,
   AdminAiGenerationLocalContractDto,
 } from "../contracts/admin-ai-generation-local-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type { AdminRole } from "../models/auth";
 import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
@@ -29,10 +30,43 @@ import {
 } from "../services/admin-ai-generation-local-contract-route";
 import type { SessionService } from "../services/session-service";
 
+function createDefaultAdminWorkspaceCapability(input: {
+  adminRoles: AdminRole[];
+  organizationPublicId: string | null;
+}): AdminWorkspaceCapabilitySummary | undefined {
+  const isOrganizationAdvancedRole =
+    input.adminRoles.includes("org_advanced_admin") ||
+    input.adminRoles.includes("super_admin");
+  const isOrganizationStandardRole =
+    input.adminRoles.includes("org_standard_admin");
+
+  if (!isOrganizationAdvancedRole && !isOrganizationStandardRole) {
+    return undefined;
+  }
+
+  return {
+    adminRoles: input.adminRoles,
+    organizationPublicId: input.organizationPublicId,
+    organizationEffectiveEdition: isOrganizationAdvancedRole
+      ? "advanced"
+      : "standard",
+    organizationAuthorizationSource: "org_auth",
+    capabilitySource: "service_computed",
+    canUseOrganizationAdvancedWorkspace:
+      isOrganizationAdvancedRole && input.organizationPublicId !== null,
+  };
+}
+
 function createAdminSessionService(input: {
   adminRoles: AdminRole[];
   organizationPublicId?: string | null;
 }): Pick<SessionService, "getCurrentSession"> {
+  const organizationPublicId = input.organizationPublicId ?? null;
+  const adminWorkspaceCapability = createDefaultAdminWorkspaceCapability({
+    adminRoles: input.adminRoles,
+    organizationPublicId,
+  });
+
   return {
     async getCurrentSession() {
       return {
@@ -47,9 +81,12 @@ function createAdminSessionService(input: {
             status: "active",
             lockedUntilAt: null,
             employeePublicId: null,
-            organizationPublicId: input.organizationPublicId ?? null,
+            organizationPublicId,
             adminPublicId: "admin_public_901",
             adminRoles: input.adminRoles,
+            ...(adminWorkspaceCapability === undefined
+              ? {}
+              : { adminWorkspaceCapability }),
           },
           session: {
             expiresAt: "2026-06-26T20:00:00.000Z",

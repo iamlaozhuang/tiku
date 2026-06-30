@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: detail-security-next-approval-decision-package-2026-06-29
-updatedAt: "2026-06-29T17:06:19-07:00"
+currentPhase: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+updatedAt: "2026-06-29T19:19:38-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -41,6 +41,195 @@ localSecurityRepairLoopApproval20260629:
   evidenceRestrictions:
     allowed: file_paths_risk_category_severity_status_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
     forbidden: credentials_tokens_sessions_cookies_auth_headers_env_connection_strings_raw_db_rows_internal_ids_pii_plaintext_redeem_code_provider_payloads_prompts_raw_ai_io_full_question_paper_material_resource_chunk_content_raw_dom_screenshots_traces
+securityUnitADependencyPackageAdvisoryRemediation20260629:
+  taskId: security-unit-a-dependency-package-advisory-remediation-2026-06-29
+  phase: security-unit-a-dependency-package-advisory-remediation-2026-06-29
+  status: closed
+  result: pass_dependency_advisory_remediation_unblocked_by_test_fixture_repair
+  branch: codex/unit-a-dependency-advisory-20260629
+  taskKind: dependency_package_advisory_remediation
+  moduleRunVersion: 2
+  priority: p0
+  severity: high
+  approvedAt: "2026-06-29T17:58:20-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_message_authorized_unit_a_dependency_package_advisory_remediation
+  approvalConsumed: unit_a_dependency_package_advisory_remediation_fresh_approval_2026_06_29
+  claimedAt: "2026-06-29T17:58:20-07:00"
+  plannedAt: "2026-06-29T17:58:20-07:00"
+  materializedAt: "2026-06-29T17:58:20-07:00"
+  implementedAt: "2026-06-29T18:23:33-07:00"
+  validatedAt: "2026-06-29T19:27:49-07:00"
+  reviewedAt: "2026-06-29T19:27:49-07:00"
+  closedAt: "2026-06-29T19:27:49-07:00"
+  goal: remediate approved Unit A dependency and package advisory surface with isolated package and lockfile changes plus redacted governance evidence
+  coveredBlockedTasks:
+    - security-package-manager-advisory-remediation-gate-2026-06-29
+    - security-dev-toolchain-advisory-remediation-gate-2026-06-29
+    - security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+    - security-dependency-script-binary-policy-gate-2026-06-29
+  allowedFiles:
+    - package.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/**
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/dependency-introduction-gate.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - docs/01-requirements/traceability/**
+  blockedFiles:
+    - .env*
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - src/db/**
+    - drizzle.config.ts
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  dependencyBoundary: allow_unit_a_package_manager_version_update_dependency_update_lockfile_refresh_and_public_audit_validation_no_new_dependency_without_gate_record
+  packageManagerBoundary: pnpm_package_manager_and_lockfile_changes_allowed_only_for_unit_a_advisory_remediation
+  lifecycleScriptBoundary: avoid_lifecycle_scripts_where_possible_use_ignore_scripts_for_lockfile_refresh_do_not_record_raw_install_logs_with_sensitive_material
+  localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero
+  browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+  credentialBoundary: no_env_secret_connection_string_account_login_private_account_registry_token_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+  evidenceRedaction:
+    allowed: package_name_version_change_type_advisory_id_severity_fixed_version_status_count_validation_command_commit_branch_merge_push_cleanup_summary_only
+    forbidden:
+      - registry_tokens_private_registry_urls_or_auth_headers
+      - credential_cookie_token_session_values
+      - env_file_contents_or_connection_strings
+      - raw_install_or_audit_json_payloads
+      - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+      - raw_dom_screenshots_traces_html_reports
+      - provider_payload_prompt_raw_ai_input_raw_ai_output
+      - complete_question_paper_material_resource_or_chunk_content
+  dependencyGateRecord:
+    humanApproval: current_user_message_authorized_unit_a_dependency_package_advisory_remediation
+    packageManagerChange:
+      packageName: pnpm
+      versionRange: 10.34.4_or_newer_safe_patch_if_required_by_package_manager
+      changeType: upgrade_package_manager_field
+      purpose: remediate public pnpm advisory matches from security dependency public advisory lookup
+      importBoundary: package_manager_metadata_only_no_runtime_import
+      licenseCompatibility: MIT-compatible package manager ecosystem
+      alternativeConsidered: keep_pnpm_10_33_4_and_record_blocker
+      alternativeRejectedReason: public advisory lookup found high priority pnpm advisory matches with fixed 10.34.x ranges
+      abandonmentRisk: low
+      securityMaintenanceRisk: reduced_by_moving_to_fixed_patch_range
+      compatibilityImpact: local_package_manager_version_alignment_required_for_windows_and_ci
+      bundleRuntimeImpact: none_package_manager_metadata_only
+      validationCommand: pnpm_install_lockfile_only_ignore_scripts_plus_lint_typecheck_audit_validation
+    transitiveToolchainChange:
+      packageName: vite_and_esbuild
+      versionRange: fixed_ranges_from_public_advisory_lookup_if_lockfile_update_resolves_without_source_changes
+      changeType: transitive_update_or_override_only_if_needed
+      purpose: remediate dev toolchain advisory matches without source runtime changes
+      importBoundary: dev_toolchain_only_no_application_import_boundary_change
+      licenseCompatibility: MIT-compatible toolchain ecosystem
+      alternativeConsidered: defer_toolchain_advisories_to_separate_unit
+      alternativeRejectedReason: user_authorized_unit_a_covering_dependency_package_advisory_remediation
+      abandonmentRisk: low
+      securityMaintenanceRisk: reduced_if_lockfile_resolves_to_fixed_versions
+      compatibilityImpact: local_test_toolchain_may_change_vite_esbuild_patch_behavior
+      bundleRuntimeImpact: none_expected_for_production_app_dependencies
+      validationCommand: lint_typecheck_unit_tests_and_public_audit_validation
+  validationCommands:
+    - corepack pnpm install --lockfile-only --ignore-scripts
+    - corepack pnpm install --ignore-scripts
+    - corepack pnpm audit --audit-level moderate
+    - corepack pnpm audit --audit-level low
+    - corepack pnpm run lint
+    - corepack pnpm run typecheck
+    - corepack pnpm run test:unit
+    - corepack pnpm exec vitest run src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+    - npx.cmd prettier --write --ignore-unknown package.json pnpm-lock.yaml pnpm-workspace.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - npx.cmd prettier --check --ignore-unknown package.json pnpm-lock.yaml pnpm-workspace.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - git diff --check
+    - git diff --name-only -- src tests e2e drizzle migrations seed scripts playwright-report test-results .next .env
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-unit-a-dependency-package-advisory-remediation-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-unit-a-dependency-package-advisory-remediation-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-unit-a-dependency-package-advisory-remediation-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: unit_a_dependency_package_advisory_remediation_fresh_approval_2026_06_29
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: unit_a_dependency_package_advisory_remediation_fresh_approval_2026_06_29
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: unit_a_dependency_package_advisory_remediation_fresh_approval_2026_06_29
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: unit_a_dependency_package_advisory_remediation_fresh_approval_2026_06_29
+  remediationSummary:
+    packageManager: pnpm_10_33_4_to_10_34_4
+    directDependencyUpdates:
+      - shadcn_4_7_0_to_4_12_0
+    devDependencyUpdates:
+      - "@vitejs/plugin-react_6_0_2_to_6_0_3"
+      - vitest_4_1_6_to_4_1_9
+    pnpmOverrides:
+      - "@babel/core_7_29_6"
+      - esbuild_0_28_1
+      - hono_4_12_27
+      - js-yaml_4_3_0
+      - postcss_8_5_16
+      - qs_6_15_3
+      - undici_7_28_0
+      - vite_8_1_0
+    sourceTestDbProviderRuntimeChanges: none
+  validationStatus: pass_after_child_test_fixture_repair
+  validationResults:
+    dependencyAuditModerate: pass_no_moderate_or_high_known_vulnerabilities
+    dependencyAuditLow: pass_no_known_vulnerabilities
+    lint: pass
+    typecheck: pass
+    unit: pass_319_files_1453_tests_after_child_fixture_repair
+    focusedCurrentBranchUnit:
+      command: corepack pnpm exec vitest run src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      result: fail_same_assertion_payload_code_403011_expected_0
+    focusedMasterBaselineUnit:
+      worktree: .worktrees/unit-a-baseline-check
+      result: fail_same_assertion_payload_code_403011_expected_0_before_dependency_changes
+    baselineWorktreeCleanup: pass_removed
+  closeoutStatus: pass_pending_final_git_closeout
+  closeoutBlockedReason: null
+  unblockedByTaskId: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+  updatedAt: "2026-06-29T19:27:49-07:00"
 detailSecurityNextApprovalDecisionPackage20260629:
   taskId: detail-security-next-approval-decision-package-2026-06-29
   phase: detail-security-next-approval-decision-package-2026-06-29
@@ -3891,47 +4080,58 @@ repository:
   lastKnownMasterSha: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
   lastKnownOriginMasterSha: c9f3a105ae8a1ec5b1a00b9e974b48faea0e82b4
 currentTask:
-  id: detail-security-next-approval-decision-package-2026-06-29
+  id: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
   status: closed
-  result: pass_fresh_approval_units_defined_no_blocked_execution
-  sourceStory: active_thread_goal_continuation_after_blocked_remainder_consolidation_2026_06_29
-  targetClosureItem: define next-stage fresh approval decision units without unblocking or executing blocked work
-  behaviorBoundary: docs_state_only_no_runtime_no_source_no_dependency_no_db_no_provider_no_release
-  executionProfile: docs_state_fresh_approval_decision_package
-  evidenceMode: redacted_approval_unit_blocker_class_priority_status_next_action_only
-  taskKind: governance_fresh_approval_decision_package
+  result: pass_validation_baseline_test_fixture_repair_unblocked_unit_a
+  sourceStory: current_user_authorized_security_unit_a_validation_baseline_test_fixture_repair_2026_06_29
+  targetClosureItem: repair pre-existing focused unit test fixture failure that blocks Unit A dependency advisory closeout
+  behaviorBoundary: test_fixture_only_no_business_source_no_db_no_provider_no_browser_no_release_no_new_dependency_change
+  executionProfile: targeted_unit_baseline_repair_to_unblock_unit_a_closeout
+  evidenceMode: redacted_test_path_assertion_code_validation_summary_only
+  taskKind: validation_baseline_repair
   moduleRunVersion: 2
-  priority: p1
-  severity: medium
-  branch: codex/next-approval-decision-package-20260629
-  approvedAt: "2026-06-29T17:03:16-07:00"
+  priority: p0
+  severity: high
+  branch: codex/unit-a-dependency-advisory-20260629
+  approvedAt: "2026-06-29T19:19:38-07:00"
   approvedBy: laozhuang
-  approvalConsumed: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
-  claimedAt: "2026-06-29T17:03:16-07:00"
-  plannedAt: "2026-06-29T17:03:16-07:00"
-  materializedAt: "2026-06-29T17:03:16-07:00"
-  implementedAt: "2026-06-29T17:06:19-07:00"
-  validatedAt: "2026-06-29T17:06:19-07:00"
-  reviewedAt: "2026-06-29T17:06:19-07:00"
-  closedAt: "2026-06-29T17:06:19-07:00"
+  humanApproval: current_user_message_authorized_security_unit_a_validation_baseline_test_fixture_repair_only
+  approvalConsumed: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
+  claimedAt: "2026-06-29T19:19:38-07:00"
+  plannedAt: "2026-06-29T19:19:38-07:00"
+  materializedAt: "2026-06-29T19:19:38-07:00"
+  implementedAt: "2026-06-29T19:27:49-07:00"
+  validatedAt: "2026-06-29T19:27:49-07:00"
+  reviewedAt: "2026-06-29T19:27:49-07:00"
+  closedAt: "2026-06-29T19:27:49-07:00"
+  parentBlockedTask: security-unit-a-dependency-package-advisory-remediation-2026-06-29
+  pendingParentDiffHandling: >-
+    Current branch already contains uncommitted Unit A dependency remediation files. This test fixture repair may
+    validate and close the combined local branch only after it records that no additional package or lockfile edits were
+    made by this task.
   allowedFiles:
+    - package.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md
-    - docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md
-    - docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md
-    - docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+    - docs/01-requirements/traceability/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/01-requirements/traceability/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
   blockedFiles:
     - .env*
-    - package.json
-    - package-lock.yaml
-    - package-lock.json
-    - pnpm-lock.yaml
-    - src/**
     - tests/**
     - e2e/**
     - src/db/schema/**
+    - src/db/**
     - drizzle/**
     - migrations/**
     - seed/**
@@ -3944,75 +4144,77 @@ currentTask:
     - docs/04-agent-system/state/task-history-index.yaml
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
+  dependencyBoundary: no_new_package_or_lockfile_change_in_this_task_parent_unit_a_package_diff_is_carried_forward_only
+  packageManagerBoundary: no_package_manager_or_dependency_change_in_this_task
+  lifecycleScriptBoundary: no_new_install_required_for_test_fixture_edit_existing_unit_a_dependency_sync_may_be_validated_only
   localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
   aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero
   browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
   credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
-  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
   releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
   evidenceRedaction:
-    allowed: task_id_blocker_class_severity_priority_status_count_approval_type_validation_command_commit_branch_merge_push_cleanup_only
-    forbidden: credentials_tokens_sessions_cookies_auth_headers_env_connection_strings_raw_db_rows_internal_ids_pii_plaintext_redeem_code_provider_payloads_prompts_raw_ai_io_full_question_paper_material_resource_chunk_content_raw_dom_screenshots_traces_html_reports
+    allowed: file_path_test_name_error_code_expected_observed_validation_command_status_count_commit_branch_merge_push_cleanup_summary_only
+    forbidden: credentials_tokens_sessions_cookies_auth_headers_env_connection_strings_raw_db_rows_internal_ids_pii_plaintext_redeem_code_provider_payloads_prompts_raw_ai_io_full_question_paper_material_resource_chunk_content_raw_dom_screenshots_traces_install_or_audit_json_payloads_registry_tokens
   validationCommands:
-    - npx.cmd prettier --write --ignore-unknown ...
-    - npx.cmd prettier --check --ignore-unknown ...
+    - corepack pnpm exec vitest run src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+    - corepack pnpm run test:unit
+    - corepack pnpm run lint
+    - corepack pnpm run typecheck
+    - corepack pnpm audit --audit-level low
+    - corepack pnpm exec prettier --write --ignore-unknown src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - corepack pnpm exec prettier --check --ignore-unknown src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
     - git diff --check
-    - git diff --name-only -- package.json pnpm-lock.yaml package-lock.yaml package-lock.json src tests e2e drizzle migrations seed scripts playwright-report test-results .next
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+    - git diff --name-only -- e2e drizzle migrations seed scripts playwright-report test-results .next .env
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-unit-a-validation-baseline-test-fixture-repair-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      approvalSource: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      approvalSource: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
     push:
       approved: true
       target: origin/master
-      approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      approvalSource: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
     cleanup:
       deleteShortBranch: true
-      approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
-  validationStatus: pass_docs_state_approval_decision_package_prettier_diff_module_run_v2
-  approvalDecisionPackage:
-    approvableUnits: 5
-    remainingTopLevelBlockedTaskCount: 9
-    unitA:
-      name: dependency_package_advisory_remediation
-      coveredBlockedTaskCount: 4
-      highestPrioritySeverity: p0_high
-      currentStatus: blocked_requires_fresh_dependency_package_manager_approval
-    unitB:
-      name: db_migration_command_guard_implementation
-      coveredBlockedTaskCount: 1
-      highestPrioritySeverity: p2_medium
-      currentStatus: blocked_requires_fresh_task_specific_approval
-    unitC:
-      name: provider_browser_runtime_acceptance
-      coveredBlockedTaskCount: 1
-      highestPrioritySeverity: p2_medium
-      currentStatus: blocked_requires_fresh_provider_browser_runtime_approval
-    unitD:
-      name: db_browser_runtime_acceptance
-      coveredBlockedTaskCount: 1
-      highestPrioritySeverity: p2_medium
-      currentStatus: blocked_requires_fresh_db_browser_runtime_approval
-    unitE:
-      name: staging_release_boundary_execution
-      coveredBlockedTaskCount: 2
-      highestPrioritySeverity: p1_high
-      currentStatus: blocked_by_current_goal_and_release_boundary
-    recommendedFirstFreshApprovalUnit: unitA_dependency_package_advisory_remediation
-    thisPackageGrantsExecutionApproval: false
-  updatedAt: "2026-06-29T17:06:19-07:00"
+      approvalSource: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
+  validationStatus: pass
+  validationResults:
+    focusedUnit: pass_1_file_5_tests
+    fullUnit: pass_319_files_1453_tests
+    lint: pass
+    typecheck: pass
+    dependencyAuditLow: pass_no_known_vulnerabilities
+  closeoutStatus: pass_pending_final_git_closeout
+  updatedAt: "2026-06-29T19:27:49-07:00"
+nextTaskCandidate:
+  id: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+  status: closed
+  approvedAt: "2026-06-29T19:19:38-07:00"
+  approvalConsumed: security_unit_a_validation_baseline_test_fixture_repair_fresh_approval_2026_06_29
+  reason: security_unit_a_closeout_blocked_by_pre_existing_focused_unit_baseline_failure_reproduced_on_master
+  targetClosureItem: repair test fixture only so Unit A dependency advisory remediation can complete validation
+  likelyRootCause: missing_service_computed_organization_admin_workspace_capability_in_repository_test_fixture
+  allowedFilesAfterApproval:
+    - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+  blockedUntil: null
 previousTestAcceptanceRedactedE2eEvidencePolicyReviewTask:
   id: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
   status: closed
