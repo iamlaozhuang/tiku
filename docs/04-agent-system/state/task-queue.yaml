@@ -262,17 +262,26 @@ tasks:
       - security-unit-b-auth-role-boundary-static-review-2026-06-29
     taskPlanPolicy: required_before_source_or_test_edit
     targetClosureItem: Require organization training runtime admin context to consume service-computed organization workspace capability metadata before training management operations
-    behaviorBoundary: source_test_repair_blocked_until_fresh_approval::no_source_edit_in_unit_b_static_review
+    behaviorBoundary: focused_source_test_security_repair_no_db_no_provider_no_browser_no_release
     executionProfile: focused_source_test_security_repair
     evidenceMode: redacted_file_path_route_guard_test_status_count_validation_summary_only
     taskKind: focused_source_test_security_repair
     moduleRunVersion: 2
-    status: blocked_pending_fresh_source_test_approval
+    status: closed
+    result: pass_require_service_computed_organization_training_capability_local_repair
     priority: p0
     severity: medium
     findingId: unit-b-auth-role-001
-    approvalRequired: fresh_user_approval_required_before_execution
+    approvedAt: "2026-06-29T21:09:37-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_message_authorized_repair_organization_training_capability_source_boundary_2026_06_29
+    approvalConsumed: repair_organization_training_capability_source_boundary_fresh_approval_2026_06_29
+    implementedAt: "2026-06-29T21:18:45-07:00"
+    validatedAt: "2026-06-29T21:18:45-07:00"
+    reviewedAt: "2026-06-29T21:18:45-07:00"
+    closedAt: "2026-06-29T21:18:45-07:00"
     plannedBranch: codex/org-training-capability-repair-20260629
+    branch: codex/org-training-capability-repair-20260629
     allowedFiles:
       - src/server/services/organization-training-route.ts
       - src/server/services/organization-training-route.test.ts
@@ -345,20 +354,20 @@ tasks:
     acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-organization-training-capability-source-boundary.md
     closeoutPolicy:
       localCommit:
-        approved: false
-        approvalSource: blocked_until_fresh_source_test_approval
+        approved: true
+        approvalSource: repair_organization_training_capability_source_boundary_fresh_approval_2026_06_29
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: blocked_until_fresh_source_test_approval
+        approvalSource: repair_organization_training_capability_source_boundary_fresh_approval_2026_06_29
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: blocked_until_fresh_source_test_approval
+        approvalSource: repair_organization_training_capability_source_boundary_fresh_approval_2026_06_29
       cleanup:
-        deleteShortBranch: false
-        approvalSource: blocked_until_fresh_source_test_approval
-    validationStatus: blocked_not_executed
+        deleteShortBranch: true
+        approvalSource: repair_organization_training_capability_source_boundary_fresh_approval_2026_06_29
+    validationStatus: pass_red_green_focused_unit_lint_typecheck_prettier_diff_module_run_v2
 
   - id: security-unit-a-dependency-package-advisory-remediation-2026-06-29
     title: Security Unit A dependency package advisory remediation

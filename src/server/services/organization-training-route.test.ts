@@ -11,6 +11,7 @@ import { POST as submitRoutePost } from "@/app/api/v1/organization-trainings/[pu
 import { GET as visibleListRouteGet } from "@/app/api/v1/organization-trainings/visible-list/route";
 
 import type { AuthContextDto } from "../contracts/auth-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type {
   EffectiveAuthorizationCapabilitiesDto,
   EffectiveAuthorizationContextDto,
@@ -380,6 +381,22 @@ function createCopyInput(
   };
 }
 
+function createOrganizationAdminWorkspaceCapability(
+  overrides: Partial<AdminWorkspaceCapabilitySummary> = {},
+): AdminWorkspaceCapabilitySummary {
+  return {
+    adminRoles: [
+      "org_advanced_admin",
+    ] as unknown as AdminWorkspaceCapabilitySummary["adminRoles"],
+    organizationPublicId: "organization_route_public_401",
+    organizationEffectiveEdition: "advanced",
+    organizationAuthorizationSource: "org_auth",
+    capabilitySource: "service_computed",
+    canUseOrganizationAdvancedWorkspace: true,
+    ...overrides,
+  };
+}
+
 function createAdminAuthContext(
   overrides: Partial<AuthContextDto["user"]> = {},
 ): AuthContextDto {
@@ -397,6 +414,7 @@ function createAdminAuthContext(
       adminRoles: [
         "org_advanced_admin",
       ] as unknown as AuthContextDto["user"]["adminRoles"],
+      adminWorkspaceCapability: createOrganizationAdminWorkspaceCapability(),
       ...overrides,
     },
     session: {
@@ -1203,6 +1221,74 @@ describe("organization training publish route handlers", () => {
     expect(
       runtimeRepositoryMock.lookupTrustedPersistenceLineage,
     ).not.toHaveBeenCalled();
+  });
+
+  it("rejects advanced organization admins without service-computed organization capability before trusted training lineage lookup", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext({
+        adminWorkspaceCapability: undefined,
+      }),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403063,
+      message:
+        "Organization training publish organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(
+      runtimeRepositoryMock.lookupVisibleOrganizationScope,
+    ).not.toHaveBeenCalled();
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).not.toHaveBeenCalled();
+    expect(runtimeRepositoryMock.publishVersion).not.toHaveBeenCalled();
+  });
+
+  it("rejects advanced organization admins with false service-computed organization capability before trusted training lineage lookup", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext({
+        adminWorkspaceCapability: createOrganizationAdminWorkspaceCapability({
+          canUseOrganizationAdvancedWorkspace: false,
+        }),
+      }),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403063,
+      message:
+        "Organization training publish organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(
+      runtimeRepositoryMock.lookupVisibleOrganizationScope,
+    ).not.toHaveBeenCalled();
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).not.toHaveBeenCalled();
+    expect(runtimeRepositoryMock.publishVersion).not.toHaveBeenCalled();
   });
 
   it("uses repository visible organization scope for the runtime organization-admin actor context", async () => {

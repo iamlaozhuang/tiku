@@ -3,6 +3,7 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type {
   EffectiveAuthorizationContextDto,
   EffectiveAuthorizationListDto,
@@ -446,6 +447,25 @@ function isOrganizationTrainingRuntimeAdminRole(
   return role === "super_admin" || role === "org_advanced_admin";
 }
 
+function canUseServiceComputedOrganizationTrainingCapability(
+  capabilitySummary: AdminWorkspaceCapabilitySummary | undefined,
+): capabilitySummary is AdminWorkspaceCapabilitySummary & {
+  organizationPublicId: string;
+  organizationEffectiveEdition: "advanced";
+  organizationAuthorizationSource: "org_auth";
+  capabilitySource: "service_computed";
+  canUseOrganizationAdvancedWorkspace: true;
+} {
+  return (
+    capabilitySummary !== undefined &&
+    capabilitySummary.capabilitySource === "service_computed" &&
+    capabilitySummary.organizationAuthorizationSource === "org_auth" &&
+    capabilitySummary.organizationPublicId !== null &&
+    capabilitySummary.organizationEffectiveEdition === "advanced" &&
+    capabilitySummary.canUseOrganizationAdvancedWorkspace === true
+  );
+}
+
 function normalizeVisibleOrganizationPublicIds(
   visibleOrganizationPublicIds: readonly string[] | null,
 ): string[] {
@@ -492,8 +512,16 @@ function createSessionBackedOrganizationAdminContextResolver(
     const hasAdminRole = (sessionResponse.data.user.adminRoles ?? []).some(
       (adminRole) => isOrganizationTrainingRuntimeAdminRole(adminRole),
     );
+    const adminWorkspaceCapability =
+      sessionResponse.data.user.adminWorkspaceCapability;
 
-    if (adminPublicId === null || !hasAdminRole) {
+    if (
+      adminPublicId === null ||
+      !hasAdminRole ||
+      !canUseServiceComputedOrganizationTrainingCapability(
+        adminWorkspaceCapability,
+      )
+    ) {
       return null;
     }
 
