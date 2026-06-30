@@ -48,6 +48,13 @@ standingApprovals:
     approvedAt: "2026-06-30T00:14:42-07:00"
     approvedBy: laozhuang
     approvalSource: current_user_central_authorization_for_items_1_to_9_local_repair_loop_only_with_per_task_materialization_required
+    latestRefreshAt: "2026-06-30T00:59:38-07:00"
+    latestRefreshSource: current_user_reconfirmed_central_authorization_for_items_1_to_9_local_repair_loop_only_2026_06_30
+    latestRefreshSummary: >-
+      User reconfirmed centralized approval for packages 1-9 as local repair loop only. Each task must still
+      materialize exact allowedFiles, blockedFiles, DB boundary, AI/Provider boundary, browser boundary, credential
+      boundary, evidence redaction, validation commands, and closeoutPolicy before execution; forbidden items remain
+      forbidden.
     approvalTextSummary: >-
       User centrally authorized follow-up packages 1-9 for local repair loop only. Each future task must first
       materialize exact allowedFiles, blockedFiles, DB boundary, AI/Provider boundary, browser boundary, credential
@@ -57,12 +64,15 @@ standingApprovals:
     approvedPackages:
       - packageId: security-followup-approval-materialization-2026-06-30
         category: docs_state_authorization_materialization
-        status: current_task
+        status: closed
       - packageId: security-remaining-inventory-triage-2026-06-30
         category: read_only_remaining_inventory
         status: closed
       - packageId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
         category: dependency_deprecated_transitive_remediation_gate
+        status: closed
+      - packageId: security-dependency-install-script-policy-decision-2026-06-30
+        category: dependency_install_script_policy_decision
         status: closed
       - packageId: security-api-input-validation-repair-candidate-2026-06-30
         category: api_contract_input_validation_minimal_repair
@@ -792,6 +802,167 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
       sensitiveEvidenceCaptured: false
+
+  - id: security-dependency-install-script-policy-decision-2026-06-30
+    title: Security dependency install script policy decision
+    phase: security-dependency-install-script-policy-decision-2026-06-30
+    sourceStory: seeded_by_security_remaining_inventory_triage_2026_06_30_and_prior_install_script_binary_surface_review_2026_06_29
+    dependencies:
+      - security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+      - security-dependency-install-script-binary-surface-review-2026-06-29
+    taskPlanPolicy: required_before_install_script_policy_decision
+    targetClosureItem: Decide local install-script and binary policy posture without package manager mutation or script execution
+    behaviorBoundary: docs_state_policy_decision_only_package_manifest_lock_workspace_read_only_no_install_no_script_execution_no_source_test_db_provider_browser_release
+    executionProfile: local_dependency_install_script_policy_decision_docs_state_only
+    evidenceMode: package_script_count_hasbin_count_requires_build_count_ignored_built_dependency_names_policy_status_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    taskKind: dependency_install_script_policy_decision
+    moduleRunVersion: 2
+    status: closed
+    result: pass_install_script_policy_decision_no_package_or_script_execution
+    priority: p2
+    severity: medium
+    approvedAt: "2026-06-30T00:54:30-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_central_authorization_for_items_1_to_9_local_repair_loop_only_with_per_task_materialization_required
+    latestApprovalRefreshAt: "2026-06-30T00:59:38-07:00"
+    latestApprovalRefreshSource: current_user_reconfirmed_central_authorization_for_items_1_to_9_local_repair_loop_only_2026_06_30
+    approvalConsumed: securityFollowupCentralApproval20260630
+    branch: codex/security-install-script-policy-20260630
+    claimedAt: "2026-06-30T00:54:30-07:00"
+    plannedAt: "2026-06-30T00:54:30-07:00"
+    materializedAt: "2026-06-30T00:54:30-07:00"
+    implementedAt: "2026-06-30T00:59:38-07:00"
+    validatedAt: "2026-06-30T00:59:38-07:00"
+    reviewedAt: "2026-06-30T00:59:38-07:00"
+    closedAt: "2026-06-30T00:59:38-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/open-source-introduction.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-install-script-binary-surface-review.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dependency-install-script-binary-surface-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-install-script-binary-surface-review.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-install-script-binary-surface-review.md
+      - docs/01-requirements/traceability/2026-06-29-security-dependency-install-script-binary-surface-review.md
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dependencyBoundary: no_package_json_pnpm_lock_yaml_or_pnpm_workspace_yaml_change_no_dependency_install_update_remove_audit_fix_no_lockfile_refresh
+    lifecycleScriptBoundary: no_lifecycle_script_package_script_cli_binary_build_postinstall_prepare_or_generated_binary_execution
+    networkBoundary: no_network_advisory_lookup_no_registry_metadata_lookup_no_package_download
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: package_script_count_hasbin_count_requires_build_count_ignored_built_dependency_names_policy_status_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers_registry_tokens
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+        - raw_install_logs_script_output_or_package_manager_execution_output
+    policyDecision:
+      defaultInstallBehavior: keep_lifecycle_scripts_blocked_unless_future_task_explicitly_materializes_execution
+      lockfileRefreshBehavior: require_ignore_scripts_and_task_specific_dependency_gate
+      ignoredBuiltDependenciesPolicy: keep_existing_sharp_unrs_resolver_entries_no_change
+      rootScriptPolicy: only_task_declared_validation_commands_may_execute
+      packageManagerMutationPolicy: blocked_in_this_task
+    validationCommands:
+      - rg -n "hasBin:|requiresBuild:|ignoredBuiltDependencies" pnpm-lock.yaml pnpm-workspace.yaml
+      - rg -n "\"scripts\"|\"postinstall\"|\"prepare\"|\"build\"|\"lint\"|\"typecheck\"|\"test" package.json
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: securityFollowupCentralApproval20260630
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: securityFollowupCentralApproval20260630
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: securityFollowupCentralApproval20260630
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: securityFollowupCentralApproval20260630
+    validationSummary:
+      validationStatus: pass_install_script_policy_decision_no_package_or_script_execution
+      hasBinEntries: 46
+      requiresBuildEntries: 0
+      ignoredBuiltDependencies: 2
+      rootPackageScripts: 14
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      packageManagerMutationExecuted: false
+      lifecycleScriptExecution: false
+      databaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserOrE2eRuntimeExecuted: false
+      devServerExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      rgPolicySurface: pass
+      rootScriptInventory: pass
+      packageWorkspaceLockfileDiff: pass_no_output
+      prettierScoped: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 
   - id: agents-md-user-instruction-adoption-2026-06-29
     title: AGENTS.md user instruction adoption
