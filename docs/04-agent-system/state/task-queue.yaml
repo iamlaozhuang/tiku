@@ -141,6 +141,131 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: security-db-migration-command-guard-implementation-2026-06-29
+    title: Security DB migration command guard implementation
+    phase: security-db-migration-command-guard-implementation-2026-06-29
+    sourceStory: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+    dependencies:
+      - detail-security-local-continuation-closeout-audit-2026-06-29
+    taskPlanPolicy: required_before_script_or_test_guard_implementation
+    targetClosureItem: Require explicit local DB mutation approval before fresh validation full mode can execute create database, Drizzle migrate, dev seed, e2e, or build commands
+    behaviorBoundary: local_guard_script_and_unit_test_only_no_db_connection_no_migration_no_seed_no_env_secret_no_dependency_no_browser_no_release
+    executionProfile: focused_local_script_guard_and_unit_test_repair
+    evidenceMode: redacted_guard_decision_status_validation_command_commit_branch_merge_push_cleanup_summary_only
+    taskKind: focused_local_script_guard_and_unit_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_local_db_migration_command_guard_requires_explicit_full_mode_approval
+    priority: p1
+    severity: medium
+    approvedAt: "2026-06-29T22:50:38-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+    approvalConsumed: security_db_migration_command_guard_implementation_fresh_approval_2026_06_29
+    branch: codex/db-migration-command-guard-20260629
+    claimedAt: "2026-06-29T22:50:38-07:00"
+    plannedAt: "2026-06-29T22:50:38-07:00"
+    materializedAt: "2026-06-29T22:50:38-07:00"
+    implementedAt: "2026-06-29T22:54:47-07:00"
+    validatedAt: "2026-06-29T22:59:31-07:00"
+    reviewedAt: "2026-06-29T22:59:31-07:00"
+    closedAt: "2026-06-29T22:59:31-07:00"
+    allowedFiles:
+      - scripts/local/Invoke-FreshValidationRun.ps1
+      - tests/unit/fresh-validation-runner.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-security-db-migration-command-guard-implementation.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-command-guard-implementation.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-db-migration-command-guard-implementation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-command-guard-implementation.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-command-guard-implementation.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - docs/01-requirements/**
+      - package.json
+      - scripts/local/**
+      - scripts/db/**
+      - tests/unit/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/db/**
+      - scripts/ai/**
+      - scripts/local/Invoke-DeepSeekProviderSmoke.ps1
+      - scripts/local/Invoke-RealContentRagSmoke.ps1
+      - scripts/local/Invoke-ValidationDataPrep.ps1
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_db_mutation_no_schema_migration_seed_execution_current_task_only_script_guard_tests_with_temp_env_fixtures
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_real_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence_tests_may_use_fake_temp_env_fixture_only
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: task_id_file_path_guard_decision_status_count_validation_command_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers
+        - real_env_connection_strings_raw_db_rows_internal_ids_pii_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/fresh-validation-runner.test.ts
+      - npx.cmd prettier --write --ignore-unknown scripts/local/Invoke-FreshValidationRun.ps1 tests/unit/fresh-validation-runner.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/evidence/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-command-guard-implementation.md
+      - npx.cmd prettier --check --ignore-unknown scripts/local/Invoke-FreshValidationRun.ps1 tests/unit/fresh-validation-runner.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/evidence/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-command-guard-implementation.md docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-command-guard-implementation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src src/db drizzle migrations seed scripts/db scripts/ai e2e playwright-report test-results .next .env
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-db-migration-command-guard-implementation-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-db-migration-command-guard-implementation-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-db-migration-command-guard-implementation-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-security-db-migration-command-guard-implementation.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-security-db-migration-command-guard-implementation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-migration-command-guard-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-command-guard-implementation.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-security-db-migration-command-guard-implementation.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_authorized_security_db_migration_command_guard_implementation_2026_06_29
+    tddPolicy: red_before_guard_implementation
+    validationStatus: pass_focused_unit_prettier_lint_typecheck_diff_module_run_v2
+
   - id: detail-security-local-continuation-closeout-audit-2026-06-29
     title: Detail security local continuation closeout audit
     phase: detail-security-local-continuation-closeout-audit-2026-06-29

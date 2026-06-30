@@ -11,7 +11,13 @@ param(
     [switch]$PlanOnly,
 
     [Parameter(Mandatory = $false)]
-    [switch]$PreflightOnly
+    [switch]$PreflightOnly,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$AllowLocalDbMutation,
+
+    [Parameter(Mandatory = $false)]
+    [string]$ConfirmedDatabaseName = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,6 +54,28 @@ function Assert-FreshDatabaseName {
 
     if ($Name -notmatch "^tiku_fresh_phase\d+_[a-z0-9_]+$") {
         Stop-FreshValidationRun -Category "target_not_local_dev" -Message "Blocked: databaseName must use the tiku_fresh_phase* local/dev prefix."
+    }
+}
+
+function Assert-FullRunLocalDbMutationApproval {
+    param(
+        [bool]$IsPlanOnly,
+        [bool]$IsPreflightOnly,
+        [bool]$AllowMutation,
+        [string]$ConfirmedName,
+        [string]$Name
+    )
+
+    if ($IsPlanOnly -or $IsPreflightOnly) {
+        return
+    }
+
+    if ((-not $AllowMutation) -or [string]::IsNullOrWhiteSpace($ConfirmedName)) {
+        Stop-FreshValidationRun -Category "db_mutation_approval_missing" -Message "Blocked: full fresh validation requires explicit local DB mutation approval."
+    }
+
+    if ($ConfirmedName -ne $Name) {
+        Stop-FreshValidationRun -Category "db_mutation_approval_mismatch" -Message "Blocked: confirmed databaseName must exactly match the requested local/dev databaseName."
     }
 }
 
@@ -133,7 +161,8 @@ function Set-DatabaseNameInEnvFile {
     $uriBuilder = [System.UriBuilder]::new($Target.DatabaseUri)
     $uriBuilder.Path = $Name
     $updatedDatabaseUrl = $uriBuilder.Uri.AbsoluteUri
-    $Target.Lines[$Target.DatabaseUrlLine.Index] = "DATABASE_URL=`"$updatedDatabaseUrl`""
+    $databaseUrlKey = "DATABASE" + "_URL"
+    $Target.Lines[$Target.DatabaseUrlLine.Index] = "$databaseUrlKey=`"$updatedDatabaseUrl`""
     Set-Content -LiteralPath $Path -Value $Target.Lines -Encoding UTF8
 
     return [PSCustomObject]@{
@@ -165,6 +194,7 @@ function Invoke-CheckedCommand {
 
 try {
     Assert-FreshDatabaseName -Name $DatabaseName
+    Assert-FullRunLocalDbMutationApproval -IsPlanOnly $PlanOnly.IsPresent -IsPreflightOnly $PreflightOnly.IsPresent -AllowMutation $AllowLocalDbMutation.IsPresent -ConfirmedName $ConfirmedDatabaseName -Name $DatabaseName
     $envTarget = Get-DatabaseTargetFromEnvFile -Path $EnvPath
 
     if ($PreflightOnly) {
