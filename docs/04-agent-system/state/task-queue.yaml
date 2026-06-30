@@ -91,7 +91,7 @@ standingApprovals:
         status: closed_no_current_actionable_coverage_gap_confirmed
       - packageId: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
         category: dependency_supply_chain_remaining_gate
-        status: approved_pending_public_advisory_recheck_and_dependency_gate_materialization
+        status: closed_pnpm_package_manager_metadata_remediated
       - packageId: governance-queue-closed-task-archive-candidate-2026-06-30
         category: governance_queue_closed_task_archive_candidate
         status: closed
@@ -1078,6 +1078,214 @@ tasks:
       costCalibrationExecuted: false
       sensitiveEvidenceCaptured: false
       nextRecommendedTask: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+
+  - id: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+    title: Security dependency supply-chain remaining gate candidate
+    phase: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+    sourceStory: seeded_by_test_acceptance_regression_coverage_closeout_and_security_followup_central_approval_2026_06_30
+    dependencies:
+      - security-followup-approval-materialization-2026-06-30
+      - security-remaining-inventory-triage-2026-06-30
+      - security-package-manager-advisory-remediation-gate-2026-06-29
+      - security-dev-toolchain-advisory-remediation-gate-2026-06-29
+      - security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+      - security-dependency-install-script-policy-decision-2026-06-30
+      - test-acceptance-regression-coverage-reinforcement-candidate-2026-06-30
+    taskPlanPolicy: required_before_public_advisory_lookup_or_any_package_lockfile_change
+    targetClosureItem: Recheck remaining dependency supply-chain risk after package-manager, toolchain, deprecated transitive, and install-script policy gates
+    behaviorBoundary: dependency_supply_chain_recheck_first_public_advisory_registry_metadata_package_lock_workspace_change_only_if_current_actionable_issue_confirmed_no_source_test_db_provider_browser_release
+    executionProfile: local_dependency_supply_chain_recheck_then_close_or_minimal_dependency_gate_remediation_if_needed
+    evidenceMode: package_name_version_advisory_id_severity_status_counts_dependency_chain_policy_status_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    taskKind: dependency_supply_chain_remaining_gate_candidate
+    moduleRunVersion: 2
+    status: closed
+    result: pass_pnpm_package_manager_upgraded_to_11_9_0_current_scoped_osv_zero
+    priority: p2
+    severity: medium
+    approvedAt: "2026-06-30T00:59:38-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_reconfirmed_central_authorization_for_items_1_to_9_local_repair_loop_only_2026_06_30
+    approvalConsumed: securityFollowupCentralApproval20260630
+    branch: codex/security-dependency-supply-chain-remaining-gate-20260630
+    claimedAt: "2026-06-30T02:40:01-07:00"
+    plannedAt: "2026-06-30T02:40:01-07:00"
+    materializedAt: "2026-06-30T02:40:01-07:00"
+    implementedAt: "2026-06-30T02:55:04-07:00"
+    validatedAt: "2026-06-30T02:55:04-07:00"
+    reviewedAt: "2026-06-30T02:55:04-07:00"
+    closedAt: "2026-06-30T02:55:04-07:00"
+    allowedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/open-source-introduction.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-public-advisory-lookup.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dev-toolchain-advisory-remediation-gate.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dev-toolchain-advisory-remediation-gate.md
+      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-regression-coverage-reinforcement-candidate.md
+      - docs/05-execution-logs/evidence/2026-06-30-test-acceptance-regression-coverage-reinforcement-candidate.md
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+    blockedFiles:
+      - .env*
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dependencyBoundary: package_json_pnpm_lock_yaml_pnpm_workspace_yaml_change_allowed_only_after_current_recheck_confirms_a_current_actionable_public_advisory_or_supply_chain_issue_and_only_for_minimal_existing_dependency_or_lockfile_remediation_no_new_dependency_without_new_gate
+    packageManagerBoundary: no_install_update_remove_audit_fix_or_lockfile_refresh_before_recheck_if_fix_required_use_lockfile_only_ignore_scripts_and_record_no_lifecycle_execution
+    networkBoundary: public_advisory_and_public_registry_metadata_lookup_only_for_scoped_packages_no_private_registry_no_registry_token_no_package_download_except_conditional_lockfile_resolution_if_fix_required
+    lifecycleScriptBoundary: lifecycle_script_execution_blocked_ignore_scripts_required_for_any_conditional_lockfile_resolution
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: package_name_version_dependency_chain_public_advisory_id_severity_status_count_policy_decision_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers_registry_tokens
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+        - raw_registry_json_install_logs_or_package_download_logs
+    reviewScope:
+      sourceOrTestChangeAllowed: false
+      migrationFileModificationAllowed: false
+      dbConnectionAllowed: false
+      browserOrE2eRuntimeAllowed: false
+      devServerAllowed: false
+      providerRuntimeBudget: zero
+      packageOrLockfileChangeAllowed: conditional_after_recheck_confirms_current_actionable_issue
+      dependencyInstallUpdateRemoveAuditFixAllowed: conditional_lockfile_only_ignore_scripts_if_needed_no_lifecycle_scripts
+      dependencyScriptExecutionAllowed: false
+      publicRegistryMetadataLookupAllowed: true
+      publicAdvisoryLookupAllowed: true
+      packageSet:
+        - pnpm
+        - vite
+        - esbuild
+        - vitest
+        - "@vitejs/plugin-react"
+        - drizzle-kit
+        - shadcn
+        - "@esbuild-kit/esm-loader"
+        - "@esbuild-kit/core-utils"
+    validationCommands:
+      - 'rg -n "security-dependency-supply-chain-remaining-gate-candidate-2026-06-30|securityFollowupCentralApproval20260630|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md'
+      - 'rg -n "\"packageManager\"|\"pnpm\"|\"overrides\"|\"vite\"|\"esbuild\"|\"drizzle-kit\"|\"shadcn\"" package.json pnpm-lock.yaml pnpm-workspace.yaml'
+      - 'rg -n "deprecated:|hasBin:|requiresBuild:|ignoredBuiltDependencies" pnpm-lock.yaml pnpm-workspace.yaml'
+      - public advisory recheck summary for current pnpm vite esbuild and remaining deprecated transitive package set
+      - npm.cmd view pnpm@10.34.4 version
+      - npm.cmd view pnpm@11.9.0 version engines --json
+      - node -v
+      - npm.cmd view vite@8.1.0 version
+      - npm.cmd view esbuild@0.28.1 version
+      - conditional only if remediation is required: corepack pnpm install --lockfile-only --ignore-scripts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - conditional only if package_or_lockfile_changed: npm.cmd run test:unit
+      - npx.cmd prettier --write --ignore-unknown package.json pnpm-lock.yaml pnpm-workspace.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - npx.cmd prettier --check --ignore-unknown package.json pnpm-lock.yaml pnpm-workspace.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+      - git diff --check
+      - git diff --name-only -- src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-supply-chain-remaining-gate-candidate-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: securityFollowupCentralApproval20260630
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: securityFollowupCentralApproval20260630
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: securityFollowupCentralApproval20260630
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: securityFollowupCentralApproval20260630
+    validationSummary:
+      validationStatus: pass_pnpm_10_34_4_current_advisory_confirmed_then_package_manager_metadata_upgraded_to_11_9_0
+      redPublicAdvisoryRecheck: pass_pnpm_10_34_4_matches_GHSA_gj8w_mvpf_x27x_CVE_2026_55697
+      greenPublicAdvisoryRecheck: pass_scoped_osv_current_package_set_zero_after_pnpm_11_9_0
+      pnpmTargetVersion: 11.9.0
+      pnpmTargetEngine: node_gte_22_13
+      localNodeVersion: v22.14.0
+      viteCurrent: 8.1.0
+      esbuildCurrent: 0.28.1
+      vitestCurrent: 4.1.9
+      vitePluginReactCurrent: 6.0.3
+      drizzleKitCurrent: 0.31.10
+      shadcnCurrent: 4.12.0
+      deprecatedEntriesCurrent: 2
+      hasBinEntriesCurrent: 46
+      requiresBuildEntriesCurrent: 0
+      ignoredBuiltDependenciesMarker: 1
+      packageOrLockfileChanged: true_package_json_only
+      pnpmLockfileChanged: false
+      pnpmWorkspaceChanged: false
+      packageManagerMutationExecuted: false
+      lifecycleScriptExecution: false
+      installUpdateRemoveAuditFixExecuted: false
+      lint: pass
+      typecheck: pass
+      fullUnit: pass_320_files_1459_tests
+      sourceOrTestChanged: false
+      databaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserOrE2eRuntimeExecuted: false
+      devServerExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
+      nextRecommendedTask: detail-optimization-security-review-goal-closeout-rollup-2026-06-30
 
   - id: security-followup-approval-materialization-2026-06-30
     title: Security follow-up approval materialization
