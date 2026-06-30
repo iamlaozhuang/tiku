@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-dependency-install-script-policy-decision-2026-06-30
-updatedAt: "2026-06-30T00:59:38-07:00"
+currentPhase: governance-queue-closed-task-archive-candidate-2026-06-30
+updatedAt: "2026-06-30T01:07:13-07:00"
 securityFollowupApprovalMaterialization20260630:
   taskId: security-followup-approval-materialization-2026-06-30
   phase: security-followup-approval-materialization-2026-06-30
@@ -123,7 +123,7 @@ securityFollowupApprovalMaterialization20260630:
       authorizationUse: public advisory or registry metadata lookup and no package change unless separately materialized under dependency gate
     - id: governance-queue-closed-task-archive-candidate-2026-06-30
       category: governance_queue_closed_task_archive_candidate
-      status: approved_pending_task_materialization
+      status: closed
       authorizationUse: docs state queue cleanup or archive candidate only
   stillRequiresBeforeEachFollowupTask:
     - create_or_switch_to_codex_short_branch
@@ -5042,40 +5042,40 @@ repository:
   lastKnownMasterSha: 0e8594c68ea91a165cb2440080e7635076a7d7fc
   lastKnownOriginMasterSha: 0e8594c68ea91a165cb2440080e7635076a7d7fc
 currentTask:
-  id: security-dependency-install-script-policy-decision-2026-06-30
+  id: governance-queue-closed-task-archive-candidate-2026-06-30
   status: closed
-  result: pass_install_script_policy_decision_no_package_or_script_execution
-  sourceStory: seeded_by_security_remaining_inventory_triage_2026_06_30_and_prior_install_script_binary_surface_review_2026_06_29
-  targetClosureItem: decide local install-script and binary policy posture without package manager mutation or script execution
-  behaviorBoundary: docs_state_policy_decision_only_package_manifest_lock_workspace_read_only_no_install_no_script_execution_no_source_test_db_provider_browser_release
-  executionProfile: local_dependency_install_script_policy_decision_docs_state_only
-  evidenceMode: package_script_count_hasbin_count_requires_build_count_ignored_built_dependency_names_policy_status_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
-  taskKind: dependency_install_script_policy_decision
+  result: pass_archive_deferred_future_exact_batch_required_no_archive_write
+  sourceStory: seeded_by_security_remaining_inventory_triage_2026_06_30_after_dependency_followups_closed
+  targetClosureItem: decide whether closed-task queue history should be archived now or split into a safer future archival task
+  behaviorBoundary: docs_state_archive_candidate_decision_only_no_archive_write_no_history_index_change_no_source_test_db_provider_browser_dependency_release
+  executionProfile: governance_queue_archive_candidate_decision_docs_state_only
+  evidenceMode: redacted_queue_history_path_count_decision_validation_command_commit_branch_merge_push_cleanup_summary_only
+  taskKind: governance_queue_archive_candidate_decision
   moduleRunVersion: 2
-  priority: p2
-  severity: medium
-  branch: codex/security-install-script-policy-20260630
-  approvedAt: "2026-06-30T00:54:30-07:00"
+  priority: p3
+  severity: governance
+  branch: codex/governance-queue-archive-candidate-20260630
+  approvedAt: "2026-06-30T01:07:13-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_items_1_to_9_local_repair_loop_only_with_per_task_materialization_required
-  latestApprovalRefreshAt: "2026-06-30T00:59:38-07:00"
+  latestApprovalRefreshAt: "2026-06-30T01:07:13-07:00"
   latestApprovalRefreshSource: current_user_reconfirmed_central_authorization_for_items_1_to_9_local_repair_loop_only_2026_06_30
   approvalConsumed: securityFollowupCentralApproval20260630
-  claimedAt: "2026-06-30T00:54:30-07:00"
-  plannedAt: "2026-06-30T00:54:30-07:00"
-  materializedAt: "2026-06-30T00:54:30-07:00"
-  implementedAt: "2026-06-30T00:59:38-07:00"
-  validatedAt: "2026-06-30T00:59:38-07:00"
-  reviewedAt: "2026-06-30T00:59:38-07:00"
-  closedAt: "2026-06-30T00:59:38-07:00"
+  claimedAt: "2026-06-30T01:07:13-07:00"
+  plannedAt: "2026-06-30T01:07:13-07:00"
+  materializedAt: "2026-06-30T01:07:13-07:00"
+  implementedAt: "2026-06-30T01:09:58-07:00"
+  validatedAt: "2026-06-30T01:09:58-07:00"
+  reviewedAt: "2026-06-30T01:09:58-07:00"
+  closedAt: "2026-06-30T01:09:58-07:00"
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md
-    - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md
-    - docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
-    - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md
-    - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    - docs/01-requirements/traceability/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    - docs/05-execution-logs/task-plans/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    - docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    - docs/05-execution-logs/acceptance/2026-06-30-governance-queue-closed-task-archive-candidate.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
@@ -5084,15 +5084,10 @@ currentTask:
     - docs/04-agent-system/sop/dependency-introduction-gate.md
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-    - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-install-script-binary-surface-review.md
-    - docs/05-execution-logs/evidence/2026-06-29-security-dependency-install-script-binary-surface-review.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-install-script-binary-surface-review.md
-    - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-install-script-binary-surface-review.md
-    - docs/01-requirements/traceability/2026-06-29-security-dependency-install-script-binary-surface-review.md
-    - package.json
-    - pnpm-lock.yaml
-    - pnpm-workspace.yaml
+    - docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
+    - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    - docs/05-execution-logs/**
+    - docs/01-requirements/traceability/**
   blockedFiles:
     - .env*
     - package.json
@@ -5115,20 +5110,18 @@ currentTask:
     - docs/04-agent-system/state/task-history-index.yaml
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
-  dependencyBoundary: no_package_json_pnpm_lock_yaml_or_pnpm_workspace_yaml_change_no_dependency_install_update_remove_audit_fix_no_lockfile_refresh
-  lifecycleScriptBoundary: no_lifecycle_script_package_script_cli_binary_build_postinstall_prepare_or_generated_binary_execution
-  networkBoundary: no_network_advisory_lookup_no_registry_metadata_lookup_no_package_download
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
+  archiveBoundary: no_archive_file_write_no_task_history_index_change_no_move_delete_or_bulk_rewrite_current_task
+  networkBoundary: no_network_lookup_no_cloud_remote_api_no_package_registry_lookup
   localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
   aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
   browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
   credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
   releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
-  policyDecision:
-    defaultInstallBehavior: keep_lifecycle_scripts_blocked_unless_future_task_explicitly_materializes_execution
-    lockfileRefreshBehavior: require_ignore_scripts_and_task_specific_dependency_gate
-    ignoredBuiltDependenciesPolicy: keep_existing_sharp_unrs_resolver_entries_no_change
-    rootScriptPolicy: only_task_declared_validation_commands_may_execute
-    packageManagerMutationPolicy: blocked_in_this_task
+  archiveDecision:
+    currentTaskArchiveWrites: blocked
+    taskHistoryIndexChange: blocked
+    decisionCandidate: split_future_archive_batch_only_if_exact_archive_files_index_policy_rollback_and_validation_are_materialized
   evidenceRedaction:
     allowed: task_ids_file_paths_risk_category_severity_status_counts_validation_commands_commit_branch_merge_push_cleanup_public_advisory_id_redacted_expected_observed_summary_only
     forbidden:
@@ -5138,21 +5131,19 @@ currentTask:
       - full_question_paper_material_resource_chunk_content
       - raw_dom_screenshots_traces_html_reports
   validationCommands:
-    - rg -n "hasBin:|requiresBuild:|ignoredBuiltDependencies" pnpm-lock.yaml pnpm-workspace.yaml
-    - rg -n "\"scripts\"|\"postinstall\"|\"prepare\"|\"build\"|\"lint\"|\"typecheck\"|\"test" package.json
-    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml
-    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
-    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    - rg -n "governance-queue-closed-task-archive-candidate-2026-06-30" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/acceptance/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    - "npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/task-plans/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/audits-reviews/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/acceptance/2026-06-30-governance-queue-closed-task-archive-candidate.md"
+    - "npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/task-plans/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/audits-reviews/2026-06-30-governance-queue-closed-task-archive-candidate.md docs/05-execution-logs/acceptance/2026-06-30-governance-queue-closed-task-archive-candidate.md"
     - git diff --check
-    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-install-script-policy-decision-2026-06-30 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-install-script-policy-decision.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-security-dependency-install-script-policy-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-install-script-policy-decision.md
+    - git diff --name-only -- docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml package.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId governance-queue-closed-task-archive-candidate-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId governance-queue-closed-task-archive-candidate-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId governance-queue-closed-task-archive-candidate-2026-06-30 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-governance-queue-closed-task-archive-candidate.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-governance-queue-closed-task-archive-candidate.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-queue-closed-task-archive-candidate.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-governance-queue-closed-task-archive-candidate.md
   closeoutPolicy:
     localCommit:
       approved: true
@@ -5169,15 +5160,16 @@ currentTask:
       deleteShortBranch: true
       approvalSource: securityFollowupCentralApproval20260630
   validationSummary:
-    sourceOrTestChanged: false
-    validationStatus: pass_install_script_policy_decision_no_package_or_script_execution
-    hasBinEntries: 46
-    requiresBuildEntries: 0
-    ignoredBuiltDependencies: 2
-    rootPackageScripts: 14
+    validationStatus: pass_archive_deferred_future_exact_batch_required_no_archive_write
+    projectStateLines: 27489
+    taskQueueLines: 19862
+    projectStateClosedMarkers: 281
+    taskQueueClosedMarkers: 118
+    archiveFilesChanged: false
+    taskHistoryIndexChanged: false
     packageOrLockfileChanged: false
+    sourceOrTestChanged: false
     packageManagerMutationExecuted: false
-    lifecycleScriptExecution: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     browserOrE2eRuntimeExecuted: false
@@ -5186,9 +5178,7 @@ currentTask:
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-    rgPolicySurface: pass
-    rootScriptInventory: pass
-    packageWorkspaceLockfileDiff: pass_no_output
+    rgAnchors: pass
     prettierScoped: pass
     gitDiffCheck: pass
     blockedPathDiff: pass_no_output
@@ -5604,9 +5594,9 @@ securityDependencyDeprecatedTransitiveRemediationGate20260630:
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
 nextTaskCandidate:
-  id: governance-queue-closed-task-archive-candidate-2026-06-30
-  status: pending_task_materialization_under_securityFollowupCentralApproval20260630
-  reason: install-script policy decision closed without package or script execution; remaining local non-runtime candidate is optional governance queue hygiene
+  id: security-api-input-validation-repair-candidate-2026-06-30
+  status: approved_pending_issue_recheck_and_task_materialization
+  reason: governance queue archive candidate closed without archive write; next approved repair-family candidate should start with exact issue recheck and materialization
   approvalSource: securityFollowupCentralApproval20260630
   requiredBeforeExecution:
     - create_or_switch_to_codex_short_branch
