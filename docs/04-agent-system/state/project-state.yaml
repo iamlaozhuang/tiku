@@ -8981,57 +8981,146 @@ repository:
   lastKnownMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
   lastKnownOriginMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
 currentTask:
-  id: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
+  id: terminal-active-queue-archive-index-cleanup-2026-06-30
   status: closed
-  result: pass_staging_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution_current_goal_still_blocks_staging
-  taskKind: approval_package_candidate
+  result: pass_terminal_active_queue_archive_index_cleanup_current_six_candidates
+  taskKind: docs_state_governance_cleanup
   moduleRunVersion: 2
-  priority: p1
-  severity: high
-  branch: codex/staging-e2e-runtime-boundary-package-20260630
-  approvedAt: "2026-06-30T07:49:06-07:00"
+  priority: p2
+  severity: low
+  branch: codex/terminal-active-queue-archive-cleanup-20260630
+  approvedAt: "2026-06-30T09:45:00-07:00"
   approvedBy: laozhuang
-  humanApproval: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-  approvalConsumed: blockedGatesCentralFreshApproval20260630
-  claimedAt: "2026-06-30T09:31:31-07:00"
-  plannedAt: "2026-06-30T09:31:31-07:00"
-  materializedAt: "2026-06-30T09:31:31-07:00"
-  implementedAt: "2026-06-30T09:31:31-07:00"
-  validatedAt: "2026-06-30T09:31:31-07:00"
-  reviewedAt: "2026-06-30T09:31:31-07:00"
-  closedAt: "2026-06-30T09:31:31-07:00"
-  sourceStory: test-acceptance-runtime-gate-split-review-2026-06-29
-  targetClosureItem: Materialize staging/release-adjacent e2e runtime boundary approval package without executing it.
-  behaviorBoundary: docs_state_staging_e2e_runtime_approval_package_only_no_staging_prod_cloud_deploy_browser_e2e_dev_server_execution
-  executionProfile: docs_state_approval_package
-  validationPolicy: staging_e2e_runtime_boundary_package_after_central_fresh_approval_and_task_materialization_no_prod_no_release_claim
-  evidenceMode: redacted_lane_gate_command_label_summary_only_no_staging_runtime_dom_screenshot_trace_session_secret_or_release_claim
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
+  humanApproval: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+  claimedAt: "2026-06-30T09:45:00-07:00"
+  plannedAt: "2026-06-30T09:45:00-07:00"
+  materializedAt: "2026-06-30T09:45:00-07:00"
+  implementedAt: "2026-06-30T09:58:00-07:00"
+  validatedAt: "2026-06-30T09:58:00-07:00"
+  reviewedAt: "2026-06-30T09:58:00-07:00"
+  closedAt: "2026-06-30T09:58:00-07:00"
+  sourceStory: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+  targetClosureItem: Archive the six terminal active-queue candidates reported before this task materialization and update the task-history index.
+  behaviorBoundary: docs_state_active_queue_archive_index_cleanup_only_no_source_test_package_db_browser_provider_staging_release_final_or_cost
+  executionProfile: docs_state_archive_index_cleanup
+  validationPolicy: local_docs_state_governance_validation_only
+  evidenceMode: redacted_command_label_summary_only_no_raw_dom_screenshot_trace_db_rows_ids_pii_credentials_tokens_provider_payloads_or_full_content
+  targetArchiveCandidates:
+    - blocked-gates-central-fresh-approval-package-2026-06-30
+    - post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+    - security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+    - security-dependency-script-binary-policy-gate-2026-06-29
+    - test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+    - test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
   validationSummary:
-    validationStatus: pass_module_run_v2_local_validation
-    approvalPackageMaterialized: true
-    stagingRuntimeRemainsBlockedByCurrentGoal: true
-    runtimeExecuted: false
-    databaseAccessExecuted: false
-    browserOrE2eRuntimeExecuted: false
-    devServerExecuted: false
+    validationStatus: pass_docs_state_archive_index_cleanup_local_gate
+    preMaterializationArchiveCandidateCount: 6
+    movedArchiveCandidateCount: 6
+    activeQueueTaskCountAfterMove: 11
+    archiveTaskCountAfterMove: 1404
+    historyIndexEntriesAdded: 6
+    archiveCandidateCountAfterMove: 1
+    remainingArchiveCandidateExcludedBecausePreMaterializationCurrentTask: true
+    queueSlimmingDiagnostic: pass_slimming_candidate_count_1
+    projectStatusDiagnostic: pass_idle_no_pending_task
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiff: pass_empty
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
+    databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
     stagingProdCloudDeployExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     costCalibrationExecuted: false
     sensitiveEvidenceCaptured: false
-    prettierScoped: pass
-    gitDiffCheck: pass
-    blockedPathDiff: pass_empty
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_result_repair
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  releaseReadinessClaimed: false
+  finalPassClaimed: false
+  costCalibrationExecuted: false
+terminalActiveQueueArchiveIndexCleanup20260630:
+  taskId: terminal-active-queue-archive-index-cleanup-2026-06-30
+  phase: terminal-active-queue-archive-index-cleanup-2026-06-30
+  status: closed
+  result: pass_terminal_active_queue_archive_index_cleanup_current_six_candidates
+  taskKind: docs_state_governance_cleanup
+  moduleRunVersion: 2
+  branch: codex/terminal-active-queue-archive-cleanup-20260630
+  approvedAt: "2026-06-30T09:45:00-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+  claimedAt: "2026-06-30T09:45:00-07:00"
+  plannedAt: "2026-06-30T09:45:00-07:00"
+  materializedAt: "2026-06-30T09:45:00-07:00"
+  implementedAt: "2026-06-30T09:58:00-07:00"
+  validatedAt: "2026-06-30T09:58:00-07:00"
+  reviewedAt: "2026-06-30T09:58:00-07:00"
+  closedAt: "2026-06-30T09:58:00-07:00"
+  sourceStory: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+  scope: docs_state_only_archive_current_six_terminal_active_queue_candidates_and_history_index
+  targetArchiveCandidates:
+    - blocked-gates-central-fresh-approval-package-2026-06-30
+    - post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+    - security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+    - security-dependency-script-binary-policy-gate-2026-06-29
+    - test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+    - test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+  validationSummary:
+    validationStatus: pass_docs_state_archive_index_cleanup_local_gate
+    movedArchiveCandidateCount: 6
+    archiveCandidateCountAfterMove: 1
+    remainingArchiveCandidateExcludedBecausePreMaterializationCurrentTask: true
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    stagingProdCloudDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
+  boundaries:
+    sourceOrTestChange: blocked
+    packageOrLockfileChange: blocked
+    databaseAccessOrMutation: blocked
+    providerOrAiCall: blocked
+    browserRuntimeOrE2e: blocked
+    stagingProdCloudDeploy: blocked
+    releaseReadinessClaim: blocked
+    finalPassClaim: blocked
+    costCalibration: blocked
+    envSecretCredentialTokenSessionAccess: blocked
+    rawDomScreenshotTraceCapture: blocked
+    rawDbRowsInternalIdsPiiOrFullContentCapture: blocked
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
   releaseReadinessClaimed: false
   finalPassClaimed: false
   costCalibrationExecuted: false

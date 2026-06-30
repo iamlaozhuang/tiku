@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-  updatedAt: "2026-06-30T07:29:38-07:00"
+  updatedByTask: terminal-active-queue-archive-index-cleanup-2026-06-30
+  updatedAt: "2026-06-30T09:45:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16668,3 +16668,57 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-30T07:24:08-07:00"
+  - id: blocked-gates-central-fresh-approval-package-2026-06-30
+    phase: blocked-gates-central-fresh-approval-package-2026-06-30
+    status: closed
+    taskKind: docs_state_central_fresh_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-blocked-gates-central-fresh-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-central-fresh-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T07:54:09-07:00"
+  - id: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+    phase: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+    status: closed
+    taskKind: docs_state_governance_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T07:35:45-07:00"
+  - id: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+    phase: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+    status: closed
+    taskKind: dependency_gate_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: security-dependency-script-binary-policy-gate-2026-06-29
+    phase: security-dependency-script-binary-policy-gate-2026-06-29
+    status: closed
+    taskKind: dependency_gate_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-script-binary-policy-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-script-binary-policy-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+    phase: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+    status: closed
+    taskKind: approval_package_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+    phase: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+    status: closed
+    taskKind: approval_package_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""

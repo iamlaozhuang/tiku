@@ -297,227 +297,50 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
-  - id: blocked-gates-central-fresh-approval-package-2026-06-30
-    title: Blocked gates central fresh approval package
-    phase: blocked-gates-central-fresh-approval-package-2026-06-30
-    sourceStory: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
+  - id: terminal-active-queue-archive-index-cleanup-2026-06-30
+    title: Terminal active queue archive index cleanup
+    phase: terminal-active-queue-archive-index-cleanup-2026-06-30
+    sourceStory: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
     dependencies:
-      - post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-    taskKind: docs_state_central_fresh_approval_package
-    moduleRunVersion: 2
-    status: closed
-    result: pass_central_fresh_approval_package_materialized_no_gate_execution
-    priority: p1
-    severity: governance
-    branch: codex/blocked-gates-central-fresh-approval-20260630
-    approvedAt: "2026-06-30T07:49:06-07:00"
-    approvedBy: laozhuang
-    humanApproval: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    approvalConsumed: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    claimedAt: "2026-06-30T07:49:06-07:00"
-    plannedAt: "2026-06-30T07:49:06-07:00"
-    materializedAt: "2026-06-30T07:49:06-07:00"
-    implementedAt: "2026-06-30T07:54:09-07:00"
-    validatedAt: "2026-06-30T07:54:09-07:00"
-    reviewedAt: "2026-06-30T07:54:09-07:00"
-    closedAt: "2026-06-30T07:54:09-07:00"
-    taskPlanPolicy: required_before_state_or_queue_edit
-    targetClosureItem: Central fresh approval package and serial metadata completion for remaining blocked gates
-    behaviorBoundary: docs_state_central_fresh_approval_package_only_no_gate_execution
-    executionProfile: docs_state_central_fresh_approval_package
-    validationPolicy: scoped_docs_state_local_governance_gates
-    evidenceMode: redacted_task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_approval_boundary_summary_only
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-central-fresh-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-30-blocked-gates-central-fresh-approval-package.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-central-fresh-approval-package.md
-      - docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-central-fresh-approval-package.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/task-plans/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/acceptance/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - scripts/**
-      - src/db/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push_in_this_package
-    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_in_this_package
-    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace_in_this_package
-    accountCredentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
-    releaseBoundary: no_production_deploy_no_release_readiness_no_final_pass_no_cost_calibration
-    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup_in_this_package
-    evidenceRedaction:
-      allowed: task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_redacted_gate_boundary_summary_only
-      forbidden:
-        - credentials_tokens_sessions_cookies_auth_headers
-        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
-        - provider_payloads_prompts_raw_ai_io
-        - full_question_paper_material_resource_chunk_content
-        - raw_dom_screenshots_traces_html_reports
-        - raw_exception_payload_or_stack_trace
-    centralFreshApproval:
-      approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      gatesExecutedByThisPackage: false
-      packetMetadataCompletedForHighRiskGateCount: 5
-      serialGateCount: 6
-      serialOrder:
-        - security-dependency-deprecated-transitive-remediation-gate-2026-06-29
-        - security-dependency-script-binary-policy-gate-2026-06-29
-        - test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-        - test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
-        - test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
-        - layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
-      executionRule: each_gate_requires_independent_short_branch_materialization_validation_commit_ff_merge_push_cleanup_before_next_gate
-      stagingExecutionRule: layer_3_staging_execution_remains_conditional_on_concrete_isolated_staging_target_registration
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/evidence/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-central-fresh-approval-package.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/evidence/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-central-fresh-approval-package.md docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-central-fresh-approval-package.md
-      - git diff --check
-      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId blocked-gates-central-fresh-approval-package-2026-06-30
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId blocked-gates-central-fresh-approval-package-2026-06-30
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId blocked-gates-central-fresh-approval-package-2026-06-30 -SkipRemoteAheadCheck
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-central-fresh-approval-package.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-blocked-gates-central-fresh-approval-package.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-central-fresh-approval-package.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-central-fresh-approval-package.md
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    validationSummary:
-      validationStatus: pass_docs_state_central_fresh_approval_package_local_gate
-      queueSlimmingAfterMetadataCompletion: pass_slimming_candidates_archive_candidate_count_1_high_risk_blocked_count_0
-      projectStatusAfterMaterialization: pass_current_task_active_high_risk_blocked_count_0
-      scopedPrettierWrite: pass
-      scopedPrettierCheck: pass
-      diffCheck: pass
-      blockedPathDiff: pass_empty
-      preCommitHardening: pass
-      moduleCloseoutReadiness: pass_after_final_evidence_anchor_update
-      prePushReadiness: pass
-      gatesExecutedByThisPackage: false
-      packetMetadataCompletedForHighRiskGateCount: 5
-      sourceOrTestChanged: false
-      packageOrLockfileChanged: false
-      databaseAccessExecuted: false
-      providerCallOrConfigurationExecuted: false
-      browserOrE2eRuntimeExecuted: false
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      costCalibrationExecuted: false
-
-  - id: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-    title: Post blocked gates closed task archive index cleanup
-    phase: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-    sourceStory: blocked-gates-serial-approval-package-2026-06-30
-    dependencies:
-      - blocked-gates-serial-approval-package-2026-06-30
+      - test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
+    taskPlanPolicy: required_before_docs_state_archive_write
+    humanApproval: >-
+      User requested a separate docs/state-only task to archive the current six terminal active-queue candidates.
+      Approval covers docs/state archive/index cleanup, local commit, fast-forward merge to master, push to
+      origin/master, and short-branch cleanup. It does not approve source/test/package changes, DB access or mutation,
+      browser/e2e runtime, Provider/AI calls, staging/prod/cloud/deploy, release readiness, final Pass, or Cost
+      Calibration.
     taskKind: docs_state_governance_cleanup
     moduleRunVersion: 2
-    status: closed
-    result: pass_post_blocked_gates_archive_index_cleanup
-    priority: p2
-    severity: governance
-    branch: codex/post-blocked-gates-archive-index-cleanup-20260630
-    approvedAt: "2026-06-30T07:29:38-07:00"
-    approvedBy: laozhuang
-    humanApproval: active_goal_governance_queue_cleanup_continuation_2026_06_30
-    approvalConsumed: active_goal_governance_queue_cleanup_continuation_2026_06_30
-    claimedAt: "2026-06-30T07:29:38-07:00"
-    plannedAt: "2026-06-30T07:29:38-07:00"
-    materializedAt: "2026-06-30T07:29:38-07:00"
-    implementedAt: "2026-06-30T07:35:45-07:00"
-    validatedAt: "2026-06-30T07:35:45-07:00"
-    reviewedAt: "2026-06-30T07:35:45-07:00"
-    closedAt: "2026-06-30T07:35:45-07:00"
-    taskPlanPolicy: required_before_archive_index_cleanup
-    defaultAction: move_eligible_terminal_task_blocks_to_archive_and_history_index
-    targetClosureItem: Move eligible post-blocked-gates closed active-queue task blocks to the June archive and history index.
-    behaviorBoundary: docs_state_archive_index_cleanup_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
     executionProfile: docs_state_archive_index_cleanup
-    validationPolicy: archive_index_scoped_local_governance_gates
+    validationPolicy: local_docs_state_governance_validation_only
+    priority: p2
+    severity: low
+    branch: codex/terminal-active-queue-archive-cleanup-20260630
+    status: closed
+    claimedAt: "2026-06-30T09:45:00-07:00"
+    plannedAt: "2026-06-30T09:45:00-07:00"
+    materializedAt: "2026-06-30T09:45:00-07:00"
+    implementedAt: "2026-06-30T09:58:00-07:00"
+    validatedAt: "2026-06-30T09:58:00-07:00"
+    reviewedAt: "2026-06-30T09:58:00-07:00"
+    closedAt: "2026-06-30T09:58:00-07:00"
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
       - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/acceptance/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-    readOnlyAllowedFiles:
-      - AGENTS.md
-      - docs/03-standards/code-taste-ten-commandments.md
-      - docs/02-architecture/adr/**
-      - docs/04-agent-system/sop/active-queue-slimming-plan.md
-      - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      - docs/04-agent-system/state/task-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/acceptance/2026-06-30-blocked-gates-serial-approval-package.md
-      - docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
-      - docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
-      - scripts/agent-system/Get-TikuProjectStatus.ps1
-      - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+      - docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
     blockedFiles:
       - .env*
       - package.json
-      - package-lock.yaml
-      - package-lock.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
+      - package-lock.yaml
+      - package-lock.json
       - src/**
       - tests/**
       - scripts/**
@@ -530,483 +353,112 @@ tasks:
       - test-results/**
       - .next/**
       - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
-    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
-    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
-    accountCredentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
-    evidenceRedaction:
-      allowed: task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_redacted_archive_index_summary_only
-      forbidden:
-        - credentials_tokens_sessions_cookies_auth_headers
-        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
-        - provider_payloads_prompts_raw_ai_io
-        - full_question_paper_material_resource_chunk_content
-        - raw_dom_screenshots_traces_html_reports
-        - raw_exception_payload_or_stack_trace
-    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
-    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
-    archiveMovement:
-      terminalRecoveryWindow: 8
-      candidateTaskIds:
-        - post-local-quality-next-scope-decision-package-2026-06-30
-        - governance-closed-task-archive-index-cleanup-2026-06-30
-        - blocked-gates-serial-approval-package-2026-06-30
-      movedTaskCount: 3
-      archiveTaskCountBefore: 1395
-      archiveTaskCountAfter: 1398
-      activeQueueTaskCountAfterMove: 15
-      archiveCandidateCountAfterMove: 0
-      archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-      historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    riskTypes:
+      - automation_state
+      - evidence_integrity
+      - archive_index_governance
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      credentialCookieTokenSessionAccess: blocked
+      dependencyIntroduction: blocked
+      packageLockfileMutation: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessClaim: blocked
+      finalPassClaim: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    targetArchiveCandidates:
+      - blocked-gates-central-fresh-approval-package-2026-06-30
+      - post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+      - security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+      - security-dependency-script-binary-policy-gate-2026-06-29
+      - test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+      - test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+    evidenceRedactionRules:
+      - record_command_labels_and_pass_fail_summary_only
+      - do_not_record_raw_dom_screenshots_traces
+      - do_not_record_raw_db_rows_internal_ids_pii_email_phone_or_plaintext_redeem_code
+      - do_not_record_env_secrets_connection_strings_credentials_cookies_tokens_sessions_or_authorization_headers
+      - do_not_record_provider_payloads_prompts_or_raw_ai_io
+      - do_not_record_full_question_paper_material_resource_chunk_content
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
-      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
       - git diff --check
       - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30 -SkipRemoteAheadCheck
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-post-blocked-gates-closed-task-archive-index-cleanup.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId terminal-active-queue-archive-index-cleanup-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId terminal-active-queue-archive-index-cleanup-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId terminal-active-queue-archive-index-cleanup-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-terminal-active-queue-archive-index-cleanup.md
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: active_goal_governance_queue_cleanup_continuation_2026_06_30
+        approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
       fastForwardMerge:
         approved: true
         targetBranch: master
-        approvalSource: active_goal_governance_queue_cleanup_continuation_2026_06_30
+        approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
       push:
         approved: true
         target: origin/master
-        approvalSource: active_goal_governance_queue_cleanup_continuation_2026_06_30
+        approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
       cleanup:
         deleteShortBranch: true
-        approvalSource: active_goal_governance_queue_cleanup_continuation_2026_06_30
+        approvalSource: current_user_requested_archive_current_six_terminal_active_queue_candidates_2026_06_30
     acceptanceCriteria:
-      - two_named_terminal_tasks_archived
-      - history_index_entries_created_for_moved_tasks
-      - active_queue_keeps_blocked_gates_and_latest_recovery_window
-      - no_gate_execution_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+      - task_plan_and_state_queue_materialized_before_archive_write
+      - exactly_six_pre_materialization_terminal_archive_candidates_moved_to_2026_06_archive
+      - task_history_index_updated_for_moved_candidates
+      - original_archived_task_blocks_preserved_without_semantic_edits
+      - no_source_test_package_db_provider_browser_staging_release_final_or_cost_action
+      - evidence_acceptance_and_audit_docs_capture_redacted_validation_summary
     validationSummary:
       validationStatus: pass_docs_state_archive_index_cleanup_local_gate
-      queueSlimmingAfterMove: pass_clean_archive_candidate_count_0_high_risk_blocked_count_5
-      projectStatusAfterMove: pass_idle_no_pending_task_archive_candidate_count_0_high_risk_blocked_count_5
-      terminalTaskBlocksMoved: 3
-      historyIndexEntriesAdded: 3
+      preMaterializationArchiveCandidateCount: 6
+      movedArchiveCandidateCount: 6
+      activeQueueTaskCountAfterMove: 11
+      archiveTaskCountAfterMove: 1404
+      historyIndexEntriesAdded: 6
+      archiveCandidateCountAfterMove: 1
+      remainingArchiveCandidateExcludedBecausePreMaterializationCurrentTask: true
+      queueSlimmingDiagnostic: pass_slimming_candidate_count_1
+      projectStatusDiagnostic: pass_idle_no_pending_task
       scopedPrettierWrite: pass
       scopedPrettierCheck: pass
-      diffCheck: pass_with_archive_line_ending_normalization_warning
+      gitDiffCheck: pass
       blockedPathDiff: pass_empty
-      preCommitHardening: pass
-      moduleCloseoutReadiness: pass
-      prePushReadiness: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
       sourceOrTestChanged: false
       packageOrLockfileChanged: false
       databaseAccessExecuted: false
       providerCallOrConfigurationExecuted: false
       browserOrE2eRuntimeExecuted: false
+      stagingProdCloudDeployExecuted: false
       releaseReadinessClaimed: false
       finalPassClaimed: false
       costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     costCalibrationExecuted: false
-  - id: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
-    title: Security dependency deprecated transitive remediation gate
-    phase: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
-    sourceStory: seeded_by_security_dependency_deprecated_transitive_review_2026_06_29
-    dependencies:
-      - security-dependency-deprecated-transitive-review-2026-06-29
-    taskPlanPolicy: required_before_any_package_or_lockfile_change
-    targetClosureItem: decide whether deprecated transitive dependency remediation needs dependency upgrades or package classification changes
-    behaviorBoundary: docs_state_dependency_gate_package_only_until_fresh_dependency_approval
-    executionProfile: dependency_remediation_gate_package
-    evidenceMode: package_name_version_reason_approval_status_summary_only
-    validationPolicy: dependency_gate_serial_execution_after_central_fresh_approval_and_task_materialization
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-      - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-      - package.json
-      - pnpm-lock.yaml
-    blockedFiles:
-      - .env*
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - scripts/**
-      - src/db/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    validationCommands:
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - git diff --name-only -- src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    taskKind: dependency_gate_candidate
-    moduleRunVersion: 2
-    status: closed
-    result: closed_no_current_actionable_dependency_deprecated_transitive_gap_confirmed
-    nextRecommended: false
-    recommendedAfter: security-dependency-deprecated-transitive-review-2026-06-29
-    priority: p2
-    severity: medium
-    approvalSource: blockedGatesCentralFreshApproval20260630
-    executionBranch: codex/security-dependency-deprecated-transitive-gate-20260630
-    legacyBlockedGateCloseout:
-      supersedingClosedTaskId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
-      closureMode: recheck_current_state_then_close_legacy_blocked_queue_record
-      packageOrLockfileMutationDefault: blocked_unless_new_current_actionable_gap_found
-      recheckedAt: "2026-06-30T08:15:06-07:00"
-      currentDeprecatedEntryCount: 2
-      noSafeMinimalLocalRemediationConfirmed: true
-      packageOrLockfileChanged: false
-      validationStatus: pass_module_run_v2_local_validation
-    blockedWithoutFreshApproval:
-      - package_json_change
-      - pnpm_lock_yaml_change
-      - dependency_install_update_remove_or_audit_fix
-      - public_registry_or_advisory_network_lookup_without_explicit_scope
-      - source_or_test_change
-      - db_provider_browser_runtime
-      - release_readiness_or_final_pass_or_cost_calibration
-
-  - id: security-dependency-script-binary-policy-gate-2026-06-29
-    title: Security dependency script binary policy gate
-    phase: security-dependency-script-binary-policy-gate-2026-06-29
-    sourceStory: seeded_by_security_dependency_install_script_binary_surface_review_2026_06_29
-    dependencies:
-      - security-dependency-install-script-binary-surface-review-2026-06-29
-    taskPlanPolicy: required_before_any_package_script_binary_execution_or_policy_change
-    targetClosureItem: decide whether CLI/bin allowlist, ignored built dependency policy, or dependency script execution needs a future approved change
-    behaviorBoundary: docs_state_policy_gate_only_until_fresh_dependency_script_approval
-    executionProfile: dependency_script_binary_policy_gate_package
-    evidenceMode: package_name_surface_count_policy_reason_approval_status_summary_only
-    validationPolicy: dependency_script_binary_policy_gate_after_central_fresh_approval_and_task_materialization
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-script-binary-policy-gate.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-script-binary-policy-gate.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-script-binary-policy-gate.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-script-binary-policy-gate.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-script-binary-policy-gate.md
-      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-script-binary-policy-gate.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-script-binary-policy-gate.md
-      - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-script-binary-policy-gate.md
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-    blockedFiles:
-      - .env*
-      - package-lock.yaml
-      - package-lock.json
-      - src/**
-      - tests/**
-      - scripts/**
-      - src/db/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    validationCommands:
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - git diff --check
-      - git diff --name-only -- src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-script-binary-policy-gate-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-script-binary-policy-gate-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-script-binary-policy-gate-2026-06-29 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    taskKind: dependency_gate_candidate
-    moduleRunVersion: 2
-    status: closed
-    result: closed_no_current_actionable_dependency_script_binary_policy_gap_confirmed
-    nextRecommended: false
-    recommendedAfter: security-dependency-install-script-binary-surface-review-2026-06-29
-    priority: p2
-    severity: medium
-    approvalSource: blockedGatesCentralFreshApproval20260630
-    executionBranch: codex/security-dependency-script-binary-policy-gate-20260630
-    legacyBlockedGateCloseout:
-      supersedingClosedTaskId: security-dependency-install-script-policy-decision-2026-06-30
-      closureMode: recheck_current_policy_surface_then_close_legacy_blocked_queue_record
-      packageWorkspaceLockMutationDefault: blocked_unless_new_current_actionable_policy_gap_found
-      recheckedAt: "2026-06-30T08:47:18-07:00"
-      hasBinEntries: 46
-      requiresBuildEntries: 0
-      ignoredBuiltDependencies: 2
-      rootPackageScripts: 14
-      noCurrentActionablePolicyGapConfirmed: true
-      packageWorkspaceLockChanged: false
-      scriptOrBinaryExecution: false
-      validationStatus: pass_module_run_v2_local_validation
-    blockedWithoutFreshApproval:
-      - package_json_change
-      - pnpm_lock_yaml_change
-      - pnpm_workspace_yaml_change
-      - dependency_install_update_remove_or_audit_fix
-      - lifecycle_script_execution
-      - cli_binary_execution_outside_task_declared_validation
-      - source_or_test_change
-      - db_provider_browser_runtime
-      - release_readiness_or_final_pass_or_cost_calibration
-
-  - id: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
-    title: Test acceptance Provider AI e2e runtime boundary approval package
-    phase: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
-    sourceStory: seeded_by_test_acceptance_runtime_gate_split_review_2026_06_29
-    dependencies:
-      - test-acceptance-runtime-gate-split-review-2026-06-29
-    taskPlanPolicy: required_before_provider_ai_browser_e2e_runtime_approval_package
-    targetClosureItem: prepare Provider/AI/RAG/knowledge-labeled e2e runtime approval package without executing it
-    behaviorBoundary: docs_state::provider_ai_e2e_runtime_approval_package_only_execution_blocked
-    executionProfile: docs_state_approval_package
-    evidenceMode: redacted_lane_gate_command_label_summary_only
-    validationPolicy: provider_ai_e2e_runtime_boundary_package_after_central_fresh_approval_and_task_materialization
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - scripts/**
-      - src/db/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    validationCommands:
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/evidence/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    taskKind: approval_package_candidate
-    moduleRunVersion: 2
-    status: closed
-    result: pass_provider_ai_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution
-    nextRecommended: false
-    recommendedAfter: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
-    priority: p2
-    severity: medium
-    approvalSource: blockedGatesCentralFreshApproval20260630
-    executionBranch: codex/provider-ai-e2e-runtime-boundary-package-20260630
-    approvalPackage:
-      materializedAt: "2026-06-30T09:19:41-07:00"
-      runtimeExecutionApprovedByPackage: false
-      providerAiCallApprovedByPackage: false
-      browserOrE2eApprovedByPackage: false
-      devServerApprovedByPackage: false
-      evidenceMode: redacted_lane_gate_command_label_summary_only_no_provider_payload_prompt_raw_ai_io_dom_screenshot_trace_or_session_material
-      validationStatus: pass_module_run_v2_local_validation
-    blockedWithoutFreshApproval:
-      - browser_or_e2e_runtime
-      - dev_server_start
-      - provider_call_or_configuration
-      - prompt_provider_payload_raw_ai_io_evidence
-      - credential_cookie_token_session_localStorage_or_Authorization_header_capture
-      - raw_dom_screenshot_trace_or_html_report_evidence
-      - database_connection_read_write_migration_or_seed
-      - source_or_test_change
-      - package_or_lockfile_change
-      - release_readiness_or_final_pass_or_cost_calibration
-
-  - id: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-    title: Test acceptance DB-backed e2e runtime boundary approval package
-    phase: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-    sourceStory: seeded_by_test_acceptance_runtime_gate_split_review_2026_06_29
-    dependencies:
-      - test-acceptance-runtime-gate-split-review-2026-06-29
-    taskPlanPolicy: required_before_db_backed_browser_e2e_runtime_approval_package
-    targetClosureItem: prepare DB-backed/API data e2e runtime approval package without executing it
-    behaviorBoundary: docs_state::db_backed_e2e_runtime_approval_package_only_execution_blocked
-    executionProfile: docs_state_approval_package
-    evidenceMode: redacted_lane_gate_command_label_summary_only
-    validationPolicy: db_backed_e2e_runtime_boundary_package_after_central_fresh_approval_and_task_materialization
-    planPath: docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/evidence/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-      - docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-    blockedFiles:
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - scripts/**
-      - src/db/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - docs/04-agent-system/state/archive/**
-      - docs/04-agent-system/state/task-history-index.yaml
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    validationCommands:
-      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/evidence/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
-    taskKind: approval_package_candidate
-    moduleRunVersion: 2
-    status: closed
-    result: pass_db_backed_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution
-    nextRecommended: false
-    recommendedAfter: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
-    priority: p2
-    severity: medium
-    approvalSource: blockedGatesCentralFreshApproval20260630
-    executionBranch: codex/db-backed-e2e-runtime-boundary-package-20260630
-    approvalPackage:
-      materializedAt: "2026-06-30T09:03:12-07:00"
-      runtimeExecutionApprovedByPackage: false
-      databaseConnectionApprovedByPackage: false
-      browserOrE2eApprovedByPackage: false
-      devServerApprovedByPackage: false
-      evidenceMode: redacted_lane_gate_command_label_summary_only_no_raw_rows_pii_dom_screenshot_trace_or_session_material
-      validationStatus: pass_module_run_v2_local_validation
-    blockedWithoutFreshApproval:
-      - browser_or_e2e_runtime
-      - dev_server_start
-      - database_connection_read_write_migration_or_seed
-      - raw_db_rows_internal_ids_or_pii_evidence
-      - credential_cookie_token_session_localStorage_or_Authorization_header_capture
-      - raw_dom_screenshot_trace_or_html_report_evidence
-      - provider_call_or_configuration
-      - source_or_test_change
-      - package_or_lockfile_change
-      - release_readiness_or_final_pass_or_cost_calibration
-
   - id: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
     title: Test acceptance staging e2e runtime boundary approval package
     phase: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
