@@ -1,8 +1,160 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-log-list-query-filter-boundary-hardening-2026-06-30
-updatedAt: "2026-06-30T04:19:25-07:00"
+currentPhase: security-local-automation-session-storage-boundary-review-2026-06-30
+updatedAt: "2026-06-30T04:28:36-07:00"
+securityLocalAutomationSessionStorageBoundaryReview20260630:
+  taskId: security-local-automation-session-storage-boundary-review-2026-06-30
+  phase: security-local-automation-session-storage-boundary-review-2026-06-30
+  status: closed
+  result: pass_source_read_only_review_split_future_repair
+  priority: p2
+  severity: medium
+  taskKind: docs_state_source_read_only_security_inventory
+  moduleRunVersion: 2
+  approvedAt: "2026-06-30T00:14:42-07:00"
+  approvedBy: laozhuang
+  humanApproval: securityFollowupCentralApproval20260630
+  approvalConsumed: securityFollowupCentralApproval20260630
+  branch: codex/security-local-session-storage-review-20260630
+  claimedAt: "2026-06-30T04:28:36-07:00"
+  plannedAt: "2026-06-30T04:28:36-07:00"
+  materializedAt: "2026-06-30T04:28:36-07:00"
+  implementedAt: "2026-06-30T04:31:15-07:00"
+  validatedAt: "2026-06-30T04:32:29-07:00"
+  reviewedAt: "2026-06-30T04:31:15-07:00"
+  closedAt: "2026-06-30T04:32:29-07:00"
+  sourceStory: split_by_local-security-static-inventory-refresh-2026-06-30
+  targetClosureItem: Recheck local automation session storage and Authorization construction boundaries in student runtime/login/session-boundary owner files without browser runtime or source repair.
+  behaviorBoundary: local_docs_state_and_source_read_only_session_storage_boundary_review_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+  executionProfile: local_docs_state_source_read_only_security_review
+  evidenceMode: redacted_file_path_boundary_category_status_count_validation_commit_branch_merge_push_cleanup_summary_only_no_values
+  sourceReadOnly: true
+  noRuntimeExecution: true
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-local-security-static-inventory-refresh.md
+    - docs/05-execution-logs/evidence/2026-06-30-local-security-static-inventory-refresh.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-local-security-static-inventory-refresh.md
+    - docs/05-execution-logs/acceptance/2026-06-30-local-security-static-inventory-refresh.md
+    - docs/05-execution-logs/task-plans/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    - docs/05-execution-logs/evidence/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    - docs/05-execution-logs/acceptance/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    - src/features/student/studentRuntimeApi.ts
+    - src/app/(auth)/login/page.tsx
+    - src/server/contracts/user-auth/session-boundary.ts
+    - tests/unit/student-login-ui.test.ts
+    - tests/unit/auth/session-personal-auth-boundary.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+  credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_value_access_or_evidence
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+  recheckPolicy:
+    mustRecheckBeforeRepair: true
+    defaultAction: close_noop_if_no_current_actionable_issue_is_confirmed
+    repairScopeIfConfirmed: split_future_minimal_task_with_fresh_allowedFiles_and_blockedFiles_before_any_source_or_test_edit
+  evidenceRedaction:
+    allowed: task_ids_file_paths_boundary_category_status_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
+    forbidden:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_io
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_reports
+      - localStorage_sessionStorage_cookie_or_Authorization_header_values
+      - raw_exception_payload_or_stack_trace
+  validationCommands:
+    - 'rg -n "security-local-automation-session-storage-boundary-review-2026-06-30|securityFollowupCentralApproval20260630|sourceReadOnly: true|noRuntimeExecution: true|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md'
+    - 'rg -n "localStorage|sessionStorage|Authorization|cookie|studentRuntimeApi|session-boundary" src/features/student/studentRuntimeApi.ts src/app/(auth)/login/page.tsx src/server/contracts/user-auth/session-boundary.ts tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts'
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - git diff --check
+    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-local-automation-session-storage-boundary-review-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-local-automation-session-storage-boundary-review-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-local-automation-session-storage-boundary-review-2026-06-30 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-local-automation-session-storage-boundary-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+  reviewFindings:
+    localAutomationStudentTokenGate: pass_localhost_and_browser_automation_required
+    postLoginSessionBoundaryContract: pass_server_session_and_exposeBearerTokenToClient_false
+    browserStorageSecretExposure: pass_no_secret_or_runtime_storage_value_recorded
+    cookieBackedMarkerReadbackBoundary: split_future_repair_candidate_marker_should_not_flow_as_bearer_token_input
+    sourceOrTestChanged: false
+    browserRuntimeExecuted: false
+    credentialOrStorageValueEvidenceRecorded: false
+  nextRecommendedTask: security-local-session-marker-bearer-boundary-repair-2026-06-30
+  validationSummary:
+    validationStatus: pass_source_read_only_review_split_future_repair
+    anchorCheck: pass
+    keywordReview: pass
+    prettierWrite: pass
+    prettierCheck: pass
+    diffCheck: pass
+    blockedPathDiff: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: securityFollowupCentralApproval20260630
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: securityFollowupCentralApproval20260630
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: securityFollowupCentralApproval20260630
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: securityFollowupCentralApproval20260630
+  releaseReadinessClaimed: false
+  finalPassClaimed: false
+  costCalibrationExecuted: false
 securityLogListQueryFilterBoundaryHardening20260630:
   taskId: security-log-list-query-filter-boundary-hardening-2026-06-30
   phase: security-log-list-query-filter-boundary-hardening-2026-06-30
@@ -329,11 +481,70 @@ localSecurityStaticInventoryRefresh20260630:
       evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-log-list-query-filter-boundary-hardening.md
       auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-log-list-query-filter-boundary-hardening.md
     - id: security-local-automation-session-storage-boundary-review-2026-06-30
-      status: pending_read_only_first
+      status: closed
       priority: p2
       riskCategory: browser_storage_and_local_automation_session_boundary
       reason: Student runtime keeps a localhost automation-only storage bridge and a cookie-backed marker; source tests show constraints, but the boundary should be refreshed before any behavior change.
-      nextStep: materialize source_read_only_review_task_before_any_source_change
+      nextStep: split_future_minimal_repair_for_cookie_marker_bearer_boundary
+      reviewResult: split_future_repair_candidate_marker_should_not_flow_as_bearer_token_input
+      taskKind: docs_state_source_read_only_security_inventory
+      moduleRunVersion: 2
+      allowedFiles:
+        - docs/04-agent-system/state/project-state.yaml
+        - docs/04-agent-system/state/task-queue.yaml
+        - docs/05-execution-logs/task-plans/2026-06-30-security-local-automation-session-storage-boundary-review.md
+        - docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md
+        - docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md
+        - docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+      blockedFiles:
+        - .env*
+        - package.json
+        - package-lock.yaml
+        - package-lock.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - src/**
+        - tests/**
+        - scripts/**
+        - src/db/**
+        - drizzle/**
+        - migrations/**
+        - seed/**
+        - e2e/**
+        - playwright-report/**
+        - test-results/**
+        - .next/**
+      evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md
+      auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md
+      acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    - id: security-local-session-marker-bearer-boundary-repair-2026-06-30
+      status: pending_materialization_under_securityFollowupCentralApproval20260630
+      priority: p2
+      riskCategory: browser_storage_and_authorization_header_boundary
+      reason: Source-read-only review confirmed the cookie-backed session marker is a sentinel, not a bearer token, but the current student runtime reader can return any non-empty stored value for Authorization construction.
+      nextStep: materialize focused source_test_repair_task_before_editing
+      taskKind: focused_source_test_security_repair_candidate
+      proposedAllowedFiles:
+        - src/features/student/studentRuntimeApi.ts
+        - tests/unit/student-login-ui.test.ts
+        - docs/04-agent-system/state/project-state.yaml
+        - docs/04-agent-system/state/task-queue.yaml
+        - docs/05-execution-logs/task-plans/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+        - docs/05-execution-logs/evidence/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+        - docs/05-execution-logs/audits-reviews/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+        - docs/05-execution-logs/acceptance/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+      blockedFiles:
+        - .env*
+        - package.json
+        - package-lock.yaml
+        - package-lock.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - src/db/**
+        - drizzle/**
+        - migrations/**
+        - seed/**
+        - e2e/**
   nextRecommendedTask: security-log-list-query-filter-boundary-hardening-2026-06-30
   closeoutPolicy:
     localCommit:
@@ -6490,28 +6701,28 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f77b0b491aeb535c66c68290975140164a977c56
-  lastKnownOriginMasterSha: f77b0b491aeb535c66c68290975140164a977c56
+  lastKnownMasterSha: 4fc3799632cf0d2d26b46202382f3aae775c59d8
+  lastKnownOriginMasterSha: 4fc3799632cf0d2d26b46202382f3aae775c59d8
 currentTask:
-  id: security-log-list-query-filter-boundary-hardening-2026-06-30
+  id: security-local-automation-session-storage-boundary-review-2026-06-30
   status: closed
-  result: pass_log_list_query_filter_boundary_hardened
-  taskKind: focused_source_test_security_repair
+  result: pass_source_read_only_review_split_future_repair
+  taskKind: docs_state_source_read_only_security_inventory
   moduleRunVersion: 2
   priority: p2
   severity: medium
-  branch: codex/security-log-list-query-filter-boundary-20260630
+  branch: codex/security-local-session-storage-review-20260630
   approvedAt: "2026-06-30T00:14:42-07:00"
   approvedBy: laozhuang
   humanApproval: securityFollowupCentralApproval20260630
   approvalConsumed: securityFollowupCentralApproval20260630
-  claimedAt: "2026-06-30T04:12:48-07:00"
-  plannedAt: "2026-06-30T04:12:48-07:00"
-  materializedAt: "2026-06-30T04:12:48-07:00"
-  implementedAt: "2026-06-30T04:17:11-07:00"
-  validatedAt: "2026-06-30T04:19:25-07:00"
-  reviewedAt: "2026-06-30T04:19:25-07:00"
-  closedAt: "2026-06-30T04:19:25-07:00"
+  claimedAt: "2026-06-30T04:28:36-07:00"
+  plannedAt: "2026-06-30T04:28:36-07:00"
+  materializedAt: "2026-06-30T04:28:36-07:00"
+  implementedAt: "2026-06-30T04:31:15-07:00"
+  validatedAt: "2026-06-30T04:32:29-07:00"
+  reviewedAt: "2026-06-30T04:31:15-07:00"
+  closedAt: "2026-06-30T04:32:29-07:00"
   sourceStory: split_by_local-security-static-inventory-refresh-2026-06-30
   targetClosureItem: Recheck and harden admin audit log and AI call log list-query validator free-text filter length boundaries with focused regression coverage.
   behaviorBoundary: local_source_test_validator_repair_only_no_db_provider_browser_dependency_release_final_or_cost
