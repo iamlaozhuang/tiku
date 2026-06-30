@@ -350,11 +350,52 @@ tasks:
       costCalibrationExecuted: false
     candidateTaskSplit:
       - id: security-provider-metadata-redaction-allowlist-repair-2026-06-30
-        status: pending
+        status: closed
         priority: p2
         riskCategory: data_redaction_and_provider_metadata
         reason: Provider metadata mapper preserves arbitrary scalar metadata; new-write path appears constrained, but legacy or abnormal metadata should be hardened by allowlist or deny-sensitive-key behavior.
         nextStep: materialize focused source_test_repair_task_before_editing
+        taskKind: focused_source_test_security_repair_candidate
+        moduleRunVersion: 2
+        executionProfile: local_focused_unit_mapper_repair
+        allowedFiles:
+          - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+          - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+          - docs/04-agent-system/state/project-state.yaml
+          - docs/04-agent-system/state/task-queue.yaml
+          - docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+          - docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+          - docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+          - docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+        blockedFiles:
+          - .env*
+          - package.json
+          - package-lock.yaml
+          - package-lock.json
+          - pnpm-lock.yaml
+          - pnpm-workspace.yaml
+          - src/db/**
+          - drizzle/**
+          - migrations/**
+          - seed/**
+          - e2e/**
+          - playwright-report/**
+          - test-results/**
+          - .next/**
+        validationCommands:
+          - 'rg -n "security-provider-metadata-redaction-allowlist-repair-2026-06-30|securityFollowupCentralApproval20260630|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md'
+          - npx.cmd vitest run tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+          - npm.cmd run lint -- src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+          - npm.cmd run typecheck
+          - npx.cmd prettier --write --ignore-unknown src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+          - npx.cmd prettier --check --ignore-unknown src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+          - git diff --check
+          - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src/db drizzle migrations seed e2e playwright-report test-results .next .env
+          - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30
+          - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30
+          - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30 -SkipRemoteAheadCheck
+        evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+        auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
       - id: security-log-list-query-filter-boundary-hardening-2026-06-30
         status: pending
         priority: p2
@@ -391,11 +432,112 @@ tasks:
     dependencies:
       - local-security-static-inventory-refresh-2026-06-30
     taskPlanPolicy: required_before_source_or_test_edit
-    status: pending
-    result: pending_materialization
+    status: closed
+    result: pass_provider_metadata_allowlist_redaction_repaired
     priority: p2
     severity: medium
     taskKind: focused_source_test_security_repair_candidate
+    branch: codex/security-provider-metadata-redaction-20260630
+    approvedAt: "2026-06-30T03:58:50-07:00"
+    approvedBy: laozhuang
+    humanApproval: securityFollowupCentralApproval20260630_and_current_user_priority_provider_metadata_2026_06_30
+    approvalConsumed: securityFollowupCentralApproval20260630
+    claimedAt: "2026-06-30T03:58:50-07:00"
+    plannedAt: "2026-06-30T03:58:50-07:00"
+    materializedAt: "2026-06-30T03:58:50-07:00"
+    implementedAt: "2026-06-30T04:04:20-07:00"
+    validatedAt: "2026-06-30T04:04:20-07:00"
+    reviewedAt: "2026-06-30T04:04:20-07:00"
+    closedAt: "2026-06-30T04:04:20-07:00"
+    behaviorBoundary: local_source_test_security_repair_only_no_db_provider_browser_dependency_release_final_or_cost
+    executionProfile: local_focused_unit_mapper_repair
+    evidenceMode: redacted_task_file_path_synthetic_marker_validation_commit_branch_merge_push_cleanup_summary_only
+    allowedFiles:
+      - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+      - docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-30-local-security-static-inventory-refresh.md
+      - docs/05-execution-logs/evidence/2026-06-30-local-security-static-inventory-refresh.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-local-security-static-inventory-refresh.md
+      - docs/05-execution-logs/acceptance/2026-06-30-local-security-static-inventory-refresh.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+    evidenceRedaction:
+      allowed: task_ids_file_paths_synthetic_test_marker_key_names_status_counts_validation_commands_commit_branch_merge_push_cleanup_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+        - raw_exception_payload_or_stack_trace
+    validationCommands:
+      - 'rg -n "security-provider-metadata-redaction-allowlist-repair-2026-06-30|securityFollowupCentralApproval20260630|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md'
+      - npx.cmd vitest run tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - npm.cmd run lint -- src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+      - npx.cmd prettier --check --ignore-unknown src/server/repositories/admin-ai-audit-log-runtime-repository.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src/db drizzle migrations seed e2e playwright-report test-results .next .env
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-provider-metadata-redaction-allowlist-repair-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    validationSummary:
+      validationStatus: pass_provider_metadata_allowlist_redaction_repaired
+      redBeforeRepair: true
+      focusedUnit: pass_1_file_9_tests
+      lint: pass
+      typecheck: pass
+      prettierWrite: pass
+      prettierCheck: pass
+      diffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommitHardening: pass_after_candidate_summary_scope_anchor_refresh
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedTask: security-log-list-query-filter-boundary-hardening-2026-06-30
     candidateScope:
       proposedAllowedFiles:
         - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
@@ -420,7 +562,24 @@ tasks:
         - e2e/**
       boundaries: no_db_connection_no_provider_call_no_env_secret_no_browser_no_dependency_no_release_final_or_cost
       validationHint: focused_unit_plus_lint_typecheck_diff_module_run_v2
-    closeoutPolicy: must_be_materialized_in_task_before_execution
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: securityFollowupCentralApproval20260630_and_current_user_priority_provider_metadata_2026_06_30
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: securityFollowupCentralApproval20260630_and_current_user_priority_provider_metadata_2026_06_30
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: securityFollowupCentralApproval20260630_and_current_user_priority_provider_metadata_2026_06_30
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: securityFollowupCentralApproval20260630_and_current_user_priority_provider_metadata_2026_06_30
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
 
   - id: security-log-list-query-filter-boundary-hardening-2026-06-30
     title: Log list query filter boundary hardening

@@ -21,6 +21,7 @@ import {
   createAdminAiAuditLogOpsService,
   createUnavailableAdminAiAuditLogOpsService,
 } from "@/server/services/admin-ai-audit-log-ops-service";
+import { createPostgresAdminAiAuditLogRuntimeRepositories } from "@/server/repositories/admin-ai-audit-log-runtime-repository";
 import { createAdminAiAuditLogOpsRouteHandlers } from "@/server/services/admin-ai-audit-log-ops-route";
 import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
 
@@ -182,6 +183,58 @@ describe("admin ai and audit log ops baseline", () => {
       data: null,
       pagination: null,
     });
+  });
+
+  it("allowlists provider metadata exposed by runtime repository mapping", async () => {
+    const execute = vi
+      .fn()
+      .mockResolvedValueOnce([
+        {
+          public_id: "model-provider-public-redaction",
+          provider_key: "local_mock",
+          display_name: "Local Mock",
+          api_key_last_four: "0001",
+          base_url: null,
+          secret_status: "configured",
+          provider_metadata: {
+            runtime: "unit",
+            secretStorage: "external_ref_required",
+            apiKey: "x",
+            token: "x",
+            promptDigest: "x",
+            nested: {
+              token: "x",
+            },
+          },
+          is_enabled: true,
+          updated_at: "2026-05-26T00:00:00.000Z",
+        },
+      ])
+      .mockResolvedValueOnce([{ value: 1 }]);
+    const repositories = createPostgresAdminAiAuditLogRuntimeRepositories({
+      createDatabase: () => ({ execute }) as never,
+    });
+
+    const result = await repositories.listModelProviders?.(
+      createAdminAiAuditLogListQuery(),
+    );
+
+    expect(result?.modelProviders[0]?.providerMetadata).toEqual({
+      runtime: "unit",
+      secretStorage: "external_ref_required",
+    });
+    expect(result?.modelProviders[0]?.providerMetadata).not.toHaveProperty(
+      "apiKey",
+    );
+    expect(result?.modelProviders[0]?.providerMetadata).not.toHaveProperty(
+      "token",
+    );
+    expect(result?.modelProviders[0]?.providerMetadata).not.toHaveProperty(
+      "promptDigest",
+    );
+    expect(
+      JSON.stringify(result?.modelProviders[0]?.providerMetadata),
+    ).not.toContain("apiKey");
   });
 
   it("adapts ai and audit operation route requests to standard responses", async () => {

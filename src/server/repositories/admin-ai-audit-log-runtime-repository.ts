@@ -1380,17 +1380,33 @@ function toRedactedMetadata(value: unknown): RedactedMetadata {
   const metadata: RedactedMetadata = {};
 
   for (const [key, item] of Object.entries(value)) {
-    if (
-      typeof item === "string" ||
-      typeof item === "number" ||
-      typeof item === "boolean" ||
-      item === null
-    ) {
-      metadata[key] = item;
+    const safeValue = toSafeProviderMetadataValue(key, item);
+
+    if (safeValue !== undefined) {
+      metadata[key] = safeValue;
     }
   }
 
   return metadata;
+}
+
+function toSafeProviderMetadataValue(
+  key: string,
+  value: unknown,
+): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  if (key === "runtime" && (value === "unit" || value === "local_mock")) {
+    return value;
+  }
+
+  if (key === "secretStorage" && value === "external_ref_required") {
+    return value;
+  }
+
+  return undefined;
 }
 
 function toIsoString(value: Date | string): string {
