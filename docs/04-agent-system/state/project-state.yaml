@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-followup-approval-materialization-2026-06-30
-updatedAt: "2026-06-30T00:14:42-07:00"
+currentPhase: security-remaining-inventory-triage-2026-06-30
+updatedAt: "2026-06-30T00:35:29-07:00"
 securityFollowupApprovalMaterialization20260630:
   taskId: security-followup-approval-materialization-2026-06-30
   phase: security-followup-approval-materialization-2026-06-30
@@ -5032,7 +5032,7 @@ repository:
   lastKnownMasterSha: 0e8594c68ea91a165cb2440080e7635076a7d7fc
   lastKnownOriginMasterSha: 0e8594c68ea91a165cb2440080e7635076a7d7fc
 currentTask:
-  id: security-followup-approval-materialization-2026-06-30
+  id: security-remaining-inventory-triage-2026-06-30
   status: closed
   result: pass_central_followup_authorization_materialized_without_repair_execution
   sourceStory: current_user_approved_followup_authorization_packages_1_to_9_after_security_dev_toolchain_gate_closeout
@@ -5188,10 +5188,230 @@ currentTask:
     moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     validationStatus: pass_docs_state_authorization_materialization_module_run_v2
+securityRemainingInventoryTriage20260630:
+  taskId: security-remaining-inventory-triage-2026-06-30
+  phase: security-remaining-inventory-triage-2026-06-30
+  status: closed
+  result: pass_remaining_inventory_triaged_next_dependency_gate_candidate_seeded_no_repair_execution
+  priority: p1
+  severity: governance
+  taskKind: security_remaining_inventory_triage
+  moduleRunVersion: 2
+  approvedAt: "2026-06-30T00:31:55-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_items_1_to_9_local_repair_loop_only_with_per_task_materialization_required
+  approvalConsumed: securityFollowupCentralApproval20260630
+  branch: codex/security-remaining-inventory-triage-20260630
+  claimedAt: "2026-06-30T00:31:55-07:00"
+  plannedAt: "2026-06-30T00:31:55-07:00"
+  materializedAt: "2026-06-30T00:31:55-07:00"
+  implementedAt: "2026-06-30T00:35:29-07:00"
+  validatedAt: "2026-06-30T00:35:29-07:00"
+  reviewedAt: "2026-06-30T00:35:29-07:00"
+  closedAt: "2026-06-30T00:35:29-07:00"
+  sourceStory: security_followup_package_2_read_only_remaining_inventory_under_central_local_authorization
+  targetClosureItem: recheck remaining security and detail optimization inventory and split next minimal executable tasks without source repair
+  behaviorBoundary: docs_state_read_only_source_test_structure_inventory_no_source_test_write_no_db_no_provider_no_browser_no_dependency_no_release
+  executionProfile: bounded_parent_agent_inventory_triage_not_exhaustive_codex_security_scan
+  evidenceMode: redacted_file_path_risk_category_severity_status_count_next_task_summary_only
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-06-30-security-remaining-inventory-triage.md
+    - docs/05-execution-logs/task-plans/2026-06-30-security-remaining-inventory-triage.md
+    - docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md
+    - docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/open-source-introduction.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/dependency-introduction-gate.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/acceptance/**
+    - package.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+  credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_no_package_manager_resolution_no_lifecycle_script
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+  inventoryBuckets:
+    - ui_ux_detail_optimization
+    - permission_and_role_boundary
+    - api_contract_and_input_validation
+    - data_redaction_and_logs
+    - ai_provider_boundary
+    - db_schema_migration_risk
+    - dependency_and_supply_chain_risk
+    - test_and_acceptance_regression_risk
+  evidenceRedaction:
+    allowed: task_ids_file_paths_module_names_risk_category_severity_status_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
+    forbidden:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_io
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_reports
+      - raw_exception_payload_or_stack_trace
+  validationCommands:
+    - 'rg -n "security-remaining-inventory-triage-2026-06-30|securityFollowupCentralApproval20260630|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md'
+    - powershell.exe -NoProfile -Command "rg --files src tests scripts docs/05-execution-logs docs/01-requirements package.json pnpm-lock.yaml pnpm-workspace.yaml | Measure-Object"
+    - powershell.exe -NoProfile -Command "rg -n 'authorization|permission|role|effectiveEdition|redeem_code|audit_log|ai_call_log|model_provider|prompt_template|drizzle|migrate|seed|sortBy|pageSize|console\.|logger|redact' src tests scripts docs/05-execution-logs | Measure-Object"
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/task-plans/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/task-plans/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md
+    - git diff --check
+    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-remaining-inventory-triage-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-remaining-inventory-triage-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-remaining-inventory-triage-2026-06-30 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-remaining-inventory-triage.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-security-remaining-inventory-triage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: securityFollowupCentralApproval20260630
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: securityFollowupCentralApproval20260630
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: securityFollowupCentralApproval20260630
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: securityFollowupCentralApproval20260630
+  blockedWithoutFreshMaterialization:
+    - source_or_test_change
+    - package_or_lockfile_change
+    - dependency_install_update_remove_audit_fix_or_lifecycle_script
+    - browser_or_e2e_runtime
+    - database_connection_or_mutation
+    - schema_migration_or_seed
+    - provider_call_or_configuration
+    - env_secret_credential_cookie_token_session_localStorage_Authorization_header_access
+    - staging_prod_cloud_deploy
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - pr_or_force_push
+  inventorySummary:
+    codexSecurityScanMode: bounded_parent_agent_inventory_triage_not_exhaustive_repository_scan
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    dependencyInstallUpdateRemoveAuditFixExecuted: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
+    structureCounts:
+      sourceTestScriptTotal: 1136
+      apiRouteFiles: 116
+      serverFiles: 687
+      serviceFiles: 260
+      repositoryFiles: 65
+      validatorFiles: 139
+      testFiles: 99
+      scriptFiles: 125
+    currentBucketStatus:
+      uiUxDetailOptimization: low_risk_inventory_followups_closed_no_new_immediate_repair
+      permissionAndRoleBoundary: prior_high_and_medium_findings_closed_no_new_confirmed_local_repair
+      apiContractInputValidation: prior_sort_boundary_not_actionable_error_envelope_fixed_low_contract_watch_only
+      dataRedactionAndLogs: prior_three_followups_closed_no_new_confirmed_local_repair
+      aiProviderBoundary: provider_budget_zero_existing_gates_reconciled_provider_runtime_still_blocked
+      dbSchemaMigrationRisk: local_guard_and_runtime_boundary_closed_schema_migration_seed_still_blocked
+      dependencySupplyChainRisk: advisory_lookup_toolchain_package_manager_closed_remaining_deprecated_transitive_and_install_script_policy_gates_need_task_materialization
+      testAcceptanceRegressionRisk: local_unit_baseline_green_runtime_e2e_provider_db_staging_gates_still_blocked
+    remainingCandidateCount:
+      localNonRuntimeNonDeployCandidates: 3
+      blockedByCurrentGoalOrFreshHighRiskApproval: 4
+      newConfirmedP1P2SourceRepairFindings: 0
+    seededFollowUpTaskCandidates:
+      - taskId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+        priority: p2
+        severity: medium
+        status: pending_task_materialization_under_securityFollowupCentralApproval20260630
+        reason: remaining_dependency_gate_candidate_after_public_advisory_toolchain_package_manager_and_install_script_reviews
+        authorizationNeed: dependency_gate_materialization_package_json_pnpm_lock_yaml_write_only_if_recheck_proves_necessary
+      - taskId: security-dependency-install-script-policy-decision-2026-06-30
+        priority: p2
+        severity: medium
+        status: pending_task_materialization_under_securityFollowupCentralApproval20260630
+        reason: remaining_install_script_and_cli_binary_policy_decision_no_lifecycle_execution
+        authorizationNeed: docs_state_or_package_policy_only_no_lifecycle_script_no_install_without_gate
+      - taskId: governance-queue-closed-task-archive-candidate-2026-06-30
+        priority: p3
+        severity: governance
+        status: pending_task_materialization_under_securityFollowupCentralApproval20260630
+        reason: optional_queue_hygiene_after_security_inventory_closeout
+        authorizationNeed: docs_state_archive_only_no_source_runtime
+    nextRecommendedTaskId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+  validationSummary:
+    rgAnchors: pass
+    inventoryFileCountCommand: pass_6455
+    inventoryRiskPatternCountCommand: pass_39603
+    prettierScoped: pass
+    gitDiffCheck: pass
+    blockedPathDiff: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_anchor_repair
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    dependencyInstallUpdateRemoveAuditFixExecuted: false
+    lifecycleScriptExecution: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    devServerExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    sensitiveEvidenceCaptured: false
+    validationStatus: pass_docs_state_read_only_inventory_module_run_v2
 nextTaskCandidate:
-  id: security-remaining-inventory-triage-2026-06-30
-  status: approved_pending_task_materialization_after_current_authorization_materialization_closes
-  reason: first next task should recheck remaining security/detail optimization inventory read-only before selecting any minimal repair
+  id: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+  status: pending_task_materialization_under_securityFollowupCentralApproval20260630
+  reason: remaining non-runtime non-deploy security follow-up with current evidence; must recheck before any package or lockfile change
   approvalSource: securityFollowupCentralApproval20260630
   requiredBeforeExecution:
     - create_or_switch_to_codex_short_branch
