@@ -390,24 +390,37 @@ tasks:
     evidenceMode: redacted_file_path_mapper_guard_test_status_count_validation_summary_only
     taskKind: focused_source_test_security_repair
     moduleRunVersion: 2
-    status: pending_task_materialization_under_central_local_security_repair_authorization
+    status: closed
+    result: pass_focused_auth_mapper_source_boundary_repair
     priority: p0
     severity: medium
     findingId: unit-b-auth-mapper-001
     approvalAvailableFrom: detailSecurityLocalContinuationApproval20260629
     approvalCategory: local_low_or_medium_confirmed_minimal_source_and_test_repairs
+    approvedAt: "2026-06-29T21:28:32-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_message_central_authorized_items_1_to_7_for_detail_security_local_continuation
+    approvalConsumed: detail_security_local_continuation_central_authorization_2026_06_29_local_low_or_medium_confirmed_minimal_source_and_test_repairs
     seededAt: "2026-06-29T21:49:35-07:00"
-    plannedAllowedFiles:
+    branch: codex/auth-mapper-source-boundary-repair-20260629
+    claimedAt: "2026-06-29T22:03:13-07:00"
+    plannedAt: "2026-06-29T22:03:13-07:00"
+    materializedAt: "2026-06-29T22:03:13-07:00"
+    implementedAt: "2026-06-29T22:09:57-07:00"
+    validatedAt: "2026-06-29T22:09:57-07:00"
+    closedAt: "2026-06-29T22:13:25-07:00"
+    allowedFiles:
       - src/server/mappers/auth-mapper.ts
       - src/server/mappers/auth-mapper.test.ts
       - tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
       - docs/05-execution-logs/task-plans/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
       - docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
       - docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
       - docs/05-execution-logs/acceptance/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
-    plannedBlockedFiles:
+    blockedFiles:
       - .env*
       - package.json
       - package-lock.yaml
@@ -447,11 +460,38 @@ tasks:
       - task_plan
       - closeoutPolicy
       - focused_red_green_tests
-    plannedValidation:
+    validationCommands:
       - npx.cmd vitest run src/server/mappers/auth-mapper.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
-      - npx.cmd prettier --check --ignore-unknown TASK_SCOPED_FILES
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npx.cmd prettier --write --ignore-unknown src/server/mappers/auth-mapper.ts src/server/mappers/auth-mapper.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+      - npx.cmd prettier --check --ignore-unknown src/server/mappers/auth-mapper.ts src/server/mappers/auth-mapper.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/task-plans/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md docs/05-execution-logs/acceptance/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
       - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e scripts playwright-report test-results .next .env
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_local_low_or_medium_confirmed_minimal_source_and_test_repairs
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_local_low_or_medium_confirmed_minimal_source_and_test_repairs
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_local_low_or_medium_confirmed_minimal_source_and_test_repairs
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_local_low_or_medium_confirmed_minimal_source_and_test_repairs
+    validationStatus: pass_focused_unit_lint_typecheck_prettier_diff_module_run_v2
 
   - id: security-unit-b-auth-role-boundary-static-review-2026-06-29
     title: Security Unit B auth role boundary static review

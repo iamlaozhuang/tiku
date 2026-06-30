@@ -5,7 +5,7 @@ import type {
   AuthenticatedUserDto,
   UserRegistrationDto,
 } from "../contracts/auth-contract";
-import type { AdminRole, AuthorizationEdition } from "../models/auth";
+import type { AdminRole } from "../models/auth";
 import type { AuthUserAccessRow } from "../repositories/auth-repository";
 
 export type ResolvedAuthContext = {
@@ -21,28 +21,21 @@ function hasAdminRole(adminRoles: readonly AdminRole[], role: AdminRole) {
   return adminRoles.includes(role);
 }
 
-function resolveOrganizationWorkspaceEffectiveEdition(
+function hasOrganizationWorkspaceRole(
   adminRoles: readonly AdminRole[],
-): AuthorizationEdition | null {
-  if (hasAdminRole(adminRoles, "org_advanced_admin")) {
-    return "advanced";
-  }
-
-  if (hasAdminRole(adminRoles, "org_standard_admin")) {
-    return "standard";
-  }
-
-  return null;
+): boolean {
+  return (
+    hasAdminRole(adminRoles, "org_advanced_admin") ||
+    hasAdminRole(adminRoles, "org_standard_admin")
+  );
 }
 
 function mapAdminWorkspaceCapabilityToApi(
   authUser: AuthUserAccessRow,
 ): AdminWorkspaceCapabilitySummary | undefined {
   const adminRoles = authUser.admin_roles ?? [];
-  const organizationEffectiveEdition =
-    resolveOrganizationWorkspaceEffectiveEdition(adminRoles);
 
-  if (organizationEffectiveEdition === null) {
+  if (!hasOrganizationWorkspaceRole(adminRoles)) {
     return undefined;
   }
 
@@ -51,12 +44,10 @@ function mapAdminWorkspaceCapabilityToApi(
   return {
     adminRoles,
     organizationPublicId,
-    organizationEffectiveEdition,
-    organizationAuthorizationSource: "org_auth",
-    capabilitySource: "service_computed",
-    canUseOrganizationAdvancedWorkspace:
-      organizationEffectiveEdition === "advanced" &&
-      organizationPublicId !== null,
+    organizationEffectiveEdition: null,
+    organizationAuthorizationSource: null,
+    capabilitySource: "session_fallback",
+    canUseOrganizationAdvancedWorkspace: false,
   };
 }
 

@@ -74,7 +74,7 @@ afterEach(() => {
 });
 
 describe("organization admin standard/advanced workspace source contract", () => {
-  it("maps organization admin sessions to a service-side workspace capability summary", () => {
+  it("maps organization admin sessions to an explicit fallback workspace capability summary", () => {
     const mappedAuthContext = mapAuthContextToApi({
       session: {
         token: "s",
@@ -100,10 +100,10 @@ describe("organization admin standard/advanced workspace source contract", () =>
     expect(mappedAuthContext.user.adminWorkspaceCapability).toEqual({
       adminRoles: ["org_advanced_admin"],
       organizationPublicId: "organization-source-contract-001",
-      organizationEffectiveEdition: "advanced",
-      organizationAuthorizationSource: "org_auth",
-      capabilitySource: "service_computed",
-      canUseOrganizationAdvancedWorkspace: true,
+      organizationEffectiveEdition: null,
+      organizationAuthorizationSource: null,
+      capabilitySource: "session_fallback",
+      canUseOrganizationAdvancedWorkspace: false,
     });
     expect(mappedAuthContext.user.adminWorkspaceCapability).not.toHaveProperty(
       "id",
