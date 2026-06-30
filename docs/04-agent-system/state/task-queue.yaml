@@ -687,13 +687,23 @@ tasks:
         approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
     taskKind: dependency_gate_candidate
     moduleRunVersion: 2
-    status: blocked_requires_fresh_dependency_approval
-    result: pending_owner_selection_and_dependency_gate_approval
+    status: closed
+    result: closed_no_current_actionable_dependency_deprecated_transitive_gap_confirmed
     nextRecommended: false
     recommendedAfter: security-dependency-deprecated-transitive-review-2026-06-29
     priority: p2
     severity: medium
-    approvalSource: fresh_dependency_gate_approval_required_for_package_or_lockfile_change
+    approvalSource: blockedGatesCentralFreshApproval20260630
+    executionBranch: codex/security-dependency-deprecated-transitive-gate-20260630
+    legacyBlockedGateCloseout:
+      supersedingClosedTaskId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+      closureMode: recheck_current_state_then_close_legacy_blocked_queue_record
+      packageOrLockfileMutationDefault: blocked_unless_new_current_actionable_gap_found
+      recheckedAt: "2026-06-30T08:15:06-07:00"
+      currentDeprecatedEntryCount: 2
+      noSafeMinimalLocalRemediationConfirmed: true
+      packageOrLockfileChanged: false
+      validationStatus: pass_module_run_v2_local_validation
     blockedWithoutFreshApproval:
       - package_json_change
       - pnpm_lock_yaml_change

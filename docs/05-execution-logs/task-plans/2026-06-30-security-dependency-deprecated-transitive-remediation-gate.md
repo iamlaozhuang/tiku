@@ -3,7 +3,10 @@
 ## Task
 
 - Task id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-30`
+- Legacy blocked queue record being closed by this serial run:
+  `security-dependency-deprecated-transitive-remediation-gate-2026-06-29`
 - Branch: `codex/security-dep-transitive-gate-20260630`
+- Current branch for legacy closeout: `codex/security-dependency-deprecated-transitive-gate-20260630`
 - Goal: recheck current deprecated transitive dependency status and perform only necessary minimal dependency metadata or package/lockfile remediation.
 - Non-goals: no source or test edits, no DB connection or mutation, no schema/migration/seed, no Provider/AI call or configuration, no env/secret/credential access, no browser/e2e/dev server, no staging/prod/cloud/deploy, no release readiness, no final Pass, no Cost Calibration, no PR, and no force-push.
 
@@ -58,6 +61,16 @@
 4. Decide whether minimal remediation is necessary.
 5. If remediation is necessary, use the smallest package/lockfile change and `--ignore-scripts`; otherwise close with no dependency change.
 6. Run declared validation, write evidence/audit/acceptance/traceability, then commit, fast-forward merge, push, and cleanup under `securityFollowupCentralApproval20260630`.
+
+## Legacy Blocked Gate Closeout Addendum
+
+- Central fresh approval source: `blockedGatesCentralFreshApproval20260630`.
+- Legacy queue id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-29`.
+- Superseding closed task id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-30`.
+- Closeout approach: recheck current lockfile deprecation entries and current superseding evidence, then close the legacy
+  blocked record as `closed_no_current_actionable_dependency_deprecated_transitive_gap_confirmed` if no new actionable
+  package or lockfile remediation is found.
+- Package and lockfile mutation remains blocked unless the recheck finds a new current actionable gap.
 
 ## Validation Commands
 

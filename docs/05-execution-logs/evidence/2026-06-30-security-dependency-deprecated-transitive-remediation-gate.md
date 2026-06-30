@@ -1,7 +1,10 @@
 # Security Dependency Deprecated Transitive Remediation Gate Evidence
 
 - Task id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-30`
+- Legacy blocked queue record closed by current serial run:
+  `security-dependency-deprecated-transitive-remediation-gate-2026-06-29`
 - Branch: `codex/security-dep-transitive-gate-20260630`
+- Current branch for legacy closeout: `codex/security-dependency-deprecated-transitive-gate-20260630`
 - Evidence status: pass.
 - Result: pass.
 - Result detail: pass_current_deprecated_transitive_rechecked_no_safe_minimal_package_or_lockfile_change_available.
@@ -96,3 +99,45 @@ connection, schema/migration/seed, raw DB rows, Provider/AI calls, Provider/mode
 browser/runtime/dev-server/e2e, source/test changes, credentials, env/secret/connection strings, registry tokens,
 private registry URLs, account sessions, cookies, tokens, localStorage, Authorization headers, raw DOM, screenshots,
 traces, and sensitive evidence capture remain blocked.
+
+## Legacy Blocked Gate Closeout Addendum
+
+- Legacy queue id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-29`.
+- Approval consumed: `blockedGatesCentralFreshApproval20260630`.
+- Current branch: `codex/security-dependency-deprecated-transitive-gate-20260630`.
+- Superseding closed task id: `security-dependency-deprecated-transitive-remediation-gate-2026-06-30`.
+- Closeout result: `closed_no_current_actionable_dependency_deprecated_transitive_gap_confirmed`.
+
+### Current Recheck
+
+| Check                              | Result | Redacted summary                                                                                |
+| ---------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| Current `deprecated:` entries      | pass   | 2 entries remain in `pnpm-lock.yaml`.                                                           |
+| Current dependency chain           | pass   | Remaining entries are under the `drizzle-kit` to `@esbuild-kit/esm-loader` chain.               |
+| Direct package latest metadata     | pass   | Current direct package version remains latest and still declares the same upstream chain.       |
+| Deprecated upstream package status | pass   | Current `@esbuild-kit` packages still report deprecated status in public registry metadata.     |
+| Prior stale deprecated entry       | pass   | Prior `node-domexception` entry remains absent from the current lockfile.                       |
+| Minimal local remediation          | pass   | No safe minimal package or lockfile mutation was found; package and lockfile remained stable.   |
+| Forbidden boundary                 | pass   | No DB, Provider/AI, browser/e2e/dev-server, credential, deploy, release, final, or cost action. |
+
+### Legacy Validation Results
+
+| Command                                                                                                                                                                                                                                            | Result  | Redacted summary                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------- |
+| `rg -n "deprecated:" pnpm-lock.yaml`                                                                                                                                                                                                               | pass    | 2 entries found.                                            |
+| `rg -n "@esbuild-kit/esm-loader\|@esbuild-kit/core-utils\|node-domexception\|drizzle-kit\|shadcn\|node-fetch\|fetch-blob" package.json pnpm-lock.yaml pnpm-workspace.yaml`                                                                         | pass    | Current dependency chain rechecked.                         |
+| `npm.cmd view drizzle-kit@latest version` and scoped dependency lookup                                                                                                                                                                             | pass    | Current direct version remains latest and points to chain.  |
+| `npm.cmd view shadcn@latest version` and scoped dependency lookup                                                                                                                                                                                  | pass    | Current direct version remains latest; stale chain absent.  |
+| `npm.cmd view @esbuild-kit/esm-loader@2.6.5 version deprecated`                                                                                                                                                                                    | pass    | Public metadata confirms deprecated status.                 |
+| `npm.cmd view @esbuild-kit/core-utils@3.3.2 version deprecated`                                                                                                                                                                                    | pass    | Public metadata confirms deprecated status.                 |
+| `npm.cmd view node-domexception@1.0.0 version deprecated`                                                                                                                                                                                          | pass    | Public metadata checked; no current lockfile hit.           |
+| `conditional only if remediation is required: corepack pnpm install --lockfile-only --ignore-scripts`                                                                                                                                              | skipped | Not executed because no safe minimal remediation was found. |
+| `npx.cmd prettier --write --ignore-unknown ...`                                                                                                                                                                                                    | pass    | Scoped formatting completed.                                |
+| `npx.cmd prettier --check --ignore-unknown ...`                                                                                                                                                                                                    | pass    | Scoped formatting check passed.                             |
+| `npm.cmd run lint`                                                                                                                                                                                                                                 | pass    | ESLint passed.                                              |
+| `npm.cmd run typecheck`                                                                                                                                                                                                                            | pass    | TypeScript check passed.                                    |
+| `git diff --check`                                                                                                                                                                                                                                 | pass    | No whitespace errors.                                       |
+| `git diff --name-only -- src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml package-lock.yaml package-lock.json` | pass    | No blocked path output.                                     |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29`                                              | pass    | Module Run v2 pre-commit hardening passed.                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29`                                         | pass    | Module Run v2 closeout readiness passed.                    |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-29 -SkipRemoteAheadCheck`                          | pass    | Module Run v2 pre-push readiness passed.                    |
