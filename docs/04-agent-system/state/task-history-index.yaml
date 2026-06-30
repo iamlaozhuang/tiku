@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: governance-closed-task-archive-index-cleanup-2026-06-30
-  updatedAt: "2026-06-30T06:48:18-07:00"
+  updatedByTask: post-blocked-gates-closed-task-archive-index-cleanup-2026-06-30
+  updatedAt: "2026-06-30T07:29:38-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16641,3 +16641,30 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-28T09:45:54-07:00"
+  - id: post-local-quality-next-scope-decision-package-2026-06-30
+    phase: post-local-quality-next-scope-decision-package-2026-06-30
+    status: closed
+    taskKind: docs_state_next_scope_decision_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T07:04:35-07:00"
+  - id: governance-closed-task-archive-index-cleanup-2026-06-30
+    phase: governance-closed-task-archive-index-cleanup-2026-06-30
+    status: closed
+    taskKind: docs_state_governance_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:51:16-07:00"
+  - id: blocked-gates-serial-approval-package-2026-06-30
+    phase: blocked-gates-serial-approval-package-2026-06-30
+    status: closed
+    taskKind: docs_state_serial_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-blocked-gates-serial-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-blocked-gates-serial-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T07:24:08-07:00"
