@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: terminal-active-queue-archive-index-cleanup-2026-06-30
-  updatedAt: "2026-06-30T09:45:00-07:00"
+  updatedByTask: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
+  updatedAt: "2026-06-30T10:15:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16722,3 +16722,21 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: ""
+  - id: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
+    phase: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
+    status: closed
+    taskKind: approval_package_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-staging-e2e-runtime-boundary-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: terminal-active-queue-archive-index-cleanup-2026-06-30
+    phase: terminal-active-queue-archive-index-cleanup-2026-06-30
+    status: closed
+    taskKind: docs_state_governance_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-terminal-active-queue-archive-index-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T09:58:00-07:00"
