@@ -109,6 +109,152 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: detail-security-next-approval-decision-package-2026-06-29
+    title: Detail security next approval decision package
+    phase: detail-security-next-approval-decision-package-2026-06-29
+    sourceStory: active_thread_goal_continuation_after_blocked_remainder_consolidation_2026_06_29
+    dependencies:
+      - detail-security-blocked-remainder-consolidation-2026-06-29
+    taskPlanPolicy: required_before_docs_state_approval_decision_package
+    targetClosureItem: Define next-stage fresh approval decision units without unblocking or executing blocked work
+    behaviorBoundary: docs_state_only::approval_decision_package_no_runtime_no_source_no_dependency_no_db_no_provider_no_release
+    executionProfile: docs_state_fresh_approval_decision_package
+    evidenceMode: redacted_approval_unit_blocker_class_priority_status_next_action_only
+    taskKind: governance_fresh_approval_decision_package
+    moduleRunVersion: 2
+    status: closed
+    result: pass_fresh_approval_units_defined_no_blocked_execution
+    priority: p1
+    severity: medium
+    approvedAt: "2026-06-29T17:03:16-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+    branch: codex/next-approval-decision-package-20260629
+    claimedAt: "2026-06-29T17:03:16-07:00"
+    plannedAt: "2026-06-29T17:03:16-07:00"
+    materializedAt: "2026-06-29T17:03:16-07:00"
+    implementedAt: "2026-06-29T17:06:19-07:00"
+    validatedAt: "2026-06-29T17:06:19-07:00"
+    reviewedAt: "2026-06-29T17:06:19-07:00"
+    closedAt: "2026-06-29T17:06:19-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md
+      - docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md
+      - docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/acceptance/**
+      - docs/01-requirements/traceability/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - src/db/**
+      - drizzle.config.ts
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_read_write_schema_migration_seed_or_raw_row_access
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io_provider_budget_zero
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: task_id_approval_unit_blocker_class_severity_priority_status_count_next_action_validation_command_commit_branch_merge_push_cleanup_only
+      forbidden:
+        - credential_cookie_token_session_auth_header_values
+        - raw_db_rows_internal_ids_email_phone_plaintext_redeem_code
+        - raw_dom_screenshots_traces_html_reports
+        - provider_payload_prompt_raw_ai_input_raw_ai_output
+        - complete_question_paper_material_resource_or_chunk_content
+        - env_file_contents_or_connection_strings
+        - raw_exception_payload_or_stack_trace
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml package-lock.yaml package-lock.json src tests e2e drizzle migrations seed scripts playwright-report test-results .next
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-security-next-approval-decision-package-2026-06-29 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-security-next-approval-decision-package.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-security-next-approval-decision-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-security-next-approval-decision-package.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: active_thread_goal_continuation_docs_state_next_approval_decision_package_2026_06_29
+    validationStatus: pass_docs_state_approval_decision_package_prettier_diff_module_run_v2
+    approvalDecisionPackage:
+      approvableUnits: 5
+      remainingTopLevelBlockedTaskCount: 9
+      unitA:
+        name: dependency_package_advisory_remediation
+        coveredBlockedTaskCount: 4
+        highestPrioritySeverity: p0_high
+        currentStatus: blocked_requires_fresh_dependency_package_manager_approval
+      unitB:
+        name: db_migration_command_guard_implementation
+        coveredBlockedTaskCount: 1
+        highestPrioritySeverity: p2_medium
+        currentStatus: blocked_requires_fresh_task_specific_approval
+      unitC:
+        name: provider_browser_runtime_acceptance
+        coveredBlockedTaskCount: 1
+        highestPrioritySeverity: p2_medium
+        currentStatus: blocked_requires_fresh_provider_browser_runtime_approval
+      unitD:
+        name: db_browser_runtime_acceptance
+        coveredBlockedTaskCount: 1
+        highestPrioritySeverity: p2_medium
+        currentStatus: blocked_requires_fresh_db_browser_runtime_approval
+      unitE:
+        name: staging_release_boundary_execution
+        coveredBlockedTaskCount: 2
+        highestPrioritySeverity: p1_high
+        currentStatus: blocked_by_current_goal_and_release_boundary
+      recommendedFirstFreshApprovalUnit: unitA_dependency_package_advisory_remediation
+      thisPackageGrantsExecutionApproval: false
+
   - id: detail-security-blocked-remainder-consolidation-2026-06-29
     title: Detail security blocked remainder consolidation
     phase: detail-security-blocked-remainder-consolidation-2026-06-29
