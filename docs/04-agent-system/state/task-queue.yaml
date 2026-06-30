@@ -60,7 +60,10 @@ standingApprovals:
         status: current_task
       - packageId: security-remaining-inventory-triage-2026-06-30
         category: read_only_remaining_inventory
-        status: materialized_in_progress
+        status: closed
+      - packageId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+        category: dependency_deprecated_transitive_remediation_gate
+        status: closed
       - packageId: security-api-input-validation-repair-candidate-2026-06-30
         category: api_contract_input_validation_minimal_repair
         status: approved_pending_issue_recheck_and_task_materialization
@@ -596,6 +599,199 @@ tasks:
       costCalibrationExecuted: false
       sensitiveEvidenceCaptured: false
       validationStatus: pass_docs_state_read_only_inventory_module_run_v2
+
+  - id: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+    title: Security dependency deprecated transitive remediation gate
+    phase: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+    sourceStory: seeded_by_security_remaining_inventory_triage_2026_06_30_and_prior_deprecated_transitive_review_2026_06_29
+    dependencies:
+      - security-remaining-inventory-triage-2026-06-30
+      - security-dependency-deprecated-transitive-review-2026-06-29
+    taskPlanPolicy: required_before_registry_lookup_or_any_package_lockfile_change
+    targetClosureItem: Recheck current deprecated transitive dependency status and perform only necessary minimal dependency metadata or package lock remediation
+    behaviorBoundary: dependency_gate_deprecated_transitive_recheck_first_package_lock_workspace_change_only_if_current_issue_confirmed_no_source_test_db_provider_browser_release
+    executionProfile: local_dependency_gate_deprecated_transitive_recheck_then_minimal_remediation_if_needed
+    evidenceMode: package_name_version_dependency_chain_deprecation_status_registry_metadata_status_change_summary_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+    taskKind: dependency_gate_deprecated_transitive_remediation
+    moduleRunVersion: 2
+    status: closed
+    result: pass_current_deprecated_transitive_rechecked_no_safe_minimal_package_or_lockfile_change_available
+    priority: p2
+    severity: medium
+    approvedAt: "2026-06-30T00:45:20-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_central_authorization_for_items_1_to_9_local_repair_loop_only_with_per_task_materialization_required
+    approvalConsumed: securityFollowupCentralApproval20260630
+    branch: codex/security-dep-transitive-gate-20260630
+    claimedAt: "2026-06-30T00:45:20-07:00"
+    plannedAt: "2026-06-30T00:45:20-07:00"
+    materializedAt: "2026-06-30T00:45:20-07:00"
+    implementedAt: "2026-06-30T00:49:09-07:00"
+    validatedAt: "2026-06-30T00:49:09-07:00"
+    reviewedAt: "2026-06-30T00:49:09-07:00"
+    closedAt: "2026-06-30T00:49:09-07:00"
+    allowedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/open-source-introduction.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-30-security-remaining-inventory-triage.md
+      - docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md
+      - docs/05-execution-logs/acceptance/2026-06-30-security-remaining-inventory-triage.md
+      - docs/05-execution-logs/task-plans/2026-06-29-security-dependency-deprecated-transitive-review.md
+      - docs/05-execution-logs/evidence/2026-06-29-security-dependency-deprecated-transitive-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-deprecated-transitive-review.md
+      - docs/05-execution-logs/acceptance/2026-06-29-security-dependency-deprecated-transitive-review.md
+      - docs/01-requirements/traceability/2026-06-29-security-dependency-deprecated-transitive-review.md
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+    blockedFiles:
+      - .env*
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    dependencyBoundary: package_json_pnpm_lock_yaml_pnpm_workspace_yaml_change_allowed_only_after_current_recheck_confirms_deprecated_transitive_issue_and_only_for_minimal_direct_dependency_or_lockfile_remediation_no_new_dependency_without_new_gate
+    packageManagerBoundary: no_install_update_remove_audit_fix_before_recheck_if_fix_required_use_lockfile_only_ignore_scripts_and_record_no_lifecycle_execution
+    networkBoundary: public_registry_and_public_advisory_metadata_lookup_only_for_scoped_packages_no_private_registry_no_registry_token_no_package_download_except_lockfile_resolution_if_fix_required
+    lifecycleScriptBoundary: lifecycle_script_execution_blocked_ignore_scripts_required_for_any_conditional_lockfile_resolution
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    evidenceRedaction:
+      allowed: package_name_version_dependency_chain_deprecation_status_public_registry_metadata_status_advisory_id_if_any_severity_status_count_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers_registry_tokens
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+        - raw_registry_json_install_logs_or_package_download_logs
+    reviewScope:
+      sourceOrTestChangeAllowed: false
+      migrationFileModificationAllowed: false
+      dbConnectionAllowed: false
+      browserOrE2eRuntimeAllowed: false
+      devServerAllowed: false
+      providerRuntimeBudget: zero
+      packageOrLockfileChangeAllowed: conditional_after_recheck_confirms_needed
+      dependencyInstallUpdateRemoveAuditFixAllowed: conditional_lockfile_only_ignore_scripts_if_needed_no_lifecycle_scripts
+      dependencyScriptExecutionAllowed: false
+      publicRegistryMetadataLookupAllowed: true
+      packageSet:
+        - drizzle-kit
+        - "@esbuild-kit/esm-loader"
+        - "@esbuild-kit/core-utils"
+        - shadcn
+        - node-fetch
+        - fetch-blob
+        - node-domexception
+      objective:
+        - recheck current lockfile deprecated entries and direct dependency chains
+        - check public registry metadata for current and latest scoped package versions
+        - decide whether minimal dependency remediation is necessary
+        - avoid package or lockfile mutation unless the recheck proves a necessary minimal change
+    validationCommands:
+      - rg -n "deprecated:" pnpm-lock.yaml
+      - rg -n "@esbuild-kit/esm-loader|@esbuild-kit/core-utils|node-domexception|drizzle-kit|shadcn|node-fetch|fetch-blob" package.json pnpm-lock.yaml pnpm-workspace.yaml
+      - npm.cmd view drizzle-kit@latest version dependencies --json
+      - npm.cmd view shadcn@latest version dependencies --json
+      - npm.cmd view @esbuild-kit/esm-loader@2.6.5 version deprecated --json
+      - npm.cmd view @esbuild-kit/core-utils@3.3.2 version deprecated --json
+      - npm.cmd view node-domexception@1.0.0 version deprecated --json
+      - conditional only if remediation is required: corepack pnpm install --lockfile-only --ignore-scripts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - conditional only if package_or_lockfile_changed: npm.cmd run test:unit
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+      - git diff --check
+      - git diff --name-only -- src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId security-dependency-deprecated-transitive-remediation-gate-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: securityFollowupCentralApproval20260630
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: securityFollowupCentralApproval20260630
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: securityFollowupCentralApproval20260630
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: securityFollowupCentralApproval20260630
+    validationSummary:
+      validationStatus: pass_rechecked_no_safe_minimal_dependency_change
+      deprecatedEntriesCurrent: 2
+      priorDeprecatedEntries: 3
+      nodeDomexceptionCurrentLockfileHit: false
+      drizzleKitLatestStillCurrent: true
+      drizzleKitLatestStillDependsOnDeprecatedEsbuildKitLoader: true
+      esbuildKitLatestStillDeprecated: true
+      packageOrLockfileChanged: false
+      packageManagerMutationExecuted: false
+      lifecycleScriptExecution: false
+      registryMetadataLookup: pass_public_scoped
+      minimalRemediationAvailable: false_upstream_deprecated_chain_remains
+      lint: pass
+      typecheck: pass
+      unitTest: skipped_no_package_or_lockfile_change
+      prettierScoped: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_status_update
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      databaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserOrE2eRuntimeExecuted: false
+      devServerExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
 
   - id: agents-md-user-instruction-adoption-2026-06-29
     title: AGENTS.md user instruction adoption
