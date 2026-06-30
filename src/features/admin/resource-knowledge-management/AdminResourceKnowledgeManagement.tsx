@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ChevronDown,
@@ -1403,6 +1403,18 @@ function FilteredEmptyState() {
   );
 }
 
+function AdminResourceModalShell({ children }: { children: ReactNode }) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      {children}
+    </div>
+  );
+}
+
 function PublishConfirmationDialog({
   isSubmitting,
   onCancel,
@@ -1415,11 +1427,7 @@ function PublishConfirmationDialog({
   resource: AdminResourceOpsSummaryDto;
 }) {
   return (
-    <div
-      aria-modal="true"
-      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
-      role="alertdialog"
-    >
+    <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
           确认发布{resource.title}的 Markdown？
@@ -1440,7 +1448,7 @@ function PublishConfirmationDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </AdminResourceModalShell>
   );
 }
 
@@ -1456,11 +1464,7 @@ function RebuildConfirmationDialog({
   resource: AdminResourceOpsSummaryDto;
 }) {
   return (
-    <div
-      aria-modal="true"
-      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
-      role="alertdialog"
-    >
+    <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
           确认重建{resource.title}的向量？
@@ -1481,7 +1485,7 @@ function RebuildConfirmationDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </AdminResourceModalShell>
   );
 }
 
@@ -1497,11 +1501,7 @@ function DisableConfirmationDialog({
   resource: AdminResourceOpsSummaryDto;
 }) {
   return (
-    <div
-      aria-modal="true"
-      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
-      role="alertdialog"
-    >
+    <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
           确认停用{resource.title}？
@@ -1522,7 +1522,7 @@ function DisableConfirmationDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </AdminResourceModalShell>
   );
 }
 
@@ -1538,11 +1538,7 @@ function EnableConfirmationDialog({
   resource: AdminResourceOpsSummaryDto;
 }) {
   return (
-    <div
-      aria-modal="true"
-      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
-      role="alertdialog"
-    >
+    <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
           确认启用{resource.title}？
@@ -1559,7 +1555,7 @@ function EnableConfirmationDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </AdminResourceModalShell>
   );
 }
 
