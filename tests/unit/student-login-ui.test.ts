@@ -525,7 +525,11 @@ describe("LoginPage", () => {
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 
-  it("does not treat the cookie-backed marker as a student bearer token", () => {
+  it("does not treat blank values or the cookie-backed marker as a student bearer token", () => {
+    localStorage.setItem(STUDENT_SESSION_TOKEN_STORAGE_KEY, "   ");
+
+    expect(getStoredStudentSessionToken()).toBeNull();
+
     localStorage.setItem(
       STUDENT_SESSION_TOKEN_STORAGE_KEY,
       COOKIE_BACKED_SESSION_MARKER,
