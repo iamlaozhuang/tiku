@@ -14,19 +14,19 @@ export default function RootPage() {
       <div className="flex flex-col gap-3">
         <Link
           href="/home"
-          className="rounded-radius-md bg-brand-primary text-text-inverse px-6 py-3 text-center text-sm font-medium shadow-sm transition-opacity hover:opacity-90"
+          className="rounded-radius-md bg-brand-primary text-text-inverse px-6 py-3 text-center text-sm font-medium shadow-sm transition-transform hover:opacity-90 active:scale-[0.98]"
         >
           进入学员端
         </Link>
         <Link
           href="/content/papers"
-          className="rounded-radius-md border-border bg-surface text-text-primary border px-6 py-3 text-center text-sm font-medium shadow-sm transition-colors hover:bg-green-50"
+          className="rounded-radius-md border-border bg-surface text-text-primary hover:bg-muted border px-6 py-3 text-center text-sm font-medium shadow-sm transition-transform active:scale-[0.98]"
         >
           内容后台
         </Link>
         <Link
           href="/ops/users"
-          className="rounded-radius-md border-border bg-surface text-text-primary border px-6 py-3 text-center text-sm font-medium shadow-sm transition-colors hover:bg-green-50"
+          className="rounded-radius-md border-border bg-surface text-text-primary hover:bg-muted border px-6 py-3 text-center text-sm font-medium shadow-sm transition-transform active:scale-[0.98]"
         >
           运营后台
         </Link>
