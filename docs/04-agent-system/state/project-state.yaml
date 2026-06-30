@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+currentPhase: security-dependency-script-binary-policy-gate-2026-06-29
 updatedAt: "2026-06-30T07:49:06-07:00"
 blockedGatesCentralFreshApprovalPackage20260630:
   taskId: blocked-gates-central-fresh-approval-package-2026-06-30
@@ -8981,50 +8981,53 @@ repository:
   lastKnownMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
   lastKnownOriginMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
 currentTask:
-  id: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+  id: security-dependency-script-binary-policy-gate-2026-06-29
   status: closed
-  result: closed_no_current_actionable_dependency_deprecated_transitive_gap_confirmed
-  taskKind: dependency_gate_candidate_legacy_blocked_queue_closeout
+  result: closed_no_current_actionable_dependency_script_binary_policy_gap_confirmed
+  taskKind: dependency_script_binary_policy_gate_legacy_blocked_queue_closeout
   moduleRunVersion: 2
   priority: p2
   severity: medium
-  branch: codex/security-dependency-deprecated-transitive-gate-20260630
+  branch: codex/security-dependency-script-binary-policy-gate-20260630
   approvedAt: "2026-06-30T07:49:06-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
   approvalConsumed: blockedGatesCentralFreshApproval20260630
-  claimedAt: "2026-06-30T08:07:31-07:00"
-  plannedAt: "2026-06-30T08:07:31-07:00"
-  materializedAt: "2026-06-30T08:07:31-07:00"
-  implementedAt: "2026-06-30T08:15:06-07:00"
-  validatedAt: "2026-06-30T08:15:06-07:00"
-  reviewedAt: "2026-06-30T08:15:06-07:00"
-  closedAt: "2026-06-30T08:15:06-07:00"
-  sourceStory: security-dependency-deprecated-transitive-review-2026-06-29
-  targetClosureItem: Close the legacy 2026-06-29 blocked deprecated transitive dependency gate after rechecking current state and superseding evidence.
-  behaviorBoundary: legacy_blocked_dependency_gate_recheck_no_package_or_lockfile_mutation_unless_new_current_actionable_gap_found
-  executionProfile: local_dependency_gate_legacy_blocked_closeout
-  validationPolicy: dependency_gate_serial_execution_after_central_fresh_approval_and_task_materialization
-  evidenceMode: package_name_version_dependency_chain_deprecation_status_registry_metadata_status_change_summary_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+  claimedAt: "2026-06-30T08:39:42-07:00"
+  plannedAt: "2026-06-30T08:39:42-07:00"
+  materializedAt: "2026-06-30T08:39:42-07:00"
+  implementedAt: "2026-06-30T08:47:18-07:00"
+  validatedAt: "2026-06-30T08:47:18-07:00"
+  reviewedAt: "2026-06-30T08:47:18-07:00"
+  closedAt: "2026-06-30T08:47:18-07:00"
+  sourceStory: security-dependency-install-script-binary-surface-review-2026-06-29
+  targetClosureItem: Close the legacy 2026-06-29 blocked install-script and binary policy gate after current policy-surface recheck and superseding evidence.
+  behaviorBoundary: legacy_blocked_dependency_script_binary_policy_gate_recheck_no_package_workspace_lock_mutation_no_script_or_binary_execution_unless_new_current_actionable_gap_found
+  executionProfile: local_dependency_script_binary_policy_legacy_blocked_closeout
+  validationPolicy: dependency_script_binary_policy_gate_after_central_fresh_approval_and_task_materialization
+  evidenceMode: package_script_count_hasbin_count_requires_build_count_ignored_built_dependency_names_policy_status_validation_command_commit_branch_merge_push_cleanup_redacted_summary_only
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-script-binary-policy-gate.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-script-binary-policy-gate.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-script-binary-policy-gate.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-script-binary-policy-gate.md
   supersedingClosedTask:
-    taskId: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
-    result: pass_current_deprecated_transitive_rechecked_no_safe_minimal_package_or_lockfile_change_available
+    taskId: security-dependency-install-script-policy-decision-2026-06-30
+    result: pass_install_script_policy_decision_no_package_or_script_execution
   validationSummary:
     validationStatus: pass_module_run_v2_local_validation
     legacyQueueRecordClosed: true
-    currentDeprecatedEntryCount: 2
-    deprecatedChain: drizzle_kit_to_esbuild_kit_esm_loader_to_esbuild_kit_core_utils
-    directPackageLatestStillCurrent: true
-    upstreamDeprecatedChainStillPresent: true
-    minimalRemediationAvailable: false_upstream_deprecated_chain_remains
+    hasBinEntries: 46
+    requiresBuildEntries: 0
+    ignoredBuiltDependencies: 2
+    rootPackageScripts: 14
+    noCurrentActionablePolicyGapConfirmed: true
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
+    pnpmWorkspaceChanged: false
     dependencyInstallUpdateRemoveAuditFixExecuted: false
     lifecycleScriptExecution: false
+    cliBinaryExecution: false
+    packageManagerMutationExecuted: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
     browserOrE2eRuntimeExecuted: false
@@ -9039,7 +9042,70 @@ currentTask:
     gitDiffCheck: pass
     blockedPathDiff: pass_empty
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_anchor_repair
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  releaseReadinessClaimed: false
+  finalPassClaimed: false
+  costCalibrationExecuted: false
+securityDependencyScriptBinaryPolicyGate20260629:
+  taskId: security-dependency-script-binary-policy-gate-2026-06-29
+  phase: security-dependency-script-binary-policy-gate-2026-06-29
+  status: closed
+  result: closed_no_current_actionable_dependency_script_binary_policy_gap_confirmed
+  priority: p2
+  severity: medium
+  taskKind: dependency_script_binary_policy_gate_legacy_blocked_queue_closeout
+  moduleRunVersion: 2
+  approvedAt: "2026-06-30T07:49:06-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
+  approvalConsumed: blockedGatesCentralFreshApproval20260630
+  branch: codex/security-dependency-script-binary-policy-gate-20260630
+  claimedAt: "2026-06-30T08:39:42-07:00"
+  plannedAt: "2026-06-30T08:39:42-07:00"
+  materializedAt: "2026-06-30T08:39:42-07:00"
+  implementedAt: "2026-06-30T08:47:18-07:00"
+  validatedAt: "2026-06-30T08:47:18-07:00"
+  reviewedAt: "2026-06-30T08:47:18-07:00"
+  closedAt: "2026-06-30T08:47:18-07:00"
+  sourceStory: security-dependency-install-script-binary-surface-review-2026-06-29
+  targetClosureItem: Close legacy blocked install-script and binary policy gate after current policy-surface recheck and superseding evidence.
+  behaviorBoundary: legacy_blocked_dependency_script_binary_policy_gate_recheck_no_package_workspace_lock_mutation_no_script_or_binary_execution_unless_new_current_actionable_gap_found
+  executionProfile: local_dependency_script_binary_policy_legacy_blocked_closeout
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-security-dependency-script-binary-policy-gate.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-script-binary-policy-gate.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-script-binary-policy-gate.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-security-dependency-script-binary-policy-gate.md
+  supersedingClosedTask:
+    taskId: security-dependency-install-script-policy-decision-2026-06-30
+    result: pass_install_script_policy_decision_no_package_or_script_execution
+  validationSummary:
+    validationStatus: pass_module_run_v2_local_validation
+    hasBinEntries: 46
+    requiresBuildEntries: 0
+    ignoredBuiltDependencies: 2
+    rootPackageScripts: 14
+    noCurrentActionablePolicyGapConfirmed: true
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    pnpmWorkspaceChanged: false
+    dependencyInstallUpdateRemoveAuditFixExecuted: false
+    lifecycleScriptExecution: false
+    cliBinaryExecution: false
+    packageManagerMutationExecuted: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+    lint: pass
+    typecheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    blockedPathDiff: pass_empty
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_anchor_repair
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   releaseReadinessClaimed: false
   finalPassClaimed: false

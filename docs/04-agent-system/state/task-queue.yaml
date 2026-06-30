@@ -783,13 +783,27 @@ tasks:
         approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
     taskKind: dependency_gate_candidate
     moduleRunVersion: 2
-    status: blocked_requires_fresh_dependency_script_approval
-    result: pending_owner_selection_and_dependency_script_policy_approval
+    status: closed
+    result: closed_no_current_actionable_dependency_script_binary_policy_gap_confirmed
     nextRecommended: false
     recommendedAfter: security-dependency-install-script-binary-surface-review-2026-06-29
     priority: p2
     severity: medium
-    approvalSource: fresh_dependency_script_policy_approval_required_for_package_lockfile_workspace_or_script_execution_change
+    approvalSource: blockedGatesCentralFreshApproval20260630
+    executionBranch: codex/security-dependency-script-binary-policy-gate-20260630
+    legacyBlockedGateCloseout:
+      supersedingClosedTaskId: security-dependency-install-script-policy-decision-2026-06-30
+      closureMode: recheck_current_policy_surface_then_close_legacy_blocked_queue_record
+      packageWorkspaceLockMutationDefault: blocked_unless_new_current_actionable_policy_gap_found
+      recheckedAt: "2026-06-30T08:47:18-07:00"
+      hasBinEntries: 46
+      requiresBuildEntries: 0
+      ignoredBuiltDependencies: 2
+      rootPackageScripts: 14
+      noCurrentActionablePolicyGapConfirmed: true
+      packageWorkspaceLockChanged: false
+      scriptOrBinaryExecution: false
+      validationStatus: pass_module_run_v2_local_validation
     blockedWithoutFreshApproval:
       - package_json_change
       - pnpm_lock_yaml_change
