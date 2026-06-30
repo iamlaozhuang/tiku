@@ -415,12 +415,18 @@ export function AdminOrganizationTrainingPage() {
       </header>
 
       {message === null ? null : (
-        <div className="bg-success/10 text-success rounded-md px-4 py-3 text-sm">
+        <div
+          className="bg-success/10 text-success rounded-md px-4 py-3 text-sm"
+          role="status"
+        >
           {message}
         </div>
       )}
       {errorMessage === null ? null : (
-        <div className="bg-destructive/10 text-destructive rounded-md px-4 py-3 text-sm">
+        <div
+          className="bg-destructive/10 text-destructive rounded-md px-4 py-3 text-sm"
+          role="alert"
+        >
           {errorMessage}
         </div>
       )}
