@@ -297,6 +297,167 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: owner-preview-local-walkthrough-preparation-package-2026-06-30
+    title: Owner preview local walkthrough preparation package
+    phase: owner-preview-local-walkthrough-preparation-package-2026-06-30
+    sourceStory: current_user_requested_docs_state_only_owner_preview_preparation_package_for_manual_browser_walkthrough
+    dependencies: []
+    taskPlanPolicy: required_before_docs_state_owner_preview_package_write
+    humanApproval: >-
+      User requested a docs/state-only owner-preview local walkthrough preparation package and explicitly approved the
+      codex short branch, task materialization, local governance validation, local commit, fast-forward merge to master,
+      push to origin/master, and short-branch cleanup. Scope is limited to role lists, workflow checklists, boundaries,
+      recording templates, and local startup recommendations for the owner to use manually. This task does not approve
+      browser login, credential reading, e2e, Provider/AI execution, DB/schema/migration/seed changes or execution,
+      source/test/package/lockfile changes, staging/prod/cloud/deploy, release readiness, final Pass, or Cost
+      Calibration.
+    taskKind: docs_state_only_owner_preview_preparation
+    moduleRunVersion: 2
+    executionProfile: docs_state_owner_preview_preparation
+    validationPolicy: local_docs_state_governance_validation_only
+    priority: p1
+    severity: governance
+    branch: codex/owner-preview-local-walkthrough-prep-20260630
+    status: closed
+    result: pass_owner_preview_local_walkthrough_preparation_package_created
+    claimedAt: "2026-06-30T10:45:00-07:00"
+    plannedAt: "2026-06-30T10:45:00-07:00"
+    materializedAt: "2026-06-30T10:45:00-07:00"
+    implementedAt: "2026-06-30T10:55:00-07:00"
+    validatedAt: "2026-06-30T10:55:00-07:00"
+    reviewedAt: "2026-06-30T10:55:00-07:00"
+    closedAt: "2026-06-30T10:55:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - docs/05-execution-logs/handoffs/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - docs/05-execution-logs/evidence/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - docs/05-execution-logs/acceptance/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/local-experience-coverage-matrix.yaml
+      - docs/04-agent-system/sop/local-experience-closure-governance.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capture-scope.md
+      - docs/05-execution-logs/task-plans/2026-06-30-remaining-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-30-remaining-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-remaining-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/acceptance/2026-06-30-remaining-terminal-active-queue-archive-index-cleanup.md
+      - docs/05-execution-logs/task-plans/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-prep-plan.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-role-scenario-scripts.md
+      - docs/05-execution-logs/acceptance/2026-06-23-l6-owner-preview-readiness-package.md
+      - package.json
+      - compose.yaml
+      - scripts/db/Seed-DevDatabase.ps1
+      - scripts/local/Invoke-FreshValidationRun.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - docs_state_only
+      - owner_preview_preparation
+      - evidence_redaction
+      - no_browser_runtime
+      - no_provider_ai
+      - no_release_readiness
+      - cost_calibration_blocked
+    boundaries:
+      localDb: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+      aiProvider: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+      browser: no_browser_runtime_no_login_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+      accountCredential: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+      release: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+      dependency: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+    evidenceRedaction:
+      allowed: task_ids_file_paths_role_labels_flow_labels_status_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+        - raw_exception_payload_or_stack_trace
+    validationCommands:
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/handoffs/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/evidence/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/audits-reviews/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/acceptance/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/handoffs/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/evidence/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/audits-reviews/2026-06-30-owner-preview-local-walkthrough-preparation-package.md docs/05-execution-logs/acceptance/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-preview-local-walkthrough-preparation-package-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId owner-preview-local-walkthrough-preparation-package-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-preview-local-walkthrough-preparation-package-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    packagePath: docs/05-execution-logs/handoffs/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-owner-preview-local-walkthrough-preparation-package.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_owner_preview_local_walkthrough_preparation_package_2026_06_30
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_owner_preview_local_walkthrough_preparation_package_2026_06_30
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_owner_preview_local_walkthrough_preparation_package_2026_06_30
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_owner_preview_local_walkthrough_preparation_package_2026_06_30
+    validationSummary:
+      taskPlanPrepared: pass
+      packagePrepared: pass
+      roleChecklistPrepared: pass
+      issueTemplatePrepared: pass
+      localStartupSuggestionsPrepared: pass_no_command_executed_by_codex
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      blockedPathDiff: pass_empty
+      projectStatusDiagnostic: pass_idle_no_pending_task_archive_candidate_count_1_current_terminal_task
+      preCommitHardening: pass
+      moduleCloseoutReadiness: pass
+      prePushReadiness: pass
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      browserRuntimeExecuted: false
+      privateAccountMaterialRead: false
+      databaseConnectionOrSeedExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdCloudDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      sensitiveEvidenceCaptured: false
   - id: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
     title: Remaining terminal active queue archive index cleanup
     phase: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
