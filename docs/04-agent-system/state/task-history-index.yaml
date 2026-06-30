@@ -1,10 +1,10 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: local-blocked-gate-supersession-triage-2026-06-28
-  updatedAt: "2026-06-28T09:39:13-07:00"
+  updatedByTask: governance-closed-task-archive-index-cleanup-2026-06-30
+  updatedAt: "2026-06-30T06:48:18-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -15480,3 +15480,1164 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-28T09:39:13-07:00"
+  - id: post-detail-security-local-quality-kickoff-2026-06-30
+    phase: post-detail-security-local-quality-kickoff-2026-06-30
+    status: closed
+    taskKind: docs_state_startup_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-detail-security-local-quality-kickoff.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-detail-security-local-quality-kickoff.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T05:19:00-07:00"
+  - id: regression-coverage-gap-inventory-2026-06-30
+    phase: regression-coverage-gap-inventory-2026-06-30
+    status: closed
+    taskKind: docs_state_source_read_only_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-regression-coverage-gap-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-regression-coverage-gap-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T05:36:02-07:00"
+  - id: provider-metadata-redaction-regression-reinforcement-2026-06-30
+    phase: provider-metadata-redaction-regression-reinforcement-2026-06-30
+    status: closed
+    taskKind: focused_regression_coverage_reinforcement
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-provider-metadata-redaction-regression-reinforcement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-provider-metadata-redaction-regression-reinforcement.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T05:44:50-07:00"
+  - id: log-list-query-boundary-regression-reinforcement-2026-06-30
+    phase: log-list-query-boundary-regression-reinforcement-2026-06-30
+    status: closed
+    taskKind: focused_regression_coverage_reinforcement
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-log-list-query-boundary-regression-reinforcement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-log-list-query-boundary-regression-reinforcement.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T05:54:05-07:00"
+  - id: student-session-marker-regression-reinforcement-2026-06-30
+    phase: student-session-marker-regression-reinforcement-2026-06-30
+    status: closed
+    taskKind: focused_regression_coverage_reinforcement
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-student-session-marker-regression-reinforcement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-student-session-marker-regression-reinforcement.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:02:33-07:00"
+  - id: ui-ux-static-detail-inventory-2026-06-30
+    phase: ui-ux-static-detail-inventory-2026-06-30
+    status: closed
+    taskKind: docs_state_source_read_only_ui_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-ux-static-detail-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-ux-static-detail-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:11:08-07:00"
+  - id: ui-token-layout-small-repair-2026-06-30
+    phase: ui-token-layout-small-repair-2026-06-30
+    status: closed
+    taskKind: low_risk_ui_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-token-layout-small-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-token-layout-small-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:21:36-07:00"
+  - id: ui-state-feedback-small-repair-2026-06-30
+    phase: ui-state-feedback-small-repair-2026-06-30
+    status: closed
+    taskKind: low_risk_ui_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-state-feedback-small-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-state-feedback-small-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:30:31-07:00"
+  - id: ui-form-action-consistency-small-repair-2026-06-30
+    phase: ui-form-action-consistency-small-repair-2026-06-30
+    status: closed
+    taskKind: low_risk_ui_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-form-action-consistency-small-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-form-action-consistency-small-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T06:38:41-07:00"
+  - id: detail-optimization-security-review-goal-completion-audit-2026-06-30
+    phase: detail-optimization-security-review-goal-completion-audit-2026-06-30
+    status: closed
+    taskKind: docs_state_goal_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-completion-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-completion-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T04:46:06-07:00"
+  - id: local-security-static-inventory-refresh-2026-06-30
+    phase: local-security-static-inventory-refresh-2026-06-30
+    status: closed
+    taskKind: docs_state_source_read_only_security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-local-security-static-inventory-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-local-security-static-inventory-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T03:37:39-07:00"
+  - id: security-provider-metadata-redaction-allowlist-repair-2026-06-30
+    phase: post-detail-security-local-hardening
+    status: closed
+    taskKind: focused_source_test_security_repair_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-provider-metadata-redaction-allowlist-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T04:04:20-07:00"
+  - id: security-log-list-query-filter-boundary-hardening-2026-06-30
+    phase: post-detail-security-local-hardening
+    status: closed
+    taskKind: focused_source_test_security_repair_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-log-list-query-filter-boundary-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T04:19:25-07:00"
+  - id: security-local-automation-session-storage-boundary-review-2026-06-30
+    phase: security-local-automation-session-storage-boundary-review-2026-06-30
+    status: closed
+    taskKind: docs_state_source_read_only_security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-local-automation-session-storage-boundary-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T04:32:29-07:00"
+  - id: security-local-session-marker-bearer-boundary-repair-2026-06-30
+    phase: security-local-session-marker-bearer-boundary-repair-2026-06-30
+    status: closed
+    taskKind: focused_source_test_security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-local-session-marker-bearer-boundary-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T04:42:29-07:00"
+  - id: post-detail-security-next-scope-approval-package-2026-06-30
+    phase: post-detail-security-next-scope-approval-package-2026-06-30
+    status: closed
+    taskKind: docs_state_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-detail-security-next-scope-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-detail-security-next-scope-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T03:23:21-07:00"
+  - id: detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+    phase: detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+    status: closed
+    taskKind: docs_state_goal_closeout_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T03:10:21-07:00"
+  - id: security-api-input-validation-repair-candidate-2026-06-30
+    phase: security-api-input-validation-repair-candidate-2026-06-30
+    status: closed
+    taskKind: security_fix_candidate_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-api-input-validation-repair-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-api-input-validation-repair-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T01:22:27-07:00"
+  - id: security-log-redaction-repair-candidate-2026-06-30
+    phase: security-log-redaction-repair-candidate-2026-06-30
+    status: closed
+    taskKind: security_fix_candidate_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-log-redaction-repair-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-log-redaction-repair-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T01:37:05-07:00"
+  - id: security-auth-role-boundary-followup-candidate-2026-06-30
+    phase: security-auth-role-boundary-followup-candidate-2026-06-30
+    status: closed
+    taskKind: security_fix_candidate_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-auth-role-boundary-followup-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-auth-role-boundary-followup-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T01:50:37-07:00"
+  - id: ui-ux-detail-small-repair-candidate-2026-06-30
+    phase: ui-ux-detail-small-repair-candidate-2026-06-30
+    status: closed
+    taskKind: ui_ux_token_interaction_small_repair_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-ux-detail-small-repair-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-ux-detail-small-repair-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T02:07:57-07:00"
+  - id: test-acceptance-regression-coverage-reinforcement-candidate-2026-06-30
+    phase: test-acceptance-regression-coverage-reinforcement-candidate-2026-06-30
+    status: closed
+    taskKind: test_acceptance_regression_coverage_reinforcement_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-regression-coverage-reinforcement-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-regression-coverage-reinforcement-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T02:31:40-07:00"
+  - id: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+    phase: security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+    status: closed
+    taskKind: dependency_supply_chain_remaining_gate_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-supply-chain-remaining-gate-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T02:55:04-07:00"
+  - id: security-followup-approval-materialization-2026-06-30
+    phase: security-followup-approval-materialization-2026-06-30
+    status: closed
+    taskKind: governance_approval_materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-followup-approval-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-followup-approval-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T00:21:41-07:00"
+  - id: security-remaining-inventory-triage-2026-06-30
+    phase: security-remaining-inventory-triage-2026-06-30
+    status: closed
+    taskKind: security_remaining_inventory_triage
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-remaining-inventory-triage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-remaining-inventory-triage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T00:35:29-07:00"
+  - id: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+    phase: security-dependency-deprecated-transitive-remediation-gate-2026-06-30
+    status: closed
+    taskKind: dependency_gate_deprecated_transitive_remediation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-deprecated-transitive-remediation-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T00:49:09-07:00"
+  - id: security-dependency-install-script-policy-decision-2026-06-30
+    phase: security-dependency-install-script-policy-decision-2026-06-30
+    status: closed
+    taskKind: dependency_install_script_policy_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-security-dependency-install-script-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-security-dependency-install-script-policy-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T00:59:38-07:00"
+  - id: governance-queue-closed-task-archive-candidate-2026-06-30
+    phase: governance-queue-closed-task-archive-candidate-2026-06-30
+    status: closed
+    taskKind: governance_queue_archive_candidate_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-queue-closed-task-archive-candidate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T01:09:58-07:00"
+  - id: agents-md-user-instruction-adoption-2026-06-29
+    phase: agents-md-user-instruction-adoption-2026-06-29
+    status: closed
+    taskKind: governance_instruction_adoption
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-agents-md-user-instruction-adoption.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-agents-md-user-instruction-adoption.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T23:13:07-07:00"
+  - id: security-db-migration-command-guard-implementation-2026-06-29
+    phase: security-db-migration-command-guard-implementation-2026-06-29
+    status: closed
+    taskKind: focused_local_script_guard_and_unit_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-migration-command-guard-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-command-guard-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T22:59:31-07:00"
+  - id: detail-security-local-continuation-closeout-audit-2026-06-29
+    phase: detail-security-local-continuation-closeout-audit-2026-06-29
+    status: closed
+    taskKind: governance_closeout_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-closeout-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-closeout-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T22:29:27-07:00"
+  - id: detail-security-local-continuation-approval-materialization-2026-06-29
+    phase: detail-security-local-continuation-approval-materialization-2026-06-29
+    status: closed
+    taskKind: governance_approval_materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-approval-materialization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-approval-materialization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T21:38:36-07:00"
+  - id: unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
+    phase: unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
+    status: closed
+    taskKind: auth_mapper_source_of_truth_read_only_review_and_repair_task_split
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T21:57:02-07:00"
+  - id: repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+    phase: repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: focused_source_test_security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T22:13:25-07:00"
+  - id: security-unit-b-auth-role-boundary-static-review-2026-06-29
+    phase: security-unit-b-auth-role-boundary-static-review-2026-06-29
+    status: closed
+    taskKind: auth_role_boundary_static_review_and_repair_task_split
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-b-auth-role-boundary-static-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T20:35:23-07:00"
+  - id: repair-organization-training-capability-source-boundary-2026-06-29
+    phase: repair-organization-training-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: focused_source_test_security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-organization-training-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-training-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T21:18:45-07:00"
+  - id: security-unit-a-dependency-package-advisory-remediation-2026-06-29
+    phase: security-unit-a-dependency-package-advisory-remediation-2026-06-29
+    status: closed
+    taskKind: dependency_package_advisory_remediation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-dependency-package-advisory-remediation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T19:27:49-07:00"
+  - id: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+    phase: security-unit-a-validation-baseline-test-fixture-repair-2026-06-29
+    status: closed
+    taskKind: validation_baseline_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-unit-a-validation-baseline-test-fixture-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T19:27:49-07:00"
+  - id: detail-security-next-approval-decision-package-2026-06-29
+    phase: detail-security-next-approval-decision-package-2026-06-29
+    status: closed
+    taskKind: governance_fresh_approval_decision_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-next-approval-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-next-approval-decision-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T17:06:19-07:00"
+  - id: detail-security-blocked-remainder-consolidation-2026-06-29
+    phase: detail-security-blocked-remainder-consolidation-2026-06-29
+    status: closed
+    taskKind: governance_blocked_remainder_consolidation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-blocked-remainder-consolidation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-blocked-remainder-consolidation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T16:57:01-07:00"
+  - id: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    phase: full-acceptance-matrix-unit-baseline-repair-requirements-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-unit-baseline-repair-requirements.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T12:17:08-07:00"
+  - id: full-unit-baseline-repair-2026-06-28
+    phase: full-unit-baseline-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T12:52:00-07:00"
+  - id: full-acceptance-personal-standard-student-workflow-2026-06-29
+    phase: full-acceptance-personal-standard-student-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-personal-standard-student-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-personal-standard-student-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T03:33:15-07:00"
+  - id: full-acceptance-personal-advanced-student-workflow-2026-06-29
+    phase: full-acceptance-personal-advanced-student-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-personal-advanced-student-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-personal-advanced-student-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T03:49:09-07:00"
+  - id: repair-personal-advanced-student-ai-generation-actions-2026-06-29
+    phase: repair-personal-advanced-student-ai-generation-actions-2026-06-29
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-personal-advanced-student-ai-generation-actions.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T04:08:00-07:00"
+  - id: full-acceptance-completion-audit-rollup-2026-06-29
+    phase: full-acceptance-completion-audit-rollup-2026-06-29
+    status: closed
+    taskKind: docs_state_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-completion-audit-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-completion-audit-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T04:58:00-07:00"
+  - id: full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+    phase: full-acceptance-org-advanced-employee-ai-actions-rerun-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-ai-actions-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T05:04:20-07:00"
+  - id: full-acceptance-post-employee-ai-actions-completion-audit-2026-06-29
+    phase: full-acceptance-post-employee-ai-actions-completion-audit-2026-06-29
+    status: closed
+    taskKind: docs_state_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-post-employee-ai-actions-completion-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-post-employee-ai-actions-completion-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T05:42:29-07:00"
+  - id: owner-handoff-release-readiness-approval-package-2026-06-29
+    phase: owner-handoff-release-readiness-approval-package-2026-06-29
+    status: closed
+    taskKind: docs_state_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-owner-handoff-release-readiness-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-owner-handoff-release-readiness-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T06:12:45-07:00"
+  - id: release-readiness-docs-only-execution-plan-2026-06-29
+    phase: release-readiness-docs-only-execution-plan-2026-06-29
+    status: closed
+    taskKind: docs_state_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-release-readiness-docs-only-execution-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-release-readiness-docs-only-execution-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T06:26:39-07:00"
+  - id: isolated-staging-target-package-2026-06-29
+    phase: isolated-staging-target-package-2026-06-29
+    status: closed
+    taskKind: docs_state_completion_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-isolated-staging-target-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-isolated-staging-target-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T06:48:41-07:00"
+  - id: detail-optimization-security-review-kickoff-2026-06-29
+    phase: detail-optimization-security-review-kickoff-2026-06-29
+    status: closed
+    taskKind: docs_state_security_review_kickoff
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-optimization-security-review-kickoff.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-optimization-security-review-kickoff.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T07:18:31-07:00"
+  - id: security-data-redaction-log-boundary-inventory-2026-06-29
+    phase: security-data-redaction-log-boundary-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-data-redaction-log-boundary-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T07:32:49-07:00"
+  - id: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    phase: fix-route-error-envelope-question-paper-student-experience-2026-06-29
+    status: closed
+    taskKind: security_fix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-route-error-envelope-question-paper-student-experience.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T07:53:54-07:00"
+  - id: verify-ai-provider-error-snapshot-redaction-2026-06-29
+    phase: verify-ai-provider-error-snapshot-redaction-2026-06-29
+    status: closed
+    taskKind: security_fix_or_regression
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-ai-provider-error-snapshot-redaction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T08:15:21-07:00"
+  - id: verify-local-acceptance-session-boundary-2026-06-29
+    phase: verify-local-acceptance-session-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix_or_regression
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-local-acceptance-session-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-local-acceptance-session-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T08:31:00-07:00"
+  - id: security-permission-role-boundary-inventory-2026-06-29
+    phase: security-permission-role-boundary-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-permission-role-boundary-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-permission-role-boundary-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T09:40:00-07:00"
+  - id: verify-session-login-response-credential-boundary-2026-06-29
+    phase: verify-session-login-response-credential-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix_candidate_verification_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-session-login-response-credential-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-session-login-response-credential-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T09:36:01-07:00"
+  - id: repair-session-login-response-credential-boundary-2026-06-29
+    phase: repair-session-login-response-credential-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-session-login-response-credential-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-session-login-response-credential-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T10:26:47-07:00"
+  - id: verify-organization-analytics-admin-capability-source-boundary-2026-06-29
+    phase: verify-organization-analytics-admin-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix_candidate_verification_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-organization-analytics-admin-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-analytics-admin-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T09:49:57-07:00"
+  - id: repair-organization-analytics-capability-source-boundary-2026-06-29
+    phase: repair-organization-analytics-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-organization-analytics-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-analytics-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T10:41:14-07:00"
+  - id: verify-organization-ai-generation-capability-source-boundary-2026-06-29
+    phase: verify-organization-ai-generation-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix_candidate_verification_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-organization-ai-generation-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T10:09:10-07:00"
+  - id: repair-organization-ai-generation-capability-source-boundary-2026-06-29
+    phase: repair-organization-ai-generation-capability-source-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-organization-ai-generation-capability-source-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T11:00:42-07:00"
+  - id: security-api-contract-input-validation-inventory-2026-06-29
+    phase: security-api-contract-input-validation-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-api-contract-input-validation-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-api-contract-input-validation-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T09:03:52-07:00"
+  - id: verify-api-list-sort-by-validation-boundary-2026-06-29
+    phase: verify-api-list-sort-by-validation-boundary-2026-06-29
+    status: closed
+    taskKind: security_fix_candidate_verification_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-verify-api-list-sort-by-validation-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-verify-api-list-sort-by-validation-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: detail-ui-ux-token-state-inventory-2026-06-29
+    phase: detail-ui-ux-token-state-inventory-2026-06-29
+    status: closed
+    taskKind: detail_optimization_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-ux-token-state-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-ux-token-state-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T11:06:51-07:00"
+  - id: detail-ui-tokenized-layout-primitive-candidates-2026-06-29
+    phase: detail-ui-tokenized-layout-primitive-candidates-2026-06-29
+    status: closed
+    taskKind: detail_optimization_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-tokenized-layout-primitive-candidates.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tokenized-layout-primitive-candidates.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T16:38:56-07:00"
+  - id: detail-ui-tab-feedback-consistency-candidates-2026-06-29
+    phase: detail-ui-tab-feedback-consistency-candidates-2026-06-29
+    status: closed
+    taskKind: detail_optimization_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-ui-tab-feedback-consistency-candidates.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T11:18:47-07:00"
+  - id: security-ai-provider-boundary-inventory-2026-06-29
+    phase: security-ai-provider-boundary-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-ai-provider-boundary-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-provider-boundary-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T11:37:11-07:00"
+  - id: security-db-schema-migration-risk-inventory-2026-06-29
+    phase: security-db-schema-migration-risk-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-schema-migration-risk-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-schema-migration-risk-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T11:50:39-07:00"
+  - id: security-db-runtime-connection-boundary-hardening-2026-06-29
+    phase: security-db-runtime-connection-boundary-hardening-2026-06-29
+    status: closed
+    taskKind: security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-runtime-connection-boundary-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T12:53:44-07:00"
+  - id: security-db-repository-query-construction-review-2026-06-29
+    phase: security-db-repository-query-construction-review-2026-06-29
+    status: closed
+    taskKind: security_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-repository-query-construction-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-repository-query-construction-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T13:08:20-07:00"
+  - id: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    phase: security-ai-model-config-fallback-order-limit-repair-2026-06-29
+    status: closed
+    taskKind: security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-ai-model-config-fallback-order-limit-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T13:28:29-07:00"
+  - id: security-employee-import-bulk-limit-repair-2026-06-29
+    phase: security-employee-import-bulk-limit-repair-2026-06-29
+    status: closed
+    taskKind: security_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-employee-import-bulk-limit-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-employee-import-bulk-limit-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T13:42:30-07:00"
+  - id: security-db-migration-replay-guard-review-2026-06-29
+    phase: security-db-migration-replay-guard-review-2026-06-29
+    status: closed
+    taskKind: security_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-migration-replay-guard-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-replay-guard-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T14:12:30-07:00"
+  - id: security-db-migration-policy-reconciliation-2026-06-29
+    phase: security-db-migration-policy-reconciliation-2026-06-29
+    status: closed
+    taskKind: docs_policy_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-db-migration-policy-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-db-migration-policy-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T14:13:27-07:00"
+  - id: security-dependency-supply-chain-inventory-2026-06-29
+    phase: security-dependency-supply-chain-inventory-2026-06-29
+    status: closed
+    taskKind: security_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-supply-chain-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-supply-chain-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T12:06:26-07:00"
+  - id: security-dependency-public-advisory-lookup-2026-06-29
+    phase: security-dependency-public-advisory-lookup-2026-06-29
+    status: closed
+    taskKind: security_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-public-advisory-lookup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-public-advisory-lookup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T15:06:50-07:00"
+  - id: security-package-manager-advisory-remediation-gate-2026-06-29
+    phase: security-package-manager-advisory-remediation-gate-2026-06-29
+    status: closed
+    taskKind: dependency_gate_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-package-manager-advisory-remediation-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-package-manager-advisory-remediation-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T23:37:44-07:00"
+  - id: security-dev-toolchain-advisory-remediation-gate-2026-06-29
+    phase: security-dev-toolchain-advisory-remediation-gate-2026-06-29
+    status: closed
+    taskKind: dependency_gate_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dev-toolchain-advisory-remediation-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dev-toolchain-advisory-remediation-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-30T00:02:15-07:00"
+  - id: security-dependency-deprecated-transitive-review-2026-06-29
+    phase: security-dependency-deprecated-transitive-review-2026-06-29
+    status: closed
+    taskKind: security_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-deprecated-transitive-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-deprecated-transitive-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T14:33:19-07:00"
+  - id: security-dependency-install-script-binary-surface-review-2026-06-29
+    phase: security-dependency-install-script-binary-surface-review-2026-06-29
+    status: closed
+    taskKind: security_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-security-dependency-install-script-binary-surface-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T14:48:30-07:00"
+  - id: test-acceptance-regression-risk-inventory-2026-06-29
+    phase: test-acceptance-regression-risk-inventory-2026-06-29
+    status: closed
+    taskKind: regression_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-regression-risk-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-regression-risk-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T12:21:24-07:00"
+  - id: test-acceptance-evidence-status-reconciliation-2026-06-29
+    phase: test-acceptance-evidence-status-reconciliation-2026-06-29
+    status: closed
+    taskKind: regression_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-evidence-status-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-evidence-status-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T12:34:43-07:00"
+  - id: test-acceptance-redacted-e2e-traceability-artifact-cleanup-2026-06-29
+    phase: test-acceptance-redacted-e2e-traceability-artifact-cleanup-2026-06-29
+    status: closed
+    taskKind: documentation_quality_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-redacted-e2e-traceability-artifact-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-redacted-e2e-traceability-artifact-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T16:05:21-07:00"
+  - id: test-acceptance-e2e-runtime-boundary-approval-package-2026-06-29
+    phase: test-acceptance-e2e-runtime-boundary-approval-package-2026-06-29
+    status: closed
+    taskKind: approval_package_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-e2e-runtime-boundary-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-e2e-runtime-boundary-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T16:19:36-07:00"
+  - id: test-acceptance-runtime-gate-split-review-2026-06-29
+    phase: test-acceptance-runtime-gate-split-review-2026-06-29
+    status: closed
+    taskKind: regression_review_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-runtime-gate-split-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-runtime-gate-split-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T15:31:00-07:00"
+  - id: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
+    phase: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
+    status: closed
+    taskKind: evidence_policy_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-test-acceptance-redacted-e2e-evidence-policy-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-test-acceptance-redacted-e2e-evidence-policy-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T15:49:21-07:00"
+  - id: full-unit-baseline-current-recheck-and-repair-2026-06-28
+    phase: full-unit-baseline-current-recheck-and-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-unit-baseline-current-recheck-and-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-unit-baseline-current-recheck-and-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 9d9bb7726
+    completedAt: "2026-06-28T16:33:35-07:00"
+  - id: full-unit-baseline-current-recheck-2026-06-29
+    phase: full-unit-baseline-current-recheck-2026-06-29
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-unit-baseline-current-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-unit-baseline-current-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: ff89f0729
+    completedAt: "2026-06-29T00:32:00-07:00"
+  - id: full-acceptance-remaining-coverage-audit-2026-06-29
+    phase: full-acceptance-remaining-coverage-audit-2026-06-29
+    status: closed
+    taskKind: docs_state_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-remaining-coverage-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 64ec9c44f
+    completedAt: "2026-06-29T01:05:00-07:00"
+  - id: full-acceptance-org-advanced-admin-training-workflow-2026-06-29
+    phase: full-acceptance-org-advanced-admin-training-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-admin-training-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 04610e95c
+    completedAt: "2026-06-29T02:05:00-07:00"
+  - id: full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+    phase: full-acceptance-org-standard-admin-boundary-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-admin-boundary-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 3efdb62a0
+    completedAt: "2026-06-29T00:20:00-07:00"
+  - id: full-acceptance-org-standard-employee-boundary-workflow-2026-06-29
+    phase: full-acceptance-org-standard-employee-boundary-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-standard-employee-boundary-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-standard-employee-boundary-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: d66ec9159
+    completedAt: "2026-06-29T00:31:00-07:00"
+  - id: full-acceptance-org-advanced-employee-workflow-2026-06-29
+    phase: full-acceptance-org-advanced-employee-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-org-advanced-employee-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-org-advanced-employee-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: a8a3e0935
+    completedAt: "2026-06-29T01:08:00-07:00"
+  - id: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
+    phase: repair-org-advanced-employee-ai-generation-detail-controls-2026-06-29
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-org-advanced-employee-ai-generation-detail-controls.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: c0a252c81
+    completedAt: "2026-06-29T02:06:00-07:00"
+  - id: full-acceptance-continuity-after-org-employee-repair-2026-06-29
+    phase: full-acceptance-continuity-after-org-employee-repair-2026-06-29
+    status: closed
+    taskKind: docs_state_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-org-employee-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-org-employee-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: dc4ba27d3
+    completedAt: "2026-06-29T02:22:00-07:00"
+  - id: full-acceptance-ops-admin-workflow-2026-06-29
+    phase: full-acceptance-ops-admin-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-ops-admin-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-ops-admin-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T03:18:00-07:00"
+  - id: fix-ops-admin-employee-import-entry-state-2026-06-29
+    phase: fix-ops-admin-employee-import-entry-state-2026-06-29
+    status: closed
+    taskKind: local_acceptance_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-fix-ops-admin-employee-import-entry-state.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T03:45:00-07:00"
+  - id: full-acceptance-continuity-after-ops-admin-2026-06-29
+    phase: full-acceptance-continuity-after-ops-admin-2026-06-29
+    status: closed
+    taskKind: docs_state_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-continuity-after-ops-admin.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 425ae927f
+    completedAt: "2026-06-29T04:20:00-07:00"
+  - id: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    phase: full-acceptance-content-admin-formal-content-workflow-2026-06-29
+    status: closed
+    taskKind: local_browser_acceptance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-full-acceptance-content-admin-formal-content-workflow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T06:20:00-07:00"
+  - id: repair-content-admin-formal-content-workflow-actions-2026-06-29
+    phase: repair-content-admin-formal-content-workflow-actions-2026-06-29
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-repair-content-admin-formal-content-workflow-actions.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T07:20:00-07:00"
+  - id: full-acceptance-matrix-execution-2026-06-28
+    phase: full-acceptance-matrix-execution-2026-06-28
+    status: closed
+    taskKind: local_acceptance_matrix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-matrix-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-matrix-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T13:27:44-07:00"
+  - id: full-acceptance-session-fixture-boundary-2026-06-28
+    phase: full-acceptance-session-fixture-boundary-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-session-fixture-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-session-fixture-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T13:37:23-07:00"
+  - id: full-acceptance-local-mutation-boundary-2026-06-28
+    phase: full-acceptance-local-mutation-boundary-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-local-mutation-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-local-mutation-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T13:43:09-07:00"
+  - id: fix-organization-analytics-load-state-2026-06-28
+    phase: fix-organization-analytics-load-state-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-analytics-load-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-analytics-load-state.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T14:02:26-07:00"
+  - id: fix-organization-ai-provider-copy-2026-06-28
+    phase: fix-organization-ai-provider-copy-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-fix-organization-ai-provider-copy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-fix-organization-ai-provider-copy.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T14:21:29-07:00"
+  - id: full-acceptance-post-repair-current-session-rerun-2026-06-28
+    phase: full-acceptance-post-repair-current-session-rerun-2026-06-28
+    status: closed
+    taskKind: browser_runtime_evidence
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-post-repair-current-session-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T14:37:30-07:00"
+  - id: full-acceptance-remaining-execution-approval-package-2026-06-28
+    phase: full-acceptance-remaining-execution-approval-package-2026-06-28
+    status: closed
+    taskKind: blocked_gate_approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-remaining-execution-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-remaining-execution-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T14:50:16-07:00"
+  - id: full-acceptance-option-a-session-coverage-2026-06-28
+    phase: full-acceptance-option-a-session-coverage-2026-06-28
+    status: closed
+    taskKind: local_browser_session_coverage
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-option-a-session-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-option-a-session-coverage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T15:43:35-07:00"
+  - id: full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+    phase: full-acceptance-ai-generation-detail-gap-capture-2026-06-28
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-gap-capture.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b302be2a2
+    completedAt: "2026-06-28T16:18:12-07:00"
+  - id: full-acceptance-ops-admin-session-material-completion-2026-06-28
+    phase: full-acceptance-ops-admin-session-material-completion-2026-06-28
+    status: closed
+    taskKind: local_browser_session_coverage
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ops-admin-session-material-completion.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: b56582c35
+    completedAt: "2026-06-28T16:57:39-07:00"
+  - id: ai-generation-detail-controls-source-repair-2026-06-28
+    phase: ai-generation-detail-controls-source-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-ai-generation-detail-controls-source-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-ai-generation-detail-controls-source-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 68a2963bb5448633ebe3abb025383b025495a9a7
+    completedAt: "2026-06-28T17:31:00-07:00"
+  - id: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+    phase: full-acceptance-ai-generation-detail-role-rerun-2026-06-28
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-ai-generation-detail-role-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T18:03:02-07:00"
+  - id: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+    phase: full-acceptance-content-admin-ai-generation-detail-session-proof-2026-06-28
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-session-proof.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T18:28:27-07:00"
+  - id: content-admin-test-owned-account-stage-b-repair-2026-06-28
+    phase: content-admin-test-owned-account-stage-b-repair-2026-06-28
+    status: closed
+    taskKind: local_write_flow_acceptance_setup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-test-owned-account-stage-b-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T18:47:25-07:00"
+  - id: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28
+    phase: content-admin-local-safe-role-bootstrap-stage-c-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T19:16:27-07:00"
+  - id: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28
+    phase: full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap-2026-06-28
+    status: closed
+    taskKind: local_acceptance_runtime
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-safe-bootstrap.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
+    phase: local-acceptance-session-runtime-bridge-stage-c-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-acceptance-session-runtime-bridge-stage-c-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-acceptance-session-runtime-bridge-stage-c-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 6cd3d4945
+    completedAt: "2026-06-28T20:23:06-07:00"
+  - id: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+    phase: full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair-2026-06-28
+    status: closed
+    taskKind: local_acceptance_runtime
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-ai-generation-detail-rerun-after-session-bridge-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: 766d3952d
+    completedAt: "2026-06-28T20:40:03-07:00"
+  - id: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+    phase: full-acceptance-content-admin-formal-content-readonly-2026-06-28
+    status: closed
+    taskKind: local_acceptance_runtime
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-full-acceptance-content-admin-formal-content-readonly.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T21:55:24-07:00"
+  - id: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+    phase: org-advanced-analytics-summary-load-failure-stage-c-repair-2026-06-28
+    status: closed
+    taskKind: implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-summary-load-failure-stage-c-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T22:34:00-07:00"
+  - id: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
+    phase: org-advanced-analytics-browser-rerun-after-summary-repair-2026-06-28
+    status: closed
+    taskKind: acceptance_runtime_walkthrough
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-browser-rerun-after-summary-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T22:52:00-07:00"
+  - id: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+    phase: org-advanced-analytics-runtime-summary-load-diagnostic-2026-06-28
+    status: closed
+    taskKind: local_runtime_diagnostic
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-runtime-summary-load-diagnostic.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: org-advanced-analytics-db-alignment-repair-2026-06-28
+    phase: org-advanced-analytics-db-alignment-repair-2026-06-28
+    status: closed
+    taskKind: local_db_schema_test_owned_data_alignment_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-org-advanced-analytics-db-alignment-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: ""
+  - id: org-advanced-analytics-runtime-reverification-repair-2026-06-29
+    phase: org-advanced-analytics-runtime-reverification-repair-2026-06-29
+    status: closed
+    taskKind: local_db_schema_test_owned_data_alignment_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-29-org-advanced-analytics-runtime-reverification-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-org-advanced-analytics-runtime-reverification-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-29T05:20:00-07:00"
+  - id: owner-facing-local-experience-batch-2026-06-28
+    phase: owner-facing-local-experience-batch-2026-06-28
+    status: closed
+    taskKind: local_experience_batch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-local-experience-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-local-experience-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T11:52:26-07:00"
+  - id: owner-facing-role-gap-capture-scope-2026-06-28
+    phase: owner-facing-role-gap-capture-scope-2026-06-28
+    status: closed
+    taskKind: docs_requirement_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-owner-facing-role-gap-capture-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-owner-facing-role-gap-capture-scope.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T10:48:39-07:00"
+  - id: local-blocked-gate-supersession-triage-2026-06-28
+    phase: local-blocked-gate-supersession-triage-2026-06-28
+    status: closed
+    taskKind: docs_state_blocked_gate_triage_archive
+    evidencePath: docs/05-execution-logs/evidence/2026-06-28-local-blocked-gate-supersession-triage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-28-local-blocked-gate-supersession-triage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-28T09:45:54-07:00"

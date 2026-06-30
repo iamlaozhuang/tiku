@@ -1,8 +1,155 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ui-form-action-consistency-small-repair-2026-06-30
-updatedAt: "2026-06-30T06:35:28-07:00"
+currentPhase: governance-closed-task-archive-index-cleanup-2026-06-30
+updatedAt: "2026-06-30T06:44:18-07:00"
+governanceClosedTaskArchiveIndexCleanup20260630:
+  taskId: governance-closed-task-archive-index-cleanup-2026-06-30
+  phase: governance-closed-task-archive-index-cleanup-2026-06-30
+  status: closed
+  result: pass_closed_task_archive_index_cleanup
+  priority: p2
+  severity: governance
+  taskKind: docs_state_governance_cleanup
+  moduleRunVersion: 2
+  approvedAt: "2026-06-30T05:15:10-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+  approvalConsumed: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+  branch: codex/governance-closed-task-archive-index-cleanup-20260630
+  claimedAt: "2026-06-30T06:44:18-07:00"
+  plannedAt: "2026-06-30T06:44:18-07:00"
+  materializedAt: "2026-06-30T06:44:18-07:00"
+  implementedAt: "2026-06-30T06:51:16-07:00"
+  validatedAt: "2026-06-30T06:51:16-07:00"
+  reviewedAt: "2026-06-30T06:51:16-07:00"
+  closedAt: "2026-06-30T06:51:16-07:00"
+  sourceStory: post-detail-security-local-quality-kickoff-2026-06-30
+  targetClosureItem: Run docs/state governance cleanup for closed task archive and history index after local quality batches.
+  behaviorBoundary: docs_state_archive_index_cleanup_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+  executionProfile: docs_state_archive_index_cleanup
+  validationPolicy: archive_index_scoped_local_governance_gates
+  evidenceMode: redacted_task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_only_no_sensitive_content
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/active-queue-slimming-plan.md
+    - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-ui-form-action-consistency-small-repair.md
+    - docs/05-execution-logs/evidence/2026-06-30-ui-form-action-consistency-small-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-ui-form-action-consistency-small-repair.md
+    - docs/05-execution-logs/acceptance/2026-06-30-ui-form-action-consistency-small-repair.md
+    - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    - scripts/agent-system/Get-TikuProjectStatus.ps1
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_io
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_reports
+      - raw_exception_payload_or_stack_trace
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - git diff --check
+    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId governance-closed-task-archive-index-cleanup-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId governance-closed-task-archive-index-cleanup-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId governance-closed-task-archive-index-cleanup-2026-06-30 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_request_post_detail_security_local_quality_goal_2026_06_30
+  releaseReadinessClaimed: false
+  finalPassClaimed: false
+  costCalibrationExecuted: false
+  archiveIndexCleanup:
+    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    activeQueueTaskCountBefore: 145
+    activeQueueTerminalCountBefore: 137
+    activeQueueNonTerminalCountBefore: 8
+    terminalRecoveryWindow: 8
+    movedTerminalTaskCount: 129
+    activeQueueTaskCountAfterMove: 15
+    archiveTaskCountBefore: 1266
+    archiveTaskCountAfter: 1395
+    missingEvidencePathCount: 0
+    missingAuditReviewPathCount: 0
+    archiveCandidateCountAfterMove: 0
+    archiveIndexMovementExecuted: true
+  validationSummary:
+    validationStatus: pass_docs_state_archive_index_cleanup_local_gate
+    queueSlimmingBefore: pass_slimming_candidates_archive_candidate_count_129_after_current_pointer_materialization
+    queueSlimmingAfter: pass_clean_archive_candidate_count_0
+    projectStatusAfter: pass_current_task_active_queue_slimming_clean_before_close_status
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
 uiFormActionConsistencySmallRepair20260630:
   taskId: ui-form-action-consistency-small-repair-2026-06-30
   phase: ui-form-action-consistency-small-repair-2026-06-30
@@ -8157,43 +8304,59 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3799454f77fcdc4b40f5cb33980f7b66f9b652c8
-  lastKnownOriginMasterSha: 3799454f77fcdc4b40f5cb33980f7b66f9b652c8
+  lastKnownMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
+  lastKnownOriginMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
 currentTask:
-  id: ui-form-action-consistency-small-repair-2026-06-30
+  id: governance-closed-task-archive-index-cleanup-2026-06-30
   status: closed
-  result: pass_ui_form_action_submitting_copy_repair
-  taskKind: low_risk_ui_source_test_repair
+  result: pass_closed_task_archive_index_cleanup
+  taskKind: docs_state_governance_cleanup
   moduleRunVersion: 2
   priority: p2
-  severity: low
-  branch: codex/ui-form-action-consistency-small-repair-20260630
-  approvedAt: "2026-06-30T06:35:28-07:00"
+  severity: governance
+  branch: codex/governance-closed-task-archive-index-cleanup-20260630
+  approvedAt: "2026-06-30T05:15:10-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_request_post_detail_security_local_quality_goal_2026_06_30
   approvalConsumed: current_user_request_post_detail_security_local_quality_goal_2026_06_30
-  claimedAt: "2026-06-30T06:35:28-07:00"
-  plannedAt: "2026-06-30T06:35:28-07:00"
-  materializedAt: "2026-06-30T06:35:28-07:00"
-  implementedAt: "2026-06-30T06:37:59-07:00"
-  validatedAt: "2026-06-30T06:38:41-07:00"
-  reviewedAt: "2026-06-30T06:38:41-07:00"
-  closedAt: "2026-06-30T06:38:41-07:00"
-  sourceStory: ui-ux-static-detail-inventory-2026-06-30
-  targetClosureItem: Add dynamic submitting labels to organization training form actions while keeping behavior unchanged.
-  behaviorBoundary: focused_ui_form_action_consistency_source_test_repair_no_package_db_provider_browser_dependency_release_final_or_cost
-  executionProfile: local_tdd_ui_form_action_consistency_repair
-  evidenceMode: redacted_file_path_ui_form_action_category_status_counts_only_no_raw_dom_screenshot_trace_or_sensitive_values
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-ui-form-action-consistency-small-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-ui-form-action-consistency-small-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-ui-form-action-consistency-small-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-ui-form-action-consistency-small-repair.md
+  claimedAt: "2026-06-30T06:44:18-07:00"
+  plannedAt: "2026-06-30T06:44:18-07:00"
+  materializedAt: "2026-06-30T06:44:18-07:00"
+  implementedAt: "2026-06-30T06:51:16-07:00"
+  validatedAt: "2026-06-30T06:51:16-07:00"
+  reviewedAt: "2026-06-30T06:51:16-07:00"
+  closedAt: "2026-06-30T06:51:16-07:00"
+  sourceStory: post-detail-security-local-quality-kickoff-2026-06-30
+  targetClosureItem: Run docs/state governance cleanup for closed task archive and history index after local quality batches.
+  behaviorBoundary: docs_state_archive_index_cleanup_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+  executionProfile: docs_state_archive_index_cleanup
+  validationPolicy: archive_index_scoped_local_governance_gates
+  evidenceMode: redacted_task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_only_no_sensitive_content
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  archiveIndexCleanup:
+    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
+    activeQueueTaskCountBefore: 145
+    activeQueueTerminalCountBefore: 137
+    activeQueueNonTerminalCountBefore: 8
+    terminalRecoveryWindow: 8
+    movedTerminalTaskCount: 129
+    activeQueueTaskCountAfterMove: 15
+    archiveTaskCountBefore: 1266
+    archiveTaskCountAfter: 1395
+    missingEvidencePathCount: 0
+    missingAuditReviewPathCount: 0
+    archiveCandidateCountAfterMove: 0
+    archiveIndexMovementExecuted: true
   validationSummary:
-    validationStatus: pass_tdd_ui_form_action_consistency_repair_full_local_gate
-    redStatus: pass_expected_submitting_copy_missing_before_source_change
-    greenStatus: pass_submitting_copy_after_source_change
-    sourceChanged: true
-    testChanged: true
+    validationStatus: pass_docs_state_archive_index_cleanup_local_gate
+    queueSlimmingBefore: pass_slimming_candidates_archive_candidate_count_129_after_current_pointer_materialization
+    queueSlimmingAfter: pass_clean_archive_candidate_count_0
+    projectStatusAfter: pass_current_task_active_queue_slimming_clean_before_close_status
+    sourceOrTestChanged: false
     packageOrLockfileChanged: false
     databaseAccessExecuted: false
     providerCallOrConfigurationExecuted: false
