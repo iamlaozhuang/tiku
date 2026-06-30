@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: detail-security-local-continuation-approval-materialization-2026-06-29
-updatedAt: "2026-06-29T21:38:36-07:00"
+currentPhase: repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+updatedAt: "2026-06-29T21:57:02-07:00"
 localSecurityRepairLoopApproval20260629:
   approvedAt: "2026-06-29T10:01:28-07:00"
   approvedBy: laozhuang
@@ -4343,42 +4343,42 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 14e3d00b12bb41fa9a5ca78ca2a7f904155ada55
-  lastKnownOriginMasterSha: 14e3d00b12bb41fa9a5ca78ca2a7f904155ada55
+  lastKnownMasterSha: 921439f4835c1d5c81485d9c87e3f474aa12c158
+  lastKnownOriginMasterSha: 921439f4835c1d5c81485d9c87e3f474aa12c158
 currentTask:
-  id: detail-security-local-continuation-approval-materialization-2026-06-29
+  id: unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
   status: closed
-  result: pass_detail_security_local_continuation_approval_materialized
-  sourceStory: current_user_central_authorization_for_items_1_to_7_detail_security_local_continuation_2026_06_29
-  targetClosureItem: materialize centralized approval for remaining inventory, low/medium local repairs, Unit B auth mapper read-only review, API/input validation repairs, log redaction repairs, UI/UX small repairs, and local closeout
-  behaviorBoundary: docs_state_approval_materialization_only_no_source_no_db_no_provider_no_browser_no_release
-  executionProfile: docs_state_approval_materialization
-  evidenceMode: redacted_task_id_approval_category_boundary_validation_closeout_summary_only
-  taskKind: governance_approval_materialization
+  result: pass_auth_mapper_source_of_truth_review_repair_task_seeded_no_source_changes
+  sourceStory: current_user_central_authorized_unit_b_auth_mapper_source_of_truth_read_only_review_2026_06_29
+  targetClosureItem: review session/auth mapper capability projection against ADR-007 source-of-truth rules and split any confirmed minimal repair task without changing source
+  behaviorBoundary: docs_state_and_source_read_only_review_no_source_no_db_no_provider_no_browser_no_release
+  executionProfile: bounded_auth_mapper_source_of_truth_static_review
+  evidenceMode: redacted_file_path_mapper_boundary_status_count_task_id_summary_only
+  taskKind: auth_mapper_source_of_truth_read_only_review_and_repair_task_split
   moduleRunVersion: 2
   priority: p0
-  severity: governance
-  plannedBranch: codex/detail-security-approval-materialization-20260629
-  branch: codex/detail-security-approval-materialization-clean-20260629
+  severity: medium
+  findingId: unit-b-auth-mapper-001
+  branch: codex/unit-b-auth-mapper-review-20260629
   approvedAt: "2026-06-29T21:28:32-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_message_central_authorized_items_1_to_7_for_detail_security_local_continuation
-  approvalConsumed: detail_security_local_continuation_central_authorization_2026_06_29
-  claimedAt: "2026-06-29T21:28:32-07:00"
-  plannedAt: "2026-06-29T21:28:32-07:00"
-  materializedAt: "2026-06-29T21:28:32-07:00"
-  implementedAt: "2026-06-29T21:38:36-07:00"
-  validatedAt: "2026-06-29T21:38:36-07:00"
-  reviewedAt: "2026-06-29T21:38:36-07:00"
-  closedAt: "2026-06-29T21:38:36-07:00"
+  approvalConsumed: detail_security_local_continuation_central_authorization_2026_06_29_unit_b_auth_mapper_read_only_review
+  claimedAt: "2026-06-29T21:45:10-07:00"
+  plannedAt: "2026-06-29T21:45:10-07:00"
+  materializedAt: "2026-06-29T21:45:10-07:00"
+  reviewedAt: "2026-06-29T21:49:35-07:00"
+  implementedAt: "2026-06-29T21:57:02-07:00"
+  validatedAt: "2026-06-29T21:57:02-07:00"
+  closedAt: "2026-06-29T21:57:02-07:00"
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/traceability/2026-06-29-detail-security-local-continuation-approval-materialization.md
-    - docs/05-execution-logs/task-plans/2026-06-29-detail-security-local-continuation-approval-materialization.md
-    - docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-approval-materialization.md
-    - docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-approval-materialization.md
-    - docs/05-execution-logs/acceptance/2026-06-29-detail-security-local-continuation-approval-materialization.md
+    - docs/01-requirements/traceability/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    - docs/05-execution-logs/task-plans/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    - docs/05-execution-logs/evidence/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    - docs/05-execution-logs/acceptance/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
@@ -4388,6 +4388,14 @@ currentTask:
     - docs/04-agent-system/state/task-queue.yaml
     - docs/05-execution-logs/**
     - docs/01-requirements/**
+    - src/server/mappers/auth-mapper.ts
+    - src/server/contracts/auth-contract.ts
+    - src/server/contracts/admin-workspace-role-guard-contract.ts
+    - src/server/services/admin-workspace-role-guard-service.ts
+    - src/server/services/**
+    - src/features/admin/**
+    - src/app/api/**
+    - tests/**
   blockedFiles:
     - .env*
     - package.json
@@ -4415,45 +4423,62 @@ currentTask:
   dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix
   releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
   evidenceRedaction:
-    allowed: task_id_approval_category_file_path_status_count_validation_command_commit_branch_merge_push_cleanup_summary_only
+    allowed: file_path_mapper_boundary_status_count_validation_command_commit_branch_merge_push_cleanup_redacted_expected_observed_summary_only
     forbidden: credentials_tokens_sessions_cookies_auth_headers_env_connection_strings_raw_db_rows_internal_ids_pii_plaintext_redeem_code_provider_payloads_prompts_raw_ai_io_full_question_paper_material_resource_chunk_content_raw_dom_screenshots_traces
   validationCommands:
-    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/task-plans/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/acceptance/2026-06-29-detail-security-local-continuation-approval-materialization.md
-    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/task-plans/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-approval-materialization.md docs/05-execution-logs/acceptance/2026-06-29-detail-security-local-continuation-approval-materialization.md
+    - rg -n effectiveEdition src/server/mappers/auth-mapper.ts src/server/contracts/auth-contract.ts src/server/services src/features/admin tests
+    - rg -n "session_fallback|org_auth|personal_auth|auth_upgrade|capability" src/server/mappers/auth-mapper.ts src/server/contracts/auth-contract.ts src/server/services src/features/admin tests
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/task-plans/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/evidence/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/audits-reviews/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/acceptance/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/task-plans/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/evidence/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/audits-reviews/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md docs/05-execution-logs/acceptance/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
     - git diff --check
     - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e drizzle migrations seed scripts playwright-report test-results .next .env
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-security-local-continuation-approval-materialization-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-security-local-continuation-approval-materialization-2026-06-29
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-security-local-continuation-approval-materialization-2026-06-29 -SkipRemoteAheadCheck
-  planPath: docs/05-execution-logs/task-plans/2026-06-29-detail-security-local-continuation-approval-materialization.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-detail-security-local-continuation-approval-materialization.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-29-detail-security-local-continuation-approval-materialization.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-detail-security-local-continuation-approval-materialization.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-detail-security-local-continuation-approval-materialization.md
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-29-unit-b-auth-mapper-source-of-truth-alignment-review.md
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29
+      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_unit_b_auth_mapper_read_only_review
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29
+      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_unit_b_auth_mapper_read_only_review
     push:
       approved: true
       target: origin/master
-      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29
+      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_unit_b_auth_mapper_read_only_review
     cleanup:
       deleteShortBranch: true
-      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29
-  validationStatus: pass_docs_state_approval_materialization_prettier_diff_module_run_v2
-  updatedAt: "2026-06-29T21:38:36-07:00"
+      approvalSource: detail_security_local_continuation_central_authorization_2026_06_29_unit_b_auth_mapper_read_only_review
+  validationStatus: pass_read_only_review_prettier_diff_module_run_v2_no_blocked_paths
+  reviewOutcome:
+    findingId: unit-b-auth-mapper-001
+    severity: medium
+    status: confirmed_repair_task_seeded_pending_materialization
+    redactedObservation: auth mapper projects organization workspace capability from admin role and organization public id while marking it service_computed even though the repository row does not include org_auth auth_upgrade or effective authorization source facts
+    repairTaskId: repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+  updatedAt: "2026-06-29T21:57:02-07:00"
 nextTaskCandidate:
-  id: unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
-  status: blocked_requires_separate_task_materialization_and_fresh_approval
-  seededBy: security-unit-b-auth-role-boundary-static-review-2026-06-29
-  rule: deeper_auth_mapper_source_of_truth_alignment_review_requires_new_task_plan_allowedFiles_blockedFiles_boundaries_validation_and_fresh_approval
-  targetClosureItem: review session/auth mapper capability projection against ADR-007 source-of-truth rules without expanding this repair scope
-  plannedAllowedFiles: []
+  id: repair-auth-mapper-admin-workspace-capability-source-boundary-2026-06-29
+  status: pending_task_materialization_under_central_local_security_repair_authorization
+  seededBy: unit-b-auth-mapper-source-of-truth-alignment-review-2026-06-29
+  rule: no_source_or_test_repair_until_the_repair_task_materializes_exact_allowedFiles_blockedFiles_boundaries_validation_and_closeoutPolicy
+  targetClosureItem: make admin workspace capability projection distinguish real service-computed org_auth capability from role-derived session fallback before advanced organization access trusts it
+  plannedAllowedFiles:
+    - src/server/mappers/auth-mapper.ts
+    - src/server/mappers/auth-mapper.test.ts
+    - tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    - docs/05-execution-logs/evidence/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    - docs/05-execution-logs/audits-reviews/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
+    - docs/05-execution-logs/acceptance/2026-06-29-repair-auth-mapper-admin-workspace-capability-source-boundary.md
   blockedWithoutFreshApproval:
     - source_or_test_change
     - browser_or_playwright_runtime
