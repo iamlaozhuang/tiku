@@ -52,7 +52,15 @@ export function getStoredStudentSessionToken(): string | null {
     .getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)
     ?.trim();
 
-  return storedSessionValue === "" ? null : (storedSessionValue ?? null);
+  if (
+    storedSessionValue === undefined ||
+    storedSessionValue === "" ||
+    storedSessionValue === COOKIE_BACKED_SESSION_MARKER
+  ) {
+    return null;
+  }
+
+  return storedSessionValue;
 }
 
 export function clearStoredStudentSessionToken() {

@@ -13,6 +13,7 @@ import { buildDevSeedDataset, devSeedPublicIds } from "@/db/dev-seed";
 import {
   COOKIE_BACKED_SESSION_MARKER,
   STUDENT_SESSION_TOKEN_STORAGE_KEY,
+  getStoredStudentSessionToken,
   shouldPersistLocalAutomationStudentSessionToken,
 } from "@/features/student/studentRuntimeApi";
 
@@ -522,5 +523,23 @@ describe("LoginPage", () => {
       COOKIE_BACKED_SESSION_MARKER,
     );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
+  });
+
+  it("does not treat the cookie-backed marker as a student bearer token", () => {
+    localStorage.setItem(
+      STUDENT_SESSION_TOKEN_STORAGE_KEY,
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+
+    expect(getStoredStudentSessionToken()).toBeNull();
+
+    localStorage.setItem(
+      STUDENT_SESSION_TOKEN_STORAGE_KEY,
+      "unit-test-local-automation-token",
+    );
+
+    expect(getStoredStudentSessionToken()).toBe(
+      "unit-test-local-automation-token",
+    );
   });
 });
