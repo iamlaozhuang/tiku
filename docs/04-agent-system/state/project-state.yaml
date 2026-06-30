@@ -1,8 +1,165 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: governance-closed-task-archive-index-cleanup-2026-06-30
-updatedAt: "2026-06-30T06:44:18-07:00"
+currentPhase: post-local-quality-next-scope-decision-package-2026-06-30
+updatedAt: "2026-06-30T07:04:35-07:00"
+postLocalQualityNextScopeDecisionPackage20260630:
+  taskId: post-local-quality-next-scope-decision-package-2026-06-30
+  phase: post-local-quality-next-scope-decision-package-2026-06-30
+  status: closed
+  result: pass_next_scope_decision_package_prepared_no_runtime_execution
+  priority: p2
+  severity: governance
+  taskKind: docs_state_next_scope_decision_package
+  moduleRunVersion: 2
+  approvedAt: "2026-06-30T07:02:07-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+  approvalConsumed: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+  branch: codex/post-local-quality-next-scope-decision-package-20260630
+  claimedAt: "2026-06-30T07:02:07-07:00"
+  plannedAt: "2026-06-30T07:02:07-07:00"
+  materializedAt: "2026-06-30T07:02:07-07:00"
+  implementedAt: "2026-06-30T07:04:35-07:00"
+  validatedAt: "2026-06-30T07:04:35-07:00"
+  reviewedAt: "2026-06-30T07:04:35-07:00"
+  closedAt: "2026-06-30T07:04:35-07:00"
+  sourceStory: governance-closed-task-archive-index-cleanup-2026-06-30
+  targetClosureItem: Prepare a docs/state-only next-scope decision package after the local quality goal closed.
+  behaviorBoundary: docs_state_next_scope_decision_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+  executionProfile: docs_state_decision_package_only
+  validationPolicy: scoped_docs_state_local_governance_gates
+  evidenceMode: redacted_task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_only_no_sensitive_content
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-post-local-quality-next-scope-decision-package.md
+    - docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md
+    - docs/05-execution-logs/acceptance/2026-06-30-post-local-quality-next-scope-decision-package.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
+    - scripts/agent-system/Get-TikuProjectStatus.ps1
+    - scripts/agent-system/Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+  aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  evidenceRedaction:
+    allowed: task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_redacted_decision_summary_only
+    forbidden:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_io
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_reports
+      - raw_exception_payload_or_stack_trace
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+  baseline:
+    masterHeadBeforeTask: 637fc2175dcc8b33dc453804963afef2ef5322f6
+    originMasterBeforeTask: 637fc2175dcc8b33dc453804963afef2ef5322f6
+    projectStatusDecisionBeforeTask: idle_no_pending_task
+    activeQueueNonTerminalCountBeforeTask: 6
+    queueSlimmingDecisionBeforeTask: clean
+    highRiskRepairBlockedCountBeforeTask: 5
+  decisionPackage:
+    purpose: document_next_scope_choices_without_executing_any_blocked_runtime_or_release_gate
+    executableTaskSeeded: false
+    nextScopeCandidates:
+      - id: security-dependency-deprecated-transitive-remediation-gate-2026-06-29
+        status: blocked_requires_fresh_dependency_approval
+        reason: package_lockfile_dependency_and_registry_actions_remain_blocked_without_separate_dependency_gate
+      - id: security-dependency-script-binary-policy-gate-2026-06-29
+        status: blocked_requires_fresh_dependency_script_approval
+        reason: dependency_script_binary_policy_actions_require_separate_fresh_approval
+      - id: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+        status: blocked_requires_fresh_provider_browser_runtime_approval
+        reason: Provider_AI_browser_runtime_credentials_and_raw_runtime_evidence_remain_blocked
+      - id: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+        status: blocked_requires_fresh_db_browser_runtime_approval
+        reason: DB_browser_runtime_credentials_and_mutation_boundaries_remain_blocked
+      - id: test-acceptance-staging-e2e-runtime-boundary-approval-package-2026-06-29
+        status: blocked_requires_fresh_staging_runtime_approval
+        reason: staging_cloud_deploy_release_and_runtime_acceptance_boundaries_remain_blocked
+    recommendedDefaultNextStep: choose_one_blocked_gate_for_a_docs_state_approval_boundary_refresh_before_any_runtime_execution
+  validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2QueueSlimmingSelfRepair.ps1
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+    - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/acceptance/2026-06-30-post-local-quality-next-scope-decision-package.md
+    - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md docs/05-execution-logs/acceptance/2026-06-30-post-local-quality-next-scope-decision-package.md
+    - git diff --check
+    - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml package-lock.yaml package-lock.json src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-local-quality-next-scope-decision-package-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-local-quality-next-scope-decision-package-2026-06-30
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId post-local-quality-next-scope-decision-package-2026-06-30 -SkipRemoteAheadCheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-post-local-quality-next-scope-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-post-local-quality-next-scope-decision-package.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+  validationSummary:
+    validationStatus: pass_docs_state_next_scope_decision_package_local_gate
+    projectStatusBeforeMaterialization: idle_no_pending_task
+    projectStatusAfterCloseout: idle_no_pending_task_archive_candidate_count_1_governance_cleanup_task_deferred
+    queueSlimmingAfterCloseout: diagnostic_slimming_candidate_count_1_governance_cleanup_task_deferred_no_archive_index_edit_in_scope
+    highRiskRepairBlockedCount: 5
+    executableTaskSeeded: false
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    databaseAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+  releaseReadinessClaimed: false
+  finalPassClaimed: false
+  costCalibrationExecuted: false
 governanceClosedTaskArchiveIndexCleanup20260630:
   taskId: governance-closed-task-archive-index-cleanup-2026-06-30
   phase: governance-closed-task-archive-index-cleanup-2026-06-30
@@ -8307,55 +8464,47 @@ repository:
   lastKnownMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
   lastKnownOriginMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
 currentTask:
-  id: governance-closed-task-archive-index-cleanup-2026-06-30
+  id: post-local-quality-next-scope-decision-package-2026-06-30
   status: closed
-  result: pass_closed_task_archive_index_cleanup
-  taskKind: docs_state_governance_cleanup
+  result: pass_next_scope_decision_package_prepared_no_runtime_execution
+  taskKind: docs_state_next_scope_decision_package
   moduleRunVersion: 2
   priority: p2
   severity: governance
-  branch: codex/governance-closed-task-archive-index-cleanup-20260630
-  approvedAt: "2026-06-30T05:15:10-07:00"
+  branch: codex/post-local-quality-next-scope-decision-package-20260630
+  approvedAt: "2026-06-30T07:02:07-07:00"
   approvedBy: laozhuang
-  humanApproval: current_user_request_post_detail_security_local_quality_goal_2026_06_30
-  approvalConsumed: current_user_request_post_detail_security_local_quality_goal_2026_06_30
-  claimedAt: "2026-06-30T06:44:18-07:00"
-  plannedAt: "2026-06-30T06:44:18-07:00"
-  materializedAt: "2026-06-30T06:44:18-07:00"
-  implementedAt: "2026-06-30T06:51:16-07:00"
-  validatedAt: "2026-06-30T06:51:16-07:00"
-  reviewedAt: "2026-06-30T06:51:16-07:00"
-  closedAt: "2026-06-30T06:51:16-07:00"
-  sourceStory: post-detail-security-local-quality-kickoff-2026-06-30
-  targetClosureItem: Run docs/state governance cleanup for closed task archive and history index after local quality batches.
-  behaviorBoundary: docs_state_archive_index_cleanup_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
-  executionProfile: docs_state_archive_index_cleanup
-  validationPolicy: archive_index_scoped_local_governance_gates
+  humanApproval: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+  approvalConsumed: current_user_approved_post_local_quality_next_scope_decision_package_2026_06_30
+  claimedAt: "2026-06-30T07:02:07-07:00"
+  plannedAt: "2026-06-30T07:02:07-07:00"
+  materializedAt: "2026-06-30T07:02:07-07:00"
+  implementedAt: "2026-06-30T07:04:35-07:00"
+  validatedAt: "2026-06-30T07:04:35-07:00"
+  reviewedAt: "2026-06-30T07:04:35-07:00"
+  closedAt: "2026-06-30T07:04:35-07:00"
+  sourceStory: governance-closed-task-archive-index-cleanup-2026-06-30
+  targetClosureItem: Prepare a docs/state-only next-scope decision package after the local quality goal closed.
+  behaviorBoundary: docs_state_next_scope_decision_only_no_source_test_package_db_provider_browser_dependency_release_final_or_cost
+  executionProfile: docs_state_decision_package_only
+  validationPolicy: scoped_docs_state_local_governance_gates
   evidenceMode: redacted_task_ids_status_counts_file_paths_validation_commands_commit_branch_merge_push_cleanup_only_no_sensitive_content
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
-  archiveIndexCleanup:
-    archiveTargetPath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
-    historyIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    activeQueueTaskCountBefore: 145
-    activeQueueTerminalCountBefore: 137
-    activeQueueNonTerminalCountBefore: 8
-    terminalRecoveryWindow: 8
-    movedTerminalTaskCount: 129
-    activeQueueTaskCountAfterMove: 15
-    archiveTaskCountBefore: 1266
-    archiveTaskCountAfter: 1395
-    missingEvidencePathCount: 0
-    missingAuditReviewPathCount: 0
-    archiveCandidateCountAfterMove: 0
-    archiveIndexMovementExecuted: true
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-post-local-quality-next-scope-decision-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-post-local-quality-next-scope-decision-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-post-local-quality-next-scope-decision-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-post-local-quality-next-scope-decision-package.md
+  decisionPackage:
+    executableTaskSeeded: false
+    highRiskRepairBlockedCount: 5
+    archiveCandidateAfterCloseout: 1
+    archiveCandidateAfterCloseoutTaskId: governance-closed-task-archive-index-cleanup-2026-06-30
+    nextRecommendedAction: choose_one_blocked_gate_for_docs_state_approval_boundary_refresh_before_runtime_execution
   validationSummary:
-    validationStatus: pass_docs_state_archive_index_cleanup_local_gate
-    queueSlimmingBefore: pass_slimming_candidates_archive_candidate_count_129_after_current_pointer_materialization
-    queueSlimmingAfter: pass_clean_archive_candidate_count_0
-    projectStatusAfter: pass_current_task_active_queue_slimming_clean_before_close_status
+    validationStatus: pass_docs_state_next_scope_decision_package_local_gate
+    projectStatusAfterCloseout: idle_no_pending_task_archive_candidate_count_1_governance_cleanup_task_deferred
+    queueSlimmingAfterCloseout: diagnostic_slimming_candidate_count_1_governance_cleanup_task_deferred_no_archive_index_edit_in_scope
+    highRiskRepairBlockedCount: 5
+    executableTaskSeeded: false
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
     databaseAccessExecuted: false
@@ -8367,6 +8516,21 @@ currentTask:
   releaseReadinessClaimed: false
   finalPassClaimed: false
   costCalibrationExecuted: false
+previousCurrentTaskGovernanceClosedTaskArchiveIndexCleanup20260630:
+  id: governance-closed-task-archive-index-cleanup-2026-06-30
+  status: closed
+  result: pass_closed_task_archive_index_cleanup
+  taskKind: docs_state_governance_cleanup
+  moduleRunVersion: 2
+  priority: p2
+  severity: governance
+  branch: codex/governance-closed-task-archive-index-cleanup-20260630
+  closedAt: "2026-06-30T06:51:16-07:00"
+  sourceStory: post-detail-security-local-quality-kickoff-2026-06-30
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-governance-closed-task-archive-index-cleanup.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-governance-closed-task-archive-index-cleanup.md
 previousCurrentTaskLogListQueryBoundaryRegressionReinforcement20260630:
   id: log-list-query-boundary-regression-reinforcement-2026-06-30
   status: closed
