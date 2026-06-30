@@ -217,6 +217,121 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+    title: Detail optimization security review goal closeout rollup
+    phase: detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+    sourceStory: seeded_by_dependency_supply_chain_remaining_gate_closeout_882a712f7
+    dependencies:
+      - security-followup-approval-materialization-2026-06-30
+      - security-remaining-inventory-triage-2026-06-30
+      - security-api-input-validation-repair-candidate-2026-06-30
+      - security-log-redaction-repair-candidate-2026-06-30
+      - security-auth-role-boundary-followup-candidate-2026-06-30
+      - ui-ux-detail-small-repair-candidate-2026-06-30
+      - test-acceptance-regression-coverage-reinforcement-candidate-2026-06-30
+      - security-dependency-supply-chain-remaining-gate-candidate-2026-06-30
+    taskPlanPolicy: required_before_goal_closeout_rollup
+    targetClosureItem: Goal-level closeout rollup for detail optimization inventory, security review, and executable repair task split without release readiness final Pass or Cost Calibration claims
+    behaviorBoundary: docs_state_rollup_only_no_source_test_package_db_provider_browser_e2e_release_final_or_cost_execution
+    executionProfile: local_docs_state_goal_closeout_rollup
+    evidenceMode: redacted_task_id_status_count_commit_branch_merge_push_cleanup_summary_only
+    taskKind: docs_state_goal_closeout_rollup
+    moduleRunVersion: 2
+    status: closed
+    result: pass_detail_optimization_security_review_goal_closeout_rollup_no_release_claim
+    priority: p0
+    severity: governance
+    approvedAt: "2026-06-30T03:05:55-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_initial_goal_docs_state_closeout_authorization_2026_06_30
+    approvalConsumed: initial_current_goal_docs_state_closeout_authorization_2026_06_30
+    branch: codex/detail-security-goal-closeout-rollup-20260630
+    claimedAt: "2026-06-30T03:05:55-07:00"
+    plannedAt: "2026-06-30T03:05:55-07:00"
+    materializedAt: "2026-06-30T03:05:55-07:00"
+    implementedAt: "2026-06-30T03:10:21-07:00"
+    validatedAt: "2026-06-30T03:10:21-07:00"
+    reviewedAt: "2026-06-30T03:10:21-07:00"
+    closedAt: "2026-06-30T03:10:21-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - docs/05-execution-logs/task-plans/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - docs/05-execution-logs/acceptance/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace_no_dev_server_action_no_e2e
+    credentialBoundary: no_env_secret_connection_string_registry_token_account_login_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove_audit_fix_or_registry_lookup
+    validationCommands:
+      - 'rg -n "detail-optimization-security-review-goal-closeout-rollup-2026-06-30|releaseReadinessClaimed: false|finalPassClaimed: false|costCalibrationExecuted: false" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/acceptance/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md'
+      - 'rg -n "closed_pnpm_package_manager_metadata_remediated|closed_no_current_actionable_repair_confirmed|pass_root_entry_token_hover_and_active_feedback_repaired|pass_no_current_actionable_coverage_gap_confirmed" docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml'
+      - npx.cmd prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/task-plans/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/acceptance/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/task-plans/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md docs/05-execution-logs/acceptance/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+      - git diff --check
+      - git diff --name-only -- package.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e playwright-report test-results .next .env package-lock.yaml package-lock.json
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId detail-optimization-security-review-goal-closeout-rollup-2026-06-30
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId detail-optimization-security-review-goal-closeout-rollup-2026-06-30 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-detail-optimization-security-review-goal-closeout-rollup.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: initial_current_goal_docs_state_closeout_authorization_2026_06_30
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: initial_current_goal_docs_state_closeout_authorization_2026_06_30
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: initial_current_goal_docs_state_closeout_authorization_2026_06_30
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: initial_current_goal_docs_state_closeout_authorization_2026_06_30
+    validationSummary:
+      validationStatus: pass_detail_optimization_security_review_goal_closeout_rollup_no_release_claim
+      currentGoalProgress: 100_percent_for_approved_local_scope
+      remainingCurrentGoalTasks: 0
+      completedLocalFollowupPackages: 11
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      databaseAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserOrE2eRuntimeExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedDirection: future_work_requires_fresh_task_specific_approval_for_blocked_runtime_release_or_external_gates
+
   - id: security-api-input-validation-repair-candidate-2026-06-30
     title: Security API input validation repair candidate recheck
     phase: security-api-input-validation-repair-candidate-2026-06-30
