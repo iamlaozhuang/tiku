@@ -11,6 +11,8 @@ import {
   createBlockedAuditLogGovernanceHandoff,
 } from "@/server/services/audit-log/route-handlers";
 import type { SessionService } from "@/server/services/session-service";
+import { parseAiCallLogListQuery } from "@/server/validators/ai-call-log/list-query";
+import { parseAuditLogListQuery } from "@/server/validators/audit-log/list-query";
 
 type AdminRole = "super_admin" | "ops_admin" | "content_admin";
 
@@ -381,6 +383,53 @@ describe("admin log retention, redaction, and layering repair", () => {
       providerExecutionStatus: "blocked",
       rawViewerStatus: "blocked",
       readOnly: true,
+    });
+  });
+
+  it("drops overlong audit_log and ai_call_log list filter text", () => {
+    const overlongFilterText = "x".repeat(129);
+
+    const auditLogQuery = parseAuditLogListQuery(
+      new Request(
+        `http://localhost/api/v1/audit-logs?actionType=${overlongFilterText}&actorPublicId=${overlongFilterText}&keyword=${overlongFilterText}&targetResourceType=${overlongFilterText}`,
+      ),
+    );
+    const aiCallLogQuery = parseAiCallLogListQuery(
+      new Request(
+        `http://localhost/api/v1/ai-call-logs?organizationPublicId=${overlongFilterText}&userPublicId=${overlongFilterText}`,
+      ),
+    );
+
+    expect(auditLogQuery).toMatchObject({
+      actionType: "all",
+      actorPublicId: null,
+      keyword: null,
+      targetResourceType: "all",
+    });
+    expect(aiCallLogQuery).toMatchObject({
+      organizationPublicId: null,
+      userPublicId: null,
+    });
+
+    expect(
+      parseAuditLogListQuery(
+        new Request(
+          "http://localhost/api/v1/audit-logs?actionType=model_config.update&keyword=model_config",
+        ),
+      ),
+    ).toMatchObject({
+      actionType: "model_config.update",
+      keyword: "model_config",
+    });
+    expect(
+      parseAiCallLogListQuery(
+        new Request(
+          "http://localhost/api/v1/ai-call-logs?organizationPublicId=organization-public-001&userPublicId=user-public-001",
+        ),
+      ),
+    ).toMatchObject({
+      organizationPublicId: "organization-public-001",
+      userPublicId: "user-public-001",
     });
   });
 });

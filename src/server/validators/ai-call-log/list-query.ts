@@ -15,6 +15,7 @@ const aiCallLogFunctionTypes = [
 const aiCallLogStatuses = ["success", "failed"] as const;
 const aiCallLogProfessions = ["monopoly", "marketing", "logistics"] as const;
 const aiCallLogPageSizeOptions = [20, 50, 100] as const;
+const LOG_LIST_FILTER_TEXT_MAX_LENGTH = 128;
 
 export function parseAiCallLogListQuery(request: Request): AiCallLogListQuery {
   const searchParams = new URL(request.url).searchParams;
@@ -44,6 +45,10 @@ function normalizeNullableText(value: string | null): string | null {
   }
 
   const normalizedText = value.trim();
+
+  if (normalizedText.length > LOG_LIST_FILTER_TEXT_MAX_LENGTH) {
+    return null;
+  }
 
   return normalizedText.length === 0 ? null : normalizedText;
 }
