@@ -521,7 +521,7 @@ function DraftForm({
       />
       <ScopeFields values={values} onChange={onChange} />
       <Button disabled={isSubmitting} type="submit">
-        创建草稿
+        {isSubmitting ? "创建中" : "创建草稿"}
       </Button>
     </form>
   );
@@ -579,7 +579,7 @@ function SourceContextForm({
         onChange={(value) => onChange({ ...values, totalScore: value })}
       />
       <Button disabled={disabled || isSubmitting} type="submit">
-        绑定来源
+        {isSubmitting ? "绑定中" : "绑定来源"}
       </Button>
     </form>
   );
@@ -622,7 +622,7 @@ function CopyToDraftForm({
         onChange={(value) => onChange({ ...values, newDraftTitle: value })}
       />
       <Button disabled={isSubmitting} type="submit">
-        复制为草稿
+        {isSubmitting ? "复制中" : "复制为草稿"}
       </Button>
     </form>
   );

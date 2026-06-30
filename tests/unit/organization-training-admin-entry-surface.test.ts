@@ -465,4 +465,72 @@ describe("AdminOrganizationTrainingPage", () => {
     const mutationAlert = await screen.findByRole("alert");
     expect(mutationAlert).toHaveTextContent("组织培训草稿创建失败");
   });
+
+  it("shows submitting copy while creating an organization training draft", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    let resolveDraftResponse: (
+      response: ReturnType<typeof createJsonResponse>,
+    ) => void = () => {};
+    const draftResponsePromise = new Promise<
+      ReturnType<typeof createJsonResponse>
+    >((resolve) => {
+      resolveDraftResponse = resolve;
+    });
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        const method = init?.method ?? "GET";
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (path === "/api/v1/organization-trainings" && method === "POST") {
+          return draftResponsePromise;
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(
+      await screen.findByRole("heading", { name: "组织培训" }),
+    ).toBeInTheDocument();
+
+    const draftForm = within(
+      screen.getByRole("form", { name: "组织培训草稿表单" }),
+    );
+    fireEvent.change(draftForm.getByLabelText("组织业务标识"), {
+      target: { value: "organization-admin-scope-001" },
+    });
+    fireEvent.change(draftForm.getByLabelText("企业授权业务标识"), {
+      target: { value: "org-auth-admin-scope-001" },
+    });
+    fireEvent.change(draftForm.getByLabelText("培训标题"), {
+      target: { value: "门店服务训练" },
+    });
+    fireEvent.click(draftForm.getByRole("button", { name: "创建草稿" }));
+
+    await waitFor(() =>
+      expect(draftForm.getByRole("button", { name: "创建中" })).toBeDisabled(),
+    );
+
+    resolveDraftResponse(
+      createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: { draft: createdDraft },
+      }),
+    );
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "草稿 organization-training-draft-ui-001 已创建",
+    );
+  });
 });
