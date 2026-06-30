@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
-updatedAt: "2026-06-30T07:49:06-07:00"
+currentPhase: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
+updatedAt: "2026-06-30T09:19:41-07:00"
 blockedGatesCentralFreshApprovalPackage20260630:
   taskId: blocked-gates-central-fresh-approval-package-2026-06-30
   phase: blocked-gates-central-fresh-approval-package-2026-06-30
@@ -8981,35 +8981,35 @@ repository:
   lastKnownMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
   lastKnownOriginMasterSha: 0abee92730a0799478b1855d79ea9f08e0e5d41d
 currentTask:
-  id: test-acceptance-db-backed-e2e-runtime-boundary-approval-package-2026-06-29
+  id: test-acceptance-provider-ai-e2e-runtime-boundary-approval-package-2026-06-29
   status: closed
-  result: pass_db_backed_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution
+  result: pass_provider_ai_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution
   taskKind: approval_package_candidate
   moduleRunVersion: 2
   priority: p2
   severity: medium
-  branch: codex/db-backed-e2e-runtime-boundary-package-20260630
+  branch: codex/provider-ai-e2e-runtime-boundary-package-20260630
   approvedAt: "2026-06-30T07:49:06-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
   approvalConsumed: blockedGatesCentralFreshApproval20260630
-  claimedAt: "2026-06-30T09:03:12-07:00"
-  plannedAt: "2026-06-30T09:03:12-07:00"
-  materializedAt: "2026-06-30T09:03:12-07:00"
-  implementedAt: "2026-06-30T09:03:12-07:00"
-  validatedAt: "2026-06-30T09:03:12-07:00"
-  reviewedAt: "2026-06-30T09:03:12-07:00"
-  closedAt: "2026-06-30T09:03:12-07:00"
+  claimedAt: "2026-06-30T09:19:41-07:00"
+  plannedAt: "2026-06-30T09:19:41-07:00"
+  materializedAt: "2026-06-30T09:19:41-07:00"
+  implementedAt: "2026-06-30T09:19:41-07:00"
+  validatedAt: "2026-06-30T09:19:41-07:00"
+  reviewedAt: "2026-06-30T09:19:41-07:00"
+  closedAt: "2026-06-30T09:19:41-07:00"
   sourceStory: test-acceptance-runtime-gate-split-review-2026-06-29
-  targetClosureItem: Materialize DB-backed/API data e2e runtime boundary approval package without executing it.
-  behaviorBoundary: docs_state_db_backed_e2e_runtime_approval_package_only_no_db_browser_e2e_dev_server_execution
+  targetClosureItem: Materialize Provider/AI/RAG/knowledge-labeled e2e runtime boundary approval package without executing it.
+  behaviorBoundary: docs_state_provider_ai_e2e_runtime_approval_package_only_no_provider_ai_browser_e2e_dev_server_execution
   executionProfile: docs_state_approval_package
-  validationPolicy: db_backed_e2e_runtime_boundary_package_after_central_fresh_approval_and_task_materialization
-  evidenceMode: redacted_lane_gate_command_label_summary_only_no_raw_rows_pii_dom_screenshot_trace_or_session_material
-  planPath: docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-db-backed-e2e-runtime-boundary-approval-package.md
+  validationPolicy: provider_ai_e2e_runtime_boundary_package_after_central_fresh_approval_and_task_materialization
+  evidenceMode: redacted_lane_gate_command_label_summary_only_no_provider_payload_prompt_raw_ai_io_dom_screenshot_trace_or_session_material
+  planPath: docs/05-execution-logs/task-plans/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-06-30-test-acceptance-provider-ai-e2e-runtime-boundary-approval-package.md
   validationSummary:
     validationStatus: pass_module_run_v2_local_validation
     approvalPackageMaterialized: true
@@ -9020,6 +9020,7 @@ currentTask:
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
     providerCallOrConfigurationExecuted: false
+    providerPayloadPromptRawAiIoCaptured: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     costCalibrationExecuted: false

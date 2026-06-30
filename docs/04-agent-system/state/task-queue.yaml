@@ -883,13 +883,22 @@ tasks:
         approvalSource: current_user_requested_centralized_fresh_approval_for_remaining_blocked_gates_and_serial_advancement_2026_06_30
     taskKind: approval_package_candidate
     moduleRunVersion: 2
-    status: blocked_requires_fresh_provider_browser_runtime_approval
-    result: pending_owner_selection_and_fresh_provider_browser_runtime_scope
+    status: closed
+    result: pass_provider_ai_e2e_runtime_boundary_approval_package_materialized_no_runtime_execution
     nextRecommended: false
     recommendedAfter: test-acceptance-redacted-e2e-evidence-policy-review-2026-06-29
     priority: p2
     severity: medium
-    approvalSource: fresh_provider_browser_runtime_approval_required
+    approvalSource: blockedGatesCentralFreshApproval20260630
+    executionBranch: codex/provider-ai-e2e-runtime-boundary-package-20260630
+    approvalPackage:
+      materializedAt: "2026-06-30T09:19:41-07:00"
+      runtimeExecutionApprovedByPackage: false
+      providerAiCallApprovedByPackage: false
+      browserOrE2eApprovedByPackage: false
+      devServerApprovedByPackage: false
+      evidenceMode: redacted_lane_gate_command_label_summary_only_no_provider_payload_prompt_raw_ai_io_dom_screenshot_trace_or_session_material
+      validationStatus: pass_module_run_v2_local_validation
     blockedWithoutFreshApproval:
       - browser_or_e2e_runtime
       - dev_server_start
