@@ -75,6 +75,12 @@ export type AdminAiGenerationLocalContractRuntimeBridgeDto = {
   providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   executionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
+  visibleGeneratedContent: {
+    content: string;
+    contentVisibility: "transient_response_only";
+    persistenceStatus: "not_persisted";
+    safetyStatus: "checked";
+  } | null;
   redactionStatus: "redacted";
   blockedReasons: string[];
 };

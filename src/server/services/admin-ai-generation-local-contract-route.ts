@@ -338,6 +338,7 @@ function mapAdminAiGenerationRuntimeBridgeReadModelToLocalContract(
     providerConfigurationRead: runtimeBridge.providerConfigurationRead,
     costCalibrationExecuted: runtimeBridge.costCalibrationExecuted,
     executionSummary: runtimeBridge.providerExecutionSummary,
+    visibleGeneratedContent: runtimeBridge.visibleGeneratedContent,
     redactionStatus: runtimeBridge.redactionStatus,
     blockedReasons: runtimeBridge.blockedReasons,
   };

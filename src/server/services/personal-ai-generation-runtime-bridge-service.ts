@@ -103,6 +103,7 @@ function buildPersonalAiGenerationRuntimeBridgeDto(
     providerExecutionSummary: executionOutcome.executionSummary,
     resultMaterializationSummary:
       createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
+    visibleGeneratedContent: null,
     blockedReasons: isControlledRunnerEnabled
       ? ["real_provider_execution_requires_fresh_approval"]
       : [
@@ -196,6 +197,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerExecutionSummary: executionOutcome.executionSummary,
     resultMaterializationSummary:
       createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
+    visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
     blockedReasons: executionOutcome.providerCallExecuted
       ? []
       : ["real_provider_execution_requires_fresh_approval"],

@@ -137,6 +137,7 @@ function createLocalContractResponse(input: {
         envSecretAccessed: false,
         providerConfigurationRead: false,
         costCalibrationExecuted: false,
+        visibleGeneratedContent: null,
         redactionStatus: "redacted",
       },
       formalContentBoundary: {
@@ -537,6 +538,75 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_A");
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_B");
+  });
+
+  it("renders transient visible generated content for provider-enabled admin responses", async () => {
+    globalThis.localStorage?.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token",
+    );
+    const blockedResponse = createLocalContractResponse({
+      workspace: "content",
+      generationKind: "paper",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "后台本次生成草稿：包含试卷结构和知识点覆盖建议。",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        String(url) === "/api/v1/content-ai-generation-requests" &&
+        init?.method === "POST"
+      ) {
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (String(url) === "/api/v1/content-ai-generation-requests") {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "paper",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    expect(
+      await screen.findByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("后台本次生成草稿：包含试卷结构和知识点覆盖建议。");
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("providerPayload");
   });
 
   it("submits organization advanced admin local contract requests to the organization API", async () => {

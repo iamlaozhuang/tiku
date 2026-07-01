@@ -683,7 +683,7 @@ describe("personal AI generation request route handlers", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 8,
+            maxOutputTokens: 220,
             timeoutMs: 30000,
             readProviderCredential: async () => "synthetic-test-credential",
             executeProviderRequest: async (executionInput) => {
@@ -700,6 +700,12 @@ describe("personal AI generation request route handlers", () => {
                   totalTokens: 15,
                 },
                 providerErrorSummary: null,
+                visibleGeneratedContent: {
+                  content: "学生端本次可见 AI 预览内容",
+                  contentVisibility: "transient_response_only",
+                  persistenceStatus: "not_persisted",
+                  safetyStatus: "checked",
+                },
               };
             },
           },
@@ -725,7 +731,7 @@ describe("personal AI generation request route handlers", () => {
       limits: {
         maxRequests: 1,
         maxRetries: 0,
-        maxOutputTokens: 8,
+        maxOutputTokens: 220,
         timeoutMs: 30000,
       },
       requestContext: {
@@ -766,12 +772,20 @@ describe("personal AI generation request route handlers", () => {
             redactionStatus: "redacted",
           },
           blockedReasons: [],
+          visibleGeneratedContent: {
+            content: "学生端本次可见 AI 预览内容",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
         },
       },
     });
     expect(serializedPayload).not.toContain("synthetic-test-credential");
     expect(serializedPayload).not.toContain("provider payload");
-    expect(serializedPayload).not.toContain("generated content");
+    expect(
+      payload.data.runtimeBridge.providerExecutionSummary,
+    ).not.toHaveProperty("visibleGeneratedContent");
   });
 
   it("materializes only redacted result references from server-side route dependencies", async () => {

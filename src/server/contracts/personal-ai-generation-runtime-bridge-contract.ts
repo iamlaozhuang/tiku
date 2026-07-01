@@ -46,6 +46,13 @@ export type PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto = {
   formalAdoptionStatus: "blocked";
 };
 
+export type PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto = {
+  content: string;
+  contentVisibility: "transient_response_only";
+  persistenceStatus: "not_persisted";
+  safetyStatus: "checked";
+} | null;
+
 export type PersonalAiGenerationRuntimeBridgeDto = {
   bridgeStatus: PersonalAiGenerationRuntimeBridgeStatus;
   bridgeMode: PersonalAiGenerationRuntimeBridgeMode;
@@ -76,5 +83,6 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
   };
   providerExecutionSummary: PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto;
   resultMaterializationSummary: PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto;
+  visibleGeneratedContent: PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto;
   blockedReasons: PersonalAiGenerationRuntimeBridgeBlockedReason[];
 };

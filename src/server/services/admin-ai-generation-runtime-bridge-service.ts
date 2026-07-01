@@ -13,15 +13,14 @@ import type {
 import {
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedVisibleGeneratedContent,
+  ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
   qwenRouteIntegratedProviderMetadata,
   resolveRouteIntegratedProviderFailureCategory,
   summarizeRouteIntegratedProviderError,
   summarizeRouteIntegratedProviderUsage,
 } from "./route-integrated-provider-execution-service";
-
-const internalAdminRouteIntegratedInstruction =
-  "Return one short confirmation word for a local Tiku admin route-integrated provider check.";
 
 export function createAdminAiGenerationRouteIntegratedProviderRequestContext(
   input: AdminAiGenerationRuntimeBridgeInput,
@@ -67,6 +66,7 @@ export function buildAdminAiGenerationRuntimeBridgeReadModel(
     redactionStatus: "redacted",
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     providerExecutionSummary: providerDisabledOutcome.executionSummary,
+    visibleGeneratedContent: null,
     providerRequestContext:
       createAdminAiGenerationRouteIntegratedProviderRequestContext(input),
     blockedReasons: [
@@ -119,6 +119,7 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "missing_provider_credential",
       ),
+      visibleGeneratedContent: null,
     };
   }
 
@@ -137,21 +138,31 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       createAdminAiGenerationRouteIntegratedProviderRequestContext(input),
     providerCredential,
   });
-  const executionSummary =
-    ensureRouteIntegratedProviderExecutionSummaryRedacted(
-      {
-        ...executionResult,
-        redactionStatus: "redacted",
-      },
-      [providerCredential],
-    );
+  const executionSummary = ensureAdminRouteIntegratedExecutionSummaryRedacted({
+    executionResult,
+    providerCredential,
+  });
+  const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
+    executionResult.visibleGeneratedContent,
+    [providerCredential],
+  );
+  const finalExecutionSummary = visibleContentCheck.redactionViolationFound
+    ? createBlockedRouteIntegratedProviderExecutionSummary(
+        "redaction_violation",
+      )
+    : executionSummary;
+  const visibleGeneratedContent =
+    finalExecutionSummary.resultStatus === "pass"
+      ? visibleContentCheck.visibleGeneratedContent
+      : null;
 
   return {
     realProviderExecutionApproved: true,
-    providerCallExecuted: executionSummary.requestCount === 1,
+    providerCallExecuted: finalExecutionSummary.requestCount === 1,
     envSecretAccessed: true,
     providerConfigurationRead: true,
-    executionSummary,
+    executionSummary: finalExecutionSummary,
+    visibleGeneratedContent,
   };
 }
 
@@ -179,7 +190,7 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
         : undefined;
     const result = await generateText({
       model: providerModel,
-      prompt: internalAdminRouteIntegratedInstruction,
+      prompt: createAdminRouteIntegratedInstruction(input.requestContext),
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -192,6 +203,9 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
       durationMs: Math.max(0, Date.now() - startedAt),
       usageSummary: summarizeRouteIntegratedProviderUsage(result.usage),
       providerErrorSummary: null,
+      visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
+        result.text,
+      ),
     };
   } catch (providerError) {
     return {
@@ -203,8 +217,46 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
       usageSummary: null,
       providerErrorSummary:
         summarizeRouteIntegratedProviderError(providerError),
+      visibleGeneratedContent: null,
     };
   }
+}
+
+function ensureAdminRouteIntegratedExecutionSummaryRedacted(input: {
+  executionResult: AdminAiGenerationRouteIntegratedProviderExecutionResult;
+  providerCredential: string;
+}) {
+  const executionResultSummaryFields = {
+    requestCount: input.executionResult.requestCount,
+    resultStatus: input.executionResult.resultStatus,
+    failureCategory: input.executionResult.failureCategory,
+    durationMs: input.executionResult.durationMs,
+    usageSummary: input.executionResult.usageSummary,
+    providerErrorSummary: input.executionResult.providerErrorSummary,
+  };
+
+  return ensureRouteIntegratedProviderExecutionSummaryRedacted(
+    {
+      ...executionResultSummaryFields,
+      redactionStatus: "redacted",
+    },
+    [input.providerCredential],
+  );
+}
+
+function createAdminRouteIntegratedInstruction(
+  requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
+): string {
+  const generationLabel =
+    requestContext.generationKind === "question" ? "AI出题" : "AI组卷";
+  const workspaceLabel =
+    requestContext.workspace === "content" ? "内容草稿评审" : "组织草稿";
+
+  return [
+    "为题库系统本地 owner preview 生成简短中文体验内容。",
+    `场景：${workspaceLabel} ${generationLabel}。`,
+    "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
+  ].join("\n");
 }
 
 function createAdminAiGenerationRuntimeBridgeReadModelFromProviderOutcome(input: {
@@ -237,6 +289,8 @@ function createAdminAiGenerationRuntimeBridgeReadModelFromProviderOutcome(input:
     redactionStatus: "redacted",
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     providerExecutionSummary: input.providerExecutionOutcome.executionSummary,
+    visibleGeneratedContent:
+      input.providerExecutionOutcome.visibleGeneratedContent,
     providerRequestContext:
       createAdminAiGenerationRouteIntegratedProviderRequestContext(input.input),
     blockedReasons: resolveAdminAiGenerationRuntimeBridgeBlockedReasons(

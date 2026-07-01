@@ -116,7 +116,7 @@ const ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID =
 const copy = {
   title: "AI训练",
   subtitle:
-    "面向高级授权学员的 AI出题 和 AI组卷入口；当前仅展示本地合约摘要和脱敏状态。",
+    "面向高级授权学员的 AI出题 和 AI组卷入口；本地 owner preview 可展示本次生成内容和脱敏状态。",
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
   emptyDescription:
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730\u63a5\u53e3\u5951\u7ea6\u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
@@ -133,7 +133,7 @@ const copy = {
   unavailableTitle:
     "\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e AI \u8bad\u7ec3",
   unavailableDescription:
-    "\u8bf7\u786e\u8ba4\u5df2\u9009\u62e9\u6709\u6548\u7684\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\uff1b\u672c\u9875\u4e0d\u4f1a\u6267\u884c\u771f\u5b9e\u6a21\u578b\u8c03\u7528\u3002",
+    "\u8bf7\u786e\u8ba4\u5df2\u9009\u62e9\u6709\u6548\u7684\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\u3002",
   blockedTitle: "\u8bf7\u6c42\u5df2\u963b\u65ad",
   contractTitle: "\u672c\u5730\u5408\u7ea6\u6458\u8981",
   historyTitle: "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2",
@@ -673,6 +673,35 @@ function ContractField({ label, value }: { label: string; value: string }) {
   );
 }
 
+function StudentPersonalAiGenerationVisibleGeneratedContent({
+  visibleGeneratedContent,
+}: {
+  visibleGeneratedContent: PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"];
+}) {
+  if (visibleGeneratedContent == null) {
+    return null;
+  }
+
+  return (
+    <section
+      className="border-border bg-background mb-3 rounded-lg border p-3"
+      data-testid="student-visible-generated-content"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-text-primary text-sm font-semibold">
+          本次生成内容
+        </h3>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          临时展示
+        </span>
+      </div>
+      <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
+        {visibleGeneratedContent.content}
+      </p>
+    </section>
+  );
+}
+
 function StudentPersonalAiGenerationContractSummary({
   experience,
 }: {
@@ -703,6 +732,12 @@ function StudentPersonalAiGenerationContractSummary({
           </span>
         </div>
       ) : null}
+
+      <StudentPersonalAiGenerationVisibleGeneratedContent
+        visibleGeneratedContent={
+          experience.runtimeBridge.visibleGeneratedContent
+        }
+      />
 
       <dl>
         <ContractField label="runtimeStatus" value={experience.runtimeStatus} />

@@ -57,6 +57,7 @@ describe("admin AI generation runtime bridge service", () => {
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
       blockedReasons: [
         "provider_call_blocked",
         "env_secret_access_blocked",
@@ -120,7 +121,7 @@ describe("admin AI generation runtime bridge service", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 8,
+            maxOutputTokens: 220,
             timeoutMs: 30000,
             readProviderCredential: () => "synthetic-admin-provider-credential",
             executeProviderRequest: async (providerInput) => {
@@ -137,6 +138,12 @@ describe("admin AI generation runtime bridge service", () => {
                   totalTokens: 4,
                 },
                 providerErrorSummary: null,
+                visibleGeneratedContent: {
+                  content: "后台本次 AI 草稿预览",
+                  contentVisibility: "transient_response_only",
+                  persistenceStatus: "not_persisted",
+                  safetyStatus: "checked",
+                },
               };
             },
           },
@@ -154,7 +161,7 @@ describe("admin AI generation runtime bridge service", () => {
       limits: {
         maxRequests: 1,
         maxRetries: 0,
-        maxOutputTokens: 8,
+        maxOutputTokens: 220,
         timeoutMs: 30000,
       },
       requestContext: {
@@ -191,6 +198,12 @@ describe("admin AI generation runtime bridge service", () => {
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: {
+        content: "后台本次 AI 草稿预览",
+        contentVisibility: "transient_response_only",
+        persistenceStatus: "not_persisted",
+        safetyStatus: "checked",
+      },
       blockedReasons: [],
     });
     expect(serializedBridge).not.toContain(
@@ -226,7 +239,7 @@ describe("admin AI generation runtime bridge service", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 8,
+            maxOutputTokens: 220,
             timeoutMs: 30000,
             readProviderCredential: () => null,
             executeProviderRequest: async (providerInput) => {
@@ -256,6 +269,7 @@ describe("admin AI generation runtime bridge service", () => {
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
     });
   });
 });

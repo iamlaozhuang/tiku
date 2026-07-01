@@ -9,7 +9,7 @@ export type AiGenerationRouteIntegratedProviderMetadata = {
 export type AiGenerationRouteIntegratedProviderLimits = {
   maxRequests: 1;
   maxRetries: 0;
-  maxOutputTokens: 8;
+  maxOutputTokens: 220;
   timeoutMs: 30000;
 };
 
@@ -43,12 +43,15 @@ export type AiGenerationRouteIntegratedProviderExecutionResult = {
   durationMs: number;
   usageSummary: AiGenerationRouteIntegratedProviderUsageSummary;
   providerErrorSummary: AiGenerationRouteIntegratedProviderErrorSummary;
+  visibleGeneratedContent?: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
 };
 
-export type AiGenerationRouteIntegratedProviderExecutionSummary =
-  AiGenerationRouteIntegratedProviderExecutionResult & {
-    redactionStatus: "redacted";
-  };
+export type AiGenerationRouteIntegratedProviderExecutionSummary = Omit<
+  AiGenerationRouteIntegratedProviderExecutionResult,
+  "visibleGeneratedContent"
+> & {
+  redactionStatus: "redacted";
+};
 
 export type AiGenerationRouteIntegratedProviderExecutionInput<
   TRequestContext extends object = Record<string, unknown>,
@@ -72,10 +75,17 @@ export type AiGenerationRouteIntegratedProviderExecutionControl<
   realProviderExecutionApproved: true;
   maxRequests: 1;
   maxRetries: 0;
-  maxOutputTokens: 8;
+  maxOutputTokens: 220;
   timeoutMs: 30000;
   readProviderCredential: () => Promise<string | null> | string | null;
   executeProviderRequest?: AiGenerationRouteIntegratedProviderExecutor<TRequestContext>;
+};
+
+export type AiGenerationRouteIntegratedVisibleGeneratedContent = {
+  content: string;
+  contentVisibility: "transient_response_only";
+  persistenceStatus: "not_persisted";
+  safetyStatus: "checked";
 };
 
 export type AiGenerationRouteIntegratedProviderExecutionOutcome = {
@@ -84,4 +94,5 @@ export type AiGenerationRouteIntegratedProviderExecutionOutcome = {
   envSecretAccessed: boolean;
   providerConfigurationRead: boolean;
   executionSummary: AiGenerationRouteIntegratedProviderExecutionSummary;
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
 };

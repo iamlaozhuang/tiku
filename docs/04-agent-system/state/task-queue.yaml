@@ -297,6 +297,145 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: owner-preview-qwen-visible-ai-2026-07-01
+    title: Owner preview Qwen visible AI runtime bridge
+    phase: owner-preview-qwen-visible-ai-2026-07-01
+    sourceStory: current_user_requested_two_stage_owner_preview_preparation_plan_implementation
+    dependencies:
+      - owner-preview-empty-baseline-2026-07-01
+    taskPlanPolicy: required_before_source_write
+    humanApproval: >-
+      User explicitly requested implementation of the two-stage owner preview preparation plan on 2026-07-01. This
+      stage is limited to local owner preview Qwen/OpenAI-compatible runtime bridge wiring and transient page-visible
+      generated content. Real Provider execution is not run during validation without separate fresh preview approval.
+    targetClosureItem: Local Qwen runtime bridge can return transient visible generated content while persistence and evidence remain redacted.
+    behaviorBoundary: local_source_test_only_no_real_provider_call_no_env_file_read_no_db_no_schema_no_migration_no_e2e
+    executionProfile: local_owner_preview_qwen_visible_ai_source_test
+    evidenceMode: redacted_provider_status_duration_bucket_token_counts_validation_commands_only
+    validationPolicy: focused_unit_lint_typecheck_governance_gates
+    taskKind: local_owner_preview_qwen_visible_ai_runtime_bridge
+    moduleRunVersion: 2
+    status: closed
+    result: pass_owner_preview_qwen_visible_ai_runtime_bridge
+    branch: codex/owner-preview-qwen-visible-ai
+    approvedAt: "2026-07-01T00:00:00-07:00"
+    approvedBy: laozhuang
+    approvalConsumed: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+    claimedAt: "2026-07-01T06:20:00-07:00"
+    plannedAt: "2026-07-01T06:20:00-07:00"
+    implementedAt: "2026-07-01T06:27:00-07:00"
+    validatedAt: "2026-07-01T06:29:00-07:00"
+    reviewedAt: "2026-07-01T06:29:00-07:00"
+    closedAt: "2026-07-01T06:29:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-01-owner-preview-qwen-visible-ai.md
+      - docs/05-execution-logs/evidence/2026-07-01-owner-preview-qwen-visible-ai.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-owner-preview-qwen-visible-ai.md
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts
+      - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved_fast_forward_only
+      pushOriginMaster: approved
+      branchCleanup: approved
+      realProviderCallDuringValidation: blocked_without_separate_fresh_preview_approval
+      envFileRead: blocked
+      schemaMigration: blocked
+      databaseConnection: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      pr: blocked
+      forcePush: blocked
+      releaseReadinessOrFinalPass: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-preview-qwen-visible-ai-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-preview-qwen-visible-ai-2026-07-01 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-owner-preview-qwen-visible-ai.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-owner-preview-qwen-visible-ai.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-owner-preview-qwen-visible-ai.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+    validationSummary:
+      validationStatus: pass_owner_preview_qwen_visible_ai_local_gate
+      focusedUnit: pass_11_files_105_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      realProviderCallExecuted: false
+      envFileRead: false
+      databaseConnectionOrMutationExecuted: false
+      packageOrLockfileChanged: false
+      schemaOrMigrationChanged: false
+
   - id: owner-preview-empty-baseline-2026-07-01
     title: Owner preview empty baseline reset tooling
     phase: owner-preview-empty-baseline-2026-07-01

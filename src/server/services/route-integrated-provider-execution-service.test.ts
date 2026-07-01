@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
   qwenRouteIntegratedProviderLimits,
   qwenRouteIntegratedProviderMetadata,
@@ -26,6 +27,7 @@ describe("shared route-integrated Provider execution primitives", () => {
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
     });
   });
 
@@ -40,9 +42,22 @@ describe("shared route-integrated Provider execution primitives", () => {
     expect(qwenRouteIntegratedProviderLimits).toEqual({
       maxRequests: 1,
       maxRetries: 0,
-      maxOutputTokens: 8,
+      maxOutputTokens: 220,
       timeoutMs: 30000,
     });
+  });
+
+  it("normalizes transient visible generated content outside execution evidence", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent("  可见预览内容  "),
+    ).toEqual({
+      content: "可见预览内容",
+      contentVisibility: "transient_response_only",
+      persistenceStatus: "not_persisted",
+      safetyStatus: "checked",
+    });
+    expect(createRouteIntegratedVisibleGeneratedContent("   ")).toBeNull();
+    expect(createRouteIntegratedVisibleGeneratedContent(null)).toBeNull();
   });
 
   it("converts forbidden evidence values into a redaction violation summary", () => {

@@ -101,7 +101,12 @@ describe("admin AI generation task persistence DB adapter", () => {
   });
 
   it("builds companion metadata values for route and boundary metadata", () => {
-    const input = createPersistenceInput();
+    const input = createPersistenceInput({
+      runtimeBridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+    });
     const values = createAdminAiGenerationTaskMetadataInsertValue(input, 901);
 
     expect(values).toMatchObject({
@@ -117,10 +122,10 @@ describe("admin AI generation task persistence DB adapter", () => {
       result_kind: "ai_generated_paper_draft",
       content_visibility: "summary_only",
       runtime_status: "local_contract_only",
-      runtime_bridge_status: "provider_call_blocked",
-      provider_call_executed: false,
-      env_secret_accessed: false,
-      provider_configuration_read: false,
+      runtime_bridge_status: "provider_call_succeeded",
+      provider_call_executed: true,
+      env_secret_accessed: true,
+      provider_configuration_read: true,
       cost_calibration_executed: false,
       question_write_status: "blocked_without_follow_up_task",
       paper_write_status: "blocked_without_follow_up_task",
@@ -195,9 +200,53 @@ describe("admin AI generation task persistence DB adapter", () => {
     expect(JSON.stringify(row)).not.toContain("metadata_id");
   });
 
-  it("rejects DB rows that violate the Provider-disabled boundary", () => {
+  it("maps Provider execution status booleans while rejecting Cost Calibration", () => {
     const input = createPersistenceInput();
 
+    const providerExecutedRow = mapAdminAiGenerationTaskPersistenceDbRowToRow({
+      id: 901,
+      metadata_id: 902,
+      public_id: input.taskPublicId,
+      request_public_id: input.requestPublicId,
+      task_type: input.taskType,
+      workspace: input.workspace,
+      generation_kind: input.generationKind,
+      task_status: "pending",
+      requested_at: input.requestedAt,
+      authorization_source: input.authorizationSource,
+      authorization_public_id: input.authorizationPublicId,
+      actor_public_id: input.actorPublicId,
+      owner_type: input.ownerType,
+      owner_public_id: input.ownerPublicId,
+      organization_public_id: input.organizationPublicId,
+      quota_owner_type: input.quotaOwnerType,
+      quota_owner_public_id: input.quotaOwnerPublicId,
+      idempotency_key_hash: input.idempotencyKeyHash,
+      result_public_id: null,
+      evidence_status: "none",
+      citation_count: 0,
+      ai_call_log_public_id: null,
+      runtime_status: input.runtimeStatus,
+      runtime_bridge_status: "provider_call_succeeded",
+      provider_call_executed: true,
+      env_secret_accessed: true,
+      provider_configuration_read: true,
+      cost_calibration_executed: false,
+      question_write_status: input.questionWriteStatus,
+      paper_write_status: input.paperWriteStatus,
+      source_question_public_id: null,
+      source_paper_public_id: null,
+      content_visibility: "summary_only",
+      redaction_status: "redacted",
+    });
+
+    expect(providerExecutedRow).toMatchObject({
+      runtime_bridge_status: "provider_call_succeeded",
+      provider_call_executed: true,
+      env_secret_accessed: true,
+      provider_configuration_read: true,
+      cost_calibration_executed: false,
+    });
     expect(() =>
       mapAdminAiGenerationTaskPersistenceDbRowToRow({
         id: 901,
@@ -227,7 +276,7 @@ describe("admin AI generation task persistence DB adapter", () => {
         provider_call_executed: true,
         env_secret_accessed: false,
         provider_configuration_read: false,
-        cost_calibration_executed: false,
+        cost_calibration_executed: true,
         question_write_status: input.questionWriteStatus,
         paper_write_status: input.paperWriteStatus,
         source_question_public_id: null,

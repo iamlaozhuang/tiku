@@ -22,7 +22,9 @@ export type AdminAiGenerationPersistenceTaskType = Extract<
 >;
 
 export type AdminAiGenerationTaskPersistenceRuntimeBridgeStatus =
-  "provider_call_blocked";
+  | "provider_call_blocked"
+  | "provider_call_succeeded"
+  | "provider_call_failed";
 
 export type AdminAiGenerationTaskPersistenceRedactionStatus = "redacted";
 
@@ -52,9 +54,9 @@ export type CreateAdminAiGenerationTaskPersistenceInput = {
   aiCallLogPublicId: string | null;
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   runtimeBridgeStatus: AdminAiGenerationTaskPersistenceRuntimeBridgeStatus;
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   questionWriteStatus: AdminAiGenerationLocalContractFormalContentBoundaryDto["questionWriteStatus"];
   paperWriteStatus: AdminAiGenerationLocalContractFormalContentBoundaryDto["paperWriteStatus"];
@@ -87,9 +89,9 @@ export type AdminAiGenerationTaskPersistenceRow = {
   ai_call_log_public_id: string | null;
   runtime_status: AdminAiGenerationLocalContractRuntimeStatus;
   runtime_bridge_status: AdminAiGenerationTaskPersistenceRuntimeBridgeStatus;
-  provider_call_executed: false;
-  env_secret_accessed: false;
-  provider_configuration_read: false;
+  provider_call_executed: boolean;
+  env_secret_accessed: boolean;
+  provider_configuration_read: boolean;
   cost_calibration_executed: false;
   question_write_status: AdminAiGenerationLocalContractFormalContentBoundaryDto["questionWriteStatus"];
   paper_write_status: AdminAiGenerationLocalContractFormalContentBoundaryDto["paperWriteStatus"];
@@ -146,9 +148,9 @@ export type AdminAiGenerationTaskPersistenceDto = {
   aiCallLogPublicId: string | null;
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   runtimeBridgeStatus: AdminAiGenerationTaskPersistenceRuntimeBridgeStatus;
-  providerCallExecuted: false;
-  envSecretAccessed: false;
-  providerConfigurationRead: false;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
   sourceQuestionPublicId: string | null;

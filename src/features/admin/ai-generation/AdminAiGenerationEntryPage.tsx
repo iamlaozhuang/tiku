@@ -111,7 +111,7 @@ function getPageCopy(
       eyebrow: "内容 AI 草稿/评审",
       title: isQuestionGeneration ? "内容 AI出题" : "内容 AI组卷",
       description:
-        "生成结果只进入内容 AI 草稿/评审池，正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
+        "本地 owner preview 可展示本次生成草稿；正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
       actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
       boundaryLabel: "不直接写入正式题目或试卷",
     };
@@ -121,7 +121,7 @@ function getPageCopy(
     eyebrow: "组织高级 AI 草稿",
     title: isQuestionGeneration ? "组织 AI出题" : "组织 AI组卷",
     description:
-      "生成结果归属当前组织，保留在组织内容草稿池，不进入平台正式题库或试卷库。",
+      "本地 owner preview 可展示本次组织生成草稿，正式采用仍保留在组织内容草稿池。",
     actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
     boundaryLabel: "仅创建组织草稿",
   };
@@ -422,8 +422,43 @@ function AdminAiGenerationDetailControls({
       </div>
 
       <p className="text-text-secondary mt-3 text-xs leading-5">
-        当前仅准备本地生成条件和{draftBoundaryLabel}
-        入口，不触发模型服务或正式题库写入。
+        当前准备本地生成条件和{draftBoundaryLabel}
+        入口；只生成本地预览草稿，不触发正式题库写入。
+      </p>
+    </section>
+  );
+}
+
+function AdminAiGenerationVisibleGeneratedContent({
+  localContractSummary,
+}: {
+  localContractSummary: AdminAiGenerationLocalContractDto;
+}) {
+  const visibleGeneratedContent =
+    localContractSummary.runtimeBridge.visibleGeneratedContent;
+
+  if (visibleGeneratedContent == null) {
+    return null;
+  }
+
+  return (
+    <section
+      className="border-border bg-background mt-4 rounded-md border p-3"
+      data-testid="admin-visible-generated-content"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">本次生成草稿</p>
+          <h3 className="text-text-primary mt-1 text-sm font-semibold">
+            临时展示内容
+          </h3>
+        </div>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          不持久化正文
+        </span>
+      </div>
+      <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
+        {visibleGeneratedContent.content}
       </p>
     </section>
   );
@@ -1103,7 +1138,7 @@ export function AdminAiGenerationEntryPage({
             <h2>{pageCopy.actionLabel}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            本地入口已就绪，模型服务执行仍由后续任务审批。
+            本地入口已就绪，配置本地密钥后可生成预览草稿。
           </p>
           <button
             className="bg-primary text-primary-foreground mt-4 inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
@@ -1211,6 +1246,10 @@ export function AdminAiGenerationEntryPage({
               </dd>
             </div>
           </dl>
+
+          <AdminAiGenerationVisibleGeneratedContent
+            localContractSummary={localContractSummary}
+          />
         </section>
       ) : null}
     </section>

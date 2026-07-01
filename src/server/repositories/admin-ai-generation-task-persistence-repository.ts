@@ -105,10 +105,12 @@ export function createAdminAiGenerationTaskPersistenceInput(
     citationCount: 0,
     aiCallLogPublicId: null,
     runtimeStatus: input.localContract.runtimeStatus,
-    runtimeBridgeStatus: "provider_call_blocked",
-    providerCallExecuted: false,
-    envSecretAccessed: false,
-    providerConfigurationRead: false,
+    runtimeBridgeStatus: input.localContract.runtimeBridge.bridgeStatus,
+    providerCallExecuted:
+      input.localContract.runtimeBridge.providerCallExecuted,
+    envSecretAccessed: input.localContract.runtimeBridge.envSecretAccessed,
+    providerConfigurationRead:
+      input.localContract.runtimeBridge.providerConfigurationRead,
     costCalibrationExecuted: false,
     questionWriteStatus:
       input.localContract.formalContentBoundary.questionWriteStatus,
@@ -170,9 +172,6 @@ function createServerOwnedPendingTaskInput(
     evidenceStatus: "none",
     citationCount: 0,
     aiCallLogPublicId: null,
-    providerCallExecuted: false,
-    envSecretAccessed: false,
-    providerConfigurationRead: false,
     costCalibrationExecuted: false,
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
@@ -208,19 +207,11 @@ function assertAcceptedProviderDisabledAdminLocalContract(
     resultReference.citationCount === 0 &&
     resultReference.redactionStatus === "redacted";
 
-  const isProviderDisabled =
-    runtimeBridge.bridgeStatus === "provider_call_blocked" &&
-    runtimeBridge.providerCallExecuted === false &&
-    runtimeBridge.envSecretAccessed === false &&
-    runtimeBridge.providerConfigurationRead === false &&
+  const isProviderBoundarySafe =
     runtimeBridge.costCalibrationExecuted === false &&
     runtimeBridge.redactionStatus === "redacted" &&
-    executionSummary.requestCount === 0 &&
-    executionSummary.resultStatus === "blocked" &&
-    executionSummary.failureCategory === "provider_call_blocked" &&
-    executionSummary.usageSummary === null &&
-    executionSummary.providerErrorSummary === null &&
-    executionSummary.redactionStatus === "redacted";
+    executionSummary.redactionStatus === "redacted" &&
+    matchesSafeProviderBridgeState(localContract);
 
   const isFormalWriteBlocked =
     localContract.formalContentBoundary.questionWriteStatus ===
@@ -237,13 +228,69 @@ function assertAcceptedProviderDisabledAdminLocalContract(
 
   if (
     !isAcceptedLocalContract ||
-    !isProviderDisabled ||
+    !isProviderBoundarySafe ||
     !isFormalWriteBlocked ||
     !isAdminOwnerBoundary ||
     !isOrganizationOwnedDraftBoundary
   ) {
     throw new Error(UNSAFE_ADMIN_AI_GENERATION_PERSISTENCE_BOUNDARY_ERROR);
   }
+}
+
+function matchesSafeProviderBridgeState(
+  localContract: AdminAiGenerationLocalContractBaseDto,
+): boolean {
+  const runtimeBridge = localContract.runtimeBridge;
+  const executionSummary = runtimeBridge.executionSummary;
+  const visibleGeneratedContent = runtimeBridge.visibleGeneratedContent;
+
+  if (runtimeBridge.costCalibrationExecuted !== false) {
+    return false;
+  }
+
+  if (visibleGeneratedContent !== null) {
+    const isVisibleContentTransient =
+      visibleGeneratedContent.contentVisibility === "transient_response_only" &&
+      visibleGeneratedContent.persistenceStatus === "not_persisted" &&
+      visibleGeneratedContent.safetyStatus === "checked";
+
+    if (!isVisibleContentTransient) {
+      return false;
+    }
+  }
+
+  if (runtimeBridge.bridgeStatus === "provider_call_succeeded") {
+    return (
+      runtimeBridge.providerCallExecuted === true &&
+      runtimeBridge.envSecretAccessed === true &&
+      runtimeBridge.providerConfigurationRead === true &&
+      executionSummary.requestCount === 1 &&
+      executionSummary.resultStatus === "pass" &&
+      executionSummary.failureCategory === null &&
+      executionSummary.providerErrorSummary === null &&
+      visibleGeneratedContent !== null
+    );
+  }
+
+  if (runtimeBridge.bridgeStatus === "provider_call_failed") {
+    return (
+      runtimeBridge.providerCallExecuted === true &&
+      runtimeBridge.envSecretAccessed === true &&
+      runtimeBridge.providerConfigurationRead === true &&
+      executionSummary.requestCount === 1 &&
+      executionSummary.resultStatus === "fail" &&
+      executionSummary.failureCategory !== null &&
+      visibleGeneratedContent === null
+    );
+  }
+
+  return (
+    runtimeBridge.providerCallExecuted === false &&
+    executionSummary.requestCount === 0 &&
+    executionSummary.resultStatus === "blocked" &&
+    executionSummary.failureCategory !== null &&
+    visibleGeneratedContent === null
+  );
 }
 
 function matchesContentAdminOwnerBoundary(

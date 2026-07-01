@@ -39,6 +39,7 @@ const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionS
     providerErrorSummary: null,
     redactionStatus: "redacted",
   };
+const visibleAdminProviderContent = "后台本次可见 AI 草稿预览";
 
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
@@ -198,7 +199,7 @@ function createFakeProviderRuntimeBridgeControl(
       realProviderExecutionApproved: true,
       maxRequests: 1,
       maxRetries: 0,
-      maxOutputTokens: 8,
+      maxOutputTokens: 220,
       timeoutMs: 30000,
       readProviderCredential: () => "synthetic-admin-provider-credential",
       executeProviderRequest: async (providerInput) => {
@@ -215,6 +216,12 @@ function createFakeProviderRuntimeBridgeControl(
             totalTokens: 7,
           },
           providerErrorSummary: null,
+          visibleGeneratedContent: {
+            content: visibleAdminProviderContent,
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
         };
       },
     },
@@ -1116,6 +1123,8 @@ describe("admin AI generation local contract route handlers", () => {
     async (routeCase) => {
       const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
         [];
+      const resultPersistenceRecorder =
+        createGeneratedResultPersistenceRecorder();
       const response = await postLocalContractRequest({
         workspace: routeCase.workspace,
         adminRoles: routeCase.adminRoles,
@@ -1126,6 +1135,7 @@ describe("admin AI generation local contract route handlers", () => {
         },
         runtimeBridgeControl:
           createFakeProviderRuntimeBridgeControl(providerInputs),
+        resultPersistenceRepository: resultPersistenceRecorder.repository,
       });
       const payload = await response.json();
       const serializedPayload = JSON.stringify(payload);
@@ -1139,7 +1149,7 @@ describe("admin AI generation local contract route handlers", () => {
         limits: {
           maxRequests: 1,
           maxRetries: 0,
-          maxOutputTokens: 8,
+          maxOutputTokens: 220,
           timeoutMs: 30000,
         },
         requestContext: {
@@ -1183,6 +1193,12 @@ describe("admin AI generation local contract route handlers", () => {
               providerErrorSummary: null,
               redactionStatus: "redacted",
             },
+            visibleGeneratedContent: {
+              content: visibleAdminProviderContent,
+              contentVisibility: "transient_response_only",
+              persistenceStatus: "not_persisted",
+              safetyStatus: "checked",
+            },
             blockedReasons: [],
           },
           formalContentBoundary: {
@@ -1200,6 +1216,15 @@ describe("admin AI generation local contract route handlers", () => {
       expect(serializedPayload).not.toContain("providerPayload");
       expect(serializedPayload).not.toContain("Authorization");
       expect(serializedPayload).not.toMatch(/"id":/);
+      expect(
+        JSON.stringify(
+          (payload.data as { runtimeBridge: { executionSummary: unknown } })
+            .runtimeBridge.executionSummary,
+        ),
+      ).not.toContain(visibleAdminProviderContent);
+      expect(JSON.stringify(resultPersistenceRecorder.calls)).not.toContain(
+        visibleAdminProviderContent,
+      );
     },
   );
 

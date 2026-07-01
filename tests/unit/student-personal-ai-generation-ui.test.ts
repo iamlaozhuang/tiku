@@ -117,6 +117,64 @@ const localExperienceResponse = {
       errorState: "supported",
       permissionBlockedState: "supported",
     },
+    runtimeBridge: {
+      bridgeStatus: "provider_call_blocked",
+      bridgeMode: "default_blocked",
+      runnerMode: "provider_call_blocked_runner",
+      localSwitchRequired: true,
+      explicitLocalSwitchPresent: false,
+      realProviderExecutionApproved: false,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      providerRetryAttempted: false,
+      providerStreamingEnabled: false,
+      costCalibrationExecuted: false,
+      redactionStatus: "redacted",
+      providerMetadata: {
+        modelProvider: "openai_compatible",
+        providerName: "alibaba-qwen",
+        modelName: "qwen3.7-max",
+        baseUrlHost: "dashscope.aliyuncs.com",
+        envKeyAlias: "ALIBABA_API_KEY",
+      },
+      redactionProbe: {
+        requestContext: {
+          redactionStatus: "redacted",
+          reason: "user_answer",
+        },
+        modelOutput: {
+          redactionStatus: "redacted",
+          reason: "model_output",
+        },
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+        providerErrorPayload: null,
+      },
+      providerExecutionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "provider_call_blocked",
+        durationMs: 0,
+        usageSummary: null,
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
+      resultMaterializationSummary: {
+        materializationStatus: "not_requested",
+        failureCategory: "not_requested",
+        resultPublicId: null,
+        contentDigest: null,
+        contentPreviewMasked: null,
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+        evidenceStatus: "none",
+        citationCount: 0,
+        formalAdoptionStatus: "blocked",
+      },
+      visibleGeneratedContent: null,
+      blockedReasons: ["provider_call_blocked"],
+    },
     requestFlow: {
       runtimeStatus: "local_contract_only",
       flowStatus: "accepted",
@@ -1288,6 +1346,64 @@ describe("StudentPersonalAiGenerationPage", () => {
     ]);
   });
 
+  it("renders transient visible generated content from a provider-enabled local response", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          bridgeMode: "controlled_runner",
+          runnerMode: "route_integrated_provider_runner",
+          explicitLocalSwitchPresent: true,
+          realProviderExecutionApproved: true,
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          providerExecutionSummary: {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            durationMs: 42,
+            usageSummary: {
+              inputTokens: 12,
+              outputTokens: 24,
+              totalTokens: 36,
+            },
+            providerErrorSummary: null,
+            redactionStatus: "redacted",
+          },
+          visibleGeneratedContent: {
+            content: "学生端本次生成内容：先复习知识点，再完成两道自练题。",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const fetchMock = createPersonalAiGenerationFetchMockWithHistorySequence(
+      [emptyServerHistoryResponse, emptyServerHistoryResponse],
+      visibleResponse,
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(
+      await screen.findByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("学生端本次生成内容：先复习知识点，再完成两道自练题。");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
   it("renders a redacted history error state when the post-submit server refresh fails", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = createPersonalAiGenerationFetchMockWithHistorySequence([
@@ -1365,6 +1481,14 @@ describe("StudentPersonalAiGenerationPage", () => {
         });
         expect(init).not.toHaveProperty("headers");
 
+        if (String(url) === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
         if (String(url) === "/api/v1/authorizations") {
           return {
             ok: true,
@@ -1403,7 +1527,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain(
       COOKIE_BACKED_SESSION_MARKER,
     );
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it("renders the local contract blocked state without provider content", async () => {

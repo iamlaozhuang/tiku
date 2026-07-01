@@ -68,6 +68,12 @@ function createExecutionControl(
         httpStatus: number | null;
         providerErrorCode: string | null;
       } | null;
+      visibleGeneratedContent?: {
+        content: string;
+        contentVisibility: "transient_response_only";
+        persistenceStatus: "not_persisted";
+        safetyStatus: "checked";
+      } | null;
     }>;
   } = {},
 ) {
@@ -76,7 +82,7 @@ function createExecutionControl(
     realProviderExecutionApproved: true as const,
     maxRequests: 1 as const,
     maxRetries: 0 as const,
-    maxOutputTokens: 8 as const,
+    maxOutputTokens: 220 as const,
     timeoutMs: 30000 as const,
     readProviderCredential:
       overrides.readProviderCredential ??
@@ -111,6 +117,7 @@ describe("personal AI generation route-integrated provider execution service", (
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
     });
   });
 
@@ -152,7 +159,7 @@ describe("personal AI generation route-integrated provider execution service", (
       limits: {
         maxRequests: 1,
         maxRetries: 0,
-        maxOutputTokens: 8,
+        maxOutputTokens: 220,
         timeoutMs: 30000,
       },
       requestContext: {
@@ -180,6 +187,7 @@ describe("personal AI generation route-integrated provider execution service", (
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
     });
     expect(serializedOutcome).not.toContain("synthetic-provider-credential");
     expect(serializedOutcome).not.toContain("providerPayload");
@@ -218,6 +226,77 @@ describe("personal AI generation route-integrated provider execution service", (
         providerErrorSummary: null,
         redactionStatus: "redacted",
       },
+      visibleGeneratedContent: null,
+    });
+  });
+
+  it("returns transient visible generated content without adding it to the redacted summary", async () => {
+    const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow(),
+      createExecutionControl({
+        executeProviderRequest: async () => ({
+          requestCount: 1,
+          resultStatus: "pass",
+          failureCategory: null,
+          durationMs: 31,
+          usageSummary: {
+            inputTokens: 12,
+            outputTokens: 18,
+            totalTokens: 30,
+          },
+          providerErrorSummary: null,
+          visibleGeneratedContent: {
+            content: "个人 AI 解析预览：先定位薄弱知识点，再练习同类题。",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
+        }),
+      }),
+    );
+    const serializedSummary = JSON.stringify(outcome.executionSummary);
+
+    expect(outcome.visibleGeneratedContent).toEqual({
+      content: "个人 AI 解析预览：先定位薄弱知识点，再练习同类题。",
+      contentVisibility: "transient_response_only",
+      persistenceStatus: "not_persisted",
+      safetyStatus: "checked",
+    });
+    expect(serializedSummary).not.toContain("个人 AI 解析预览");
+    expect(JSON.stringify(outcome)).not.toContain(
+      "synthetic-provider-credential",
+    );
+  });
+
+  it("blocks visible generated content that contains protected Provider material", async () => {
+    const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow(),
+      createExecutionControl({
+        executeProviderRequest: async () => ({
+          requestCount: 1,
+          resultStatus: "pass",
+          failureCategory: null,
+          durationMs: 31,
+          usageSummary: null,
+          providerErrorSummary: null,
+          visibleGeneratedContent: {
+            content: "synthetic-provider-credential",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
+        }),
+      }),
+    );
+
+    expect(outcome).toMatchObject({
+      providerCallExecuted: false,
+      executionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "redaction_violation",
+      },
+      visibleGeneratedContent: null,
     });
   });
 });

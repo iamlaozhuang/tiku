@@ -202,6 +202,7 @@ describe("personal AI generation runtime bridge service", () => {
         citationCount: 0,
         formalAdoptionStatus: "blocked",
       },
+      visibleGeneratedContent: null,
     });
     expect(persistedInputs).toEqual([
       expect.objectContaining({
@@ -223,5 +224,60 @@ describe("personal AI generation runtime bridge service", () => {
     expect(serializedBridge).not.toContain("provider payload");
     expect(serializedBridge).not.toContain("raw prompt");
     expect(serializedBridge).not.toContain("raw response");
+  });
+
+  it("carries transient visible provider content through the route bridge only", async () => {
+    const bridge =
+      await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
+        createRequestFlow(),
+        {
+          runtimeBridgeControl: {
+            bridgeMode: "controlled_runner",
+            explicitLocalSwitchPresent: true,
+            providerExecution: {
+              executionMode: "route_integrated_provider",
+              realProviderExecutionApproved: true,
+              maxRequests: 1,
+              maxRetries: 0,
+              maxOutputTokens: 220,
+              timeoutMs: 30000,
+              readProviderCredential: () => "synthetic-bridge-credential",
+              executeProviderRequest: async () => ({
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 44,
+                usageSummary: {
+                  inputTokens: 16,
+                  outputTokens: 22,
+                  totalTokens: 38,
+                },
+                providerErrorSummary: null,
+                visibleGeneratedContent: {
+                  content: "学生端本次 AI 生成预览",
+                  contentVisibility: "transient_response_only",
+                  persistenceStatus: "not_persisted",
+                  safetyStatus: "checked",
+                },
+              }),
+            },
+          },
+        },
+      );
+    const serializedSummary = JSON.stringify(bridge.providerExecutionSummary);
+
+    expect(bridge).toMatchObject({
+      bridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      visibleGeneratedContent: {
+        content: "学生端本次 AI 生成预览",
+        contentVisibility: "transient_response_only",
+        persistenceStatus: "not_persisted",
+        safetyStatus: "checked",
+      },
+    });
+    expect(serializedSummary).not.toContain("学生端本次 AI 生成预览");
+    expect(JSON.stringify(bridge)).not.toContain("synthetic-bridge-credential");
+    expect(JSON.stringify(bridge)).not.toContain("provider payload");
   });
 });

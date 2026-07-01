@@ -6,6 +6,7 @@ import type {
   AiGenerationRouteIntegratedProviderLimits,
   AiGenerationRouteIntegratedProviderMetadata,
   AiGenerationRouteIntegratedProviderUsageSummary,
+  AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 
 export const qwenRouteIntegratedProviderMetadata = {
@@ -19,7 +20,7 @@ export const qwenRouteIntegratedProviderMetadata = {
 export const qwenRouteIntegratedProviderLimits = {
   maxRequests: 1,
   maxRetries: 0,
-  maxOutputTokens: 8,
+  maxOutputTokens: 220,
   timeoutMs: 30000,
 } as const satisfies AiGenerationRouteIntegratedProviderLimits;
 
@@ -34,6 +35,8 @@ const forbiddenProviderExecutionEvidenceKeys = [
   "providerResponse",
   "rawGeneratedOutput",
 ] as const;
+
+const visibleGeneratedContentMaxLength = 2000;
 
 export function createBlockedRouteIntegratedProviderExecutionSummary(
   failureCategory: Exclude<
@@ -61,6 +64,7 @@ export function createDefaultBlockedRouteIntegratedProviderExecutionOutcome(): A
     executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
       "provider_call_blocked",
     ),
+    visibleGeneratedContent: null,
   };
 }
 
@@ -98,6 +102,67 @@ export function summarizeRouteIntegratedProviderUsage(
   return numericUsageEntries.length > 0
     ? Object.fromEntries(numericUsageEntries)
     : null;
+}
+
+export function createRouteIntegratedVisibleGeneratedContent(
+  content: unknown,
+): AiGenerationRouteIntegratedVisibleGeneratedContent | null {
+  if (typeof content !== "string") {
+    return null;
+  }
+
+  const normalizedContent = content.trim();
+
+  if (normalizedContent.length === 0) {
+    return null;
+  }
+
+  return {
+    content:
+      normalizedContent.length > visibleGeneratedContentMaxLength
+        ? normalizedContent.slice(0, visibleGeneratedContentMaxLength)
+        : normalizedContent,
+    contentVisibility: "transient_response_only",
+    persistenceStatus: "not_persisted",
+    safetyStatus: "checked",
+  };
+}
+
+export function ensureRouteIntegratedVisibleGeneratedContentSafe(
+  visibleGeneratedContent:
+    | AiGenerationRouteIntegratedVisibleGeneratedContent
+    | null
+    | undefined,
+  additionalForbiddenEvidenceValues: string[] = [],
+): {
+  redactionViolationFound: boolean;
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
+} {
+  if (
+    visibleGeneratedContent === null ||
+    visibleGeneratedContent === undefined
+  ) {
+    return {
+      redactionViolationFound: false,
+      visibleGeneratedContent: null,
+    };
+  }
+
+  const serializedVisibleContent = JSON.stringify(visibleGeneratedContent);
+  const forbiddenValueFound = [
+    ...forbiddenProviderExecutionEvidenceKeys,
+    ...additionalForbiddenEvidenceValues,
+  ].some((forbiddenValue) => serializedVisibleContent.includes(forbiddenValue));
+
+  return forbiddenValueFound
+    ? {
+        redactionViolationFound: true,
+        visibleGeneratedContent: null,
+      }
+    : {
+        redactionViolationFound: false,
+        visibleGeneratedContent,
+      };
 }
 
 export function resolveRouteIntegratedProviderFailureCategory(

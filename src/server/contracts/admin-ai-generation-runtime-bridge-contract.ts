@@ -6,6 +6,7 @@ import type {
   AiGenerationRouteIntegratedProviderExecutor,
   AiGenerationRouteIntegratedProviderExecutionSummary,
   AiGenerationRouteIntegratedProviderMetadata,
+  AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "./route-integrated-provider-execution-contract";
 import type {
   AdminAiGenerationKind,
@@ -117,6 +118,7 @@ export type AdminAiGenerationRuntimeBridgeDto = {
   redactionStatus: "redacted";
   providerMetadata: AiGenerationRouteIntegratedProviderMetadata;
   providerExecutionSummary: AiGenerationRouteIntegratedProviderExecutionSummary;
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
   providerRequestContext: AdminAiGenerationRouteIntegratedProviderRequestContext;
   blockedReasons: AdminAiGenerationRuntimeBridgeBlockedReason[];
 };

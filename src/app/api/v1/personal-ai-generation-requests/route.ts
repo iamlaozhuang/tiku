@@ -1,5 +1,6 @@
 import { createLocalSessionRuntime } from "@/server/auth/local-session-runtime";
 import { createPostgresPersonalAiGenerationRequestRepository } from "@/server/repositories/personal-ai-generation-request-repository";
+import { createOwnerPreviewQwenPersonalRuntimeBridgeControl } from "@/server/services/owner-preview-qwen-visible-ai-runtime-control";
 import {
   createPersonalAiGenerationRequestRouteHandlers,
   createPersonalAiGenerationRequestUserResolver,
@@ -10,6 +11,8 @@ const personalAiGenerationRequestRouteHandlers =
     createPersonalAiGenerationRequestUserResolver(createLocalSessionRuntime()),
     {
       requestRepository: createPostgresPersonalAiGenerationRequestRepository(),
+      runtimeBridgeControl:
+        createOwnerPreviewQwenPersonalRuntimeBridgeControl(),
     },
   );
 

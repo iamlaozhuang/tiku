@@ -361,9 +361,11 @@ export function mapAdminAiGenerationTaskPersistenceDbRowToRow(
     ai_call_log_public_id: row.ai_call_log_public_id,
     runtime_status: toRuntimeStatus(row.runtime_status),
     runtime_bridge_status: toRuntimeBridgeStatus(row.runtime_bridge_status),
-    provider_call_executed: toFalseBoundary(row.provider_call_executed),
-    env_secret_accessed: toFalseBoundary(row.env_secret_accessed),
-    provider_configuration_read: toFalseBoundary(
+    provider_call_executed: toProviderBoundaryBoolean(
+      row.provider_call_executed,
+    ),
+    env_secret_accessed: toProviderBoundaryBoolean(row.env_secret_accessed),
+    provider_configuration_read: toProviderBoundaryBoolean(
       row.provider_configuration_read,
     ),
     cost_calibration_executed: toFalseBoundary(row.cost_calibration_executed),
@@ -478,11 +480,23 @@ function toRuntimeStatus(
 function toRuntimeBridgeStatus(
   value: string,
 ): AdminAiGenerationTaskPersistenceRuntimeBridgeStatus {
-  if (value === "provider_call_blocked") {
+  if (
+    value === "provider_call_blocked" ||
+    value === "provider_call_succeeded" ||
+    value === "provider_call_failed"
+  ) {
     return value;
   }
 
   throw new Error("invalid admin AI generation runtime bridge status.");
+}
+
+function toProviderBoundaryBoolean(value: boolean): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  throw new Error("unsafe admin AI generation provider boundary.");
 }
 
 function toFalseBoundary(value: boolean): false {

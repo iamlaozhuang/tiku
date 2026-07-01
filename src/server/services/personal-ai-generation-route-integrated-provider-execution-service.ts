@@ -16,6 +16,8 @@ import type {
 import {
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedVisibleGeneratedContent,
+  ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
   qwenRouteIntegratedProviderLimits,
   qwenRouteIntegratedProviderMetadata,
@@ -74,9 +76,6 @@ export {
   qwenRouteIntegratedProviderMetadata,
 };
 
-const internalRouteIntegratedInstruction =
-  "Return one short confirmation word for a local Tiku route-integrated provider check.";
-
 export function createRouteIntegratedProviderRequestContext(
   requestFlow: PersonalAiGenerationRequestFlowDto,
 ): PersonalAiGenerationRouteIntegratedProviderRequestContext {
@@ -104,6 +103,7 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
         "missing_provider_credential",
       ),
+      visibleGeneratedContent: null,
     };
   }
 
@@ -111,18 +111,42 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
     control.executeProviderRequest ?? executeQwenRouteIntegratedProviderRequest;
   const executionResult = await executeProviderRequest({
     providerMetadata: qwenRouteIntegratedProviderMetadata,
-    limits: qwenRouteIntegratedProviderLimits,
+    limits: {
+      maxRequests: control.maxRequests,
+      maxRetries: control.maxRetries,
+      maxOutputTokens: control.maxOutputTokens,
+      timeoutMs: control.timeoutMs,
+    },
     requestContext: createRouteIntegratedProviderRequestContext(requestFlow),
     providerCredential,
   });
-  const executionSummary =
-    ensureRouteIntegratedProviderExecutionSummaryRedacted(
-      {
-        ...executionResult,
-        redactionStatus: "redacted",
-      },
-      [providerCredential],
-    );
+  const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
+    executionResult.visibleGeneratedContent,
+    [providerCredential],
+  );
+  const executionResultSummaryFields = {
+    requestCount: executionResult.requestCount,
+    resultStatus: executionResult.resultStatus,
+    failureCategory: executionResult.failureCategory,
+    durationMs: executionResult.durationMs,
+    usageSummary: executionResult.usageSummary,
+    providerErrorSummary: executionResult.providerErrorSummary,
+  };
+  const executionSummary = visibleContentCheck.redactionViolationFound
+    ? createBlockedRouteIntegratedProviderExecutionSummary(
+        "redaction_violation",
+      )
+    : ensureRouteIntegratedProviderExecutionSummaryRedacted(
+        {
+          ...executionResultSummaryFields,
+          redactionStatus: "redacted",
+        },
+        [providerCredential],
+      );
+  const visibleGeneratedContent =
+    executionSummary.resultStatus === "pass"
+      ? visibleContentCheck.visibleGeneratedContent
+      : null;
 
   return {
     realProviderExecutionApproved: true,
@@ -130,6 +154,7 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
     envSecretAccessed: true,
     providerConfigurationRead: true,
     executionSummary,
+    visibleGeneratedContent,
   };
 }
 
@@ -157,7 +182,7 @@ export async function executeQwenRouteIntegratedProviderRequest(
         : undefined;
     const result = await generateText({
       model: providerModel,
-      prompt: internalRouteIntegratedInstruction,
+      prompt: createPersonalRouteIntegratedInstruction(input.requestContext),
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -170,6 +195,9 @@ export async function executeQwenRouteIntegratedProviderRequest(
       durationMs: Math.max(0, Date.now() - startedAt),
       usageSummary: summarizeRouteIntegratedProviderUsage(result.usage),
       providerErrorSummary: null,
+      visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
+        result.text,
+      ),
     };
   } catch (providerError) {
     return {
@@ -181,8 +209,28 @@ export async function executeQwenRouteIntegratedProviderRequest(
       usageSummary: null,
       providerErrorSummary:
         summarizeRouteIntegratedProviderError(providerError),
+      visibleGeneratedContent: null,
     };
   }
+}
+
+function createPersonalRouteIntegratedInstruction(
+  requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
+): string {
+  const taskLabel =
+    requestContext.aiFuncType === "explanation"
+      ? "AI解析"
+      : requestContext.aiFuncType === "hint"
+        ? "AI提示"
+        : requestContext.aiFuncType === "kn_recommendation"
+          ? "知识点推荐"
+          : "学习建议";
+
+  return [
+    "为题库系统本地 owner preview 生成简短中文体验内容。",
+    `场景：${taskLabel}。`,
+    "不要引用真实题目全文；输出可读的要点或小练习草稿。",
+  ].join("\n");
 }
 
 function createProviderCredentialSettings(

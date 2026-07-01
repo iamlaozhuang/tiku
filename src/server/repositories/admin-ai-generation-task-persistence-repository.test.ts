@@ -544,6 +544,70 @@ describe("admin AI generation task persistence repository", () => {
     expect(JSON.stringify(result)).not.toMatch(/"id":/);
   });
 
+  it("persists only safe Provider status metadata for provider-enabled local contracts", async () => {
+    const visibleProviderContent = "后台草稿正文只允许留在响应中";
+    const localContract = await createAcceptedLocalContract({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      generationKind: "paper",
+    });
+    const providerEnabledLocalContract = {
+      ...localContract,
+      runtimeBridge: {
+        ...localContract.runtimeBridge,
+        bridgeStatus: "provider_call_succeeded",
+        providerCallExecuted: true,
+        envSecretAccessed: true,
+        providerConfigurationRead: true,
+        executionSummary: {
+          requestCount: 1,
+          resultStatus: "pass",
+          failureCategory: null,
+          durationMs: 42,
+          usageSummary: {
+            promptTokens: 9,
+            completionTokens: 14,
+            totalTokens: 23,
+          },
+          providerErrorSummary: null,
+          redactionStatus: "redacted",
+        },
+        visibleGeneratedContent: {
+          content: visibleProviderContent,
+          contentVisibility: "transient_response_only",
+          persistenceStatus: "not_persisted",
+          safetyStatus: "checked",
+        },
+      },
+    } satisfies AdminAiGenerationLocalContractBaseDto;
+    const gateway = createGateway();
+    const repository =
+      createAdminAiGenerationTaskPersistenceRepository(gateway);
+
+    const result = await repository.createOrReuseTask({
+      localContract: providerEnabledLocalContract,
+      requestPublicId: "admin_ai_generation_request_public_provider_901",
+      requestedAt: new Date("2026-06-26T19:07:00.000Z"),
+    });
+
+    expect(gateway.insertInputs[0]).toMatchObject({
+      runtimeBridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+      costCalibrationExecuted: false,
+    });
+    expect(result.task).toMatchObject({
+      runtimeBridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
+    });
+    expect(JSON.stringify(gateway.insertInputs[0])).not.toContain(
+      visibleProviderContent,
+    );
+  });
+
   it("reuses an existing admin generation task by owner and idempotency key", async () => {
     const localContract = await createAcceptedLocalContract({
       workspace: "content",
