@@ -297,6 +297,116 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: owner-preview-empty-baseline-2026-07-01
+    title: Owner preview empty baseline reset tooling
+    phase: owner-preview-empty-baseline-2026-07-01
+    sourceStory: current_user_requested_two_stage_owner_preview_preparation_plan_implementation
+    dependencies: []
+    taskPlanPolicy: required_before_local_tooling_write
+    humanApproval: >-
+      User explicitly requested implementation of the two-stage owner preview preparation plan on 2026-07-01. This
+      stage is limited to the owner preview empty-baseline reset and seed utility with dry-run and guardrails. Actual
+      destructive reset execution remains blocked until separate fresh approval at run time.
+    taskKind: local_owner_preview_empty_baseline_tooling
+    moduleRunVersion: 2
+    executionProfile: local_owner_preview_empty_baseline_tooling
+    validationPolicy: focused_unit_lint_typecheck_governance_gates
+    priority: p1
+    severity: governance
+    branch: codex/owner-preview-empty-baseline
+    status: closed
+    result: pass_owner_preview_empty_baseline_tooling
+    claimedAt: "2026-07-01T00:00:00-07:00"
+    plannedAt: "2026-07-01T00:00:00-07:00"
+    materializedAt: "2026-07-01T00:00:00-07:00"
+    implementedAt: "2026-07-01T06:00:00-07:00"
+    validatedAt: "2026-07-01T06:04:00-07:00"
+    reviewedAt: "2026-07-01T06:04:00-07:00"
+    closedAt: "2026-07-01T06:05:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-01-owner-preview-empty-baseline.md
+      - docs/05-execution-logs/evidence/2026-07-01-owner-preview-empty-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-owner-preview-empty-baseline.md
+      - scripts/db/Reset-OwnerPreviewEmptyBaseline.ps1
+      - src/db/owner-preview-empty-baseline.ts
+      - tests/unit/owner-preview-empty-baseline.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      localDatabaseConnection: blocked_for_validation
+      localDatabaseMutation: blocked_until_run_time_fresh_approval
+      destructiveDatabaseOperation: blocked_until_run_time_fresh_approval
+      schemaMigration: blocked
+      seedExecution: blocked_for_this_implementation_task
+      providerCall: blocked
+      providerConfiguration: blocked
+      envSecretAccess: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      dependencyIntroduction: blocked
+      packageLockfileMutation: blocked
+      costCalibrationGate: blocked
+      pr: blocked
+      forcePush: blocked
+    evidenceRedaction:
+      allowed: task_ids_file_paths_role_labels_table_group_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_summary_only
+      forbidden: credentials_tokens_sessions_cookies_auth_headers_env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code_provider_payloads_prompts_raw_ai_io_full_question_paper_material_resource_chunk_content_raw_dom_screenshots_traces
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-empty-baseline.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-preview-empty-baseline-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-preview-empty-baseline-2026-07-01 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-owner-preview-empty-baseline.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-owner-preview-empty-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-owner-preview-empty-baseline.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
+    validationSummary:
+      validationStatus: pass_owner_preview_empty_baseline_local_gate
+      focusedUnit: pass_1_file_7_tests
+      wrapperDryRun: pass_no_database_target_required
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      destructiveResetExecuted: false
+      browserRuntimeExecuted: false
+      providerRuntimeExecuted: false
+      packageOrLockfileChanged: false
+      schemaOrMigrationChanged: false
   - id: owner-preview-local-walkthrough-preparation-package-2026-06-30
     title: Owner preview local walkthrough preparation package
     phase: owner-preview-local-walkthrough-preparation-package-2026-06-30
