@@ -297,6 +297,259 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-repair-roadmap-2026-07-01
+    title: AI generation repair roadmap materialization
+    phase: ai-generation-repair-roadmap-2026-07-01
+    sourceStory: current_user_requested_durable_ai_generation_repair_roadmap_and_queue_2026_07_01
+    humanApprovalBoundary: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
+    targetClosureItem: AI generation repair roadmap, root-cause protocol, reuse protocol, and queued follow-up tasks
+    behaviorBoundary: docs_state_roadmap_only_no_source_repair_no_browser_no_provider_no_db_no_schema_no_migration_no_seed_no_resource_import
+    executionProfile: local_docs_state_repair_roadmap
+    evidenceMode: redacted_task_file_issue_role_workflow_status_count_validation_summary_only
+    validationPolicy: lint_typecheck_format_governance_gates
+    taskKind: docs_state_ai_generation_repair_roadmap
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ai_generation_repair_roadmap_materialized
+    approvedAt: "2026-07-01T08:08:05-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-07-01T08:08:05-07:00"
+    plannedAt: "2026-07-01T08:08:05-07:00"
+    implementedAt: "2026-07-01T08:12:26-07:00"
+    validatedAt: "2026-07-01T08:12:26-07:00"
+    reviewedAt: "2026-07-01T08:12:26-07:00"
+    closedAt: "2026-07-01T08:12:26-07:00"
+    branch: codex/ai-generation-repair-roadmap
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      resourceImport: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-repair-roadmap.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_import_or_destructive_reset
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    futureTaskOrder:
+      - ai-generation-p0-entry-unblock-2026-07-01
+      - ai-generation-p1-core-semantics-2026-07-01
+      - ai-generation-p2-history-ux-2026-07-01
+      - ai-generation-data-backed-walkthrough-2026-07-01
+      - ai-generation-eight-role-matrix-rerun-2026-07-01
+      - ai-generation-real-provider-sample-2026-07-01
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-repair-roadmap.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-repair-roadmap.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-repair-roadmap-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-repair-roadmap-2026-07-01 -SkipRemoteAheadCheck
+    roadmapPath: docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md
+    rootCauseReuseProtocolPath: docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-repair-roadmap.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
+    validationSummary:
+      validationStatus: pass_ai_generation_repair_roadmap_local_gate
+      roadmapPrepared: pass
+      rootCauseReuseProtocolPrepared: pass
+      futureTasksQueued: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      prettier: pass
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+      sourceOrTestChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserRuntimeExecuted: false
+      sensitiveEvidenceCaptured: false
+
+  - id: ai-generation-p0-entry-unblock-2026-07-01
+    title: AI generation P0 entry unblock
+    phase: ai-generation-p0-entry-unblock-2026-07-01
+    status: pending
+    taskKind: source_test_repair
+    priority: p0
+    dependsOn:
+      - ai-generation-repair-roadmap-2026-07-01
+    issues:
+      - OP-03
+      - OP-04
+    scope: Repair learner/employee active authorization false-expired state and organization advanced admin workspace capability downgrade before AI role walkthrough continues.
+    requiredBeforeImplementation:
+      - create_short_codex_branch
+      - read_AGENTS_ten_commandments_all_ADRs_project_state_task_queue
+      - materialize_exact_allowedFiles_blockedFiles_boundaries_validation_commands_and_closeoutPolicy
+      - write_task_plan_and_redacted_evidence_template
+      - identify_root_cause_boundary_using_ai_generation_root_cause_and_reuse_protocol
+      - inspect_existing_authorization_and_capability_services_before_editing
+    blockedUntilMaterialized: true
+    targetExitCriteria:
+      - active valid personal and employee authorization paths no longer show false expired in scoped checks
+      - organization advanced admin reaches the advanced workspace capability expected by contract
+      - focused tests protect authorization and workspace capability behavior
+
+  - id: ai-generation-p1-core-semantics-2026-07-01
+    title: AI generation P1 core semantics
+    phase: ai-generation-p1-core-semantics-2026-07-01
+    status: pending
+    taskKind: source_test_repair
+    priority: p1
+    dependsOn:
+      - ai-generation-p0-entry-unblock-2026-07-01
+    issues:
+      - OP-01
+      - OP-05
+      - OP-06
+    scope: Repair AI 出题 / AI 组卷 task semantics, level parameter contract, and structured quantity/result contract using shared services and fake Provider tests.
+    requiredBeforeImplementation:
+      - create_short_codex_branch
+      - materialize_task_boundaries_and_plan
+      - inspect_existing_ai_generation_contracts_services_repositories_parser_and_UI_surfaces
+      - add_or_update_focused_tests_before_claiming_fix
+    blockedUntilDependenciesClosed: true
+    targetExitCriteria:
+      - learner AI 出题 and AI 组卷 no longer share incorrect task/function semantics
+      - level options are 1_2_3_4_5 by shared contract
+      - quantity 10 produces 10 structured drafts or explicit parse failure
+
+  - id: ai-generation-p2-history-ux-2026-07-01
+    title: AI generation P2 history and UX
+    phase: ai-generation-p2-history-ux-2026-07-01
+    status: pending
+    taskKind: source_test_repair
+    priority: p2
+    dependsOn:
+      - ai-generation-p1-core-semantics-2026-07-01
+    issues:
+      - OP-02
+      - OP-07
+      - OP-08
+      - OP-09
+    scope: Repair empty-state guidance, result placement, history type isolation, descending order, pagination, and filtering.
+    requiredBeforeImplementation:
+      - create_short_codex_branch
+      - materialize_task_boundaries_and_plan
+      - inspect_existing_history_query_pagination_and_admin_student_AI_UI_patterns
+      - add_or_update_focused_tests_for_history_isolation_and_visible_states
+    blockedUntilDependenciesClosed: true
+    targetExitCriteria:
+      - empty knowledge or missing question bank states are explicit
+      - current generation result is visible near the action area or focused by UI behavior
+      - AI 出题 and AI 组卷 histories are isolated and paginated/filterable
+
+  - id: ai-generation-data-backed-walkthrough-2026-07-01
+    title: AI generation data-backed walkthrough
+    phase: ai-generation-data-backed-walkthrough-2026-07-01
+    status: blocked_pending_fresh_approval
+    taskKind: local_data_backed_walkthrough
+    priority: p1
+    dependsOn:
+      - ai-generation-p2-history-ux-2026-07-01
+    scope: Validate AI 出题 / AI 组卷 with an approved local脱敏 resource set covering profession, level, subject, knowledge_node, question bank, and paper examples.
+    freshApprovalRequiredFor:
+      - local_database_connection_or_mutation_if_needed
+      - resource_import_or_seed
+      - reading_local_private_resource_package
+      - browser_runtime_if_used
+    evidenceMode: status_count_summary_only_no_raw_fixture_content
+
+  - id: ai-generation-eight-role-matrix-rerun-2026-07-01
+    title: AI generation eight-role matrix rerun
+    phase: ai-generation-eight-role-matrix-rerun-2026-07-01
+    status: pending_after_dependencies
+    taskKind: local_owner_preview_walkthrough
+    priority: p1
+    dependsOn:
+      - ai-generation-p0-entry-unblock-2026-07-01
+      - ai-generation-p1-core-semantics-2026-07-01
+      - ai-generation-p2-history-ux-2026-07-01
+    scope: Rerun the AI 出题 / AI 组卷 role/function matrix and record pass/fail/blocked/not_applicable outcomes.
+    runtimeApprovalRequiredBeforeExecution: true
+    evidenceMode: role_route_workflow_status_count_summary_only_no_credentials_no_raw_dom_no_screenshots
+
+  - id: ai-generation-real-provider-sample-2026-07-01
+    title: AI generation real Provider sample
+    phase: ai-generation-real-provider-sample-2026-07-01
+    status: blocked_pending_fresh_approval
+    taskKind: local_real_provider_owner_preview_sample
+    priority: p1
+    dependsOn:
+      - ai-generation-eight-role-matrix-rerun-2026-07-01
+    scope: Run a small local Qwen sample only for already-unblocked eligible roles, at most one AI 出题 and one AI 组卷 per role.
+    freshApprovalRequiredFor:
+      - real_provider_call
+      - provider_runtime_boundary
+      - browser_runtime_if_used
+    evidenceMode: provider_status_duration_bucket_token_count_failure_category_only_no_prompt_payload_or_output
+
   - id: ai-generation-core-walkthrough-2026-07-01
     title: AI generation core walkthrough contract
     phase: ai-generation-core-walkthrough-2026-07-01
