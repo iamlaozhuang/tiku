@@ -2,7 +2,154 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ai-generation-data-backed-walkthrough-2026-07-01
-updatedAt: "2026-07-01T09:57:46-07:00"
+updatedAt: "2026-07-01T10:08:33-07:00"
+aiGenerationDataBackedWalkthrough20260701:
+  taskId: ai-generation-data-backed-walkthrough-2026-07-01
+  phase: ai-generation-data-backed-walkthrough-2026-07-01
+  status: closed
+  result: blocked_requires_follow_up_import_contract
+  validatedAt: "2026-07-01T10:08:33-07:00"
+  reviewedAt: "2026-07-01T10:08:33-07:00"
+  closedAt: "2026-07-01T10:08:33-07:00"
+  priority: p1
+  taskKind: local_data_backed_walkthrough
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-p2-history-ux-2026-07-01
+  approvedAt: "2026-07-01T08:24:18-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  branch: codex/ai-generation-data-backed-walkthrough
+  claimedAt: "2026-07-01T10:03:10-07:00"
+  plannedAt: "2026-07-01T10:03:10-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_lacks_profession_level_knowledge_node_question_bank_2026_07_01
+  targetClosureItem: data-backed local walkthrough readiness for AI 出题 / AI 组卷 without raw fixture evidence
+  behaviorBoundary: local_dev_data_backed_walkthrough_no_source_repair_no_schema_migration_no_dependency_no_provider_no_staging_prod
+  executionProfile: local_resource_package_discovery_db_safety_preflight_and_optional_import
+  evidenceMode: status_count_summary_only_no_raw_fixture_content
+  rootCauseBoundary:
+    dataAvailability: profession_level_subject_knowledge_node_question_bank_paper_material_resource_coverage
+  resourceDiscoveryResult:
+    packageRoot: D:\tiku-local-private\owner-facing-fixtures
+    status: partially_usable
+    evidenceMode: metadata_counts_only_no_raw_resource_content
+    fileCount: 75
+    directoryCount: 48
+    totalSizeMb: 20.66
+    extensionCounts:
+      pdf: 41
+      docx: 18
+      csv: 5
+      yaml: 4
+      json: 3
+      md: 3
+      pptx: 1
+  dataPreparationResult:
+    status: dry_run_only
+    resetDryRun: pass
+    resetExecuted: false
+    devSeedExecuted: false
+    resourceImportExecuted: false
+    dedicatedPackageImporterFound: false
+    blockingReason: no_scoped_private_package_importer_contract_with_dry_run_local_db_protection_and_redacted_counts
+    nextTask: ai-generation-resource-import-contract-2026-07-01
+  reuseChecklist:
+    existingScripts: inspect_existing_reset_seed_import_package_scripts_before_new_logic
+    existingRepositories: inspect_existing_content_question_paper_knowledge_resource_repositories_if_needed
+    existingResourceDocs: inspect_docs_for_owner_preview_or_resource_import_paths
+    localDbSafety: require_local_dev_target_confirmation_and_no_raw_rows
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-data-backed-walkthrough.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-data-backed-walkthrough.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-data-backed-walkthrough.md
+  readOnlyOrRuntimeAllowed:
+    - D:/tiku-local-private/**
+    - D:/*resource*
+    - D:/*Resource*
+    - D:/*资料*
+    - D:/*资源*
+    - scripts/**
+    - package.json
+    - docs/**
+    - src/server/repositories/**
+    - src/server/services/**
+    - src/db/schema/**
+  blockedFiles:
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  localDbBoundary: local_dev_only_dry_run_or_confirmed_safe_import_no_raw_rows_no_connection_string_evidence
+  aiProviderBoundary: no_real_provider_call_in_this_task
+  browserBoundary: browser_runtime_allowed_only_if_needed_for_localhost_manual_walkthrough_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_account_password_private_account_cookie_session_storage_or_auth_header_capture
+  envBoundary: no_environment_value_read_or_modification_existence_check_only_if_needed
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-data-backed-walkthrough.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-data-backed-walkthrough.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-data-backed-walkthrough.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  validationCommands:
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-01-ai-generation-data-backed-walkthrough.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-data-backed-walkthrough.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-data-backed-walkthrough.md
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-data-backed-walkthrough-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-data-backed-walkthrough-2026-07-01 -SkipRemoteAheadCheck
+aiGenerationResourceImportContract20260701:
+  taskId: ai-generation-resource-import-contract-2026-07-01
+  phase: ai-generation-resource-import-contract-2026-07-01
+  status: pending
+  priority: p1
+  taskKind: local_resource_import_mechanism
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-data-backed-walkthrough-2026-07-01
+  approvedAt: "2026-07-01T08:24:18-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  branch: codex/ai-generation-resource-import-contract
+  targetClosureItem: dry_run_first local private resource package importer for AI generation data-backed walkthrough
+  behaviorBoundary: local_source_script_test_repair_for_importer_no_schema_migration_dependency_provider_staging_prod
+  packageRoot: D:\tiku-local-private\owner-facing-fixtures
+  evidenceMode: status_count_summary_only_no_raw_fixture_content
+  materializationRequiredBeforeExecution:
+    - exact_allowedFiles_blockedFiles_and_redaction_rules
+    - local_db_safety_plan_with_no_raw_rows
+    - dry_run_output_contract
+    - package_manifest_or_mapping_contract
+    - rollback_and_stop_conditions
+  plannedOutputs:
+    - importer_dry_run_with_package_validation_counts
+    - local_dev_only_execution_gate
+    - aggregate coverage counts for profession level subject knowledge_node question paper material resource
+    - no raw resource question paper material chunk evidence
 aiGenerationP2HistoryUx20260701:
   taskId: ai-generation-p2-history-ux-2026-07-01
   phase: ai-generation-p2-history-ux-2026-07-01
@@ -10106,40 +10253,38 @@ repository:
   lastKnownMasterSha: 0f2a422f27bf3e5112a3fd7c796153a3191c3160
   lastKnownOriginMasterSha: 0f2a422f27bf3e5112a3fd7c796153a3191c3160
 currentTask:
-  id: ai-generation-p2-history-ux-2026-07-01
-  status: in_progress
-  taskKind: source_test_repair
+  id: ai-generation-data-backed-walkthrough-2026-07-01
+  status: closed
+  taskKind: local_data_backed_walkthrough
   moduleRunVersion: 2
-  priority: p2
-  severity: owner_preview_history_ux
-  branch: codex/ai-generation-p2-history-ux
+  priority: p1
+  branch: codex/ai-generation-data-backed-walkthrough
   approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-  latestApprovalRefreshAt: "2026-07-01T08:59:30-07:00"
-  latestApprovalRefreshSource: current_user_reconfirmed_bounded_high_risk_ai_generation_repair_goal_2026_07_01
-  claimedAt: "2026-07-01T09:18:58-07:00"
-  plannedAt: "2026-07-01T09:18:58-07:00"
-  sourceStory: current_owner_preview_feedback_ai_generation_history_ux_2026_07_01
-  targetClosureItem: OP-02 empty data guidance, OP-07 visible result placement, OP-08 history isolation, and OP-09 descending paginated filterable history
-  behaviorBoundary: p2_history_ux_source_test_repair_only_no_provider_no_db_no_browser_no_env_no_dependency_no_schema_no_deploy
-  executionProfile: local_source_test_repair_with_fake_history_repository_tests
-  validationPolicy: red_green_focused_unit_lint_typecheck_governance_gates
-  evidenceMode: redacted_issue_role_route_status_count_validation_summary_only
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p2-history-ux.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p2-history-ux.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p2-history-ux.md
+  claimedAt: "2026-07-01T10:03:10-07:00"
+  plannedAt: "2026-07-01T10:03:10-07:00"
+  closedAt: "2026-07-01T10:08:33-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_lacks_profession_level_knowledge_node_question_bank_2026_07_01
+  targetClosureItem: data-backed local walkthrough readiness for AI 出题 / AI 组卷 without raw fixture evidence
+  behaviorBoundary: local_dev_data_backed_walkthrough_no_source_repair_no_schema_migration_no_dependency_no_provider_no_staging_prod
+  executionProfile: local_resource_package_discovery_db_safety_preflight_and_optional_import
+  evidenceMode: status_count_summary_only_no_raw_fixture_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-data-backed-walkthrough.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-data-backed-walkthrough.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-data-backed-walkthrough.md
+  nextTaskCandidate: ai-generation-resource-import-contract-2026-07-01
   validationSummary:
-    validationStatus: pending
-    focusedUnitRed: pending
-    focusedUnitGreen: pending
-    prettier: pending
-    lint: pending
-    typecheck: pending
-    diffCheck: pending
-    preCommitHardening: pending
-    prePushReadiness: pending
-    sourceAndTestChanged: pending
+    validationStatus: pass
+    resourcePackageStatus: partially_usable
+    dataPreparationResult: dry_run_only
+    prettier: pass
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+    sourceAndTestChanged: false
     browserRuntimeExecuted: false
     localDatabaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
