@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-data-backed-walkthrough-2026-07-01
-updatedAt: "2026-07-01T10:08:33-07:00"
+currentPhase: ai-generation-resource-import-contract-2026-07-01
+updatedAt: "2026-07-01T10:18:30-07:00"
 aiGenerationDataBackedWalkthrough20260701:
   taskId: ai-generation-data-backed-walkthrough-2026-07-01
   phase: ai-generation-data-backed-walkthrough-2026-07-01
@@ -125,7 +125,12 @@ aiGenerationDataBackedWalkthrough20260701:
 aiGenerationResourceImportContract20260701:
   taskId: ai-generation-resource-import-contract-2026-07-01
   phase: ai-generation-resource-import-contract-2026-07-01
-  status: pending
+  status: closed
+  result: pass_resource_import_contract_executed_locally
+  implementedAt: "2026-07-01T10:38:30-07:00"
+  validatedAt: "2026-07-01T10:38:30-07:00"
+  reviewedAt: "2026-07-01T10:38:30-07:00"
+  closedAt: "2026-07-01T10:38:30-07:00"
   priority: p1
   taskKind: local_resource_import_mechanism
   moduleRunVersion: 2
@@ -134,11 +139,30 @@ aiGenerationResourceImportContract20260701:
   approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  latestApprovalRefreshAt: "2026-07-01T10:18:30-07:00"
+  latestApprovalRefreshSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
   branch: codex/ai-generation-resource-import-contract
+  claimedAt: "2026-07-01T10:18:30-07:00"
+  plannedAt: "2026-07-01T10:18:30-07:00"
   targetClosureItem: dry_run_first local private resource package importer for AI generation data-backed walkthrough
   behaviorBoundary: local_source_script_test_repair_for_importer_no_schema_migration_dependency_provider_staging_prod
   packageRoot: D:\tiku-local-private\owner-facing-fixtures
   evidenceMode: status_count_summary_only_no_raw_fixture_content
+  boundedUnifiedAuthorization:
+    approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+    approvedCategories:
+      - local_private_resource_package_read_or_import
+      - local_dev_db_reset_seed_or_import_if_task_scoped
+      - browser_manual_role_walkthrough_with_user_credential_entry_only
+      - local_real_qwen_provider_sample_after_dependency_tasks
+      - env_file_manual_user_maintenance_only_no_agent_value_read
+      - package_lock_dependency_schema_migration_seed_changes_only_when_task_materialized_and_needed
+    nonNegotiableBoundaries:
+      - no_secret_value_or_session_material_capture
+      - no_raw_db_rows_internal_ids_pii_or_complete_content_evidence
+      - no_provider_payload_prompt_raw_ai_io_evidence
+      - no_staging_prod_cloud_deploy_release_readiness_final_pass_or_cost_calibration
+      - minimize_scope_and_prevent_regression_with_focused_tests_and_full_gates
   materializationRequiredBeforeExecution:
     - exact_allowedFiles_blockedFiles_and_redaction_rules
     - local_db_safety_plan_with_no_raw_rows
@@ -150,6 +174,105 @@ aiGenerationResourceImportContract20260701:
     - local_dev_only_execution_gate
     - aggregate coverage counts for profession level subject knowledge_node question paper material resource
     - no raw resource question paper material chunk evidence
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-import-contract.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-import-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-import-contract.md
+    - tests/unit/owner-preview-resource-import.test.ts
+    - src/db/owner-preview-resource-import.ts
+    - scripts/db/Import-OwnerPreviewResourcePackage.ps1
+  readOnlyOrRuntimeAllowed:
+    - D:/tiku-local-private/**
+    - scripts/db/Reset-OwnerPreviewEmptyBaseline.ps1
+    - src/db/owner-preview-empty-baseline.ts
+    - src/db/schema/**
+    - docs/**
+    - package.json
+  blockedFiles:
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  localDbBoundary: local_dev_only_execute_requires_local_target_and_confirm_flag_no_raw_rows_no_connection_string_evidence
+  aiProviderBoundary: no_real_provider_call_in_this_task
+  browserBoundary: no_browser_runtime_in_this_task
+  accountCredentialBoundary: no_account_password_private_account_cookie_session_storage_or_auth_header_capture
+  envBoundary: runtime_local_env_db_target_load_allowed_no_value_output_or_modification
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+  schemaBoundary: no_schema_migration_seed_change
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-import-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-import-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-import-contract.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-import-contract.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-import-contract.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-import-contract.md tests/unit/owner-preview-resource-import.test.ts src/db/owner-preview-resource-import.ts scripts/db/Import-OwnerPreviewResourcePackage.ps1
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-resource-import-contract-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-resource-import-contract-2026-07-01 -SkipRemoteAheadCheck
+  importResult:
+    dryRunStatus: usable
+    localExecuteStatus: executed
+    questionRowCount: 3
+    resourceInventoryRowCount: 62
+    professionCount: 2
+    levelCount: 3
+    subjectCount: 2
+    knowledgeNodeCount: 3
+    importedKnowledgeBaseCount: 2
+    importedKnowledgeNodeCount: 3
+    importedMaterialCount: 3
+    importedQuestionCount: 3
+    importedResourceCount: 62
+    importedPaperCount: 3
+    importedPaperQuestionCount: 3
+  validationSummary:
+    validationStatus: pass_resource_import_contract_executed_locally
+    focusedUnitRed: pass_expected_missing_module_before_implementation
+    focusedUnitGreen: pass_1_file_6_tests
+    dryRun: pass_usable
+    localImportExecution: pass_executed
+    prettier: pass
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+    sourceAndTestChanged: true
+    browserRuntimeExecuted: false
+    localDatabaseConnectionOrMutationExecuted: true
+    localEnvRuntimeLoadExecuted: true
+    envFileValueOutputOrModified: false
+    providerCallOrConfigurationExecuted: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationOrSeedChanged: false
+    deploymentExecuted: false
 aiGenerationP2HistoryUx20260701:
   taskId: ai-generation-p2-history-ux-2026-07-01
   phase: ai-generation-p2-history-ux-2026-07-01
@@ -406,7 +529,6 @@ aiGenerationP1CoreSemantics20260701:
     browserRuntimeExecuted: false
     localDatabaseConnectionOrMutationExecuted: false
     providerCallOrConfigurationExecuted: false
-    envFileReadOrModified: false
     dependencyOrLockfileChanged: false
     schemaMigrationOrSeedChanged: false
     deploymentExecuted: false
@@ -10250,45 +10372,56 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 0f2a422f27bf3e5112a3fd7c796153a3191c3160
-  lastKnownOriginMasterSha: 0f2a422f27bf3e5112a3fd7c796153a3191c3160
+  lastKnownMasterSha: ef7a53b70b55637b6f64779c1c33d7054e20f28d
+  lastKnownOriginMasterSha: ef7a53b70b55637b6f64779c1c33d7054e20f28d
 currentTask:
-  id: ai-generation-data-backed-walkthrough-2026-07-01
+  id: ai-generation-resource-import-contract-2026-07-01
   status: closed
-  taskKind: local_data_backed_walkthrough
+  result: pass_resource_import_contract_executed_locally
+  taskKind: local_resource_import_mechanism
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-data-backed-walkthrough
+  branch: codex/ai-generation-resource-import-contract
   approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-  claimedAt: "2026-07-01T10:03:10-07:00"
-  plannedAt: "2026-07-01T10:03:10-07:00"
-  closedAt: "2026-07-01T10:08:33-07:00"
+  latestApprovalRefreshAt: "2026-07-01T10:18:30-07:00"
+  latestApprovalRefreshSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+  claimedAt: "2026-07-01T10:18:30-07:00"
+  plannedAt: "2026-07-01T10:18:30-07:00"
+  implementedAt: "2026-07-01T10:38:30-07:00"
+  validatedAt: "2026-07-01T10:38:30-07:00"
+  reviewedAt: "2026-07-01T10:38:30-07:00"
+  closedAt: "2026-07-01T10:38:30-07:00"
   sourceStory: current_owner_preview_feedback_ai_generation_lacks_profession_level_knowledge_node_question_bank_2026_07_01
-  targetClosureItem: data-backed local walkthrough readiness for AI 出题 / AI 组卷 without raw fixture evidence
-  behaviorBoundary: local_dev_data_backed_walkthrough_no_source_repair_no_schema_migration_no_dependency_no_provider_no_staging_prod
-  executionProfile: local_resource_package_discovery_db_safety_preflight_and_optional_import
+  targetClosureItem: dry_run_first local private resource package importer for AI generation data-backed walkthrough
+  behaviorBoundary: local_source_script_test_repair_for_importer_no_schema_migration_dependency_provider_staging_prod
+  executionProfile: local_resource_package_contract_dry_run_local_db_gate_and_optional_scoped_import
   evidenceMode: status_count_summary_only_no_raw_fixture_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-data-backed-walkthrough.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-data-backed-walkthrough.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-data-backed-walkthrough.md
-  nextTaskCandidate: ai-generation-resource-import-contract-2026-07-01
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-import-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-import-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-import-contract.md
+  nextTaskCandidate: ai-generation-eight-role-matrix-rerun-2026-07-01
+  boundedUnifiedAuthorization:
+    approvalSource: current_user_unified_bounded_high_risk_authorization_2026_07_01
+    scopeLimit: only_task_materialized_actions_with_redacted_evidence_and_regression_gates
   validationSummary:
-    validationStatus: pass
-    resourcePackageStatus: partially_usable
-    dataPreparationResult: dry_run_only
+    validationStatus: pass_resource_import_contract_executed_locally
+    resourceImporterContract: pass
+    dryRun: pass_usable
+    optionalLocalImportExecution: pass_executed
+    focusedUnit: pass_1_file_6_tests
     prettier: pass
     lint: pass
     typecheck: pass
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass
-    sourceAndTestChanged: false
     browserRuntimeExecuted: false
-    localDatabaseConnectionOrMutationExecuted: false
+    localDatabaseConnectionOrMutationExecuted: true
+    localEnvRuntimeLoadExecuted: true
+    envFileValueOutputOrModified: false
     providerCallOrConfigurationExecuted: false
-    envFileReadOrModified: false
     dependencyOrLockfileChanged: false
     schemaMigrationOrSeedChanged: false
     deploymentExecuted: false
