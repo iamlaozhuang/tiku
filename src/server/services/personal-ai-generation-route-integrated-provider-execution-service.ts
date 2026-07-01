@@ -14,8 +14,11 @@ import type {
   AiGenerationRouteIntegratedProviderUsageSummary,
 } from "../contracts/route-integrated-provider-execution-contract";
 import {
+  addRouteIntegratedStructuredPreview,
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedStructuredPreviewOptionsForTask,
+  createRouteIntegratedTaskLabel,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
@@ -34,6 +37,10 @@ export type PersonalAiGenerationRouteIntegratedProviderLimits =
 
 export type PersonalAiGenerationRouteIntegratedProviderRequestContext = {
   taskPublicId: string;
+  taskType: PersonalAiGenerationRequestFlowDto["resultReference"]["taskType"];
+  routeWorkflow:
+    | "personal_ai_question_generation"
+    | "personal_ai_paper_generation";
   aiFuncType: string;
   questionPublicId: string;
   answerRecordPublicId: string | null;
@@ -81,6 +88,11 @@ export function createRouteIntegratedProviderRequestContext(
 ): PersonalAiGenerationRouteIntegratedProviderRequestContext {
   return {
     taskPublicId: requestFlow.resultReference.taskPublicId,
+    taskType: requestFlow.resultReference.taskType,
+    routeWorkflow:
+      requestFlow.resultReference.taskType === "ai_question_generation"
+        ? "personal_ai_question_generation"
+        : "personal_ai_paper_generation",
     aiFuncType: requestFlow.request.aiFuncType,
     questionPublicId: requestFlow.request.generationContext.questionPublicId,
     answerRecordPublicId:
@@ -109,6 +121,8 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
 
   const executeProviderRequest =
     control.executeProviderRequest ?? executeQwenRouteIntegratedProviderRequest;
+  const requestContext =
+    createRouteIntegratedProviderRequestContext(requestFlow);
   const executionResult = await executeProviderRequest({
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     limits: {
@@ -117,11 +131,18 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       maxOutputTokens: control.maxOutputTokens,
       timeoutMs: control.timeoutMs,
     },
-    requestContext: createRouteIntegratedProviderRequestContext(requestFlow),
+    requestContext,
     providerCredential,
   });
+  const visibleGeneratedContentWithPreview =
+    addRouteIntegratedStructuredPreview(
+      executionResult.visibleGeneratedContent ?? null,
+      createRouteIntegratedStructuredPreviewOptionsForTask(
+        requestContext.taskType,
+      ),
+    );
   const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
-    executionResult.visibleGeneratedContent,
+    visibleGeneratedContentWithPreview,
     [providerCredential],
   );
   const executionResultSummaryFields = {
@@ -197,6 +218,12 @@ export async function executeQwenRouteIntegratedProviderRequest(
       providerErrorSummary: null,
       visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
         result.text,
+        {
+          structuredPreview:
+            createRouteIntegratedStructuredPreviewOptionsForTask(
+              input.requestContext.taskType,
+            ),
+        },
       ),
     };
   } catch (providerError) {
@@ -217,18 +244,16 @@ export async function executeQwenRouteIntegratedProviderRequest(
 function createPersonalRouteIntegratedInstruction(
   requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
 ): string {
-  const taskLabel =
-    requestContext.aiFuncType === "explanation"
-      ? "AI解析"
-      : requestContext.aiFuncType === "hint"
-        ? "AI提示"
-        : requestContext.aiFuncType === "kn_recommendation"
-          ? "知识点推荐"
-          : "学习建议";
+  const taskLabel = createRouteIntegratedTaskLabel(requestContext.taskType);
+  const outputContract =
+    requestContext.taskType === "ai_question_generation"
+      ? "输出 JSON；questions 数组必须正好包含 10 条结构化练习草稿摘要。"
+      : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
 
   return [
     "为题库系统本地 owner preview 生成简短中文体验内容。",
     `场景：${taskLabel}。`,
+    outputContract,
     "不要引用真实题目全文；输出可读的要点或小练习草稿。",
   ].join("\n");
 }

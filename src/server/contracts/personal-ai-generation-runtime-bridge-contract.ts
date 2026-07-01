@@ -9,6 +9,7 @@ import type {
   PersonalAiGenerationRuntimeBridgeRunnerMode,
   PersonalAiGenerationRuntimeBridgeStatus,
 } from "../models/personal-ai-generation-runtime-bridge";
+import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
 export type PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto = {
   requestCount: 0 | 1;
   resultStatus: "pass" | "fail" | "blocked";
@@ -46,12 +47,8 @@ export type PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto = {
   formalAdoptionStatus: "blocked";
 };
 
-export type PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto = {
-  content: string;
-  contentVisibility: "transient_response_only";
-  persistenceStatus: "not_persisted";
-  safetyStatus: "checked";
-} | null;
+export type PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto =
+  AiGenerationRouteIntegratedVisibleGeneratedContent | null;
 
 export type PersonalAiGenerationRuntimeBridgeDto = {
   bridgeStatus: PersonalAiGenerationRuntimeBridgeStatus;

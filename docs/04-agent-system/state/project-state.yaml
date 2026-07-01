@@ -1,8 +1,135 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-p0-entry-unblock-2026-07-01
-updatedAt: "2026-07-01T08:49:37-07:00"
+currentPhase: ai-generation-p1-core-semantics-2026-07-01
+updatedAt: "2026-07-01T09:11:01-07:00"
+aiGenerationP1CoreSemantics20260701:
+  taskId: ai-generation-p1-core-semantics-2026-07-01
+  phase: ai-generation-p1-core-semantics-2026-07-01
+  status: closed
+  result: pass_ai_generation_p1_core_semantics_repaired
+  priority: p1
+  severity: owner_preview_core_semantics
+  taskKind: source_test_repair
+  moduleRunVersion: 2
+  approvedAt: "2026-07-01T08:24:18-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  latestApprovalRefreshAt: "2026-07-01T08:59:30-07:00"
+  latestApprovalRefreshSource: current_user_reconfirmed_bounded_high_risk_ai_generation_repair_goal_2026_07_01
+  branch: codex/ai-generation-p1-core-semantics
+  claimedAt: "2026-07-01T08:59:30-07:00"
+  plannedAt: "2026-07-01T08:59:30-07:00"
+  implementedAt: "2026-07-01T09:11:01-07:00"
+  validatedAt: "2026-07-01T09:11:01-07:00"
+  reviewedAt: "2026-07-01T09:11:01-07:00"
+  closedAt: "2026-07-01T09:11:01-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_core_semantics_2026_07_01
+  targetClosureItem: OP-01 task semantics, OP-05 level contract, and OP-06 structured quantity/result contract
+  behaviorBoundary: p1_core_semantics_source_test_repair_only_no_provider_no_db_no_browser_no_env_no_dependency_no_schema_no_deploy
+  executionProfile: local_source_test_repair_with_fake_provider_contracts
+  validationPolicy: red_green_focused_unit_lint_typecheck_governance_gates
+  evidenceMode: redacted_issue_role_route_status_count_validation_summary_only
+  rootCauseBoundary:
+    OP-01: service_business_logic_and_route_adapter_task_type_semantics
+    OP-05: api_contract_and_ui_parameter_contract_level_enum
+    OP-06: structured_parser_and_result_contract_quantity_validation
+  reuseChecklist:
+    sharedContracts: inspect_src_server_contracts_ai_generation
+    sharedServices: inspect_src_server_services_ai_generation
+    adminUiSurface: inspect_src_features_admin_ai_generation
+    studentUiSurface: inspect_src_features_student_ai_generation
+    glossaryEnumSource: inspect_docs_03_standards_glossary_yaml_for_level_if_needed
+    fakeProviderTests: use_existing_provider_execution_tests_no_real_provider_call
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p1-core-semantics.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-p1-core-semantics.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p1-core-semantics.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - tests/unit/admin-ai-generation-entry-surface.test.ts
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - tests/unit/student-personal-ai-generation-ui.test.ts
+    - src/server/contracts/route-integrated-provider-execution-contract.ts
+    - src/server/contracts/admin-ai-generation-local-contract.ts
+    - src/server/services/route-integrated-provider-execution-service.ts
+    - src/server/services/route-integrated-provider-execution-service.test.ts
+    - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+    - src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+    - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_direct_database_connection_or_mutation_no_reset_seed_resource_import_no_raw_rows_no_schema_migration
+  aiProviderBoundary: no_real_provider_call_no_provider_configuration_no_prompt_payload_no_raw_ai_io_fake_provider_tests_only
+  browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  envBoundary: no_env_file_read_or_modification_for_p1
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p1-core-semantics.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p1-core-semantics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p1-core-semantics.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p1-core-semantics.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-p1-core-semantics.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p1-core-semantics.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx tests/unit/student-personal-ai-generation-ui.test.ts src/server/contracts/route-integrated-provider-execution-contract.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-p1-core-semantics-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-p1-core-semantics-2026-07-01 -SkipRemoteAheadCheck
+  validationSummary:
+    validationStatus: pass_ai_generation_p1_core_semantics_local_gate
+    focusedUnitRed: pass_expected_failures_before_fix_12
+    focusedUnitGreen: pass_6_files_56_tests
+    prettier: pass
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+    sourceAndTestChanged: true
+    browserRuntimeExecuted: false
+    localDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    envFileReadOrModified: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationOrSeedChanged: false
+    deploymentExecuted: false
 aiGenerationP0EntryUnblock20260701:
   taskId: ai-generation-p0-entry-unblock-2026-07-01
   phase: ai-generation-p0-entry-unblock-2026-07-01
@@ -9843,39 +9970,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 214e962e153e894888f1766d59b801e08ddb5413
-  lastKnownOriginMasterSha: 214e962e153e894888f1766d59b801e08ddb5413
+  lastKnownMasterSha: df92b351abf16d91636f5a2a01f16d9ff302b4f3
+  lastKnownOriginMasterSha: df92b351abf16d91636f5a2a01f16d9ff302b4f3
 currentTask:
-  id: ai-generation-p0-entry-unblock-2026-07-01
+  id: ai-generation-p1-core-semantics-2026-07-01
   status: closed
-  result: pass_ai_generation_p0_entry_unblock_repaired
+  result: pass_ai_generation_p1_core_semantics_repaired
   taskKind: source_test_repair
   moduleRunVersion: 2
-  priority: p0
-  severity: owner_preview_blocker
-  branch: codex/ai-generation-p0-entry-unblock
+  priority: p1
+  severity: owner_preview_core_semantics
+  branch: codex/ai-generation-p1-core-semantics
   approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-  claimedAt: "2026-07-01T08:36:00-07:00"
-  plannedAt: "2026-07-01T08:36:00-07:00"
-  implementedAt: "2026-07-01T08:49:37-07:00"
-  validatedAt: "2026-07-01T08:49:37-07:00"
-  reviewedAt: "2026-07-01T08:49:37-07:00"
-  closedAt: "2026-07-01T08:49:37-07:00"
-  sourceStory: current_owner_preview_feedback_ai_generation_entry_blockers_2026_07_01
-  targetClosureItem: OP-03 false authorization expired state and OP-04 organization advanced admin capability downgrade
-  behaviorBoundary: p0_entry_unblock_only_no_ai_generation_semantics_no_provider_no_db_mutation_no_schema_no_seed_no_dependency_no_deploy
-  executionProfile: local_source_test_repair
-  validationPolicy: focused_unit_lint_typecheck_governance_gates
-  evidenceMode: redacted_role_route_status_count_validation_summary_only
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p0-entry-unblock.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md
+  latestApprovalRefreshAt: "2026-07-01T08:59:30-07:00"
+  latestApprovalRefreshSource: current_user_reconfirmed_bounded_high_risk_ai_generation_repair_goal_2026_07_01
+  claimedAt: "2026-07-01T08:59:30-07:00"
+  plannedAt: "2026-07-01T08:59:30-07:00"
+  implementedAt: "2026-07-01T09:11:01-07:00"
+  validatedAt: "2026-07-01T09:11:01-07:00"
+  reviewedAt: "2026-07-01T09:11:01-07:00"
+  closedAt: "2026-07-01T09:11:01-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_core_semantics_2026_07_01
+  targetClosureItem: OP-01 task semantics, OP-05 level contract, and OP-06 structured quantity/result contract
+  behaviorBoundary: p1_core_semantics_source_test_repair_only_no_provider_no_db_no_browser_no_env_no_dependency_no_schema_no_deploy
+  executionProfile: local_source_test_repair_with_fake_provider_contracts
+  validationPolicy: red_green_focused_unit_lint_typecheck_governance_gates
+  evidenceMode: redacted_issue_role_route_status_count_validation_summary_only
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p1-core-semantics.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p1-core-semantics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p1-core-semantics.md
   validationSummary:
-    validationStatus: pass_ai_generation_p0_entry_unblock_local_gate
-    focusedUnitRed: pass_expected_failure_before_fix
-    focusedUnitGreen: pass
+    validationStatus: pass_ai_generation_p1_core_semantics_local_gate
+    focusedUnitRed: pass_expected_failures_before_fix_12
+    focusedUnitGreen: pass_6_files_56_tests
     prettier: pass
     lint: pass
     typecheck: pass

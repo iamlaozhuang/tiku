@@ -60,6 +60,108 @@ describe("shared route-integrated Provider execution primitives", () => {
     expect(createRouteIntegratedVisibleGeneratedContent(null)).toBeNull();
   });
 
+  it("builds a parsed question-set structured preview only from safe counts", () => {
+    const content = JSON.stringify({
+      questions: Array.from({ length: 10 }, (_, index) => ({
+        questionType: index % 2 === 0 ? "single_choice" : "judge",
+        difficulty: "medium",
+        knowledgeNodeLabels: ["redacted_knowledge_node"],
+      })),
+    });
+
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 10,
+        },
+      });
+
+    expect(visibleGeneratedContent).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "parsed",
+        requestedQuestionCount: 10,
+        actualQuestionCount: 10,
+        draftCount: 10,
+      },
+    });
+    expect(
+      visibleGeneratedContent?.structuredPreview?.kind === "question_set" &&
+        visibleGeneratedContent.structuredPreview.parseStatus === "parsed"
+        ? visibleGeneratedContent.structuredPreview.draftSummaries[0]
+        : null,
+    ).toMatchObject({
+      draftNumber: 1,
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeCount: 1,
+      reviewStatus: "draft_review_required",
+    });
+  });
+
+  it("reports a structured parse failure when question count mismatches the requested quantity", () => {
+    const content = JSON.stringify({
+      questions: Array.from({ length: 2 }, () => ({
+        questionType: "single_choice",
+      })),
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 10,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        requestedQuestionCount: 10,
+        actualQuestionCount: 2,
+        failureCategory: "question_count_mismatch",
+        draftCount: 0,
+        draftSummaries: [],
+      },
+    });
+  });
+
+  it("builds a parsed paper structured preview from section and coverage counts", () => {
+    const content = JSON.stringify({
+      paperSections: [
+        { paperSectionType: "single_choice", questionCount: 20 },
+        { paperSectionType: "judge", questionCount: 30 },
+      ],
+      questionTypeDistribution: {
+        single_choice: 20,
+        judge: 30,
+      },
+      knowledgeCoverage: [
+        "redacted_knowledge_node_a",
+        "redacted_knowledge_node_b",
+      ],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "parsed",
+        paperSectionCount: 2,
+        questionCount: 50,
+        questionTypeDistributionCount: 2,
+        knowledgeCoverageCount: 2,
+        reviewStatus: "draft_review_required",
+      },
+    });
+  });
+
   it("converts forbidden evidence values into a redaction violation summary", () => {
     const summary = ensureRouteIntegratedProviderExecutionSummaryRedacted(
       {

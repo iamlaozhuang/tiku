@@ -64,6 +64,7 @@ export type AdminAiGenerationRouteIntegratedProviderRequestContext = {
   resultPublicId: string;
   requestPublicId: string;
   routeWorkflow: AdminAiGenerationRuntimeBridgeRouteWorkflow;
+  taskType: "ai_question_generation" | "ai_paper_generation";
   workspace: AdminAiGenerationWorkspace;
   generationKind: AdminAiGenerationKind;
   ownerType: AdminAiGenerationRuntimeBridgeOwnerType;

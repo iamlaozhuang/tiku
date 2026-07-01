@@ -11,8 +11,12 @@ import type {
   AdminAiGenerationRuntimeBridgeRouteWorkflow,
 } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import {
+  addRouteIntegratedStructuredPreview,
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedGenerationKindLabel,
+  createRouteIntegratedStructuredPreviewOptionsForGenerationKind,
+  createRouteIntegratedTaskTypeFromGenerationKind,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
@@ -30,6 +34,9 @@ export function createAdminAiGenerationRouteIntegratedProviderRequestContext(
     resultPublicId: input.resultPublicId,
     requestPublicId: input.requestPublicId,
     routeWorkflow: resolveAdminAiGenerationRouteWorkflow(input),
+    taskType: createRouteIntegratedTaskTypeFromGenerationKind(
+      input.generationKind,
+    ),
     workspace: input.workspace,
     generationKind: input.generationKind,
     ownerType: input.ownerType,
@@ -126,6 +133,8 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
   const executeProviderRequest =
     control.executeProviderRequest ??
     executeQwenAdminRouteIntegratedProviderRequest;
+  const requestContext =
+    createAdminAiGenerationRouteIntegratedProviderRequestContext(input);
   const executionResult = await executeProviderRequest({
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     limits: {
@@ -134,16 +143,22 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       maxOutputTokens: control.maxOutputTokens,
       timeoutMs: control.timeoutMs,
     },
-    requestContext:
-      createAdminAiGenerationRouteIntegratedProviderRequestContext(input),
+    requestContext,
     providerCredential,
   });
   const executionSummary = ensureAdminRouteIntegratedExecutionSummaryRedacted({
     executionResult,
     providerCredential,
   });
+  const visibleGeneratedContentWithPreview =
+    addRouteIntegratedStructuredPreview(
+      executionResult.visibleGeneratedContent ?? null,
+      createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
+        requestContext.generationKind,
+      ),
+    );
   const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
-    executionResult.visibleGeneratedContent,
+    visibleGeneratedContentWithPreview,
     [providerCredential],
   );
   const finalExecutionSummary = visibleContentCheck.redactionViolationFound
@@ -205,6 +220,12 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
       providerErrorSummary: null,
       visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
         result.text,
+        {
+          structuredPreview:
+            createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
+              input.requestContext.generationKind,
+            ),
+        },
       ),
     };
   } catch (providerError) {
@@ -247,14 +268,20 @@ function ensureAdminRouteIntegratedExecutionSummaryRedacted(input: {
 function createAdminRouteIntegratedInstruction(
   requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
 ): string {
-  const generationLabel =
-    requestContext.generationKind === "question" ? "AI出题" : "AI组卷";
+  const generationLabel = createRouteIntegratedGenerationKindLabel(
+    requestContext.generationKind,
+  );
   const workspaceLabel =
     requestContext.workspace === "content" ? "内容草稿评审" : "组织草稿";
+  const outputContract =
+    requestContext.generationKind === "question"
+      ? "输出 JSON；questions 数组必须正好包含 10 条结构化草稿摘要。"
+      : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
 
   return [
     "为题库系统本地 owner preview 生成简短中文体验内容。",
     `场景：${workspaceLabel} ${generationLabel}。`,
+    outputContract,
     "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
   ].join("\n");
 }

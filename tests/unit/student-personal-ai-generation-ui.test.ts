@@ -1380,6 +1380,22 @@ describe("StudentPersonalAiGenerationPage", () => {
             contentVisibility: "transient_response_only",
             persistenceStatus: "not_persisted",
             safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 10,
+              actualQuestionCount: 10,
+              draftCount: 10,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
           },
           blockedReasons: [],
         },
@@ -1399,6 +1415,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       await screen.findByTestId("student-visible-generated-content"),
     ).toHaveTextContent("学生端本次生成内容：先复习知识点，再完成两道自练题。");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("结构化预览");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("草稿 10/10");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("unit-test-session-token");

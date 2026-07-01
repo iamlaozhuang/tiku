@@ -89,6 +89,7 @@ describe("admin AI generation runtime bridge service", () => {
       resultPublicId: "admin_ai_generation_result_org_bridge_101",
       requestPublicId: "admin_ai_generation_request_org_bridge_101",
       routeWorkflow: "organization_ai_paper_generation",
+      taskType: "ai_paper_generation",
       workspace: "organization",
       generationKind: "paper",
       ownerType: "organization",
@@ -166,6 +167,7 @@ describe("admin AI generation runtime bridge service", () => {
       },
       requestContext: {
         routeWorkflow: "content_ai_paper_generation",
+        taskType: "ai_paper_generation",
         workspace: "content",
         generationKind: "paper",
         ownerType: "platform",
@@ -213,6 +215,73 @@ describe("admin AI generation runtime bridge service", () => {
     expect(serializedBridge).not.toContain("rawOutput");
     expect(serializedBridge).not.toContain("providerPayload");
     expect(serializedBridge).not.toContain("Authorization");
+  });
+
+  it("adds a structured paper preview to controlled runner visible content", async () => {
+    const bridge = await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
+      {
+        actorPublicId: "admin_public_runtime_bridge_104",
+        workspace: "content",
+        generationKind: "paper",
+        requestPublicId: "admin_ai_generation_request_runtime_bridge_104",
+        taskPublicId: "admin_ai_generation_task_runtime_bridge_104",
+        resultPublicId: "admin_ai_generation_result_runtime_bridge_104",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+      },
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            readProviderCredential: () => "synthetic-admin-provider-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 13,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: JSON.stringify({
+                  paperSections: [
+                    { paperSectionType: "single_choice", questionCount: 20 },
+                    { paperSectionType: "judge", questionCount: 30 },
+                  ],
+                  questionTypeDistribution: {
+                    single_choice: 20,
+                    judge: 30,
+                  },
+                  knowledgeCoverage: [
+                    "redacted_knowledge_node_a",
+                    "redacted_knowledge_node_b",
+                  ],
+                }),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    expect(bridge.visibleGeneratedContent?.structuredPreview).toMatchObject({
+      kind: "paper_draft",
+      parseStatus: "parsed",
+      paperSectionCount: 2,
+      questionCount: 50,
+      questionTypeDistributionCount: 2,
+      knowledgeCoverageCount: 2,
+    });
   });
 
   it("blocks an explicit controlled runner when the local Provider credential is unavailable", async () => {

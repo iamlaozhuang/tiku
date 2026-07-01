@@ -5,6 +5,7 @@ import type {
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
 import type { AiGenerationTaskResultContentVisibility } from "../models/ai-generation-task-request";
+import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
 import type {
   AdminAiGenerationResultContentVisibility,
   AdminAiGenerationResultFormalAdoptionStatus,
@@ -75,12 +76,7 @@ export type AdminAiGenerationLocalContractRuntimeBridgeDto = {
   providerConfigurationRead: boolean;
   costCalibrationExecuted: false;
   executionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
-  visibleGeneratedContent: {
-    content: string;
-    contentVisibility: "transient_response_only";
-    persistenceStatus: "not_persisted";
-    safetyStatus: "checked";
-  } | null;
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
   redactionStatus: "redacted";
   blockedReasons: string[];
 };

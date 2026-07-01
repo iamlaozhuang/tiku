@@ -260,8 +260,8 @@ const baseAiGenerationDetailControls = [
   {
     inputMode: "select",
     label: "等级",
-    options: ["中级工", "高级工", "技师"],
-    value: "高级工",
+    options: ["1级", "2级", "3级", "4级", "5级"],
+    value: "3级",
   },
   {
     inputMode: "select",
@@ -460,7 +460,56 @@ function AdminAiGenerationVisibleGeneratedContent({
       <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
         {visibleGeneratedContent.content}
       </p>
+      {visibleGeneratedContent.structuredPreview ? (
+        <StructuredPreviewSummary
+          structuredPreview={visibleGeneratedContent.structuredPreview}
+        />
+      ) : null}
     </section>
+  );
+}
+
+function StructuredPreviewSummary({
+  structuredPreview,
+}: {
+  structuredPreview: NonNullable<
+    NonNullable<
+      AdminAiGenerationLocalContractDto["runtimeBridge"]["visibleGeneratedContent"]
+    >["structuredPreview"]
+  >;
+}) {
+  const displayItems =
+    structuredPreview.kind === "question_set"
+      ? structuredPreview.parseStatus === "parsed"
+        ? [
+            `草稿 ${structuredPreview.actualQuestionCount}/${structuredPreview.requestedQuestionCount}`,
+            `待评审 ${structuredPreview.draftCount}`,
+          ]
+        : [
+            "结构化解析失败",
+            `草稿 ${structuredPreview.actualQuestionCount ?? 0}/${structuredPreview.requestedQuestionCount}`,
+          ]
+      : structuredPreview.parseStatus === "parsed"
+        ? [
+            `paper_section ${structuredPreview.paperSectionCount}`,
+            `题量 ${structuredPreview.questionCount ?? "未识别"}`,
+          ]
+        : ["结构化解析失败", "paper_section 0"];
+
+  return (
+    <div className="border-border bg-muted mt-3 rounded-md border p-2">
+      <p className="text-text-primary text-xs font-medium">结构化预览</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {displayItems.map((displayItem) => (
+          <span
+            className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
+            key={displayItem}
+          >
+            {displayItem}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

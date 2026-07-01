@@ -7,7 +7,11 @@ import {
 } from "./personal-ai-generation-route-integrated-provider-execution-service";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
 
-function createRequestFlow(): PersonalAiGenerationRequestFlowDto {
+function createRequestFlow(
+  taskType:
+    | "ai_question_generation"
+    | "ai_paper_generation" = "ai_question_generation",
+): PersonalAiGenerationRequestFlowDto {
   const requestFlowResponse = buildPersonalAiGenerationRequestFlowReadModel({
     userPublicId: "student_public_route_provider_121",
     authorizationPublicId: "personal_auth_public_route_provider_121",
@@ -20,7 +24,7 @@ function createRequestFlow(): PersonalAiGenerationRequestFlowDto {
     auditLogPublicId: null,
     aiCallLogPublicId: null,
     taskPublicId: "ai_generation_task_public_route_provider_121",
-    taskType: "ai_question_generation",
+    taskType,
     actorPublicId: "student_public_route_provider_121",
     authorizationSource: "personal_auth",
     ownerType: "personal",
@@ -164,6 +168,8 @@ describe("personal AI generation route-integrated provider execution service", (
       },
       requestContext: {
         taskPublicId: "ai_generation_task_public_route_provider_121",
+        taskType: "ai_question_generation",
+        routeWorkflow: "personal_ai_question_generation",
         aiFuncType: "explanation",
         questionPublicId: "question_public_route_provider_121",
         answerRecordPublicId: "answer_record_public_route_provider_121",
@@ -192,6 +198,72 @@ describe("personal AI generation route-integrated provider execution service", (
     expect(serializedOutcome).not.toContain("synthetic-provider-credential");
     expect(serializedOutcome).not.toContain("providerPayload");
     expect(serializedOutcome).not.toContain("rawPrompt");
+  });
+
+  it("maps personal paper generation into a distinct Provider request context", async () => {
+    const executorInputs: PersonalAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+
+    await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow("ai_paper_generation"),
+      createExecutionControl({
+        executeProviderRequest: async (input) => {
+          executorInputs.push(input);
+
+          return {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            durationMs: 16,
+            usageSummary: null,
+            providerErrorSummary: null,
+          };
+        },
+      }),
+    );
+
+    expect(executorInputs).toHaveLength(1);
+    expect(executorInputs[0].requestContext).toMatchObject({
+      taskType: "ai_paper_generation",
+      routeWorkflow: "personal_ai_paper_generation",
+      aiFuncType: "explanation",
+    });
+  });
+
+  it("adds a structured question preview to fake Provider visible content", async () => {
+    const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow("ai_question_generation"),
+      createExecutionControl({
+        executeProviderRequest: async () => ({
+          requestCount: 1,
+          resultStatus: "pass",
+          failureCategory: null,
+          durationMs: 31,
+          usageSummary: null,
+          providerErrorSummary: null,
+          visibleGeneratedContent: {
+            content: JSON.stringify({
+              questions: Array.from({ length: 10 }, () => ({
+                questionType: "single_choice",
+                difficulty: "medium",
+                knowledgeNodeLabels: ["redacted_knowledge_node"],
+              })),
+            }),
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+          },
+        }),
+      }),
+    );
+
+    expect(outcome.visibleGeneratedContent?.structuredPreview).toMatchObject({
+      kind: "question_set",
+      parseStatus: "parsed",
+      requestedQuestionCount: 10,
+      actualQuestionCount: 10,
+      draftCount: 10,
+    });
   });
 
   it("converts secret-like sanitized summaries into a redaction violation", async () => {
@@ -256,11 +328,17 @@ describe("personal AI generation route-integrated provider execution service", (
     );
     const serializedSummary = JSON.stringify(outcome.executionSummary);
 
-    expect(outcome.visibleGeneratedContent).toEqual({
+    expect(outcome.visibleGeneratedContent).toMatchObject({
       content: "个人 AI 解析预览：先定位薄弱知识点，再练习同类题。",
       contentVisibility: "transient_response_only",
       persistenceStatus: "not_persisted",
       safetyStatus: "checked",
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        failureCategory: "invalid_json",
+        requestedQuestionCount: 10,
+      },
     });
     expect(serializedSummary).not.toContain("个人 AI 解析预览");
     expect(JSON.stringify(outcome)).not.toContain(

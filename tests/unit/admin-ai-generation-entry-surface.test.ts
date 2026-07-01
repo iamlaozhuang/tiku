@@ -390,7 +390,12 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("学习目标");
     expect(detailControls).toHaveTextContent("草稿评审");
     expect(screen.getByLabelText("专业")).toHaveDisplayValue("市场营销");
-    expect(screen.getByLabelText("等级")).toHaveDisplayValue("高级工");
+    expect(screen.getByLabelText("等级")).toHaveDisplayValue("3级");
+    expect(detailControls).toHaveTextContent("1级");
+    expect(detailControls).toHaveTextContent("5级");
+    expect(detailControls).not.toHaveTextContent("高级工");
+    expect(detailControls).not.toHaveTextContent("中级工");
+    expect(detailControls).not.toHaveTextContent("技师");
     expect(screen.getByLabelText("科目")).toHaveDisplayValue("理论知识");
     expect(screen.getByLabelText("题型")).toHaveDisplayValue("单选题");
     fireEvent.change(screen.getByLabelText("专业"), {
@@ -447,6 +452,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("试卷结构");
     expect(detailControls).toHaveTextContent("组卷目标");
     expect(detailControls).toHaveTextContent("组织草稿");
+    expect(screen.getByLabelText("等级")).toHaveDisplayValue("3级");
     expect(screen.getByLabelText("试卷结构")).toHaveDisplayValue(
       "按 paper_section 组织",
     );
@@ -564,6 +570,15 @@ describe("admin AI generation entry surfaces", () => {
             contentVisibility: "transient_response_only",
             persistenceStatus: "not_persisted",
             safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 2,
+              questionCount: 50,
+              questionTypeDistributionCount: 3,
+              knowledgeCoverageCount: 4,
+              reviewStatus: "draft_review_required",
+            },
           },
           redactionStatus: "redacted",
         },
@@ -604,6 +619,15 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("后台本次生成草稿：包含试卷结构和知识点覆盖建议。");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("结构化预览");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("paper_section 2");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("题量 50");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("providerPayload");
