@@ -15,6 +15,7 @@ export type PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto = {
   resultStatus: "pass" | "fail" | "blocked";
   failureCategory:
     | "provider_call_blocked"
+    | "insufficient_grounding_evidence"
     | "missing_provider_credential"
     | "provider_error"
     | "timeout"

@@ -7,6 +7,7 @@ import type {
   AiGenerationTaskRequestAuthorizationSource,
   AiGenerationTaskRequestOwnerType,
 } from "../models/ai-generation-task-request";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "./route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationRequestContextDto = {
   userPublicId: string;
@@ -42,6 +43,7 @@ export type PersonalAiGenerationRequestDto = {
     mockExamPublicId: string | null;
     selectedContext: PersonalAiGenerationRequestContextSelection;
   };
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   redeemCodeReference: {
     publicId: string | null;
     redactionStatus: "redacted";

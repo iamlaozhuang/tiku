@@ -37,6 +37,11 @@ import type {
   AdminAiGenerationRuntimeBridgeInput,
 } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedSubject,
+} from "../contracts/route-integrated-provider-execution-contract";
+import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
   AdminAiGenerationTaskPersistenceRepository,
@@ -145,6 +150,119 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function normalizeGenerationKind(value: unknown): AdminAiGenerationKind | null {
   return value === "question" || value === "paper" ? value : null;
+}
+
+const routeIntegratedProfessionValues = [
+  "monopoly",
+  "marketing",
+  "logistics",
+] as const;
+const routeIntegratedSubjectValues = ["theory", "skill"] as const;
+
+function normalizeOptionalText(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+
+  return normalizedValue.length === 0 ? null : normalizedValue;
+}
+
+function normalizeRouteIntegratedProfession(
+  value: unknown,
+): AiGenerationRouteIntegratedProfession | null {
+  return typeof value === "string" &&
+    routeIntegratedProfessionValues.includes(
+      value as AiGenerationRouteIntegratedProfession,
+    )
+    ? (value as AiGenerationRouteIntegratedProfession)
+    : null;
+}
+
+function normalizeRouteIntegratedSubject(
+  value: unknown,
+): AiGenerationRouteIntegratedSubject | null {
+  return typeof value === "string" &&
+    routeIntegratedSubjectValues.includes(
+      value as AiGenerationRouteIntegratedSubject,
+    )
+    ? (value as AiGenerationRouteIntegratedSubject)
+    : null;
+}
+
+function normalizeRouteIntegratedLevel(
+  value: unknown,
+): AiGenerationRouteIntegratedGenerationParameters["level"] | null {
+  const parsedLevel =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return parsedLevel === 1 ||
+    parsedLevel === 2 ||
+    parsedLevel === 3 ||
+    parsedLevel === 4 ||
+    parsedLevel === 5
+    ? parsedLevel
+    : null;
+}
+
+function normalizeRouteIntegratedQuestionCount(value: unknown): number | null {
+  const parsedCount =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return parsedCount !== null &&
+    Number.isInteger(parsedCount) &&
+    parsedCount > 0 &&
+    parsedCount <= 100
+    ? parsedCount
+    : null;
+}
+
+function normalizeRouteIntegratedGenerationParameters(
+  value: unknown,
+): AiGenerationRouteIntegratedGenerationParameters | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const profession = normalizeRouteIntegratedProfession(value.profession);
+  const level = normalizeRouteIntegratedLevel(value.level);
+  const subject = normalizeRouteIntegratedSubject(value.subject);
+  const questionCount = normalizeRouteIntegratedQuestionCount(
+    value.questionCount,
+  );
+
+  if (
+    profession === null ||
+    level === null ||
+    subject === null ||
+    questionCount === null
+  ) {
+    return null;
+  }
+
+  return {
+    profession,
+    level,
+    subject,
+    knowledgeNode: normalizeOptionalText(value.knowledgeNode),
+    questionType: normalizeOptionalText(value.questionType),
+    questionCount,
+    difficulty: normalizeOptionalText(value.difficulty),
+    learningObjective: normalizeOptionalText(value.learningObjective),
+  };
 }
 
 function normalizePositiveInteger(
@@ -474,6 +592,7 @@ async function resolveAdminAiGenerationRuntimeBridge(input: {
 function createAdminAiGenerationRuntimeBridgeInput(input: {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   requestPublicId: string;
   resultPublicId: string;
   taskRequest: AdminAiGenerationLocalContractBaseDto["taskRequest"];
@@ -492,6 +611,7 @@ function createAdminAiGenerationRuntimeBridgeInput(input: {
         : "platform",
     ownerPublicId: input.taskRequest.ownerPublicId,
     organizationPublicId: input.taskRequest.organizationPublicId,
+    generationParameters: input.generationParameters,
   };
 }
 
@@ -529,6 +649,7 @@ async function buildAdminAiGenerationLocalContract(input: {
     requestPublicIdInput: AdminAiGenerationRequestPublicIdInput,
   ) => string;
   generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
@@ -559,6 +680,7 @@ async function buildAdminAiGenerationLocalContract(input: {
     runtimeBridgeInput: createAdminAiGenerationRuntimeBridgeInput({
       actor: input.actor,
       generationKind: input.generationKind,
+      generationParameters: input.generationParameters,
       requestPublicId,
       resultPublicId,
       taskRequest,
@@ -714,8 +836,12 @@ function createAdminAiGenerationLocalContractResultInput(input: {
     ),
     contentPreviewMasked: "redacted admin AI generation local contract summary",
     citationRedactedSnapshot: null,
-    evidenceStatus: "none",
-    citationCount: 0,
+    evidenceStatus:
+      input.localContract.runtimeBridge.visibleGeneratedContent
+        ?.groundingSummary?.evidenceStatus ?? "none",
+    citationCount:
+      input.localContract.runtimeBridge.visibleGeneratedContent
+        ?.groundingSummary?.citationCount ?? 0,
     aiCallLogPublicId: null,
     sourceQuestionPublicId: null,
     sourcePaperPublicId: null,
@@ -1006,8 +1132,12 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
         const generationKind = normalizeGenerationKind(
           isRecord(body) ? body.generationKind : null,
         );
+        const generationParameters =
+          normalizeRouteIntegratedGenerationParameters(
+            isRecord(body) ? body.generationParameters : null,
+          );
 
-        if (generationKind === null) {
+        if (generationKind === null || generationParameters === null) {
           return createJsonResponse(invalidAdminAiGenerationRequestResponse);
         }
 
@@ -1020,6 +1150,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             actor,
             createRequestPublicId,
             generationKind,
+            generationParameters,
             requestClock,
             resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,

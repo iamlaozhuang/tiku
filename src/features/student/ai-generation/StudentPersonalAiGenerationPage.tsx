@@ -35,6 +35,7 @@ import type {
   PersonalAiGenerationResultHistoryDto,
 } from "@/server/contracts/personal-ai-generation-result-history-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
@@ -121,13 +122,13 @@ const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
 const copy = {
   title: "AI训练",
   subtitle:
-    "面向高级授权学员的 AI出题 和 AI组卷入口；本地 owner preview 可展示本次生成内容和脱敏状态。",
-  emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
+    "面向高级授权学员的 AI出题 和 AI组卷入口；资料充足时可生成本次训练草稿。",
+  emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u751f\u6210\u8bf7\u6c42",
   emptyDescription:
-    "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730\u63a5\u53e3\u5951\u7ea6\u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
+    "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u6309\u5f53\u524d\u6388\u6743\u8303\u56f4\u5c1d\u8bd5\u751f\u6210\u8bad\u7ec3\u8349\u7a3f\u3002",
   requestButton: "AI出题：生成练习题",
   paperButton: "AI组卷：生成自测试卷",
-  loadingTitle: "\u6b63\u5728\u53d1\u8d77\u672c\u5730\u8bf7\u6c42",
+  loadingTitle: "\u6b63\u5728\u53d1\u8d77\u751f\u6210\u8bf7\u6c42",
   errorTitle: "\u672c\u5730 AI \u8bf7\u6c42\u5931\u8d25",
   errorDescription:
     "\u8bf7\u7a0d\u540e\u5237\u65b0\u9875\u9762\u6216\u91cd\u65b0\u767b\u5f55\u540e\u518d\u5c1d\u8bd5\u3002",
@@ -140,7 +141,7 @@ const copy = {
   unavailableDescription:
     "\u8bf7\u786e\u8ba4\u5df2\u9009\u62e9\u6709\u6548\u7684\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\u3002",
   blockedTitle: "\u8bf7\u6c42\u5df2\u963b\u65ad",
-  contractTitle: "\u672c\u5730\u5408\u7ea6\u6458\u8981",
+  contractTitle: "\u751f\u6210\u4efb\u52a1\u5df2\u53d7\u7406",
   historyTitle: "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2",
   historyEmptyTitle: "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42",
   historyLoadingTitle: "\u5386\u53f2\u8bf7\u6c42\u540c\u6b65\u4e2d",
@@ -153,40 +154,33 @@ const copy = {
   resultHistoryErrorTitle: "\u7ed3\u679c\u5386\u53f2\u6682\u4e0d\u53ef\u7528",
   resultHistoryUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u5386\u53f2",
-  resultDetailTitle: "\u8131\u654f\u7ed3\u679c\u8be6\u60c5",
-  resultDetailButton: "\u67e5\u770b\u8131\u654f\u8be6\u60c5",
+  resultDetailTitle: "\u7ed3\u679c\u8be6\u60c5",
+  resultDetailButton: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
   resultDetailLoadingTitle: "\u7ed3\u679c\u8be6\u60c5\u540c\u6b65\u4e2d",
   resultDetailEmptyTitle:
-    "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8131\u654f\u5feb\u7167",
+    "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8349\u7a3f",
   resultDetailErrorTitle: "\u7ed3\u679c\u8be6\u60c5\u6682\u4e0d\u53ef\u7528",
   resultDetailUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
   practiceFeedbackTitle:
     "\u751f\u6210\u7ec3\u4e60\u4e0e\u5b66\u4e60\u53cd\u9988",
   practiceFeedbackDescription:
-    "\u672c\u5730\u5408\u7ea6\u53d7\u7406\u540e\uff0c\u53ef\u4ee5\u8fdb\u5165\u751f\u6210\u7ec3\u4e60\u3001\u63d0\u4ea4\u4f5c\u7b54\u5e76\u67e5\u770b\u8131\u654f\u5b66\u4e60\u53cd\u9988\uff1b\u4e0d\u5199\u5165\u6b63\u5f0f\u9898\u76ee\u6216\u8bd5\u5377\u3002",
+    "\u751f\u6210\u4efb\u52a1\u53d7\u7406\u540e\uff0c\u53ef\u4ee5\u8fdb\u5165\u7ec3\u4e60\u3001\u63d0\u4ea4\u4f5c\u7b54\u5e76\u67e5\u770b\u5b66\u4e60\u53cd\u9988\uff1b\u4e0d\u5199\u5165\u6b63\u5f0f\u9898\u76ee\u6216\u8bd5\u5377\u3002",
 };
 
 const contractFieldLabelMap: Record<string, string> = {
-  citationCount: "引用数量",
-  contentDigest: "内容摘要哈希",
-  contentPreviewMasked: "脱敏预览",
-  contentReferenceRedactionStatus: "内容引用脱敏状态",
-  contentReferenceVisibility: "内容引用可见性",
-  contentVisibility: "内容可见性",
-  detailDisplayMode: "详情展示模式",
-  evidenceStatus: "证据状态",
+  citationCount: "依据数量",
+  contentPreviewMasked: "草稿摘要",
+  evidenceStatus: "资料依据",
   experienceSurface: "体验入口",
   flowStatus: "流程状态",
-  formalAdoptionStatus: "正式入库状态",
-  formalAdoptionWriteStatus: "正式入库写入状态",
-  isFormalAdoptionBlocked: "是否阻断正式入库",
+  formalAdoptionStatus: "正式采用",
+  formalAdoptionWriteStatus: "正式采用",
+  isFormalAdoptionBlocked: "正式采用",
   authorizationSource: "授权来源",
   ownerType: "使用上下文",
   quotaOwnerType: "额度上下文",
   persistedAt: "持久化时间",
-  redactionStatus: "脱敏状态",
-  referenceRedactionStatus: "引用脱敏状态",
   requestedAt: "请求时间",
   resultStatus: "结果状态",
   runtimeStatus: "运行状态",
@@ -198,13 +192,13 @@ const contractValueLabelMap: Record<string, string> = {
   accepted: "已受理",
   ai_paper_generation: "AI组卷",
   ai_question_generation: "AI出题",
-  blocked: "已阻断",
-  blocked_without_follow_up_task: "待后续任务审批",
+  blocked: "暂不可用",
+  blocked_without_follow_up_task: "需后续审批",
   draft: "草稿",
-  false: "否",
-  local_contract_only: "仅本地合约",
-  metadata_only: "仅元数据",
-  none: "无证据",
+  false: "可采用",
+  local_contract_only: "任务已受理",
+  metadata_only: "基础信息",
+  none: "资料不足",
   org_auth: "组织授权",
   organization: "组织上下文",
   pending: "处理中",
@@ -212,15 +206,12 @@ const contractValueLabelMap: Record<string, string> = {
   personal_auth: "个人授权",
   quota_insufficient: "额度不足",
   ready: "就绪",
-  redacted: "已脱敏",
-  redacted_snapshot: "脱敏快照",
-  student_local_browser: "学员本地页面",
+  student_local_browser: "AI训练页",
   succeeded: "已完成",
-  sufficient: "证据充分",
-  summary_only: "仅摘要",
-  true: "是",
+  sufficient: "资料充足",
+  true: "需审核后采用",
   unknown: "未知原因",
-  weak: "证据较弱",
+  weak: "资料较少",
 };
 
 const practiceFeedbackStatusLabelMap: Record<
@@ -430,6 +421,48 @@ function canUsePersonalAiGeneration(
   );
 }
 
+function selectPersonalAiGenerationAuthorizationContext(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+  taskType: StudentPersonalAiGenerationTaskType,
+): EffectiveAuthorizationContextDto | null {
+  return (
+    authorizationContexts.find((authorizationContext) => {
+      if (authorizationContext.effectiveEdition !== "advanced") {
+        return false;
+      }
+
+      return taskType === "ai_question_generation"
+        ? authorizationContext.capabilities.canGenerateAiQuestion
+        : authorizationContext.capabilities.canGenerateAiPaper;
+    }) ?? null
+  );
+}
+
+function createStudentGenerationParameters(
+  authorizationContext: EffectiveAuthorizationContextDto,
+  taskType: StudentPersonalAiGenerationTaskType,
+): AiGenerationRouteIntegratedGenerationParameters {
+  return {
+    profession: authorizationContext.profession,
+    level:
+      authorizationContext.level === 1 ||
+      authorizationContext.level === 2 ||
+      authorizationContext.level === 3 ||
+      authorizationContext.level === 4 ||
+      authorizationContext.level === 5
+        ? authorizationContext.level
+        : 3,
+    subject: "theory",
+    knowledgeNode: null,
+    questionType:
+      taskType === "ai_question_generation" ? "single_choice" : null,
+    questionCount: taskType === "ai_question_generation" ? 10 : 50,
+    difficulty: "medium",
+    learningObjective:
+      taskType === "ai_question_generation" ? "弱项巩固" : "阶段自测",
+  };
+}
+
 async function fetchPersonalAiGenerationAuthorizationContexts(
   studentSessionValue: StudentSessionRequestToken,
 ): Promise<EffectiveAuthorizationContextDto[]> {
@@ -460,6 +493,7 @@ async function fetchPersonalAiGenerationAuthorizationContexts(
 function createPersonalAiGenerationRequestBody(
   draft: StudentPersonalAiGenerationRequestDraft,
   sessionUser: AuthContextDto["user"],
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
 ) {
   const userPublicId = sessionUser.publicId;
   const authorizationContext =
@@ -489,6 +523,7 @@ function createPersonalAiGenerationRequestBody(
     ...draft,
     ...createPersonalAiGenerationRequestIdentifiers(),
     ...authorizationContext,
+    generationParameters,
     userPublicId,
     actorPublicId: userPublicId,
   };
@@ -790,7 +825,6 @@ function StudentPersonalAiGenerationContractSummary({
   experience: PersonalAiGenerationLocalBrowserExperienceDto;
 }) {
   const disabledReason = experience.requestState.action.disabledReason;
-  const resultReference = experience.requestFlow.resultReference;
 
   return (
     <section className="border-border bg-surface rounded-xl border p-4">
@@ -799,8 +833,8 @@ function StudentPersonalAiGenerationContractSummary({
           {copy.contractTitle}
         </h2>
         <span className="bg-secondary text-secondary-foreground rounded-lg px-2 py-1 text-xs font-medium">
-          {contractValueLabelMap[experience.redactionStatus] ??
-            experience.redactionStatus}
+          {contractValueLabelMap[experience.flowStatus] ??
+            experience.flowStatus}
         </span>
       </div>
 
@@ -815,58 +849,38 @@ function StudentPersonalAiGenerationContractSummary({
         </div>
       ) : null}
 
-      <dl>
-        <ContractField label="runtimeStatus" value={experience.runtimeStatus} />
-        <ContractField
-          label="experienceSurface"
-          value={experience.experienceSurface}
-        />
-        <ContractField label="flowStatus" value={experience.flowStatus} />
-        <ContractField
-          label="authorizationSource"
-          value={
-            experience.requestFlow.contextSelection.authorizationBoundary
-              .authorizationSource
-          }
-        />
-        <ContractField
-          label="ownerType"
-          value={
-            experience.requestFlow.contextSelection.authorizationBoundary
-              .ownerType
-          }
-        />
-        <ContractField
-          label="quotaOwnerType"
-          value={
-            experience.requestFlow.contextSelection.authorizationBoundary
-              .quotaOwnerType
-          }
-        />
-        <ContractField
-          label="resultStatus"
-          value={experience.resultState.status}
-        />
-        <ContractField
-          label="contentVisibility"
-          value={experience.resultState.contentVisibility}
-        />
-        <ContractField
-          label="isFormalAdoptionBlocked"
-          value={String(experience.resultState.isFormalAdoptionBlocked)}
-        />
-        <ContractField
-          label="evidenceStatus"
-          value={resultReference.resultReference.evidenceStatus}
-        />
-        <ContractField
-          label="citationCount"
-          value={String(resultReference.resultReference.citationCount)}
-        />
-        <ContractField
-          label="referenceRedactionStatus"
-          value={resultReference.resultReference.redactionStatus}
-        />
+      <dl className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-text-secondary text-sm">任务状态</dt>
+          <dd className="text-text-primary text-sm font-medium">
+            {contractValueLabelMap[experience.resultState.status] ??
+              experience.resultState.status}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-text-secondary text-sm">结果内容</dt>
+          <dd className="text-text-primary text-sm font-medium">
+            {experience.resultState.resultPublicId === null
+              ? "暂无生成结果"
+              : "结果已生成"}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-text-secondary text-sm">资料依据</dt>
+          <dd className="text-text-primary text-sm font-medium">
+            {experience.resultState.evidenceStatus === "sufficient"
+              ? "资料充足"
+              : "资料不足"}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-text-secondary text-sm">正式内容</dt>
+          <dd className="text-text-primary text-sm font-medium">
+            {experience.resultState.isFormalAdoptionBlocked
+              ? "需审核后采用"
+              : "可采用"}
+          </dd>
+        </div>
       </dl>
     </section>
   );
@@ -1035,10 +1049,6 @@ function StudentPersonalAiGenerationHistorySummary({
                 label="citationCount"
                 value={String(historyRow.citationCount)}
               />
-              <ContractField
-                label="redactionStatus"
-                value={historyRow.redactionStatus}
-              />
             </dl>
           </article>
         ))}
@@ -1169,25 +1179,6 @@ function StudentPersonalAiGenerationResultHistorySummary({
 
     return (
       <div className="space-y-3">
-        <dl className="border-border rounded-lg border px-3">
-          <ContractField
-            label="runtimeStatus"
-            value={resultHistory.runtimeStatus}
-          />
-          <ContractField
-            label="contentVisibility"
-            value={resultHistory.contentVisibility}
-          />
-          <ContractField
-            label="redactionStatus"
-            value={resultHistory.redactionStatus}
-          />
-          <ContractField
-            label="formalAdoptionWriteStatus"
-            value={resultHistory.formalAdoptionWriteStatus}
-          />
-        </dl>
-
         {resultHistory.results.map((resultRow) => (
           <article
             key={resultRow.resultPublicId}
@@ -1201,11 +1192,7 @@ function StudentPersonalAiGenerationResultHistorySummary({
                 value={resultRow.persistedAt}
               />
               <ContractField
-                label="contentDigest"
-                value={resultRow.contentReference.contentDigest}
-              />
-              <ContractField
-                label="contentPreviewMasked"
+                label="草稿摘要"
                 value={resultRow.contentReference.contentPreviewMasked}
               />
               <ContractField
@@ -1354,23 +1341,6 @@ function StudentPersonalAiGenerationResultDetailSummary({
 
     return (
       <dl className="border-border rounded-lg border px-3">
-        <ContractField
-          label="runtimeStatus"
-          value={resultDetail.runtimeStatus}
-        />
-        <ContractField label="detailDisplayMode" value="metadata_only" />
-        <ContractField
-          label="contentVisibility"
-          value={resultDetail.contentVisibility}
-        />
-        <ContractField
-          label="redactionStatus"
-          value={resultDetail.redactionStatus}
-        />
-        <ContractField
-          label="formalAdoptionWriteStatus"
-          value={resultDetail.formalAdoptionWriteStatus}
-        />
         <ContractField label="taskType" value={resultDetail.result.taskType} />
         <ContractField label="status" value={resultDetail.result.status} />
         <ContractField
@@ -1378,20 +1348,8 @@ function StudentPersonalAiGenerationResultDetailSummary({
           value={resultDetail.result.persistedAt}
         />
         <ContractField
-          label="contentDigest"
-          value={resultDetail.result.contentReference.contentDigest}
-        />
-        <ContractField
-          label="contentPreviewMasked"
+          label="草稿摘要"
           value={resultDetail.result.contentReference.contentPreviewMasked}
-        />
-        <ContractField
-          label="contentReferenceVisibility"
-          value={resultDetail.result.contentReference.contentVisibility}
-        />
-        <ContractField
-          label="contentReferenceRedactionStatus"
-          value={resultDetail.result.contentReference.redactionStatus}
         />
         <ContractField
           label="evidenceStatus"
@@ -1780,6 +1738,17 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
+      const generationAuthorizationContext =
+        selectPersonalAiGenerationAuthorizationContext(
+          authorizationContexts,
+          taskType,
+        );
+
+      if (generationAuthorizationContext === null) {
+        markUnavailable();
+        return;
+      }
+
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
           "/api/v1/personal-ai-generation-requests",
@@ -1793,6 +1762,10 @@ export function StudentPersonalAiGenerationPage() {
               createPersonalAiGenerationRequestBody(
                 createPersonalAiGenerationDraftForTask(taskType),
                 sessionResponse.data.user,
+                createStudentGenerationParameters(
+                  generationAuthorizationContext,
+                  taskType,
+                ),
               ),
             ),
           },

@@ -69,6 +69,7 @@ standingApprovals:
       - ai-generation-data-backed-walkthrough-2026-07-01
       - ai-generation-eight-role-matrix-rerun-2026-07-01
       - ai-generation-real-provider-sample-2026-07-01
+      - ai-generation-grounding-product-ui-repair-2026-07-01
     executionRule: >-
       This central approval does not permit unbounded execution. Each covered task must first create a short branch,
       materialize exact allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential
@@ -344,6 +345,140 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-grounding-product-ui-repair-2026-07-01
+    title: AI generation grounding and product UI repair
+    phase: ai-generation-grounding-product-ui-repair-2026-07-01
+    sourceStory: current_owner_preview_feedback_ai_generation_resource_grounding_and_governance_copy_2026_07_01
+    humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    targetClosureItem: shared AI 出题 / AI 组卷 grounding gate, product UI wording, ops route guard, and paper quantity preview regression repair
+    behaviorBoundary: local_source_test_docs_repair_no_db_mutation_no_provider_no_env_no_dependency_no_schema_no_browser_no_deploy
+    executionProfile: tdd_first_shared_contract_reuse_and_product_surface_repair
+    evidenceMode: redacted_status_and_validation_summary_only_no_raw_content_or_provider_io
+    taskKind: local_source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ai_generation_grounding_product_ui_repair
+    priority: p1
+    dependsOn:
+      - ai-generation-provider-matrix-rerun-after-repair-2026-07-01
+    branch: codex/ai-generation-grounding-product-ui-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-grounding-product-ui-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-grounding-product-ui-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-grounding-product-ui-repair.md
+    approvedAt: "2026-07-01T08:24:18-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-07-01T13:02:15-07:00"
+    plannedAt: "2026-07-01T13:02:15-07:00"
+    implementedAt: "2026-07-01T13:40:33-07:00"
+    validatedAt: "2026-07-01T13:40:33-07:00"
+    reviewedAt: "2026-07-01T13:40:33-07:00"
+    closedAt: "2026-07-01T13:40:33-07:00"
+    rootCauseBoundary:
+      cross001: provider_request_not_rag_grounded_form_parameters_only
+      cross002: governance_debug_metadata_rendered_on_product_surfaces
+      routeGuard: ops_admin_organization_ai_submit_surface_visible
+      paperPreview: paper_quantity_parser_requires_section_question_count_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-grounding-product-ui-repair.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-grounding-product-ui-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-grounding-product-ui-repair.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/contracts/personal-ai-generation-request-contract.ts
+      - src/server/contracts/admin-ai-generation-runtime-bridge-contract.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts
+      - src/server/models/personal-ai-generation-request.ts
+      - src/server/models/personal-ai-generation-runtime-bridge.ts
+      - src/server/validators/personal-ai-generation-request.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-request-service.ts
+      - src/server/services/personal-ai-generation-request-context-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-grounding-product-ui-repair-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-grounding-product-ui-repair-2026-07-01 -SkipRemoteAheadCheck
+    validationSummary:
+      validationStatus: pass_ai_generation_grounding_product_ui_repair_local_gate
+      focusedUnit: pass_10_files_119_tests
+      prettierCheck: pass
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      realProviderCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      browserRuntimeExecuted: false
+      packageOrLockfileChanged: false
+      schemaOrMigrationOrSeedChanged: false
   - id: ai-generation-central-repair-approval-2026-07-01
     title: AI generation central repair approval
     phase: ai-generation-central-repair-approval-2026-07-01

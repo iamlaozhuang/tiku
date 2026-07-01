@@ -40,6 +40,16 @@ const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionS
     redactionStatus: "redacted",
   };
 const visibleAdminProviderContent = "后台本次可见 AI 草稿预览";
+const defaultAdminGenerationParameters = {
+  profession: "marketing",
+  level: 3,
+  subject: "theory",
+  knowledgeNode: "卷烟营销基础",
+  questionType: "single_choice",
+  questionCount: 10,
+  difficulty: "medium",
+  learningObjective: "专项练习",
+};
 
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
@@ -119,10 +129,22 @@ function createPostRequest(
   workspace: AdminAiGenerationWorkspace,
   body: Record<string, unknown>,
 ): Request {
+  const requestBody =
+    (body.generationKind === "question" || body.generationKind === "paper") &&
+    body.generationParameters === undefined
+      ? {
+          ...body,
+          generationParameters: {
+            ...defaultAdminGenerationParameters,
+            questionCount: body.generationKind === "question" ? 10 : 50,
+          },
+        }
+      : body;
+
   return new Request(
     `http://localhost/api/v1/${workspace}-ai-generation-requests`,
     {
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
       headers: {
         authorization: "Bearer synthetic-admin-session",
         "content-type": "application/json",
@@ -1028,6 +1050,10 @@ describe("admin AI generation local contract route handlers", () => {
         actorPublicId: "admin_public_123",
         workspace: "organization",
         generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 50,
+        },
         requestPublicId: "admin_ai_generation_request_public_route_test",
         taskPublicId:
           "admin_ai_generation_task_organization_paper_admin_public_123",

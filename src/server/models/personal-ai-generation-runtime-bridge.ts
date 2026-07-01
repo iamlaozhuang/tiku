@@ -30,6 +30,11 @@ export const personalAiGenerationRuntimeBridgeBlockedReasonValues = [
   "provider_call_blocked",
   "env_secret_access_blocked",
   "real_provider_execution_requires_fresh_approval",
+  "insufficient_grounding_evidence",
+  "missing_provider_credential",
+  "provider_error",
+  "timeout",
+  "redaction_violation",
 ] as const;
 
 export type PersonalAiGenerationRuntimeBridgeBlockedReason =

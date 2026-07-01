@@ -21,6 +21,11 @@ import type {
 } from "@/server/contracts/admin-ai-generation-local-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedSubject,
+} from "@/server/contracts/route-integrated-provider-execution-contract";
 
 import {
   AdminLoadingState,
@@ -38,6 +43,7 @@ type AdminAiGenerationEntryLoadState =
   | "loading"
   | "ready"
   | "standard-unavailable"
+  | "permission-denied"
   | "unauthorized"
   | "error";
 type AdminAiGenerationWorkspace = "content" | "organization";
@@ -70,6 +76,11 @@ type AdminAiGenerationDetailControl = {
   value: string;
 };
 
+type AdminAiGenerationDetailControlChange = {
+  label: string;
+  value: string;
+};
+
 function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
   return expectedRoles.some((expectedRole) =>
     adminRoles.includes(expectedRole),
@@ -97,10 +108,14 @@ function resolveLoadState(
       : "unauthorized";
   }
 
-  return resolveOrganizationWorkspacePageAccess(
+  const organizationAccess = resolveOrganizationWorkspacePageAccess(
     authContext,
     getOrganizationAiGenerationPath(generationKind),
   ).loadState;
+
+  return organizationAccess === "unauthorized"
+    ? "permission-denied"
+    : organizationAccess;
 }
 
 function getPageCopy(
@@ -235,9 +250,9 @@ function getTaskStatusLabel(
 }
 
 function getVisibilityLabel(
-  visibility: AdminAiGenerationTaskHistoryItemDto["contentVisibility"],
+  visibility: "summary_only" | "redacted_snapshot",
 ): string {
-  return visibility === "summary_only" ? "仅摘要" : visibility;
+  return visibility === "summary_only" ? "结果摘要" : "草稿快照";
 }
 
 function formatRequestedAt(requestedAt: string): string {
@@ -267,118 +282,227 @@ const contentAdminReviewLocalValidationItems = [
   },
 ] as const;
 
-const baseAiGenerationDetailControls = [
-  {
-    inputMode: "select",
-    label: "专业",
-    options: ["专卖管理", "市场营销", "物流管理"],
-    value: "市场营销",
-  },
-  {
-    inputMode: "select",
-    label: "等级",
-    options: ["1级", "2级", "3级", "4级", "5级"],
-    value: "3级",
-  },
-  {
-    inputMode: "select",
-    label: "科目",
-    options: ["理论知识", "技能实操"],
-    value: "理论知识",
-  },
-] satisfies readonly AdminAiGenerationDetailControl[];
+const adminProfessionLabelByValue = {
+  logistics: "物流管理",
+  marketing: "市场营销",
+  monopoly: "专卖管理",
+} satisfies Record<AiGenerationRouteIntegratedProfession, string>;
 
-const questionGenerationDetailControls = [
-  ...baseAiGenerationDetailControls,
-  {
-    inputMode: "text",
-    label: "知识点",
-    value: "卷烟营销基础",
-  },
-  {
-    inputMode: "select",
-    label: "题型",
-    options: ["单选题", "多选题", "判断题", "案例分析题"],
-    value: "单选题",
-  },
-  {
-    inputMode: "number",
-    label: "出题数量",
-    value: "10",
-  },
-  {
-    inputMode: "select",
-    label: "难度",
-    options: ["基础", "中等", "进阶"],
-    value: "中等",
-  },
-  {
-    inputMode: "text",
-    label: "学习目标",
-    value: "弱项巩固",
-  },
-] satisfies readonly AdminAiGenerationDetailControl[];
+const adminProfessionValueByLabel = Object.fromEntries(
+  Object.entries(adminProfessionLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, AiGenerationRouteIntegratedProfession>;
 
-const paperGenerationDetailControls = [
-  ...baseAiGenerationDetailControls,
-  {
-    inputMode: "number",
-    label: "题目数量",
-    value: "50",
-  },
-  {
-    inputMode: "select",
-    label: "题型分布",
-    options: [
-      "单选 40% / 多选 30% / 判断 30%",
-      "单选 50% / 多选 25% / 判断 25%",
-      "按薄弱项动态分配",
-    ],
-    value: "单选 40% / 多选 30% / 判断 30%",
-  },
-  {
-    inputMode: "select",
-    label: "难度",
-    options: ["基础", "中等", "进阶"],
-    value: "中等",
-  },
-  {
-    inputMode: "text",
-    label: "知识点覆盖",
-    value: "覆盖薄弱知识点",
-  },
-  {
-    inputMode: "select",
-    label: "试卷结构",
-    options: ["按 paper_section 组织", "按知识点模块组织"],
-    value: "按 paper_section 组织",
-  },
-  {
-    inputMode: "text",
-    label: "组卷目标",
-    value: "阶段自测",
-  },
-] satisfies readonly AdminAiGenerationDetailControl[];
+const adminSubjectLabelByValue = {
+  skill: "技能实操",
+  theory: "理论知识",
+} satisfies Record<AiGenerationRouteIntegratedSubject, string>;
+
+const adminSubjectValueByLabel = Object.fromEntries(
+  Object.entries(adminSubjectLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, AiGenerationRouteIntegratedSubject>;
+
+const adminQuestionTypeLabelByValue = {
+  case_analysis: "案例分析题",
+  judge: "判断题",
+  multiple_choice: "多选题",
+  single_choice: "单选题",
+} as const;
+
+const adminQuestionTypeValueByLabel = Object.fromEntries(
+  Object.entries(adminQuestionTypeLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, string>;
+
+const adminDifficultyLabelByValue = {
+  easy: "基础",
+  hard: "进阶",
+  medium: "中等",
+} as const;
+
+const adminDifficultyValueByLabel = Object.fromEntries(
+  Object.entries(adminDifficultyLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, string>;
+
+function createDefaultAdminGenerationParameters(
+  generationKind: AdminAiGenerationKind,
+): AiGenerationRouteIntegratedGenerationParameters {
+  return {
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    knowledgeNode:
+      generationKind === "question" ? "卷烟营销基础" : "覆盖薄弱知识点",
+    questionType: generationKind === "question" ? "single_choice" : null,
+    questionCount: generationKind === "question" ? 10 : 50,
+    difficulty: "medium",
+    learningObjective: generationKind === "question" ? "弱项巩固" : "阶段自测",
+  };
+}
+
+function parseLevelLabel(
+  value: string,
+): AiGenerationRouteIntegratedGenerationParameters["level"] {
+  const parsedLevel = Number(value.replace("级", ""));
+
+  return parsedLevel === 1 ||
+    parsedLevel === 2 ||
+    parsedLevel === 3 ||
+    parsedLevel === 4 ||
+    parsedLevel === 5
+    ? parsedLevel
+    : 3;
+}
+
+function parsePositiveCount(value: string, fallbackValue: number): number {
+  const parsedCount = Number(value);
+
+  return Number.isInteger(parsedCount) && parsedCount > 0
+    ? parsedCount
+    : fallbackValue;
+}
 
 const aiGenerationDetailControlClassName =
   "border-input bg-background text-text-primary mt-1 h-9 w-full rounded-md border px-3 text-sm";
 
 function getAiGenerationDetailControls(
   generationKind: AdminAiGenerationKind,
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
 ): readonly AdminAiGenerationDetailControl[] {
+  const baseControls = [
+    {
+      inputMode: "select",
+      label: "专业",
+      options: ["专卖管理", "市场营销", "物流管理"],
+      value: adminProfessionLabelByValue[generationParameters.profession],
+    },
+    {
+      inputMode: "select",
+      label: "等级",
+      options: ["1级", "2级", "3级", "4级", "5级"],
+      value: `${generationParameters.level}级`,
+    },
+    {
+      inputMode: "select",
+      label: "科目",
+      options: ["理论知识", "技能实操"],
+      value: adminSubjectLabelByValue[generationParameters.subject],
+    },
+  ] satisfies readonly AdminAiGenerationDetailControl[];
+
   return generationKind === "question"
-    ? questionGenerationDetailControls
-    : paperGenerationDetailControls;
+    ? ([
+        ...baseControls,
+        {
+          inputMode: "text",
+          label: "知识点",
+          value: generationParameters.knowledgeNode ?? "",
+        },
+        {
+          inputMode: "select",
+          label: "题型",
+          options: ["单选题", "多选题", "判断题", "案例分析题"],
+          value:
+            generationParameters.questionType === null
+              ? "单选题"
+              : (adminQuestionTypeLabelByValue[
+                  generationParameters.questionType as keyof typeof adminQuestionTypeLabelByValue
+                ] ?? "单选题"),
+        },
+        {
+          inputMode: "number",
+          label: "出题数量",
+          value: String(generationParameters.questionCount),
+        },
+        {
+          inputMode: "select",
+          label: "难度",
+          options: ["基础", "中等", "进阶"],
+          value:
+            generationParameters.difficulty === null
+              ? "中等"
+              : (adminDifficultyLabelByValue[
+                  generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
+                ] ?? "中等"),
+        },
+        {
+          inputMode: "text",
+          label: "学习目标",
+          value: generationParameters.learningObjective ?? "",
+        },
+      ] satisfies readonly AdminAiGenerationDetailControl[])
+    : ([
+        ...baseControls,
+        {
+          inputMode: "number",
+          label: "题目数量",
+          value: String(generationParameters.questionCount),
+        },
+        {
+          inputMode: "select",
+          label: "题型分布",
+          options: [
+            "单选 40% / 多选 30% / 判断 30%",
+            "单选 50% / 多选 25% / 判断 25%",
+            "按薄弱项动态分配",
+          ],
+          value: "单选 40% / 多选 30% / 判断 30%",
+        },
+        {
+          inputMode: "select",
+          label: "难度",
+          options: ["基础", "中等", "进阶"],
+          value:
+            generationParameters.difficulty === null
+              ? "中等"
+              : (adminDifficultyLabelByValue[
+                  generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
+                ] ?? "中等"),
+        },
+        {
+          inputMode: "text",
+          label: "知识点覆盖",
+          value: generationParameters.knowledgeNode ?? "",
+        },
+        {
+          inputMode: "select",
+          label: "试卷结构",
+          options: ["按 paper_section 组织", "按知识点模块组织"],
+          value: "按 paper_section 组织",
+        },
+        {
+          inputMode: "text",
+          label: "组卷目标",
+          value: generationParameters.learningObjective ?? "",
+        },
+      ] satisfies readonly AdminAiGenerationDetailControl[]);
 }
 
 function AdminAiGenerationDetailControls({
+  generationParameters,
   generationKind,
+  onChange,
   workspace,
 }: {
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   generationKind: AdminAiGenerationKind;
+  onChange: (change: AdminAiGenerationDetailControlChange) => void;
   workspace: AdminAiGenerationWorkspace;
 }) {
-  const controls = getAiGenerationDetailControls(generationKind);
+  const controls = getAiGenerationDetailControls(
+    generationKind,
+    generationParameters,
+  );
   const draftBoundaryLabel =
     workspace === "organization" ? "组织草稿" : "草稿评审";
   const title = generationKind === "question" ? "出题细节" : "组卷细节";
@@ -414,7 +538,13 @@ function AdminAiGenerationDetailControls({
               <select
                 aria-label={control.label}
                 className={aiGenerationDetailControlClassName}
-                defaultValue={control.value}
+                value={control.value}
+                onChange={(event) =>
+                  onChange({
+                    label: control.label,
+                    value: event.currentTarget.value,
+                  })
+                }
               >
                 {control.options?.map((optionLabel) => (
                   <option key={optionLabel} value={optionLabel}>
@@ -426,12 +556,18 @@ function AdminAiGenerationDetailControls({
               <input
                 aria-label={control.label}
                 className={aiGenerationDetailControlClassName}
-                defaultValue={control.value}
+                value={control.value}
                 inputMode={
                   control.inputMode === "number" ? "numeric" : undefined
                 }
                 min={control.inputMode === "number" ? 1 : undefined}
                 type={control.inputMode === "number" ? "number" : "text"}
+                onChange={(event) =>
+                  onChange({
+                    label: control.label,
+                    value: event.currentTarget.value,
+                  })
+                }
               />
             )}
           </label>
@@ -567,9 +703,8 @@ function AdminAiGenerationTaskHistoryPanel({
             "组织草稿池暂无任务记录。模型服务仍待审批，不会生成正式题目或试卷。",
         }
       : {
-          eyebrow: "Provider-disabled 状态",
-          empty:
-            "暂无任务记录。提交后将显示等待生成、Provider 阻断和正式写入阻断状态。",
+          eyebrow: "生成任务状态",
+          empty: "暂无任务记录。提交后将显示等待生成、资料依据和正式采用状态。",
         };
   const boundaryCopy =
     workspace === "organization"
@@ -583,13 +718,13 @@ function AdminAiGenerationTaskHistoryPanel({
             "当前仅显示入口状态。历史接口失败不会启用模型服务，也不会写入正式题目或试卷。",
         }
       : {
-          serviceLabel: "Provider",
-          serviceStatus: "Provider 已阻断",
-          costLabel: "成本校准",
-          costStatus: "Cost Calibration 已阻断",
-          formalStatus: "正式写入已阻断",
+          serviceLabel: "模型服务",
+          serviceStatus: "待生成",
+          costLabel: "用量规则",
+          costStatus: "待审批",
+          formalStatus: "需后续评审",
           historyError:
-            "当前仅显示入口状态。历史接口失败不会启用 Provider，也不会写入正式题目或试卷。",
+            "当前仅显示入口状态。历史接口失败不会启用模型服务，也不会写入正式题目或试卷。",
         };
 
   return (
@@ -709,7 +844,7 @@ function AdminAiGenerationTaskHistoryPanel({
 
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <dt className="text-text-secondary">内容可见性</dt>
+                  <dt className="text-text-secondary">结果状态</dt>
                   <dd className="text-text-primary mt-1">
                     {getVisibilityLabel(taskItem.contentVisibility)}
                   </dd>
@@ -741,26 +876,31 @@ function AdminAiGenerationTaskHistoryPanel({
               {taskItem.generatedResult !== null ? (
                 <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
                   <p className="text-brand-primary text-xs font-medium">
-                    已持久化脱敏生成摘要
+                    历史草稿摘要
                   </p>
                   <p className="text-text-primary mt-2 text-sm leading-6">
                     {taskItem.generatedResult.contentPreviewMasked}
                   </p>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                      <dt className="text-text-secondary">结果可见性</dt>
+                      <dt className="text-text-secondary">草稿状态</dt>
                       <dd className="text-text-primary mt-1">
-                        {taskItem.generatedResult.contentVisibility}
+                        {getVisibilityLabel(
+                          taskItem.generatedResult.contentVisibility,
+                        )}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-text-secondary">证据状态</dt>
+                      <dt className="text-text-secondary">资料依据</dt>
                       <dd className="text-text-primary mt-1">
-                        {taskItem.generatedResult.evidenceStatus}
+                        {taskItem.generatedResult.evidenceStatus ===
+                        "sufficient"
+                          ? "资料充足"
+                          : "资料不足"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-text-secondary">引用数量</dt>
+                      <dt className="text-text-secondary">依据数量</dt>
                       <dd className="text-text-primary mt-1">
                         {taskItem.generatedResult.citationCount}
                       </dd>
@@ -989,6 +1129,13 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationHistoryState>("loading");
   const [localContractSummary, setLocalContractSummary] =
     useState<AdminAiGenerationLocalContractDto | null>(null);
+  const [generationParameterState, setGenerationParameterState] = useState<{
+    generationKind: AdminAiGenerationKind;
+    parameters: AiGenerationRouteIntegratedGenerationParameters;
+  }>(() => ({
+    generationKind,
+    parameters: createDefaultAdminGenerationParameters(generationKind),
+  }));
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
   const [taskHistoryPagination, setTaskHistoryPagination] =
@@ -1007,11 +1154,110 @@ export function AdminAiGenerationEntryPage({
             "请求未执行模型服务，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。",
         }
       : {
-          label: "Provider",
-          blocked: "已阻断",
-          error:
-            "请求未执行 Provider，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。",
+          label: "模型服务",
+          blocked: "待生成",
+          error: "请求未完成模型生成，也未写入正式题目或试卷。请稍后重试。",
         };
+
+  const generationParameters =
+    generationParameterState.generationKind === generationKind
+      ? generationParameterState.parameters
+      : createDefaultAdminGenerationParameters(generationKind);
+
+  function handleGenerationParameterChange({
+    label,
+    value,
+  }: AdminAiGenerationDetailControlChange) {
+    setGenerationParameterState((currentState) => {
+      const currentParameters =
+        currentState.generationKind === generationKind
+          ? currentState.parameters
+          : createDefaultAdminGenerationParameters(generationKind);
+
+      switch (label) {
+        case "专业":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              profession:
+                adminProfessionValueByLabel[value] ??
+                currentParameters.profession,
+            },
+          };
+        case "等级":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              level: parseLevelLabel(value),
+            },
+          };
+        case "科目":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              subject:
+                adminSubjectValueByLabel[value] ?? currentParameters.subject,
+            },
+          };
+        case "知识点":
+        case "知识点覆盖":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              knowledgeNode: value.trim().length === 0 ? null : value.trim(),
+            },
+          };
+        case "题型":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              questionType:
+                adminQuestionTypeValueByLabel[value] ??
+                currentParameters.questionType,
+            },
+          };
+        case "出题数量":
+        case "题目数量":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              questionCount: parsePositiveCount(
+                value,
+                currentParameters.questionCount,
+              ),
+            },
+          };
+        case "难度":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              difficulty:
+                adminDifficultyValueByLabel[value] ??
+                currentParameters.difficulty,
+            },
+          };
+        case "学习目标":
+        case "组卷目标":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              learningObjective:
+                value.trim().length === 0 ? null : value.trim(),
+            },
+          };
+        default:
+          return currentState;
+      }
+    });
+  }
 
   const refreshTaskHistory = useCallback(
     async (sessionToken: string | null, page: number) => {
@@ -1117,7 +1363,7 @@ export function AdminAiGenerationEntryPage({
           getAdminAiGenerationRequestPath(workspace),
           sessionToken,
           {
-            body: JSON.stringify({ generationKind }),
+            body: JSON.stringify({ generationKind, generationParameters }),
             headers: {
               "content-type": "application/json",
             },
@@ -1218,6 +1464,17 @@ export function AdminAiGenerationEntryPage({
     return <AdminUnauthorizedState />;
   }
 
+  if (loadState === "permission-denied") {
+    return (
+      <AdminSurfaceStatus
+        description="当前账号没有该后台入口权限，请切换到对应管理员账号。"
+        icon={<AlertCircle aria-hidden="true" className="size-5" />}
+        state="permission-denied"
+        title="无权访问该后台"
+      />
+    );
+  }
+
   if (loadState === "standard-unavailable") {
     return (
       <AdminUpgradeRequiredState
@@ -1260,7 +1517,9 @@ export function AdminAiGenerationEntryPage({
       </header>
 
       <AdminAiGenerationDetailControls
+        generationParameters={generationParameters}
         generationKind={generationKind}
+        onChange={handleGenerationParameterChange}
         workspace={workspace}
       />
 
@@ -1271,7 +1530,7 @@ export function AdminAiGenerationEntryPage({
             <h2>{pageCopy.actionLabel}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            本地入口已就绪，配置本地密钥后可生成预览草稿。
+            生成入口已就绪，资料充足时可生成预览草稿。
           </p>
           <button
             className="bg-primary text-primary-foreground mt-4 inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
@@ -1297,10 +1556,10 @@ export function AdminAiGenerationEntryPage({
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <ShieldCheck aria-hidden="true" className="size-4" />
-            <h2>脱敏证据</h2>
+            <h2>资料依据</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            仅记录入口、状态、角色和脱敏摘要。
+            生成前需要匹配本地资料；资料不足时不生成草稿。
           </p>
         </section>
       </div>
@@ -1312,7 +1571,7 @@ export function AdminAiGenerationEntryPage({
           role="alert"
         >
           <h2 className="text-text-primary text-sm font-semibold">
-            本地合约请求暂不可用
+            生成请求暂不可用
           </h2>
           <p className="text-text-secondary mt-2 text-sm leading-6">
             {providerExecutionCopy.error}
@@ -1328,15 +1587,12 @@ export function AdminAiGenerationEntryPage({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-brand-primary text-xs font-medium">
-                本地合约摘要
+                草稿已提交
               </p>
               <h2 className="text-text-primary mt-1 text-base font-semibold">
-                {localContractSummary.flowStatus}
+                {getTaskStatusLabel(localContractSummary.resultState.status)}
               </h2>
             </div>
-            <code className="bg-muted text-text-secondary rounded-md px-2 py-1 font-mono text-xs">
-              {localContractSummary.runtimeStatus}
-            </code>
           </div>
 
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -1355,9 +1611,12 @@ export function AdminAiGenerationEntryPage({
               </dd>
             </div>
             <div>
-              <dt className="text-text-secondary">可见性</dt>
+              <dt className="text-text-secondary">资料依据</dt>
               <dd className="text-text-primary mt-1">
-                {localContractSummary.resultState.contentVisibility}
+                {localContractSummary.resultState.evidenceStatus ===
+                "sufficient"
+                  ? "资料充足"
+                  : "资料不足"}
               </dd>
             </div>
             <div>

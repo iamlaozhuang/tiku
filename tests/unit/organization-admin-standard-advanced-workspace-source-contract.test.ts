@@ -227,4 +227,53 @@ describe("organization admin standard/advanced workspace source contract", () =>
       "标准版暂不可用",
     );
   });
+
+  it("does not load organization AI history or submit actions for ops admins without organization capability", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              publicId: "user-ops-admin-source-contract",
+              phone: "13900000902",
+              name: "运维管理员",
+              userType: null,
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: null,
+              organizationPublicId: null,
+              adminPublicId: "admin-ops-source-contract-001",
+              adminRoles: ["ops_admin"],
+            },
+            session: {
+              expiresAt: "2026-06-30T04:00:00.000Z",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+        "/api/v1/sessions",
+      ]);
+    });
+    expect(screen.queryByTestId("admin-ai-generation-submit")).toBeNull();
+    expect(screen.queryByTestId("admin-ai-generation-task-history")).toBeNull();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "无权访问该后台",
+    );
+  });
 });

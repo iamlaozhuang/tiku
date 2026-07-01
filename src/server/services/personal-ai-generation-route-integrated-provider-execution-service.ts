@@ -9,6 +9,8 @@ import type {
   AiGenerationRouteIntegratedProviderExecutionSummary,
   AiGenerationRouteIntegratedProviderExecutor,
   AiGenerationRouteIntegratedProviderFailureCategory,
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedGroundingContext,
   AiGenerationRouteIntegratedProviderLimits,
   AiGenerationRouteIntegratedProviderMetadata,
   AiGenerationRouteIntegratedProviderUsageSummary,
@@ -17,11 +19,13 @@ import {
   addRouteIntegratedStructuredPreview,
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedGroundingSummary,
   createRouteIntegratedStructuredPreviewOptionsForTask,
   createRouteIntegratedTaskLabel,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
+  isRouteIntegratedGroundingSufficient,
   qwenRouteIntegratedProviderLimits,
   qwenRouteIntegratedProviderMetadata,
   resolveRouteIntegratedProviderFailureCategory,
@@ -44,6 +48,7 @@ export type PersonalAiGenerationRouteIntegratedProviderRequestContext = {
   aiFuncType: string;
   questionPublicId: string;
   answerRecordPublicId: string | null;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
 };
 
 export type PersonalAiGenerationRouteIntegratedProviderUsageSummary =
@@ -97,6 +102,7 @@ export function createRouteIntegratedProviderRequestContext(
     questionPublicId: requestFlow.request.generationContext.questionPublicId,
     answerRecordPublicId:
       requestFlow.request.generationContext.answerRecordPublicId,
+    generationParameters: requestFlow.request.generationParameters,
   };
 }
 
@@ -104,6 +110,29 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
   requestFlow: PersonalAiGenerationRequestFlowDto,
   control: PersonalAiGenerationRouteIntegratedProviderExecutionControl,
 ): Promise<PersonalAiGenerationRouteIntegratedProviderExecutionOutcome> {
+  const requestContext =
+    createRouteIntegratedProviderRequestContext(requestFlow);
+  const groundingContext =
+    control.resolveGroundingContext === undefined
+      ? null
+      : await control.resolveGroundingContext({ requestContext });
+
+  if (
+    control.resolveGroundingContext !== undefined &&
+    !isRouteIntegratedGroundingSufficient(groundingContext)
+  ) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "insufficient_grounding_evidence",
+      ),
+      visibleGeneratedContent: null,
+    };
+  }
+
   const providerCredential = await control.readProviderCredential();
 
   if (!providerCredential) {
@@ -121,8 +150,6 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
 
   const executeProviderRequest =
     control.executeProviderRequest ?? executeQwenRouteIntegratedProviderRequest;
-  const requestContext =
-    createRouteIntegratedProviderRequestContext(requestFlow);
   const executionResult = await executeProviderRequest({
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     limits: {
@@ -132,14 +159,18 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
       timeoutMs: control.timeoutMs,
     },
     requestContext,
+    groundingContext,
     providerCredential,
   });
   const visibleGeneratedContentWithPreview =
-    addRouteIntegratedStructuredPreview(
-      executionResult.visibleGeneratedContent ?? null,
-      createRouteIntegratedStructuredPreviewOptionsForTask(
-        requestContext.taskType,
+    attachRouteIntegratedGroundingSummary(
+      addRouteIntegratedStructuredPreview(
+        executionResult.visibleGeneratedContent ?? null,
+        createRouteIntegratedStructuredPreviewOptionsForTask(
+          requestContext.taskType,
+        ),
       ),
+      groundingContext,
     );
   const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
     visibleGeneratedContentWithPreview,
@@ -203,7 +234,10 @@ export async function executeQwenRouteIntegratedProviderRequest(
         : undefined;
     const result = await generateText({
       model: providerModel,
-      prompt: createPersonalRouteIntegratedInstruction(input.requestContext),
+      prompt: createPersonalRouteIntegratedInstruction(
+        input.requestContext,
+        input.groundingContext,
+      ),
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -219,6 +253,11 @@ export async function executeQwenRouteIntegratedProviderRequest(
       visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
         result.text,
         {
+          groundingSummary:
+            input.groundingContext === null ||
+            input.groundingContext === undefined
+              ? undefined
+              : createRouteIntegratedGroundingSummary(input.groundingContext),
           structuredPreview:
             createRouteIntegratedStructuredPreviewOptionsForTask(
               input.requestContext.taskType,
@@ -243,19 +282,48 @@ export async function executeQwenRouteIntegratedProviderRequest(
 
 function createPersonalRouteIntegratedInstruction(
   requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
+  groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ): string {
   const taskLabel = createRouteIntegratedTaskLabel(requestContext.taskType);
   const outputContract =
     requestContext.taskType === "ai_question_generation"
       ? "输出 JSON；questions 数组必须正好包含 10 条结构化练习草稿摘要。"
       : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
+  const groundingLines =
+    groundingContext === null || groundingContext === undefined
+      ? ["资料依据：未提供，本次请求应由上游门禁阻止真实生成。"]
+      : [
+          `生成范围：${groundingContext.generationParameters.profession} ${groundingContext.generationParameters.level}级 ${groundingContext.generationParameters.subject}。`,
+          `知识点：${groundingContext.generationParameters.knowledgeNode ?? "按资料证据覆盖"}`,
+          `资料依据：${groundingContext.citationCount} 条。仅依据下列资料片段生成，不得补充资料外的历史或泛行业内容。`,
+          ...groundingContext.citations.map(
+            (citation, index) => `资料片段${index + 1}：${citation.chunkText}`,
+          ),
+        ];
 
   return [
     "为题库系统本地 owner preview 生成简短中文体验内容。",
     `场景：${taskLabel}。`,
+    ...groundingLines,
     outputContract,
     "不要引用真实题目全文；输出可读的要点或小练习草稿。",
   ].join("\n");
+}
+
+function attachRouteIntegratedGroundingSummary(
+  visibleGeneratedContent: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome["visibleGeneratedContent"],
+  groundingContext: AiGenerationRouteIntegratedGroundingContext | null,
+): PersonalAiGenerationRouteIntegratedProviderExecutionOutcome["visibleGeneratedContent"] {
+  if (visibleGeneratedContent === null || groundingContext === null) {
+    return visibleGeneratedContent;
+  }
+
+  return {
+    ...visibleGeneratedContent,
+    groundingSummary:
+      visibleGeneratedContent.groundingSummary ??
+      createRouteIntegratedGroundingSummary(groundingContext),
+  };
 }
 
 function createProviderCredentialSettings(

@@ -384,6 +384,7 @@ describe("personal AI generation request route handlers", () => {
             contextPublicId: "paper_public_123",
           },
         },
+        generationParameters: null,
         redeemCodeReference: {
           publicId: "redeem_code_public_123",
           redactionStatus: "redacted",

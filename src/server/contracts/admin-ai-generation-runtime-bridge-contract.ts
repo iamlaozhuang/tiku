@@ -7,6 +7,7 @@ import type {
   AiGenerationRouteIntegratedProviderExecutionSummary,
   AiGenerationRouteIntegratedProviderMetadata,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
+  AiGenerationRouteIntegratedGenerationParameters,
 } from "./route-integrated-provider-execution-contract";
 import type {
   AdminAiGenerationKind,
@@ -36,6 +37,7 @@ export type AdminAiGenerationRuntimeBridgeBlockedReason =
   | "provider_configuration_read_blocked"
   | "cost_calibration_gate_blocked"
   | "real_provider_execution_requires_follow_up_task"
+  | "insufficient_grounding_evidence"
   | "missing_provider_credential"
   | "provider_error"
   | "timeout"
@@ -51,6 +53,7 @@ export type AdminAiGenerationRuntimeBridgeInput = {
   ownerType: AdminAiGenerationRuntimeBridgeOwnerType;
   ownerPublicId: string;
   organizationPublicId: string | null;
+  generationParameters?: AiGenerationRouteIntegratedGenerationParameters | null;
 };
 
 export type AdminAiGenerationRuntimeBridgeRouteWorkflow =
@@ -70,6 +73,7 @@ export type AdminAiGenerationRouteIntegratedProviderRequestContext = {
   ownerType: AdminAiGenerationRuntimeBridgeOwnerType;
   ownerPublicId: string;
   organizationPublicId: string | null;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
 };
 
 export type AdminAiGenerationRouteIntegratedProviderExecutionInput =

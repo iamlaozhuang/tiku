@@ -10,16 +10,19 @@ import type {
   AdminAiGenerationRuntimeBridgeReadModelOptions,
   AdminAiGenerationRuntimeBridgeRouteWorkflow,
 } from "../contracts/admin-ai-generation-runtime-bridge-contract";
+import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import {
   addRouteIntegratedStructuredPreview,
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedGroundingSummary,
   createRouteIntegratedGenerationKindLabel,
   createRouteIntegratedStructuredPreviewOptionsForGenerationKind,
   createRouteIntegratedTaskTypeFromGenerationKind,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
+  isRouteIntegratedGroundingSufficient,
   qwenRouteIntegratedProviderMetadata,
   resolveRouteIntegratedProviderFailureCategory,
   summarizeRouteIntegratedProviderError,
@@ -42,6 +45,7 @@ export function createAdminAiGenerationRouteIntegratedProviderRequestContext(
     ownerType: input.ownerType,
     ownerPublicId: input.ownerPublicId,
     organizationPublicId: input.organizationPublicId,
+    generationParameters: input.generationParameters ?? null,
   };
 }
 
@@ -115,6 +119,29 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
   input: AdminAiGenerationRuntimeBridgeInput,
   control: AdminAiGenerationRouteIntegratedProviderExecutionControl,
 ): Promise<AdminAiGenerationRouteIntegratedProviderExecutionOutcome> {
+  const requestContext =
+    createAdminAiGenerationRouteIntegratedProviderRequestContext(input);
+  const groundingContext =
+    control.resolveGroundingContext === undefined
+      ? null
+      : await control.resolveGroundingContext({ requestContext });
+
+  if (
+    control.resolveGroundingContext !== undefined &&
+    !isRouteIntegratedGroundingSufficient(groundingContext)
+  ) {
+    return {
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      executionSummary: createBlockedRouteIntegratedProviderExecutionSummary(
+        "insufficient_grounding_evidence",
+      ),
+      visibleGeneratedContent: null,
+    };
+  }
+
   const providerCredential = await control.readProviderCredential();
 
   if (!providerCredential) {
@@ -133,8 +160,6 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
   const executeProviderRequest =
     control.executeProviderRequest ??
     executeQwenAdminRouteIntegratedProviderRequest;
-  const requestContext =
-    createAdminAiGenerationRouteIntegratedProviderRequestContext(input);
   const executionResult = await executeProviderRequest({
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     limits: {
@@ -144,6 +169,7 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       timeoutMs: control.timeoutMs,
     },
     requestContext,
+    groundingContext,
     providerCredential,
   });
   const executionSummary = ensureAdminRouteIntegratedExecutionSummaryRedacted({
@@ -151,11 +177,14 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
     providerCredential,
   });
   const visibleGeneratedContentWithPreview =
-    addRouteIntegratedStructuredPreview(
-      executionResult.visibleGeneratedContent ?? null,
-      createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
-        requestContext.generationKind,
+    attachAdminRouteIntegratedGroundingSummary(
+      addRouteIntegratedStructuredPreview(
+        executionResult.visibleGeneratedContent ?? null,
+        createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
+          requestContext.generationKind,
+        ),
       ),
+      groundingContext,
     );
   const visibleContentCheck = ensureRouteIntegratedVisibleGeneratedContentSafe(
     visibleGeneratedContentWithPreview,
@@ -205,7 +234,10 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
         : undefined;
     const result = await generateText({
       model: providerModel,
-      prompt: createAdminRouteIntegratedInstruction(input.requestContext),
+      prompt: createAdminRouteIntegratedInstruction(
+        input.requestContext,
+        input.groundingContext,
+      ),
       maxOutputTokens: input.limits.maxOutputTokens,
       maxRetries: input.limits.maxRetries,
       abortSignal,
@@ -221,6 +253,11 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
       visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
         result.text,
         {
+          groundingSummary:
+            input.groundingContext === null ||
+            input.groundingContext === undefined
+              ? undefined
+              : createRouteIntegratedGroundingSummary(input.groundingContext),
           structuredPreview:
             createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
               input.requestContext.generationKind,
@@ -267,6 +304,7 @@ function ensureAdminRouteIntegratedExecutionSummaryRedacted(input: {
 
 function createAdminRouteIntegratedInstruction(
   requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
+  groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ): string {
   const generationLabel = createRouteIntegratedGenerationKindLabel(
     requestContext.generationKind,
@@ -277,13 +315,41 @@ function createAdminRouteIntegratedInstruction(
     requestContext.generationKind === "question"
       ? "输出 JSON；questions 数组必须正好包含 10 条结构化草稿摘要。"
       : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
+  const groundingLines =
+    groundingContext === null || groundingContext === undefined
+      ? ["资料依据：未提供，本次请求应由上游门禁阻止真实生成。"]
+      : [
+          `生成范围：${groundingContext.generationParameters.profession} ${groundingContext.generationParameters.level}级 ${groundingContext.generationParameters.subject}。`,
+          `知识点：${groundingContext.generationParameters.knowledgeNode ?? "按资料证据覆盖"}`,
+          `资料依据：${groundingContext.citationCount} 条。仅依据下列资料片段生成，不得补充资料外的历史或泛行业内容。`,
+          ...groundingContext.citations.map(
+            (citation, index) => `资料片段${index + 1}：${citation.chunkText}`,
+          ),
+        ];
 
   return [
     "为题库系统本地 owner preview 生成简短中文体验内容。",
     `场景：${workspaceLabel} ${generationLabel}。`,
+    ...groundingLines,
     outputContract,
     "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
   ].join("\n");
+}
+
+function attachAdminRouteIntegratedGroundingSummary(
+  visibleGeneratedContent: AdminAiGenerationRouteIntegratedProviderExecutionOutcome["visibleGeneratedContent"],
+  groundingContext: AiGenerationRouteIntegratedGroundingContext | null,
+): AdminAiGenerationRouteIntegratedProviderExecutionOutcome["visibleGeneratedContent"] {
+  if (visibleGeneratedContent === null || groundingContext === null) {
+    return visibleGeneratedContent;
+  }
+
+  return {
+    ...visibleGeneratedContent,
+    groundingSummary:
+      visibleGeneratedContent.groundingSummary ??
+      createRouteIntegratedGroundingSummary(groundingContext),
+  };
 }
 
 function createAdminAiGenerationRuntimeBridgeReadModelFromProviderOutcome(input: {

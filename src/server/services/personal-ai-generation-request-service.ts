@@ -30,6 +30,7 @@ function mapPersonalAiGenerationRequestToDto(
       mockExamPublicId: input.mockExamPublicId,
       selectedContext,
     },
+    generationParameters: input.generationParameters,
     redeemCodeReference: {
       publicId: input.redeemCodePublicId,
       redactionStatus: "redacted",

@@ -43,6 +43,7 @@ export type AdminAiGenerationRuntimeBridgeErrorSummaryDto = {
 
 export type AdminAiGenerationRuntimeBridgeFailureCategoryDto =
   | "provider_call_blocked"
+  | "insufficient_grounding_evidence"
   | "missing_provider_credential"
   | "provider_error"
   | "timeout"

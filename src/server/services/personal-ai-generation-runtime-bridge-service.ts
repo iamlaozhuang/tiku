@@ -200,6 +200,8 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
     blockedReasons: executionOutcome.providerCallExecuted
       ? []
-      : ["real_provider_execution_requires_fresh_approval"],
+      : executionOutcome.executionSummary.failureCategory === null
+        ? ["real_provider_execution_requires_fresh_approval"]
+        : [executionOutcome.executionSummary.failureCategory],
   };
 }

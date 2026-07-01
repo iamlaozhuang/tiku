@@ -155,11 +155,11 @@ function mockAuthorizationAndResultHistoryResponse(
         };
       }
 
-      if (url === "/api/v1/personal-ai-generation-requests") {
+      if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
         return requestHistoryResponse;
       }
 
-      if (url === "/api/v1/personal-ai-generation-results") {
+      if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
         return resultResponse;
       }
 
@@ -193,19 +193,11 @@ function mockResultHistoryAndDetailResponses({
         };
       }
 
-      if (url === "/api/v1/personal-ai-generation-requests") {
+      if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
         return {
           code: 0,
           message: "ok",
           data: [],
-        };
-      }
-
-      if (url === "/api/v1/personal-ai-generation-results") {
-        return {
-          code: 0,
-          message: "ok",
-          data: createResultHistoryPayload(),
         };
       }
 
@@ -214,6 +206,14 @@ function mockResultHistoryAndDetailResponses({
         "/api/v1/personal-ai-generation-results/personal_ai_result_public_ui_501"
       ) {
         return detailResponse;
+      }
+
+      if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+        return {
+          code: 0,
+          message: "ok",
+          data: createResultHistoryPayload(),
+        };
       }
 
       return {
@@ -278,14 +278,14 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-results",
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
         "local-session-token",
         {
           method: "GET",
         },
       );
     });
-    expect(await screen.findByText("待后续任务审批")).toBeInTheDocument();
+    expect(await screen.findByText("暂不可用")).toBeInTheDocument();
     expect(screen.getByText("masked preview ui 501")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_result_public_ui_501"),
@@ -320,7 +320,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     await waitFor(() => {
       expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
-        "/api/v1/personal-ai-generation-requests",
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
         "local-session-token",
         {
           method: "GET",
@@ -331,7 +331,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("2026-06-14T09:00:00.000Z"),
     ).toBeInTheDocument();
     expect(screen.getByText("已完成")).toBeInTheDocument();
-    expect(screen.getByText("证据较弱")).toBeInTheDocument();
+    expect(screen.getByText("资料较少")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_request_history_public_ui_701"),
     ).not.toBeInTheDocument();
@@ -384,7 +384,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "\u67e5\u770b\u8131\u654f\u8be6\u60c5",
+        name: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
       }),
     );
 
@@ -398,12 +398,13 @@ describe("StudentPersonalAiGenerationPage", () => {
       );
     });
     expect(
-      await screen.findByText("\u8131\u654f\u7ed3\u679c\u8be6\u60c5"),
+      await screen.findByText("\u7ed3\u679c\u8be6\u60c5"),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("仅本地合约").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("脱敏快照").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("待后续任务审批").length).toBeGreaterThan(0);
+    expect(screen.queryByText("仅本地合约")).not.toBeInTheDocument();
+    expect(screen.queryByText("脱敏快照")).not.toBeInTheDocument();
+    expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
+    expect(screen.getAllByText("暂不可用").length).toBeGreaterThan(0);
+    expect(screen.getByText("需审核后采用")).toBeInTheDocument();
     expect(screen.getByText("masked preview detail 501")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_result_public_ui_501"),
@@ -437,7 +438,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "\u67e5\u770b\u8131\u654f\u8be6\u60c5",
+        name: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
       }),
     );
 
@@ -459,13 +460,13 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "\u67e5\u770b\u8131\u654f\u8be6\u60c5",
+        name: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
       }),
     );
 
     expect(
       await screen.findByText(
-        "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8131\u654f\u5feb\u7167",
+        "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8349\u7a3f",
       ),
     ).toBeInTheDocument();
   });
@@ -484,7 +485,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "\u67e5\u770b\u8131\u654f\u8be6\u60c5",
+        name: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
       }),
     );
 

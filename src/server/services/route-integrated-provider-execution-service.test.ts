@@ -192,6 +192,48 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it("derives paper question counts from nested section question arrays", () => {
+    const content = JSON.stringify({
+      paperSections: [
+        {
+          paperSectionType: "single_choice",
+          questions: [
+            { redactedDraftSummary: "synthetic question summary a" },
+            { redactedDraftSummary: "synthetic question summary b" },
+          ],
+        },
+        {
+          paperSectionType: "judge",
+          questionDrafts: [
+            { redactedDraftSummary: "synthetic question summary c" },
+          ],
+        },
+      ],
+      questionTypeDistribution: {
+        single_choice: 2,
+        judge: 1,
+      },
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "parsed",
+        paperSectionCount: 2,
+        questionCount: 3,
+        questionTypeDistributionCount: 2,
+        knowledgeCoverageCount: 1,
+      },
+    });
+  });
+
   it("converts forbidden evidence values into a redaction violation summary", () => {
     const summary = ensureRouteIntegratedProviderExecutionSummaryRedacted(
       {

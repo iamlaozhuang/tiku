@@ -698,9 +698,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("状态")).toBeInTheDocument();
     expect(screen.getByText("已完成")).toBeInTheDocument();
     expect(screen.getByText("请求时间")).toBeInTheDocument();
-    expect(screen.getByText("脱敏状态")).toBeInTheDocument();
-    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
-    expect(screen.getByText("证据充分")).toBeInTheDocument();
+    expect(screen.queryByText("脱敏状态")).not.toBeInTheDocument();
+    expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
+    expect(screen.getByText("资料充足")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
     expectRenderedTextToHideValues([
       serverHistoryResponse.data[0].requestPublicId,
@@ -791,22 +791,19 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByRole("heading", { name: pageTitle }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42"),
-    ).toBeInTheDocument();
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
-    expect(screen.getByText("学员本地页面")).toBeInTheDocument();
-    expect(screen.getByText("已受理")).toBeInTheDocument();
-    expect(screen.getByText("内容可见性")).toBeInTheDocument();
-    expect(screen.getByText("引用脱敏状态")).toBeInTheDocument();
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
+    expect(screen.queryByText("仅本地合约")).not.toBeInTheDocument();
+    expect(screen.queryByText("学员本地页面")).not.toBeInTheDocument();
+    expect(screen.queryByText("内容可见性")).not.toBeInTheDocument();
+    expect(screen.queryByText("引用脱敏状态")).not.toBeInTheDocument();
     expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
-    expect(screen.getByText("仅摘要")).toBeInTheDocument();
-    expect(screen.getByText("是否阻断正式入库")).toBeInTheDocument();
-    expect(screen.getByText("是")).toBeInTheDocument();
+    expect(screen.queryByText("仅摘要")).not.toBeInTheDocument();
+    expect(screen.queryByText("是否阻断正式入库")).not.toBeInTheDocument();
+    expect(screen.getByText("需审核后采用")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "开始练习" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "提交作答" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeEnabled();
@@ -838,6 +835,16 @@ describe("StudentPersonalAiGenerationPage", () => {
       "/api/v1/personal-ai-generation-requests",
     );
     expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("POST");
+    expect(
+      JSON.parse(String(fetchMock.mock.calls[5]?.[1]?.body)),
+    ).toMatchObject({
+      generationParameters: {
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 10,
+      },
+    });
     expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
     );
@@ -883,6 +890,16 @@ describe("StudentPersonalAiGenerationPage", () => {
       ),
       existingTaskPublicId: null,
       existingTaskStatus: null,
+      generationParameters: {
+        difficulty: "medium",
+        knowledgeNode: null,
+        learningObjective: "弱项巩固",
+        level: 3,
+        profession: "monopoly",
+        questionCount: 10,
+        questionType: "single_choice",
+        subject: "theory",
+      },
       resultPublicId: null,
       evidenceStatus: "none",
       citationCount: 0,
@@ -1272,7 +1289,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     await waitFor(() => expect(submittedBodies).toHaveLength(1));
-    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
@@ -1310,14 +1327,14 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
     expect(
       await screen.findByText("2026-06-12T12:30:00.000Z"),
     ).toBeInTheDocument();
     expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("无证据").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("资料不足").length).toBeGreaterThan(0);
     expect(screen.getAllByText("0").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
       serverHistoryAfterSubmitResponse.data[0].requestPublicId,
       serverHistoryAfterSubmitResponse.data[0].taskPublicId,
@@ -1451,7 +1468,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
     expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("database stack");
     expect(document.body.textContent).not.toContain("provider payload");
@@ -1665,14 +1682,13 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("仅本地合约")).toBeInTheDocument();
-    expect(screen.getAllByText("内容可见性").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("仅摘要").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("证据状态").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("证据充分").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("引用数量").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("2").length).toBeGreaterThan(0);
-    expect(screen.getByText("引用脱敏状态")).toBeInTheDocument();
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
+    expect(screen.queryByText("内容可见性")).not.toBeInTheDocument();
+    expect(screen.queryByText("仅摘要")).not.toBeInTheDocument();
+    expect(screen.getAllByText("资料依据").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("资料充足").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("依据数量").length).toBeGreaterThan(0);
+    expect(screen.queryByText("引用脱敏状态")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
       redactedReferenceResponse.data.resultState.taskPublicId,
       redactedReferenceResponse.data.resultState.resultPublicId,
@@ -1828,9 +1844,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("resultPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("aiCallLogPublicId")).not.toBeInTheDocument();
     expect(screen.getByText("请求时间")).toBeInTheDocument();
-    expect(screen.getAllByText("证据较弱").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("资料较少").length).toBeGreaterThan(0);
     expect(screen.getAllByText("3").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("已脱敏").length).toBeGreaterThan(0);
+    expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
       redactedReferenceResponse.data.resultState.taskPublicId,
       redactedReferenceResponse.data.resultState.resultPublicId,

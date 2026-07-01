@@ -5,7 +5,40 @@ import {
   buildAdminAiGenerationRuntimeBridgeReadModel,
   createAdminAiGenerationRouteIntegratedProviderRequestContext,
 } from "./admin-ai-generation-runtime-bridge-service";
+import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { AdminAiGenerationRouteIntegratedProviderExecutionInput } from "../contracts/admin-ai-generation-runtime-bridge-contract";
+
+const adminSufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    generationParameters: {
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      knowledgeNode: "synthetic admin knowledge node",
+      questionType: "single_choice",
+      questionCount: 10,
+      difficulty: "medium",
+      learningObjective: "synthetic admin goal",
+    },
+    evidenceStatus: "sufficient",
+    citationCount: 2,
+    citations: [
+      {
+        resourceTitle: "synthetic admin resource",
+        headingPath: ["synthetic heading"],
+        chunkIndex: 0,
+        chunkText: "synthetic admin grounding evidence",
+        score: 0.93,
+      },
+      {
+        resourceTitle: "synthetic admin resource",
+        headingPath: ["synthetic heading"],
+        chunkIndex: 1,
+        chunkText: "synthetic admin grounding support",
+        score: 0.9,
+      },
+    ],
+  };
 
 describe("admin AI generation runtime bridge service", () => {
   it("defaults content admin workflow to a provider-disabled redacted bridge", () => {
@@ -92,6 +125,7 @@ describe("admin AI generation runtime bridge service", () => {
       taskType: "ai_paper_generation",
       workspace: "organization",
       generationKind: "paper",
+      generationParameters: null,
       ownerType: "organization",
       ownerPublicId: "organization_public_runtime_bridge_101",
       organizationPublicId: "organization_public_runtime_bridge_101",
@@ -125,6 +159,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxOutputTokens: 1800,
             timeoutMs: 60000,
             readProviderCredential: () => "synthetic-admin-provider-credential",
+            resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async (providerInput) => {
               providerInputs.push(providerInput);
 
@@ -154,6 +189,15 @@ describe("admin AI generation runtime bridge service", () => {
     const serializedBridge = JSON.stringify(bridge);
 
     expect(providerInputs).toHaveLength(1);
+    expect(providerInputs[0].groundingContext).toMatchObject({
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      generationParameters: {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+      },
+    });
     expect(providerInputs[0]).toMatchObject({
       providerMetadata: {
         providerName: "alibaba-qwen",

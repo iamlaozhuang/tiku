@@ -1,3 +1,5 @@
+import type { EvidenceStatus } from "../models/ai-rag";
+
 export type AiGenerationRouteIntegratedProviderMetadata = {
   modelProvider: "openai_compatible";
   providerName: "alibaba-qwen";
@@ -25,6 +27,7 @@ export type AiGenerationRouteIntegratedProviderErrorSummary = {
 
 export type AiGenerationRouteIntegratedProviderFailureCategory =
   | "provider_call_blocked"
+  | "insufficient_grounding_evidence"
   | "missing_provider_credential"
   | "provider_error"
   | "timeout"
@@ -59,6 +62,7 @@ export type AiGenerationRouteIntegratedProviderExecutionInput<
   providerMetadata: AiGenerationRouteIntegratedProviderMetadata;
   limits: AiGenerationRouteIntegratedProviderLimits;
   requestContext: TRequestContext;
+  groundingContext?: AiGenerationRouteIntegratedGroundingContext | null;
   providerCredential: string;
 };
 
@@ -77,9 +81,51 @@ export type AiGenerationRouteIntegratedProviderExecutionControl<
   maxRetries: 0;
   maxOutputTokens: number;
   timeoutMs: number;
+  resolveGroundingContext?: (input: {
+    requestContext: TRequestContext;
+  }) =>
+    | Promise<AiGenerationRouteIntegratedGroundingContext>
+    | AiGenerationRouteIntegratedGroundingContext;
   readProviderCredential: () => Promise<string | null> | string | null;
   executeProviderRequest?: AiGenerationRouteIntegratedProviderExecutor<TRequestContext>;
 };
+
+export type AiGenerationRouteIntegratedProfession =
+  | "monopoly"
+  | "marketing"
+  | "logistics";
+
+export type AiGenerationRouteIntegratedSubject = "theory" | "skill";
+
+export type AiGenerationRouteIntegratedGenerationParameters = {
+  profession: AiGenerationRouteIntegratedProfession;
+  level: 1 | 2 | 3 | 4 | 5;
+  subject: AiGenerationRouteIntegratedSubject;
+  knowledgeNode: string | null;
+  questionType: string | null;
+  questionCount: number;
+  difficulty: string | null;
+  learningObjective: string | null;
+};
+
+export type AiGenerationRouteIntegratedGroundingCitation = {
+  resourceTitle: string;
+  headingPath: string[];
+  chunkIndex: number;
+  chunkText: string;
+  score: number;
+};
+
+export type AiGenerationRouteIntegratedGroundingSummary = {
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+};
+
+export type AiGenerationRouteIntegratedGroundingContext =
+  AiGenerationRouteIntegratedGroundingSummary & {
+    generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+    citations: AiGenerationRouteIntegratedGroundingCitation[];
+  };
 
 export type AiGenerationRouteIntegratedStructuredPreviewOptions =
   | {
@@ -144,6 +190,7 @@ export type AiGenerationRouteIntegratedVisibleGeneratedContent = {
   contentVisibility: "transient_response_only";
   persistenceStatus: "not_persisted";
   safetyStatus: "checked";
+  groundingSummary?: AiGenerationRouteIntegratedGroundingSummary;
   structuredPreview?: AiGenerationRouteIntegratedStructuredPreview;
 };
 

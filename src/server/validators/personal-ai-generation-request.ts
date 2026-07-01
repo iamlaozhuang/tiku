@@ -7,6 +7,11 @@ import type {
   PersonalAiGenerationFuncType,
   PersonalAiGenerationRequestInput,
 } from "../models/personal-ai-generation-request";
+import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedSubject,
+} from "../contracts/route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationRequestValidationResult =
   | {
@@ -30,6 +35,8 @@ const authorizationSourceValues = [
   "org_auth",
 ] as const satisfies readonly PersonalAiGenerationAuthorizationSource[];
 const ownerTypeValues = ["personal", "organization", "platform"] as const;
+const professionValues = ["monopoly", "marketing", "logistics"] as const;
+const subjectValues = ["theory", "skill"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -85,6 +92,92 @@ function normalizeOwnerType(
     ownerTypeValues.includes(text as AiGenerationTaskRequestOwnerType)
     ? (text as AiGenerationTaskRequestOwnerType)
     : null;
+}
+
+function normalizeProfession(
+  value: unknown,
+): AiGenerationRouteIntegratedProfession | null {
+  return typeof value === "string" &&
+    professionValues.includes(value as AiGenerationRouteIntegratedProfession)
+    ? (value as AiGenerationRouteIntegratedProfession)
+    : null;
+}
+
+function normalizeSubject(
+  value: unknown,
+): AiGenerationRouteIntegratedSubject | null {
+  return typeof value === "string" &&
+    subjectValues.includes(value as AiGenerationRouteIntegratedSubject)
+    ? (value as AiGenerationRouteIntegratedSubject)
+    : null;
+}
+
+function normalizeLevel(
+  value: unknown,
+): AiGenerationRouteIntegratedGenerationParameters["level"] | null {
+  const parsedLevel =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return parsedLevel === 1 ||
+    parsedLevel === 2 ||
+    parsedLevel === 3 ||
+    parsedLevel === 4 ||
+    parsedLevel === 5
+    ? parsedLevel
+    : null;
+}
+
+function normalizePositiveCount(value: unknown): number | null {
+  const parsedCount =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : null;
+
+  return parsedCount !== null &&
+    Number.isInteger(parsedCount) &&
+    parsedCount > 0 &&
+    parsedCount <= 100
+    ? parsedCount
+    : null;
+}
+
+function normalizeGenerationParameters(
+  value: unknown,
+): AiGenerationRouteIntegratedGenerationParameters | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const profession = normalizeProfession(value.profession);
+  const level = normalizeLevel(value.level);
+  const subject = normalizeSubject(value.subject);
+  const questionCount = normalizePositiveCount(value.questionCount);
+
+  if (
+    profession === null ||
+    level === null ||
+    subject === null ||
+    questionCount === null
+  ) {
+    return null;
+  }
+
+  return {
+    profession,
+    level,
+    subject,
+    knowledgeNode: normalizeOptionalText(value.knowledgeNode),
+    questionType: normalizeOptionalText(value.questionType),
+    questionCount,
+    difficulty: normalizeOptionalText(value.difficulty),
+    learningObjective: normalizeOptionalText(value.learningObjective),
+  };
 }
 
 function resolveAuthorizationSource(
@@ -168,6 +261,9 @@ export function normalizePersonalAiGenerationRequestInput(
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
   const paperPublicId = normalizeOptionalText(input.paperPublicId);
   const mockExamPublicId = normalizeOptionalText(input.mockExamPublicId);
+  const generationParameters = normalizeGenerationParameters(
+    input.generationParameters,
+  );
 
   if (
     userPublicId === null ||
@@ -233,6 +329,7 @@ export function normalizePersonalAiGenerationRequestInput(
       redeemCodePublicId: normalizeOptionalText(input.redeemCodePublicId),
       auditLogPublicId: normalizeOptionalText(input.auditLogPublicId),
       aiCallLogPublicId: normalizeOptionalText(input.aiCallLogPublicId),
+      generationParameters,
     },
   };
 }

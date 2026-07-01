@@ -5,7 +5,48 @@ import {
   executePersonalAiGenerationRouteIntegratedProvider,
   type PersonalAiGenerationRouteIntegratedProviderExecutionInput,
 } from "./personal-ai-generation-route-integrated-provider-execution-service";
+import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
+
+const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    generationParameters: {
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      knowledgeNode: "synthetic knowledge node",
+      questionType: "single_choice",
+      questionCount: 10,
+      difficulty: "medium",
+      learningObjective: "synthetic learning goal",
+    },
+    evidenceStatus: "sufficient",
+    citationCount: 2,
+    citations: [
+      {
+        resourceTitle: "synthetic resource title",
+        headingPath: ["synthetic heading"],
+        chunkIndex: 0,
+        chunkText: "synthetic bounded grounding evidence",
+        score: 0.91,
+      },
+      {
+        resourceTitle: "synthetic resource title",
+        headingPath: ["synthetic heading"],
+        chunkIndex: 1,
+        chunkText: "synthetic bounded grounding support",
+        score: 0.88,
+      },
+    ],
+  };
+
+const insufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    ...sufficientGroundingContext,
+    evidenceStatus: "none",
+    citationCount: 0,
+    citations: [],
+  };
 
 function createRequestFlow(
   taskType:
@@ -79,6 +120,9 @@ function createExecutionControl(
         safetyStatus: "checked";
       } | null;
     }>;
+    resolveGroundingContext?: () =>
+      | Promise<AiGenerationRouteIntegratedGroundingContext>
+      | AiGenerationRouteIntegratedGroundingContext;
   } = {},
 ) {
   return {
@@ -92,10 +136,85 @@ function createExecutionControl(
       overrides.readProviderCredential ??
       (async () => "synthetic-provider-credential"),
     executeProviderRequest: overrides.executeProviderRequest,
+    resolveGroundingContext: overrides.resolveGroundingContext,
   };
 }
 
 describe("personal AI generation route-integrated provider execution service", () => {
+  it("blocks before credential access when grounding evidence is insufficient", async () => {
+    let credentialRead = false;
+    let providerExecuted = false;
+    const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow(),
+      createExecutionControl({
+        readProviderCredential: () => {
+          credentialRead = true;
+          return "synthetic-provider-credential";
+        },
+        resolveGroundingContext: () => insufficientGroundingContext,
+        executeProviderRequest: async () => {
+          providerExecuted = true;
+          throw new Error("provider executor should not be called");
+        },
+      }),
+    );
+
+    expect(credentialRead).toBe(false);
+    expect(providerExecuted).toBe(false);
+    expect(outcome).toEqual({
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      executionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "insufficient_grounding_evidence",
+        durationMs: 0,
+        usageSummary: null,
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
+      visibleGeneratedContent: null,
+    });
+  });
+
+  it("passes sufficient grounding context into the injected provider executor", async () => {
+    const executorInputs: PersonalAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+
+    await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow(),
+      createExecutionControl({
+        resolveGroundingContext: () => sufficientGroundingContext,
+        executeProviderRequest: async (input) => {
+          executorInputs.push(input);
+
+          return {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            durationMs: 12,
+            usageSummary: null,
+            providerErrorSummary: null,
+          };
+        },
+      }),
+    );
+
+    expect(executorInputs).toHaveLength(1);
+    expect(executorInputs[0].groundingContext).toMatchObject({
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      generationParameters: {
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        questionCount: 10,
+      },
+    });
+  });
+
   it("blocks execution when the injected credential reader returns no credential", async () => {
     const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
       createRequestFlow(),

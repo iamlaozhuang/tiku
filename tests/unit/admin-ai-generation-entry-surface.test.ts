@@ -561,24 +561,37 @@ describe("admin AI generation entry surfaces", () => {
     });
     const requestInit = fetchMock.mock.calls[2]?.[1] as RequestInit;
 
-    expect(JSON.parse(String(requestInit.body))).toEqual({
+    expect(JSON.parse(String(requestInit.body))).toMatchObject({
       generationKind: "question",
+      generationParameters: {
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNode: "卷烟营销基础",
+        questionType: "single_choice",
+        questionCount: 10,
+      },
     });
     expect(
       await screen.findByTestId("admin-ai-generation-local-contract-summary"),
-    ).toHaveTextContent("local_contract_only");
+    ).toHaveTextContent("草稿已提交");
     expect(
       screen.getByTestId("admin-ai-generation-local-contract-summary"),
-    ).toHaveTextContent("summary_only");
+    ).not.toHaveTextContent("summary_only");
+    expect(
+      screen.getByTestId("admin-ai-generation-local-contract-summary"),
+    ).not.toHaveTextContent("本地合约");
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("Provider 已阻断");
+    ).toHaveTextContent("待生成");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain(
       "admin_ai_generation_task_content_question_history",
     );
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_A");
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_B");
+    expect(document.body.textContent).not.toContain("已脱敏");
+    expect(document.body.textContent).not.toContain("contentVisibility");
   });
 
   it("renders transient visible generated content for provider-enabled admin responses", async () => {
@@ -751,7 +764,10 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("暂无生成结果");
     expect(
       screen.getByTestId("admin-ai-generation-local-contract-summary"),
-    ).toHaveTextContent("summary_only");
+    ).toHaveTextContent("资料不足");
+    expect(
+      screen.getByTestId("admin-ai-generation-local-contract-summary"),
+    ).not.toHaveTextContent("summary_only");
     expect(document.body.textContent).not.toContain("Provider");
     expect(document.body.textContent).not.toContain("provider_call_blocked");
   });
@@ -843,10 +859,10 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("AI组卷");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("Provider 已阻断");
+    ).toHaveTextContent("待生成");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("正式写入已阻断");
+    ).toHaveTextContent("需后续评审");
     expect(document.body.textContent).not.toContain(
       "admin_ai_generation_task_content_paper_secret_123",
     );
@@ -902,7 +918,7 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("redacted_snapshot");
+    ).toHaveTextContent("草稿快照");
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
     expect(document.body.textContent).not.toContain("rawPrompt");
@@ -1103,7 +1119,7 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("组织草稿池");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("redacted_snapshot");
+    ).toHaveTextContent("草稿快照");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).not.toHaveTextContent("Provider");

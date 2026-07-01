@@ -3,6 +3,7 @@ import type {
   AiGenerationTaskRequestAuthorizationSource,
   AiGenerationTaskRequestOwnerType,
 } from "./ai-generation-task-request";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationFuncType = Exclude<AiFuncType, "scoring">;
 
@@ -35,6 +36,7 @@ export type PersonalAiGenerationRequestInput = {
   redeemCodePublicId: string | null;
   auditLogPublicId: string | null;
   aiCallLogPublicId: string | null;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
 };
 
 export function resolvePersonalAiGenerationRequestContextSelection(

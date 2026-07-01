@@ -8,6 +8,8 @@ import type {
   AiGenerationRouteIntegratedStructuredPreview,
   AiGenerationRouteIntegratedStructuredPreviewOptions,
   AiGenerationRouteIntegratedProviderUsageSummary,
+  AiGenerationRouteIntegratedGroundingContext,
+  AiGenerationRouteIntegratedGroundingSummary,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 
@@ -109,6 +111,7 @@ export function summarizeRouteIntegratedProviderUsage(
 export function createRouteIntegratedVisibleGeneratedContent(
   content: unknown,
   options?: {
+    groundingSummary?: AiGenerationRouteIntegratedGroundingSummary;
     structuredPreview?: AiGenerationRouteIntegratedStructuredPreviewOptions;
   },
 ): AiGenerationRouteIntegratedVisibleGeneratedContent | null {
@@ -132,6 +135,10 @@ export function createRouteIntegratedVisibleGeneratedContent(
       persistenceStatus: "not_persisted",
       safetyStatus: "checked",
     };
+
+  if (options?.groundingSummary !== undefined) {
+    visibleGeneratedContent.groundingSummary = options.groundingSummary;
+  }
 
   if (options?.structuredPreview === undefined) {
     return visibleGeneratedContent;
@@ -211,6 +218,26 @@ export function createRouteIntegratedGenerationKindLabel(
   return createRouteIntegratedTaskLabel(
     createRouteIntegratedTaskTypeFromGenerationKind(generationKind),
   );
+}
+
+export function isRouteIntegratedGroundingSufficient(
+  groundingContext: AiGenerationRouteIntegratedGroundingContext | null,
+): groundingContext is AiGenerationRouteIntegratedGroundingContext {
+  return (
+    groundingContext !== null &&
+    groundingContext.evidenceStatus === "sufficient" &&
+    groundingContext.citationCount > 0 &&
+    groundingContext.citations.length > 0
+  );
+}
+
+export function createRouteIntegratedGroundingSummary(
+  groundingContext: AiGenerationRouteIntegratedGroundingContext,
+): AiGenerationRouteIntegratedGroundingSummary {
+  return {
+    evidenceStatus: groundingContext.evidenceStatus,
+    citationCount: groundingContext.citationCount,
+  };
 }
 
 function createRouteIntegratedStructuredPreview(
@@ -448,9 +475,10 @@ function sumQuestionCounts(paperSections: unknown[]): number | null {
       continue;
     }
 
-    const questionCount = normalizeQuestionCount(
-      paperSection.questionCount ?? paperSection.question_count,
-    );
+    const questionCount =
+      normalizeQuestionCount(
+        paperSection.questionCount ?? paperSection.question_count,
+      ) ?? readNestedSectionQuestionCount(paperSection);
 
     if (questionCount !== null) {
       sectionWithQuestionCount = true;
@@ -459,6 +487,19 @@ function sumQuestionCounts(paperSections: unknown[]): number | null {
   }
 
   return sectionWithQuestionCount ? totalQuestionCount : null;
+}
+
+function readNestedSectionQuestionCount(
+  paperSection: Record<string, unknown>,
+): number | null {
+  const nestedQuestions = readArrayProperty(paperSection, [
+    "questions",
+    "questionDrafts",
+    "question_drafts",
+    "items",
+  ]);
+
+  return nestedQuestions === null ? null : nestedQuestions.length;
 }
 
 function normalizeQuestionCount(value: unknown): number | null {
@@ -521,7 +562,11 @@ export function resolveRouteIntegratedProviderFailureCategory(
   providerError: unknown,
 ): Exclude<
   AiGenerationRouteIntegratedProviderFailureCategory,
-  null | "missing_provider_credential" | "redaction_violation"
+  | null
+  | "provider_call_blocked"
+  | "insufficient_grounding_evidence"
+  | "missing_provider_credential"
+  | "redaction_violation"
 > {
   if (
     providerError &&
