@@ -7,7 +7,10 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AdminAiGenerationEntryPage } from "./AdminAiGenerationEntryPage";
+import {
+  AdminAiGenerationEntryPage,
+  resolveAdminAiGenerationParameters,
+} from "./AdminAiGenerationEntryPage";
 
 function createJsonResponse(payload: unknown): Response {
   return new Response(JSON.stringify(payload), {
@@ -235,6 +238,47 @@ afterEach(() => {
 });
 
 describe("AdminAiGenerationEntryPage", () => {
+  it("falls back to route defaults when preserved admin parameter state is missing parameters", () => {
+    const generationParameters = resolveAdminAiGenerationParameters(
+      "question",
+      {
+        generationKind: "question",
+        parameters: undefined,
+      } as never,
+    );
+
+    expect(generationParameters).toMatchObject({
+      difficulty: "medium",
+      knowledgeNode: "卷烟营销基础",
+      learningObjective: "弱项巩固",
+      level: 3,
+      profession: "marketing",
+      questionCount: 10,
+      questionType: "single_choice",
+      subject: "theory",
+    });
+  });
+
+  it("merges preserved partial admin parameter state with paper route defaults", () => {
+    const generationParameters = resolveAdminAiGenerationParameters("paper", {
+      generationKind: "paper",
+      parameters: {
+        profession: "monopoly",
+      },
+    } as never);
+
+    expect(generationParameters).toMatchObject({
+      difficulty: "medium",
+      knowledgeNode: "覆盖薄弱知识点",
+      learningObjective: "阶段自测",
+      level: 3,
+      profession: "monopoly",
+      questionCount: 50,
+      questionType: null,
+      subject: "theory",
+    });
+  });
+
   it("shows generated draft content with business wording and hides governance implementation terms", async () => {
     mockAdminAiGenerationFetch();
 

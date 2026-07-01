@@ -737,9 +737,15 @@ tasks:
     behaviorBoundary: source_and_focused_tests_only_no_db_provider_env_dependency_schema_deploy
     taskKind: source_test_repair
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: completed_admin_ai_generation_parameters_runtime_repair
     priority: p1
+    claimedAt: "2026-07-01T18:25:00-07:00"
+    plannedAt: "2026-07-01T18:25:00-07:00"
+    implementedAt: "2026-07-01T18:40:00-07:00"
+    validatedAt: "2026-07-01T18:40:00-07:00"
+    reviewedAt: "2026-07-01T18:40:00-07:00"
+    closedAt: "2026-07-01T18:40:00-07:00"
     dependsOn:
       - ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
     branch: codex/ai-generation-admin-parameters-runtime-repair
@@ -749,6 +755,13 @@ tasks:
     issueFrom:
       taskId: ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
       finding: admin_ai_generation_parameters_runtime_crash
+    crossRoleCarryForward:
+      resourceGroundingScan: required_in_next_browser_rerun
+      ordinaryUiTechnicalWordingScan: required_in_next_browser_rerun
+      note: >-
+        User explicitly reminded that resource-pack/RAG grounding and technical governance wording leaks span
+        multiple roles and UI surfaces. This task only removes the admin runtime blocker; the follow-up walkthrough
+        must scan every AI 出题 / AI组卷 role entrance before marking those concerns closed.
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -795,6 +808,105 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-admin-parameters-runtime-repair-2026-07-01
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-admin-parameters-runtime-repair-2026-07-01 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      redTest: pass_expected_failure_before_fix
+      focusedUnitTests: pass_2_files_21_tests
+      prettierCheck: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_checkpoint_update
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileContentReadOrWritten: false
+      databaseMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    nextRecommendedTask: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+  - id: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+    title: AI generation post admin parameters localhost rerun
+    phase: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+    sourceStory: current_goal_ai_generation_admin_parameters_runtime_repair_2026_07_01
+    humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    targetClosureItem: rerun localhost owner preview after admin parameter runtime repair and scan all AI 出题 / AI组卷 role entrances for resource grounding and ordinary UI wording leakage
+    behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
+    taskKind: local_owner_preview_matrix_rerun
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    priority: p1
+    dependsOn:
+      - ai-generation-admin-parameters-runtime-repair-2026-07-01
+    branch: codex/ai-generation-post-admin-parameters-localhost-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    requiredMatrix:
+      roles:
+        - personal_standard_student
+        - personal_advanced_student
+        - org_standard_employee
+        - org_advanced_employee
+        - org_standard_admin
+        - org_advanced_admin
+        - content_admin
+        - ops_admin
+      workflows:
+        - ai_question_generation
+        - ai_paper_generation
+      crossRoleScanItems:
+        - resource_pack_rag_grounding_required_or_generation_blocked_when_evidence_insufficient
+        - ordinary_user_ui_must_not_show_local_contract_summary_redaction_status_or_other_technical_governance_terms
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    runtimeAllowed:
+      localDevServer: true
+      restartLocalDevServer: true
+      localhostBrowser: true
+      localDbMutationViaLocalhostUi: true
+      realProviderCallsViaLocalhostUi: true
+      maxProviderSubmitAttempts: 4
+      credentialReadAndInputForLocalhostOnly: true
+      envFileContentReadOrWrite: false
+      sourceOrTestChange: false
+      dependencyPackageLockfileChange: false
+      schemaMigrationSeedChange: false
+      stagingProdCloudDeploy: false
+      e2eAutomation: false
+      costCalibration: false
+      releaseReadinessOrFinalPass: false
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .env
+      - .env.*
+    validationCommands:
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-post-admin-parameters-localhost-rerun-2026-07-01 -SkipRemoteAheadCheck
     validationSummary:
       status: pending
   - id: ai-generation-cross-role-grounding-ui-rerun-2026-07-01

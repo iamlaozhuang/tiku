@@ -54,6 +54,10 @@ type AdminAiGenerationRequestState =
   | "accepted"
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
+type AdminAiGenerationParameterState = {
+  generationKind?: AdminAiGenerationKind;
+  parameters?: Partial<AiGenerationRouteIntegratedGenerationParameters> | null;
+};
 const ADMIN_AI_GENERATION_HISTORY_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_BUSINESS_RESULT_PREVIEW =
@@ -396,6 +400,90 @@ function parsePositiveCount(value: string, fallbackValue: number): number {
   return Number.isInteger(parsedCount) && parsedCount > 0
     ? parsedCount
     : fallbackValue;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isAdminAiGenerationProfession(
+  value: unknown,
+): value is AiGenerationRouteIntegratedProfession {
+  return typeof value === "string" && value in adminProfessionLabelByValue;
+}
+
+function isAdminAiGenerationSubject(
+  value: unknown,
+): value is AiGenerationRouteIntegratedSubject {
+  return typeof value === "string" && value in adminSubjectLabelByValue;
+}
+
+function isAdminAiGenerationLevel(
+  value: unknown,
+): value is AiGenerationRouteIntegratedGenerationParameters["level"] {
+  return (
+    value === 1 || value === 2 || value === 3 || value === 4 || value === 5
+  );
+}
+
+function resolveNullableText(
+  value: unknown,
+  fallbackValue: string | null,
+): string | null {
+  return typeof value === "string" || value === null ? value : fallbackValue;
+}
+
+export function resolveAdminAiGenerationParameters(
+  generationKind: AdminAiGenerationKind,
+  generationParameterState: AdminAiGenerationParameterState | null | undefined,
+): AiGenerationRouteIntegratedGenerationParameters {
+  const defaultParameters =
+    createDefaultAdminGenerationParameters(generationKind);
+
+  if (
+    generationParameterState?.generationKind !== generationKind ||
+    !isRecord(generationParameterState.parameters)
+  ) {
+    return defaultParameters;
+  }
+
+  const persistedParameters = generationParameterState.parameters;
+  const persistedQuestionCount = persistedParameters.questionCount;
+
+  return {
+    profession: isAdminAiGenerationProfession(persistedParameters.profession)
+      ? persistedParameters.profession
+      : defaultParameters.profession,
+    level: isAdminAiGenerationLevel(persistedParameters.level)
+      ? persistedParameters.level
+      : defaultParameters.level,
+    subject: isAdminAiGenerationSubject(persistedParameters.subject)
+      ? persistedParameters.subject
+      : defaultParameters.subject,
+    knowledgeNode: resolveNullableText(
+      persistedParameters.knowledgeNode,
+      defaultParameters.knowledgeNode,
+    ),
+    questionType: resolveNullableText(
+      persistedParameters.questionType,
+      defaultParameters.questionType,
+    ),
+    questionCount:
+      typeof persistedQuestionCount === "number"
+        ? parsePositiveCount(
+            String(persistedQuestionCount),
+            defaultParameters.questionCount,
+          )
+        : defaultParameters.questionCount,
+    difficulty: resolveNullableText(
+      persistedParameters.difficulty,
+      defaultParameters.difficulty,
+    ),
+    learningObjective: resolveNullableText(
+      persistedParameters.learningObjective,
+      defaultParameters.learningObjective,
+    ),
+  };
 }
 
 const aiGenerationDetailControlClassName =
@@ -1159,13 +1247,11 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationHistoryState>("loading");
   const [localContractSummary, setLocalContractSummary] =
     useState<AdminAiGenerationLocalContractDto | null>(null);
-  const [generationParameterState, setGenerationParameterState] = useState<{
-    generationKind: AdminAiGenerationKind;
-    parameters: AiGenerationRouteIntegratedGenerationParameters;
-  }>(() => ({
-    generationKind,
-    parameters: createDefaultAdminGenerationParameters(generationKind),
-  }));
+  const [generationParameterState, setGenerationParameterState] =
+    useState<AdminAiGenerationParameterState>(() => ({
+      generationKind,
+      parameters: createDefaultAdminGenerationParameters(generationKind),
+    }));
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
   const [taskHistoryPagination, setTaskHistoryPagination] =
@@ -1189,20 +1275,20 @@ export function AdminAiGenerationEntryPage({
           error: "请求未完成模型生成，也未写入正式题目或试卷。请稍后重试。",
         };
 
-  const generationParameters =
-    generationParameterState.generationKind === generationKind
-      ? generationParameterState.parameters
-      : createDefaultAdminGenerationParameters(generationKind);
+  const generationParameters = resolveAdminAiGenerationParameters(
+    generationKind,
+    generationParameterState,
+  );
 
   function handleGenerationParameterChange({
     label,
     value,
   }: AdminAiGenerationDetailControlChange) {
     setGenerationParameterState((currentState) => {
-      const currentParameters =
-        currentState.generationKind === generationKind
-          ? currentState.parameters
-          : createDefaultAdminGenerationParameters(generationKind);
+      const currentParameters = resolveAdminAiGenerationParameters(
+        generationKind,
+        currentState,
+      );
 
       switch (label) {
         case "专业":
