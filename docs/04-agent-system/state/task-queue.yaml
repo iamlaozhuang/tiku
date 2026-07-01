@@ -44,6 +44,47 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 standingApprovals:
+  aiGenerationCentralRepairApproval20260701:
+    approvedAt: "2026-07-01T08:24:18-07:00"
+    approvedBy: laozhuang
+    approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    approvalTextSummary: >-
+      User centrally authorized the remaining AI 出题 / AI 组卷 repair program, including local source/test repair, local
+      DB read/write/reset/seed/resource import when task-scoped, D drive local resource package read/import when
+      task-scoped, localhost browser multi-role walkthrough, real Qwen Provider sample, env file read/write when
+      task-scoped, package/lockfile/dependency change when task-scoped, schema/migration/seed changes when
+      task-scoped, staging/prod/cloud/deploy when task-scoped, and release readiness/final Pass/Cost Calibration only
+      after prerequisite evidence. The authorization is conditional on bounded scope, root-cause analysis, reuse checks,
+      focused tests, validation gates, redacted evidence, and stopping on validation failure or boundary expansion.
+    coveredTasks:
+      - ai-generation-p0-entry-unblock-2026-07-01
+      - ai-generation-p1-core-semantics-2026-07-01
+      - ai-generation-p2-history-ux-2026-07-01
+      - ai-generation-data-backed-walkthrough-2026-07-01
+      - ai-generation-eight-role-matrix-rerun-2026-07-01
+      - ai-generation-real-provider-sample-2026-07-01
+    executionRule: >-
+      This central approval does not permit unbounded execution. Each covered task must first create a short branch,
+      materialize exact allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential
+      boundary, env/dependency/schema/deploy boundary when relevant, validation commands, evidence redaction rules,
+      and closeoutPolicy in project-state.yaml, task-queue.yaml, and its task plan.
+    regressionControl:
+      - serial_tasks_only_no_mega_branch
+      - root_cause_boundary_required_before_source_repair
+      - reuse_inspection_required_before_new_role_specific_logic
+      - focused_tests_or_contract_checks_required_for_source_repairs
+      - validation_failure_stops_merge_push_and_next_task
+    forbiddenEvidence:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_values_connection_strings_provider_credentials
+      - raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_input_output
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_dumps
+    closeoutRule: >-
+      Covered tasks may commit, fast-forward merge to master, push origin/master, and delete the merged short branch
+      only after their declared validations and Module Run v2 gates pass. PR creation and force push remain blocked
+      unless a later task explicitly materializes and approves them.
   blockedGatesCentralFreshApproval20260630:
     approvedAt: "2026-06-30T07:49:06-07:00"
     approvedBy: laozhuang
@@ -297,6 +338,135 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-central-repair-approval-2026-07-01
+    title: AI generation central repair approval
+    phase: ai-generation-central-repair-approval-2026-07-01
+    sourceStory: current_user_authorized_all_remaining_ai_generation_repair_capabilities_with_bounded_scope_and_regression_gates_2026_07_01
+    humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    targetClosureItem: Central approval package for bounded AI generation repair, data-backed walkthrough, role matrix rerun, and real Provider sample
+    behaviorBoundary: docs_state_approval_only_no_runtime_execution_no_source_repair_no_db_no_provider_no_browser_no_env_no_dependency_no_schema_no_deploy
+    executionProfile: local_docs_state_central_approval
+    evidenceMode: redacted_approval_task_file_capability_status_validation_summary_only
+    validationPolicy: lint_typecheck_format_governance_gates
+    taskKind: docs_state_central_repair_approval
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ai_generation_central_repair_approval_materialized
+    approvedAt: "2026-07-01T08:24:18-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-07-01T08:24:18-07:00"
+    plannedAt: "2026-07-01T08:24:18-07:00"
+    implementedAt: "2026-07-01T08:28:43-07:00"
+    validatedAt: "2026-07-01T08:28:43-07:00"
+    reviewedAt: "2026-07-01T08:28:43-07:00"
+    closedAt: "2026-07-01T08:28:43-07:00"
+    branch: codex/ai-generation-central-repair-approval
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked_in_this_task_approved_for_later_covered_tasks
+      browserRuntime: blocked_in_this_task_approved_for_later_covered_tasks
+      devServer: blocked_in_this_task_approved_for_later_covered_tasks
+      e2eRuntime: blocked_in_this_task_approved_for_later_covered_tasks
+      localDatabaseConnection: blocked_in_this_task_approved_for_later_covered_tasks
+      localDatabaseMutation: blocked_in_this_task_approved_for_later_covered_tasks
+      schemaMigration: blocked_in_this_task_approved_for_later_covered_tasks
+      seedExecution: blocked_in_this_task_approved_for_later_covered_tasks
+      resourceImport: blocked_in_this_task_approved_for_later_covered_tasks
+      providerCall: blocked_in_this_task_approved_for_later_covered_tasks
+      providerConfiguration: blocked_in_this_task_approved_for_later_covered_tasks
+      providerCredentialRead: blocked_in_this_task_approved_for_later_covered_tasks
+      envFileReadWrite: blocked_in_this_task_approved_for_later_covered_tasks
+      dependencyIntroduction: blocked_in_this_task_approved_for_later_covered_tasks
+      stagingProdDeploy: blocked_in_this_task_approved_for_later_covered_tasks
+      releaseReadinessDecision: blocked_in_this_task_approved_for_later_covered_tasks
+      finalPassClaim: blocked_in_this_task_approved_for_later_covered_tasks
+      costCalibrationGate: blocked_in_this_task_approved_for_later_covered_tasks
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    approvalPackagePath: docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+    coveredTasks:
+      - ai-generation-p0-entry-unblock-2026-07-01
+      - ai-generation-p1-core-semantics-2026-07-01
+      - ai-generation-p2-history-ux-2026-07-01
+      - ai-generation-data-backed-walkthrough-2026-07-01
+      - ai-generation-eight-role-matrix-rerun-2026-07-01
+      - ai-generation-real-provider-sample-2026-07-01
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-central-repair-approval-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-central-repair-approval-2026-07-01 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    validationSummary:
+      validationStatus: pass_ai_generation_central_repair_approval_local_gate
+      approvalPackagePrepared: pass
+      queueReferencesUpdated: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      prettier: pass
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+      runtimeSourceChanged: false
+      databaseOrSeedExecuted: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      envFileReadOrModified: false
+      dependencyOrLockfileChanged: false
+      schemaMigrationChanged: false
+      deploymentExecuted: false
+
   - id: ai-generation-repair-roadmap-2026-07-01
     title: AI generation repair roadmap materialization
     phase: ai-generation-repair-roadmap-2026-07-01
@@ -438,7 +608,9 @@ tasks:
     taskKind: source_test_repair
     priority: p0
     dependsOn:
+      - ai-generation-central-repair-approval-2026-07-01
       - ai-generation-repair-roadmap-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     issues:
       - OP-03
       - OP-04
@@ -464,6 +636,7 @@ tasks:
     priority: p1
     dependsOn:
       - ai-generation-p0-entry-unblock-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     issues:
       - OP-01
       - OP-05
@@ -488,6 +661,7 @@ tasks:
     priority: p2
     dependsOn:
       - ai-generation-p1-core-semantics-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     issues:
       - OP-02
       - OP-07
@@ -508,17 +682,23 @@ tasks:
   - id: ai-generation-data-backed-walkthrough-2026-07-01
     title: AI generation data-backed walkthrough
     phase: ai-generation-data-backed-walkthrough-2026-07-01
-    status: blocked_pending_fresh_approval
+    status: pending_after_dependencies_under_central_approval
     taskKind: local_data_backed_walkthrough
     priority: p1
     dependsOn:
       - ai-generation-p2-history-ux-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     scope: Validate AI 出题 / AI 组卷 with an approved local脱敏 resource set covering profession, level, subject, knowledge_node, question bank, and paper examples.
-    freshApprovalRequiredFor:
+    centralApprovalCovers:
       - local_database_connection_or_mutation_if_needed
       - resource_import_or_seed
       - reading_local_private_resource_package
       - browser_runtime_if_used
+    stillRequiresTaskMaterialization:
+      - exact_allowedFiles_blockedFiles_and_redaction_rules
+      - local_db_safety_plan_with_no_raw_rows
+      - resource_package_status_count_summary_only
+      - no_credentials_or_session_material_capture
     evidenceMode: status_count_summary_only_no_raw_fixture_content
 
   - id: ai-generation-eight-role-matrix-rerun-2026-07-01
@@ -531,23 +711,30 @@ tasks:
       - ai-generation-p0-entry-unblock-2026-07-01
       - ai-generation-p1-core-semantics-2026-07-01
       - ai-generation-p2-history-ux-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     scope: Rerun the AI 出题 / AI 组卷 role/function matrix and record pass/fail/blocked/not_applicable outcomes.
-    runtimeApprovalRequiredBeforeExecution: true
+    runtimeApprovalCoveredBy: ai-generation-central-repair-approval-2026-07-01
+    stillRequiresUserPresenceForManualCredentialEntry: true
     evidenceMode: role_route_workflow_status_count_summary_only_no_credentials_no_raw_dom_no_screenshots
 
   - id: ai-generation-real-provider-sample-2026-07-01
     title: AI generation real Provider sample
     phase: ai-generation-real-provider-sample-2026-07-01
-    status: blocked_pending_fresh_approval
+    status: pending_after_dependencies_under_central_approval
     taskKind: local_real_provider_owner_preview_sample
     priority: p1
     dependsOn:
       - ai-generation-eight-role-matrix-rerun-2026-07-01
+    centralApproval: ai-generation-central-repair-approval-2026-07-01
     scope: Run a small local Qwen sample only for already-unblocked eligible roles, at most one AI 出题 and one AI 组卷 per role.
-    freshApprovalRequiredFor:
+    centralApprovalCovers:
       - real_provider_call
       - provider_runtime_boundary
       - browser_runtime_if_used
+    stillRequiresTaskMaterialization:
+      - bounded_request_count_and_token_limits
+      - no_prompt_payload_or_raw_ai_output_evidence
+      - provider_status_duration_bucket_token_count_failure_category_only
     evidenceMode: provider_status_duration_bucket_token_count_failure_category_only_no_prompt_payload_or_output
 
   - id: ai-generation-core-walkthrough-2026-07-01

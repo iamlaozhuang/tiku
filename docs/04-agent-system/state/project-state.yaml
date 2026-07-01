@@ -1,8 +1,131 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-repair-roadmap-2026-07-01
-updatedAt: "2026-07-01T08:12:26-07:00"
+currentPhase: ai-generation-central-repair-approval-2026-07-01
+updatedAt: "2026-07-01T08:28:43-07:00"
+aiGenerationCentralRepairApproval20260701:
+  taskId: ai-generation-central-repair-approval-2026-07-01
+  phase: ai-generation-central-repair-approval-2026-07-01
+  status: closed
+  result: pass_ai_generation_central_repair_approval_materialized
+  priority: p0
+  severity: governance
+  taskKind: docs_state_central_repair_approval
+  moduleRunVersion: 2
+  approvedAt: "2026-07-01T08:24:18-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  branch: codex/ai-generation-central-repair-approval
+  claimedAt: "2026-07-01T08:24:18-07:00"
+  plannedAt: "2026-07-01T08:24:18-07:00"
+  implementedAt: "2026-07-01T08:28:43-07:00"
+  validatedAt: "2026-07-01T08:28:43-07:00"
+  reviewedAt: "2026-07-01T08:28:43-07:00"
+  closedAt: "2026-07-01T08:28:43-07:00"
+  sourceStory: current_user_authorized_all_remaining_ai_generation_repair_capabilities_with_bounded_scope_and_regression_gates_2026_07_01
+  targetClosureItem: Central approval package for bounded AI generation repair, data-backed walkthrough, role matrix rerun, and real Provider sample
+  behaviorBoundary: docs_state_approval_only_no_runtime_execution_no_source_repair_no_db_no_provider_no_browser_no_env_no_dependency_no_schema_no_deploy
+  executionProfile: local_docs_state_central_approval
+  validationPolicy: lint_typecheck_format_governance_gates
+  evidenceMode: redacted_approval_task_file_capability_status_validation_summary_only
+  approvalPackagePath: docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+  coveredTaskOrder:
+    - ai-generation-p0-entry-unblock-2026-07-01
+    - ai-generation-p1-core-semantics-2026-07-01
+    - ai-generation-p2-history-ux-2026-07-01
+    - ai-generation-data-backed-walkthrough-2026-07-01
+    - ai-generation-eight-role-matrix-rerun-2026-07-01
+    - ai-generation-real-provider-sample-2026-07-01
+  approvedCapabilityBoundary:
+    sourceAndTestRepair: approved_when_task_materialized
+    localDbReadWriteResetSeedImport: approved_when_task_materialized_local_dev_only_no_raw_rows
+    dDriveResourcePackageReadImport: approved_when_task_materialized_status_count_summary_only
+    localhostBrowserRoleWalkthrough: approved_when_task_materialized_no_credential_or_session_capture
+    realQwenProviderSample: approved_when_task_materialized_bounded_no_prompt_payload_output_evidence
+    envFileReadOrModification: approved_when_task_materialized_no_secret_output_or_commit
+    packageLockDependencyChange: approved_when_task_materialized_dependency_gate_required
+    schemaMigrationSeedChange: approved_when_task_materialized_reviewed_plan_required_no_drizzle_push
+    stagingProdCloudDeploy: approved_when_task_materialized_only_if_goal_requires_isolated_plan
+    releaseReadinessFinalPassCostCalibration: approved_when_task_materialized_after_all_prerequisite_evidence
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-central-repair-approval-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-central-repair-approval-2026-07-01 -SkipRemoteAheadCheck
+  validationSummary:
+    validationStatus: pass_ai_generation_central_repair_approval_local_gate
+    approvalPackagePrepared: pass
+    queueReferencesUpdated: pass
+    evidencePrepared: pass
+    auditReviewPrepared: pass
+    prettier: pass
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+    runtimeSourceChanged: false
+    databaseOrSeedExecuted: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    envFileReadOrModified: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationChanged: false
+    deploymentExecuted: false
 aiGenerationRepairRoadmap20260701:
   taskId: ai-generation-repair-roadmap-2026-07-01
   phase: ai-generation-repair-roadmap-2026-07-01
@@ -9615,43 +9738,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f9968d15a3d89ff6250fc0933813ef64525ab75e
-  lastKnownOriginMasterSha: f9968d15a3d89ff6250fc0933813ef64525ab75e
+  lastKnownMasterSha: 09fb00fdfbd3da81269819de3d409afe8af84849
+  lastKnownOriginMasterSha: 09fb00fdfbd3da81269819de3d409afe8af84849
 currentTask:
-  id: ai-generation-repair-roadmap-2026-07-01
+  id: ai-generation-central-repair-approval-2026-07-01
   status: closed
-  result: pass_ai_generation_repair_roadmap_materialized
-  taskKind: docs_state_ai_generation_repair_roadmap
+  result: pass_ai_generation_central_repair_approval_materialized
+  taskKind: docs_state_central_repair_approval
   moduleRunVersion: 2
-  priority: p1
+  priority: p0
   severity: governance
-  branch: codex/ai-generation-repair-roadmap
-  approvedAt: "2026-07-01T08:08:05-07:00"
+  branch: codex/ai-generation-central-repair-approval
+  approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
-  humanApproval: current_user_approved_ai_generation_repair_roadmap_materialization_2026_07_01
-  claimedAt: "2026-07-01T08:08:05-07:00"
-  plannedAt: "2026-07-01T08:08:05-07:00"
-  materializedAt: "2026-07-01T08:08:05-07:00"
-  implementedAt: "2026-07-01T08:12:26-07:00"
-  validatedAt: "2026-07-01T08:12:26-07:00"
-  reviewedAt: "2026-07-01T08:12:26-07:00"
-  closedAt: "2026-07-01T08:12:26-07:00"
-  sourceStory: current_user_requested_durable_ai_generation_repair_roadmap_and_queue_2026_07_01
-  targetClosureItem: AI generation repair roadmap, root-cause protocol, reuse protocol, and queued follow-up tasks
-  behaviorBoundary: docs_state_roadmap_only_no_source_repair_no_browser_no_provider_no_db_no_schema_no_migration_no_seed_no_resource_import
-  executionProfile: local_docs_state_repair_roadmap
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  claimedAt: "2026-07-01T08:24:18-07:00"
+  plannedAt: "2026-07-01T08:24:18-07:00"
+  materializedAt: "2026-07-01T08:24:18-07:00"
+  implementedAt: "2026-07-01T08:28:43-07:00"
+  validatedAt: "2026-07-01T08:28:43-07:00"
+  reviewedAt: "2026-07-01T08:28:43-07:00"
+  closedAt: "2026-07-01T08:28:43-07:00"
+  sourceStory: current_user_authorized_all_remaining_ai_generation_repair_capabilities_with_bounded_scope_and_regression_gates_2026_07_01
+  targetClosureItem: Central approval package for bounded AI generation repair, data-backed walkthrough, role matrix rerun, and real Provider sample
+  behaviorBoundary: docs_state_approval_only_no_runtime_execution_no_source_repair_no_db_no_provider_no_browser_no_env_no_dependency_no_schema_no_deploy
+  executionProfile: local_docs_state_central_approval
   validationPolicy: lint_typecheck_format_governance_gates
-  evidenceMode: redacted_task_file_issue_role_workflow_status_count_validation_summary_only
-  roadmapPath: docs/01-requirements/traceability/2026-07-01-ai-generation-core-repair-roadmap.md
-  rootCauseReuseProtocolPath: docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-repair-roadmap.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+  evidenceMode: redacted_approval_task_file_capability_status_validation_summary_only
+  approvalPackagePath: docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
   validationSummary:
-    validationStatus: pass_ai_generation_repair_roadmap_local_gate
-    roadmapPrepared: pass
-    rootCauseReuseProtocolPrepared: pass
-    futureTasksQueued: pass
+    validationStatus: pass_ai_generation_central_repair_approval_local_gate
+    approvalPackagePrepared: pass
+    queueReferencesUpdated: pass
     evidencePrepared: pass
     auditReviewPrepared: pass
     prettier: pass
@@ -9660,11 +9781,14 @@ currentTask:
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass
-    sourceOrTestChanged: false
-    directDatabaseConnectionOrMutationExecuted: false
-    providerCallOrConfigurationExecuted: false
+    runtimeSourceChanged: false
+    databaseOrSeedExecuted: false
+    providerCallExecuted: false
     browserRuntimeExecuted: false
-    sensitiveEvidenceCaptured: false
+    envFileReadOrModified: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationChanged: false
+    deploymentExecuted: false
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:
   taskId: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
   phase: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
