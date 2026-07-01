@@ -2,6 +2,7 @@ import type {
   PersonalAiGenerationResultDetailQuery,
   PersonalAiGenerationResultHistoryQuery,
 } from "../models/personal-ai-generation-result-history";
+import type { PersonalAiGenerationResultTaskType } from "../models/personal-ai-generation-result";
 
 export type PersonalAiGenerationResultHistoryValidationResult =
   | {
@@ -52,6 +53,28 @@ function normalizeLimit(value: unknown): number | undefined | null {
     : null;
 }
 
+function normalizeOffset(value: unknown): number | undefined | null {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? value
+    : null;
+}
+
+function normalizeTaskType(
+  value: unknown,
+): PersonalAiGenerationResultTaskType | undefined | null {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  return value === "ai_question_generation" || value === "ai_paper_generation"
+    ? value
+    : null;
+}
+
 export function normalizePersonalAiGenerationResultHistoryQuery(
   input: unknown,
 ): PersonalAiGenerationResultHistoryValidationResult {
@@ -63,9 +86,20 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   }
 
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const taskType = normalizeTaskType(input.taskType);
+  const page = normalizeLimit(input.page);
+  const pageSize = normalizeLimit(input.pageSize);
   const limit = normalizeLimit(input.limit);
+  const offset = normalizeOffset(input.offset);
 
-  if (ownerPublicId === null || limit === null) {
+  if (
+    ownerPublicId === null ||
+    taskType === null ||
+    page === null ||
+    pageSize === null ||
+    limit === null ||
+    offset === null
+  ) {
     return {
       success: false,
       message: INVALID_PERSONAL_AI_GENERATION_RESULT_HISTORY_INPUT_MESSAGE,
@@ -76,7 +110,11 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
     success: true,
     value: {
       ownerPublicId,
+      taskType,
+      page,
+      pageSize,
       limit,
+      offset,
     },
   };
 }

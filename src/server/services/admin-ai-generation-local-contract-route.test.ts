@@ -132,9 +132,12 @@ function createPostRequest(
   );
 }
 
-function createGetRequest(workspace: AdminAiGenerationWorkspace): Request {
+function createGetRequest(
+  workspace: AdminAiGenerationWorkspace,
+  searchParams = "",
+): Request {
   return new Request(
-    `http://localhost/api/v1/${workspace}-ai-generation-requests`,
+    `http://localhost/api/v1/${workspace}-ai-generation-requests${searchParams}`,
     {
       headers: {
         authorization: "Bearer synthetic-admin-session",
@@ -233,6 +236,7 @@ async function getLocalContractHistory(input: {
   adminRoles: AdminRole[];
   adminWorkspaceCapability?: AdminWorkspaceCapabilitySummary | null;
   organizationPublicId?: string | null;
+  searchParams?: string;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 }) {
@@ -261,7 +265,7 @@ async function getLocalContractHistory(input: {
     }
   ).GET;
 
-  return getHandler(createGetRequest(input.workspace));
+  return getHandler(createGetRequest(input.workspace, input.searchParams));
 }
 
 function createTaskPersistenceResult(
@@ -1340,6 +1344,7 @@ describe("admin AI generation local contract route handlers", () => {
     const response = await getLocalContractHistory({
       workspace: "content",
       adminRoles: ["content_admin"],
+      searchParams: "?generationKind=paper&page=1&pageSize=10",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
     });
     const payload = await response.json();
@@ -1350,12 +1355,23 @@ describe("admin AI generation local contract route handlers", () => {
         workspace: "content",
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
+        generationKind: "paper",
+        page: 1,
+        pageSize: 10,
         limit: 10,
+        offset: 0,
       },
     ]);
     expect(payload).toMatchObject({
       code: 0,
       message: "ok",
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
       data: {
         workspace: "content",
         latestTask: {
@@ -1391,6 +1407,58 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("Authorization");
   });
 
+  it("passes generation kind and pagination query into admin AI history repositories", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+
+    const response = await getLocalContractHistory({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      searchParams: "?generationKind=paper&page=2&pageSize=5",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+
+    expect(taskPersistenceRecorder.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        generationKind: "paper",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(generatedResultPersistenceRecorder.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        generationKind: "paper",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
+  });
+
   it("returns content admin generated result history summaries without raw result payloads", async () => {
     const taskPublicId =
       "admin_ai_generation_task_content_question_history_456";
@@ -1423,6 +1491,7 @@ describe("admin AI generation local contract route handlers", () => {
     const response = await getLocalContractHistory({
       workspace: "content",
       adminRoles: ["content_admin"],
+      searchParams: "?generationKind=question&page=1&pageSize=10",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         generatedResultPersistenceRecorder.repository,
@@ -1435,7 +1504,11 @@ describe("admin AI generation local contract route handlers", () => {
         workspace: "content",
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
+        generationKind: "question",
+        page: 1,
+        pageSize: 10,
         limit: 10,
+        offset: 0,
       },
     ]);
     expect(payload).toMatchObject({
@@ -1512,6 +1585,7 @@ describe("admin AI generation local contract route handlers", () => {
       workspace: "organization",
       adminRoles: ["org_advanced_admin"],
       organizationPublicId: "organization_public_123",
+      searchParams: "?generationKind=paper&page=1&pageSize=10",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         generatedResultPersistenceRecorder.repository,
@@ -1524,7 +1598,11 @@ describe("admin AI generation local contract route handlers", () => {
         workspace: "organization",
         ownerType: "organization",
         ownerPublicId: "organization_public_123",
+        generationKind: "paper",
+        page: 1,
+        pageSize: 10,
         limit: 10,
+        offset: 0,
       },
     ]);
     expect(payload).toMatchObject({

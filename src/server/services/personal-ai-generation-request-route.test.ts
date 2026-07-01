@@ -121,10 +121,24 @@ function createRequestRepository(
   PersonalAiGenerationRequestRepository,
   "createOrReuseRequest" | "listRequestHistory"
 > & {
-  calls: Array<{ ownerPublicId: string; limit?: number }>;
+  calls: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+  }>;
   createCalls: CreatePersonalAiGenerationRequestInput[];
 } {
-  const calls: Array<{ ownerPublicId: string; limit?: number }> = [];
+  const calls: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+  }> = [];
   const createCalls: CreatePersonalAiGenerationRequestInput[] = [];
 
   return {
@@ -150,6 +164,7 @@ function createRequestRepository(
             taskPublicId: input.taskPublicId,
             status: "pending",
             requestedAt: input.requestedAt.toISOString(),
+            taskType: input.taskType,
             resultPublicId: input.resultPublicId ?? null,
             evidenceStatus: input.evidenceStatus ?? "none",
             citationCount: input.citationCount ?? 0,
@@ -433,14 +448,63 @@ describe("personal AI generation request route handlers", () => {
       code: 0,
       message: "ok",
       data: [],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
     });
     expect(requestRepository.calls).toEqual([
       {
         ownerPublicId: userContext.userPublicId,
+        taskType: undefined,
+        page: 1,
+        pageSize: 10,
+        limit: 10,
+        offset: 0,
       },
     ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
     expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("passes task type and pagination query to personal request history repository", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(createGetRequest("?taskType=ai_paper_generation&page=2&pageSize=5"));
+    const payload = await response.json();
+
+    expect(requestRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+        taskType: "ai_paper_generation",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
   });
 
   it("returns persisted redacted request history rows from the repository", async () => {
@@ -450,6 +514,7 @@ describe("personal AI generation request route handlers", () => {
         taskPublicId: "ai_generation_task_public_route_301",
         status: "succeeded",
         requestedAt: "2026-06-12T16:30:00.000Z",
+        taskType: "ai_question_generation",
         resultPublicId: "ai_generation_result_public_route_301",
         evidenceStatus: "sufficient",
         citationCount: 2,
@@ -479,6 +544,7 @@ describe("personal AI generation request route handlers", () => {
           taskPublicId: "ai_generation_task_public_route_301",
           status: "succeeded",
           requestedAt: "2026-06-12T16:30:00.000Z",
+          taskType: "ai_question_generation",
           resultPublicId: "ai_generation_result_public_route_301",
           evidenceStatus: "sufficient",
           citationCount: 2,
@@ -486,10 +552,22 @@ describe("personal AI generation request route handlers", () => {
           redactionStatus: "redacted",
         },
       ],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
     });
     expect(requestRepository.calls).toEqual([
       {
         ownerPublicId: userContext.userPublicId,
+        taskType: undefined,
+        page: 1,
+        pageSize: 10,
+        limit: 10,
+        offset: 0,
       },
     ]);
     expect(serializedPayload).not.toContain("stale_client_user");
@@ -1057,6 +1135,7 @@ describe("personal AI generation request route handlers", () => {
           taskPublicId: "ai_generation_task_public_existing_route",
           status: "running",
           requestedAt: "2026-06-12T17:00:00.000Z",
+          taskType: "ai_question_generation",
           resultPublicId: "ai_generation_result_public_existing_route",
           evidenceStatus: "weak",
           citationCount: 2,

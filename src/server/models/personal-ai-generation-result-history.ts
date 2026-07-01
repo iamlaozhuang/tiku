@@ -1,6 +1,7 @@
 import type {
   PersonalAiGenerationResultContentVisibility,
   PersonalAiGenerationResultRedactionStatus,
+  PersonalAiGenerationResultTaskType,
 } from "./personal-ai-generation-result";
 
 export type PersonalAiGenerationResultHistoryRuntimeStatus =
@@ -11,7 +12,11 @@ export type PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus =
 
 export type PersonalAiGenerationResultHistoryQuery = {
   ownerPublicId: string;
+  taskType?: PersonalAiGenerationResultTaskType;
+  page?: number;
+  pageSize?: number;
   limit?: number;
+  offset?: number;
 };
 
 export type PersonalAiGenerationResultDetailQuery = {

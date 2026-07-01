@@ -78,7 +78,23 @@ function createGateway(options: {
     task_type: "ai_question_generation" | "ai_paper_generation";
   } | null;
 }) {
-  const listResultRows = vi.fn(async () => options.rows ?? []);
+  const listResultRows = vi.fn(async (query) =>
+    (options.rows ?? [])
+      .filter(
+        (row) =>
+          row.workspace === query.workspace &&
+          row.owner_type === query.ownerType &&
+          row.owner_public_id === query.ownerPublicId &&
+          row.generation_kind === query.generationKind &&
+          row.result_status === "draft",
+      )
+      .sort(
+        (leftRow, rightRow) =>
+          rightRow.created_at.getTime() - leftRow.created_at.getTime() ||
+          leftRow.public_id.localeCompare(rightRow.public_id),
+      )
+      .slice(query.offset, query.offset + query.limit),
+  );
   const findResultByTaskPublicId = vi.fn(
     async () => options.existingRow ?? null,
   );
@@ -112,6 +128,7 @@ describe("admin AI generation result persistence repository", () => {
       workspace: "organization",
       ownerType: "organization",
       ownerPublicId: "organization_public_901",
+      generationKind: "paper",
     });
 
     expect(condition).not.toBeNull();
@@ -162,14 +179,22 @@ describe("admin AI generation result persistence repository", () => {
       workspace: "organization",
       ownerType: "organization",
       ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 3,
       limit: 3,
+      offset: 0,
     });
 
     expect(listResultRows).toHaveBeenCalledWith({
       workspace: "organization",
       ownerType: "organization",
       ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 3,
       limit: 3,
+      offset: 0,
     });
     expect(draftResults.map((result) => result.resultPublicId)).toEqual([
       "admin_ai_generation_result_public_c",
@@ -180,6 +205,58 @@ describe("admin AI generation result persistence repository", () => {
     expect(JSON.stringify(draftResults)).not.toContain(
       "content_redacted_snapshot",
     );
+  });
+
+  it("filters draft result history by generation kind before pagination", async () => {
+    const { gateway, listResultRows } = createGateway({
+      rows: [
+        createResultRow({
+          public_id: "admin_ai_generation_result_question_newer",
+          generation_kind: "question",
+          task_type: "ai_question_generation",
+          created_at: new Date("2026-06-26T22:00:00.000Z"),
+        }),
+        createResultRow({
+          public_id: "admin_ai_generation_result_paper_newer",
+          generation_kind: "paper",
+          task_type: "ai_paper_generation",
+          created_at: new Date("2026-06-26T21:00:00.000Z"),
+        }),
+        createResultRow({
+          public_id: "admin_ai_generation_result_paper_older",
+          generation_kind: "paper",
+          task_type: "ai_paper_generation",
+          created_at: new Date("2026-06-26T20:00:00.000Z"),
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+
+    expect(listResultRows).toHaveBeenCalledWith({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+    expect(draftResults.map((result) => result.resultPublicId)).toEqual([
+      "admin_ai_generation_result_paper_newer",
+    ]);
   });
 
   it("creates a backend admin draft result and attaches only result summary fields to the task", async () => {

@@ -35,6 +35,7 @@ function createPersistenceRow(
   return {
     public_id: "ai_generation_task_public_301",
     request_public_id: "personal_ai_request_public_301",
+    task_type: "ai_question_generation",
     task_status: "pending",
     requested_at: new Date("2026-06-12T10:00:00.000Z"),
     result_public_id: null,
@@ -48,14 +49,28 @@ function createPersistenceRow(
 function createGateway(
   rows: PersonalAiGenerationRequestPersistenceRow[],
 ): PersonalAiGenerationRequestTaskGateway & {
-  listQueries: Array<{ ownerPublicId: string; limit: number }>;
+  listQueries: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page: number;
+    pageSize: number;
+    limit: number;
+    offset: number;
+  }>;
   idempotencyQueries: Array<{
     ownerPublicId: string;
     idempotencyKeyHash: string;
   }>;
   insertInputs: unknown[];
 } {
-  const listQueries: Array<{ ownerPublicId: string; limit: number }> = [];
+  const listQueries: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page: number;
+    pageSize: number;
+    limit: number;
+    offset: number;
+  }> = [];
   const idempotencyQueries: Array<{
     ownerPublicId: string;
     idempotencyKeyHash: string;
@@ -69,7 +84,18 @@ function createGateway(
     async listRequestRows(query) {
       listQueries.push(query);
 
-      return rows;
+      return rows
+        .filter(
+          (row) =>
+            row.owner_public_id === query.ownerPublicId &&
+            (query.taskType === undefined || row.task_type === query.taskType),
+        )
+        .sort(
+          (leftRow, rightRow) =>
+            rightRow.requested_at.getTime() - leftRow.requested_at.getTime() ||
+            leftRow.request_public_id.localeCompare(rightRow.request_public_id),
+        )
+        .slice(query.offset, query.offset + query.limit);
     },
     async findRequestByIdempotencyKey(query) {
       idempotencyQueries.push(query);
@@ -88,6 +114,7 @@ function createGateway(
       return createPersistenceRow({
         public_id: input.taskPublicId,
         request_public_id: input.requestPublicId,
+        task_type: input.taskType,
         task_status: "pending",
         requested_at: input.requestedAt,
         idempotency_key_hash: input.idempotencyKeyHash,
@@ -99,8 +126,9 @@ function createGateway(
 
 describe("personal AI generation request repository", () => {
   it("builds owner-scoped personal request history conditions", () => {
-    const condition =
-      createPersonalAiGenerationRequestHistoryCondition("student_public_301");
+    const condition = createPersonalAiGenerationRequestHistoryCondition({
+      ownerPublicId: "student_public_301",
+    });
 
     expect(condition).not.toBeNull();
     expect(containsText(condition, "owner_public_id")).toBe(true);
@@ -158,7 +186,10 @@ describe("personal AI generation request repository", () => {
     expect(gateway.listQueries).toEqual([
       {
         ownerPublicId: "student_public_303",
+        page: 1,
+        pageSize: 3,
         limit: 3,
+        offset: 0,
       },
     ]);
     expect(history.map((row) => row.requestPublicId)).toEqual([
@@ -168,6 +199,59 @@ describe("personal AI generation request repository", () => {
     ]);
     expect(JSON.stringify(history)).not.toMatch(/"id":/);
     expect(JSON.stringify(history)).not.toContain("owner_public_id");
+  });
+
+  it("filters request history by task type before applying descending pagination", async () => {
+    const gateway = createGateway([
+      createPersistenceRow({
+        public_id: "ai_generation_task_question_newer",
+        request_public_id: "personal_ai_request_question_newer",
+        task_type: "ai_question_generation",
+        requested_at: new Date("2026-06-12T13:00:00.000Z"),
+        owner_public_id: "student_public_303",
+      }),
+      createPersistenceRow({
+        public_id: "ai_generation_task_paper_newer",
+        request_public_id: "personal_ai_request_paper_newer",
+        task_type: "ai_paper_generation",
+        requested_at: new Date("2026-06-12T12:00:00.000Z"),
+        owner_public_id: "student_public_303",
+      }),
+      createPersistenceRow({
+        public_id: "ai_generation_task_paper_older",
+        request_public_id: "personal_ai_request_paper_older",
+        task_type: "ai_paper_generation",
+        requested_at: new Date("2026-06-12T11:00:00.000Z"),
+        owner_public_id: "student_public_303",
+      }),
+    ]);
+    const repository = createPersonalAiGenerationRequestRepository(gateway);
+
+    const history = await repository.listRequestHistory({
+      ownerPublicId: "student_public_303",
+      taskType: "ai_paper_generation",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+
+    expect(gateway.listQueries).toEqual([
+      {
+        ownerPublicId: "student_public_303",
+        taskType: "ai_paper_generation",
+        page: 1,
+        pageSize: 1,
+        limit: 1,
+        offset: 0,
+      },
+    ]);
+    expect(history).toMatchObject([
+      {
+        requestPublicId: "personal_ai_request_paper_newer",
+        taskType: "ai_paper_generation",
+      },
+    ]);
   });
 
   it("reuses an existing request by owner idempotency key", async () => {

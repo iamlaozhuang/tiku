@@ -859,24 +859,146 @@ tasks:
   - id: ai-generation-p2-history-ux-2026-07-01
     title: AI generation P2 history and UX
     phase: ai-generation-p2-history-ux-2026-07-01
-    status: pending
+    status: closed
+    result: pass_ai_generation_p2_history_ux_repaired
     taskKind: source_test_repair
+    moduleRunVersion: 2
     priority: p2
     dependsOn:
       - ai-generation-p1-core-semantics-2026-07-01
     centralApproval: ai-generation-central-repair-approval-2026-07-01
+    approvedAt: "2026-07-01T08:24:18-07:00"
+    approvedBy: laozhuang
+    humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    latestApprovalRefreshAt: "2026-07-01T08:59:30-07:00"
+    latestApprovalRefreshSource: current_user_reconfirmed_bounded_high_risk_ai_generation_repair_goal_2026_07_01
+    branch: codex/ai-generation-p2-history-ux
+    claimedAt: "2026-07-01T09:18:58-07:00"
+    plannedAt: "2026-07-01T09:18:58-07:00"
+    implementedAt: "2026-07-01T09:57:46-07:00"
+    validatedAt: "2026-07-01T09:57:46-07:00"
+    reviewedAt: "2026-07-01T09:57:46-07:00"
+    closedAt: "2026-07-01T09:57:46-07:00"
     issues:
       - OP-02
       - OP-07
       - OP-08
       - OP-09
     scope: Repair empty-state guidance, result placement, history type isolation, descending order, pagination, and filtering.
+    targetClosureItem: OP-02 empty data guidance, OP-07 visible result placement, OP-08 history isolation, and OP-09 descending paginated filterable history
+    behaviorBoundary: p2_history_ux_source_test_repair_only_no_provider_no_db_no_browser_no_env_no_dependency_no_schema_no_deploy
+    executionProfile: local_source_test_repair_with_fake_history_repository_tests
+    validationPolicy: red_green_focused_unit_lint_typecheck_governance_gates
+    evidenceMode: redacted_issue_role_route_status_count_validation_summary_only
+    rootCauseBoundary:
+      OP-02: data_availability_and_ui_interaction_state
+      OP-07: ui_interaction_state
+      OP-08: history_query_isolation_api_contract_repository_persistence
+      OP-09: api_contract_repository_persistence_ui_interaction_state
+    reuseChecklist:
+      - inspect_shared_ai_generation_contracts_services_repositories_before_new_logic
+      - reuse_existing_admin_student_ai_generation_surfaces
+      - reuse_existing_page_pageSize_pagination_contracts
+      - use_fake_repository_tests_no_database_connection
     requiredBeforeImplementation:
       - create_short_codex_branch
       - materialize_task_boundaries_and_plan
       - inspect_existing_history_query_pagination_and_admin_student_AI_UI_patterns
       - add_or_update_focused_tests_for_history_isolation_and_visible_states
     blockedUntilDependenciesClosed: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p2-history-ux.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-p2-history-ux.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p2-history-ux.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-task-persistence-contract.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts
+      - src/server/contracts/personal-ai-generation-request-history-contract.ts
+      - src/server/contracts/personal-ai-generation-result-history-contract.ts
+      - src/server/mappers/personal-ai-generation-request-mapper.ts
+      - src/server/mappers/personal-ai-generation-request-mapper.test.ts
+      - src/server/models/personal-ai-generation-request-history.ts
+      - src/server/models/personal-ai-generation-result-history.ts
+      - src/server/validators/personal-ai-generation-request-history.ts
+      - src/server/validators/personal-ai-generation-result-history.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+      - src/server/services/personal-ai-generation-request-history-service.ts
+      - src/server/services/personal-ai-generation-request-history-service.test.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-history-service.test.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/repositories/personal-ai-generation-result-repository.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_database_connection_or_mutation_no_reset_seed_resource_import_no_raw_rows_no_schema_migration
+    aiProviderBoundary: no_real_provider_call_no_provider_configuration_no_prompt_payload_no_raw_ai_io_fake_repository_and_service_tests_only
+    browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    envBoundary: no_env_file_read_or_modification_for_p2
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p2-history-ux.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p2-history-ux.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p2-history-ux.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-request-history-service.test.ts src/server/services/personal-ai-generation-result-history-service.test.ts src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/mappers/personal-ai-generation-request-mapper.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p2-history-ux.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-p2-history-ux.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p2-history-ux.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx tests/unit/student-personal-ai-generation-ui.test.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/contracts/admin-ai-generation-task-persistence-contract.ts src/server/contracts/admin-ai-generation-result-persistence-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/contracts/personal-ai-generation-request-history-contract.ts src/server/contracts/personal-ai-generation-result-history-contract.ts src/server/validators/personal-ai-generation-request-history.ts src/server/validators/personal-ai-generation-result-history.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-result-route.ts src/server/services/personal-ai-generation-request-history-service.ts src/server/services/personal-ai-generation-request-history-service.test.ts src/server/services/personal-ai-generation-result-history-service.ts src/server/services/personal-ai-generation-result-history-service.test.ts src/server/repositories/personal-ai-generation-request-repository.ts src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.ts src/server/repositories/personal-ai-generation-result-repository.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-p2-history-ux-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-p2-history-ux-2026-07-01 -SkipRemoteAheadCheck
     targetExitCriteria:
       - empty knowledge or missing question bank states are explicit
       - current generation result is visible near the action area or focused by UI behavior

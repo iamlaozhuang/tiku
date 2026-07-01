@@ -19,6 +19,7 @@ import type {
   AdminAiGenerationTaskHistoryDto,
   AdminAiGenerationTaskHistoryItemDto,
 } from "@/server/contracts/admin-ai-generation-local-contract";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 
 import {
@@ -47,6 +48,8 @@ type AdminAiGenerationRequestState =
   | "accepted"
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
+const ADMIN_AI_GENERATION_HISTORY_PAGE = 1;
+const ADMIN_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
 type ContentAdminReviewDecision = "approved" | "rejected";
 type ContentAdminReviewActionState =
   | "idle"
@@ -133,6 +136,20 @@ function getAdminAiGenerationRequestPath(
   return workspace === "content"
     ? "/api/v1/content-ai-generation-requests"
     : "/api/v1/organization-ai-generation-requests";
+}
+
+function getAdminAiGenerationHistoryPath(
+  workspace: AdminAiGenerationWorkspace,
+  generationKind: AdminAiGenerationKind,
+  page: number,
+): string {
+  const searchParams = new URLSearchParams({
+    generationKind,
+    page: String(page),
+    pageSize: String(ADMIN_AI_GENERATION_HISTORY_PAGE_SIZE),
+  });
+
+  return `${getAdminAiGenerationRequestPath(workspace)}?${searchParams.toString()}`;
 }
 
 function getContentAiGenerationFormalAdoptionPath(
@@ -514,13 +531,19 @@ function StructuredPreviewSummary({
 }
 
 function AdminAiGenerationTaskHistoryPanel({
+  generationKind,
+  onChangePage,
   onReviewContentDraft,
+  pagination,
   reviewActionStateByResultPublicId,
   state,
   taskHistory,
   workspace,
 }: {
+  generationKind: AdminAiGenerationKind;
+  onChangePage: (page: number) => void;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
+  pagination: ApiPagination | null;
   reviewActionStateByResultPublicId: Record<
     string,
     ContentAdminReviewActionState
@@ -530,6 +553,12 @@ function AdminAiGenerationTaskHistoryPanel({
   workspace: AdminAiGenerationWorkspace;
 }) {
   const items = taskHistory?.items ?? [];
+  const totalPages =
+    pagination === null
+      ? 1
+      : Math.max(1, Math.ceil(pagination.total / pagination.pageSize));
+  const canGoPrevious = pagination !== null && pagination.page > 1;
+  const canGoNext = pagination !== null && pagination.page < totalPages;
   const historyCopy =
     workspace === "organization"
       ? {
@@ -581,6 +610,47 @@ function AdminAiGenerationTaskHistoryPanel({
           元数据历史
         </span>
       </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          当前筛选：{getGenerationKindLabel(generationKind)}
+        </span>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          默认按请求时间倒序
+        </span>
+        {pagination !== null ? (
+          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+            第 {pagination.page} / {totalPages} 页，共 {pagination.total} 条
+          </span>
+        ) : null}
+      </div>
+      {pagination !== null ? (
+        <nav
+          aria-label="AI生成历史分页"
+          className="mt-3 flex items-center justify-between gap-3"
+        >
+          <p className="text-text-secondary text-sm">
+            第 {pagination.page} / {totalPages} 页
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={state === "loading" || !canGoPrevious}
+              onClick={() => onChangePage(pagination.page - 1)}
+            >
+              上一页
+            </button>
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={state === "loading" || !canGoNext}
+              onClick={() => onChangePage(pagination.page + 1)}
+            >
+              下一页
+            </button>
+          </div>
+        </nav>
+      ) : null}
 
       {state === "loading" ? (
         <div
@@ -921,6 +991,8 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationLocalContractDto | null>(null);
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
+  const [taskHistoryPagination, setTaskHistoryPagination] =
+    useState<ApiPagination | null>(null);
   const [
     reviewActionStateByResultPublicId,
     setReviewActionStateByResultPublicId,
@@ -942,33 +1014,36 @@ export function AdminAiGenerationEntryPage({
         };
 
   const refreshTaskHistory = useCallback(
-    async (sessionToken: string | null) => {
+    async (sessionToken: string | null, page: number) => {
       setHistoryState("loading");
 
       const historyResponse =
         await fetchAdminApi<AdminAiGenerationTaskHistoryDto>(
-          getAdminAiGenerationRequestPath(workspace),
+          getAdminAiGenerationHistoryPath(workspace, generationKind, page),
           sessionToken,
         );
 
       if (isUnauthorizedResponse(historyResponse)) {
         setLoadState("unauthorized");
+        setTaskHistoryPagination(null);
         return "unauthorized";
       }
 
       if (historyResponse.code !== 0 || historyResponse.data === null) {
         setTaskHistory(null);
+        setTaskHistoryPagination(null);
         setHistoryState("error");
         return "ready";
       }
 
       setTaskHistory(historyResponse.data);
+      setTaskHistoryPagination(historyResponse.pagination ?? null);
       setHistoryState(
         historyResponse.data.items.length === 0 ? "empty" : "ready",
       );
       return "ready";
     },
-    [workspace],
+    [generationKind, workspace],
   );
 
   useEffect(() => {
@@ -1008,7 +1083,10 @@ export function AdminAiGenerationEntryPage({
           return;
         }
 
-        const historyLoadState = await refreshTaskHistory(sessionToken);
+        const historyLoadState = await refreshTaskHistory(
+          sessionToken,
+          ADMIN_AI_GENERATION_HISTORY_PAGE,
+        );
 
         if (isActive && historyLoadState === "ready") {
           setLoadState("ready");
@@ -1059,10 +1137,16 @@ export function AdminAiGenerationEntryPage({
 
       setLocalContractSummary(requestResponse.data);
       setRequestState("accepted");
-      await refreshTaskHistory(sessionToken);
+      await refreshTaskHistory(sessionToken, ADMIN_AI_GENERATION_HISTORY_PAGE);
     } catch {
       setRequestState("error");
     }
+  }
+
+  async function handleChangeTaskHistoryPage(page: number) {
+    const sessionToken = getStoredSessionToken();
+
+    await refreshTaskHistory(sessionToken, page);
   }
 
   async function handleReviewContentDraft(
@@ -1117,7 +1201,7 @@ export function AdminAiGenerationEntryPage({
         [input.resultPublicId]:
           input.reviewDecision === "approved" ? "adopted" : "rejected",
       }));
-      await refreshTaskHistory(sessionToken);
+      await refreshTaskHistory(sessionToken, ADMIN_AI_GENERATION_HISTORY_PAGE);
     } catch {
       setReviewActionStateByResultPublicId((currentState) => ({
         ...currentState,
@@ -1221,14 +1305,6 @@ export function AdminAiGenerationEntryPage({
         </section>
       </div>
 
-      <AdminAiGenerationTaskHistoryPanel
-        reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
-        state={historyState}
-        taskHistory={taskHistory}
-        workspace={workspace}
-        onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
-      />
-
       {requestState === "error" ? (
         <section
           className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
@@ -1301,6 +1377,17 @@ export function AdminAiGenerationEntryPage({
           />
         </section>
       ) : null}
+
+      <AdminAiGenerationTaskHistoryPanel
+        generationKind={generationKind}
+        onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
+        pagination={taskHistoryPagination}
+        reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
+        state={historyState}
+        taskHistory={taskHistory}
+        workspace={workspace}
+        onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
+      />
     </section>
   );
 }

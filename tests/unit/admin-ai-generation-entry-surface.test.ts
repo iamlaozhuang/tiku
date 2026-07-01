@@ -265,6 +265,22 @@ function createEmptyTaskHistoryResponse(workspace: "content" | "organization") {
   };
 }
 
+function isAdminAiGenerationHistoryRequest(
+  url: string | URL,
+  path: string,
+  init?: RequestInit,
+): boolean {
+  return init?.method !== "POST" && String(url).startsWith(`${path}?`);
+}
+
+function isAdminAiGenerationPostRequest(
+  url: string | URL,
+  path: string,
+  init?: RequestInit,
+): boolean {
+  return String(url) === path && init?.method === "POST";
+}
+
 afterEach(() => {
   cleanup();
   globalThis.localStorage?.clear();
@@ -361,7 +377,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
         return Response.json(createEmptyTaskHistoryResponse("content"));
       }
 
@@ -408,7 +429,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(screen.getByLabelText("题型")).toHaveDisplayValue("多选题");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
-      "/api/v1/content-ai-generation-requests",
+      "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
     ]);
   });
 
@@ -423,7 +444,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+        )
+      ) {
         return Response.json(createEmptyTaskHistoryResponse("organization"));
       }
 
@@ -462,7 +488,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
-      "/api/v1/organization-ai-generation-requests",
+      "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
     ]);
   });
 
@@ -479,8 +505,11 @@ describe("admin AI generation entry surfaces", () => {
       }
 
       if (
-        String(url) === "/api/v1/content-ai-generation-requests" &&
-        init?.method === "POST"
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
       ) {
         expect(init).toMatchObject({
           method: "POST",
@@ -494,7 +523,13 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "content",
@@ -519,9 +554,9 @@ describe("admin AI generation entry surfaces", () => {
     await waitFor(() => {
       expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
         "/api/v1/sessions",
+        "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
         "/api/v1/content-ai-generation-requests",
-        "/api/v1/content-ai-generation-requests",
-        "/api/v1/content-ai-generation-requests",
+        "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
       ]);
     });
     const requestInit = fetchMock.mock.calls[2]?.[1] as RequestInit;
@@ -593,13 +628,22 @@ describe("admin AI generation entry surfaces", () => {
       }
 
       if (
-        String(url) === "/api/v1/content-ai-generation-requests" &&
-        init?.method === "POST"
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
       ) {
         return Response.json(providerVisibleResponse);
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
         return Response.json(createEmptyTaskHistoryResponse("content"));
       }
 
@@ -628,6 +672,13 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("题量 50");
+    expect(
+      screen
+        .getByTestId("admin-visible-generated-content")
+        .compareDocumentPosition(
+          screen.getByTestId("admin-ai-generation-task-history"),
+        ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("providerPayload");
@@ -645,8 +696,11 @@ describe("admin AI generation entry surfaces", () => {
       }
 
       if (
-        String(url) === "/api/v1/organization-ai-generation-requests" &&
-        init?.method === "POST"
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
       ) {
         return Response.json(
           createLocalContractResponse({
@@ -656,7 +710,13 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "organization",
@@ -681,9 +741,9 @@ describe("admin AI generation entry surfaces", () => {
     await waitFor(() => {
       expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
         "/api/v1/sessions",
+        "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
         "/api/v1/organization-ai-generation-requests",
-        "/api/v1/organization-ai-generation-requests",
-        "/api/v1/organization-ai-generation-requests",
+        "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
       ]);
     });
     expect(
@@ -749,7 +809,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "content",
@@ -799,7 +864,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "content",
@@ -853,7 +923,13 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "content",
@@ -960,9 +1036,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("reject_disabled");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
-      "/api/v1/content-ai-generation-requests",
+      "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
       adoptionUrl,
-      "/api/v1/content-ai-generation-requests",
+      "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
     ]);
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
@@ -986,7 +1062,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+        )
+      ) {
         return Response.json(
           createTaskHistoryResponse({
             workspace: "organization",
@@ -1038,7 +1119,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
         return Response.json(createEmptyTaskHistoryResponse("content"));
       }
 
@@ -1069,7 +1155,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/organization-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+        )
+      ) {
         return Response.json(createEmptyTaskHistoryResponse("organization"));
       }
 
@@ -1112,7 +1203,12 @@ describe("admin AI generation entry surfaces", () => {
         );
       }
 
-      if (String(url) === "/api/v1/content-ai-generation-requests") {
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
         return Response.json({
           code: 500001,
           message: "synthetic failure",

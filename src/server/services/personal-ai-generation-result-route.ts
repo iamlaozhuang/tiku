@@ -73,23 +73,60 @@ function isPersonalAiGenerationResultUserContext(
   return "userPublicId" in value;
 }
 
-function readLimitInput(request: Request): number | string | undefined {
-  const limit = new URL(request.url).searchParams.get("limit");
+function readPositiveIntegerInput(
+  searchParams: URLSearchParams,
+  name: string,
+): number | string | undefined {
+  const value = searchParams.get(name);
 
-  if (limit === null) {
+  if (value === null) {
     return undefined;
   }
 
-  return /^\d+$/.test(limit) ? Number(limit) : limit;
+  return /^\d+$/.test(value) ? Number(value) : value;
+}
+
+function readTaskTypeInput(
+  searchParams: URLSearchParams,
+): "ai_question_generation" | "ai_paper_generation" | string | undefined {
+  const taskType = searchParams.get("taskType");
+
+  if (taskType === null) {
+    return undefined;
+  }
+
+  return taskType === "ai_question_generation" ||
+    taskType === "ai_paper_generation"
+    ? taskType
+    : taskType;
 }
 
 function createResultHistoryQuery(
   request: Request,
   userContext: PersonalAiGenerationResultUserContext,
 ) {
+  const searchParams = new URL(request.url).searchParams;
+  const page = readPositiveIntegerInput(searchParams, "page");
+  const pageSize = readPositiveIntegerInput(searchParams, "pageSize");
+  const limit = readPositiveIntegerInput(searchParams, "limit");
+  const resolvedPage = typeof page === "number" ? page : 1;
+  const resolvedPageSize =
+    typeof pageSize === "number"
+      ? pageSize
+      : typeof limit === "number"
+        ? limit
+        : 10;
+
   return {
     ownerPublicId: userContext.userPublicId,
-    limit: readLimitInput(request),
+    taskType: readTaskTypeInput(searchParams),
+    page,
+    pageSize,
+    limit: pageSize ?? limit,
+    offset:
+      typeof page === "string" || typeof pageSize === "string"
+        ? undefined
+        : (resolvedPage - 1) * resolvedPageSize,
   };
 }
 

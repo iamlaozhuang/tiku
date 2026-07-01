@@ -111,7 +111,11 @@ export type AdminAiGenerationTaskHistoryQuery = {
   workspace: AdminAiGenerationWorkspace;
   ownerType: AiGenerationTaskRequestOwnerType;
   ownerPublicId: string;
+  generationKind: AdminAiGenerationKind;
+  page: number;
+  pageSize: number;
   limit: number;
+  offset: number;
 };
 
 export type AdminAiGenerationTaskPersistenceGateway = {
@@ -124,6 +128,7 @@ export type AdminAiGenerationTaskPersistenceGateway = {
   listTaskHistory(
     query: AdminAiGenerationTaskHistoryQuery,
   ): Promise<AdminAiGenerationTaskPersistenceRow[]>;
+  countTaskHistory?(query: AdminAiGenerationTaskHistoryQuery): Promise<number>;
 };
 
 export type AdminAiGenerationTaskPersistenceDto = {
@@ -177,4 +182,5 @@ export type AdminAiGenerationTaskPersistenceRepository = {
   listTaskHistory(
     query: AdminAiGenerationTaskHistoryQuery,
   ): Promise<AdminAiGenerationTaskPersistenceDto[]>;
+  countTaskHistory?(query: AdminAiGenerationTaskHistoryQuery): Promise<number>;
 };

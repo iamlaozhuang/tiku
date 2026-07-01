@@ -1,5 +1,5 @@
 import { aiGenerationTask } from "@/db/schema";
-import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
@@ -23,7 +23,11 @@ export type PersonalAiGenerationTaskType = Exclude<
 
 export type ListPersonalAiGenerationRequestHistoryQuery = {
   ownerPublicId: string;
+  taskType?: PersonalAiGenerationTaskType;
+  page?: number;
+  pageSize?: number;
   limit?: number;
+  offset?: number;
 };
 
 export type CreatePersonalAiGenerationRequestInput = {
@@ -62,6 +66,9 @@ export type PersonalAiGenerationRequestRepository = {
   listRequestHistory(
     query: ListPersonalAiGenerationRequestHistoryQuery,
   ): Promise<PersonalAiGenerationRequestHistoryDto>;
+  countRequestHistory?(
+    query: ListPersonalAiGenerationRequestHistoryQuery,
+  ): Promise<number>;
   createOrReuseRequest(
     input: CreatePersonalAiGenerationRequestInput,
   ): Promise<PersonalAiGenerationRequestPersistenceResult>;
@@ -70,8 +77,16 @@ export type PersonalAiGenerationRequestRepository = {
 export type PersonalAiGenerationRequestTaskGateway = {
   listRequestRows(query: {
     ownerPublicId: string;
+    taskType?: PersonalAiGenerationTaskType;
+    page: number;
+    pageSize: number;
     limit: number;
+    offset: number;
   }): Promise<PersonalAiGenerationRequestPersistenceRow[]>;
+  countRequestRows?(query: {
+    ownerPublicId: string;
+    taskType?: PersonalAiGenerationTaskType;
+  }): Promise<number>;
   findRequestByIdempotencyKey(query: {
     ownerPublicId: string;
     idempotencyKeyHash: string;
@@ -91,6 +106,7 @@ export const PERSONAL_AI_GENERATION_TASK_TYPES = [
 const personalAiGenerationRequestSelection = {
   public_id: aiGenerationTask.public_id,
   request_public_id: aiGenerationTask.request_public_id,
+  task_type: aiGenerationTask.task_type,
   task_status: aiGenerationTask.task_status,
   requested_at: aiGenerationTask.requested_at,
   result_public_id: aiGenerationTask.result_public_id,
@@ -99,13 +115,16 @@ const personalAiGenerationRequestSelection = {
   ai_call_log_public_id: aiGenerationTask.ai_call_log_public_id,
 };
 
-export function createPersonalAiGenerationRequestHistoryCondition(
-  ownerPublicId: string,
-): SQL {
+export function createPersonalAiGenerationRequestHistoryCondition(query: {
+  ownerPublicId: string;
+  taskType?: PersonalAiGenerationTaskType;
+}): SQL {
   return and(
     eq(aiGenerationTask.owner_type, "personal"),
-    eq(aiGenerationTask.owner_public_id, ownerPublicId),
-    inArray(aiGenerationTask.task_type, PERSONAL_AI_GENERATION_TASK_TYPES),
+    eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
+    query.taskType === undefined
+      ? inArray(aiGenerationTask.task_type, PERSONAL_AI_GENERATION_TASK_TYPES)
+      : eq(aiGenerationTask.task_type, query.taskType),
   ) as SQL;
 }
 
@@ -126,9 +145,17 @@ export function createPersonalAiGenerationRequestRepository(
 ): PersonalAiGenerationRequestRepository {
   return {
     async listRequestHistory(query) {
+      const page = resolveRequestHistoryPage(query.page);
+      const pageSize = resolveRequestHistoryLimit(
+        query.pageSize ?? query.limit,
+      );
       const rows = await gateway.listRequestRows({
         ownerPublicId: query.ownerPublicId,
-        limit: resolveRequestHistoryLimit(query.limit),
+        taskType: query.taskType,
+        page,
+        pageSize,
+        limit: pageSize,
+        offset: query.offset ?? (page - 1) * pageSize,
       });
 
       return [...rows]
@@ -168,6 +195,14 @@ export function createPersonalAiGenerationRequestRepository(
         historyItem: mapPersonalAiGenerationRequestRowToHistoryDto(resolvedRow),
       };
     },
+    countRequestHistory:
+      gateway.countRequestRows === undefined
+        ? undefined
+        : async (query) =>
+            gateway.countRequestRows?.({
+              ownerPublicId: query.ownerPublicId,
+              taskType: query.taskType,
+            }) ?? 0,
   };
 }
 
@@ -195,19 +230,36 @@ export function createPostgresPersonalAiGenerationRequestRepository(
     async listRequestRows(query) {
       const database = getDatabase();
 
-      return database
+      const rows = await database
         .select(personalAiGenerationRequestSelection)
         .from(aiGenerationTask)
         .where(
-          createPersonalAiGenerationRequestHistoryCondition(
-            query.ownerPublicId,
-          ),
+          createPersonalAiGenerationRequestHistoryCondition({
+            ownerPublicId: query.ownerPublicId,
+            taskType: query.taskType,
+          }),
         )
         .orderBy(
           desc(aiGenerationTask.requested_at),
           asc(aiGenerationTask.request_public_id),
         )
+        .offset(query.offset)
         .limit(query.limit);
+
+      return rows as PersonalAiGenerationRequestPersistenceRow[];
+    },
+    async countRequestRows(query) {
+      const [totalRow] = await getDatabase()
+        .select({ value: count() })
+        .from(aiGenerationTask)
+        .where(
+          createPersonalAiGenerationRequestHistoryCondition({
+            ownerPublicId: query.ownerPublicId,
+            taskType: query.taskType,
+          }),
+        );
+
+      return totalRow?.value ?? 0;
     },
     async findRequestByIdempotencyKey(query) {
       const row = await findRequestByIdempotencyKey(getDatabase(), query);
@@ -257,7 +309,9 @@ export function createPostgresPersonalAiGenerationRequestRepository(
         })
         .returning(personalAiGenerationRequestSelection);
 
-      return row ?? null;
+      return (
+        (row as PersonalAiGenerationRequestPersistenceRow | undefined) ?? null
+      );
     },
   });
 }
@@ -275,7 +329,7 @@ async function findRequestByIdempotencyKey(
     .where(createPersonalAiGenerationRequestIdempotencyCondition(query))
     .limit(1);
 
-  return row ?? null;
+  return (row as PersonalAiGenerationRequestPersistenceRow | undefined) ?? null;
 }
 
 function resolveRequestHistoryLimit(limit: number | undefined): number {
@@ -288,6 +342,14 @@ function resolveRequestHistoryLimit(limit: number | undefined): number {
   }
 
   return Math.min(limit, MAX_REQUEST_HISTORY_LIMIT);
+}
+
+function resolveRequestHistoryPage(page: number | undefined): number {
+  if (page === undefined) {
+    return 1;
+  }
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
 function comparePersonalAiGenerationRequestPersistenceRows(

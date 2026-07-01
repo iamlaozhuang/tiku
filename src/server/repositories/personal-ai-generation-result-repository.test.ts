@@ -70,7 +70,21 @@ function createGateway(
     } | null;
   } = {},
 ) {
-  const listResultRows = vi.fn(async () => options.rows ?? []);
+  const listResultRows = vi.fn(async (query) =>
+    (options.rows ?? [])
+      .filter(
+        (row) =>
+          row.owner_public_id === query.ownerPublicId &&
+          row.result_status === "draft" &&
+          (query.taskType === undefined || row.task_type === query.taskType),
+      )
+      .sort(
+        (leftRow, rightRow) =>
+          rightRow.created_at.getTime() - leftRow.created_at.getTime() ||
+          leftRow.public_id.localeCompare(rightRow.public_id),
+      )
+      .slice(query.offset, query.offset + query.limit),
+  );
   const findResultByTaskPublicId = vi.fn(
     async () => options.existingRow ?? null,
   );
@@ -100,8 +114,9 @@ function createGateway(
 
 describe("personal AI generation result repository", () => {
   it("builds owner-scoped result history conditions", () => {
-    const condition =
-      createPersonalAiGenerationResultHistoryCondition("student_public_170");
+    const condition = createPersonalAiGenerationResultHistoryCondition({
+      ownerPublicId: "student_public_170",
+    });
 
     expect(condition).not.toBeNull();
     expect(containsText(condition, "owner_public_id")).toBe(true);
@@ -126,14 +141,17 @@ describe("personal AI generation result repository", () => {
     const { gateway, listResultRows } = createGateway({
       rows: [
         createPersistenceRow({
+          owner_public_id: "student_public_172",
           public_id: "personal_ai_result_public_b",
           created_at: new Date("2026-06-13T12:00:00.000Z"),
         }),
         createPersistenceRow({
+          owner_public_id: "student_public_172",
           public_id: "personal_ai_result_public_c",
           created_at: new Date("2026-06-13T13:00:00.000Z"),
         }),
         createPersistenceRow({
+          owner_public_id: "student_public_172",
           public_id: "personal_ai_result_public_a",
           created_at: new Date("2026-06-13T12:00:00.000Z"),
         }),
@@ -143,12 +161,18 @@ describe("personal AI generation result repository", () => {
 
     const draftResults = await repository.listDraftResults({
       ownerPublicId: "student_public_172",
+      page: 1,
+      pageSize: 3,
       limit: 3,
+      offset: 0,
     });
 
     expect(listResultRows).toHaveBeenCalledWith({
       ownerPublicId: "student_public_172",
+      page: 1,
+      pageSize: 3,
       limit: 3,
+      offset: 0,
     });
     expect(draftResults.map((row) => row.resultPublicId)).toEqual([
       "personal_ai_result_public_c",
@@ -159,6 +183,53 @@ describe("personal AI generation result repository", () => {
     expect(JSON.stringify(draftResults)).not.toContain(
       "content_redacted_snapshot",
     );
+  });
+
+  it("filters owner draft results by task type before pagination", async () => {
+    const { gateway, listResultRows } = createGateway({
+      rows: [
+        createPersistenceRow({
+          owner_public_id: "student_public_172",
+          public_id: "personal_ai_result_question_newer",
+          task_type: "ai_question_generation",
+          created_at: new Date("2026-06-13T14:00:00.000Z"),
+        }),
+        createPersistenceRow({
+          owner_public_id: "student_public_172",
+          public_id: "personal_ai_result_paper_newer",
+          task_type: "ai_paper_generation",
+          created_at: new Date("2026-06-13T13:00:00.000Z"),
+        }),
+        createPersistenceRow({
+          owner_public_id: "student_public_172",
+          public_id: "personal_ai_result_paper_older",
+          task_type: "ai_paper_generation",
+          created_at: new Date("2026-06-13T12:00:00.000Z"),
+        }),
+      ],
+    });
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      ownerPublicId: "student_public_172",
+      taskType: "ai_paper_generation",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+
+    expect(listResultRows).toHaveBeenCalledWith({
+      ownerPublicId: "student_public_172",
+      taskType: "ai_paper_generation",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+    expect(draftResults.map((row) => row.resultPublicId)).toEqual([
+      "personal_ai_result_paper_newer",
+    ]);
   });
 
   it("reuses an existing draft result for the owner and task", async () => {

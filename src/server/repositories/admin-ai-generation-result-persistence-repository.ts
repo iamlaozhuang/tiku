@@ -20,13 +20,14 @@ const MAX_RESULT_HISTORY_LIMIT = 50;
 export function createAdminAiGenerationResultHistoryCondition(
   query: Pick<
     AdminAiGenerationResultHistoryQuery,
-    "workspace" | "ownerType" | "ownerPublicId"
+    "workspace" | "ownerType" | "ownerPublicId" | "generationKind"
   >,
 ): SQL {
   return and(
     eq(adminAiGenerationResult.workspace, query.workspace),
     eq(adminAiGenerationResult.owner_type, query.ownerType),
     eq(adminAiGenerationResult.owner_public_id, query.ownerPublicId),
+    eq(adminAiGenerationResult.generation_kind, query.generationKind),
     eq(adminAiGenerationResult.result_status, "draft"),
   ) as SQL;
 }
@@ -51,7 +52,11 @@ export function createAdminAiGenerationResultPersistenceRepository(
         workspace: query.workspace,
         ownerType: query.ownerType,
         ownerPublicId: query.ownerPublicId,
+        generationKind: query.generationKind,
+        page: query.page,
+        pageSize: query.pageSize,
         limit: resolveResultHistoryLimit(query.limit),
+        offset: query.offset,
       });
 
       return [...rows]

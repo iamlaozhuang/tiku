@@ -404,13 +404,14 @@ function createGateway(
             row.workspace === query.workspace &&
             row.owner_type === query.ownerType &&
             row.owner_public_id === query.ownerPublicId &&
+            row.generation_kind === query.generationKind &&
             ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES.includes(row.task_type),
         )
         .sort(
           (leftRow, rightRow) =>
             rightRow.requested_at.getTime() - leftRow.requested_at.getTime(),
         )
-        .slice(0, query.limit);
+        .slice(query.offset, query.offset + query.limit);
     },
   };
 }
@@ -708,6 +709,8 @@ describe("admin AI generation task persistence repository", () => {
       createPersistenceRow({
         public_id: "admin_ai_generation_task_old_content_901",
         request_public_id: "admin_ai_generation_request_old_content_901",
+        generation_kind: "paper",
+        task_type: "ai_paper_generation",
         requested_at: new Date("2026-06-26T19:00:00.000Z"),
       }),
       createPersistenceRow({
@@ -743,7 +746,11 @@ describe("admin AI generation task persistence repository", () => {
       workspace: "content",
       ownerType: "platform",
       ownerPublicId: "platform_content_review_pool",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 2,
       limit: 2,
+      offset: 0,
     });
 
     expect(gateway.historyQueries).toEqual([
@@ -751,7 +758,11 @@ describe("admin AI generation task persistence repository", () => {
         workspace: "content",
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
+        generationKind: "paper",
+        page: 1,
+        pageSize: 2,
         limit: 2,
+        offset: 0,
       },
     ]);
     expect(result).toMatchObject([
@@ -779,5 +790,60 @@ describe("admin AI generation task persistence repository", () => {
       },
     ]);
     expect(JSON.stringify(result)).not.toMatch(/"id":/);
+  });
+
+  it("filters task history by generation kind before applying descending pagination", async () => {
+    const gateway = createGateway([
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_question_newer",
+        request_public_id: "admin_ai_generation_request_question_newer",
+        generation_kind: "question",
+        task_type: "ai_question_generation",
+        requested_at: new Date("2026-06-26T22:00:00.000Z"),
+      }),
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_paper_newer",
+        request_public_id: "admin_ai_generation_request_paper_newer",
+        generation_kind: "paper",
+        task_type: "ai_paper_generation",
+        requested_at: new Date("2026-06-26T21:00:00.000Z"),
+      }),
+      createPersistenceRow({
+        public_id: "admin_ai_generation_task_paper_older",
+        request_public_id: "admin_ai_generation_request_paper_older",
+        generation_kind: "paper",
+        task_type: "ai_paper_generation",
+        requested_at: new Date("2026-06-26T20:00:00.000Z"),
+      }),
+    ]);
+    const repository =
+      createAdminAiGenerationTaskPersistenceRepository(gateway);
+
+    const history = await repository.listTaskHistory({
+      workspace: "content",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 1,
+      limit: 1,
+      offset: 0,
+    });
+
+    expect(gateway.historyQueries).toEqual([
+      {
+        workspace: "content",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        generationKind: "paper",
+        page: 1,
+        pageSize: 1,
+        limit: 1,
+        offset: 0,
+      },
+    ]);
+    expect(history.map((row) => row.taskPublicId)).toEqual([
+      "admin_ai_generation_task_paper_newer",
+    ]);
   });
 });

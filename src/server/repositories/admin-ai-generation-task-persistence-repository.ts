@@ -67,6 +67,10 @@ export function createAdminAiGenerationTaskPersistenceRepository(
         mapAdminAiGenerationTaskPersistenceRowToDto(row),
       );
     },
+    countTaskHistory:
+      gateway.countTaskHistory === undefined
+        ? undefined
+        : async (query) => gateway.countTaskHistory?.(query) ?? 0,
   };
 }
 

@@ -1,10 +1,14 @@
 import type { PersonalAiGenerationRequestHistoryItemDto } from "../contracts/personal-ai-generation-request-history-contract";
-import type { AiGenerationTaskStatus } from "../models/ai-generation-task";
+import type {
+  AiGenerationTaskStatus,
+  AiGenerationTaskType,
+} from "../models/ai-generation-task";
 import type { EvidenceStatus } from "../models/ai-rag";
 
 export type PersonalAiGenerationRequestPersistenceRow = {
   public_id: string;
   request_public_id: string;
+  task_type: Exclude<AiGenerationTaskType, "organization_training_generation">;
   task_status: AiGenerationTaskStatus;
   requested_at: Date;
   result_public_id: string | null;
@@ -21,6 +25,7 @@ export function mapPersonalAiGenerationRequestRowToHistoryDto(
   return {
     requestPublicId: row.request_public_id,
     taskPublicId: row.public_id,
+    taskType: row.task_type,
     status: row.task_status,
     requestedAt: row.requested_at.toISOString(),
     resultPublicId: row.result_public_id,

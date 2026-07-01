@@ -9,6 +9,7 @@ function createPersistenceRow(
   return {
     public_id: "ai_generation_task_public_201",
     request_public_id: "personal_ai_request_public_201",
+    task_type: "ai_question_generation",
     task_status: "succeeded",
     requested_at: new Date("2026-06-12T16:30:00.000Z"),
     result_public_id: "ai_generation_result_public_201",
@@ -32,6 +33,7 @@ describe("personal AI generation request mapper", () => {
     expect(dto).toEqual({
       requestPublicId: "personal_ai_request_public_201",
       taskPublicId: "ai_generation_task_public_201",
+      taskType: "ai_question_generation",
       status: "succeeded",
       requestedAt: "2026-06-12T16:30:00.000Z",
       resultPublicId: "ai_generation_result_public_201",

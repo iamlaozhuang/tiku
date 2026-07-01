@@ -1,5 +1,5 @@
 import { aiGenerationTask, personalAiGenerationResult } from "@/db/schema";
-import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import type { PersonalAiGenerationResultPersistenceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
@@ -29,7 +29,11 @@ export type PersonalAiGenerationResultTaskRow = {
 
 export type ListPersonalAiGenerationResultQuery = {
   ownerPublicId: string;
+  taskType?: PersonalAiGenerationResultTaskType;
+  page?: number;
+  pageSize?: number;
   limit?: number;
+  offset?: number;
 };
 
 export type CreatePersonalAiGenerationResultInput =
@@ -59,6 +63,9 @@ export type PersonalAiGenerationResultRepository = {
   listDraftResults(
     query: ListPersonalAiGenerationResultQuery,
   ): Promise<PersonalAiGenerationResultPersistenceResult["result"][]>;
+  countDraftResults?(
+    query: ListPersonalAiGenerationResultQuery,
+  ): Promise<number>;
   createOrReuseDraftResult(
     input: CreatePersonalAiGenerationResultInput,
   ): Promise<PersonalAiGenerationResultPersistenceResult>;
@@ -67,8 +74,16 @@ export type PersonalAiGenerationResultRepository = {
 export type PersonalAiGenerationResultTaskGateway = {
   listResultRows(query: {
     ownerPublicId: string;
+    taskType?: PersonalAiGenerationResultTaskType;
+    page: number;
+    pageSize: number;
     limit: number;
+    offset: number;
   }): Promise<PersonalAiGenerationResultPersistenceRow[]>;
+  countResultRows?(query: {
+    ownerPublicId: string;
+    taskType?: PersonalAiGenerationResultTaskType;
+  }): Promise<number>;
   findResultByTaskPublicId(query: {
     ownerPublicId: string;
     taskPublicId: string;
@@ -116,11 +131,18 @@ const personalAiGenerationResultSelection = {
   updated_at: personalAiGenerationResult.updated_at,
 };
 
-export function createPersonalAiGenerationResultHistoryCondition(
-  ownerPublicId: string,
-): SQL {
+export function createPersonalAiGenerationResultHistoryCondition(query: {
+  ownerPublicId: string;
+  taskType?: PersonalAiGenerationResultTaskType;
+}): SQL {
   return and(
-    eq(personalAiGenerationResult.owner_public_id, ownerPublicId),
+    eq(personalAiGenerationResult.owner_public_id, query.ownerPublicId),
+    query.taskType === undefined
+      ? inArray(
+          personalAiGenerationResult.task_type,
+          PERSONAL_AI_GENERATION_RESULT_TASK_TYPES,
+        )
+      : eq(personalAiGenerationResult.task_type, query.taskType),
     eq(personalAiGenerationResult.result_status, "draft"),
   ) as SQL;
 }
@@ -140,9 +162,15 @@ export function createPersonalAiGenerationResultRepository(
 ): PersonalAiGenerationResultRepository {
   return {
     async listDraftResults(query) {
+      const page = resolveResultHistoryPage(query.page);
+      const pageSize = resolveResultHistoryLimit(query.pageSize ?? query.limit);
       const rows = await gateway.listResultRows({
         ownerPublicId: query.ownerPublicId,
-        limit: resolveResultHistoryLimit(query.limit),
+        taskType: query.taskType,
+        page,
+        pageSize,
+        limit: pageSize,
+        offset: query.offset ?? (page - 1) * pageSize,
       });
 
       return [...rows]
@@ -201,6 +229,14 @@ export function createPersonalAiGenerationResultRepository(
         result: mapPersonalAiGenerationResultRowToDto(resolvedRow),
       };
     },
+    countDraftResults:
+      gateway.countResultRows === undefined
+        ? undefined
+        : async (query) =>
+            gateway.countResultRows?.({
+              ownerPublicId: query.ownerPublicId,
+              taskType: query.taskType,
+            }) ?? 0,
   };
 }
 
@@ -218,15 +254,32 @@ export function createPostgresPersonalAiGenerationResultRepository(
         .select(personalAiGenerationResultSelection)
         .from(personalAiGenerationResult)
         .where(
-          createPersonalAiGenerationResultHistoryCondition(query.ownerPublicId),
+          createPersonalAiGenerationResultHistoryCondition({
+            ownerPublicId: query.ownerPublicId,
+            taskType: query.taskType,
+          }),
         )
         .orderBy(
           desc(personalAiGenerationResult.created_at),
           asc(personalAiGenerationResult.public_id),
         )
+        .offset(query.offset)
         .limit(query.limit);
 
       return rows as PersonalAiGenerationResultPersistenceRow[];
+    },
+    async countResultRows(query) {
+      const [totalRow] = await getDatabase()
+        .select({ value: count() })
+        .from(personalAiGenerationResult)
+        .where(
+          createPersonalAiGenerationResultHistoryCondition({
+            ownerPublicId: query.ownerPublicId,
+            taskType: query.taskType,
+          }),
+        );
+
+      return totalRow?.value ?? 0;
     },
     async findResultByTaskPublicId(query) {
       return findResultByTaskPublicId(getDatabase(), query);
@@ -350,6 +403,14 @@ function resolveResultHistoryLimit(limit: number | undefined): number {
   }
 
   return Math.min(limit, MAX_RESULT_HISTORY_LIMIT);
+}
+
+function resolveResultHistoryPage(page: number | undefined): number {
+  if (page === undefined) {
+    return 1;
+  }
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
 function comparePersonalAiGenerationResultRows(

@@ -1,6 +1,8 @@
 import {
   createErrorResponse,
+  createPaginatedResponse,
   createSuccessResponse,
+  type ApiPagination,
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
@@ -34,7 +36,7 @@ const RESULT_DETAIL_UNAVAILABLE_MESSAGE =
 
 type PersonalAiGenerationResultHistoryRepository = Pick<
   PersonalAiGenerationResultRepository,
-  "listDraftResults"
+  "countDraftResults" | "listDraftResults"
 >;
 
 export type PersonalAiGenerationResultHistoryService = {
@@ -125,7 +127,11 @@ async function listDraftResults(
 ): Promise<PersonalAiGenerationResultDto[]> {
   return repository.listDraftResults({
     ownerPublicId: query.ownerPublicId,
+    taskType: query.taskType,
+    page: query.page,
+    pageSize: query.pageSize,
     limit: query.limit,
+    offset: query.offset,
   });
 }
 
@@ -160,10 +166,30 @@ export function createPersonalAiGenerationResultHistoryService(
       }
 
       try {
-        return createSuccessResponse(
-          buildPersonalAiGenerationResultHistoryDto(
-            await listDraftResults(repository, normalizedQuery.value),
-          ),
+        const results = await listDraftResults(
+          repository,
+          normalizedQuery.value,
+        );
+        const total =
+          repository.countDraftResults === undefined
+            ? results.length
+            : await repository.countDraftResults({
+                ownerPublicId: normalizedQuery.value.ownerPublicId,
+                taskType: normalizedQuery.value.taskType,
+              });
+        const page = normalizedQuery.value.page ?? 1;
+        const pageSize =
+          normalizedQuery.value.pageSize ?? normalizedQuery.value.limit ?? 10;
+
+        return createPaginatedResponse(
+          buildPersonalAiGenerationResultHistoryDto(results),
+          {
+            page,
+            pageSize,
+            total,
+            sortBy: "persistedAt",
+            sortOrder: "desc",
+          } satisfies ApiPagination,
         );
       } catch {
         return createErrorResponse(

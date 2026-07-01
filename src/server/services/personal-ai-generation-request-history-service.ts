@@ -21,6 +21,7 @@ function mapPersonalAiGenerationRequestHistoryToDto(
   return {
     requestPublicId: input.requestPublicId,
     taskPublicId: input.taskPublicId,
+    taskType: input.taskType,
     status: input.status,
     requestedAt: input.requestedAt,
     resultPublicId: input.resultPublicId,

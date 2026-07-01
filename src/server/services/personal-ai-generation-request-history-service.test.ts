@@ -6,6 +6,7 @@ function createHistoryRow(overrides: Record<string, unknown> = {}) {
   return {
     requestPublicId: "personal_ai_request_public_001",
     taskPublicId: "ai_generation_task_public_001",
+    taskType: "ai_question_generation",
     status: "succeeded",
     requestedAt: "2026-06-12T12:00:00.000Z",
     resultPublicId: "ai_generation_result_public_001",
@@ -43,6 +44,7 @@ describe("personal AI generation request history service", () => {
         {
           requestPublicId: "personal_ai_request_public_001",
           taskPublicId: "ai_generation_task_public_001",
+          taskType: "ai_question_generation",
           status: "succeeded",
           requestedAt: "2026-06-12T12:00:00.000Z",
           resultPublicId: "ai_generation_result_public_001",

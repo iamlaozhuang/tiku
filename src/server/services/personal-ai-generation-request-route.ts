@@ -1,6 +1,7 @@
 import {
   createErrorResponse,
-  createSuccessResponse,
+  createPaginatedResponse,
+  type ApiPagination,
   type ApiResponse,
 } from "../contracts/api-response";
 import { getRequestAuthorization } from "../auth/session-cookie";
@@ -32,7 +33,12 @@ type PersonalAiGenerationRequestRouteRepository = Pick<
   PersonalAiGenerationRequestRepository,
   "listRequestHistory"
 > &
-  Partial<Pick<PersonalAiGenerationRequestRepository, "createOrReuseRequest">>;
+  Partial<
+    Pick<
+      PersonalAiGenerationRequestRepository,
+      "countRequestHistory" | "createOrReuseRequest"
+    >
+  >;
 
 export type PersonalAiGenerationRequestRouteDependencies = {
   requestRepository?: PersonalAiGenerationRequestRouteRepository;
@@ -43,6 +49,9 @@ export type PersonalAiGenerationRequestRouteDependencies = {
 const REQUEST_HISTORY_UNAVAILABLE_CODE = 500017;
 const REQUEST_HISTORY_UNAVAILABLE_MESSAGE =
   "Personal AI request history is temporarily unavailable.";
+const PERSONAL_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
+const PERSONAL_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
+const PERSONAL_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
 const REQUEST_PERSISTENCE_UNAVAILABLE_CODE = 500018;
 const REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE =
   "Personal AI generation request could not be persisted.";
@@ -85,6 +94,67 @@ function isPersonalAiGenerationRequestUserContext(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function normalizePersonalAiGenerationTaskType(
+  value: string | null,
+): CreatePersonalAiGenerationRequestInput["taskType"] | undefined | null {
+  if (value === null) {
+    return undefined;
+  }
+
+  return value === "ai_question_generation" || value === "ai_paper_generation"
+    ? value
+    : null;
+}
+
+function normalizePositiveInteger(
+  value: string | null,
+  fallbackValue: number,
+): number {
+  if (value === null || !/^\d+$/.test(value)) {
+    return fallbackValue;
+  }
+
+  const parsedValue = Number(value);
+
+  return parsedValue > 0 ? parsedValue : fallbackValue;
+}
+
+function createPersonalAiGenerationHistoryQuery(request: Request): {
+  taskType:
+    | CreatePersonalAiGenerationRequestInput["taskType"]
+    | undefined
+    | null;
+  page: number;
+  pageSize: number;
+  limit: number;
+  offset: number;
+} {
+  const searchParams = new URL(request.url).searchParams;
+  const taskType = normalizePersonalAiGenerationTaskType(
+    searchParams.get("taskType"),
+  );
+  const page = normalizePositiveInteger(
+    searchParams.get("page"),
+    PERSONAL_AI_GENERATION_HISTORY_DEFAULT_PAGE,
+  );
+  const requestedPageSize = normalizePositiveInteger(
+    searchParams.get("pageSize"),
+    PERSONAL_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE,
+  );
+  const pageSize = Math.min(
+    requestedPageSize,
+    PERSONAL_AI_GENERATION_HISTORY_MAX_PAGE_SIZE,
+  );
+
+  return {
+    taskType,
+    page,
+    pageSize,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+  };
 }
 
 function shouldReturnLocalBrowserExperience(input: unknown): boolean {
@@ -390,13 +460,44 @@ export function createPersonalAiGenerationRequestRouteHandlers(
           }
 
           try {
+            const historyQuery =
+              createPersonalAiGenerationHistoryQuery(request);
+
+            if (historyQuery.taskType === null) {
+              return createJsonResponse(
+                createErrorResponse(
+                  400016,
+                  "Invalid personal AI generation request history input.",
+                ),
+              );
+            }
+
             const history = await requestRepository.listRequestHistory({
               ownerPublicId: userContext.userPublicId,
+              taskType: historyQuery.taskType,
+              page: historyQuery.page,
+              pageSize: historyQuery.pageSize,
+              limit: historyQuery.limit,
+              offset: historyQuery.offset,
             });
+            const historyTotal =
+              requestRepository.countRequestHistory === undefined
+                ? history.length
+                : await requestRepository.countRequestHistory({
+                    ownerPublicId: userContext.userPublicId,
+                    taskType: historyQuery.taskType,
+                  });
 
             return createJsonResponse(
-              createSuccessResponse<PersonalAiGenerationRequestHistoryDto>(
+              createPaginatedResponse<PersonalAiGenerationRequestHistoryDto>(
                 history,
+                {
+                  page: historyQuery.page,
+                  pageSize: historyQuery.pageSize,
+                  total: historyTotal,
+                  sortBy: "requestedAt",
+                  sortOrder: "desc",
+                } satisfies ApiPagination,
               ),
             );
           } catch {

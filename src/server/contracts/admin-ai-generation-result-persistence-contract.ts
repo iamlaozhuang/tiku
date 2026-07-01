@@ -58,7 +58,11 @@ export type AdminAiGenerationResultHistoryQuery = {
   workspace: AdminAiGenerationWorkspace;
   ownerType: AdminAiGenerationResultOwnerType;
   ownerPublicId: string;
+  generationKind: AdminAiGenerationKind;
+  page: number;
+  pageSize: number;
   limit?: number;
+  offset: number;
 };
 
 export type FindAdminAiGenerationResultByTaskQuery = {

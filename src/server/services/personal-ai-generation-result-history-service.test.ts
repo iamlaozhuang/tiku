@@ -80,11 +80,56 @@ describe("personal AI generation result history service", () => {
         privateUseBoundary: createExpectedPrivateUseBoundary(),
         results: [],
       },
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
     });
 
     expect(repository.listDraftResults).toHaveBeenCalledWith({
       ownerPublicId: "student_public_200",
+      taskType: undefined,
+      page: undefined,
+      pageSize: undefined,
       limit: undefined,
+      offset: undefined,
+    });
+  });
+
+  it("passes task type and pagination into the result repository", async () => {
+    const repository = createRepository();
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    const response = await service.listDraftResultHistory({
+      ownerPublicId: "student_public_200",
+      taskType: "ai_paper_generation",
+      page: 2,
+      pageSize: 5,
+      limit: 5,
+      offset: 5,
+    });
+
+    expect(response).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(repository.listDraftResults).toHaveBeenCalledWith({
+      ownerPublicId: "student_public_200",
+      taskType: "ai_paper_generation",
+      page: 2,
+      pageSize: 5,
+      limit: 5,
+      offset: 5,
     });
   });
 
@@ -138,7 +183,11 @@ describe("personal AI generation result history service", () => {
     });
     expect(repository.listDraftResults).toHaveBeenCalledWith({
       ownerPublicId: "student_public_200",
+      taskType: undefined,
+      page: undefined,
+      pageSize: undefined,
       limit: 3,
+      offset: undefined,
     });
     expect(serializedResponse).not.toMatch(/"id":/);
     expect(serializedResponse).not.toContain("internalId");
@@ -209,7 +258,11 @@ describe("personal AI generation result history service", () => {
     });
     expect(repository.listDraftResults).toHaveBeenCalledWith({
       ownerPublicId: "student_public_200",
+      taskType: undefined,
+      page: undefined,
+      pageSize: undefined,
       limit: undefined,
+      offset: undefined,
     });
     expect(serializedResponse).not.toContain(generatedContentKey);
     expect(serializedResponse).not.toContain(omittedGeneratedFixture);
@@ -235,7 +288,11 @@ describe("personal AI generation result history service", () => {
     });
     expect(repository.listDraftResults).toHaveBeenCalledWith({
       ownerPublicId: "student_public_200",
+      taskType: undefined,
+      page: undefined,
+      pageSize: undefined,
       limit: undefined,
+      offset: undefined,
     });
   });
 

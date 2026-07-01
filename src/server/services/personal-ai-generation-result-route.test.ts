@@ -70,9 +70,23 @@ function createResultRepository(
     listError?: Error;
   } = {},
 ): Pick<PersonalAiGenerationResultRepository, "listDraftResults"> & {
-  calls: Array<{ ownerPublicId: string; limit?: number }>;
+  calls: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+  }>;
 } {
-  const calls: Array<{ ownerPublicId: string; limit?: number }> = [];
+  const calls: Array<{
+    ownerPublicId: string;
+    taskType?: string;
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+  }> = [];
 
   return {
     calls,
@@ -355,16 +369,64 @@ describe("personal AI generation result route handlers", () => {
           },
         ],
       },
+      pagination: {
+        page: 1,
+        pageSize: 5,
+        total: 1,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
     });
     expect(resultRepository.calls).toEqual([
       {
         ownerPublicId: userContext.userPublicId,
+        taskType: undefined,
+        page: undefined,
+        pageSize: undefined,
         limit: 5,
+        offset: 0,
       },
     ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
     expect(serializedPayload).not.toMatch(/"id":/);
     expect(serializedPayload).not.toContain(omittedText);
+  });
+
+  it("passes task type and pagination query to personal result history repository", async () => {
+    const resultRepository = createResultRepository([]);
+    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest("?taskType=ai_paper_generation&page=2&pageSize=5"),
+    );
+    const payload = await response.json();
+
+    expect(resultRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+        taskType: "ai_paper_generation",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
   });
 
   it("rejects invalid limit input before touching the repository", async () => {
@@ -486,7 +548,11 @@ describe("personal AI generation result route handlers", () => {
     expect(resultRepository.calls).toEqual([
       {
         ownerPublicId: userContext.userPublicId,
+        taskType: undefined,
+        page: undefined,
+        pageSize: undefined,
         limit: undefined,
+        offset: undefined,
       },
     ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
@@ -546,7 +612,11 @@ describe("personal AI generation result route handlers", () => {
     expect(resultRepository.calls).toEqual([
       {
         ownerPublicId: userContext.userPublicId,
+        taskType: undefined,
+        page: undefined,
+        pageSize: undefined,
         limit: undefined,
+        offset: undefined,
       },
     ]);
   });

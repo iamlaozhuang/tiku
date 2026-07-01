@@ -3,9 +3,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import {
+  createPaginatedResponse,
   createErrorResponse,
   createSuccessResponse,
   type ApiResponse,
+  type ApiPagination,
 } from "../contracts/api-response";
 import type {
   AdminAiGenerationKind,
@@ -108,7 +110,9 @@ export type AdminAiGenerationRuntimeBridgeControl = {
 
 const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
 const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
-const ADMIN_AI_GENERATION_HISTORY_LIMIT = 10;
+const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
+const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
+const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
 
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
@@ -141,6 +145,54 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function normalizeGenerationKind(value: unknown): AdminAiGenerationKind | null {
   return value === "question" || value === "paper" ? value : null;
+}
+
+function normalizePositiveInteger(
+  value: string | null,
+  fallbackValue: number,
+): number {
+  if (value === null || !/^\d+$/.test(value)) {
+    return fallbackValue;
+  }
+
+  const parsedValue = Number(value);
+
+  return parsedValue > 0 ? parsedValue : fallbackValue;
+}
+
+function normalizeAdminAiGenerationHistoryQueryInput(request: Request): {
+  generationKind: AdminAiGenerationKind | null;
+  page: number;
+  pageSize: number;
+  limit: number;
+  offset: number;
+} {
+  const searchParams = new URL(request.url).searchParams;
+  const generationKindInput = searchParams.get("generationKind");
+  const generationKind =
+    generationKindInput === null
+      ? "question"
+      : normalizeGenerationKind(generationKindInput);
+  const page = normalizePositiveInteger(
+    searchParams.get("page"),
+    ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE,
+  );
+  const requestedPageSize = normalizePositiveInteger(
+    searchParams.get("pageSize"),
+    ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE,
+  );
+  const pageSize = Math.min(
+    requestedPageSize,
+    ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE,
+  );
+
+  return {
+    generationKind,
+    page,
+    pageSize,
+    limit: pageSize,
+    offset: (page - 1) * pageSize,
+  };
 }
 
 function hasRole(actor: AdminAiGenerationActor, role: AdminRole): boolean {
@@ -292,14 +344,23 @@ function createAdminAiGenerationPolicyInput(input: {
 
 function resolveAdminAiGenerationTaskHistoryQuery(input: {
   actor: AdminAiGenerationActor;
+  historyQueryInput: {
+    generationKind: AdminAiGenerationKind;
+    page: number;
+    pageSize: number;
+    limit: number;
+    offset: number;
+  };
   workspace: AdminAiGenerationWorkspace;
 }): AdminAiGenerationTaskHistoryQuery | null {
+  const historyQueryInput = input.historyQueryInput;
+
   if (input.workspace === "content") {
     return {
       workspace: "content",
       ownerType: "platform",
       ownerPublicId: "platform_content_review_pool",
-      limit: ADMIN_AI_GENERATION_HISTORY_LIMIT,
+      ...historyQueryInput,
     };
   }
 
@@ -314,7 +375,7 @@ function resolveAdminAiGenerationTaskHistoryQuery(input: {
     workspace: "organization",
     ownerType: "organization",
     ownerPublicId: organizationCapability.organizationPublicId,
-    limit: ADMIN_AI_GENERATION_HISTORY_LIMIT,
+    ...historyQueryInput,
   };
 }
 
@@ -778,18 +839,30 @@ function resolveAdminAiGenerationResultHistoryQuery(
     workspace: historyQuery.workspace,
     ownerType: historyQuery.ownerType,
     ownerPublicId: historyQuery.ownerPublicId,
+    generationKind: historyQuery.generationKind,
+    page: historyQuery.page,
+    pageSize: historyQuery.pageSize,
     limit: historyQuery.limit,
+    offset: historyQuery.offset,
   };
 }
 
 async function listAdminAiGenerationTaskHistory(input: {
   actor: AdminAiGenerationActor;
+  historyQueryInput: {
+    generationKind: AdminAiGenerationKind;
+    page: number;
+    pageSize: number;
+    limit: number;
+    offset: number;
+  };
   resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationTaskHistoryDto | null>> {
   const historyQuery = resolveAdminAiGenerationTaskHistoryQuery({
     actor: input.actor,
+    historyQueryInput: input.historyQueryInput,
     workspace: input.workspace,
   });
 
@@ -819,13 +892,26 @@ async function listAdminAiGenerationTaskHistory(input: {
       generatedResultsByTaskPublicId.get(task.taskPublicId) ?? null,
     ),
   );
+  const historyTotal =
+    input.taskPersistenceRepository.countTaskHistory === undefined
+      ? historyItems.length
+      : await input.taskPersistenceRepository.countTaskHistory(historyQuery);
 
-  return createSuccessResponse({
-    workspace: input.workspace,
-    latestTask: historyItems[0] ?? null,
-    items: historyItems,
-    redactionStatus: "redacted",
-  });
+  return createPaginatedResponse(
+    {
+      workspace: input.workspace,
+      latestTask: historyItems[0] ?? null,
+      items: historyItems,
+      redactionStatus: "redacted",
+    },
+    {
+      page: historyQuery.page,
+      pageSize: historyQuery.pageSize,
+      total: historyTotal,
+      sortBy: "requestedAt",
+      sortOrder: "desc",
+    } satisfies ApiPagination,
+  );
 }
 
 async function resolveAdminAiGenerationActor(
@@ -886,9 +972,20 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
           return createJsonResponse(adminAiGenerationPermissionDeniedResponse);
         }
 
+        const historyQueryInput =
+          normalizeAdminAiGenerationHistoryQueryInput(request);
+
+        if (historyQueryInput.generationKind === null) {
+          return createJsonResponse(invalidAdminAiGenerationRequestResponse);
+        }
+
         return createJsonResponse(
           await listAdminAiGenerationTaskHistory({
             actor,
+            historyQueryInput: {
+              ...historyQueryInput,
+              generationKind: historyQueryInput.generationKind,
+            },
             resultPersistenceRepository,
             taskPersistenceRepository,
             workspace,

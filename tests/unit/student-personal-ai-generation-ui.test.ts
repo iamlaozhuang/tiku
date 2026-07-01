@@ -36,6 +36,7 @@ const serverHistoryResponse = {
       taskPublicId: "ai-generation-task-public-initial-001",
       status: "succeeded",
       requestedAt: "2026-06-12T10:00:00.000Z",
+      taskType: "ai_question_generation",
       resultPublicId: "ai-result-public-initial-001",
       evidenceStatus: "sufficient",
       citationCount: 1,
@@ -54,6 +55,7 @@ const serverHistoryAfterSubmitResponse = {
       taskPublicId: "ai-generation-task-public-server-after-submit-001",
       status: "pending",
       requestedAt: "2026-06-12T12:30:00.000Z",
+      taskType: "ai_question_generation",
       resultPublicId: null,
       evidenceStatus: "none",
       citationCount: 0,
@@ -403,7 +405,7 @@ function createPersonalAiGenerationFetchMock(
       };
     }
 
-    if (path === "/api/v1/personal-ai-generation-requests") {
+    if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
       expect(init?.headers).toMatchObject({
         authorization: "Bearer unit-test-session-token",
       });
@@ -425,7 +427,7 @@ function createPersonalAiGenerationFetchMock(
       };
     }
 
-    if (path === "/api/v1/personal-ai-generation-results") {
+    if (path.startsWith("/api/v1/personal-ai-generation-results")) {
       expect(init?.method).toBe("GET");
       expect(init?.headers).toMatchObject({
         authorization: "Bearer unit-test-session-token",
@@ -477,7 +479,7 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
       };
     }
 
-    if (path === "/api/v1/personal-ai-generation-requests") {
+    if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
       expect(init?.headers).toMatchObject({
         authorization: "Bearer unit-test-session-token",
       });
@@ -502,7 +504,7 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
       };
     }
 
-    if (path === "/api/v1/personal-ai-generation-results") {
+    if (path.startsWith("/api/v1/personal-ai-generation-results")) {
       expect(init?.method).toBe("GET");
       expect(init?.headers).toMatchObject({
         authorization: "Bearer unit-test-session-token",
@@ -596,7 +598,9 @@ describe("StudentPersonalAiGenerationPage", () => {
             };
           }
 
-          if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          if (
+            String(url).startsWith("/api/v1/personal-ai-generation-requests")
+          ) {
             expect(init?.method).toBe("GET");
 
             return {
@@ -606,7 +610,9 @@ describe("StudentPersonalAiGenerationPage", () => {
             };
           }
 
-          if (String(url) === "/api/v1/personal-ai-generation-results") {
+          if (
+            String(url).startsWith("/api/v1/personal-ai-generation-results")
+          ) {
             expect(init?.method).toBe("GET");
 
             return {
@@ -653,7 +659,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
@@ -666,7 +672,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
@@ -723,7 +729,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
           });
@@ -762,7 +768,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
@@ -817,11 +823,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
     expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
     );
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-results",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
     );
     expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[3]?.[0])).toBe("/api/v1/sessions");
@@ -833,11 +839,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
     expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("POST");
     expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
     );
     expect(fetchMock.mock.calls[6]?.[1]?.method).toBe("GET");
     expect(String(fetchMock.mock.calls[7]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-results",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
     );
     expect(fetchMock.mock.calls[7]?.[1]?.method).toBe("GET");
 
@@ -930,7 +936,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           if (init?.method === "GET") {
             return {
               ok: true,
@@ -951,7 +957,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1024,7 +1030,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1034,7 +1040,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1128,7 +1134,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
           });
@@ -1153,7 +1159,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
             authorization: "Bearer unit-test-session-token",
@@ -1224,7 +1230,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           if (init?.method === "GET") {
             return {
               ok: true,
@@ -1246,7 +1252,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           return {
             ok: true,
             status: 200,
@@ -1326,13 +1332,13 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
       "/api/v1/authorizations",
-      "/api/v1/personal-ai-generation-requests",
-      "/api/v1/personal-ai-generation-results",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
       "/api/v1/sessions",
       "/api/v1/authorizations",
       "/api/v1/personal-ai-generation-requests",
-      "/api/v1/personal-ai-generation-requests",
-      "/api/v1/personal-ai-generation-results",
+      "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+      "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
     ]);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
       "GET",
@@ -1519,7 +1525,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
           return {
             ok: true,
             status: 200,
@@ -1527,7 +1533,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/personal-ai-generation-results") {
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
           return {
             ok: true,
             status: 200,
@@ -1641,6 +1647,7 @@ describe("StudentPersonalAiGenerationPage", () => {
                 taskPublicId: "ai-generation-task-public-history-001",
                 status: "succeeded",
                 requestedAt: "2026-06-12T12:45:00.000Z",
+                taskType: "ai_question_generation",
                 resultPublicId: "ai-result-public-history-001",
                 evidenceStatus: "weak",
                 citationCount: 3,
@@ -1732,6 +1739,7 @@ describe("StudentPersonalAiGenerationPage", () => {
                 taskPublicId: "ai-generation-task-public-history-001",
                 status: "succeeded",
                 requestedAt: "2026-06-12T12:45:00.000Z",
+                taskType: "ai_question_generation",
                 resultPublicId: "ai-result-public-history-001",
                 evidenceStatus: "weak",
                 citationCount: 3,
@@ -1780,6 +1788,98 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("full paper content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("requests task-type isolated paginated histories and shows the active history filter", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const observedGetUrls: string[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            observedGetUrls.push(path);
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              ...localExperienceResponse,
+              data: {
+                ...localExperienceResponse.data,
+                requestFlow: {
+                  ...localExperienceResponse.data.requestFlow,
+                  resultReference: {
+                    ...localExperienceResponse.data.requestFlow.resultReference,
+                    taskType: "ai_paper_generation",
+                  },
+                },
+              },
+            }),
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          observedGetUrls.push(path);
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(screen.getAllByText("当前筛选：AI出题").length).toBeGreaterThan(0);
+    expect(observedGetUrls).toEqual(
+      expect.arrayContaining([
+        "/api/v1/personal-ai-generation-requests?taskType=ai_question_generation&page=1&pageSize=10",
+        "/api/v1/personal-ai-generation-results?taskType=ai_question_generation&page=1&pageSize=10",
+      ]),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    await waitFor(() => {
+      expect(observedGetUrls).toEqual(
+        expect.arrayContaining([
+          "/api/v1/personal-ai-generation-requests?taskType=ai_paper_generation&page=1&pageSize=10",
+          "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10",
+        ]),
+      );
+    });
+    expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
   });
 
   it("renders request history error state without exposing private content", async () => {

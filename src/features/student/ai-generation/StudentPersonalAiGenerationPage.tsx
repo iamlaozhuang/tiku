@@ -34,6 +34,7 @@ import type {
   PersonalAiGenerationResultDetailDto,
   PersonalAiGenerationResultHistoryDto,
 } from "@/server/contracts/personal-ai-generation-result-history-contract";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
@@ -112,6 +113,10 @@ type StudentPersonalAiGenerationDetailControl = {
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID =
   "org-auth-public-local-contract";
+const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
+const PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
+const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
+  "ai_question_generation" satisfies StudentPersonalAiGenerationTaskType;
 
 const copy = {
   title: "AI训练",
@@ -491,13 +496,20 @@ function createPersonalAiGenerationRequestBody(
 
 async function fetchPersonalAiGenerationResultHistory(
   studentSessionValue: StudentSessionRequestToken,
+  taskType: StudentPersonalAiGenerationTaskType,
+  page: number,
 ): Promise<{
   code: number;
   message: string;
   data: PersonalAiGenerationResultHistoryDto | null;
+  pagination?: ApiPagination;
 }> {
   return fetchStudentApi<PersonalAiGenerationResultHistoryDto>(
-    "/api/v1/personal-ai-generation-results",
+    createPersonalAiGenerationHistoryPath(
+      "/api/v1/personal-ai-generation-results",
+      taskType,
+      page,
+    ),
     studentSessionValue,
     {
       method: "GET",
@@ -526,18 +538,39 @@ async function fetchPersonalAiGenerationResultDetail(
 
 async function fetchPersonalAiGenerationRequestHistoryForSession(
   studentSessionValue: StudentSessionRequestToken,
+  taskType: StudentPersonalAiGenerationTaskType,
+  page: number,
 ): Promise<{
   code: number;
   message: string;
   data: PersonalAiGenerationRequestHistoryDto | null;
+  pagination?: ApiPagination;
 }> {
   return fetchStudentApi<PersonalAiGenerationRequestHistoryDto>(
-    "/api/v1/personal-ai-generation-requests",
+    createPersonalAiGenerationHistoryPath(
+      "/api/v1/personal-ai-generation-requests",
+      taskType,
+      page,
+    ),
     studentSessionValue,
     {
       method: "GET",
     },
   );
+}
+
+function createPersonalAiGenerationHistoryPath(
+  basePath: string,
+  taskType: StudentPersonalAiGenerationTaskType,
+  page: number,
+): string {
+  const searchParams = new URLSearchParams({
+    taskType,
+    page: String(page),
+    pageSize: String(PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE),
+  });
+
+  return `${basePath}?${searchParams.toString()}`;
 }
 
 function StudentPersonalAiGenerationStateMessage({
@@ -931,10 +964,23 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
 function StudentPersonalAiGenerationHistorySummary({
   historyState,
   historyRows,
+  onChangePage,
+  pagination,
+  taskType,
 }: {
   historyState: StudentPersonalAiGenerationHistoryState;
   historyRows: PersonalAiGenerationRequestHistoryDto;
+  onChangePage: (page: number) => void;
+  pagination: ApiPagination | null;
+  taskType: StudentPersonalAiGenerationTaskType;
 }) {
+  const totalPages =
+    pagination === null
+      ? 1
+      : Math.max(1, Math.ceil(pagination.total / pagination.pageSize));
+  const canGoPrevious = pagination !== null && pagination.page > 1;
+  const canGoNext = pagination !== null && pagination.page < totalPages;
+
   function renderHistoryBody() {
     if (historyState === "loading") {
       return (
@@ -1016,24 +1062,78 @@ function StudentPersonalAiGenerationHistorySummary({
           {copy.historyTitle}
         </h2>
       </div>
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          当前筛选：{contractValueLabelMap[taskType]}
+        </span>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          默认按请求时间倒序
+        </span>
+        {pagination !== null ? (
+          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+            第 {pagination.page} / {totalPages} 页，共 {pagination.total} 条
+          </span>
+        ) : null}
+      </div>
+      {pagination !== null ? (
+        <nav
+          aria-label="AI请求历史分页"
+          className="mb-3 flex items-center justify-between gap-3"
+        >
+          <p className="text-text-secondary text-sm">
+            第 {pagination.page} / {totalPages} 页
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={historyState === "loading" || !canGoPrevious}
+              onClick={() => onChangePage(pagination.page - 1)}
+            >
+              上一页
+            </button>
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={historyState === "loading" || !canGoNext}
+              onClick={() => onChangePage(pagination.page + 1)}
+            >
+              下一页
+            </button>
+          </div>
+        </nav>
+      ) : null}
       {renderHistoryBody()}
     </section>
   );
 }
 
 function StudentPersonalAiGenerationResultHistorySummary({
+  historyTaskType,
+  onChangePage,
+  pagination,
   resultHistoryState,
   resultHistory,
   isResultDetailLoading,
   onOpenResultDetail,
   selectedResultPublicId,
 }: {
+  historyTaskType: StudentPersonalAiGenerationTaskType;
+  onChangePage: (page: number) => void;
+  pagination: ApiPagination | null;
   resultHistoryState: StudentPersonalAiGenerationHistoryState;
   resultHistory: PersonalAiGenerationResultHistoryDto | null;
   isResultDetailLoading: boolean;
   onOpenResultDetail: (resultPublicId: string) => void;
   selectedResultPublicId: string | null;
 }) {
+  const totalPages =
+    pagination === null
+      ? 1
+      : Math.max(1, Math.ceil(pagination.total / pagination.pageSize));
+  const canGoPrevious = pagination !== null && pagination.page > 1;
+  const canGoNext = pagination !== null && pagination.page < totalPages;
+
   function renderResultHistoryBody() {
     if (resultHistoryState === "loading") {
       return (
@@ -1162,6 +1262,47 @@ function StudentPersonalAiGenerationResultHistorySummary({
           {copy.resultHistoryTitle}
         </h2>
       </div>
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          当前筛选：{contractValueLabelMap[historyTaskType]}
+        </span>
+        <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+          默认按持久化时间倒序
+        </span>
+        {pagination !== null ? (
+          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 font-medium">
+            第 {pagination.page} / {totalPages} 页，共 {pagination.total} 条
+          </span>
+        ) : null}
+      </div>
+      {pagination !== null ? (
+        <nav
+          aria-label="AI生成结果历史分页"
+          className="mb-3 flex items-center justify-between gap-3"
+        >
+          <p className="text-text-secondary text-sm">
+            第 {pagination.page} / {totalPages} 页
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={resultHistoryState === "loading" || !canGoPrevious}
+              onClick={() => onChangePage(pagination.page - 1)}
+            >
+              上一页
+            </button>
+            <button
+              type="button"
+              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={resultHistoryState === "loading" || !canGoNext}
+              onClick={() => onChangePage(pagination.page + 1)}
+            >
+              下一页
+            </button>
+          </div>
+        </nav>
+      ) : null}
       {renderResultHistoryBody()}
     </section>
   );
@@ -1309,12 +1450,16 @@ export function StudentPersonalAiGenerationPage() {
     );
   const [requestHistory, setRequestHistory] =
     useState<PersonalAiGenerationRequestHistoryDto>([]);
+  const [requestHistoryPagination, setRequestHistoryPagination] =
+    useState<ApiPagination | null>(null);
   const [resultHistoryState, setResultHistoryState] =
     useState<StudentPersonalAiGenerationHistoryState>(
       hasSessionToken ? "loading" : "loading",
     );
   const [resultHistory, setResultHistory] =
     useState<PersonalAiGenerationResultHistoryDto | null>(null);
+  const [resultHistoryPagination, setResultHistoryPagination] =
+    useState<ApiPagination | null>(null);
   const [resultDetailState, setResultDetailState] =
     useState<StudentPersonalAiGenerationResultDetailState>("idle");
   const [resultDetail, setResultDetail] =
@@ -1323,6 +1468,8 @@ export function StudentPersonalAiGenerationPage() {
     string | null
   >(null);
   const [lastSubmittedTaskType, setLastSubmittedTaskType] =
+    useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
+  const [historyTaskType, setHistoryTaskType] =
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
   const [practiceFeedbackState, setPracticeFeedbackState] =
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
@@ -1336,8 +1483,10 @@ export function StudentPersonalAiGenerationPage() {
       setPageState("unauthorized");
       setHistoryState("unauthorized");
       setRequestHistory([]);
+      setRequestHistoryPagination(null);
       setResultHistoryState("unauthorized");
       setResultHistory(null);
+      setResultHistoryPagination(null);
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
@@ -1348,8 +1497,10 @@ export function StudentPersonalAiGenerationPage() {
       setPageState("unavailable");
       setHistoryState("unauthorized");
       setRequestHistory([]);
+      setRequestHistoryPagination(null);
       setResultHistoryState("unauthorized");
       setResultHistory(null);
+      setResultHistoryPagination(null);
       setResultDetailState("idle");
       setResultDetail(null);
       setSelectedResultPublicId(null);
@@ -1401,6 +1552,8 @@ export function StudentPersonalAiGenerationPage() {
           setPageState("error");
           setHistoryState("error");
           setResultHistoryState("error");
+          setRequestHistoryPagination(null);
+          setResultHistoryPagination(null);
           return false;
         }
 
@@ -1412,6 +1565,8 @@ export function StudentPersonalAiGenerationPage() {
           setPageState("error");
           setHistoryState("error");
           setResultHistoryState("error");
+          setRequestHistoryPagination(null);
+          setResultHistoryPagination(null);
         }
 
         return false;
@@ -1441,6 +1596,8 @@ export function StudentPersonalAiGenerationPage() {
         const historyResponse =
           await fetchPersonalAiGenerationRequestHistoryForSession(
             sessionRequestToken,
+            DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE,
+            PERSONAL_AI_GENERATION_HISTORY_PAGE,
           );
 
         if (isCancelled) {
@@ -1460,23 +1617,29 @@ export function StudentPersonalAiGenerationPage() {
         if (historyResponse.code !== 0 || historyResponse.data === null) {
           setHistoryState("error");
           setRequestHistory([]);
+          setRequestHistoryPagination(null);
           return;
         }
 
         setRequestHistory(historyResponse.data);
+        setRequestHistoryPagination(historyResponse.pagination ?? null);
         setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
       } catch {
         if (!isCancelled) {
           setHistoryState("error");
           setRequestHistory([]);
+          setRequestHistoryPagination(null);
         }
       }
     }
 
     async function fetchInitialResultHistory() {
       try {
-        const historyResponse =
-          await fetchPersonalAiGenerationResultHistory(sessionRequestToken);
+        const historyResponse = await fetchPersonalAiGenerationResultHistory(
+          sessionRequestToken,
+          DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE,
+          PERSONAL_AI_GENERATION_HISTORY_PAGE,
+        );
 
         if (isCancelled) {
           return;
@@ -1495,10 +1658,12 @@ export function StudentPersonalAiGenerationPage() {
         if (historyResponse.code !== 0 || historyResponse.data === null) {
           setResultHistoryState("error");
           setResultHistory(null);
+          setResultHistoryPagination(null);
           return;
         }
 
         setResultHistory(historyResponse.data);
+        setResultHistoryPagination(historyResponse.pagination ?? null);
         setResultHistoryState(
           historyResponse.data.results.length === 0 ? "empty" : "ready",
         );
@@ -1506,6 +1671,7 @@ export function StudentPersonalAiGenerationPage() {
         if (!isCancelled) {
           setResultHistoryState("error");
           setResultHistory(null);
+          setResultHistoryPagination(null);
         }
       }
     }
@@ -1545,8 +1711,10 @@ export function StudentPersonalAiGenerationPage() {
       setPageState("unauthorized");
       setHistoryState("unauthorized");
       setRequestHistory([]);
+      setRequestHistoryPagination(null);
       setResultHistoryState("unauthorized");
       setResultHistory(null);
+      setResultHistoryPagination(null);
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
@@ -1557,14 +1725,17 @@ export function StudentPersonalAiGenerationPage() {
       setPageState("unavailable");
       setHistoryState("unauthorized");
       setRequestHistory([]);
+      setRequestHistoryPagination(null);
       setResultHistoryState("unauthorized");
       setResultHistory(null);
+      setResultHistoryPagination(null);
       setResultDetailState("idle");
       setResultDetail(null);
       setSelectedResultPublicId(null);
     }
 
     setLastSubmittedTaskType(taskType);
+    setHistoryTaskType(taskType);
     setPracticeFeedbackState("waiting");
     setHasSessionToken(true);
     setPageState("loading");
@@ -1582,8 +1753,10 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("error");
         setHistoryState("error");
         setRequestHistory([]);
+        setRequestHistoryPagination(null);
         setResultHistoryState("error");
         setResultHistory(null);
+        setResultHistoryPagination(null);
         setResultDetailState("error");
         setResultDetail(null);
         setSelectedResultPublicId(null);
@@ -1665,6 +1838,8 @@ export function StudentPersonalAiGenerationPage() {
         const historyResponse =
           await fetchPersonalAiGenerationRequestHistoryForSession(
             sessionRequestToken,
+            taskType,
+            PERSONAL_AI_GENERATION_HISTORY_PAGE,
           );
 
         if (isStudentUnauthorizedResponse(historyResponse)) {
@@ -1680,19 +1855,26 @@ export function StudentPersonalAiGenerationPage() {
         if (historyResponse.code !== 0 || historyResponse.data === null) {
           setHistoryState("error");
           setRequestHistory([]);
+          setRequestHistoryPagination(null);
           return;
         }
 
         setRequestHistory(historyResponse.data);
+        setRequestHistoryPagination(historyResponse.pagination ?? null);
         setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
       } catch {
         setHistoryState("error");
         setRequestHistory([]);
+        setRequestHistoryPagination(null);
       }
 
       try {
         const resultHistoryResponse =
-          await fetchPersonalAiGenerationResultHistory(sessionRequestToken);
+          await fetchPersonalAiGenerationResultHistory(
+            sessionRequestToken,
+            taskType,
+            PERSONAL_AI_GENERATION_HISTORY_PAGE,
+          );
 
         if (isStudentUnauthorizedResponse(resultHistoryResponse)) {
           markUnavailable();
@@ -1710,23 +1892,28 @@ export function StudentPersonalAiGenerationPage() {
         ) {
           setResultHistoryState("error");
           setResultHistory(null);
+          setResultHistoryPagination(null);
           return;
         }
 
         setResultHistory(resultHistoryResponse.data);
+        setResultHistoryPagination(resultHistoryResponse.pagination ?? null);
         setResultHistoryState(
           resultHistoryResponse.data.results.length === 0 ? "empty" : "ready",
         );
       } catch {
         setResultHistoryState("error");
         setResultHistory(null);
+        setResultHistoryPagination(null);
       }
     } catch {
       setPageState("error");
       setHistoryState("error");
       setRequestHistory([]);
+      setRequestHistoryPagination(null);
       setResultHistoryState("error");
       setResultHistory(null);
+      setResultHistoryPagination(null);
       setResultDetailState("error");
       setResultDetail(null);
       setSelectedResultPublicId(null);
@@ -1808,6 +1995,74 @@ export function StudentPersonalAiGenerationPage() {
 
   function handleRetryPersonalAiGenerationRequest() {
     void handleSubmitPersonalAiGenerationRequest(lastSubmittedTaskType);
+  }
+
+  async function handleChangeRequestHistoryPage(page: number) {
+    const sessionRequestToken = readStudentSessionRequestToken();
+
+    setHistoryState("loading");
+
+    try {
+      const historyResponse =
+        await fetchPersonalAiGenerationRequestHistoryForSession(
+          sessionRequestToken,
+          historyTaskType,
+          page,
+        );
+
+      if (historyResponse.code !== 0 || historyResponse.data === null) {
+        setHistoryState("error");
+        setRequestHistory([]);
+        setRequestHistoryPagination(null);
+        return;
+      }
+
+      setRequestHistory(historyResponse.data);
+      setRequestHistoryPagination(historyResponse.pagination ?? null);
+      setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
+    } catch {
+      setHistoryState("error");
+      setRequestHistory([]);
+      setRequestHistoryPagination(null);
+    }
+  }
+
+  async function handleChangeResultHistoryPage(page: number) {
+    const sessionRequestToken = readStudentSessionRequestToken();
+
+    setResultHistoryState("loading");
+    setResultDetailState("idle");
+    setResultDetail(null);
+    setSelectedResultPublicId(null);
+
+    try {
+      const resultHistoryResponse =
+        await fetchPersonalAiGenerationResultHistory(
+          sessionRequestToken,
+          historyTaskType,
+          page,
+        );
+
+      if (
+        resultHistoryResponse.code !== 0 ||
+        resultHistoryResponse.data === null
+      ) {
+        setResultHistoryState("error");
+        setResultHistory(null);
+        setResultHistoryPagination(null);
+        return;
+      }
+
+      setResultHistory(resultHistoryResponse.data);
+      setResultHistoryPagination(resultHistoryResponse.pagination ?? null);
+      setResultHistoryState(
+        resultHistoryResponse.data.results.length === 0 ? "empty" : "ready",
+      );
+    } catch {
+      setResultHistoryState("error");
+      setResultHistory(null);
+      setResultHistoryPagination(null);
+    }
   }
 
   const isAiGenerationActionDisabled =
@@ -1959,9 +2214,15 @@ export function StudentPersonalAiGenerationPage() {
       <StudentPersonalAiGenerationHistorySummary
         historyState={historyState}
         historyRows={requestHistory}
+        onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
+        pagination={requestHistoryPagination}
+        taskType={historyTaskType}
       />
 
       <StudentPersonalAiGenerationResultHistorySummary
+        historyTaskType={historyTaskType}
+        onChangePage={(page) => void handleChangeResultHistoryPage(page)}
+        pagination={resultHistoryPagination}
         resultHistoryState={resultHistoryState}
         resultHistory={resultHistory}
         isResultDetailLoading={resultDetailState === "loading"}

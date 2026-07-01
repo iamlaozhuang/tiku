@@ -200,6 +200,7 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
           desc(adminAiGenerationResult.created_at),
           asc(adminAiGenerationResult.public_id),
         )
+        .offset(query.offset)
         .limit(query.limit);
 
       return rows.map((row) =>

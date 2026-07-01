@@ -1,5 +1,8 @@
-import { aiGenerationTaskStatusValues } from "../models/ai-generation-task";
-import type { AiGenerationTaskStatus } from "../models/ai-generation-task";
+import {
+  aiGenerationTaskStatusValues,
+  type AiGenerationTaskStatus,
+  type AiGenerationTaskType,
+} from "../models/ai-generation-task";
 import { evidenceStatusValues } from "../models/ai-rag";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type { PersonalAiGenerationRequestHistoryInput } from "../models/personal-ai-generation-request-history";
@@ -58,6 +61,14 @@ function normalizeStatus(value: unknown): AiGenerationTaskStatus | null {
     : null;
 }
 
+function normalizeTaskType(
+  value: unknown,
+): Exclude<AiGenerationTaskType, "organization_training_generation"> | null {
+  return value === "ai_question_generation" || value === "ai_paper_generation"
+    ? value
+    : null;
+}
+
 function normalizeEvidenceStatus(value: unknown): EvidenceStatus | null {
   return typeof value === "string" &&
     evidenceStatusValues.includes(value as EvidenceStatus)
@@ -80,6 +91,7 @@ function normalizeHistoryRow(
 
   const requestPublicId = normalizeRequiredText(value.requestPublicId);
   const taskPublicId = normalizeRequiredText(value.taskPublicId);
+  const taskType = normalizeTaskType(value.taskType);
   const status = normalizeStatus(value.status);
   const requestedAt = normalizeRequestedAt(value.requestedAt);
   const evidenceStatus = normalizeEvidenceStatus(value.evidenceStatus);
@@ -88,6 +100,7 @@ function normalizeHistoryRow(
   if (
     requestPublicId === null ||
     taskPublicId === null ||
+    taskType === null ||
     status === null ||
     requestedAt === null ||
     evidenceStatus === null ||
@@ -99,6 +112,7 @@ function normalizeHistoryRow(
   return {
     requestPublicId,
     taskPublicId,
+    taskType,
     status,
     requestedAt,
     resultPublicId: normalizeOptionalText(value.resultPublicId),

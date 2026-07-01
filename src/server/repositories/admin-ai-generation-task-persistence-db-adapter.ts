@@ -1,5 +1,5 @@
 import { adminAiGenerationTaskMetadata, aiGenerationTask } from "@/db/schema";
-import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import type {
   AdminAiGenerationPersistenceTaskType,
@@ -266,6 +266,21 @@ export function createPostgresAdminAiGenerationTaskPersistenceGateway(
         mapAdminAiGenerationTaskPersistenceDbRowToRow(row),
       );
     },
+    async countTaskHistory(query) {
+      const [totalRow] = await getDatabase()
+        .select({ value: count() })
+        .from(aiGenerationTask)
+        .innerJoin(
+          adminAiGenerationTaskMetadata,
+          eq(
+            adminAiGenerationTaskMetadata.ai_generation_task_id,
+            aiGenerationTask.id,
+          ),
+        )
+        .where(createAdminAiGenerationTaskHistoryCondition(query));
+
+      return totalRow?.value ?? 0;
+    },
   };
 }
 
@@ -311,21 +326,27 @@ async function selectAdminAiGenerationTaskHistoryRows(
         aiGenerationTask.id,
       ),
     )
-    .where(
-      and(
-        eq(adminAiGenerationTaskMetadata.workspace, query.workspace),
-        eq(aiGenerationTask.owner_type, query.ownerType),
-        eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
-        inArray(
-          aiGenerationTask.task_type,
-          ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
-        ),
-      ),
-    )
+    .where(createAdminAiGenerationTaskHistoryCondition(query))
     .orderBy(desc(aiGenerationTask.requested_at))
+    .offset(query.offset)
     .limit(query.limit);
 
   return rows.map((row) => normalizeAdminAiGenerationTaskPersistenceDbRow(row));
+}
+
+function createAdminAiGenerationTaskHistoryCondition(
+  query: AdminAiGenerationTaskHistoryQuery,
+): SQL {
+  return and(
+    eq(adminAiGenerationTaskMetadata.workspace, query.workspace),
+    eq(adminAiGenerationTaskMetadata.generation_kind, query.generationKind),
+    eq(aiGenerationTask.owner_type, query.ownerType),
+    eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
+    inArray(
+      aiGenerationTask.task_type,
+      ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
+    ),
+  ) as SQL;
 }
 
 function normalizeAdminAiGenerationTaskPersistenceDbRow(

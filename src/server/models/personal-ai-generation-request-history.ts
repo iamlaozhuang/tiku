@@ -1,4 +1,7 @@
-import type { AiGenerationTaskStatus } from "./ai-generation-task";
+import type {
+  AiGenerationTaskStatus,
+  AiGenerationTaskType,
+} from "./ai-generation-task";
 import type { EvidenceStatus } from "./ai-rag";
 
 export type PersonalAiGenerationRequestHistoryRedactionStatus = "redacted";
@@ -6,6 +9,7 @@ export type PersonalAiGenerationRequestHistoryRedactionStatus = "redacted";
 export type PersonalAiGenerationRequestHistoryInput = {
   requestPublicId: string;
   taskPublicId: string;
+  taskType: Exclude<AiGenerationTaskType, "organization_training_generation">;
   status: AiGenerationTaskStatus;
   requestedAt: string;
   resultPublicId: string | null;
