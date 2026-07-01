@@ -1080,19 +1080,12 @@ export function StudentPracticePage({
     let isActive = true;
 
     async function loadPractice() {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        if (isActive) {
-          setRuntimeState("authorization_expired");
-        }
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const practicePayload = await fetchStudentApi<PracticeResultDto>(
           "/api/v1/practices",
-          token,
+          storedSessionValue,
           {
             method: "POST",
             body: JSON.stringify({ paperPublicId }),
@@ -1265,18 +1258,13 @@ export function StudentPracticePage({
       ] ?? null;
 
     if (isRuntimeMode) {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        setRuntimeState("authorization_expired");
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const answerPayload =
           await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
             `/api/v1/practices/${practice.publicId}/answers`,
-            token,
+            storedSessionValue,
             {
               method: "POST",
               body: JSON.stringify({
@@ -1336,17 +1324,12 @@ export function StudentPracticePage({
       let mistakeBookPublicId = `mistake-book-${currentQuestion.paperQuestionPublicId}`;
 
       if (isRuntimeMode) {
-        const token = getStoredStudentSessionToken();
-
-        if (token === null) {
-          setRuntimeState("authorization_expired");
-          return;
-        }
+        const storedSessionValue = getStoredStudentSessionToken();
 
         const favoritePayload =
           await fetchStudentApi<PracticeQuestionFavoriteResultDto>(
             `/api/v1/practices/${practice.publicId}/favorite-question`,
-            token,
+            storedSessionValue,
             {
               method: "POST",
               body: JSON.stringify({
@@ -1398,18 +1381,13 @@ export function StudentPracticePage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     try {
       const explanationPayload =
         await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
           `/api/v1/practices/${practice.publicId}/answers`,
-          token,
+          storedSessionValue,
           {
             method: "POST",
             body: JSON.stringify({
@@ -1455,18 +1433,13 @@ export function StudentPracticePage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     try {
       const scoringPayload =
         await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
           `/api/v1/practices/${practice.publicId}/answers`,
-          token,
+          storedSessionValue,
           {
             method: "POST",
             body: JSON.stringify({
@@ -1532,19 +1505,14 @@ export function StudentPracticePage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     setIsRestarting(true);
 
     try {
       const restartPayload = await fetchStudentApi<PracticeResultDto>(
         `/api/v1/practices/${practice.publicId}/restart`,
-        token,
+        storedSessionValue,
         {
           method: "POST",
         },

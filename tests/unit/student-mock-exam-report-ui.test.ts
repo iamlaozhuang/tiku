@@ -264,6 +264,47 @@ describe("StudentMockExamPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("starts a mock exam through the cookie-backed session when no local token is stored", async () => {
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/mock-exams");
+        expect(init?.method).toBe("POST");
+        expect(init?.credentials).toBe("same-origin");
+        expect(new Headers(init?.headers).get("authorization")).toBeNull();
+        expect(JSON.parse(String(init?.body))).toEqual({
+          paperPublicId: "paper-content-published-001",
+        });
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: { mockExam },
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("授权已失效")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("starts, saves, and submits a mock exam through the session runtime without exposing answers before submit", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const mockExam = {
@@ -1224,6 +1265,44 @@ describe("StudentExamReportPage", () => {
 });
 
 describe("StudentExamReportListPage", () => {
+  it("loads mock exam records through the cookie-backed session when no local token is stored", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe(
+          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
+        );
+        expect(init?.credentials).toBe("same-origin");
+        expect(new Headers(init?.headers).get("authorization")).toBeNull();
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              examReports: [studentExamReportFixture.examReports[0]],
+            },
+            pagination: {
+              page: 1,
+              pageSize: 20,
+              total: 1,
+              sortBy: "startedAt",
+              sortOrder: "desc",
+            },
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentExamReportListPage));
+
+    expect(await screen.findByText("营销理论模考卷 A")).toBeInTheDocument();
+    expect(screen.queryByText("授权已失效")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("loads mock exam records and supports search plus status filtering", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(

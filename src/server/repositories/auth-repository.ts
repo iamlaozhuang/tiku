@@ -1,4 +1,5 @@
 import type { AdminRole, UserStatus, UserType } from "../models/auth";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 
 export type AuthUserAccessRow = {
   id: number;
@@ -13,6 +14,7 @@ export type AuthUserAccessRow = {
   organization_public_id: string | null;
   admin_public_id?: string | null;
   admin_roles?: AdminRole[];
+  admin_workspace_capability?: AdminWorkspaceCapabilitySummary | null;
 };
 
 export type AuthUserRepository = {

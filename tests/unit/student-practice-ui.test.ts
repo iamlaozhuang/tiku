@@ -410,6 +410,47 @@ describe("StudentPracticePage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("starts practice through the cookie-backed session when no local token is stored", async () => {
+    const practice = studentPracticeFixture.practices[0].practice;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/practices");
+        expect(init?.method).toBe("POST");
+        expect(init?.credentials).toBe("same-origin");
+        expect(new Headers(init?.headers).get("authorization")).toBeNull();
+        expect(JSON.parse(String(init?.body))).toEqual({
+          paperPublicId: "paper-marketing-theory-002",
+        });
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              practice,
+              answerRecords: [],
+            },
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论冲刺卷 B" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("授权已失效")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("starts practice and submits answers through the session runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const practice = studentPracticeFixture.practices[0].practice;

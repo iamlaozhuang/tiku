@@ -1,6 +1,17 @@
 import { randomBytes, randomUUID } from "node:crypto";
 
-import { and, asc, eq, isNotNull } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  isNotNull,
+  isNull,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 
@@ -22,6 +33,7 @@ import type {
   AuthContextDto,
   SessionLoginDto,
 } from "../contracts/auth-contract";
+import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
 import type { AdminRole, UserStatus, UserType } from "../models/auth";
 import type {
   AuthUserAccessRow,
@@ -84,11 +96,14 @@ export type LocalUserRegistrationRuntimeOptions = {
 const {
   admin,
   adminOrganization,
+  authUpgrade,
   authAccount,
   authSession,
   authUser,
   employee,
   organization,
+  orgAuth,
+  orgAuthOrganization,
   student,
   user,
 } = authSchema;
@@ -141,6 +156,7 @@ function isOrganizationAdminRole(adminRole: AdminRole): boolean {
 
 function createPostgresAuthUserRepository(
   getDatabase: () => LocalSessionRuntimeDatabase,
+  getNow: () => Date,
 ): AuthUserRepository {
   return {
     async findActiveUserByAuthUserId(authUserId) {
@@ -154,13 +170,14 @@ function createPostgresAuthUserRepository(
         return userRow;
       }
 
-      return findActiveAdminAccountByAuthUserId(database, authUserId);
+      return findActiveAdminAccountByAuthUserId(database, authUserId, getNow());
     },
   };
 }
 
 function createPostgresSessionUserRepository(
   getDatabase: () => LocalSessionRuntimeDatabase,
+  getNow: () => Date,
 ): SessionUserRepository {
   return {
     async findLoginUserByPhone(phone) {
@@ -171,7 +188,7 @@ function createPostgresSessionUserRepository(
         return userRow;
       }
 
-      return findLoginAdminAccountByPhone(database, phone);
+      return findLoginAdminAccountByPhone(database, phone, getNow());
     },
 
     async recordLoginFailure(input: LoginFailureInput) {
@@ -472,6 +489,7 @@ function createRuntimeService(
   const getDatabase = createLazyDatabaseGetter(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
+  const getNow = () => options.now?.() ?? new Date();
   const baseCredentialAdapter =
     options.credentialAdapter ??
     createPostgresSessionCredentialAdapter(getDatabase, {
@@ -502,7 +520,8 @@ function createRuntimeService(
       }
     : baseCredentialAdapter;
   const baseAuthUserRepository =
-    options.authUserRepository ?? createPostgresAuthUserRepository(getDatabase);
+    options.authUserRepository ??
+    createPostgresAuthUserRepository(getDatabase, getNow);
   const authUserRepository = isLocalAcceptanceRuntimeEnabled()
     ? {
         async findActiveUserByAuthUserId(authUserId: string) {
@@ -520,7 +539,7 @@ function createRuntimeService(
     : baseAuthUserRepository;
   const sessionUserRepository =
     options.sessionUserRepository ??
-    createPostgresSessionUserRepository(getDatabase);
+    createPostgresSessionUserRepository(getDatabase, getNow);
   const authService = createAuthService(credentialAdapter, authUserRepository, {
     now: options.now,
   });
@@ -663,6 +682,7 @@ async function findActiveUserAccountByAuthUserId(
 async function findActiveAdminAccountByAuthUserId(
   database: LocalSessionRuntimeDatabase,
   authUserId: string,
+  now: Date,
 ): Promise<AuthUserAccessRow | null> {
   const [row] = await database
     .select({
@@ -670,6 +690,7 @@ async function findActiveAdminAccountByAuthUserId(
       auth_user_id: admin.auth_user_id,
       id: admin.id,
       name: admin.name,
+      organization_id: organization.id,
       organization_public_id: organization.public_id,
       phone: admin.phone,
       public_id: admin.public_id,
@@ -691,7 +712,16 @@ async function findActiveAdminAccountByAuthUserId(
     .orderBy(asc(organization.public_id))
     .limit(1);
 
-  return row === undefined ? null : mapAdminAccountRow(row);
+  if (row === undefined) {
+    return null;
+  }
+
+  return hydrateOrganizationAdminWorkspaceCapability(
+    database,
+    mapAdminAccountRow(row),
+    row.organization_id,
+    now,
+  );
 }
 
 async function findLoginUserAccountByPhone(
@@ -732,6 +762,7 @@ async function findLoginUserAccountByPhone(
 async function findLoginAdminAccountByPhone(
   database: LocalSessionRuntimeDatabase,
   phone: string,
+  now: Date,
 ): Promise<SessionLoginUserRow | null> {
   const [row] = await database
     .select({
@@ -739,6 +770,7 @@ async function findLoginAdminAccountByPhone(
       auth_user_id: admin.auth_user_id,
       id: admin.id,
       name: admin.name,
+      organization_id: organization.id,
       organization_public_id: organization.public_id,
       phone: admin.phone,
       public_id: admin.public_id,
@@ -762,14 +794,139 @@ async function findLoginAdminAccountByPhone(
     lockedUntilAt: null,
   };
 
-  return {
-    ...mapAdminAccountRow({
+  const adminAccountRow = await hydrateOrganizationAdminWorkspaceCapability(
+    database,
+    mapAdminAccountRow({
       ...row,
       locked_until_at: loginFailureState.lockedUntilAt,
     }),
+    row.organization_id,
+    now,
+  );
+
+  return {
+    ...adminAccountRow,
     login_failed_count: loginFailureState.loginFailedCount,
     login_failure_user_id: row.id,
     login_failure_user_kind: "admin",
+  };
+}
+
+function canComputeOrganizationAdminWorkspaceCapability(
+  authUser: AuthUserAccessRow,
+  organizationId: number | null,
+): boolean {
+  return (
+    typeof organizationId === "number" &&
+    authUser.organization_public_id !== null &&
+    authUser.admin_roles !== undefined &&
+    authUser.admin_roles.some(isOrganizationAdminRole)
+  );
+}
+
+async function findOrganizationAdminWorkspaceCapability(input: {
+  database: LocalSessionRuntimeDatabase;
+  authUser: AuthUserAccessRow;
+  organizationId: number;
+  now: Date;
+}): Promise<AdminWorkspaceCapabilitySummary | null> {
+  const [row] = await input.database
+    .select({
+      effective_edition: sql<"standard" | "advanced">`
+        case
+          when ${orgAuth.edition} = 'advanced' or ${authUpgrade.id} is not null
+          then 'advanced'
+          else 'standard'
+        end
+      `,
+    })
+    .from(orgAuth)
+    .leftJoin(
+      orgAuthOrganization,
+      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+    )
+    .leftJoin(
+      authUpgrade,
+      and(
+        eq(authUpgrade.org_auth_id, orgAuth.id),
+        eq(authUpgrade.status, "active"),
+        eq(authUpgrade.target_edition, "advanced"),
+        isNull(authUpgrade.revoked_at),
+        lte(authUpgrade.starts_at, input.now),
+        gt(authUpgrade.expires_at, input.now),
+      ),
+    )
+    .innerJoin(organization, eq(organization.id, input.organizationId))
+    .where(
+      and(
+        eq(organization.status, "active"),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, input.now),
+        gt(orgAuth.expires_at, input.now),
+        or(
+          eq(orgAuth.purchaser_organization_id, organization.id),
+          eq(orgAuthOrganization.organization_id, organization.id),
+        ),
+      ),
+    )
+    .orderBy(
+      sql`
+        case
+          when ${orgAuth.edition} = 'advanced' or ${authUpgrade.id} is not null
+          then 0
+          else 1
+        end
+      `,
+      desc(orgAuth.expires_at),
+    )
+    .limit(1);
+
+  if (row === undefined) {
+    return null;
+  }
+
+  const adminRoles = input.authUser.admin_roles ?? [];
+
+  return {
+    adminRoles,
+    organizationPublicId: input.authUser.organization_public_id,
+    organizationEffectiveEdition: row.effective_edition,
+    organizationAuthorizationSource: "org_auth",
+    capabilitySource: "service_computed",
+    canUseOrganizationAdvancedWorkspace:
+      row.effective_edition === "advanced" &&
+      adminRoles.includes("org_advanced_admin"),
+  };
+}
+
+async function hydrateOrganizationAdminWorkspaceCapability(
+  database: LocalSessionRuntimeDatabase,
+  authUser: AuthUserAccessRow,
+  organizationId: number | null,
+  now: Date,
+): Promise<AuthUserAccessRow> {
+  if (
+    typeof organizationId !== "number" ||
+    !canComputeOrganizationAdminWorkspaceCapability(authUser, organizationId)
+  ) {
+    return authUser;
+  }
+
+  const adminWorkspaceCapability =
+    await findOrganizationAdminWorkspaceCapability({
+      database,
+      authUser,
+      organizationId,
+      now,
+    });
+
+  if (adminWorkspaceCapability === null) {
+    return authUser;
+  }
+
+  return {
+    ...authUser,
+    admin_workspace_capability: adminWorkspaceCapability,
   };
 }
 

@@ -33,6 +33,10 @@ function hasOrganizationWorkspaceRole(
 function mapAdminWorkspaceCapabilityToApi(
   authUser: AuthUserAccessRow,
 ): AdminWorkspaceCapabilitySummary | undefined {
+  if (authUser.admin_workspace_capability !== undefined) {
+    return authUser.admin_workspace_capability ?? undefined;
+  }
+
   const adminRoles = authUser.admin_roles ?? [];
 
   if (!hasOrganizationWorkspaceRole(adminRoles)) {

@@ -1186,29 +1186,22 @@ export function StudentMockExamPage({
     let isActive = true;
 
     async function loadMockExam() {
-      const token = getStoredStudentSessionToken();
+      const storedSessionValue = getStoredStudentSessionToken();
       const cacheStorageKey = createMockExamCacheStorageKey({
         paperPublicId,
         mockExamPublicId,
       });
-
-      if (token === null) {
-        if (isActive) {
-          setRuntimeState("authorization_expired");
-        }
-        return;
-      }
 
       try {
         const mockExamPayload =
           paperPublicId === undefined
             ? await fetchStudentApi<MockExamResultDto>(
                 `/api/v1/mock-exams/${mockExamPublicId}`,
-                token,
+                storedSessionValue,
               )
             : await fetchStudentApi<MockExamResultDto>(
                 "/api/v1/mock-exams",
-                token,
+                storedSessionValue,
                 {
                   method: "POST",
                   body: JSON.stringify({ paperPublicId }),
@@ -1396,12 +1389,12 @@ export function StudentMockExamPage({
   }
 
   async function sendMockExamAnswer(
-    token: string,
+    storedSessionValue: string | null,
     pendingAnswer: MockExamPendingAnswer,
   ) {
     return await fetchStudentApi<MockExamAnswerRecordResultDto>(
       `/api/v1/mock-exams/${pendingAnswer.mockExamPublicId}/answers`,
-      token,
+      storedSessionValue,
       {
         method: "POST",
         body: JSON.stringify({
@@ -1444,19 +1437,17 @@ export function StudentMockExamPage({
     }
 
     if (isRuntimeMode) {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        setRuntimeState("authorization_expired");
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const pendingAnswer = createPendingAnswer(
           mockExam.publicId,
           currentQuestion,
         );
-        const answerPayload = await sendMockExamAnswer(token, pendingAnswer);
+        const answerPayload = await sendMockExamAnswer(
+          storedSessionValue,
+          pendingAnswer,
+        );
 
         if (isStudentUnauthorizedResponse(answerPayload)) {
           setIsRetryingPendingAnswers(false);
@@ -1491,12 +1482,7 @@ export function StudentMockExamPage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     setIsRetryingPendingAnswers(true);
 
@@ -1504,7 +1490,10 @@ export function StudentMockExamPage({
 
     for (const pendingAnswer of Object.values(pendingAnswerByQuestion)) {
       try {
-        const answerPayload = await sendMockExamAnswer(token, pendingAnswer);
+        const answerPayload = await sendMockExamAnswer(
+          storedSessionValue,
+          pendingAnswer,
+        );
 
         if (isStudentUnauthorizedResponse(answerPayload)) {
           setRuntimeState("authorization_expired");
@@ -1528,12 +1517,12 @@ export function StudentMockExamPage({
   }
 
   async function generateRuntimeExamReport(
-    token: string,
+    storedSessionValue: string | null,
     targetMockExamPublicId: string,
   ): Promise<string | null> {
     const reportPayload = await fetchStudentApi<ExamReportResultDto>(
       "/api/v1/exam-reports",
-      token,
+      storedSessionValue,
       {
         method: "POST",
         body: JSON.stringify({ mockExamPublicId: targetMockExamPublicId }),
@@ -1558,17 +1547,12 @@ export function StudentMockExamPage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     try {
       const mockExamPayload = await fetchStudentApi<MockExamResultDto>(
         `/api/v1/mock-exams/${runtimeScoringProgress.mockExamPublicId}`,
-        token,
+        storedSessionValue,
       );
 
       if (isStudentUnauthorizedResponse(mockExamPayload)) {
@@ -1585,7 +1569,7 @@ export function StudentMockExamPage({
 
       if (refreshedMockExam.examStatus === "completed") {
         const completedReportPublicId = await generateRuntimeExamReport(
-          token,
+          storedSessionValue,
           refreshedMockExam.publicId,
         );
 
@@ -1627,17 +1611,12 @@ export function StudentMockExamPage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     try {
       const retryPayload = await fetchStudentApi<MockExamRetryScoringResultDto>(
         `/api/v1/mock-exams/${runtimeScoringProgress.mockExamPublicId}/retry-scoring`,
-        token,
+        storedSessionValue,
         { method: "POST" },
       );
 
@@ -1655,7 +1634,7 @@ export function StudentMockExamPage({
 
       if (retriedMockExam.examStatus === "completed") {
         const completedReportPublicId = await generateRuntimeExamReport(
-          token,
+          storedSessionValue,
           retriedMockExam.publicId,
         );
 
@@ -1701,17 +1680,12 @@ export function StudentMockExamPage({
     }
 
     if (isRuntimeMode) {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        setRuntimeState("authorization_expired");
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const submitPayload = await fetchStudentApi<MockExamSubmitResultDto>(
           `/api/v1/mock-exams/${mockExam.publicId}/submit`,
-          token,
+          storedSessionValue,
           { method: "POST" },
         );
 
@@ -1742,7 +1716,7 @@ export function StudentMockExamPage({
         }
 
         const generatedReportPublicId = await generateRuntimeExamReport(
-          token,
+          storedSessionValue,
           mockExam.publicId,
         );
 
@@ -2031,19 +2005,12 @@ export function StudentExamReportPage({
     let isActive = true;
 
     async function loadExamReport() {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        if (isActive) {
-          setRuntimeState("authorization_expired");
-        }
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const reportPayload = await fetchStudentApi<ExamReportResultDto>(
           `/api/v1/exam-reports/${examReportPublicId}`,
-          token,
+          storedSessionValue,
         );
 
         if (!isActive) {
@@ -2165,17 +2132,12 @@ export function StudentExamReportPage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("authorization_expired");
-      return;
-    }
+    const storedSessionValue = getStoredStudentSessionToken();
 
     try {
       const retryPayload = await fetchStudentApi<MockExamRetryScoringResultDto>(
         `/api/v1/mock-exams/${targetMockExamPublicId}/retry-scoring`,
-        token,
+        storedSessionValue,
         { method: "POST" },
       );
 
@@ -2460,19 +2422,12 @@ export function StudentExamReportListPage({
     let isActive = true;
 
     async function loadExamReports() {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        if (isActive) {
-          setRuntimeState("authorization_expired");
-        }
-        return;
-      }
+      const storedSessionValue = getStoredStudentSessionToken();
 
       try {
         const reportPayload = await fetchStudentApi<ExamReportListResultDto>(
           "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
-          token,
+          storedSessionValue,
         );
 
         if (!isActive) {

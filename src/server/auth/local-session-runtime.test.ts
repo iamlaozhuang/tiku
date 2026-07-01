@@ -13,6 +13,7 @@ const TEST_TOKEN_FIELD = "token";
 
 type SelectBuilder = {
   from(table?: unknown): SelectBuilder;
+  innerJoin(table?: unknown, condition?: unknown): SelectBuilder;
   leftJoin(table?: unknown, condition?: unknown): SelectBuilder;
   orderBy(...conditions: unknown[]): SelectBuilder;
   where(condition?: unknown): SelectBuilder;
@@ -41,6 +42,9 @@ type SequentialRuntimeDatabase = {
 function createSelectBuilder(rows: unknown[]): SelectBuilder {
   const builder: SelectBuilder = {
     from() {
+      return builder;
+    },
+    innerJoin() {
       return builder;
     },
     leftJoin() {
@@ -123,6 +127,7 @@ function createAdminAccountRow(input: {
   adminRole: AdminRole;
   authUserId: string;
   id: number;
+  organizationId?: number | null;
   organizationPublicId: string | null;
   phone: string;
   publicId: string;
@@ -132,6 +137,10 @@ function createAdminAccountRow(input: {
     auth_user_id: input.authUserId,
     id: input.id,
     name: "Organization Admin",
+    organization_id:
+      input.organizationPublicId === null
+        ? null
+        : (input.organizationId ?? 201),
     organization_public_id: input.organizationPublicId,
     phone: input.phone,
     public_id: input.publicId,
@@ -399,10 +408,16 @@ describe("local session runtime", () => {
           adminRole: "org_standard_admin",
           authUserId: "auth-user-org-standard-admin",
           id: 101,
+          organizationId: 301,
           organizationPublicId: "organization-standard-public-001",
           phone: "13900000004",
           publicId: "admin-org-standard-public-001",
         }),
+      ],
+      [
+        {
+          effective_edition: "standard",
+        },
       ],
       [
         {
@@ -435,10 +450,18 @@ describe("local session runtime", () => {
           organizationPublicId: "organization-standard-public-001",
           adminPublicId: "admin-org-standard-public-001",
           adminRoles: ["org_standard_admin"],
+          adminWorkspaceCapability: {
+            adminRoles: ["org_standard_admin"],
+            organizationPublicId: "organization-standard-public-001",
+            organizationEffectiveEdition: "standard",
+            organizationAuthorizationSource: "org_auth",
+            capabilitySource: "service_computed",
+            canUseOrganizationAdvancedWorkspace: false,
+          },
         },
       },
     });
-    expect(getSelectCallCount()).toBe(3);
+    expect(getSelectCallCount()).toBe(4);
   });
 
   it("hydrates organization admin current session role and organization binding from the default local runtime source", async () => {
@@ -456,11 +479,13 @@ describe("local session runtime", () => {
           adminRole: "org_advanced_admin",
           authUserId: "auth-user-org-advanced-admin",
           id: 102,
+          organizationId: 302,
           organizationPublicId: "organization-advanced-public-001",
           phone: "13900000005",
           publicId: "admin-org-advanced-public-001",
         }),
       ],
+      [],
     ]);
     const runtime = createLocalSessionRuntime({
       createDatabase: () => database as never,
@@ -489,7 +514,67 @@ describe("local session runtime", () => {
       },
     });
     expect(response.data?.session).not.toHaveProperty("token");
-    expect(getSelectCallCount()).toBe(3);
+    expect(getSelectCallCount()).toBe(4);
+  });
+
+  it("hydrates advanced organization admin workspace capability from active org_auth", async () => {
+    const { database, getSelectCallCount } = createSequentialRuntimeDatabase([
+      [
+        {
+          [TEST_TOKEN_FIELD]: "opaque-org-advanced-admin-token",
+          auth_user_id: "auth-user-org-advanced-admin",
+          expires_at: new Date("2026-05-28T12:00:00.000Z"),
+        },
+      ],
+      [],
+      [
+        createAdminAccountRow({
+          adminRole: "org_advanced_admin",
+          authUserId: "auth-user-org-advanced-admin",
+          id: 102,
+          organizationId: 302,
+          organizationPublicId: "organization-advanced-public-001",
+          phone: "13900000005",
+          publicId: "admin-org-advanced-public-001",
+        }),
+      ],
+      [
+        {
+          effective_edition: "advanced",
+        },
+      ],
+    ]);
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-05-21T12:00:00.000Z"),
+    });
+
+    const response = await runtime.getCurrentSession({
+      authorization: "Bearer opaque-org-advanced-admin-token",
+    });
+
+    expect(response).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        user: {
+          publicId: "admin-org-advanced-public-001",
+          userType: null,
+          organizationPublicId: "organization-advanced-public-001",
+          adminPublicId: "admin-org-advanced-public-001",
+          adminRoles: ["org_advanced_admin"],
+          adminWorkspaceCapability: {
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization-advanced-public-001",
+            organizationEffectiveEdition: "advanced",
+            organizationAuthorizationSource: "org_auth",
+            capabilitySource: "service_computed",
+            canUseOrganizationAdvancedWorkspace: true,
+          },
+        },
+      },
+    });
+    expect(getSelectCallCount()).toBe(4);
   });
 
   it("does not expose organization binding for global admin roles from the default local runtime source", async () => {

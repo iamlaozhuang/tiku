@@ -1,8 +1,113 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-central-repair-approval-2026-07-01
-updatedAt: "2026-07-01T08:28:43-07:00"
+currentPhase: ai-generation-p0-entry-unblock-2026-07-01
+updatedAt: "2026-07-01T08:49:37-07:00"
+aiGenerationP0EntryUnblock20260701:
+  taskId: ai-generation-p0-entry-unblock-2026-07-01
+  phase: ai-generation-p0-entry-unblock-2026-07-01
+  status: closed
+  result: pass_ai_generation_p0_entry_unblock_repaired
+  priority: p0
+  severity: owner_preview_blocker
+  taskKind: source_test_repair
+  moduleRunVersion: 2
+  approvedAt: "2026-07-01T08:24:18-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  branch: codex/ai-generation-p0-entry-unblock
+  claimedAt: "2026-07-01T08:36:00-07:00"
+  plannedAt: "2026-07-01T08:36:00-07:00"
+  implementedAt: "2026-07-01T08:49:37-07:00"
+  validatedAt: "2026-07-01T08:49:37-07:00"
+  reviewedAt: "2026-07-01T08:49:37-07:00"
+  closedAt: "2026-07-01T08:49:37-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_entry_blockers_2026_07_01
+  targetClosureItem: OP-03 false authorization expired state and OP-04 organization advanced admin capability downgrade
+  behaviorBoundary: p0_entry_unblock_only_no_ai_generation_semantics_no_provider_no_db_mutation_no_schema_no_seed_no_dependency_no_deploy
+  executionProfile: local_source_test_repair
+  validationPolicy: focused_unit_lint_typecheck_governance_gates
+  evidenceMode: redacted_role_route_status_count_validation_summary_only
+  rootCauseBoundary:
+    OP-03: student_runtime_pages_required_localStorage_token_before_cookie_backed_session_request
+    OP-04: organization_admin_session_payload_used_session_fallback_capability_instead_of_service_computed_org_auth_capability
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p0-entry-unblock.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md
+    - src/features/student/practice/StudentPracticePage.tsx
+    - src/features/student/mock-exam/StudentMockExamReportPage.tsx
+    - tests/unit/student-practice-ui.test.ts
+    - tests/unit/student-mock-exam-report-ui.test.ts
+    - src/server/repositories/auth-repository.ts
+    - src/server/mappers/auth-mapper.ts
+    - src/server/auth/local-session-runtime.ts
+    - src/server/auth/local-session-runtime.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  localDbBoundary: no_direct_database_connection_or_mutation_no_raw_rows_no_schema_migration_seed_or_resource_import
+  aiProviderBoundary: no_provider_call_no_provider_configuration_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p0-entry-unblock.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts src/server/auth/local-session-runtime.test.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p0-entry-unblock.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md src/features/student/practice/StudentPracticePage.tsx src/features/student/mock-exam/StudentMockExamReportPage.tsx tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts src/server/repositories/auth-repository.ts src/server/mappers/auth-mapper.ts src/server/auth/local-session-runtime.ts src/server/auth/local-session-runtime.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-p0-entry-unblock-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-p0-entry-unblock-2026-07-01 -SkipRemoteAheadCheck
+  validationSummary:
+    validationStatus: pass_ai_generation_p0_entry_unblock_local_gate
+    focusedUnitRed: pass_expected_failure_before_fix
+    focusedUnitGreen: pass
+    prettier: pass
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass
+    browserRuntimeExecuted: false
+    localDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    envFileReadOrModified: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationOrSeedChanged: false
+    deploymentExecuted: false
 aiGenerationCentralRepairApproval20260701:
   taskId: ai-generation-central-repair-approval-2026-07-01
   phase: ai-generation-central-repair-approval-2026-07-01
@@ -9738,56 +9843,52 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 09fb00fdfbd3da81269819de3d409afe8af84849
-  lastKnownOriginMasterSha: 09fb00fdfbd3da81269819de3d409afe8af84849
+  lastKnownMasterSha: 214e962e153e894888f1766d59b801e08ddb5413
+  lastKnownOriginMasterSha: 214e962e153e894888f1766d59b801e08ddb5413
 currentTask:
-  id: ai-generation-central-repair-approval-2026-07-01
+  id: ai-generation-p0-entry-unblock-2026-07-01
   status: closed
-  result: pass_ai_generation_central_repair_approval_materialized
-  taskKind: docs_state_central_repair_approval
+  result: pass_ai_generation_p0_entry_unblock_repaired
+  taskKind: source_test_repair
   moduleRunVersion: 2
   priority: p0
-  severity: governance
-  branch: codex/ai-generation-central-repair-approval
+  severity: owner_preview_blocker
+  branch: codex/ai-generation-p0-entry-unblock
   approvedAt: "2026-07-01T08:24:18-07:00"
   approvedBy: laozhuang
   humanApproval: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-  claimedAt: "2026-07-01T08:24:18-07:00"
-  plannedAt: "2026-07-01T08:24:18-07:00"
-  materializedAt: "2026-07-01T08:24:18-07:00"
-  implementedAt: "2026-07-01T08:28:43-07:00"
-  validatedAt: "2026-07-01T08:28:43-07:00"
-  reviewedAt: "2026-07-01T08:28:43-07:00"
-  closedAt: "2026-07-01T08:28:43-07:00"
-  sourceStory: current_user_authorized_all_remaining_ai_generation_repair_capabilities_with_bounded_scope_and_regression_gates_2026_07_01
-  targetClosureItem: Central approval package for bounded AI generation repair, data-backed walkthrough, role matrix rerun, and real Provider sample
-  behaviorBoundary: docs_state_approval_only_no_runtime_execution_no_source_repair_no_db_no_provider_no_browser_no_env_no_dependency_no_schema_no_deploy
-  executionProfile: local_docs_state_central_approval
-  validationPolicy: lint_typecheck_format_governance_gates
-  evidenceMode: redacted_approval_task_file_capability_status_validation_summary_only
-  approvalPackagePath: docs/01-requirements/traceability/2026-07-01-ai-generation-central-repair-approval.md
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-central-repair-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+  claimedAt: "2026-07-01T08:36:00-07:00"
+  plannedAt: "2026-07-01T08:36:00-07:00"
+  implementedAt: "2026-07-01T08:49:37-07:00"
+  validatedAt: "2026-07-01T08:49:37-07:00"
+  reviewedAt: "2026-07-01T08:49:37-07:00"
+  closedAt: "2026-07-01T08:49:37-07:00"
+  sourceStory: current_owner_preview_feedback_ai_generation_entry_blockers_2026_07_01
+  targetClosureItem: OP-03 false authorization expired state and OP-04 organization advanced admin capability downgrade
+  behaviorBoundary: p0_entry_unblock_only_no_ai_generation_semantics_no_provider_no_db_mutation_no_schema_no_seed_no_dependency_no_deploy
+  executionProfile: local_source_test_repair
+  validationPolicy: focused_unit_lint_typecheck_governance_gates
+  evidenceMode: redacted_role_route_status_count_validation_summary_only
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-p0-entry-unblock.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md
   validationSummary:
-    validationStatus: pass_ai_generation_central_repair_approval_local_gate
-    approvalPackagePrepared: pass
-    queueReferencesUpdated: pass
-    evidencePrepared: pass
-    auditReviewPrepared: pass
+    validationStatus: pass_ai_generation_p0_entry_unblock_local_gate
+    focusedUnitRed: pass_expected_failure_before_fix
+    focusedUnitGreen: pass
     prettier: pass
     lint: pass
     typecheck: pass
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass
-    runtimeSourceChanged: false
-    databaseOrSeedExecuted: false
-    providerCallExecuted: false
+    sourceAndTestChanged: true
     browserRuntimeExecuted: false
+    localDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
     envFileReadOrModified: false
     dependencyOrLockfileChanged: false
-    schemaMigrationChanged: false
+    schemaMigrationOrSeedChanged: false
     deploymentExecuted: false
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:
   taskId: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
