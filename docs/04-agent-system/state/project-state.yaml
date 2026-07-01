@@ -1,8 +1,137 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: owner-preview-qwen-visible-ai-2026-07-01
-updatedAt: "2026-07-01T06:29:00-07:00"
+currentPhase: ai-generation-core-walkthrough-2026-07-01
+updatedAt: "2026-07-01T07:50:12-07:00"
+aiGenerationCoreWalkthrough20260701:
+  taskId: ai-generation-core-walkthrough-2026-07-01
+  phase: ai-generation-core-walkthrough-2026-07-01
+  status: closed
+  result: pass_ai_generation_core_walkthrough_contract
+  priority: p1
+  severity: governance
+  taskKind: docs_state_ai_generation_core_walkthrough_contract
+  moduleRunVersion: 2
+  approvedAt: "2026-07-01T07:46:46-07:00"
+  approvedBy: laozhuang
+  humanApproval: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+  branch: codex/ai-generation-core-walkthrough
+  claimedAt: "2026-07-01T07:46:46-07:00"
+  plannedAt: "2026-07-01T07:46:46-07:00"
+  implementedAt: "2026-07-01T07:50:12-07:00"
+  validatedAt: "2026-07-01T07:50:12-07:00"
+  reviewedAt: "2026-07-01T07:50:12-07:00"
+  closedAt: "2026-07-01T07:50:12-07:00"
+  sourceStory: current_user_requested_ai_generation_core_walkthrough_plan_implementation
+  targetClosureItem: AI question and AI paper generation core walkthrough contract, redacted evidence baseline, and issue mapping
+  behaviorBoundary: docs_state_contract_only_no_source_repair_no_browser_no_provider_no_db_no_schema_no_migration_no_e2e
+  executionProfile: local_docs_state_walkthrough_contract
+  validationPolicy: focused_unit_lint_typecheck_governance_gates
+  evidenceMode: redacted_role_route_workflow_status_counts_validation_commands_only
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - src/app/**/ai-question-generation/page.tsx
+    - src/app/**/ai-paper-generation/page.tsx
+    - src/app/api/v1/*ai-generation*/**
+    - src/features/admin/ai-generation/**
+    - src/features/student/ai-generation/**
+    - src/server/contracts/*ai-generation*
+    - src/server/services/*ai-generation*
+    - src/server/repositories/*ai-generation*
+    - tests/unit/admin-ai-generation-entry-surface.test.ts
+    - tests/unit/student-personal-ai-generation-ui.test.ts
+    - package.json
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_destructive_reset
+  aiProviderBoundary: no_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+  browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+  accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+  dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+  evidenceRedaction:
+    allowed: task_ids_file_paths_role_labels_route_labels_workflow_labels_status_labels_counts_validation_commands_commit_branch_merge_push_cleanup_redacted_summary_only
+    forbidden:
+      - credentials_tokens_sessions_cookies_auth_headers
+      - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code
+      - provider_payloads_prompts_raw_ai_io
+      - full_question_paper_material_resource_chunk_content
+      - raw_dom_screenshots_traces_html_reports
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-core-walkthrough-2026-07-01
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-core-walkthrough-2026-07-01 -SkipRemoteAheadCheck
+  validationSummary:
+    validationStatus: pass_ai_generation_core_walkthrough_local_gate
+    taskPlanPrepared: pass
+    contractPrepared: pass
+    evidencePrepared: pass
+    auditReviewPrepared: pass
+    prettier: pass
+    focusedUnit: pass_2_files_33_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    preCommitHardening: pass
+    prePushReadiness: pass_after_repository_checkpoint_alignment
+    repositoryCheckpointAligned: true
+    sourceOrTestChanged: false
+    directDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserRuntimeExecuted: false
+    sensitiveEvidenceCaptured: false
 ownerPreviewQwenVisibleAi20260701:
   taskId: owner-preview-qwen-visible-ai-2026-07-01
   phase: owner-preview-qwen-visible-ai-2026-07-01
@@ -9369,47 +9498,56 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fa88f5a610336a0fd13fe08e32b755dcfa267ca5
-  lastKnownOriginMasterSha: fa88f5a610336a0fd13fe08e32b755dcfa267ca5
+  lastKnownMasterSha: fd2cb5f46eac7d931f10a67cd33fe758a03dc39f
+  lastKnownOriginMasterSha: fd2cb5f46eac7d931f10a67cd33fe758a03dc39f
 currentTask:
-  id: owner-preview-qwen-visible-ai-2026-07-01
+  id: ai-generation-core-walkthrough-2026-07-01
   status: closed
-  result: pass_owner_preview_qwen_visible_ai_runtime_bridge
-  taskKind: local_owner_preview_qwen_visible_ai_runtime_bridge
+  result: pass_ai_generation_core_walkthrough_contract
+  taskKind: docs_state_ai_generation_core_walkthrough_contract
   moduleRunVersion: 2
   priority: p1
   severity: governance
-  branch: codex/owner-preview-qwen-visible-ai
-  approvedAt: "2026-07-01T00:00:00-07:00"
+  branch: codex/ai-generation-core-walkthrough
+  approvedAt: "2026-07-01T07:46:46-07:00"
   approvedBy: laozhuang
-  humanApproval: current_user_requested_owner_preview_empty_baseline_and_qwen_visible_ai_implementation_2026_07_01
-  claimedAt: "2026-07-01T06:20:00-07:00"
-  plannedAt: "2026-07-01T06:20:00-07:00"
-  materializedAt: "2026-07-01T06:20:00-07:00"
-  implementedAt: "2026-07-01T06:27:00-07:00"
-  validatedAt: "2026-07-01T06:29:00-07:00"
-  reviewedAt: "2026-07-01T06:29:00-07:00"
-  closedAt: "2026-07-01T06:29:00-07:00"
-  sourceStory: current_user_requested_two_stage_owner_preview_preparation_plan_implementation
-  targetClosureItem: Owner preview local Qwen/OpenAI-compatible runtime bridge with transient visible generated content and redacted persistence metadata
-  behaviorBoundary: local_runtime_bridge_source_and_unit_tests_only_no_real_provider_call_without_fresh_preview_approval_no_env_file_read_no_schema_no_migration_no_e2e
-  executionProfile: local_owner_preview_qwen_visible_ai_source_test
+  humanApproval: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+  claimedAt: "2026-07-01T07:46:46-07:00"
+  plannedAt: "2026-07-01T07:46:46-07:00"
+  materializedAt: "2026-07-01T07:46:46-07:00"
+  implementedAt: "2026-07-01T07:50:12-07:00"
+  validatedAt: "2026-07-01T07:50:12-07:00"
+  reviewedAt: "2026-07-01T07:50:12-07:00"
+  closedAt: "2026-07-01T07:50:12-07:00"
+  sourceStory: current_user_requested_ai_generation_core_walkthrough_plan_implementation
+  targetClosureItem: AI question and AI paper generation core walkthrough contract, redacted evidence baseline, and issue mapping
+  behaviorBoundary: docs_state_contract_only_no_source_repair_no_browser_no_provider_no_db_no_schema_no_migration_no_e2e
+  executionProfile: local_docs_state_walkthrough_contract
   validationPolicy: focused_unit_lint_typecheck_governance_gates
-  evidenceMode: redacted_provider_status_duration_bucket_token_counts_validation_commands_only_no_prompt_payload_output
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-owner-preview-qwen-visible-ai.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-owner-preview-qwen-visible-ai.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-owner-preview-qwen-visible-ai.md
+  evidenceMode: redacted_role_route_workflow_status_counts_validation_commands_only
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
   validationSummary:
-    validationStatus: pass_owner_preview_qwen_visible_ai_local_gate
-    focusedUnit: pass_11_files_105_tests
+    validationStatus: pass_ai_generation_core_walkthrough_local_gate
+    taskPlanPrepared: pass
+    contractPrepared: pass
+    evidencePrepared: pass
+    auditReviewPrepared: pass
+    prettier: pass
+    focusedUnit: pass_2_files_33_tests
     lint: pass
     typecheck: pass
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass_after_repository_checkpoint_alignment
-    realProviderCallExecuted: false
-    envFileRead: false
-    databaseConnectionOrMutationExecuted: false
+    repositoryCheckpointAligned: true
+    sourceOrTestChanged: false
+    directDatabaseConnectionOrMutationExecuted: false
+    providerCallOrConfigurationExecuted: false
+    browserRuntimeExecuted: false
+    sensitiveEvidenceCaptured: false
     packageOrLockfileChanged: false
     schemaOrMigrationChanged: false
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:

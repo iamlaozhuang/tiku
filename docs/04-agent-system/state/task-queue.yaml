@@ -297,6 +297,167 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-core-walkthrough-2026-07-01
+    title: AI generation core walkthrough contract
+    phase: ai-generation-core-walkthrough-2026-07-01
+    sourceStory: current_user_requested_ai_generation_core_walkthrough_plan_implementation
+    humanApprovalBoundary: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+    targetClosureItem: AI question and AI paper generation core walkthrough contract, redacted evidence baseline, and issue mapping
+    behaviorBoundary: docs_state_contract_only_no_source_repair_no_browser_no_provider_no_db_no_schema_no_migration_no_e2e
+    executionProfile: local_docs_state_walkthrough_contract
+    evidenceMode: redacted_role_route_workflow_status_counts_validation_commands_only
+    validationPolicy: focused_unit_lint_typecheck_governance_gates
+    taskKind: docs_state_ai_generation_core_walkthrough_contract
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ai_generation_core_walkthrough_contract
+    approvedAt: "2026-07-01T07:46:46-07:00"
+    approvedBy: laozhuang
+    claimedAt: "2026-07-01T07:46:46-07:00"
+    plannedAt: "2026-07-01T07:46:46-07:00"
+    implementedAt: "2026-07-01T07:50:12-07:00"
+    validatedAt: "2026-07-01T07:50:12-07:00"
+    reviewedAt: "2026-07-01T07:50:12-07:00"
+    closedAt: "2026-07-01T07:50:12-07:00"
+    branch: codex/ai-generation-core-walkthrough
+    capabilities:
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: approved
+      localCommit: approved
+      mergeToMaster: approved
+      pushOriginMaster: approved
+      branchCleanup: approved
+      localSourceChange: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      localDatabaseConnection: blocked
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      providerConfiguration: blocked
+      providerCredentialRead: blocked
+      costCalibrationGate: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+      pr: blocked
+      forcePush: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md
+      - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - src/app/**/ai-question-generation/page.tsx
+      - src/app/**/ai-paper-generation/page.tsx
+      - src/app/api/v1/*ai-generation*/**
+      - src/features/admin/ai-generation/**
+      - src/features/student/ai-generation/**
+      - src/server/contracts/*ai-generation*
+      - src/server/services/*ai-generation*
+      - src/server/repositories/*ai-generation*
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_schema_migration_seed_or_destructive_reset
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_model_config_read_write_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_login_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_account_password_private_account_cookie_token_session_localStorage_or_Authorization_header_access_or_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration_no_pr_no_force_push
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    evidenceRedaction: role_route_workflow_status_count_summary_only_no_sensitive_payloads
+    knownIssueMapping:
+      p0:
+        - OP-03
+        - OP-04
+      p1:
+        - OP-01
+        - OP-05
+        - OP-06
+      p2:
+        - OP-02
+        - OP-07
+        - OP-08
+        - OP-09
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-core-walkthrough-2026-07-01
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-core-walkthrough-2026-07-01 -SkipRemoteAheadCheck
+    planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-core-walkthrough.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-core-walkthrough.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-core-walkthrough.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_ai_generation_core_walkthrough_plan_implementation_2026_07_01
+    validationSummary:
+      validationStatus: pass_ai_generation_core_walkthrough_local_gate
+      taskPlanPrepared: pass
+      contractPrepared: pass
+      evidencePrepared: pass
+      auditReviewPrepared: pass
+      prettier: pass
+      focusedUnit: pass_2_files_33_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      repositoryCheckpointAligned: true
+      sourceOrTestChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserRuntimeExecuted: false
+      sensitiveEvidenceCaptured: false
+      packageOrLockfileChanged: false
+      schemaOrMigrationChanged: false
+
   - id: owner-preview-qwen-visible-ai-2026-07-01
     title: Owner preview Qwen visible AI runtime bridge
     phase: owner-preview-qwen-visible-ai-2026-07-01
