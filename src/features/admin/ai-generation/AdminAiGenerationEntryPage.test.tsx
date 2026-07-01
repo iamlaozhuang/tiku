@@ -59,7 +59,7 @@ function createEmptyHistoryResponse() {
   };
 }
 
-function createGeneratedContractResponse() {
+function createGeneratedContractResponse(input?: { visibleContent?: string }) {
   return {
     code: 0,
     message: "ok",
@@ -132,7 +132,7 @@ function createGeneratedContractResponse() {
           redactionStatus: "redacted",
         },
         visibleGeneratedContent: {
-          content: "后台本次生成草稿摘要",
+          content: input?.visibleContent ?? "后台本次生成草稿摘要",
           contentVisibility: "transient_response_only",
           persistenceStatus: "not_persisted",
           safetyStatus: "checked",
@@ -192,15 +192,15 @@ function createGeneratedContractResponse() {
   };
 }
 
-function mockAdminAiGenerationFetch() {
+function mockAdminAiGenerationFetch(options?: { visibleContent?: string }) {
   const fetchMock = vi.fn(
-    async (input: RequestInfo | URL, init?: RequestInit) => {
+    async (requestInput: RequestInfo | URL, init?: RequestInit) => {
       const url =
-        typeof input === "string"
-          ? input
-          : input instanceof Request
-            ? input.url
-            : input.toString();
+        typeof requestInput === "string"
+          ? requestInput
+          : requestInput instanceof Request
+            ? requestInput.url
+            : requestInput.toString();
 
       if (url === "/api/v1/sessions") {
         return createJsonResponse(createAdminSessionResponse());
@@ -214,7 +214,7 @@ function mockAdminAiGenerationFetch() {
         url === "/api/v1/content-ai-generation-requests" &&
         init?.method === "POST"
       ) {
-        return createJsonResponse(createGeneratedContractResponse());
+        return createJsonResponse(createGeneratedContractResponse(options));
       }
 
       return createJsonResponse({
@@ -279,5 +279,38 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(screen.getByText("生成记录")).toBeInTheDocument();
     expect(screen.queryByText(/paper_section/u)).not.toBeInTheDocument();
     expect(screen.queryByText("元数据历史")).not.toBeInTheDocument();
+  });
+
+  it("converts diagnostic generated draft content before rendering visible results", async () => {
+    mockAdminAiGenerationFetch({
+      visibleContent: "redacted admin AI generation local contract summary",
+    });
+
+    render(
+      <AdminAiGenerationEntryPage
+        generationKind="question"
+        workspace="content"
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "AI出题" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-visible-generated-content"),
+      ).toHaveTextContent("生成草稿已创建，待评审查看");
+    });
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).not.toHaveTextContent(/local contract/iu);
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).not.toHaveTextContent("本地合约");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).not.toHaveTextContent(/redacted/iu);
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).not.toHaveTextContent("已脱敏");
   });
 });

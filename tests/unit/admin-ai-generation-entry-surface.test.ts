@@ -15,6 +15,9 @@ import { AdminAiGenerationEntryPage } from "@/features/admin/ai-generation/Admin
 import type { AdminRole } from "@/server/models/auth";
 
 const workspaceRoot = process.cwd();
+const diagnosticAdminLocalContractSummary =
+  "redacted admin AI generation local contract summary";
+const businessAdminGeneratedResultFallback = "生成草稿已创建，待评审查看";
 
 function createSessionResponse(input: {
   adminRoles: AdminRole[];
@@ -868,7 +871,7 @@ describe("admin AI generation entry surfaces", () => {
     );
   });
 
-  it("shows persisted redacted generated result summaries for content admin history", async () => {
+  it("converts persisted diagnostic generated result summaries for content admin history", async () => {
     const taskPublicId =
       "admin_ai_generation_task_content_question_history_hidden_456";
     const resultPublicId =
@@ -913,17 +916,75 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent(
-      "redacted generated result summary for content history",
-    );
+    ).toHaveTextContent(businessAdminGeneratedResultFallback);
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("草稿快照");
+    expect(document.body.textContent).not.toContain(
+      "redacted generated result summary for content history",
+    );
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("rawOutput");
     expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("converts diagnostic local contract fallback text before rendering admin history", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_history_diagnostic_456";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_history_diagnostic_456";
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked: diagnosticAdminLocalContractSummary,
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const historyPanel = await screen.findByTestId(
+      "admin-ai-generation-task-history",
+    );
+
+    expect(historyPanel).toHaveTextContent(
+      businessAdminGeneratedResultFallback,
+    );
+    expect(historyPanel).not.toHaveTextContent(
+      diagnosticAdminLocalContractSummary,
+    );
+    expect(historyPanel).not.toHaveTextContent("local contract");
+    expect(historyPanel).not.toHaveTextContent("本地合约");
+    expect(historyPanel).not.toHaveTextContent("redacted");
   });
 
   it("submits content admin review adoption for a single persisted generated result without exposing sensitive content", async () => {
@@ -1078,7 +1139,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
-  it("shows persisted redacted generated result summaries for organization advanced admin history", async () => {
+  it("converts persisted diagnostic generated result summaries for organization advanced admin history", async () => {
     const taskPublicId =
       "admin_ai_generation_task_organization_paper_history_hidden_789";
     const resultPublicId =
@@ -1126,9 +1187,7 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent(
-      "redacted generated result summary for organization history",
-    );
+    ).toHaveTextContent(businessAdminGeneratedResultFallback);
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("组织草稿池");
@@ -1138,6 +1197,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).not.toHaveTextContent("Provider");
+    expect(document.body.textContent).not.toContain(
+      "redacted generated result summary for organization history",
+    );
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
   });

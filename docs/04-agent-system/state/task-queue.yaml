@@ -495,8 +495,14 @@ tasks:
     behaviorBoundary: source_and_focused_tests_only_no_db_provider_env_dependency_schema_deploy
     taskKind: source_test_repair
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: completed_admin_ai_generation_debug_summary_ui_repair
+    claimedAt: "2026-07-01T17:35:00-07:00"
+    plannedAt: "2026-07-01T17:35:00-07:00"
+    implementedAt: "2026-07-01T17:45:00-07:00"
+    validatedAt: "2026-07-01T17:45:00-07:00"
+    reviewedAt: "2026-07-01T17:45:00-07:00"
+    closedAt: "2026-07-01T17:45:00-07:00"
     priority: p1
     dependsOn:
       - ai-generation-post-repair-localhost-rerun-2026-07-01
@@ -577,7 +583,29 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-admin-debug-summary-ui-repair-2026-07-01
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-admin-debug-summary-ui-repair-2026-07-01 -SkipRemoteAheadCheck
     validationSummary:
-      status: pending
+      status: passed
+      redTestObserved: true
+      prettierScoped: pass
+      focusedAdminUnitTests: pass
+      focusedStudentRegressionTests: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      browserSpotCheck: pass_no_provider_call_no_submission
+      diagnosticUiWordingLeak: repaired_for_admin_ai_generation_surfaces
+      resourceGroundingGateChanged: false
+      providerCallExecuted: false
+      envFileContentReadOrWritten: false
+      databaseMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    nextRecommendedTask: ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
   - id: ai-generation-cross-role-grounding-ui-rerun-2026-07-01
     title: AI generation cross-role grounding and UI wording rerun
     phase: ai-generation-cross-role-grounding-ui-rerun-2026-07-01

@@ -118,6 +118,7 @@ const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
+const ADMIN_AI_GENERATION_RESULT_PREVIEW_MASKED = "生成草稿已创建，待评审查看";
 
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
@@ -848,7 +849,7 @@ function createAdminAiGenerationLocalContractResultInput(input: {
     contentDigest: createAdminAiGenerationContentDigest(
       contentRedactedSnapshot,
     ),
-    contentPreviewMasked: "redacted admin AI generation local contract summary",
+    contentPreviewMasked: ADMIN_AI_GENERATION_RESULT_PREVIEW_MASKED,
     citationRedactedSnapshot: null,
     evidenceStatus:
       input.localContract.runtimeBridge.visibleGeneratedContent

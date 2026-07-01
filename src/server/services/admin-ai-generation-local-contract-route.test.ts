@@ -807,7 +807,10 @@ describe("admin AI generation local contract route handlers", () => {
     );
     expect(
       generatedResultPersistenceRecorder.calls[0].contentPreviewMasked,
-    ).toBe("redacted admin AI generation local contract summary");
+    ).toBe("生成草稿已创建，待评审查看");
+    expect(
+      generatedResultPersistenceRecorder.calls[0].contentPreviewMasked,
+    ).not.toMatch(/redacted|local contract|本地合约/iu);
     expect(
       JSON.stringify(
         generatedResultPersistenceRecorder.calls[0].contentRedactedSnapshot,

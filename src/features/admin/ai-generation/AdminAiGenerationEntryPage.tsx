@@ -56,6 +56,16 @@ type AdminAiGenerationRequestState =
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
 const ADMIN_AI_GENERATION_HISTORY_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
+const ADMIN_AI_GENERATION_BUSINESS_RESULT_PREVIEW =
+  "生成草稿已创建，待评审查看";
+const ADMIN_AI_GENERATION_DIAGNOSTIC_CONTENT_PATTERNS = [
+  /redacted admin ai generation local contract summary/iu,
+  /redacted generated result summary/iu,
+  /\blocal contract\b/iu,
+  /\bredaction\b/iu,
+  /本地合约/u,
+  /已脱敏/u,
+];
 type ContentAdminReviewDecision = "approved" | "rejected";
 type ContentAdminReviewActionState =
   | "idle"
@@ -85,6 +95,22 @@ function hasAnyRole(adminRoles: readonly string[], expectedRoles: string[]) {
   return expectedRoles.some((expectedRole) =>
     adminRoles.includes(expectedRole),
   );
+}
+
+function resolveAdminAiGenerationBusinessPreview(
+  previewText: string | null | undefined,
+) {
+  const normalizedPreviewText = previewText?.trim();
+
+  if (!normalizedPreviewText) {
+    return ADMIN_AI_GENERATION_BUSINESS_RESULT_PREVIEW;
+  }
+
+  return ADMIN_AI_GENERATION_DIAGNOSTIC_CONTENT_PATTERNS.some((pattern) =>
+    pattern.test(normalizedPreviewText),
+  )
+    ? ADMIN_AI_GENERATION_BUSINESS_RESULT_PREVIEW
+    : normalizedPreviewText;
 }
 
 function getOrganizationAiGenerationPath(
@@ -594,6 +620,10 @@ function AdminAiGenerationVisibleGeneratedContent({
     return null;
   }
 
+  const visibleGeneratedContentText = resolveAdminAiGenerationBusinessPreview(
+    visibleGeneratedContent.content,
+  );
+
   return (
     <section
       className="border-border bg-background mt-4 rounded-md border p-3"
@@ -611,7 +641,7 @@ function AdminAiGenerationVisibleGeneratedContent({
         </span>
       </div>
       <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
-        {visibleGeneratedContent.content}
+        {visibleGeneratedContentText}
       </p>
       {visibleGeneratedContent.structuredPreview ? (
         <StructuredPreviewSummary
@@ -879,7 +909,9 @@ function AdminAiGenerationTaskHistoryPanel({
                     历史草稿摘要
                   </p>
                   <p className="text-text-primary mt-2 text-sm leading-6">
-                    {taskItem.generatedResult.contentPreviewMasked}
+                    {resolveAdminAiGenerationBusinessPreview(
+                      taskItem.generatedResult.contentPreviewMasked,
+                    )}
                   </p>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                     <div>
