@@ -261,24 +261,24 @@ function formatRequestedAt(requestedAt: string): string {
 
 const contentAdminReviewLocalValidationItems = [
   {
-    boundaryStatus: "batch_adoption_mutation:not_executed",
-    contractStatus: "batch_selection_preview",
-    validationMode: "preview_only",
+    boundaryStatus: "批量采用未执行",
+    contractStatus: "批量选择预览",
+    validationMode: "仅预览",
   },
   {
-    boundaryStatus: "retry_mutation:not_executed",
-    contractStatus: "failed_retry_state",
-    validationMode: "request_only",
+    boundaryStatus: "重试操作未执行",
+    contractStatus: "失败重试状态",
+    validationMode: "仅提交请求",
   },
   {
-    boundaryStatus: "raw_payload_exposure:not_executed",
-    contractStatus: "result_diff_read_model",
-    validationMode: "read_only",
+    boundaryStatus: "不展示原始载荷",
+    contractStatus: "结果差异查看",
+    validationMode: "只读查看",
   },
   {
-    boundaryStatus: "history_mutation:not_executed",
-    contractStatus: "adoption_history_read_model",
-    validationMode: "read_only",
+    boundaryStatus: "历史记录不改写",
+    contractStatus: "采用历史查看",
+    validationMode: "只读查看",
   },
 ] as const;
 
@@ -987,34 +987,32 @@ function ContentAdminReviewTraceabilityPanel({
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-brand-primary text-xs font-medium">
-            content_admin_review_traceability
-          </p>
+          <p className="text-brand-primary text-xs font-medium">评审留痕</p>
           <h4 className="text-text-primary mt-1 text-sm font-semibold">
-            single_result_traceable
+            单次结果可追溯
           </h4>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-          blocked_requires_fresh_publish_task
+          正式发布需单独审批
         </span>
       </div>
 
       <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <dt className="text-text-secondary">review_state</dt>
-          <dd className="text-text-primary mt-1">awaiting_metadata_review</dd>
+          <dt className="text-text-secondary">评审状态</dt>
+          <dd className="text-text-primary mt-1">待评审</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">result_scope</dt>
-          <dd className="text-text-primary mt-1">redacted</dd>
+          <dt className="text-text-secondary">结果范围</dt>
+          <dd className="text-text-primary mt-1">草稿摘要</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">adoption_mutation</dt>
-          <dd className="text-text-primary mt-1">not_executed</dd>
+          <dt className="text-text-secondary">正式写入</dt>
+          <dd className="text-text-primary mt-1">未执行</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">student_visible_runtime</dt>
-          <dd className="text-text-primary mt-1">not_executed</dd>
+          <dt className="text-text-secondary">学员可见</dt>
+          <dd className="text-text-primary mt-1">未开放</dd>
         </div>
       </dl>
 
@@ -1025,14 +1023,14 @@ function ContentAdminReviewTraceabilityPanel({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-brand-primary text-xs font-medium">
-              batch_retry_diff_history_local_validation
+              批量、重试和历史校验
             </p>
             <h5 className="text-text-primary mt-1 text-sm font-semibold">
-              source_contracts_ready
+              合同已就绪
             </h5>
           </div>
           <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-            browser_e2e_dev_server:not_executed
+            未执行浏览器自动化
           </span>
         </div>
 
@@ -1043,19 +1041,19 @@ function ContentAdminReviewTraceabilityPanel({
               key={item.contractStatus}
             >
               <div>
-                <dt className="text-text-secondary">contract</dt>
+                <dt className="text-text-secondary">校验项</dt>
                 <dd className="text-text-primary mt-1">
                   {item.contractStatus}
                 </dd>
               </div>
               <div className="mt-2">
-                <dt className="text-text-secondary">validation_mode</dt>
+                <dt className="text-text-secondary">校验方式</dt>
                 <dd className="text-text-primary mt-1">
                   {item.validationMode}
                 </dd>
               </div>
               <div className="mt-2">
-                <dt className="text-text-secondary">boundary</dt>
+                <dt className="text-text-secondary">边界</dt>
                 <dd className="text-text-primary mt-1">
                   {item.boundaryStatus}
                 </dd>
@@ -1599,7 +1597,7 @@ export function AdminAiGenerationEntryPage({
             <div>
               <dt className="text-text-secondary">任务状态</dt>
               <dd className="text-text-primary mt-1">
-                {localContractSummary.resultState.status}
+                {getTaskStatusLabel(localContractSummary.resultState.status)}
               </dd>
             </div>
             <div>

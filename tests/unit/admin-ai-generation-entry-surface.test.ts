@@ -480,7 +480,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("组织草稿");
     expect(screen.getByLabelText("等级")).toHaveDisplayValue("3级");
     expect(screen.getByLabelText("试卷结构")).toHaveDisplayValue(
-      "按 paper_section 组织",
+      "按大题模块组织",
     );
     expect(screen.getByLabelText("题型分布")).toHaveDisplayValue(
       "单选 40% / 多选 30% / 判断 30%",
@@ -681,7 +681,7 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("结构化预览");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("paper_section 2");
+    ).toHaveTextContent("大题模块 2");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("题量 50");
@@ -1006,24 +1006,39 @@ describe("admin AI generation entry surfaces", () => {
       "content-admin-review-traceability",
     );
 
-    expect(traceabilityPanel).toHaveTextContent("single_result_traceable");
-    expect(traceabilityPanel).toHaveTextContent("awaiting_metadata_review");
-    expect(traceabilityPanel).toHaveTextContent(
+    expect(traceabilityPanel).toHaveTextContent("单次结果可追溯");
+    expect(traceabilityPanel).toHaveTextContent("待评审");
+    expect(traceabilityPanel).toHaveTextContent("正式发布需单独审批");
+    expect(traceabilityPanel).toHaveTextContent("未执行");
+    expect(traceabilityPanel).not.toHaveTextContent("single_result_traceable");
+    expect(traceabilityPanel).not.toHaveTextContent("awaiting_metadata_review");
+    expect(traceabilityPanel).not.toHaveTextContent(
       "blocked_requires_fresh_publish_task",
     );
-    expect(traceabilityPanel).toHaveTextContent("not_executed");
+    expect(traceabilityPanel).not.toHaveTextContent("not_executed");
     const localValidationPanel = await screen.findByTestId(
       "content-admin-review-batch-retry-diff-history-local-validation",
     );
-    expect(localValidationPanel).toHaveTextContent("batch_selection_preview");
-    expect(localValidationPanel).toHaveTextContent("failed_retry_state");
-    expect(localValidationPanel).toHaveTextContent("result_diff_read_model");
-    expect(localValidationPanel).toHaveTextContent(
+    expect(localValidationPanel).toHaveTextContent("批量选择预览");
+    expect(localValidationPanel).toHaveTextContent("失败重试状态");
+    expect(localValidationPanel).toHaveTextContent("结果差异查看");
+    expect(localValidationPanel).toHaveTextContent("采用历史查看");
+    expect(localValidationPanel).toHaveTextContent("仅提交请求");
+    expect(localValidationPanel).toHaveTextContent("只读查看");
+    expect(localValidationPanel).toHaveTextContent("未执行");
+    expect(localValidationPanel).not.toHaveTextContent(
+      "batch_selection_preview",
+    );
+    expect(localValidationPanel).not.toHaveTextContent("failed_retry_state");
+    expect(localValidationPanel).not.toHaveTextContent(
+      "result_diff_read_model",
+    );
+    expect(localValidationPanel).not.toHaveTextContent(
       "adoption_history_read_model",
     );
-    expect(localValidationPanel).toHaveTextContent("request_only");
-    expect(localValidationPanel).toHaveTextContent("read_only");
-    expect(localValidationPanel).toHaveTextContent("not_executed");
+    expect(localValidationPanel).not.toHaveTextContent("request_only");
+    expect(localValidationPanel).not.toHaveTextContent("read_only");
+    expect(localValidationPanel).not.toHaveTextContent("not_executed");
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
     ).toBeEnabled();

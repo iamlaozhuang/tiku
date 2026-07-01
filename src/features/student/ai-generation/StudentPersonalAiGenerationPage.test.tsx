@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import {
   cleanup,
   fireEvent,
@@ -253,6 +255,17 @@ describe("StudentPersonalAiGenerationPage", () => {
         results: [],
       },
     });
+  });
+
+  it("does not pass technical field names as ordinary visible labels", () => {
+    const source = readFileSync(
+      "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+      "utf8",
+    );
+
+    expect(source).not.toMatch(
+      /<ContractField\s+label="(?:evidenceStatus|citationCount|formalAdoptionStatus|isFormalAdoptionBlocked|taskType|persistedAt|requestedAt)"/u,
+    );
   });
 
   it("uses learner-facing AI training labels for question and paper generation", () => {

@@ -1036,17 +1036,14 @@ function StudentPersonalAiGenerationHistorySummary({
             className="border-border rounded-lg border px-3"
           >
             <dl>
-              <ContractField label="status" value={historyRow.status} />
+              <ContractField label="状态" value={historyRow.status} />
+              <ContractField label="请求时间" value={historyRow.requestedAt} />
               <ContractField
-                label="requestedAt"
-                value={historyRow.requestedAt}
-              />
-              <ContractField
-                label="evidenceStatus"
+                label="资料依据"
                 value={historyRow.evidenceStatus}
               />
               <ContractField
-                label="citationCount"
+                label="依据数量"
                 value={String(historyRow.citationCount)}
               />
             </dl>
@@ -1185,26 +1182,23 @@ function StudentPersonalAiGenerationResultHistorySummary({
             className="border-border rounded-lg border px-3"
           >
             <dl>
-              <ContractField label="taskType" value={resultRow.taskType} />
-              <ContractField label="status" value={resultRow.status} />
-              <ContractField
-                label="persistedAt"
-                value={resultRow.persistedAt}
-              />
+              <ContractField label="任务类型" value={resultRow.taskType} />
+              <ContractField label="状态" value={resultRow.status} />
+              <ContractField label="生成时间" value={resultRow.persistedAt} />
               <ContractField
                 label="草稿摘要"
                 value={resultRow.contentReference.contentPreviewMasked}
               />
               <ContractField
-                label="evidenceStatus"
+                label="资料依据"
                 value={resultRow.evidenceReference.evidenceStatus}
               />
               <ContractField
-                label="citationCount"
+                label="依据数量"
                 value={String(resultRow.evidenceReference.citationCount)}
               />
               <ContractField
-                label="formalAdoptionStatus"
+                label="正式采用"
                 value={resultRow.formalAdoption.status}
               />
             </dl>
@@ -1341,10 +1335,10 @@ function StudentPersonalAiGenerationResultDetailSummary({
 
     return (
       <dl className="border-border rounded-lg border px-3">
-        <ContractField label="taskType" value={resultDetail.result.taskType} />
-        <ContractField label="status" value={resultDetail.result.status} />
+        <ContractField label="任务类型" value={resultDetail.result.taskType} />
+        <ContractField label="状态" value={resultDetail.result.status} />
         <ContractField
-          label="persistedAt"
+          label="生成时间"
           value={resultDetail.result.persistedAt}
         />
         <ContractField
@@ -1352,19 +1346,19 @@ function StudentPersonalAiGenerationResultDetailSummary({
           value={resultDetail.result.contentReference.contentPreviewMasked}
         />
         <ContractField
-          label="evidenceStatus"
+          label="资料依据"
           value={resultDetail.result.evidenceReference.evidenceStatus}
         />
         <ContractField
-          label="citationCount"
+          label="依据数量"
           value={String(resultDetail.result.evidenceReference.citationCount)}
         />
         <ContractField
-          label="formalAdoptionStatus"
+          label="正式采用"
           value={resultDetail.result.formalAdoption.status}
         />
         <ContractField
-          label="isFormalAdoptionBlocked"
+          label="采用限制"
           value={String(resultDetail.result.formalAdoption.isBlocked)}
         />
       </dl>
