@@ -1687,6 +1687,66 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("places transient visible generated content next to the submit action before practice feedback", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "本次临时预览摘要",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 10,
+              actualQuestionCount: 10,
+              draftCount: 10,
+              draftSummaries: [],
+            },
+          },
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      createPersonalAiGenerationFetchMockWithHistorySequence(
+        [emptyServerHistoryResponse, serverHistoryAfterSubmitResponse],
+        visibleResponse,
+      ),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "student-visible-generated-content",
+    );
+    const practiceFeedbackHeading = screen.getByText(
+      "\u751f\u6210\u7ec3\u4e60\u4e0e\u5b66\u4e60\u53cd\u9988",
+    );
+
+    expect(
+      visibleGeneratedContent.compareDocumentPosition(practiceFeedbackHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(visibleGeneratedContent).toHaveTextContent("草稿 10/10");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
   it("renders redacted recent request history rows from camelCase read-model fields", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const redactedReferenceResponse = {

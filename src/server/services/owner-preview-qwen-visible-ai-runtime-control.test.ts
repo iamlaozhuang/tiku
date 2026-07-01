@@ -35,8 +35,8 @@ describe("owner preview Qwen visible AI runtime control", () => {
         realProviderExecutionApproved: true,
         maxRequests: 1,
         maxRetries: 0,
-        maxOutputTokens: 220,
-        timeoutMs: 30000,
+        maxOutputTokens: 1800,
+        timeoutMs: 60000,
       },
     });
     await expect(

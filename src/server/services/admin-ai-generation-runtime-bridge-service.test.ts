@@ -122,8 +122,8 @@ describe("admin AI generation runtime bridge service", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 220,
-            timeoutMs: 30000,
+            maxOutputTokens: 1800,
+            timeoutMs: 60000,
             readProviderCredential: () => "synthetic-admin-provider-credential",
             executeProviderRequest: async (providerInput) => {
               providerInputs.push(providerInput);
@@ -162,8 +162,8 @@ describe("admin AI generation runtime bridge service", () => {
       limits: {
         maxRequests: 1,
         maxRetries: 0,
-        maxOutputTokens: 220,
-        timeoutMs: 30000,
+        maxOutputTokens: 1800,
+        timeoutMs: 60000,
       },
       requestContext: {
         routeWorkflow: "content_ai_paper_generation",
@@ -239,8 +239,8 @@ describe("admin AI generation runtime bridge service", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 220,
-            timeoutMs: 30000,
+            maxOutputTokens: 1800,
+            timeoutMs: 60000,
             readProviderCredential: () => "synthetic-admin-provider-credential",
             executeProviderRequest: async () => ({
               requestCount: 1,
@@ -308,8 +308,8 @@ describe("admin AI generation runtime bridge service", () => {
             realProviderExecutionApproved: true,
             maxRequests: 1,
             maxRetries: 0,
-            maxOutputTokens: 220,
-            timeoutMs: 30000,
+            maxOutputTokens: 1800,
+            timeoutMs: 60000,
             readProviderCredential: () => null,
             executeProviderRequest: async (providerInput) => {
               providerInputs.push(providerInput);

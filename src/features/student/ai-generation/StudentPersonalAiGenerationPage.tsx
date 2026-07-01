@@ -815,12 +815,6 @@ function StudentPersonalAiGenerationContractSummary({
         </div>
       ) : null}
 
-      <StudentPersonalAiGenerationVisibleGeneratedContent
-        visibleGeneratedContent={
-          experience.runtimeBridge.visibleGeneratedContent
-        }
-      />
-
       <dl>
         <ContractField label="runtimeStatus" value={experience.runtimeStatus} />
         <ContractField
@@ -2122,6 +2116,14 @@ export function StudentPersonalAiGenerationPage() {
           {copy.paperButton}
         </button>
       </div>
+
+      {pageState === "ready" && experience !== null ? (
+        <StudentPersonalAiGenerationVisibleGeneratedContent
+          visibleGeneratedContent={
+            experience.runtimeBridge.visibleGeneratedContent
+          }
+        />
+      ) : null}
 
       {shouldShowAiGenerationDetailControls ? (
         <div className="grid grid-cols-1 gap-3">

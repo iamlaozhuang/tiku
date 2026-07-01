@@ -42,8 +42,8 @@ describe("shared route-integrated Provider execution primitives", () => {
     expect(qwenRouteIntegratedProviderLimits).toEqual({
       maxRequests: 1,
       maxRetries: 0,
-      maxOutputTokens: 220,
-      timeoutMs: 30000,
+      maxOutputTokens: 1800,
+      timeoutMs: 60000,
     });
   });
 
@@ -97,6 +97,36 @@ describe("shared route-integrated Provider execution primitives", () => {
       difficulty: "medium",
       knowledgeNodeCount: 1,
       reviewStatus: "draft_review_required",
+    });
+  });
+
+  it("parses structured preview from the full provider text before truncating visible content", () => {
+    const content = JSON.stringify({
+      questions: Array.from({ length: 10 }, (_, index) => ({
+        questionType: index % 2 === 0 ? "single_choice" : "judge",
+        difficulty: "medium",
+        knowledgeNodeLabels: ["redacted_knowledge_node"],
+        redactedDraftSummary: "redacted draft summary ".repeat(30),
+      })),
+    });
+
+    expect(content.length).toBeGreaterThan(2000);
+
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 10,
+        },
+      });
+
+    expect(visibleGeneratedContent?.content.length).toBeLessThanOrEqual(2000);
+    expect(visibleGeneratedContent?.structuredPreview).toMatchObject({
+      kind: "question_set",
+      parseStatus: "parsed",
+      requestedQuestionCount: 10,
+      actualQuestionCount: 10,
+      draftCount: 10,
     });
   });
 

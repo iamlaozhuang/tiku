@@ -9,8 +9,8 @@ export type AiGenerationRouteIntegratedProviderMetadata = {
 export type AiGenerationRouteIntegratedProviderLimits = {
   maxRequests: 1;
   maxRetries: 0;
-  maxOutputTokens: 220;
-  timeoutMs: 30000;
+  maxOutputTokens: number;
+  timeoutMs: number;
 };
 
 export type AiGenerationRouteIntegratedProviderUsageSummary = Record<
@@ -75,8 +75,8 @@ export type AiGenerationRouteIntegratedProviderExecutionControl<
   realProviderExecutionApproved: true;
   maxRequests: 1;
   maxRetries: 0;
-  maxOutputTokens: 220;
-  timeoutMs: 30000;
+  maxOutputTokens: number;
+  timeoutMs: number;
   readProviderCredential: () => Promise<string | null> | string | null;
   executeProviderRequest?: AiGenerationRouteIntegratedProviderExecutor<TRequestContext>;
 };

@@ -22,8 +22,8 @@ export const qwenRouteIntegratedProviderMetadata = {
 export const qwenRouteIntegratedProviderLimits = {
   maxRequests: 1,
   maxRetries: 0,
-  maxOutputTokens: 220,
-  timeoutMs: 30000,
+  maxOutputTokens: 1800,
+  timeoutMs: 60000,
 } as const satisfies AiGenerationRouteIntegratedProviderLimits;
 
 const forbiddenProviderExecutionEvidenceKeys = [
@@ -133,10 +133,17 @@ export function createRouteIntegratedVisibleGeneratedContent(
       safetyStatus: "checked",
     };
 
-  return addRouteIntegratedStructuredPreview(
-    visibleGeneratedContent,
-    options?.structuredPreview,
-  );
+  if (options?.structuredPreview === undefined) {
+    return visibleGeneratedContent;
+  }
+
+  return {
+    ...visibleGeneratedContent,
+    structuredPreview: createRouteIntegratedStructuredPreview(
+      normalizedContent,
+      options.structuredPreview,
+    ),
+  };
 }
 
 export function addRouteIntegratedStructuredPreview(
