@@ -797,10 +797,10 @@ function StudentStructuredPreviewSummary({
           ]
       : structuredPreview.parseStatus === "parsed"
         ? [
-            `paper_section ${structuredPreview.paperSectionCount}`,
+            `大题模块 ${structuredPreview.paperSectionCount}`,
             `题量 ${structuredPreview.questionCount ?? "未识别"}`,
           ]
-        : ["结构化解析失败", "paper_section 0"];
+        : ["结构化解析失败", "大题模块 0"];
 
   return (
     <div className="border-border bg-muted mt-3 rounded-md border p-2">

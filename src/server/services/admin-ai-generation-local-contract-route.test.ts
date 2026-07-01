@@ -51,6 +51,10 @@ const defaultAdminGenerationParameters = {
   learningObjective: "专项练习",
 };
 
+function scopedAdminAiGenerationPublicId(prefix: string) {
+  return expect.stringMatching(new RegExp(`^${prefix}_[a-f0-9]{16}$`, "u"));
+}
+
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
   organizationPublicId: string | null;
@@ -589,8 +593,9 @@ describe("admin AI generation local contract route handlers", () => {
           quotaOwnerPublicId: "platform_content_review_pool",
           resultReference: {
             resultKind: "ai_generated_question_set",
-            resultPublicId:
+            resultPublicId: scopedAdminAiGenerationPublicId(
               "admin_ai_generation_result_content_question_admin_public_123",
+            ),
             contentVisibility: "summary_only",
             redactionStatus: "redacted",
             evidenceStatus: "none",
@@ -619,11 +624,13 @@ describe("admin AI generation local contract route handlers", () => {
         taskPersistence: {
           persistenceStatus: "created",
           requestPublicId: "admin_ai_generation_request_public_route_test",
-          taskPublicId:
+          taskPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_task_content_question_admin_public_123",
+          ),
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
@@ -631,8 +638,9 @@ describe("admin AI generation local contract route handlers", () => {
         },
         generatedResult: {
           persistenceStatus: "created",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           contentVisibility: "redacted_snapshot",
           evidenceStatus: "none",
           citationCount: 0,
@@ -646,6 +654,49 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_B");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_C");
     expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("scopes admin generation task identity to each request so stale actor-level results are not reused", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const resultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+
+    await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestPublicId: "admin_ai_generation_request_public_first_attempt",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository: resultPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+      },
+    });
+    await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      requestPublicId: "admin_ai_generation_request_public_second_attempt",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository: resultPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+      },
+    });
+
+    expect(taskPersistenceRecorder.calls).toHaveLength(2);
+    expect(resultPersistenceRecorder.calls).toHaveLength(2);
+
+    const [firstTaskCall, secondTaskCall] = taskPersistenceRecorder.calls;
+    const [firstResultCall, secondResultCall] = resultPersistenceRecorder.calls;
+
+    expect(firstTaskCall.localContract.taskRequest.taskPublicId).not.toBe(
+      secondTaskCall.localContract.taskRequest.taskPublicId,
+    );
+    expect(
+      firstTaskCall.localContract.taskRequest.idempotency.keyHash,
+    ).not.toBe(secondTaskCall.localContract.taskRequest.idempotency.keyHash);
+    expect(firstResultCall.resultPublicId).not.toBe(
+      secondResultCall.resultPublicId,
+    );
   });
 
   it("persists content admin local contracts through the injected task persistence repository", async () => {
@@ -692,11 +743,13 @@ describe("admin AI generation local contract route handlers", () => {
           persistenceStatus: "created",
           requestPublicId:
             "admin_ai_generation_request_public_content_route_123",
-          taskPublicId:
+          taskPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_task_content_question_admin_public_123",
+          ),
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
@@ -731,10 +784,12 @@ describe("admin AI generation local contract route handlers", () => {
     expect(taskPersistenceRecorder.calls).toHaveLength(1);
     expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
     expect(generatedResultPersistenceRecorder.calls[0]).toMatchObject({
-      resultPublicId:
+      resultPublicId: scopedAdminAiGenerationPublicId(
         "admin_ai_generation_result_content_question_admin_public_123",
-      taskPublicId:
+      ),
+      taskPublicId: scopedAdminAiGenerationPublicId(
         "admin_ai_generation_task_content_question_admin_public_123",
+      ),
       workspace: "content",
       generationKind: "question",
       ownerType: "platform",
@@ -763,8 +818,9 @@ describe("admin AI generation local contract route handlers", () => {
       data: {
         resultState: {
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           contentVisibility: "summary_only",
           evidenceStatus: "none",
           citationCount: 0,
@@ -772,16 +828,18 @@ describe("admin AI generation local contract route handlers", () => {
         },
         taskPersistence: {
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           evidenceStatus: "none",
           citationCount: 0,
           redactionStatus: "redacted",
         },
         generatedResult: {
           persistenceStatus: "created",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_content_question_admin_public_123",
+          ),
           contentVisibility: "redacted_snapshot",
           evidenceStatus: "none",
           citationCount: 0,
@@ -835,11 +893,13 @@ describe("admin AI generation local contract route handlers", () => {
         taskPersistence: {
           persistenceStatus: "reused",
           requestPublicId: "admin_ai_generation_request_public_org_route_123",
-          taskPublicId:
+          taskPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_task_organization_paper_admin_public_123",
+          ),
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_organization_paper_admin_public_123",
+          ),
           redactionStatus: "redacted",
         },
       },
@@ -870,10 +930,12 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
     expect(generatedResultPersistenceRecorder.calls[0]).toMatchObject({
-      resultPublicId:
+      resultPublicId: scopedAdminAiGenerationPublicId(
         "admin_ai_generation_result_organization_paper_admin_public_123",
-      taskPublicId:
+      ),
+      taskPublicId: scopedAdminAiGenerationPublicId(
         "admin_ai_generation_task_organization_paper_admin_public_123",
+      ),
       workspace: "organization",
       generationKind: "paper",
       ownerType: "organization",
@@ -888,13 +950,15 @@ describe("admin AI generation local contract route handlers", () => {
       data: {
         resultState: {
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_organization_paper_admin_public_123",
+          ),
         },
         generatedResult: {
           persistenceStatus: "reused",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_organization_paper_admin_public_123",
+          ),
           formalAdoptionStatus: "blocked",
         },
         runtimeBridge: {
@@ -984,15 +1048,17 @@ describe("admin AI generation local contract route handlers", () => {
           quotaOwnerPublicId: "organization_public_123",
           resultReference: {
             resultKind: "ai_generated_paper_draft",
-            resultPublicId:
+            resultPublicId: scopedAdminAiGenerationPublicId(
               "admin_ai_generation_result_organization_paper_admin_public_123",
+            ),
             contentVisibility: "summary_only",
           },
         },
         resultState: {
           status: "succeeded",
-          resultPublicId:
+          resultPublicId: scopedAdminAiGenerationPublicId(
             "admin_ai_generation_result_organization_paper_admin_public_123",
+          ),
           contentVisibility: "summary_only",
           redactionStatus: "redacted",
         },
@@ -1055,10 +1121,12 @@ describe("admin AI generation local contract route handlers", () => {
           questionCount: 50,
         },
         requestPublicId: "admin_ai_generation_request_public_route_test",
-        taskPublicId:
+        taskPublicId: scopedAdminAiGenerationPublicId(
           "admin_ai_generation_task_organization_paper_admin_public_123",
-        resultPublicId:
+        ),
+        resultPublicId: scopedAdminAiGenerationPublicId(
           "admin_ai_generation_result_organization_paper_admin_public_123",
+        ),
         ownerType: "organization",
         ownerPublicId: "organization_public_123",
         organizationPublicId: "organization_public_123",

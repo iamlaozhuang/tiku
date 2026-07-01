@@ -93,7 +93,7 @@ type AdminAiGenerationRuntimeBridgeControlInput =
 type AdminAiGenerationRequestPublicIdInput = {
   actorPublicId: string;
   generationKind: AdminAiGenerationKind;
-  taskPublicId: string;
+  taskPublicId?: string | null;
   workspace: AdminAiGenerationWorkspace;
 };
 
@@ -367,6 +367,7 @@ function resolveTaskType(
 function createTaskPublicId(input: {
   actorPublicId: string;
   generationKind: AdminAiGenerationKind;
+  requestPublicId: string;
   workspace: AdminAiGenerationWorkspace;
 }): string {
   return [
@@ -374,7 +375,12 @@ function createTaskPublicId(input: {
     input.workspace,
     input.generationKind,
     input.actorPublicId,
+    createPublicIdScopeSegment(input.requestPublicId),
   ].join("_");
+}
+
+function createPublicIdScopeSegment(publicId: string): string {
+  return createHash("sha256").update(publicId).digest("hex").slice(0, 16);
 }
 
 function createDefaultRequestPublicId(
@@ -392,14 +398,19 @@ function createDefaultRequestPublicId(
 function createAdminAiGenerationPolicyInput(input: {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
+  requestPublicId: string;
   workspace: AdminAiGenerationWorkspace;
 }) {
   const taskType = resolveTaskType(input.generationKind);
   const taskPublicId = createTaskPublicId({
     actorPublicId: input.actor.publicId,
     generationKind: input.generationKind,
+    requestPublicId: input.requestPublicId,
     workspace: input.workspace,
   });
+  const idempotencyScopeSegment = createPublicIdScopeSegment(
+    input.requestPublicId,
+  );
 
   if (input.workspace === "content") {
     return {
@@ -418,7 +429,7 @@ function createAdminAiGenerationPolicyInput(input: {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
-      idempotencyKeyHash: `sha256:content_${input.generationKind}_${input.actor.publicId}`,
+      idempotencyKeyHash: `sha256:content_${input.generationKind}_${input.actor.publicId}_${idempotencyScopeSegment}`,
       existingTaskPublicId: null,
       existingTaskStatus: null,
       resultPublicId: null,
@@ -449,7 +460,7 @@ function createAdminAiGenerationPolicyInput(input: {
     isScopeAllowed: true,
     isQuotaAvailable: true,
     isRuntimeConfigReady: true,
-    idempotencyKeyHash: `sha256:organization_${input.generationKind}_${input.actor.publicId}`,
+    idempotencyKeyHash: `sha256:organization_${input.generationKind}_${input.actor.publicId}_${idempotencyScopeSegment}`,
     existingTaskPublicId: null,
     existingTaskStatus: null,
     resultPublicId: null,
@@ -656,8 +667,18 @@ async function buildAdminAiGenerationLocalContract(input: {
   resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
 }): Promise<ApiResponse<AdminAiGenerationLocalContractDto | null>> {
+  const requestedAt = input.requestClock();
+  const requestPublicId = input.createRequestPublicId({
+    actorPublicId: input.actor.publicId,
+    generationKind: input.generationKind,
+    taskPublicId: null,
+    workspace: input.workspace,
+  });
   const taskRequestResponse = buildAiGenerationTaskRequestPolicyReadModel(
-    createAdminAiGenerationPolicyInput(input),
+    createAdminAiGenerationPolicyInput({
+      ...input,
+      requestPublicId,
+    }),
   );
 
   if (taskRequestResponse.code !== 0 || taskRequestResponse.data === null) {
@@ -665,13 +686,6 @@ async function buildAdminAiGenerationLocalContract(input: {
   }
 
   const taskRequest = taskRequestResponse.data;
-  const requestedAt = input.requestClock();
-  const requestPublicId = input.createRequestPublicId({
-    actorPublicId: input.actor.publicId,
-    generationKind: input.generationKind,
-    taskPublicId: taskRequest.taskPublicId,
-    workspace: input.workspace,
-  });
   const resultPublicId = createAdminAiGenerationResultPublicId(
     taskRequest.taskPublicId,
   );

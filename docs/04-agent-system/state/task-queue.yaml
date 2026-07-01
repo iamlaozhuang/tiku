@@ -356,7 +356,14 @@ tasks:
     evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
     taskKind: source_test_repair
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: completed_admin_ai_request_scoped_identity_and_ordinary_ui_wording_repair
+    claimedAt: "2026-07-01T15:50:00-07:00"
+    plannedAt: "2026-07-01T15:50:00-07:00"
+    implementedAt: "2026-07-01T16:05:00-07:00"
+    validatedAt: "2026-07-01T16:05:00-07:00"
+    reviewedAt: "2026-07-01T16:05:00-07:00"
+    closedAt: "2026-07-01T16:05:00-07:00"
     priority: p1
     dependsOn:
       - ai-generation-resource-grounded-provider-sample-2026-07-01
@@ -369,6 +376,21 @@ tasks:
       - ADMIN-AI-EVIDENCE-01
       - ADMIN-AI-PAPER-VISIBLE-01
       - PRODUCT-UI-GOVERNANCE-01
+      - AI-GENERATION-RAG-SCOPE-01
+    crossCuttingScanGate:
+      roleSurfaces:
+        - content_admin_ai_question_generation
+        - content_admin_ai_paper_generation
+        - organization_advanced_admin_ai_question_generation
+        - organization_advanced_admin_ai_paper_generation
+        - personal_advanced_student_ai_question_generation
+        - personal_advanced_student_ai_paper_generation
+        - organization_advanced_employee_ai_question_generation
+        - organization_advanced_employee_ai_paper_generation
+      requiredChecks:
+        - generation_must_not_be_treated_as_valid_when_resource_grounding_is_absent_or_stale
+        - ordinary_ui_must_not_render_local_contract_redaction_or_raw_governance_terms
+        - shared_components_and_services_must_be_reused_instead_of_role_specific_duplicates
     reuseRequirement:
       - shared_admin_ai_route_service_contracts_only_no_role_specific_duplicate_paths
       - shared_student_and_admin_ai_ui_label_helpers_preferred
@@ -442,6 +464,26 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-admin-idempotency-visible-result-repair-2026-07-01
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-admin-idempotency-visible-result-repair-2026-07-01 -SkipRemoteAheadCheck
+    validationSummary:
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_5_files_46_tests
+      ordinaryUiTechnicalWordingStaticScan: pass_test_only_hits
+      prettierScoped: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_anchor_update
+      sourceOrTestChanged: true
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserRuntimeExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-resource-grounded-provider-sample-2026-07-01
     title: AI generation resource-grounded Provider sample
     phase: ai-generation-resource-grounded-provider-sample-2026-07-01

@@ -477,8 +477,8 @@ function getAiGenerationDetailControls(
         {
           inputMode: "select",
           label: "试卷结构",
-          options: ["按 paper_section 组织", "按知识点模块组织"],
-          value: "按 paper_section 组织",
+          options: ["按大题模块组织", "按知识点模块组织"],
+          value: "按大题模块组织",
         },
         {
           inputMode: "text",
@@ -607,7 +607,7 @@ function AdminAiGenerationVisibleGeneratedContent({
           </h3>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-          不持久化正文
+          待评审草稿
         </span>
       </div>
       <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
@@ -644,10 +644,10 @@ function StructuredPreviewSummary({
           ]
       : structuredPreview.parseStatus === "parsed"
         ? [
-            `paper_section ${structuredPreview.paperSectionCount}`,
+            `大题模块 ${structuredPreview.paperSectionCount}`,
             `题量 ${structuredPreview.questionCount ?? "未识别"}`,
           ]
-        : ["结构化解析失败", "paper_section 0"];
+        : ["结构化解析失败", "大题模块 0"];
 
   return (
     <div className="border-border bg-muted mt-3 rounded-md border p-2">
@@ -742,7 +742,7 @@ function AdminAiGenerationTaskHistoryPanel({
           </h2>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-          元数据历史
+          生成记录
         </span>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">

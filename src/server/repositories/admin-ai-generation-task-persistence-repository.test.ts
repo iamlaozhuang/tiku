@@ -30,6 +30,17 @@ import {
 } from "../services/admin-ai-generation-local-contract-route";
 import type { SessionService } from "../services/session-service";
 
+const defaultAdminGenerationParameters = {
+  profession: "marketing",
+  level: 3,
+  subject: "theory",
+  knowledgeNode: "卷烟营销基础",
+  questionType: "single_choice",
+  questionCount: 10,
+  difficulty: "medium",
+  learningObjective: "专项练习",
+};
+
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
   organizationPublicId: string | null;
@@ -138,6 +149,10 @@ async function createAcceptedLocalContract(input: {
   const response = await collection.POST(
     createPostRequest(input.workspace, {
       generationKind: input.generationKind,
+      generationParameters: {
+        ...defaultAdminGenerationParameters,
+        questionCount: input.generationKind === "question" ? 10 : 50,
+      },
       clientOnlyFixtureA: "OMITTED_CLIENT_FIXTURE_A",
       clientOnlyFixtureB: "OMITTED_CLIENT_FIXTURE_B",
       clientOnlyFixtureC: "OMITTED_CLIENT_FIXTURE_C",
@@ -437,15 +452,14 @@ describe("admin AI generation task persistence repository", () => {
       {
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
-        idempotencyKeyHash: "sha256:content_question_admin_public_901",
+        idempotencyKeyHash: localContract.taskRequest.idempotency.keyHash,
         taskTypes: ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
       },
     ]);
     expect(gateway.insertInputs).toHaveLength(1);
     expect(gateway.insertInputs[0]).toMatchObject({
       requestPublicId: "admin_ai_generation_request_public_content_901",
-      taskPublicId:
-        "admin_ai_generation_task_content_question_admin_public_901",
+      taskPublicId: localContract.taskRequest.taskPublicId,
       taskType: "ai_question_generation",
       workspace: "content",
       generationKind: "question",
@@ -476,8 +490,7 @@ describe("admin AI generation task persistence repository", () => {
       persistenceStatus: "created",
       task: {
         requestPublicId: "admin_ai_generation_request_public_content_901",
-        taskPublicId:
-          "admin_ai_generation_task_content_question_admin_public_901",
+        taskPublicId: localContract.taskRequest.taskPublicId,
         status: "pending",
         workspace: "content",
         generationKind: "question",
@@ -519,8 +532,7 @@ describe("admin AI generation task persistence repository", () => {
     });
 
     expect(gateway.insertInputs[0]).toMatchObject({
-      taskPublicId:
-        "admin_ai_generation_task_organization_paper_admin_public_901",
+      taskPublicId: localContract.taskRequest.taskPublicId,
       taskType: "ai_paper_generation",
       workspace: "organization",
       generationKind: "paper",
@@ -619,7 +631,7 @@ describe("admin AI generation task persistence repository", () => {
       createPersistenceRow({
         public_id: "admin_ai_generation_task_existing_901",
         request_public_id: "admin_ai_generation_request_existing_901",
-        idempotency_key_hash: "sha256:content_question_admin_public_901",
+        idempotency_key_hash: localContract.taskRequest.idempotency.keyHash,
       }),
     ]);
     const repository =

@@ -403,6 +403,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("仅本地合约")).not.toBeInTheDocument();
     expect(screen.queryByText("脱敏快照")).not.toBeInTheDocument();
     expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
+    expect(screen.queryByText("evidenceStatus")).not.toBeInTheDocument();
+    expect(screen.queryByText("citationCount")).not.toBeInTheDocument();
+    expect(screen.queryByText("formalAdoptionStatus")).not.toBeInTheDocument();
+    expect(screen.queryByText("redactionStatus")).not.toBeInTheDocument();
     expect(screen.getAllByText("暂不可用").length).toBeGreaterThan(0);
     expect(screen.getByText("需审核后采用")).toBeInTheDocument();
     expect(screen.getByText("masked preview detail 501")).toBeInTheDocument();
