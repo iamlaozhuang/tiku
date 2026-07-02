@@ -238,6 +238,15 @@ function getFormalAdoptionStatusLabel(
   return labels[status];
 }
 
+function isAdminGeneratedResultGrounded(
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
+): boolean {
+  return (
+    generatedResult.evidenceStatus === "sufficient" &&
+    generatedResult.citationCount > 0
+  );
+}
+
 function formatRequestedAt(requestedAt: string): string {
   return requestedAt.slice(0, 16).replace("T", " ");
 }
@@ -1000,12 +1009,78 @@ function AdminAiGenerationTaskHistoryPanel({
                       onReviewContentDraft={onReviewContentDraft}
                     />
                   ) : null}
+                  {workspace === "organization" ? (
+                    <OrganizationAiGenerationDraftNextStepPanel
+                      taskItem={taskItem}
+                    />
+                  ) : null}
                 </div>
               ) : null}
             </article>
           ))}
         </div>
       ) : null}
+    </section>
+  );
+}
+
+function OrganizationAiGenerationDraftNextStepPanel({
+  taskItem,
+}: {
+  taskItem: AdminAiGenerationTaskHistoryItemDto;
+}) {
+  if (taskItem.generatedResult === null) {
+    return null;
+  }
+
+  const boundary = taskItem.organizationOwnedDraftBoundary;
+  const isOrganizationPrivateDraft =
+    boundary.generatedResultScope === "organization_private" &&
+    boundary.organizationDraftAdoptionStatus ===
+      "allowed_as_organization_private_draft";
+  const isTrainingSourceAllowed =
+    isOrganizationPrivateDraft &&
+    boundary.organizationTrainingSourceStatus ===
+      "allowed_as_organization_private_training_source" &&
+    isAdminGeneratedResultGrounded(taskItem.generatedResult);
+  const trainingSourceStatus = isTrainingSourceAllowed
+    ? "可作为组织训练素材"
+    : "资料不足，暂不可作为组织训练素材";
+
+  return (
+    <section
+      className="border-border bg-background mt-3 rounded-md border p-3"
+      data-testid="organization-ai-generation-draft-next-step"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">组织私有草稿</p>
+          <h4 className="text-text-primary mt-1 text-sm font-semibold">
+            下一步处理
+          </h4>
+        </div>
+        <a
+          className="border-border text-text-secondary hover:bg-muted inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98]"
+          href="/organization/organization-training"
+        >
+          进入企业训练配置
+        </a>
+      </div>
+
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+        <div>
+          <dt className="text-text-secondary">草稿用途</dt>
+          <dd className="text-text-primary mt-1">{trainingSourceStatus}</dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">正式发布</dt>
+          <dd className="text-text-primary mt-1">正式发布需后续编辑校验</dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">员工可见</dt>
+          <dd className="text-text-primary mt-1">发布前不可见</dd>
+        </div>
+      </dl>
     </section>
   );
 }
@@ -1054,8 +1129,7 @@ function ContentAdminReviewTraceabilityPanel({
   const isCompleted = actionState === "adopted" || actionState === "rejected";
   const actionMessage = resolveContentAdminReviewActionMessage(actionState);
   const isGeneratedResultGrounded =
-    generatedResult.evidenceStatus === "sufficient" &&
-    generatedResult.citationCount > 0;
+    isAdminGeneratedResultGrounded(generatedResult);
   const isAdoptActionDisabled =
     isSubmitting || isCompleted || !isGeneratedResultGrounded;
   const isRejectActionDisabled = isSubmitting || isCompleted;

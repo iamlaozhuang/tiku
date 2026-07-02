@@ -231,6 +231,34 @@ function createTaskHistoryResponse(input: {
           questionWriteStatus: "blocked_without_follow_up_task",
           paperWriteStatus: "blocked_without_follow_up_task",
         },
+        organizationOwnedDraftBoundary: {
+          generatedResultScope:
+            input.workspace === "organization"
+              ? "organization_private"
+              : "platform_review_pool",
+          organizationDraftAdoptionStatus:
+            input.workspace === "organization"
+              ? "allowed_as_organization_private_draft"
+              : "not_applicable_to_content_workspace",
+          organizationTrainingSourceStatus:
+            input.workspace === "organization"
+              ? "allowed_as_organization_private_training_source"
+              : "not_applicable_to_content_workspace",
+          platformFormalDraftStatus: "blocked_requires_content_admin_review",
+          publishStatus: "blocked_requires_fresh_publish_task",
+          studentVisibleStatus: "blocked",
+          ownerType:
+            input.workspace === "organization" ? "organization" : "platform",
+          ownerPublicId:
+            input.workspace === "organization"
+              ? "organization_public_123"
+              : "platform_content_review_pool",
+          organizationPublicId:
+            input.workspace === "organization"
+              ? "organization_public_123"
+              : null,
+          redactionStatus: "redacted",
+        },
         generatedResult,
         redactionStatus: "redacted",
       },
@@ -257,6 +285,34 @@ function createTaskHistoryResponse(input: {
           formalContentBoundary: {
             questionWriteStatus: "blocked_without_follow_up_task",
             paperWriteStatus: "blocked_without_follow_up_task",
+          },
+          organizationOwnedDraftBoundary: {
+            generatedResultScope:
+              input.workspace === "organization"
+                ? "organization_private"
+                : "platform_review_pool",
+            organizationDraftAdoptionStatus:
+              input.workspace === "organization"
+                ? "allowed_as_organization_private_draft"
+                : "not_applicable_to_content_workspace",
+            organizationTrainingSourceStatus:
+              input.workspace === "organization"
+                ? "allowed_as_organization_private_training_source"
+                : "not_applicable_to_content_workspace",
+            platformFormalDraftStatus: "blocked_requires_content_admin_review",
+            publishStatus: "blocked_requires_fresh_publish_task",
+            studentVisibleStatus: "blocked",
+            ownerType:
+              input.workspace === "organization" ? "organization" : "platform",
+            ownerPublicId:
+              input.workspace === "organization"
+                ? "organization_public_123"
+                : "platform_content_review_pool",
+            organizationPublicId:
+              input.workspace === "organization"
+                ? "organization_public_123"
+                : null,
+            redactionStatus: "redacted",
           },
           generatedResult,
           redactionStatus: "redacted",
@@ -1287,6 +1343,8 @@ describe("admin AI generation entry surfaces", () => {
               resultPublicId,
               contentPreviewMasked:
                 "redacted generated result summary for organization history",
+              evidenceStatus: "sufficient",
+              citationCount: 1,
             },
           }),
         );
@@ -1312,6 +1370,15 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("草稿快照");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("组织私有草稿");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("可作为组织训练素材");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("正式发布需后续编辑校验");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).not.toHaveTextContent("Provider");

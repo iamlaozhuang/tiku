@@ -60,6 +60,7 @@ type StudentPersonalAiGenerationResultDetailState =
 
 type StudentPersonalAiGenerationPracticeFeedbackState =
   | "waiting"
+  | "insufficient"
   | "practice_ready"
   | "answer_submitted"
   | "feedback_ready";
@@ -219,6 +220,7 @@ const practiceFeedbackStatusLabelMap: Record<
   string
 > = {
   waiting: "生成后可进入练习、提交作答并查看学习反馈",
+  insufficient: "资料不足时请重试生成",
   practice_ready: "生成练习已就绪",
   answer_submitted: "作答已提交",
   feedback_ready: "学习反馈可查看",
@@ -966,6 +968,18 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
         {practiceFeedbackStatusLabelMap[practiceFeedbackState]}
       </p>
     </section>
+  );
+}
+
+function canUseCurrentGeneratedPractice(
+  experience: PersonalAiGenerationLocalBrowserExperienceDto,
+): boolean {
+  return (
+    experience.flowStatus === "accepted" &&
+    experience.resultState.status === "succeeded" &&
+    experience.resultState.resultPublicId !== null &&
+    experience.resultState.evidenceStatus === "sufficient" &&
+    experience.resultState.citationCount > 0
   );
 }
 
@@ -2039,9 +2053,17 @@ export function StudentPersonalAiGenerationPage() {
   const hasLocalAiGenerationExperience =
     pageState === "ready" && experience !== null;
   const canUseGeneratedPractice =
-    hasLocalAiGenerationExperience && experience.flowStatus === "accepted";
+    hasLocalAiGenerationExperience &&
+    canUseCurrentGeneratedPractice(experience);
   const isRetryGenerationDisabled =
     isAiGenerationActionDisabled || !hasLocalAiGenerationExperience;
+  const practiceFeedbackStateForCurrentResult =
+    hasLocalAiGenerationExperience &&
+    experience.flowStatus === "accepted" &&
+    experience.resultState.status === "succeeded" &&
+    !canUseGeneratedPractice
+      ? "insufficient"
+      : practiceFeedbackState;
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -2113,7 +2135,7 @@ export function StudentPersonalAiGenerationPage() {
         <StudentPersonalAiGenerationPracticeFeedbackActions
           canUseGeneratedPractice={canUseGeneratedPractice}
           isRetryDisabled={isRetryGenerationDisabled}
-          practiceFeedbackState={practiceFeedbackState}
+          practiceFeedbackState={practiceFeedbackStateForCurrentResult}
           onStartPractice={() => setPracticeFeedbackState("practice_ready")}
           onSubmitAnswer={() => setPracticeFeedbackState("answer_submitted")}
           onViewFeedback={() => setPracticeFeedbackState("feedback_ready")}

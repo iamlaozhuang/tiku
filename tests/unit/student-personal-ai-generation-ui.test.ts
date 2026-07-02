@@ -714,6 +714,19 @@ describe("StudentPersonalAiGenerationPage", () => {
 
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const insufficientGeneratedPracticeResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId: "ai-result-public-insufficient-001",
+          evidenceStatus: "none",
+          citationCount: 0,
+        },
+      },
+    };
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
         if (String(url) === "/api/v1/authorizations") {
@@ -751,7 +764,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           return {
             ok: true,
             status: 200,
-            json: async () => localExperienceResponse,
+            json: async () => insufficientGeneratedPracticeResponse,
           };
         }
 
@@ -800,21 +813,15 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("学员本地页面")).not.toBeInTheDocument();
     expect(screen.queryByText("内容可见性")).not.toBeInTheDocument();
     expect(screen.queryByText("引用脱敏状态")).not.toBeInTheDocument();
-    expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("已完成").length).toBeGreaterThan(0);
     expect(screen.queryByText("仅摘要")).not.toBeInTheDocument();
     expect(screen.queryByText("是否阻断正式入库")).not.toBeInTheDocument();
     expect(screen.getByText("需审核后采用")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "开始练习" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "提交作答" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeEnabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
-    expect(screen.getByText("生成练习已就绪")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
-    expect(screen.getByText("作答已提交")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "查看学习反馈" }));
-    expect(screen.getByText("学习反馈可查看")).toBeInTheDocument();
+    expect(screen.getByText("资料不足时请重试生成")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
@@ -922,6 +929,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       String(requestBody.answerRecordPublicId),
       String(requestBody.paperPublicId),
       String(requestBody.userPublicId),
+      insufficientGeneratedPracticeResponse.data.resultState.resultPublicId,
     ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
