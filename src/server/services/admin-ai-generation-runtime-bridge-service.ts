@@ -179,6 +179,9 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
         executionResult.visibleGeneratedContent ?? null,
         createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
           requestContext.generationKind,
+          {
+            generationParameters: requestContext.generationParameters,
+          },
         ),
       ),
       groundingContext,
@@ -258,6 +261,9 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
           structuredPreview:
             createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
               input.requestContext.generationKind,
+              {
+                generationParameters: input.requestContext.generationParameters,
+              },
             ),
         },
       ),

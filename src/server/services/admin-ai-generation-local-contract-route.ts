@@ -714,6 +714,9 @@ async function buildAdminAiGenerationLocalContract(input: {
   const expectedStructuredPreviewKind =
     createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
       input.generationKind,
+      {
+        generationParameters: input.generationParameters,
+      },
     ).kind;
 
   if (

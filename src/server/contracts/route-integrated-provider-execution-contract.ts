@@ -134,6 +134,7 @@ export type AiGenerationRouteIntegratedStructuredPreviewOptions =
     }
   | {
       kind: "paper_draft";
+      requestedQuestionCount?: number | null;
     };
 
 export type AiGenerationRouteIntegratedQuestionDraftSummary = {

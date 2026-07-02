@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { aiGenerationSharedTaskSpecs } from "../contracts/ai-generation-task-spec-contract";
 import {
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
+  createRouteIntegratedStructuredPreviewOptionsForTask,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
   isRouteIntegratedVisibleGeneratedContentAcceptableForDraft,
@@ -46,6 +48,37 @@ describe("shared route-integrated Provider execution primitives", () => {
       maxOutputTokens: 1800,
       timeoutMs: 60000,
     });
+  });
+
+  it("defines AI question and paper generation task specs in one shared contract", () => {
+    expect(aiGenerationSharedTaskSpecs.ai_question_generation).toMatchObject({
+      taskType: "ai_question_generation",
+      label: "AI出题",
+      structuredPreviewKind: "question_set",
+      countSemantic: "exact_requested_question_count",
+      redactionCategory: "question_draft_summary_only",
+    });
+    expect(
+      aiGenerationSharedTaskSpecs.ai_question_generation.allowedOutputFields,
+    ).toEqual(["questions", "questionDrafts", "question_drafts"]);
+
+    expect(aiGenerationSharedTaskSpecs.ai_paper_generation).toMatchObject({
+      taskType: "ai_paper_generation",
+      label: "AI组卷",
+      structuredPreviewKind: "paper_draft",
+      countSemantic: "requested_total_question_count",
+      redactionCategory: "paper_draft_summary_only",
+    });
+    expect(
+      aiGenerationSharedTaskSpecs.ai_paper_generation.allowedOutputFields,
+    ).toEqual([
+      "paperSections",
+      "paper_sections",
+      "questionCount",
+      "totalQuestionCount",
+      "questionTypeDistribution",
+      "knowledgeCoverage",
+    ]);
   });
 
   it("normalizes transient visible generated content outside execution evidence", () => {
@@ -155,6 +188,52 @@ describe("shared route-integrated Provider execution primitives", () => {
         draftCount: 0,
         draftSummaries: [],
       },
+    });
+  });
+
+  it("derives question-set preview counts from task generation parameters", () => {
+    expect(
+      createRouteIntegratedStructuredPreviewOptionsForTask(
+        "ai_question_generation",
+        {
+          generationParameters: {
+            questionCount: 5,
+          },
+        },
+      ),
+    ).toEqual({
+      kind: "question_set",
+      requestedQuestionCount: 5,
+    });
+
+    expect(
+      createRouteIntegratedStructuredPreviewOptionsForTask(
+        "ai_question_generation",
+        {
+          generationParameters: {
+            questionCount: 20,
+          },
+        },
+      ),
+    ).toEqual({
+      kind: "question_set",
+      requestedQuestionCount: 20,
+    });
+  });
+
+  it("carries paper requested question counts from task generation parameters", () => {
+    expect(
+      createRouteIntegratedStructuredPreviewOptionsForTask(
+        "ai_paper_generation",
+        {
+          generationParameters: {
+            questionCount: 20,
+          },
+        },
+      ),
+    ).toEqual({
+      kind: "paper_draft",
+      requestedQuestionCount: 20,
     });
   });
 

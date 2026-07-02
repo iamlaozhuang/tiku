@@ -12,6 +12,12 @@ import type {
   AiGenerationRouteIntegratedGroundingSummary,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
+import {
+  createAiGenerationSharedTaskStructuredPreviewOptions,
+  getAiGenerationSharedTaskSpec,
+  type AiGenerationSharedTaskPreviewOptionsInput,
+  type AiGenerationSharedTaskType,
+} from "../contracts/ai-generation-task-spec-contract";
 
 export const qwenRouteIntegratedProviderMetadata = {
   modelProvider: "openai_compatible",
@@ -178,21 +184,15 @@ export function addRouteIntegratedStructuredPreview(
 }
 
 export function createRouteIntegratedStructuredPreviewOptionsForTask(
-  taskType: "ai_question_generation" | "ai_paper_generation",
+  taskType: AiGenerationSharedTaskType,
+  input?: AiGenerationSharedTaskPreviewOptionsInput,
 ): AiGenerationRouteIntegratedStructuredPreviewOptions {
-  return taskType === "ai_question_generation"
-    ? {
-        kind: "question_set",
-        requestedQuestionCount: 10,
-      }
-    : {
-        kind: "paper_draft",
-      };
+  return createAiGenerationSharedTaskStructuredPreviewOptions(taskType, input);
 }
 
 export function createRouteIntegratedTaskTypeFromGenerationKind(
   generationKind: "question" | "paper",
-): "ai_question_generation" | "ai_paper_generation" {
+): AiGenerationSharedTaskType {
   return generationKind === "question"
     ? "ai_question_generation"
     : "ai_paper_generation";
@@ -200,16 +200,18 @@ export function createRouteIntegratedTaskTypeFromGenerationKind(
 
 export function createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
   generationKind: "question" | "paper",
+  input?: AiGenerationSharedTaskPreviewOptionsInput,
 ): AiGenerationRouteIntegratedStructuredPreviewOptions {
   return createRouteIntegratedStructuredPreviewOptionsForTask(
     createRouteIntegratedTaskTypeFromGenerationKind(generationKind),
+    input,
   );
 }
 
 export function createRouteIntegratedTaskLabel(
-  taskType: "ai_question_generation" | "ai_paper_generation",
+  taskType: AiGenerationSharedTaskType,
 ): "AI出题" | "AI组卷" {
-  return taskType === "ai_question_generation" ? "AI出题" : "AI组卷";
+  return getAiGenerationSharedTaskSpec(taskType).label;
 }
 
 export function createRouteIntegratedGenerationKindLabel(

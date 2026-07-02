@@ -165,6 +165,9 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
         executionResult.visibleGeneratedContent ?? null,
         createRouteIntegratedStructuredPreviewOptionsForTask(
           requestContext.taskType,
+          {
+            generationParameters: requestContext.generationParameters,
+          },
         ),
       ),
       groundingContext,
@@ -258,6 +261,9 @@ export async function executeQwenRouteIntegratedProviderRequest(
           structuredPreview:
             createRouteIntegratedStructuredPreviewOptionsForTask(
               input.requestContext.taskType,
+              {
+                generationParameters: input.requestContext.generationParameters,
+              },
             ),
         },
       ),
