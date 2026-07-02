@@ -1,8 +1,97 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
-updatedAt: "2026-07-01T20:04:31-07:00"
+currentPhase: ai-generation-post-adoption-closure-rerun-2026-07-02
+updatedAt: "2026-07-01T20:12:00-07:00"
+aiGenerationPostAdoptionClosureRerun20260702:
+  taskId: ai-generation-post-adoption-closure-rerun-2026-07-02
+  phase: ai-generation-post-adoption-closure-rerun-2026-07-02
+  status: closed
+  result: completed_with_findings_application_closure_and_learner_mixed_state_repair_required
+  priority: p1
+  taskKind: local_owner_preview_rerun
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-grounded-result-adoption-closure-repair-2026-07-02
+  sourceStory: current_goal_after_grounded_result_adoption_closure_repair_2026_07_02
+  targetClosureItem: rerun local owner-preview AI 出题 / AI组卷 after grounded structured result and no-fabricated-adoption repair
+  behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+  evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
+  branch: codex/ai-generation-post-adoption-closure-rerun
+  claimedAt: "2026-07-01T20:12:00-07:00"
+  plannedAt: "2026-07-01T20:12:00-07:00"
+  walkedThroughAt: "2026-07-01T20:24:11-07:00"
+  reviewedAt: "2026-07-01T20:24:11-07:00"
+  closedAt: "2026-07-01T20:24:11-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  readOnlyOrRuntimeAllowed:
+    - http://localhost:3000/**
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - src/app/**/ai-generation*/**
+    - src/features/**/ai-generation*/**
+    - src/server/services/*ai-generation*
+    - src/server/routes/*ai-generation*
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: blocked
+    focusedUnitTest: not_applicable
+    staticSourceScan: approved
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_bounded_when_grounding_sufficient
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationSummary:
+    status: completed_with_findings
+    result: application_closure_and_learner_mixed_state_repair_required
+    localhostServer: pass_http_200
+    sampledRoleSurfaces: content_admin_question_paper_org_advanced_admin_question_paper_personal_advanced_student_question_paper_org_advanced_employee_question_paper
+    ordinaryUiTechnicalWording: pass_sampled_surfaces_zero_count
+    adminLevelOptions: pass_sampled_admin_surfaces_1_to_5
+    organizationAdvancedPortal: pass_not_downgraded_in_sample
+    organizationApplicationClosure: fail_no_visible_application_action
+    learnerPracticeClosure: partial_pass_practice_entry_available_mixed_insufficient_state
+    sourceOrTestChanged: false
+    providerCallExecuted: bounded_localhost_ui_generation_attempts_no_payload_or_output_recorded
+    envFileReadOrModified: false
+    databaseConnectionOrMutationExecuted: false
+    schemaMigrationSeedExecuted: false
+    dependencyPackageLockfileChanged: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 aiGenerationGroundedResultAdoptionClosureRepair20260702:
   taskId: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
   phase: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
@@ -2875,6 +2964,7 @@ aiGenerationCentralRepairApproval20260701:
     - ai-generation-real-provider-sample-2026-07-01
     - ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
     - ai-generation-admin-parameters-runtime-repair-2026-07-01
+    - ai-generation-post-adoption-closure-rerun-2026-07-02
   approvedCapabilityBoundary:
     sourceAndTestRepair: approved_when_task_materialized
     localDbReadWriteResetSeedImport: approved_when_task_materialized_local_dev_only_no_raw_rows
@@ -12574,52 +12664,40 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 52dde8a22e31f66a00233d6390370ca436e499a0
-  lastKnownOriginMasterSha: 52dde8a22e31f66a00233d6390370ca436e499a0
+  lastKnownMasterSha: d7556f9908cf4de6d213ad29e3707214a690841b
+  lastKnownOriginMasterSha: d7556f9908cf4de6d213ad29e3707214a690841b
 currentTask:
-  id: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
+  id: ai-generation-post-adoption-closure-rerun-2026-07-02
   status: closed
-  result: pass_grounded_result_gate_and_no_fabricated_adoption_payload
-  taskKind: source_test_repair
+  result: completed_with_findings_application_closure_and_learner_mixed_state_repair_required
+  taskKind: local_owner_preview_rerun
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-grounded-result-adoption-closure
+  branch: codex/ai-generation-post-adoption-closure-rerun
   humanApproval: aiGenerationCentralRepairApproval20260701
-  claimedAt: "2026-07-02T03:35:00-07:00"
-  plannedAt: "2026-07-02T03:35:00-07:00"
-  implementedAt: "2026-07-01T20:04:31-07:00"
-  validatedAt: "2026-07-01T20:04:31-07:00"
-  reviewedAt: "2026-07-01T20:04:31-07:00"
-  closedAt: "2026-07-01T20:04:31-07:00"
+  claimedAt: "2026-07-01T20:12:00-07:00"
+  plannedAt: "2026-07-01T20:12:00-07:00"
+  walkedThroughAt: "2026-07-01T20:24:11-07:00"
+  reviewedAt: "2026-07-01T20:24:11-07:00"
+  closedAt: "2026-07-01T20:24:11-07:00"
   dependsOn:
-    - ai-generation-post-query-wording-provider-rerun-2026-07-02
-  sourceStory: current_goal_post_query_wording_provider_rerun_findings_2026_07_02
-  targetClosureItem: repair admin AI generation grounded result acceptance and content admin generated-result adoption closure
-  behaviorBoundary: local_source_focused_tests_docs_state_only_no_db_provider_env_dependency_schema_e2e_deploy
-  evidenceMode: redacted_status_count_validation_summary_only_no_prompt_payload_raw_ai_output_generated_content_or_credentials
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
+    - ai-generation-grounded-result-adoption-closure-repair-2026-07-02
+  sourceStory: current_goal_after_grounded_result_adoption_closure_repair_2026_07_02
+  targetClosureItem: rerun local owner-preview AI 出题 / AI组卷 after grounded structured result and no-fabricated-adoption repair
+  behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+  evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-adoption-closure-rerun.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
-    - src/server/contracts/admin-ai-generation-local-contract.ts
-    - src/server/services/route-integrated-provider-execution-service.ts
-    - src/server/services/route-integrated-provider-execution-service.test.ts
-    - src/server/services/admin-ai-generation-local-contract-route.ts
-    - src/server/services/admin-ai-generation-local-contract-route.test.ts
-    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
-    - tests/unit/admin-ai-generation-entry-surface.test.ts
-  readOnlyAllowedFiles:
-    - AGENTS.md
-    - docs/03-standards/code-taste-ten-commandments.md
-    - docs/02-architecture/adr/**
-    - docs/04-agent-system/state/project-state.yaml
-    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+  readOnlyOrRuntimeAllowed:
+    - http://localhost:3000/**
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
     - src/app/(student)/ai-generation/page.tsx
     - src/app/(admin)/content/ai-question-generation/page.tsx
     - src/app/(admin)/content/ai-paper-generation/page.tsx
@@ -12627,12 +12705,9 @@ currentTask:
     - src/app/(admin)/organization/ai-paper-generation/page.tsx
     - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
     - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-    - src/server/services/admin-ai-generation-formal-adoption-service.ts
-    - src/server/services/personal-ai-generation-result-history-service.ts
-    - src/server/routes/admin-ai-generation-local-contract-route.ts
-    - src/server/services/rag-retrieval-service.ts
-    - src/server/services/rag-resource-knowledge-runtime.ts
-    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - src/server/services/*ai-generation*
+    - src/server/routes/*ai-generation*
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
   blockedFiles:
     - .env*
     - package.json
@@ -12648,13 +12723,13 @@ currentTask:
     - test-results/**
     - .next/**
   capabilities:
-    localSourceChange: approved
-    focusedUnitTest: approved
+    localSourceChange: blocked
+    focusedUnitTest: not_applicable
     staticSourceScan: approved
-    localDevServer: blocked
-    localhostBrowser: blocked
-    providerCall: blocked
-    credentialReadForLocalhostLogin: blocked
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_bounded_when_grounding_sufficient
+    credentialReadForLocalhostLogin: approved_no_evidence
     envSecretAccess: blocked
     databaseConnection: blocked
     databaseMutation: blocked
@@ -12666,18 +12741,17 @@ currentTask:
     pr: blocked
     costCalibrationGate: blocked
   closeoutSummary:
-    status: pass
-    result: pass_grounded_result_gate_and_no_fabricated_adoption_payload
-    redTestsAddedAndObservedFailing: true
-    focusedUnitTests: pass_4_files_59_tests
-    lint: pass
-    typecheck: pass
-    prettierCheck: pass
-    gitDiffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
-    sourceOrTestChanged: true
-    providerCallExecuted: false
+    status: completed_with_findings
+    result: application_closure_and_learner_mixed_state_repair_required
+    localhostServer: pass_http_200
+    sampledRoleSurfaces: content_admin_question_paper_org_advanced_admin_question_paper_personal_advanced_student_question_paper_org_advanced_employee_question_paper
+    ordinaryUiTechnicalWording: pass_sampled_surfaces_zero_count
+    adminLevelOptions: pass_sampled_admin_surfaces_1_to_5
+    organizationAdvancedPortal: pass_not_downgraded_in_sample
+    organizationApplicationClosure: fail_no_visible_application_action
+    learnerPracticeClosure: partial_pass_practice_entry_available_mixed_insufficient_state
+    sourceOrTestChanged: false
+    providerCallExecuted: bounded_localhost_ui_generation_attempts_no_payload_or_output_recorded
     envFileReadOrModified: false
     databaseConnectionOrMutationExecuted: false
     schemaMigrationSeedExecuted: false
