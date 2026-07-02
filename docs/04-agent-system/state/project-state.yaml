@@ -1,8 +1,153 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
-updatedAt: "2026-07-02T05:33:46-07:00"
+currentPhase: ai-generation-goal-completion-audit-2026-07-02
+updatedAt: "2026-07-02T06:25:00-07:00"
+aiGenerationGoalCompletionAudit20260702:
+  taskId: ai-generation-goal-completion-audit-2026-07-02
+  phase: ai-generation-goal-completion-audit-2026-07-02
+  status: closed
+  result: completed_ai_question_and_paper_generation_goal_problem_list
+  priority: p1
+  taskKind: docs_state_goal_completion_audit
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    - ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    - ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+    - ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+  sourceStory: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+  targetClosureItem: Audit AI出题 and AI组卷 goal acceptance criteria and close the problem list only if every criterion has evidence
+  behaviorBoundary: docs_state_goal_completion_audit_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_commit_prefix_validation_status_count_duration_bucket_structured_preview_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  branch: codex/ai-generation-goal-completion-audit
+  claimedAt: "2026-07-02T06:18:00-07:00"
+  plannedAt: "2026-07-02T06:18:00-07:00"
+  implementedAt: "2026-07-02T06:25:00-07:00"
+  validatedAt: "2026-07-02T06:25:00-07:00"
+  reviewedAt: "2026-07-02T06:25:00-07:00"
+  closedAt: "2026-07-02T06:25:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: approved
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Every AI出题 and AI组卷 goal criterion maps to closed child evidence.
+    - The old AI组卷 total-count residual is explicitly superseded by later parser and Provider count evidence.
+    - The old monopoly AI出题 residual is explicitly closed by OCR/runtime RAG coverage, parser repair, and bounded Provider rerun evidence.
+    - Focused AI generation regression tests, lint, typecheck, scoped Prettier, diff check, and Module Run v2 gates pass.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+  validationSummary:
+    status: passed
+    goalCriteriaMappedToClosedEvidence: true
+    oldAiPaperQuestionCountResidualClosedByLaterEvidence: true
+    oldMonopolyAiQuestionResidualClosedByLaterEvidence: true
+    focusedUnitTests: 11_files_170_tests_passed
+    lint: passed
+    typecheck: passed
+    prettierWrite: passed
+    prettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
 aiGenerationBoundedMonopolyQuestionProviderRerunAfterPlaintextAcceptanceRepair20260702:
   taskId: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
   phase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
@@ -15998,40 +16143,42 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 684580dc7c14f4dc42d719e6fa98dab923258e3f
-  lastKnownOriginMasterSha: 684580dc7c14f4dc42d719e6fa98dab923258e3f
+  lastKnownMasterSha: 9794175f6b812ad6122a59ee06a53eaad10d334d
+  lastKnownOriginMasterSha: 9794175f6b812ad6122a59ee06a53eaad10d334d
 currentTask:
-  id: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+  id: ai-generation-goal-completion-audit-2026-07-02
   status: closed
-  result: passed_monopoly_ai_question_provider_structured_preview_10_of_10
-  taskKind: bounded_provider_acceptance_rerun
+  result: completed_ai_question_and_paper_generation_goal_problem_list
+  taskKind: docs_state_goal_completion_audit
   validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair
-  humanApproval: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
-  claimedAt: "2026-07-02T05:33:46-07:00"
-  plannedAt: "2026-07-02T05:33:46-07:00"
-  executedAt: "2026-07-02T05:36:31-07:00"
-  validatedAt: "2026-07-02T05:36:31-07:00"
-  reviewedAt: "2026-07-02T05:36:31-07:00"
-  closedAt: "2026-07-02T05:36:31-07:00"
+  branch: codex/ai-generation-goal-completion-audit
+  humanApproval: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+  claimedAt: "2026-07-02T06:18:00-07:00"
+  plannedAt: "2026-07-02T06:18:00-07:00"
+  implementedAt: "2026-07-02T06:25:00-07:00"
+  validatedAt: "2026-07-02T06:25:00-07:00"
+  reviewedAt: "2026-07-02T06:25:00-07:00"
+  closedAt: "2026-07-02T06:25:00-07:00"
   dependsOn:
-    - ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
-    - monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
-  sourceStory: seeded_by_ai_generation_monopoly_question_structured_acceptance_diagnosis_2026_07_02
-  targetClosureItem: Rerun the remaining failed content-admin monopoly AI出题 Provider sample after plaintext structured acceptance repair
-  behaviorBoundary: bounded_localhost_content_admin_monopoly_ai_question_provider_rerun_only_no_source_dependency_schema_deploy_release_claim
-  evidenceMode: role_route_function_profession_level_subject_status_duration_bucket_structured_preview_count_failure_category_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    - ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    - ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+    - ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+  sourceStory: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+  targetClosureItem: Audit AI出题 and AI组卷 goal acceptance criteria and close the problem list only if every criterion has evidence
+  behaviorBoundary: docs_state_goal_completion_audit_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_commit_prefix_validation_status_count_duration_bucket_structured_preview_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
@@ -16040,21 +16187,20 @@ currentTask:
     - docs/01-requirements/use-cases/use-case-catalog.md
     - docs/01-requirements/modules/06-admin-ops.md
     - docs/01-requirements/advanced-edition/00-index.md
-    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
     - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
     - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
     - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
     - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
     - docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
-    - src/app/api/v1/local-acceptance-sessions/route.ts
-    - src/app/api/v1/content-ai-generation-requests/route.ts
-    - src/server/services/local-acceptance-session-service.ts
-    - src/server/services/admin-ai-generation-local-contract-route.ts
-    - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
   blockedFiles:
     - .env*
     - package.json
@@ -16063,6 +16209,7 @@ currentTask:
     - pnpm-lock.yaml
     - src/**
     - tests/**
+    - scripts/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -16073,49 +16220,77 @@ currentTask:
     - .next/**
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: approved
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Every AI出题 and AI组卷 goal criterion maps to closed child evidence.
+    - The old AI组卷 total-count residual is explicitly superseded by later parser and Provider count evidence.
+    - The old monopoly AI出题 residual is explicitly closed by OCR/runtime RAG coverage, parser repair, and bounded Provider rerun evidence.
+    - Focused AI generation regression tests, lint, typecheck, scoped Prettier, diff check, and Module Run v2 gates pass.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02 -SkipRemoteAheadCheck
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
   validationSummary:
     status: passed
-    sourceOrTestChanged: false
-    providerSubmitAttempts: 1
-    providerRetries: 0
-    monopolyAiQuestion: passed_question_set_10_of_10
-    durationBucket: 20_30s
-    focusedUnitTests: 4_files_68_tests_passed
+    goalCriteriaMappedToClosedEvidence: true
+    oldAiPaperQuestionCountResidualClosedByLaterEvidence: true
+    oldMonopolyAiQuestionResidualClosedByLaterEvidence: true
+    focusedUnitTests: 11_files_170_tests_passed
     lint: passed
     typecheck: passed
     prettierWrite: passed
     prettierCheck: passed
     gitDiffCheck: passed
     moduleRunV2PreCommit: passed
-    moduleRunV2PrePush: passed_after_repository_sha_anchor_refresh
-    rawEvidenceRecorded: false
-    providerPayloadPromptRawAiOutputRecorded: false
-    credentialSessionTokenCookieRecorded: false
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
     directDatabaseActionByAgent: false
-    privateOcrOrMaterialActionExecuted: false
     dependencyPackageLockfileChanged: false
     schemaMigrationSeedExecuted: false
     stagingProdDeployExecuted: false
-    aiPaperRepairExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     costCalibrationExecuted: false
-    nextRecommendedTaskId: ai-generation-paper-question-count-preview-diagnostic-decision-2026-07-02
 previousCurrentTaskBeforeAiGenerationSharedTaskSpecContract20260702:
   id: ai-generation-shared-structured-contract-goal-plan-2026-07-02
   status: closed
