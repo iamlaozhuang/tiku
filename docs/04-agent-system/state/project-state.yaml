@@ -1,8 +1,115 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-20-fix-quick-acceptance-2026-07-02
-updatedAt: "2026-07-02T00:15:00-07:00"
+currentPhase: ops-admin-local-login-residual-2026-07-02
+updatedAt: "2026-07-02T01:25:00-07:00"
+opsAdminLocalLoginResidual20260702:
+  taskId: ops-admin-local-login-residual-2026-07-02
+  phase: ops-admin-local-login-residual-2026-07-02
+  status: closed
+  result: pass_ops_admin_local_login_helper_repair
+  priority: p1
+  taskKind: local_browser_account_role_mapping_login_helper_check
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-20-fix-quick-acceptance-2026-07-02
+  sourceStory: current_user_requested_ops_admin_login_residual_before_resource_provider_expansion_2026_07_02
+  targetClosureItem: resolve or classify ops_admin localhost login residual without touching AI main chain
+  behaviorBoundary: local_browser_account_role_mapping_login_helper_only_no_ai_main_chain_provider_resource_db_mutation_schema_dependency_env_deploy
+  expansionNote: later resource coverage should start with marketing_and_monopoly_only_because_logistics_material_is_currently_missing
+  evidenceMode: role_label_route_label_status_category_error_category_only_no_credentials_no_raw_dom_no_screenshots_no_db_rows_no_env_no_session
+  branch: codex/ops-admin-local-login-residual
+  claimedAt: "2026-07-02T01:05:00-07:00"
+  plannedAt: "2026-07-02T01:05:00-07:00"
+  implementedAt: "2026-07-02T01:20:00-07:00"
+  validatedAt: "2026-07-02T01:25:00-07:00"
+  reviewedAt: "2026-07-02T01:25:00-07:00"
+  closedAt: "2026-07-02T01:25:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+    - src/server/contracts/local-acceptance-session-contract.ts
+    - src/server/services/local-acceptance-session-service.ts
+    - tests/unit/local-acceptance-session-bootstrap.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - src/**/auth*/**
+    - src/**/login*/**
+    - src/**/role*/**
+    - src/**/ops*/**
+    - src/**/admin*/**
+    - tests/**
+    - scripts/**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: approved_exact_login_helper_scope_only
+    focusedUnitTest: approved
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: blocked
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    resourceImport: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationSummary:
+    status: pass
+    result: pass_ops_admin_local_login_helper_repair
+    rootCause: local_acceptance_session_helper_only_allowed_content_admin
+    ordinaryOpsAdminPasswordLoginApi: pass
+    ordinaryOpsAdminBrowserFormLogin: pass
+    localAcceptanceOpsAdminBeforeRepair: blocked_invalid_request
+    localAcceptanceOpsAdminAfterRepair: pass_cookie_mode
+    redTestObserved: true
+    focusedUnitTests: pass_1_file_6_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: true
+    providerCallExecuted: false
+    envFileReadOrModified: false
+    directDatabaseConnectionOrMutationExecuted: false
+    resourceImportExecuted: false
+    schemaMigrationSeedExecuted: false
+    dependencyPackageLockfileChanged: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 aiGeneration20FixQuickAcceptance20260702:
   taskId: ai-generation-20-fix-quick-acceptance-2026-07-02
   phase: ai-generation-20-fix-quick-acceptance-2026-07-02
@@ -13320,45 +13427,48 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9a282f21b2f6403495a2d0310e2ec2ab1d6e4226
-  lastKnownOriginMasterSha: 9a282f21b2f6403495a2d0310e2ec2ab1d6e4226
+  lastKnownMasterSha: e6015f95fc5caaacfe0d5e9a516bf20cc3897ed9
+  lastKnownOriginMasterSha: e6015f95fc5caaacfe0d5e9a516bf20cc3897ed9
 currentTask:
-  id: ai-generation-20-fix-quick-acceptance-2026-07-02
+  id: ops-admin-local-login-residual-2026-07-02
   status: closed
-  result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
-  taskKind: local_browser_owner_preview_quick_acceptance
+  result: pass_ops_admin_local_login_helper_repair
+  taskKind: local_browser_account_role_mapping_login_helper_check
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-20-fix-quick-acceptance
-  humanApproval: current_user_fresh_approved_quick_acceptance_2026_07_02
-  claimedAt: "2026-07-02T00:15:00-07:00"
-  plannedAt: "2026-07-02T00:15:00-07:00"
-  walkedThroughAt: "2026-07-02T00:45:00-07:00"
-  reviewedAt: "2026-07-02T00:50:00-07:00"
-  closedAt: "2026-07-02T00:50:00-07:00"
+  branch: codex/ops-admin-local-login-residual
+  humanApproval: current_user_approved_ops_login_residual_first_and_marketing_monopoly_next_2026_07_02
+  claimedAt: "2026-07-02T01:05:00-07:00"
+  plannedAt: "2026-07-02T01:05:00-07:00"
+  implementedAt: "2026-07-02T01:20:00-07:00"
+  validatedAt: "2026-07-02T01:25:00-07:00"
+  reviewedAt: "2026-07-02T01:25:00-07:00"
+  closedAt: "2026-07-02T01:25:00-07:00"
   dependsOn:
-    - ai-generation-owner-preview-closeout-audit-2026-07-02
-  sourceStory: current_user_approved_quick_acceptance_for_20_ai_generation_repairs_2026_07_02
-  targetClosureItem: quick acceptance for the 20 repaired AI出题 / AI组卷 issue classes
-  behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
-  evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - ai-generation-20-fix-quick-acceptance-2026-07-02
+  sourceStory: current_user_requested_ops_admin_login_residual_before_resource_provider_expansion_2026_07_02
+  targetClosureItem: resolve or classify ops_admin localhost login residual without touching AI main chain
+  behaviorBoundary: local_browser_account_role_mapping_login_helper_only_no_ai_main_chain_provider_resource_db_mutation_schema_dependency_env_deploy
+  expansionNote: later resource coverage should start with marketing_and_monopoly_only_because_logistics_material_is_currently_missing
+  evidenceMode: role_label_route_label_status_category_error_category_only_no_credentials_no_raw_dom_no_screenshots_no_db_rows_no_env_no_session
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+    - src/server/contracts/local-acceptance-session-contract.ts
+    - src/server/services/local-acceptance-session-service.ts
+    - tests/unit/local-acceptance-session-bootstrap.test.ts
   blockedFiles:
     - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
-    - src/**
-    - tests/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -13368,14 +13478,16 @@ currentTask:
     - test-results/**
     - .next/**
   capabilities:
-    localSourceChange: blocked
+    localSourceChange: approved_exact_login_helper_scope_only
+    focusedUnitTest: approved
     localDevServer: approved
     localhostBrowser: approved
-    providerCall: approved_bounded_localhost_ui_only
+    providerCall: blocked
     credentialReadForLocalhostLogin: approved_no_evidence
     envSecretAccess: blocked
     databaseConnection: blocked
     databaseMutation: blocked
+    resourceImport: blocked
     dependencyIntroduction: blocked
     schemaMigration: blocked
     e2eRuntime: blocked
@@ -13385,30 +13497,25 @@ currentTask:
     costCalibrationGate: blocked
   closeoutSummary:
     status: pass
-    result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
-    roleLabelsAttempted: 8
-    aiRelevantRoleLoginPassed: 7
-    opsAdminLogin: blocked_after_retry
-    routeScans: 16
-    authExpiredVisibleCount: 0
-    technicalWordingLeakRoutes: 0
-    legacyLevelRoutes: 0
-    standardAiEnabledRoutes: 0
-    providerSubmitAttempts: 8
-    providerRetries: 0
-    providerClickedSamples: 8
-    providerFailedSamples: 0
-    learnerPrematurePracticeOrRetryEnabled: false
-    adminDraftBoundaryVisible: true
-    twentyIssueClassesAccepted: true
+    result: pass_ops_admin_local_login_helper_repair
+    rootCause: local_acceptance_session_helper_only_allowed_content_admin
+    ordinaryOpsAdminPasswordLoginApi: pass
+    ordinaryOpsAdminBrowserFormLogin: pass
+    localAcceptanceOpsAdminBeforeRepair: blocked_invalid_request
+    localAcceptanceOpsAdminAfterRepair: pass_cookie_mode
+    redTestObserved: true
+    focusedUnitTests: pass_1_file_6_tests
+    lint: pass
+    typecheck: pass
     prettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
-    sourceOrTestChanged: false
-    providerCallExecuted: bounded_localhost_ui_8_submits_no_retries
+    sourceOrTestChanged: true
+    providerCallExecuted: false
     envFileReadOrModified: false
-    databaseConnectionOrMutationExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    resourceImportExecuted: false
     schemaMigrationSeedExecuted: false
     dependencyPackageLockfileChanged: false
     costCalibrationExecuted: false

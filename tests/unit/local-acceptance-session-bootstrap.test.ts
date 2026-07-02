@@ -89,6 +89,56 @@ describe("local acceptance session bootstrap", () => {
     );
   });
 
+  it("creates an ops_admin cookie-backed session for local acceptance login checks", async () => {
+    const now = new Date("2026-06-28T12:00:00.000Z");
+    const routeHandlers = createLocalAcceptanceSessionRouteHandlers({
+      service: createLocalAcceptanceSessionService({
+        createToken: () => "local-acceptance-token-ops-admin",
+        now: () => now,
+      }),
+    });
+    const response = await routeHandlers.POST(
+      new Request("http://localhost:3000/api/v1/local-acceptance-sessions", {
+        method: "POST",
+        body: JSON.stringify({ role: "ops_admin" }),
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      code: 0,
+      data: {
+        role: "ops_admin",
+        sessionMode: "cookie",
+      },
+    });
+    expect(Object.keys(body.data)).toEqual([
+      "role",
+      "sessionMode",
+      "expiresAt",
+    ]);
+    expect(JSON.stringify(body)).not.toContain(
+      "local-acceptance-token-ops-admin",
+    );
+    expect(response.headers.get("set-cookie")).toContain("tiku_session=");
+
+    const sessionRuntime = createLocalSessionRuntime({
+      authUserRepository: createUnusedAuthUserRepository(),
+      credentialAdapter: createUnusedCredentialAdapter(),
+      now: () => now,
+    });
+    const sessionResponse = await sessionRuntime.getCurrentSession({
+      authorization: "Bearer local-acceptance-token-ops-admin",
+    });
+
+    expect(sessionResponse.code).toBe(0);
+    expect(sessionResponse.data?.user.adminRoles).toEqual(["ops_admin"]);
+    expect(sessionResponse.data?.user.adminPublicId).toBe(
+      "local-acceptance-ops-admin",
+    );
+  });
+
   it("can resolve the bootstrap session through the cookie-backed authorization marker", async () => {
     const now = new Date("2026-06-28T12:00:00.000Z");
     const routeHandlers = createLocalAcceptanceSessionRouteHandlers({
@@ -211,7 +261,7 @@ describe("local acceptance session bootstrap", () => {
     const invalidRoleResponse = await routeHandlers.POST(
       new Request("http://localhost:3000/api/v1/local-acceptance-sessions", {
         method: "POST",
-        body: JSON.stringify({ role: "ops_admin" }),
+        body: JSON.stringify({ role: "org_standard_admin" }),
       }),
     );
 

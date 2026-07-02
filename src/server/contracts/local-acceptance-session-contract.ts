@@ -5,7 +5,10 @@ export const LOCAL_ACCEPTANCE_SESSION_ERROR_CODES = {
   forbidden: 403901,
 } as const;
 
-export type LocalAcceptanceSessionRole = Extract<AdminRole, "content_admin">;
+export type LocalAcceptanceSessionRole = Extract<
+  AdminRole,
+  "content_admin" | "ops_admin"
+>;
 
 export type LocalAcceptanceSessionDto = {
   role: LocalAcceptanceSessionRole;
@@ -16,5 +19,5 @@ export type LocalAcceptanceSessionDto = {
 export function isLocalAcceptanceSessionRole(
   value: unknown,
 ): value is LocalAcceptanceSessionRole {
-  return value === "content_admin";
+  return value === "content_admin" || value === "ops_admin";
 }

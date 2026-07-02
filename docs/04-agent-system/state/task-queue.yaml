@@ -358,6 +358,113 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ops-admin-local-login-residual-2026-07-02
+    title: ops_admin local login residual
+    phase: ops-admin-local-login-residual-2026-07-02
+    sourceStory: current_user_requested_ops_admin_login_residual_before_resource_provider_expansion_2026_07_02
+    humanApprovalBoundary: current_user_approved_ops_login_residual_first_and_marketing_monopoly_next_2026_07_02
+    targetClosureItem: resolve or classify ops_admin localhost login residual without touching AI main chain
+    behaviorBoundary: local_browser_account_role_mapping_login_helper_only_no_ai_main_chain_provider_resource_db_mutation_schema_dependency_env_deploy
+    expansionNote: later resource coverage should start with marketing_and_monopoly_only_because_logistics_material_is_currently_missing
+    taskKind: local_browser_account_role_mapping_login_helper_check
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ops_admin_local_login_helper_repair
+    priority: p1
+    claimedAt: "2026-07-02T01:05:00-07:00"
+    plannedAt: "2026-07-02T01:05:00-07:00"
+    implementedAt: "2026-07-02T01:20:00-07:00"
+    validatedAt: "2026-07-02T01:25:00-07:00"
+    reviewedAt: "2026-07-02T01:25:00-07:00"
+    closedAt: "2026-07-02T01:25:00-07:00"
+    dependsOn:
+      - ai-generation-20-fix-quick-acceptance-2026-07-02
+    branch: codex/ops-admin-local-login-residual
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+      - src/server/contracts/local-acceptance-session-contract.ts
+      - src/server/services/local-acceptance-session-service.ts
+      - tests/unit/local-acceptance-session-bootstrap.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - src/**/auth*/**
+      - src/**/login*/**
+      - src/**/role*/**
+      - src/**/ops*/**
+      - src/**/admin*/**
+      - tests/**
+      - scripts/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-admin-local-login-residual-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-admin-local-login-residual-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_ops_admin_local_login_helper_repair
+      rootCause: local_acceptance_session_helper_only_allowed_content_admin
+      ordinaryOpsAdminPasswordLoginApi: pass
+      ordinaryOpsAdminBrowserFormLogin: pass
+      localAcceptanceOpsAdminBeforeRepair: blocked_invalid_request
+      localAcceptanceOpsAdminAfterRepair: pass_cookie_mode
+      redTestObserved: true
+      focusedUnitTests: pass_1_file_6_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      directDatabaseConnectionOrMutationExecuted: false
+      resourceImportExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-20-fix-quick-acceptance-2026-07-02
     title: AI generation 20 fix quick acceptance
     phase: ai-generation-20-fix-quick-acceptance-2026-07-02

@@ -85,18 +85,37 @@ function createAuthUserId(role: LocalAcceptanceSessionRole): string {
   return `${LOCAL_ACCEPTANCE_AUTH_USER_ID_PREFIX}-${role}`;
 }
 
-function createContentAdminUser(): AuthUserAccessRow {
+function createLocalAcceptanceAdminUser(
+  role: LocalAcceptanceSessionRole,
+): AuthUserAccessRow {
+  const roleProfile =
+    role === "ops_admin"
+      ? {
+          adminPublicId: "local-acceptance-ops-admin",
+          id: -2,
+          name: "本地验收运维管理员",
+          phone: "local-acceptance-ops-admin",
+          publicId: "local-acceptance-ops-admin-user",
+        }
+      : {
+          adminPublicId: "local-acceptance-content-admin",
+          id: -1,
+          name: "本地验收内容管理员",
+          phone: "local-acceptance-content-admin",
+          publicId: "local-acceptance-content-admin-user",
+        };
+
   return {
-    admin_public_id: "local-acceptance-content-admin",
-    admin_roles: ["content_admin"],
-    auth_user_id: createAuthUserId("content_admin"),
+    admin_public_id: roleProfile.adminPublicId,
+    admin_roles: [role],
+    auth_user_id: createAuthUserId(role),
     employee_public_id: null,
-    id: -1,
+    id: roleProfile.id,
     locked_until_at: null,
-    name: "本地验收内容管理员",
+    name: roleProfile.name,
     organization_public_id: null,
-    phone: "local-acceptance-content-admin",
-    public_id: "local-acceptance-content-admin-user",
+    phone: roleProfile.phone,
+    public_id: roleProfile.publicId,
     status: "active",
     user_type: null,
   };
@@ -207,7 +226,7 @@ export function createLocalAcceptanceSessionService(
       const now = getNow();
       const expiresAt = addHours(now, LOCAL_ACCEPTANCE_SESSION_DURATION_HOUR);
       const sessionCredential = createToken();
-      const authUser = createContentAdminUser();
+      const authUser = createLocalAcceptanceAdminUser(input.role);
 
       pruneExpiredSessions(now);
       getLocalAcceptanceSessions().set(sessionCredential, {
