@@ -358,6 +358,134 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: agents-advanced-requirement-reading-rule-2026-07-02
+    title: AGENTS advanced requirement reading rule
+    phase: agents-advanced-requirement-reading-rule-2026-07-02
+    sourceStory: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    humanApprovalBoundary: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    targetClosureItem: Add a general advanced-edition requirement reading rule to AGENTS.md
+    behaviorBoundary: docs_governance_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_agents_advanced_requirement_reading_rule
+    priority: p1
+    claimedAt: "2026-07-02T08:00:00-07:00"
+    plannedAt: "2026-07-02T08:00:00-07:00"
+    implementedAt: "2026-07-02T08:00:00-07:00"
+    validatedAt: "2026-07-02T08:00:00-07:00"
+    reviewedAt: "2026-07-02T08:00:00-07:00"
+    closedAt: "2026-07-02T08:00:00-07:00"
+    dependsOn:
+      - ai-generation-requirements-ssot-alignment-2026-07-02
+    branch: codex/agents-advanced-requirement-reading-rule
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+    allowedFiles:
+      - AGENTS.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+    readOnlyAllowedFiles:
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: blocked_not_needed_docs_governance_alignment_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - AGENTS.md has a general advanced-edition requirement reading rule.
+      - The rule covers advanced, edition, authorization, quota, organization, enterprise training, analytics, retention/log governance, role-separated, and content-admin AI draft/review work.
+      - AGENTS.md remains execution discipline and points to requirement SSOT instead of copying business requirements.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    validationSummary:
+      status: passed
+      agentsAdvancedReadingRuleRecorded: true
+      businessSsotBoundaryPreserved: true
+      noUnresolvedProductConflict: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
   - id: ai-generation-requirements-ssot-alignment-2026-07-02
     title: AI generation requirements SSOT alignment
     phase: ai-generation-requirements-ssot-alignment-2026-07-02
