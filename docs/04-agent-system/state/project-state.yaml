@@ -1,8 +1,71 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-resource-runtime-coverage-2026-07-02
-updatedAt: "2026-07-02T00:35:00-07:00"
+currentPhase: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+updatedAt: "2026-07-02T01:15:00-07:00"
+aiGenerationPostRuntimeResourceProviderRerun20260702:
+  taskId: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+  phase: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+  status: closed
+  result: completed_with_findings_follow_up_source_repair_required
+  priority: p1
+  taskKind: local_real_provider_owner_preview_matrix_rerun
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-resource-runtime-coverage-2026-07-02
+  sourceStory: current_goal_after_runtime_rag_resource_import_2026_07_02
+  targetClosureItem: rerun local owner-preview AI 出题 / AI组卷 after runtime RAG resource import and verify grounded Provider behavior on supported scopes
+  behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+  evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
+  branch: codex/ai-generation-post-runtime-resource-provider-rerun
+  claimedAt: "2026-07-02T01:15:00-07:00"
+  plannedAt: "2026-07-02T01:15:00-07:00"
+  walkedThroughAt: "2026-07-02T01:35:00-07:00"
+  reviewedAt: "2026-07-02T01:35:00-07:00"
+  closedAt: "2026-07-02T01:35:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+  requiredMatrix:
+    roles:
+      - personal_advanced_student
+      - org_advanced_employee
+      - org_advanced_admin
+      - content_admin
+      - standard_roles_expected_denial
+      - ops_admin_observation_only
+    workflows:
+      - ai_question_generation
+      - ai_paper_generation
+    crossRoleScanItems:
+      - resource_pack_rag_grounding_required_or_generation_blocked_when_evidence_insufficient
+      - ordinary_user_ui_must_not_show_local_contract_summary_redaction_status_or_other_technical_governance_terms
+      - generated_output_must_stay_within_available_marketing_or_monopoly_resource_scope
+      - logistics_must_remain_blocked_until_local_resource_package_exists
+  validationSummary:
+    status: completed_with_findings
+    localDevServerRestart: pass_existing_http_200
+    runtimeResourceAggregateScan: pass_resources_present_zero_unretrievable
+    browserMatrix: completed_content_admin_question_and_paper_samples
+    providerSamples: submitted_2_ui_attempts_completion_not_accepted
+    ordinaryUiWording: fail_contract_ready_wording_visible
+    groundingResult: fail_visible_evidence_count_zero_after_runtime_resource_import
+    logisticsCoverage: blocked_missing_local_package_resources
+    nextRecommendedTask: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+    prettierCheck: pass
+    typecheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: false
+    envFileContentReadOrWritten: false
+    databaseConnectionOrMutationExecuted: false
+    providerCallExecuted: pending_bounded_localhost_ui_only
+    schemaMigrationSeedExecuted: false
+    dependencyOrLockfileChanged: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecuted: false
+    releaseReadinessOrFinalPassClaimed: false
 aiGenerationResourceRuntimeCoverage20260702:
   taskId: ai-generation-resource-runtime-coverage-2026-07-02
   phase: ai-generation-resource-runtime-coverage-2026-07-02
@@ -12330,45 +12393,41 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 39b99c6a64f6bfaae173cc5ec434a5bc1641a147
-  lastKnownOriginMasterSha: 39b99c6a64f6bfaae173cc5ec434a5bc1641a147
+  lastKnownMasterSha: 7c6dffbec157a13108ea855c8b7123fbbc952b2f
+  lastKnownOriginMasterSha: 7c6dffbec157a13108ea855c8b7123fbbc952b2f
 currentTask:
-  id: ai-generation-resource-runtime-coverage-2026-07-02
+  id: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
   status: closed
-  result: pass_owner_preview_runtime_rag_coverage_import
-  taskKind: local_runtime_rag_coverage_repair
+  result: completed_with_findings_follow_up_source_repair_required
+  taskKind: local_real_provider_owner_preview_matrix_rerun
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-grounding-coverage
+  branch: codex/ai-generation-post-runtime-resource-provider-rerun
   humanApproval: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
-  claimedAt: "2026-07-02T00:35:00-07:00"
-  plannedAt: "2026-07-02T00:35:00-07:00"
-  implementedAt: "2026-07-02T01:00:00-07:00"
-  validatedAt: "2026-07-02T01:00:00-07:00"
-  reviewedAt: "2026-07-02T01:00:00-07:00"
-  closedAt: "2026-07-02T01:00:00-07:00"
-  sourceStory: current_user_resource_grounding_and_internal_wording_cross_surface_scan_reminder_2026_07_02
-  targetClosureItem: import available owner-facing material package content into local runtime RAG coverage for AI 出题 / AI组卷 before the next Provider/browser rerun
-  behaviorBoundary: local_runtime_resource_catalog_and_source_tests_only_no_db_env_provider_e2e_schema_deploy
-  evidenceMode: redacted_status_count_coverage_summary_only_no_resource_body_prompt_payload_raw_ai_output_or_generated_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-resource-runtime-coverage.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-resource-runtime-coverage.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-resource-runtime-coverage.md
+  claimedAt: "2026-07-02T01:15:00-07:00"
+  plannedAt: "2026-07-02T01:15:00-07:00"
+  walkedThroughAt: "2026-07-02T01:35:00-07:00"
+  reviewedAt: "2026-07-02T01:35:00-07:00"
+  closedAt: "2026-07-02T01:35:00-07:00"
+  sourceStory: current_goal_after_runtime_rag_resource_import_2026_07_02
+  targetClosureItem: rerun local owner-preview AI 出题 / AI组卷 after runtime RAG resource import and verify grounded Provider behavior on supported scopes
+  behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+  evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-resource-runtime-coverage.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-resource-runtime-coverage.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-resource-runtime-coverage.md
-    - src/db/owner-preview-runtime-rag-resource-import.ts
-    - scripts/db/Import-OwnerPreviewRuntimeRagResources.ps1
-    - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
   readOnlyOrRuntimeAllowed:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
-    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-*.md
-    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-*.md
+    - docs/05-execution-logs/evidence/2026-07-0*-ai-generation-*.md
+    - docs/05-execution-logs/task-plans/2026-07-0*-ai-generation-*.md
     - src/app/**/ai-generation*/**
     - src/features/**/ai-generation*/**
     - src/features/admin/admin-ops-management/**
@@ -12376,7 +12435,9 @@ currentTask:
     - src/server/services/rag-resource-knowledge-runtime.ts
     - src/rag/chunking.ts
     - D:\tiku-local-private\owner-facing-fixtures
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
     - .runtime/uploads/dev/resource/**
+    - http://localhost:3000/**
   blockedFiles:
     - .env*
     - package.json
@@ -12391,24 +12452,39 @@ currentTask:
     - playwright-report/**
     - test-results/**
     - .next/**
+  capabilities:
+    localSourceChange: blocked
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_localhost_ui_after_sufficient_grounding_max_6
+    credentialReadForLocalhostLogin: approved_no_output_or_evidence
+    envSecretAccess: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
   closeoutSummary:
-    status: pass
-    sourceOrTestChanged: true
-    redTestsAddedAndObservedFailing: true
-    dryRunImport: pass_62_inventory_rows_14_importable_materials
-    executeImport: pass_14_resources_375_chunks
-    runtimeResourceAggregateScan: pass_zero_rag_ready_without_retrievable_content
-    logisticsCoverage: blocked_missing_local_package_resources
-    focusedUnitTests: pass_9_files_83_tests
-    ordinaryUiWordingScan: pass_ai_generation_surfaces_follow_up_non_ai_generation_ops_admin_wording
-    groundingGateScan: pass_shared_provider_services
+    status: completed_with_findings
+    localDevServerRestart: pass_existing_http_200
+    runtimeResourceAggregateScan: pass_resources_present_zero_unretrievable
+    browserMatrix: completed_content_admin_question_and_paper_samples
+    providerSamples: submitted_2_ui_attempts_completion_not_accepted
+    ordinaryUiWording: fail_contract_ready_wording_visible
+    groundingResult: fail_visible_evidence_count_zero_after_runtime_resource_import
+    nextRecommendedTask: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
     prettierCheck: pass
-    lint: pass
     typecheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_update
-    providerCallExecuted: false
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: false
+    logisticsCoverage: blocked_missing_local_package_resources
+    providerCallExecuted: submitted_2_ui_attempts_completion_not_accepted_no_payload_or_output_recorded
     envFileReadOrModified: false
     databaseMutationExecuted: false
     schemaMigrationSeedExecuted: false
