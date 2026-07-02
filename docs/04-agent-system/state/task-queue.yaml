@@ -350,6 +350,145 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+    title: AI generation grounding query and ordinary UI wording repair
+    phase: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+    sourceStory: current_goal_post_runtime_resource_provider_rerun_findings_2026_07_02
+    humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+    targetClosureItem: repair shared grounding query token alignment and remove contract-ready technical wording from ordinary AI generation UI across shared AI 出题 / AI组卷 surfaces
+    behaviorBoundary: local_source_test_repair_only_no_db_provider_env_browser_dependency_schema_deploy
+    executionProfile: systematic_debugging_tdd_first_shared_service_reuse_cross_surface_static_scan
+    evidenceMode: redacted_status_count_validation_summary_only_no_prompt_payload_raw_ai_output_or_generated_content
+    taskKind: source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_grounding_query_and_cross_surface_wording_repair
+    priority: p1
+    claimedAt: "2026-07-02T01:45:00-07:00"
+    plannedAt: "2026-07-02T01:45:00-07:00"
+    implementedAt: "2026-07-02T02:15:00-07:00"
+    validatedAt: "2026-07-02T02:15:00-07:00"
+    reviewedAt: "2026-07-02T02:15:00-07:00"
+    closedAt: "2026-07-02T02:15:00-07:00"
+    dependsOn:
+      - ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+    branch: codex/ai-generation-grounding-query-wording-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+    crossSurfaceScanGate:
+      roleSurfaces:
+        - personal_advanced_student_ai_question_generation
+        - personal_advanced_student_ai_paper_generation
+        - organization_advanced_employee_ai_question_generation
+        - organization_advanced_employee_ai_paper_generation
+        - organization_advanced_admin_ai_question_generation
+        - organization_advanced_admin_ai_paper_generation
+        - content_admin_ai_question_generation
+        - content_admin_ai_paper_generation
+      requiredChecks:
+        - shared_grounding_query_must_match_runtime_resource_token_style
+        - generated_content_must_be_resource_package_or_rag_grounded_or_blocked
+        - ordinary_ui_must_not_render_contract_ready_local_validation_redaction_or_internal_governance_terms
+        - route_surfaces_must_continue_reusing_shared_student_or_admin_ai_generation_components
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/app/(student)/ai-generation/page.tsx
+      - src/app/(admin)/content/ai-question-generation/page.tsx
+      - src/app/(admin)/content/ai-paper-generation/page.tsx
+      - src/app/(admin)/organization/ai-question-generation/page.tsx
+      - src/app/(admin)/organization/ai-paper-generation/page.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/server/services/rag-retrieval-service.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      staticSourceScan: approved
+      localDevServer: blocked
+      localhostBrowser: blocked
+      providerCall: blocked
+      credentialReadForLocalhostLogin: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-grounding-query-and-contract-wording-repair-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_3_files_28_tests
+      groundingQuery: pass_runtime_style_synthetic_chunks_sufficient_for_question_and_paper
+      crossSurfaceOrdinaryUiWording: pass_static_scan_and_admin_render_guard
+      prettierCheck: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileContentReadOrWritten: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
     title: AI generation post runtime resource Provider rerun
     phase: ai-generation-post-runtime-resource-provider-rerun-2026-07-02

@@ -60,14 +60,11 @@ function createGroundingRetrievalQuery(input: {
   taskType: "ai_question_generation" | "ai_paper_generation";
 }): string {
   return [
-    input.taskType === "ai_question_generation" ? "AI出题" : "AI组卷",
+    input.taskType === "ai_question_generation" ? "AI 出题" : "AI 组卷",
     input.generationParameters.profession,
-    `${input.generationParameters.level}级`,
+    `level ${input.generationParameters.level}`,
     input.generationParameters.subject,
-    input.generationParameters.knowledgeNode,
-    input.generationParameters.questionType,
-    input.generationParameters.difficulty,
-    input.generationParameters.learningObjective,
+    "knowledge_node",
   ]
     .filter((segment): segment is string => typeof segment === "string")
     .join(" ");

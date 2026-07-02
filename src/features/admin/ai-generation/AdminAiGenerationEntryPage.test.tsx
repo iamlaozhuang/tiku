@@ -302,6 +302,8 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(screen.queryByText("元数据历史")).not.toBeInTheDocument();
     expect(screen.queryByText(/paper_section/u)).not.toBeInTheDocument();
     expect(screen.queryByText("本地合约")).not.toBeInTheDocument();
+    expect(screen.queryByText("合同已就绪")).not.toBeInTheDocument();
+    expect(screen.queryByText("本地验证证据")).not.toBeInTheDocument();
     expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
     expect(screen.queryByText("redactionStatus")).not.toBeInTheDocument();
     expect(screen.queryByText("evidenceStatus")).not.toBeInTheDocument();

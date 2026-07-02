@@ -18,6 +18,16 @@ const workspaceRoot = process.cwd();
 const diagnosticAdminLocalContractSummary =
   "redacted admin AI generation local contract summary";
 const businessAdminGeneratedResultFallback = "生成草稿已创建，待评审查看";
+const crossRoleAiGenerationSurfacePaths = [
+  "src/app/(student)/ai-generation/page.tsx",
+  "src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx",
+  "src/app/(admin)/content/ai-question-generation/page.tsx",
+  "src/app/(admin)/content/ai-paper-generation/page.tsx",
+  "src/app/(admin)/organization/ai-question-generation/page.tsx",
+  "src/app/(admin)/organization/ai-paper-generation/page.tsx",
+  "src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx",
+];
+const ordinaryUiForbiddenTechnicalPhrases = ["合同已就绪", "本地验证证据"];
 
 function createSessionResponse(input: {
   adminRoles: AdminRole[];
@@ -388,6 +398,29 @@ describe("admin AI generation entry surfaces", () => {
       "/content/ai-question-generation",
     );
     expect(sharedSurfaceSource).not.toContain("/content/ai-paper-generation");
+  });
+
+  it("keeps cross-role ordinary AI generation surfaces free of contract-ready technical wording", () => {
+    const sourceByPath = crossRoleAiGenerationSurfacePaths.map(
+      (sourcePath) => ({
+        sourcePath,
+        source: readExpectedSource(sourcePath),
+      }),
+    );
+
+    expect(
+      sourceByPath.find(
+        ({ source }) =>
+          source.includes("AdminAiGenerationEntryPage") ||
+          source.includes("StudentPersonalAiGenerationPage"),
+      ),
+    ).not.toBeUndefined();
+
+    for (const { source, sourcePath } of sourceByPath) {
+      for (const forbiddenPhrase of ordinaryUiForbiddenTechnicalPhrases) {
+        expect(source, sourcePath).not.toContain(forbiddenPhrase);
+      }
+    }
   });
 
   it("renders content AI question generation detail controls before any local contract request", async () => {

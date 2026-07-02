@@ -1158,11 +1158,11 @@ function ContentAdminReviewTraceabilityPanel({
               批量、重试和历史校验
             </p>
             <h5 className="text-text-primary mt-1 text-sm font-semibold">
-              合同已就绪
+              流程已就绪
             </h5>
           </div>
           <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-            未执行浏览器自动化
+            待人工复核
           </span>
         </div>
 
@@ -1279,7 +1279,7 @@ export function AdminAiGenerationEntryPage({
           label: "模型服务",
           blocked: "待审批",
           error:
-            "请求未执行模型服务，也未写入正式题目或试卷。请稍后重试或查看本地验证证据。",
+            "请求未执行模型服务，也未写入正式题目或试卷。请稍后重试或查看处理记录。",
         }
       : {
           label: "模型服务",
