@@ -29,6 +29,16 @@ Use it before older quick acceptance, MML rerun, capability-catalog, or use-case
 - Standard learners, `org_standard_employee`, and `org_standard_admin` remain denied, hidden, upgrade-guided, or unavailable for advanced AI generation.
 - Release readiness, final Pass, production usability, Cost Calibration, and broad production/full coverage remain unclaimed.
 
+## Current UI/UX Requirement Design Baseline
+
+For role flow, organization authorization, enterprise training, organization analytics, AI generation follow-up actions,
+and model/prompt/log governance design work, read
+`docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md`.
+
+It records the current docs-only baseline and decision register. It does not approve source implementation, schema,
+Provider execution, Prompt editing UI, runtime acceptance, release readiness, final Pass, production usability, or Cost
+Calibration.
+
 ## Source Documents
 
 Primary sources:

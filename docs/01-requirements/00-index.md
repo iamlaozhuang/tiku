@@ -58,6 +58,7 @@
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
 - [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
 - [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)
+- [UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
 
@@ -77,6 +78,13 @@
 - 统一标准/高级版修复范围中，`content_admin` 的内容后台 `AI出题` / `AI组卷` 草稿评审能力、`personal_advanced_student` 和 `org_advanced_employee` 的 `AI训练`、`org_advanced_admin` 的组织后台 AI 生成能力仍属于当前需求范围。
 - 旧文档中的 blocked/gap 行如果已被 2026-07-02 baseline 标记为 closed 或 superseded，只能作为历史证据，不得作为新的默认阻塞项。
 - 仍不声明 release readiness、final Pass、production usability、Cost Calibration、staging/prod 或广义生产全覆盖。
+
+### 2.3 UI/UX 与需求设计基线
+
+2026-07-02 起，涉及角色流程、企业授权、多范围 `org_auth`、`redeem_code`、组织树、企业训练、组织统计、内容/运营/组织后台、AI 生成后续操作、模型配置、Prompt 和日志治理的设计任务，应先读取
+[UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)。
+
+该文件只记录设计基线、缺口和建议决策项，不批准产品源码、测试、数据库、Provider、Prompt 编辑后台、浏览器验收、部署、Cost Calibration、release readiness 或 final Pass。
 
 ---
 

@@ -1,8 +1,149 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: post-archive-recovery-smoke-2026-07-02
-updatedAt: "2026-07-02T15:00:00-07:00"
+currentPhase: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+updatedAt: "2026-07-02T16:00:00-07:00"
+uiUxRequirementDesignBaselineGapAnalysis20260702:
+  taskId: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+  phase: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+  status: closed
+  result: completed_ui_ux_requirement_design_baseline_gap_analysis
+  priority: p1
+  taskKind: docs_requirement_ui_ux_design_baseline
+  moduleRunVersion: 2
+  dependsOn:
+    - post-archive-recovery-smoke-2026-07-02
+    - requirements-ssot-cross-doc-alignment-audit-2026-07-02
+    - requirements-code-implementation-alignment-audit-2026-07-02
+    - ai-generation-requirements-ssot-alignment-2026-07-02
+    - phase4-requirements-agent-baseline-alignment-2026-07-02
+  sourceStory: current_user_requested_ui_ux_requirement_ssot_design_baseline_gap_analysis_2026_07_02
+  targetClosureItem: Establish docs-only UI/UX and requirement design baseline with gap register for role flows, enterprise authorization, organization workspaces, AI generation follow-up actions, and model/prompt governance.
+  behaviorBoundary: docs_requirement_ui_ux_design_baseline_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: redacted_source_paths_status_decision_items_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_provider_payload_no_prompt_no_ai_output_no_full_content
+  branch: codex/ui-ux-requirement-baseline-gap-2026-07-02
+  claimedAt: "2026-07-02T16:00:00-07:00"
+  plannedAt: "2026-07-02T16:00:00-07:00"
+  implementedAt: "2026-07-02T16:00:00-07:00"
+  validatedAt: "2026-07-02T16:00:00-07:00"
+  reviewedAt: "2026-07-02T16:00:00-07:00"
+  closedAt: "2026-07-02T16:00:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  allowedFiles:
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: blocked
+    focusedUnitTest: blocked_not_needed_docs_requirement_alignment_only
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Current UI/UX and requirement design baseline covers learner, operations, content, organization admin, employee, model/prompt, and AI generation post-action surfaces.
+    - Gap register separates source-order-resolved items from decision-required items.
+    - Current AI generation baseline is preserved and old residuals are not reopened without current evidence.
+    - No product source, tests, runtime, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is introduced.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ui-ux-requirement-design-baseline-gap-analysis-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approved_ui_ux_requirement_baseline_commit_merge_push_cleanup_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approved_ui_ux_requirement_baseline_commit_merge_push_cleanup_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approved_ui_ux_requirement_baseline_commit_merge_push_cleanup_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approved_ui_ux_requirement_baseline_commit_merge_push_cleanup_2026_07_02
+  validationSummary:
+    status: passed
+    traceabilityBaselinePrepared: true
+    standardIndexPointerAdded: true
+    advancedIndexPointerAdded: true
+    gapDecisionItemsRecorded: 13
+    recommendedNextDocsDesignTasks: 5
+    sourceOrTestChanged: false
+    productSourceChanged: false
+    providerCallExecuted: false
+    providerConfigurationRead: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    envSecretAccessed: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+    prettierWriteScoped: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    localCommitCreated: false_fresh_closeout_approval_required
+    fastForwardMergeExecuted: false_fresh_closeout_approval_required
+    pushExecuted: false_fresh_closeout_approval_required
 postArchiveRecoverySmoke20260702:
   taskId: post-archive-recovery-smoke-2026-07-02
   phase: post-archive-recovery-smoke-2026-07-02
@@ -17948,6 +18089,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+  status: closed
+  result: completed_ui_ux_requirement_design_baseline_gap_analysis
+  taskKind: docs_requirement_ui_ux_design_baseline
+  moduleRunVersion: 2
+  branch: codex/ui-ux-requirement-baseline-gap-2026-07-02
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+previousCurrentTaskBeforeUiUxRequirementDesignBaselineGapAnalysis20260702:
   id: post-archive-recovery-smoke-2026-07-02
   status: closed
   result: completed_post_archive_recovery_smoke
