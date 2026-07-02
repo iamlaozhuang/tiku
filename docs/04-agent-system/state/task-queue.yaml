@@ -358,6 +358,154 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: post-archive-recovery-smoke-2026-07-02
+    title: Post archive recovery smoke
+    phase: post-archive-recovery-smoke-2026-07-02
+    sourceStory: current_user_approved_post_archive_recovery_smoke_and_closeout_2026_07_02
+    humanApprovalBoundary: current_user_approved_post_archive_recovery_smoke_and_closeout_2026_07_02
+    targetClosureItem: Verify first July archive batch recovery through active state, task-history index, execution-log index, and sampled archive files.
+    behaviorBoundary: docs_only_read_only_recovery_smoke_no_archive_or_index_movement_no_product_source_test_script_runtime_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_archive_recovery_smoke
+    moduleRunVersion: 2
+    status: closed
+    result: completed_post_archive_recovery_smoke
+    priority: p1
+    claimedAt: "2026-07-02T15:00:00-07:00"
+    plannedAt: "2026-07-02T15:00:00-07:00"
+    implementedAt: "2026-07-02T15:00:00-07:00"
+    validatedAt: "2026-07-02T15:00:00-07:00"
+    reviewedAt: "2026-07-02T15:00:00-07:00"
+    closedAt: "2026-07-02T15:00:00-07:00"
+    dependsOn:
+      - queue-and-execution-log-archive-first-batch-2026-07-02
+    branch: codex/post-archive-recovery-smoke-2026-07-02
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-post-archive-recovery-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-post-archive-recovery-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-post-archive-recovery-smoke.md
+    sampledArchiveTaskIds:
+      - ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+      - ai-generation-shared-task-spec-contract-2026-07-02
+      - ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-post-archive-recovery-smoke.md
+      - docs/05-execution-logs/evidence/2026-07-02-post-archive-recovery-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-post-archive-recovery-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/execution-log-index.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+      - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+      - docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
+      - docs/05-execution-logs/archive/2026-07/**
+      - docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/execution-log-index.yaml
+      - docs/05-execution-logs/archive/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      readOnlyRecoverySmoke: approved
+      archiveFileCreationOrMovement: blocked
+      indexMutation: blocked
+      scriptBehaviorChange: blocked
+      localSourceChange: blocked
+      focusedUnitTest: blocked_docs_only
+      localhostBrowserE2E: blocked
+      localDevServer: blocked
+      providerCall: blocked
+      directDatabaseConnection: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Active state can recover the current task and previous archive task without reading all archive files.
+      - Three sampled archived tasks resolve through task-history index to the July task queue archive.
+      - Each sampled task resolves task plan, evidence, and audit review through execution-log index to existing archive files.
+      - Active queue terminal/non-terminal task counts and active execution-log directory counts are recorded.
+      - No active non-terminal task depends on first-batch archived candidates without index resolution.
+      - No archive file, index, product source, test, script behavior, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is introduced.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-post-archive-recovery-smoke.md docs/05-execution-logs/evidence/2026-07-02-post-archive-recovery-smoke.md docs/05-execution-logs/audits-reviews/2026-07-02-post-archive-recovery-smoke.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-post-archive-recovery-smoke.md docs/05-execution-logs/evidence/2026-07-02-post-archive-recovery-smoke.md docs/05-execution-logs/audits-reviews/2026-07-02-post-archive-recovery-smoke.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-archive-recovery-smoke-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-archive-recovery-smoke-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId post-archive-recovery-smoke-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_post_archive_recovery_smoke_and_closeout_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_post_archive_recovery_smoke_and_closeout_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_post_archive_recovery_smoke_and_closeout_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      recoverySmoke: pass
+      sampledArchivedTasks: 3
+      activeTerminalTasks: 74
+      activeNonTerminalTasks: 1
+      batchHistoryEntries: 10
+      batchExecutionLogEntries: 30
+      batchArchiveTaskBlocks: 10
+      activeTaskPlanFiles: 1658
+      activeEvidenceFiles: 1847
+      activeAuditReviewFiles: 1523
+      candidateDependsOnRefsFromNonTerminalTasks: 0
+      archiveOrIndexMutationAfterSmoke: false
+      sourceFilesChanged: false
+      testFilesChanged: false
+      scriptBehaviorChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+      prettierWriteScoped: pass
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_checkpoint_update
   - id: queue-and-execution-log-archive-first-batch-2026-07-02
     title: Queue and execution log archive first batch
     phase: queue-and-execution-log-archive-first-batch-2026-07-02
