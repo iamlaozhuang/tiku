@@ -16,7 +16,6 @@ import {
   createBlockedRouteIntegratedProviderExecutionSummary,
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
   createRouteIntegratedGroundingSummary,
-  createRouteIntegratedGenerationKindLabel,
   createRouteIntegratedStructuredPreviewOptionsForGenerationKind,
   createRouteIntegratedTaskTypeFromGenerationKind,
   createRouteIntegratedVisibleGeneratedContent,
@@ -28,6 +27,7 @@ import {
   summarizeRouteIntegratedProviderError,
   summarizeRouteIntegratedProviderUsage,
 } from "./route-integrated-provider-execution-service";
+import { createRouteIntegratedProviderInstruction } from "./route-integrated-provider-instruction-service";
 
 export function createAdminAiGenerationRouteIntegratedProviderRequestContext(
   input: AdminAiGenerationRuntimeBridgeInput,
@@ -180,7 +180,9 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
         createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
           requestContext.generationKind,
           {
-            generationParameters: requestContext.generationParameters,
+            generationParameters:
+              requestContext.generationParameters ??
+              groundingContext.generationParameters,
           },
         ),
       ),
@@ -262,7 +264,9 @@ export async function executeQwenAdminRouteIntegratedProviderRequest(
             createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
               input.requestContext.generationKind,
               {
-                generationParameters: input.requestContext.generationParameters,
+                generationParameters:
+                  input.requestContext.generationParameters ??
+                  input.groundingContext?.generationParameters,
               },
             ),
         },
@@ -309,34 +313,17 @@ function createAdminRouteIntegratedInstruction(
   requestContext: AdminAiGenerationRouteIntegratedProviderRequestContext,
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ): string {
-  const generationLabel = createRouteIntegratedGenerationKindLabel(
-    requestContext.generationKind,
-  );
   const workspaceLabel =
     requestContext.workspace === "content" ? "内容草稿评审" : "组织草稿";
-  const outputContract =
-    requestContext.generationKind === "question"
-      ? "输出 JSON；questions 数组必须正好包含 10 条结构化草稿摘要。"
-      : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
-  const groundingLines =
-    groundingContext === null || groundingContext === undefined
-      ? ["资料依据：未提供，本次请求应由上游门禁阻止真实生成。"]
-      : [
-          `生成范围：${groundingContext.generationParameters.profession} ${groundingContext.generationParameters.level}级 ${groundingContext.generationParameters.subject}。`,
-          `知识点：${groundingContext.generationParameters.knowledgeNode ?? "按资料证据覆盖"}`,
-          `资料依据：${groundingContext.citationCount} 条。仅依据下列资料片段生成，不得补充资料外的历史或泛行业内容。`,
-          ...groundingContext.citations.map(
-            (citation, index) => `资料片段${index + 1}：${citation.chunkText}`,
-          ),
-        ];
 
-  return [
-    "为题库系统生成简短中文草稿内容。",
-    `场景：${workspaceLabel} ${generationLabel}。`,
-    ...groundingLines,
-    outputContract,
-    "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
-  ].join("\n");
+  return createRouteIntegratedProviderInstruction({
+    taskType: requestContext.taskType,
+    sceneLabel: `${workspaceLabel} ${
+      requestContext.generationKind === "question" ? "AI出题" : "AI组卷"
+    }`,
+    draftInstruction: "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
+    groundingContext,
+  });
 }
 
 function attachAdminRouteIntegratedGroundingSummary(

@@ -21,7 +21,6 @@ import {
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
   createRouteIntegratedGroundingSummary,
   createRouteIntegratedStructuredPreviewOptionsForTask,
-  createRouteIntegratedTaskLabel,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedVisibleGeneratedContentSafe,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
@@ -32,6 +31,7 @@ import {
   summarizeRouteIntegratedProviderError,
   summarizeRouteIntegratedProviderUsage,
 } from "./route-integrated-provider-execution-service";
+import { createRouteIntegratedProviderInstruction } from "./route-integrated-provider-instruction-service";
 
 export type PersonalAiGenerationRouteIntegratedProviderMetadata =
   AiGenerationRouteIntegratedProviderMetadata;
@@ -166,7 +166,9 @@ export async function executePersonalAiGenerationRouteIntegratedProvider(
         createRouteIntegratedStructuredPreviewOptionsForTask(
           requestContext.taskType,
           {
-            generationParameters: requestContext.generationParameters,
+            generationParameters:
+              requestContext.generationParameters ??
+              groundingContext.generationParameters,
           },
         ),
       ),
@@ -262,7 +264,9 @@ export async function executeQwenRouteIntegratedProviderRequest(
             createRouteIntegratedStructuredPreviewOptionsForTask(
               input.requestContext.taskType,
               {
-                generationParameters: input.requestContext.generationParameters,
+                generationParameters:
+                  input.requestContext.generationParameters ??
+                  input.groundingContext?.generationParameters,
               },
             ),
         },
@@ -287,30 +291,15 @@ function createPersonalRouteIntegratedInstruction(
   requestContext: PersonalAiGenerationRouteIntegratedProviderRequestContext,
   groundingContext?: AiGenerationRouteIntegratedGroundingContext | null,
 ): string {
-  const taskLabel = createRouteIntegratedTaskLabel(requestContext.taskType);
-  const outputContract =
-    requestContext.taskType === "ai_question_generation"
-      ? "输出 JSON；questions 数组必须正好包含 10 条结构化练习草稿摘要。"
-      : "输出 JSON；必须包含 paperSections、questionTypeDistribution 和 knowledgeCoverage 摘要。";
-  const groundingLines =
-    groundingContext === null || groundingContext === undefined
-      ? ["资料依据：未提供，本次请求应由上游门禁阻止真实生成。"]
-      : [
-          `生成范围：${groundingContext.generationParameters.profession} ${groundingContext.generationParameters.level}级 ${groundingContext.generationParameters.subject}。`,
-          `知识点：${groundingContext.generationParameters.knowledgeNode ?? "按资料证据覆盖"}`,
-          `资料依据：${groundingContext.citationCount} 条。仅依据下列资料片段生成，不得补充资料外的历史或泛行业内容。`,
-          ...groundingContext.citations.map(
-            (citation, index) => `资料片段${index + 1}：${citation.chunkText}`,
-          ),
-        ];
-
-  return [
-    "为题库系统生成简短中文训练草稿。",
-    `场景：${taskLabel}。`,
-    ...groundingLines,
-    outputContract,
-    "不要引用真实题目全文；输出可读的要点或小练习草稿。",
-  ].join("\n");
+  return createRouteIntegratedProviderInstruction({
+    taskType: requestContext.taskType,
+    sceneLabel:
+      requestContext.taskType === "ai_question_generation"
+        ? "个人训练 AI出题"
+        : "个人训练 AI组卷",
+    draftInstruction: "不要引用真实题目全文；输出可读的要点或小练习草稿。",
+    groundingContext,
+  });
 }
 
 function attachRouteIntegratedGroundingSummary(

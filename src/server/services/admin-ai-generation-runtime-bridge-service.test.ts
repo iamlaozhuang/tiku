@@ -273,6 +273,10 @@ describe("admin AI generation runtime bridge service", () => {
         ownerType: "platform",
         ownerPublicId: "platform_content_review_pool",
         organizationPublicId: null,
+        generationParameters: {
+          ...adminSufficientGroundingContext.generationParameters,
+          questionCount: 50,
+        },
       },
       {
         runtimeBridgeControl: {
