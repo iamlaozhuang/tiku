@@ -123,9 +123,10 @@ function createExecutionControl(
     resolveGroundingContext?: () =>
       | Promise<AiGenerationRouteIntegratedGroundingContext>
       | AiGenerationRouteIntegratedGroundingContext;
+    omitGroundingResolver?: boolean;
   } = {},
 ) {
-  return {
+  const control = {
     executionMode: "route_integrated_provider" as const,
     realProviderExecutionApproved: true as const,
     maxRequests: 1 as const,
@@ -136,8 +137,16 @@ function createExecutionControl(
       overrides.readProviderCredential ??
       (async () => "synthetic-provider-credential"),
     executeProviderRequest: overrides.executeProviderRequest,
-    resolveGroundingContext: overrides.resolveGroundingContext,
   };
+
+  return overrides.omitGroundingResolver === true
+    ? control
+    : {
+        ...control,
+        resolveGroundingContext:
+          overrides.resolveGroundingContext ??
+          (() => sufficientGroundingContext),
+      };
 }
 
 describe("personal AI generation route-integrated provider execution service", () => {
@@ -152,6 +161,44 @@ describe("personal AI generation route-integrated provider execution service", (
           return "synthetic-provider-credential";
         },
         resolveGroundingContext: () => insufficientGroundingContext,
+        executeProviderRequest: async () => {
+          providerExecuted = true;
+          throw new Error("provider executor should not be called");
+        },
+      }),
+    );
+
+    expect(credentialRead).toBe(false);
+    expect(providerExecuted).toBe(false);
+    expect(outcome).toEqual({
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      executionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "insufficient_grounding_evidence",
+        durationMs: 0,
+        usageSummary: null,
+        providerErrorSummary: null,
+        redactionStatus: "redacted",
+      },
+      visibleGeneratedContent: null,
+    });
+  });
+
+  it("blocks before credential access when grounding resolver is missing", async () => {
+    let credentialRead = false;
+    let providerExecuted = false;
+    const outcome = await executePersonalAiGenerationRouteIntegratedProvider(
+      createRequestFlow(),
+      createExecutionControl({
+        omitGroundingResolver: true,
+        readProviderCredential: () => {
+          credentialRead = true;
+          return "synthetic-provider-credential";
+        },
         executeProviderRequest: async () => {
           providerExecuted = true;
           throw new Error("provider executor should not be called");

@@ -126,10 +126,7 @@ export async function executeAdminAiGenerationRouteIntegratedProvider(
       ? null
       : await control.resolveGroundingContext({ requestContext });
 
-  if (
-    control.resolveGroundingContext !== undefined &&
-    !isRouteIntegratedGroundingSufficient(groundingContext)
-  ) {
+  if (!isRouteIntegratedGroundingSufficient(groundingContext)) {
     return {
       realProviderExecutionApproved: true,
       providerCallExecuted: false,

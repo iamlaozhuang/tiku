@@ -1,8 +1,102 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
-updatedAt: "2026-07-01T19:05:00-07:00"
+currentPhase: ai-generation-resource-grounding-enforcement-repair-2026-07-01
+updatedAt: "2026-07-01T19:35:00-07:00"
+aiGenerationResourceGroundingEnforcementRepair20260701:
+  taskId: ai-generation-resource-grounding-enforcement-repair-2026-07-01
+  phase: ai-generation-resource-grounding-enforcement-repair-2026-07-01
+  status: closed
+  result: completed_resource_grounding_enforcement_repair
+  priority: p1
+  taskKind: source_test_repair
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
+  sourceStory: current_goal_ai_generation_resource_pack_grounding_after_localhost_rerun_2026_07_01
+  targetClosureItem: ensure AI 出题 / AI组卷 Provider execution is constrained by imported resource knowledge chunk citation evidence and blocked when evidence is insufficient
+  behaviorBoundary: source_and_focused_tests_only_no_env_secret_output_no_provider_runtime_no_dependency_schema_or_deploy
+  evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
+  branch: codex/ai-generation-resource-grounding-enforcement-repair
+  claimedAt: "2026-07-01T19:25:00-07:00"
+  plannedAt: "2026-07-01T19:25:00-07:00"
+  implementedAt: "2026-07-01T19:35:00-07:00"
+  validatedAt: "2026-07-01T19:35:00-07:00"
+  reviewedAt: "2026-07-01T19:35:00-07:00"
+  closedAt: "2026-07-01T19:35:00-07:00"
+  crossCuttingScanGate:
+    roleSurfaces:
+      - personal_advanced_student_ai_question_generation
+      - personal_advanced_student_ai_paper_generation
+      - organization_advanced_employee_ai_question_generation
+      - organization_advanced_employee_ai_paper_generation
+      - organization_advanced_admin_ai_question_generation
+      - organization_advanced_admin_ai_paper_generation
+      - content_admin_ai_question_generation
+      - content_admin_ai_paper_generation
+    requiredChecks:
+      - generation_must_not_call_provider_when_evidence_status_is_not_sufficient_or_citation_count_is_zero
+      - generated_result_must_carry_business_grounding_summary_without_raw_chunk_or_provider_payload
+      - shared_student_and_admin_provider_execution_services_must_reuse_the_same_grounding_gate
+      - ordinary_ai_generation_ui_must_not_show_internal_governance_or_redaction_wording
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - src/server/services/route-integrated-provider-execution-service.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/personal-ai-generation-request-flow-service.ts
+    - src/server/services/route-integrated-provider-execution-service.test.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+  blockedFiles:
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .env
+    - .env.*
+  validationSummary:
+    status: pass
+    redTestsAddedAndObservedFailing: true
+    focusedUnitTests: pass_6_files_62_tests
+    staticScan:
+      groundingGate: pass_no_resolver_omission_bypass_pattern
+      crossRoleEntryCoverage: pass_shared_admin_and_student_surfaces_scanned
+      ordinaryUiInternalWording: pass_no_ordinary_ai_generation_visible_copy_hit
+    prettierCheck: pass
+    lint: pass
+    typecheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: true
+    providerCallExecuted: false
+    envFileContentReadOrWritten: false
+    databaseMutationExecuted: false
+    schemaMigrationSeedExecuted: false
+    dependencyPackageLockfileChanged: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 aiGenerationOrdinaryUiInternalWordingRepair20260701:
   taskId: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
   phase: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
@@ -12016,51 +12110,52 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c60bb5d8685efe9349d0a231e050dd22512b426d
-  lastKnownOriginMasterSha: c60bb5d8685efe9349d0a231e050dd22512b426d
+  lastKnownMasterSha: 615b093e268c834b0936a6732767b431e340d94a
+  lastKnownOriginMasterSha: 615b093e268c834b0936a6732767b431e340d94a
 currentTask:
-  id: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
+  id: ai-generation-resource-grounding-enforcement-repair-2026-07-01
   status: closed
-  result: completed_ordinary_ai_ui_internal_wording_repair
+  result: completed_resource_grounding_enforcement_repair
   taskKind: source_test_repair
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-ordinary-ui-internal-wording-repair
+  branch: codex/ai-generation-resource-grounding-enforcement-repair
   humanApproval: current_user_cross_role_scan_reminder_and_prior_central_authorization_2026_07_01
-  claimedAt: "2026-07-01T19:05:00-07:00"
-  plannedAt: "2026-07-01T19:05:00-07:00"
-  implementedAt: "2026-07-01T19:20:00-07:00"
-  validatedAt: "2026-07-01T19:20:00-07:00"
-  reviewedAt: "2026-07-01T19:20:00-07:00"
-  closedAt: "2026-07-01T19:20:00-07:00"
-  sourceStory: current_goal_ai_generation_post_admin_parameters_localhost_rerun_2026_07_01
-  targetClosureItem: remove local-preview owner-preview and internal governance wording from ordinary AI 出题 / AI组卷 UI across shared admin and student surfaces
-  behaviorBoundary: source_and_focused_tests_only_no_db_provider_env_browser_dependency_schema_or_runtime_mutation
+  claimedAt: "2026-07-01T19:25:00-07:00"
+  plannedAt: "2026-07-01T19:25:00-07:00"
+  implementedAt: "2026-07-01T19:35:00-07:00"
+  validatedAt: "2026-07-01T19:35:00-07:00"
+  reviewedAt: "2026-07-01T19:35:00-07:00"
+  closedAt: "2026-07-01T19:35:00-07:00"
+  sourceStory: current_goal_ai_generation_resource_pack_grounding_after_localhost_rerun_2026_07_01
+  targetClosureItem: ensure AI 出题 / AI组卷 Provider execution is constrained by imported resource knowledge chunk citation evidence and blocked when evidence is insufficient
+  behaviorBoundary: source_and_focused_tests_only_no_env_secret_output_no_provider_runtime_no_dependency_schema_or_deploy
   evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
-    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
-    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    - src/server/services/route-integrated-provider-execution-service.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/personal-ai-generation-request-flow-service.ts
+    - src/server/services/route-integrated-provider-execution-service.test.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+    - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
     - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
     - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
-    - tests/unit/admin-ai-generation-entry-surface.test.ts
-    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
-    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
-    - src/server/services/route-integrated-provider-execution-service.test.ts
   blockedFiles:
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
-    - src/**
-    - tests/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -12073,8 +12168,11 @@ currentTask:
   closeoutSummary:
     status: pass
     redTestsAddedAndObservedFailing: true
-    focusedUnitTests: pass_4_files_40_tests
-    productionSourceScan: pass_no_local_preview_owner_preview_hits_in_scoped_source
+    focusedUnitTests: pass_6_files_62_tests
+    staticScan:
+      groundingGate: pass_no_resolver_omission_bypass_pattern
+      crossRoleEntryCoverage: pass_shared_admin_and_student_surfaces_scanned
+      ordinaryUiInternalWording: pass_no_ordinary_ai_generation_visible_copy_hit
     prettierCheck: pass
     lint: pass
     typecheck: pass

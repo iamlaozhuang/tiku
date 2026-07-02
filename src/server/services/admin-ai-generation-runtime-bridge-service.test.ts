@@ -286,6 +286,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxOutputTokens: 1800,
             timeoutMs: 60000,
             readProviderCredential: () => "synthetic-admin-provider-credential",
+            resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async () => ({
               requestCount: 1,
               resultStatus: "pass",
@@ -328,6 +329,63 @@ describe("admin AI generation runtime bridge service", () => {
     });
   });
 
+  it("blocks controlled admin Provider execution before credential access when grounding resolver is missing", async () => {
+    let credentialRead = false;
+    let providerExecuted = false;
+    const bridge = await buildAdminAiGenerationRuntimeBridgeReadModelForRoute(
+      {
+        actorPublicId: "admin_public_runtime_bridge_no_grounding",
+        workspace: "content",
+        generationKind: "question",
+        requestPublicId: "admin_ai_generation_request_no_grounding",
+        taskPublicId: "admin_ai_generation_task_no_grounding",
+        resultPublicId: "admin_ai_generation_result_no_grounding",
+        ownerType: "platform",
+        ownerPublicId: "platform_content_review_pool",
+        organizationPublicId: null,
+      },
+      {
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 1800,
+            timeoutMs: 60000,
+            readProviderCredential: () => {
+              credentialRead = true;
+              return "synthetic-admin-provider-credential";
+            },
+            executeProviderRequest: async () => {
+              providerExecuted = true;
+              throw new Error("provider executor should not be called");
+            },
+          },
+        },
+      },
+    );
+
+    expect(credentialRead).toBe(false);
+    expect(providerExecuted).toBe(false);
+    expect(bridge).toMatchObject({
+      bridgeStatus: "provider_call_blocked",
+      realProviderExecutionApproved: true,
+      providerCallExecuted: false,
+      envSecretAccessed: false,
+      providerConfigurationRead: false,
+      providerExecutionSummary: {
+        requestCount: 0,
+        resultStatus: "blocked",
+        failureCategory: "insufficient_grounding_evidence",
+      },
+      visibleGeneratedContent: null,
+      blockedReasons: ["insufficient_grounding_evidence"],
+    });
+  });
+
   it("blocks an explicit controlled runner when the local Provider credential is unavailable", async () => {
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
@@ -355,6 +413,7 @@ describe("admin AI generation runtime bridge service", () => {
             maxOutputTokens: 1800,
             timeoutMs: 60000,
             readProviderCredential: () => null,
+            resolveGroundingContext: () => adminSufficientGroundingContext,
             executeProviderRequest: async (providerInput) => {
               providerInputs.push(providerInput);
               throw new Error("unexpected provider execution");

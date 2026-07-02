@@ -20,6 +20,10 @@ import type {
   AdminAiGenerationRuntimeBridgeRouteWorkflow,
 } from "../contracts/admin-ai-generation-runtime-bridge-contract";
 import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
+import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
   AdminAiGenerationTaskPersistenceResult,
@@ -40,16 +44,32 @@ const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionS
     redactionStatus: "redacted",
   };
 const visibleAdminProviderContent = "后台本次可见 AI 草稿预览";
-const defaultAdminGenerationParameters = {
-  profession: "marketing",
-  level: 3,
-  subject: "theory",
-  knowledgeNode: "卷烟营销基础",
-  questionType: "single_choice",
-  questionCount: 10,
-  difficulty: "medium",
-  learningObjective: "专项练习",
-};
+const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationParameters =
+  {
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    knowledgeNode: "卷烟营销基础",
+    questionType: "single_choice",
+    questionCount: 10,
+    difficulty: "medium",
+    learningObjective: "专项练习",
+  };
+const sufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    evidenceStatus: "sufficient",
+    citationCount: 1,
+    generationParameters: defaultAdminGenerationParameters,
+    citations: [
+      {
+        resourceTitle: "脱敏营销资料",
+        headingPath: ["脱敏章节"],
+        chunkIndex: 0,
+        chunkText: "脱敏资料片段",
+        score: 0.91,
+      },
+    ],
+  };
 
 function scopedAdminAiGenerationPublicId(prefix: string) {
   return expect.stringMatching(new RegExp(`^${prefix}_[a-f0-9]{16}$`, "u"));
@@ -231,6 +251,7 @@ function createFakeProviderRuntimeBridgeControl(
       maxOutputTokens: 220,
       timeoutMs: 30000,
       readProviderCredential: () => "synthetic-admin-provider-credential",
+      resolveGroundingContext: () => sufficientAdminGroundingContext,
       executeProviderRequest: async (providerInput) => {
         providerInputs.push(providerInput);
 
