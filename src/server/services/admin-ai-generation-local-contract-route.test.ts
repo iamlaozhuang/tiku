@@ -70,6 +70,40 @@ const sufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingConte
       },
     ],
   };
+const insufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    ...sufficientAdminGroundingContext,
+    evidenceStatus: "none",
+    citationCount: 0,
+    citations: [],
+  };
+
+function createStructuredAdminProviderContent(
+  generationKind: "question" | "paper",
+): string {
+  if (generationKind === "question") {
+    return JSON.stringify({
+      questions: Array.from({ length: 10 }, () => ({
+        questionType: "single_choice",
+        difficulty: "medium",
+        knowledgeNodeLabels: ["redacted_knowledge_node"],
+      })),
+    });
+  }
+
+  return JSON.stringify({
+    paperSections: [
+      {
+        paperSectionType: "single_choice",
+        questionCount: 10,
+      },
+    ],
+    questionTypeDistribution: {
+      single_choice: 10,
+    },
+    knowledgeCoverage: ["redacted_knowledge_node"],
+  });
+}
 
 function scopedAdminAiGenerationPublicId(prefix: string) {
   return expect.stringMatching(new RegExp(`^${prefix}_[a-f0-9]{16}$`, "u"));
@@ -239,6 +273,10 @@ async function postLocalContractRequest(input: {
 
 function createFakeProviderRuntimeBridgeControl(
   providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[],
+  input: {
+    content?: string;
+    groundingContext?: AiGenerationRouteIntegratedGroundingContext;
+  } = {},
 ): AdminAiGenerationRuntimeBridgeControl {
   return {
     bridgeMode: "controlled_runner",
@@ -251,7 +289,8 @@ function createFakeProviderRuntimeBridgeControl(
       maxOutputTokens: 220,
       timeoutMs: 30000,
       readProviderCredential: () => "synthetic-admin-provider-credential",
-      resolveGroundingContext: () => sufficientAdminGroundingContext,
+      resolveGroundingContext: () =>
+        input.groundingContext ?? sufficientAdminGroundingContext,
       executeProviderRequest: async (providerInput) => {
         providerInputs.push(providerInput);
 
@@ -267,7 +306,11 @@ function createFakeProviderRuntimeBridgeControl(
           },
           providerErrorSummary: null,
           visibleGeneratedContent: {
-            content: visibleAdminProviderContent,
+            content:
+              input.content ??
+              createStructuredAdminProviderContent(
+                providerInput.requestContext.generationKind,
+              ),
             contentVisibility: "transient_response_only",
             persistenceStatus: "not_persisted",
             safetyStatus: "checked",
@@ -581,9 +624,13 @@ function createGeneratedResultPersistenceRecorder(
 
 describe("admin AI generation local contract route handlers", () => {
   it("accepts content admin AI question requests as platform-owned local contracts", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const response = await postLocalContractRequest({
       workspace: "content",
       adminRoles: ["content_admin"],
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "question",
         requestedRuntimeMode: "route_integrated_provider",
@@ -619,24 +666,23 @@ describe("admin AI generation local contract route handlers", () => {
             ),
             contentVisibility: "summary_only",
             redactionStatus: "redacted",
-            evidenceStatus: "none",
-            citationCount: 0,
+            evidenceStatus: "sufficient",
+            citationCount: 1,
           },
         },
         runtimeBridge: {
-          bridgeStatus: "provider_call_blocked",
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
           costCalibrationExecuted: false,
-          executionSummary: providerDisabledExecutionSummary,
-          blockedReasons: [
-            "provider_call_blocked",
-            "env_secret_access_blocked",
-            "provider_configuration_read_blocked",
-            "cost_calibration_gate_blocked",
-            "real_provider_execution_requires_follow_up_task",
-          ],
+          executionSummary: {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            redactionStatus: "redacted",
+          },
+          blockedReasons: [],
         },
         formalContentBoundary: {
           questionWriteStatus: "blocked_without_follow_up_task",
@@ -653,8 +699,8 @@ describe("admin AI generation local contract route handlers", () => {
             "admin_ai_generation_result_content_question_admin_public_123",
           ),
           contentVisibility: "summary_only",
-          evidenceStatus: "none",
-          citationCount: 0,
+          evidenceStatus: "sufficient",
+          citationCount: 1,
           redactionStatus: "redacted",
         },
         generatedResult: {
@@ -663,8 +709,8 @@ describe("admin AI generation local contract route handlers", () => {
             "admin_ai_generation_result_content_question_admin_public_123",
           ),
           contentVisibility: "redacted_snapshot",
-          evidenceStatus: "none",
-          citationCount: 0,
+          evidenceStatus: "sufficient",
+          citationCount: 1,
           formalAdoptionStatus: "blocked",
           redactionStatus: "redacted",
         },
@@ -675,9 +721,12 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_B");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_C");
     expect(serializedPayload).not.toMatch(/"id":/);
+    expect(providerInputs).toHaveLength(1);
   });
 
   it("scopes admin generation task identity to each request so stale actor-level results are not reused", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const resultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
@@ -688,6 +737,8 @@ describe("admin AI generation local contract route handlers", () => {
       requestPublicId: "admin_ai_generation_request_public_first_attempt",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository: resultPersistenceRecorder.repository,
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "question",
       },
@@ -698,6 +749,8 @@ describe("admin AI generation local contract route handlers", () => {
       requestPublicId: "admin_ai_generation_request_public_second_attempt",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository: resultPersistenceRecorder.repository,
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "question",
       },
@@ -705,6 +758,7 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(taskPersistenceRecorder.calls).toHaveLength(2);
     expect(resultPersistenceRecorder.calls).toHaveLength(2);
+    expect(providerInputs).toHaveLength(2);
 
     const [firstTaskCall, secondTaskCall] = taskPersistenceRecorder.calls;
     const [firstResultCall, secondResultCall] = resultPersistenceRecorder.calls;
@@ -721,6 +775,8 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("persists content admin local contracts through the injected task persistence repository", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const response = await postLocalContractRequest({
       workspace: "content",
@@ -728,6 +784,8 @@ describe("admin AI generation local contract route handlers", () => {
       requestPublicId: "admin_ai_generation_request_public_content_route_123",
       requestedAt: new Date("2026-06-26T20:10:00.000Z"),
       taskPersistenceRepository: taskPersistenceRecorder.repository,
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "question",
         clientOnlyFixtureF: "OMITTED_FIXTURE_F",
@@ -745,10 +803,10 @@ describe("admin AI generation local contract route handlers", () => {
         workspace: "content",
         generationKind: "question",
         runtimeBridge: {
-          bridgeStatus: "provider_call_blocked",
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
           costCalibrationExecuted: false,
         },
         formalContentBoundary: {
@@ -772,17 +830,18 @@ describe("admin AI generation local contract route handlers", () => {
             "admin_ai_generation_result_content_question_admin_public_123",
           ),
           contentVisibility: "summary_only",
-          evidenceStatus: "none",
-          citationCount: 0,
+          evidenceStatus: "sufficient",
+          citationCount: 1,
           redactionStatus: "redacted",
         },
       },
     });
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_F");
     expect(serializedPayload).not.toMatch(/"id":/);
+    expect(providerInputs).toHaveLength(1);
   });
 
-  it("persists content admin provider-disabled generated result summaries after task persistence", async () => {
+  it("blocks content admin provider-disabled requests before task or result persistence", async () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder();
@@ -802,76 +861,12 @@ describe("admin AI generation local contract route handlers", () => {
     const payload = await response.json();
     const serializedPayload = JSON.stringify(payload);
 
-    expect(taskPersistenceRecorder.calls).toHaveLength(1);
-    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
-    expect(generatedResultPersistenceRecorder.calls[0]).toMatchObject({
-      resultPublicId: scopedAdminAiGenerationPublicId(
-        "admin_ai_generation_result_content_question_admin_public_123",
-      ),
-      taskPublicId: scopedAdminAiGenerationPublicId(
-        "admin_ai_generation_task_content_question_admin_public_123",
-      ),
-      workspace: "content",
-      generationKind: "question",
-      ownerType: "platform",
-      ownerPublicId: "platform_content_review_pool",
-      organizationPublicId: null,
-      taskType: "ai_question_generation",
-      evidenceStatus: "none",
-      citationCount: 0,
-      aiCallLogPublicId: null,
-      sourceQuestionPublicId: null,
-      sourcePaperPublicId: null,
-    });
-    expect(generatedResultPersistenceRecorder.calls[0].contentDigest).toMatch(
-      /^sha256:/u,
-    );
-    expect(
-      generatedResultPersistenceRecorder.calls[0].contentPreviewMasked,
-    ).toBe("生成草稿已创建，待评审查看");
-    expect(
-      generatedResultPersistenceRecorder.calls[0].contentPreviewMasked,
-    ).not.toMatch(/redacted|local contract|本地合约/iu);
-    expect(
-      JSON.stringify(
-        generatedResultPersistenceRecorder.calls[0].contentRedactedSnapshot,
-      ),
-    ).not.toContain("OMITTED_FIXTURE_I");
     expect(payload).toMatchObject({
-      code: 0,
-      data: {
-        resultState: {
-          status: "succeeded",
-          resultPublicId: scopedAdminAiGenerationPublicId(
-            "admin_ai_generation_result_content_question_admin_public_123",
-          ),
-          contentVisibility: "summary_only",
-          evidenceStatus: "none",
-          citationCount: 0,
-          redactionStatus: "redacted",
-        },
-        taskPersistence: {
-          status: "succeeded",
-          resultPublicId: scopedAdminAiGenerationPublicId(
-            "admin_ai_generation_result_content_question_admin_public_123",
-          ),
-          evidenceStatus: "none",
-          citationCount: 0,
-          redactionStatus: "redacted",
-        },
-        generatedResult: {
-          persistenceStatus: "created",
-          resultPublicId: scopedAdminAiGenerationPublicId(
-            "admin_ai_generation_result_content_question_admin_public_123",
-          ),
-          contentVisibility: "redacted_snapshot",
-          evidenceStatus: "none",
-          citationCount: 0,
-          formalAdoptionStatus: "blocked",
-          redactionStatus: "redacted",
-        },
-      },
+      code: 409015,
+      data: null,
     });
+    expect(taskPersistenceRecorder.calls).toHaveLength(0);
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(0);
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_I");
     expect(serializedPayload).not.toContain("rawPrompt");
     expect(serializedPayload).not.toContain("rawOutput");
@@ -880,6 +875,8 @@ describe("admin AI generation local contract route handlers", () => {
   });
 
   it("returns reused persistence summaries for organization advanced admin requests", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
       persistenceStatus: "reused",
     });
@@ -889,6 +886,8 @@ describe("admin AI generation local contract route handlers", () => {
       organizationPublicId: "organization_public_123",
       requestPublicId: "admin_ai_generation_request_public_org_route_123",
       taskPersistenceRepository: taskPersistenceRecorder.repository,
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         clientOnlyFixtureG: "OMITTED_FIXTURE_G",
@@ -929,9 +928,12 @@ describe("admin AI generation local contract route handlers", () => {
       },
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_G");
+    expect(providerInputs).toHaveLength(1);
   });
 
-  it("persists organization advanced admin provider-disabled generated result summaries", async () => {
+  it("persists organization advanced admin grounded generated result summaries", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const generatedResultPersistenceRecorder =
       createGeneratedResultPersistenceRecorder({
@@ -945,6 +947,8 @@ describe("admin AI generation local contract route handlers", () => {
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         generatedResultPersistenceRecorder.repository,
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         clientOnlyFixtureJ: "OMITTED_FIXTURE_J",
@@ -986,9 +990,9 @@ describe("admin AI generation local contract route handlers", () => {
           formalAdoptionStatus: "blocked",
         },
         runtimeBridge: {
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
           costCalibrationExecuted: false,
         },
         formalContentBoundary: {
@@ -998,13 +1002,18 @@ describe("admin AI generation local contract route handlers", () => {
       },
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_J");
+    expect(providerInputs).toHaveLength(1);
   });
 
   it("exposes organization-owned draft and training source boundaries without platform publish access", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const response = await postLocalContractRequest({
       workspace: "organization",
       adminRoles: ["org_advanced_admin"],
       organizationPublicId: "organization_public_123",
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
       },
@@ -1033,20 +1042,25 @@ describe("admin AI generation local contract route handlers", () => {
           paperWriteStatus: "blocked_without_follow_up_task",
         },
         runtimeBridge: {
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
           costCalibrationExecuted: false,
         },
       },
     });
+    expect(providerInputs).toHaveLength(1);
   });
 
   it("accepts organization advanced admin AI paper requests as organization-owned local contracts", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
     const response = await postLocalContractRequest({
       workspace: "organization",
       adminRoles: ["org_advanced_admin"],
       organizationPublicId: "organization_public_123",
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         clientOnlyFixtureD: "OMITTED_FIXTURE_D",
@@ -1087,16 +1101,22 @@ describe("admin AI generation local contract route handlers", () => {
           redactionStatus: "redacted",
         },
         runtimeBridge: {
-          bridgeStatus: "provider_call_blocked",
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
           costCalibrationExecuted: false,
-          executionSummary: providerDisabledExecutionSummary,
+          executionSummary: {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            redactionStatus: "redacted",
+          },
         },
       },
     });
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_D");
+    expect(providerInputs).toHaveLength(1);
   });
 
   it("passes admin runtime bridge context into provider-disabled diagnostics", async () => {
@@ -1125,15 +1145,8 @@ describe("admin AI generation local contract route handlers", () => {
     const payload = await response.json();
 
     expect(payload).toMatchObject({
-      code: 0,
-      data: {
-        runtimeBridge: {
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
-          costCalibrationExecuted: false,
-        },
-      },
+      code: 409015,
+      data: null,
     });
     expect(runtimeBridgeInputs).toEqual([
       {
@@ -1181,27 +1194,8 @@ describe("admin AI generation local contract route handlers", () => {
     const payload = await response.json();
 
     expect(payload).toMatchObject({
-      code: 0,
-      data: {
-        runtimeBridge: {
-          providerCallExecuted: false,
-          envSecretAccessed: false,
-          providerConfigurationRead: false,
-          costCalibrationExecuted: false,
-          blockedReasons: [
-            "provider_call_blocked",
-            "admin_runtime_bridge_control_injected",
-          ],
-          executionSummary: {
-            ...providerDisabledExecutionSummary,
-            durationMs: 12,
-          },
-        },
-        formalContentBoundary: {
-          questionWriteStatus: "blocked_without_follow_up_task",
-          paperWriteStatus: "blocked_without_follow_up_task",
-        },
-      },
+      code: 409015,
+      data: null,
     });
   });
 
@@ -1316,10 +1310,21 @@ describe("admin AI generation local contract route handlers", () => {
               redactionStatus: "redacted",
             },
             visibleGeneratedContent: {
-              content: visibleAdminProviderContent,
+              content: expect.any(String),
               contentVisibility: "transient_response_only",
               persistenceStatus: "not_persisted",
               safetyStatus: "checked",
+              groundingSummary: {
+                evidenceStatus: "sufficient",
+                citationCount: 1,
+              },
+              structuredPreview: expect.objectContaining({
+                kind:
+                  routeCase.generationKind === "question"
+                    ? "question_set"
+                    : "paper_draft",
+                parseStatus: "parsed",
+              }),
             },
             blockedReasons: [],
           },
@@ -1349,6 +1354,84 @@ describe("admin AI generation local contract route handlers", () => {
       );
     },
   );
+
+  it("blocks admin result persistence when Provider grounding evidence is insufficient", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const resultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      body: {
+        generationKind: "question",
+        clientOnlyFixtureM: "OMITTED_FIXTURE_M",
+      },
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          groundingContext: insufficientAdminGroundingContext,
+        },
+      ),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository: resultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 409015,
+      data: null,
+    });
+    expect(providerInputs).toHaveLength(0);
+    expect(taskPersistenceRecorder.calls).toHaveLength(0);
+    expect(resultPersistenceRecorder.calls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_M");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
+  });
+
+  it("blocks admin result persistence when Provider output cannot be parsed into the requested draft kind", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const resultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      body: {
+        generationKind: "question",
+        clientOnlyFixtureN: "OMITTED_FIXTURE_N",
+      },
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          content: JSON.stringify({
+            questions: [{ questionType: "single_choice" }],
+          }),
+        },
+      ),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository: resultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 409015,
+      data: null,
+    });
+    expect(providerInputs).toHaveLength(1);
+    expect(taskPersistenceRecorder.calls).toHaveLength(0);
+    expect(resultPersistenceRecorder.calls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_N");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
+  });
 
   it("denies organization advanced admin direct POST when service-computed capability is absent", async () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder();

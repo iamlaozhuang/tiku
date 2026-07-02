@@ -231,6 +231,25 @@ export function isRouteIntegratedGroundingSufficient(
   );
 }
 
+export function isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+  visibleGeneratedContent:
+    | AiGenerationRouteIntegratedVisibleGeneratedContent
+    | null
+    | undefined,
+  expectedKind?: AiGenerationRouteIntegratedStructuredPreview["kind"],
+): boolean {
+  const groundingSummary = visibleGeneratedContent?.groundingSummary;
+  const structuredPreview = visibleGeneratedContent?.structuredPreview;
+
+  return (
+    groundingSummary?.evidenceStatus === "sufficient" &&
+    groundingSummary.citationCount > 0 &&
+    structuredPreview !== undefined &&
+    structuredPreview.parseStatus === "parsed" &&
+    (expectedKind === undefined || structuredPreview.kind === expectedKind)
+  );
+}
+
 export function createRouteIntegratedGroundingSummary(
   groundingContext: AiGenerationRouteIntegratedGroundingContext,
 ): AiGenerationRouteIntegratedGroundingSummary {

@@ -5,6 +5,7 @@ import {
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
   createRouteIntegratedVisibleGeneratedContent,
   ensureRouteIntegratedProviderExecutionSummaryRedacted,
+  isRouteIntegratedVisibleGeneratedContentAcceptableForDraft,
   qwenRouteIntegratedProviderLimits,
   qwenRouteIntegratedProviderMetadata,
 } from "./route-integrated-provider-execution-service";
@@ -190,6 +191,92 @@ describe("shared route-integrated Provider execution primitives", () => {
         reviewStatus: "draft_review_required",
       },
     });
+  });
+
+  it("accepts persisted drafts only when grounding and structured preview both pass", () => {
+    const groundedQuestionSet = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        questions: Array.from({ length: 10 }, () => ({
+          questionType: "single_choice",
+          difficulty: "medium",
+          knowledgeNodeLabels: ["redacted_knowledge_node"],
+        })),
+      }),
+      {
+        groundingSummary: {
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 10,
+        },
+      },
+    );
+    const weakQuestionSet = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        questions: Array.from({ length: 10 }, () => ({
+          questionType: "single_choice",
+        })),
+      }),
+      {
+        groundingSummary: {
+          evidenceStatus: "weak",
+          citationCount: 1,
+        },
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 10,
+        },
+      },
+    );
+    const failedStructuredPreview =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          questions: [{ questionType: "single_choice" }],
+        }),
+        {
+          groundingSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 10,
+          },
+        },
+      );
+
+    expect(
+      isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+        groundedQuestionSet,
+        "question_set",
+      ),
+    ).toBe(true);
+    expect(
+      isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+        groundedQuestionSet,
+        "paper_draft",
+      ),
+    ).toBe(false);
+    expect(
+      isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+        weakQuestionSet,
+        "question_set",
+      ),
+    ).toBe(false);
+    expect(
+      isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+        failedStructuredPreview,
+        "question_set",
+      ),
+    ).toBe(false);
+    expect(
+      isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+        null,
+        "question_set",
+      ),
+    ).toBe(false);
   });
 
   it("derives paper question counts from nested section question arrays", () => {

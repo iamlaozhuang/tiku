@@ -57,6 +57,10 @@ import {
   buildAdminAiGenerationRuntimeBridgeReadModelForRoute,
 } from "./admin-ai-generation-runtime-bridge-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteIntegratedStructuredPreviewOptionsForGenerationKind,
+  isRouteIntegratedVisibleGeneratedContentAcceptableForDraft,
+} from "./route-integrated-provider-execution-service";
 import type { SessionService } from "./session-service";
 
 export type { AdminAiGenerationWorkspace };
@@ -115,6 +119,7 @@ export type AdminAiGenerationRuntimeBridgeControl = {
 
 const ADMIN_AI_GENERATION_PERMISSION_DENIED_CODE = 403011;
 const ADMIN_AI_GENERATION_INVALID_INPUT_CODE = 400013;
+const ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE = 409015;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_DEFAULT_PAGE_SIZE = 10;
 const ADMIN_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
@@ -131,6 +136,10 @@ const adminAiGenerationPermissionDeniedResponse = createErrorResponse(
 const invalidAdminAiGenerationRequestResponse = createErrorResponse(
   ADMIN_AI_GENERATION_INVALID_INPUT_CODE,
   "Invalid admin AI generation request input.",
+);
+const unacceptableAdminAiGenerationResultResponse = createErrorResponse(
+  ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE,
+  "Admin AI generation requires sufficient grounded structured output.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -702,6 +711,19 @@ async function buildAdminAiGenerationLocalContract(input: {
       workspace: input.workspace,
     }),
   });
+  const expectedStructuredPreviewKind =
+    createRouteIntegratedStructuredPreviewOptionsForGenerationKind(
+      input.generationKind,
+    ).kind;
+
+  if (
+    !isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+      runtimeBridge.visibleGeneratedContent,
+      expectedStructuredPreviewKind,
+    )
+  ) {
+    return unacceptableAdminAiGenerationResultResponse;
+  }
 
   const localContract = {
     runtimeStatus: "local_contract_only",

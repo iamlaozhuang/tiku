@@ -178,6 +178,8 @@ function createTaskHistoryResponse(input: {
   generatedResult?: {
     contentPreviewMasked: string;
     contentVisibility?: "redacted_snapshot";
+    evidenceStatus?: "none" | "weak" | "sufficient";
+    citationCount?: number;
     resultPublicId: string;
   } | null;
   taskPublicId?: string;
@@ -197,8 +199,8 @@ function createTaskHistoryResponse(input: {
           contentPreviewMasked: input.generatedResult.contentPreviewMasked,
           contentVisibility:
             input.generatedResult.contentVisibility ?? "redacted_snapshot",
-          evidenceStatus: "none",
-          citationCount: 0,
+          evidenceStatus: input.generatedResult.evidenceStatus ?? "none",
+          citationCount: input.generatedResult.citationCount ?? 0,
           formalAdoptionStatus: "blocked",
           redactionStatus: "redacted",
         };
@@ -217,8 +219,8 @@ function createTaskHistoryResponse(input: {
         requestedAt: "2026-06-26T20:30:00.000Z",
         resultPublicId,
         contentVisibility: "summary_only",
-        evidenceStatus: "none",
-        citationCount: 0,
+        evidenceStatus: input.generatedResult?.evidenceStatus ?? "none",
+        citationCount: input.generatedResult?.citationCount ?? 0,
         runtimeStatus: "local_contract_only",
         runtimeBridgeStatus: "provider_call_blocked",
         providerCallExecuted: false,
@@ -244,8 +246,8 @@ function createTaskHistoryResponse(input: {
           requestedAt: "2026-06-26T20:30:00.000Z",
           resultPublicId,
           contentVisibility: "summary_only",
-          evidenceStatus: "none",
-          citationCount: 0,
+          evidenceStatus: input.generatedResult?.evidenceStatus ?? "none",
+          citationCount: input.generatedResult?.citationCount ?? 0,
           runtimeStatus: "local_contract_only",
           runtimeBridgeStatus: "provider_call_blocked",
           providerCallExecuted: false,
@@ -1039,7 +1041,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(historyPanel).not.toHaveTextContent("redacted");
   });
 
-  it("submits content admin review adoption for a single persisted generated result without exposing sensitive content", async () => {
+  it("submits content admin review adoption without fabricating a reviewed draft payload", async () => {
     const taskPublicId =
       "admin_ai_generation_task_content_question_review_hidden_456";
     const resultPublicId =
@@ -1068,6 +1070,8 @@ describe("admin AI generation entry surfaces", () => {
               resultPublicId,
               contentPreviewMasked:
                 "redacted generated result summary for review traceability",
+              evidenceStatus: "sufficient",
+              citationCount: 1,
             },
           }),
         );
@@ -1081,11 +1085,7 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "question",
         });
-        expect(adoptionRequestBody.reviewedDraft).toMatchObject({
-          profession: "marketing",
-          questionType: "single_choice",
-          subject: "theory",
-        });
+        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain(
@@ -1189,6 +1189,72 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("rawOutput");
     expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("keeps content admin adoption disabled until a generated result is grounded", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_ungrounded_hidden_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for review traceability",
+              evidenceStatus: "none",
+              citationCount: 0,
+            },
+          }),
+        );
+      }
+
+      if (String(url) === adoptionUrl) {
+        throw new Error("Ungrounded generated result must not be adopted");
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const traceabilityPanel = await screen.findByTestId(
+      "content-admin-review-traceability",
+    );
+    const adoptAction = await screen.findByTestId(
+      "content-admin-review-adopt-action",
+    );
+
+    expect(traceabilityPanel).toHaveTextContent("资料不足");
+    expect(adoptAction).toBeDisabled();
+
+    fireEvent.click(adoptAction);
+
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+      "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
+    ]);
   });
 
   it("converts persisted diagnostic generated result summaries for organization advanced admin history", async () => {

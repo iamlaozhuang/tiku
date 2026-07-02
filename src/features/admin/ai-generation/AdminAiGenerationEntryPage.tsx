@@ -11,10 +11,6 @@ import {
 
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
 import type {
-  AdminAiGenerationFormalPaperDraftPayload,
-  AdminAiGenerationFormalQuestionDraftPayload,
-} from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
-import type {
   AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationTaskHistoryDto,
@@ -203,62 +199,6 @@ function getContentAiGenerationFormalAdoptionPath(
   return `/api/v1/content-ai-generation-results/${encodeURIComponent(
     resultPublicId,
   )}/formal-adoptions`;
-}
-
-function createContentAdminReviewedQuestionDraftPayload(): AdminAiGenerationFormalQuestionDraftPayload {
-  return {
-    questionType: "single_choice",
-    profession: "marketing",
-    level: 3,
-    subject: "theory",
-    stemRichText: "内容 AI 评审后题干草稿",
-    analysisRichText: "内容 AI 评审后老师解析草稿",
-    standardAnswerRichText: "A",
-    multiChoiceRule: "all_correct_only",
-    scoringMethod: "auto_match",
-    materialPublicId: null,
-    questionOptions: [
-      {
-        label: "A",
-        contentRichText: "评审后选项 A",
-        isCorrect: true,
-        sortOrder: 1,
-      },
-      {
-        label: "B",
-        contentRichText: "评审后选项 B",
-        isCorrect: false,
-        sortOrder: 2,
-      },
-    ],
-    scoringPoints: [],
-    fillBlankAnswers: [],
-    knowledgeNodePublicIds: [],
-    tagPublicIds: [],
-  };
-}
-
-function createContentAdminReviewedPaperDraftPayload(): AdminAiGenerationFormalPaperDraftPayload {
-  return {
-    name: "内容 AI 评审后试卷草稿",
-    profession: "marketing",
-    level: 3,
-    subject: "theory",
-    paperType: "mock_paper",
-    year: null,
-    source: "内容 AI 草稿评审",
-    durationMinute: 120,
-    totalScore: "100.0",
-    paperSections: [],
-  };
-}
-
-function createContentAdminReviewedDraftPayload(
-  generationKind: AdminAiGenerationKind,
-) {
-  return generationKind === "question"
-    ? createContentAdminReviewedQuestionDraftPayload()
-    : createContentAdminReviewedPaperDraftPayload();
 }
 
 function getGenerationKindLabel(generationKind: AdminAiGenerationKind): string {
@@ -1055,6 +995,7 @@ function AdminAiGenerationTaskHistoryPanel({
                         ] ?? "idle"
                       }
                       generationKind={taskItem.generationKind}
+                      generatedResult={taskItem.generatedResult}
                       resultPublicId={taskItem.generatedResult.resultPublicId}
                       onReviewContentDraft={onReviewContentDraft}
                     />
@@ -1098,11 +1039,13 @@ function resolveContentAdminReviewActionMessage(
 function ContentAdminReviewTraceabilityPanel({
   actionState,
   generationKind,
+  generatedResult,
   resultPublicId,
   onReviewContentDraft,
 }: {
   actionState: ContentAdminReviewActionState;
   generationKind: AdminAiGenerationKind;
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
   resultPublicId: string;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
 }) {
@@ -1110,7 +1053,12 @@ function ContentAdminReviewTraceabilityPanel({
     actionState === "adopting" || actionState === "rejecting";
   const isCompleted = actionState === "adopted" || actionState === "rejected";
   const actionMessage = resolveContentAdminReviewActionMessage(actionState);
-  const isActionDisabled = isSubmitting || isCompleted;
+  const isGeneratedResultGrounded =
+    generatedResult.evidenceStatus === "sufficient" &&
+    generatedResult.citationCount > 0;
+  const isAdoptActionDisabled =
+    isSubmitting || isCompleted || !isGeneratedResultGrounded;
+  const isRejectActionDisabled = isSubmitting || isCompleted;
 
   return (
     <section
@@ -1139,12 +1087,14 @@ function ContentAdminReviewTraceabilityPanel({
           <dd className="text-text-primary mt-1">草稿摘要</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">正式写入</dt>
-          <dd className="text-text-primary mt-1">未执行</dd>
+          <dt className="text-text-secondary">资料依据</dt>
+          <dd className="text-text-primary mt-1">
+            {isGeneratedResultGrounded ? "资料充足" : "资料不足"}
+          </dd>
         </div>
         <div>
-          <dt className="text-text-secondary">学员可见</dt>
-          <dd className="text-text-primary mt-1">未开放</dd>
+          <dt className="text-text-secondary">正式写入</dt>
+          <dd className="text-text-primary mt-1">未执行</dd>
         </div>
       </dl>
 
@@ -1199,7 +1149,7 @@ function ContentAdminReviewTraceabilityPanel({
         <button
           className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="content-admin-review-adopt-action"
-          disabled={isActionDisabled}
+          disabled={isAdoptActionDisabled}
           type="button"
           onClick={() =>
             onReviewContentDraft({
@@ -1214,7 +1164,7 @@ function ContentAdminReviewTraceabilityPanel({
         <button
           className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="content-admin-review-reject-action"
-          disabled={isActionDisabled}
+          disabled={isRejectActionDisabled}
           type="button"
           onClick={() =>
             onReviewContentDraft({
@@ -1544,10 +1494,6 @@ export function AdminAiGenerationEntryPage({
             body: JSON.stringify({
               reviewDecision: input.reviewDecision,
               reviewerConfirmed: true,
-              reviewedDraft:
-                input.reviewDecision === "approved"
-                  ? createContentAdminReviewedDraftPayload(input.generationKind)
-                  : undefined,
               targetType: input.generationKind,
             }),
             headers: {
