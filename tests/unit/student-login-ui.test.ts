@@ -18,7 +18,6 @@ import {
 } from "@/features/student/studentRuntimeApi";
 
 const replaceMock = vi.fn();
-const SESSION_PAYLOAD_FIELD_NAME = "to" + "ken";
 const STUDENT_SESSION_VALUE = "unit-test-student-session-value";
 const ADMIN_SESSION_VALUE = "unit-test-admin-session-value";
 
@@ -32,7 +31,6 @@ const studentLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: STUDENT_SESSION_VALUE,
     user: {
       publicId: "user-dev-student",
       phone: "13900000002",
@@ -55,7 +53,6 @@ const adminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-super-admin",
       phone: "13900000001",
@@ -78,7 +75,6 @@ const opsAdminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-ops-admin",
       phone: "13900000003",
@@ -101,7 +97,6 @@ const contentAdminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-content-admin",
       phone: "13900000006",
@@ -124,7 +119,6 @@ const orgStandardAdminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-org-standard-admin",
       phone: "13900000004",
@@ -147,7 +141,6 @@ const orgAdvancedAdminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-org-advanced-admin",
       phone: "13900000005",
@@ -331,7 +324,7 @@ describe("LoginPage", () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it("keeps the bearer token out of browser storage and sends students to home", async () => {
+  it("stores only the cookie-backed marker and sends students to home", async () => {
     const fetchMock = mockSessionResponse(studentLoginPayload);
 
     render(createElement(LoginPage));
@@ -351,7 +344,10 @@ describe("LoginPage", () => {
         method: "POST",
       }),
     );
-    expect(localStorage.getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)).toBeNull();
+    expect(localStorage.getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)).toBe(
+      COOKIE_BACKED_SESSION_MARKER,
+    );
+    expect(getStoredStudentSessionToken()).toBeNull();
     expect(document.body.textContent).not.toContain(STUDENT_SESSION_VALUE);
   });
 

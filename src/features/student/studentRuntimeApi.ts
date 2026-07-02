@@ -63,6 +63,14 @@ export function getStoredStudentSessionToken(): string | null {
   return storedSessionValue;
 }
 
+export function hasStoredStudentSessionSignal(): boolean {
+  const storedSessionValue = localStorage
+    .getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)
+    ?.trim();
+
+  return storedSessionValue !== undefined && storedSessionValue !== "";
+}
+
 export function clearStoredStudentSessionToken() {
   localStorage.removeItem(STUDENT_SESSION_TOKEN_STORAGE_KEY);
 }
@@ -130,7 +138,7 @@ export async function fetchCurrentStudentSession(
 }
 
 export async function fetchPersonalAiGenerationRequestHistory(
-  token: string,
+  token: string | null,
 ): Promise<ApiResponse<PersonalAiGenerationRequestHistoryDto | null>> {
   return fetchStudentApi<PersonalAiGenerationRequestHistoryDto>(
     "/api/v1/personal-ai-generation-requests",

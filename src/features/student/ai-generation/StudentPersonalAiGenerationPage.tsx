@@ -17,10 +17,10 @@ import {
 import { useEffect, useState } from "react";
 
 import {
-  COOKIE_BACKED_SESSION_MARKER,
   fetchCurrentStudentSession,
   fetchStudentApi,
   getStoredStudentSessionToken,
+  hasStoredStudentSessionSignal,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -391,15 +391,11 @@ function readHasStudentSessionToken(): boolean {
     return false;
   }
 
-  return getStoredStudentSessionToken() !== null;
+  return hasStoredStudentSessionSignal();
 }
 
 function readStudentSessionRequestToken(): StudentSessionRequestToken {
-  const storedSessionValue = getStoredStudentSessionToken();
-
-  return storedSessionValue === COOKIE_BACKED_SESSION_MARKER
-    ? null
-    : storedSessionValue;
+  return getStoredStudentSessionToken();
 }
 
 function isStudentAccessDeniedResponse(payload: { code: number }): boolean {

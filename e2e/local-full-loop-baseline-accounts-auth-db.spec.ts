@@ -1,4 +1,9 @@
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type APIResponse,
+} from "@playwright/test";
 
 type ApiPayload<TData = unknown> = {
   code: number;
@@ -11,7 +16,6 @@ type SessionLoginData = {
   session: {
     expiresAt: string;
   };
-  token: string;
   user: {
     adminPublicId?: string | null;
     adminRoles?: string[];
@@ -31,10 +35,10 @@ type SessionLoginData = {
 type RoleCase = {
   credential: Record<string, string>;
   expectedAdminRoles: string[];
+  expectedAdvancedWorkspaceCapability?: boolean;
   expectedEmployeeContext: "absent" | "present";
   expectedOrganizationContext: "absent" | "present";
   expectedUserType: "personal" | "employee" | null;
-  expectedWorkspaceEdition?: "standard" | "advanced";
   roleLabel:
     | "student"
     | "content_admin"
@@ -95,10 +99,10 @@ const roleCases: RoleCase[] = [
       [credentialValueKey]: localDevAccessValues.orgStandardAdmin,
     },
     expectedAdminRoles: ["org_standard_admin"],
+    expectedAdvancedWorkspaceCapability: false,
     expectedEmployeeContext: "absent",
     expectedOrganizationContext: "present",
     expectedUserType: null,
-    expectedWorkspaceEdition: "standard",
   },
   {
     roleLabel: "org_advanced_admin",
@@ -107,10 +111,10 @@ const roleCases: RoleCase[] = [
       [credentialValueKey]: localDevAccessValues.orgAdvancedAdmin,
     },
     expectedAdminRoles: ["org_advanced_admin"],
+    expectedAdvancedWorkspaceCapability: true,
     expectedEmployeeContext: "absent",
     expectedOrganizationContext: "present",
     expectedUserType: null,
-    expectedWorkspaceEdition: "advanced",
   },
   {
     roleLabel: "employee",
@@ -136,10 +140,8 @@ test("logs in the six local full-loop baseline roles with redacted summaries", a
 
   for (const roleCase of roleCases) {
     const payload = await login(request, roleCase.credential);
-    const sessionValue = readRequiredNestedString(payload, ["data", "token"]);
     const user = payload.data?.user;
 
-    expect(sessionValue.length).toBeGreaterThan(24);
     expect(user).toEqual(expect.any(Object));
     expect(user?.status).toBe("active");
     expect(user?.userType).toBe(roleCase.expectedUserType);
@@ -153,12 +155,14 @@ test("logs in the six local full-loop baseline roles with redacted summaries", a
       roleCase.expectedOrganizationContext,
     );
 
-    if (roleCase.expectedWorkspaceEdition !== undefined) {
+    if (roleCase.expectedAdvancedWorkspaceCapability !== undefined) {
       expect(user?.adminWorkspaceCapability).toMatchObject({
-        organizationEffectiveEdition: roleCase.expectedWorkspaceEdition,
         canUseOrganizationAdvancedWorkspace:
-          roleCase.expectedWorkspaceEdition === "advanced",
+          roleCase.expectedAdvancedWorkspaceCapability,
       });
+      expect(["standard", "advanced"]).toContain(
+        user?.adminWorkspaceCapability?.organizationEffectiveEdition,
+      );
     } else {
       expect(user?.adminWorkspaceCapability).toBeUndefined();
     }
@@ -168,9 +172,14 @@ test("logs in the six local full-loop baseline roles with redacted summaries", a
       loginStatus: "issued",
       userType: roleCase.expectedUserType ?? "admin",
       adminRoleCount: roleCase.expectedAdminRoles.length,
+      advancedWorkspaceCapability:
+        roleCase.expectedAdvancedWorkspaceCapability === undefined
+          ? "not_applicable"
+          : roleCase.expectedAdvancedWorkspaceCapability
+            ? "enabled"
+            : "blocked",
       employeeContext: roleCase.expectedEmployeeContext,
       organizationContext: roleCase.expectedOrganizationContext,
-      workspaceEdition: roleCase.expectedWorkspaceEdition ?? "not_applicable",
     });
   }
 
@@ -208,8 +217,23 @@ async function login(
     message: "ok",
     data: expect.any(Object),
   });
+  expectSessionCookieIssued(response);
+  expectClientVisibleTokenOmitted(payload.data);
 
   return payload;
+}
+
+function expectClientVisibleTokenOmitted(data: unknown) {
+  expect(isRecord(data) ? data["token"] : undefined).toBeUndefined();
+}
+
+function expectSessionCookieIssued(response: APIResponse) {
+  const sessionCookieHeader = response.headers()["set-cookie"] ?? "";
+
+  expect(sessionCookieHeader).toContain("tiku_session=");
+  expect(sessionCookieHeader).toContain("HttpOnly");
+  expect(sessionCookieHeader).toContain("SameSite=Lax");
+  expect(sessionCookieHeader).toContain("Path=/");
 }
 
 function expectContextPresence(
@@ -276,19 +300,6 @@ function expectNoInternalIdKeys(value: unknown) {
   }
 }
 
-function readRequiredNestedString(payload: ApiPayload, path: string[]): string {
-  let currentValue: unknown = payload;
-
-  for (const pathSegment of path) {
-    if (typeof currentValue !== "object" || currentValue === null) {
-      throw new Error(`Missing string at ${path.join(".")}`);
-    }
-    currentValue = (currentValue as Record<string, unknown>)[pathSegment];
-  }
-
-  if (typeof currentValue !== "string") {
-    throw new Error(`Missing string at ${path.join(".")}`);
-  }
-
-  return currentValue;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

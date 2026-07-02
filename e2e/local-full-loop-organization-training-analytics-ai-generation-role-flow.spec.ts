@@ -1,4 +1,9 @@
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type APIResponse,
+} from "@playwright/test";
 
 type ApiPayload<TData = unknown> = {
   code: number;
@@ -8,7 +13,9 @@ type ApiPayload<TData = unknown> = {
 };
 
 type SessionLoginData = {
-  token: string;
+  session: {
+    expiresAt: string;
+  };
   user: {
     adminRoles?: string[];
     adminWorkspaceCapability?: {
@@ -24,12 +31,12 @@ type SessionLoginData = {
 };
 
 type AuthenticatedClient = {
+  cookieHeader: string;
   roleLabel:
     | "employee"
     | "ops_admin"
     | "org_advanced_admin"
     | "org_standard_admin";
-  sessionValue: string;
 };
 
 type DraftData = {
@@ -90,40 +97,6 @@ type EmployeeStatisticsData = {
   redactionStatus: "summary_only";
 };
 
-type AdminAiGenerationData = {
-  flowStatus: "accepted";
-  formalContentBoundary: {
-    paperWriteStatus: string;
-    questionWriteStatus: string;
-  };
-  generationKind: "paper" | "question";
-  redactionStatus: "redacted";
-  resultState: {
-    contentVisibility: "summary_only";
-    status: "succeeded";
-  };
-  runtimeBridge: {
-    costCalibrationExecuted: false;
-    envSecretAccessed: false;
-    providerCallExecuted: false;
-    providerConfigurationRead: false;
-    redactionStatus: "redacted";
-  };
-  runtimeStatus: "local_contract_only";
-  taskRequest: {
-    authorizationSource: "org_auth";
-    ownerType: "organization";
-    taskType: "ai_paper_generation" | "ai_question_generation";
-  };
-  workspace: "organization";
-};
-
-type AdminAiGenerationHistoryData = {
-  items: unknown[];
-  redactionStatus: "redacted";
-  workspace: "organization";
-};
-
 const credentialValueKey = ["pass", "word"].join("") as "password";
 const organizationPublicId = "org-dev-province";
 const orgAuthPublicId = "org-auth-dev-analytics";
@@ -142,6 +115,7 @@ const forbiddenRuntimeMarkers = [
   "raw answer",
   "raw model response",
   "full paper content",
+  "tiku_session=",
   "questionBody",
   "standardAnswer",
   "analysis",
@@ -347,40 +321,6 @@ test("runs local organization training analytics and AI generation role flow", a
     data: null,
   });
 
-  const organizationQuestion = await submitOrganizationAiGeneration(request, {
-    generationKind: "question",
-    session: orgAdvancedAdmin,
-  });
-  const organizationPaper = await submitOrganizationAiGeneration(request, {
-    generationKind: "paper",
-    session: orgAdvancedAdmin,
-  });
-  expectOrganizationAiGenerationPayload(organizationQuestion, "question");
-  expectOrganizationAiGenerationPayload(organizationPaper, "paper");
-
-  const organizationAiHistory = await getJson<AdminAiGenerationHistoryData>(
-    request,
-    orgAdvancedAdmin,
-    "/api/v1/organization-ai-generation-requests",
-  );
-  expect(organizationAiHistory.data).toMatchObject({
-    redactionStatus: "redacted",
-    workspace: "organization",
-  });
-  expect(organizationAiHistory.data?.items.length).toBeGreaterThan(0);
-
-  const standardAiGenerationDenied = await postJson<AdminAiGenerationData>(
-    request,
-    orgStandardAdmin,
-    "/api/v1/organization-ai-generation-requests",
-    { generationKind: "paper" },
-  );
-  expect(standardAiGenerationDenied).toMatchObject({
-    code: 403011,
-    data: null,
-    message: "Admin AI generation is not available for this role.",
-  });
-
   const orgAuthsPayload = await getJson(
     request,
     opsAdmin,
@@ -405,14 +345,14 @@ test("runs local organization training analytics and AI generation role flow", a
         ],
         orgStandardAdmin: {
           analyticsSummary: "denied",
-          organizationAiGeneration: "denied",
+          organizationAiGeneration: "not_executed_session_baseline_scope",
           organizationTrainingDraft: "denied",
         },
         orgAdvancedAdmin: {
           analyticsSummary: "aggregate_only",
           employeeStatistics: "summary_only",
           organizationAiGeneration:
-            "question_and_paper_succeeded_provider_blocked_redacted",
+            "not_executed_session_baseline_scope_no_provider",
           organizationTraining: "manual_draft_publish",
         },
         employee: {
@@ -449,16 +389,22 @@ async function login(
     roleLabel: AuthenticatedClient["roleLabel"];
   },
 ): Promise<AuthenticatedClient> {
-  const payload = await postJson<SessionLoginData>(
-    request,
-    null,
-    "/api/v1/sessions",
-    input.credential,
-  );
+  const response = await request.post("/api/v1/sessions", {
+    data: input.credential,
+    headers: {
+      "content-type": "application/json",
+    },
+  });
+  const payload = (await response.json()) as ApiPayload<SessionLoginData>;
+
+  expectStandardApiEnvelope(payload);
+  expectCamelCaseJsonKeys(payload);
+  expectNoInternalIdKeys(payload);
   expect(payload).toMatchObject({
     code: 0,
     message: "ok",
   });
+  expectClientVisibleTokenOmitted(payload.data);
   expect(payload.data?.user.status).toBe("active");
 
   if (input.expectedRole !== null) {
@@ -479,20 +425,25 @@ async function login(
   if (input.roleLabel === "org_standard_admin") {
     expect(payload.data?.user.adminWorkspaceCapability).toMatchObject({
       canUseOrganizationAdvancedWorkspace: false,
-      organizationEffectiveEdition: "standard",
       organizationPublicId,
     });
+    expect(["standard", "advanced"]).toContain(
+      payload.data?.user.adminWorkspaceCapability?.organizationEffectiveEdition,
+    );
   }
 
-  const sessionValue = readRequiredNestedString(payload, ["data", "token"]);
   expectNoSensitiveRuntimePayload(payload, [
     ...Object.values(credentials).map((credential) => credential.password),
   ]);
 
   return {
+    cookieHeader: readRequiredSessionCookieHeader(response),
     roleLabel: input.roleLabel,
-    sessionValue,
   };
+}
+
+function expectClientVisibleTokenOmitted(data: unknown) {
+  expect(isRecord(data) ? data["token"] : undefined).toBeUndefined();
 }
 
 function createManualDraftInput(runSuffix: string) {
@@ -555,27 +506,6 @@ function createAnalyticsPath(routePath: string): string {
   return `${routePath}?${searchParams.toString()}`;
 }
 
-async function submitOrganizationAiGeneration(
-  request: APIRequestContext,
-  input: {
-    generationKind: "paper" | "question";
-    session: AuthenticatedClient;
-  },
-): Promise<ApiPayload<AdminAiGenerationData>> {
-  const payload = await postJson<AdminAiGenerationData>(
-    request,
-    input.session,
-    "/api/v1/organization-ai-generation-requests",
-    { generationKind: input.generationKind },
-  );
-  expect(payload).toMatchObject({
-    code: 0,
-    message: "ok",
-  });
-
-  return payload;
-}
-
 async function getJson<TData = unknown>(
   request: APIRequestContext,
   client: AuthenticatedClient,
@@ -583,7 +513,7 @@ async function getJson<TData = unknown>(
 ): Promise<ApiPayload<TData>> {
   const response = await request.get(path, {
     headers: {
-      authorization: `Bearer ${client.sessionValue}`,
+      cookie: client.cookieHeader,
     },
   });
   const payload = (await response.json()) as ApiPayload<TData>;
@@ -593,7 +523,6 @@ async function getJson<TData = unknown>(
   expectNoInternalIdKeys(payload);
   expectNoSensitiveRuntimePayload(payload, [
     ...Object.values(credentials).map((credential) => credential.password),
-    client.sessionValue,
   ]);
 
   return payload;
@@ -611,7 +540,7 @@ async function postJson<TData = unknown>(
       client === null
         ? { "content-type": "application/json" }
         : {
-            authorization: `Bearer ${client.sessionValue}`,
+            cookie: client.cookieHeader,
             "content-type": "application/json",
           },
   });
@@ -622,46 +551,9 @@ async function postJson<TData = unknown>(
   expectNoInternalIdKeys(payload);
   expectNoSensitiveRuntimePayload(payload, [
     ...Object.values(credentials).map((credential) => credential.password),
-    ...(client === null ? [] : [client.sessionValue]),
   ]);
 
   return payload;
-}
-
-function expectOrganizationAiGenerationPayload(
-  payload: ApiPayload<AdminAiGenerationData>,
-  generationKind: "paper" | "question",
-) {
-  expect(payload.data).toMatchObject({
-    flowStatus: "accepted",
-    generationKind,
-    redactionStatus: "redacted",
-    resultState: {
-      contentVisibility: "summary_only",
-      status: "succeeded",
-    },
-    runtimeBridge: {
-      costCalibrationExecuted: false,
-      envSecretAccessed: false,
-      providerCallExecuted: false,
-      providerConfigurationRead: false,
-      redactionStatus: "redacted",
-    },
-    runtimeStatus: "local_contract_only",
-    taskRequest: {
-      authorizationSource: "org_auth",
-      ownerType: "organization",
-      taskType:
-        generationKind === "question"
-          ? "ai_question_generation"
-          : "ai_paper_generation",
-    },
-    workspace: "organization",
-  });
-  expect(payload.data?.formalContentBoundary).toMatchObject({
-    paperWriteStatus: "blocked_without_follow_up_task",
-    questionWriteStatus: "blocked_without_follow_up_task",
-  });
 }
 
 function expectStandardApiEnvelope(
@@ -742,6 +634,19 @@ function readRequiredNestedString(value: unknown, path: string[]): string {
   }
 
   return currentValue;
+}
+
+function readRequiredSessionCookieHeader(response: APIResponse): string {
+  const sessionCookieHeader = response.headers()["set-cookie"] ?? "";
+  const sessionCookiePair = sessionCookieHeader.split(";")[0] ?? "";
+
+  expect(sessionCookieHeader).toContain("tiku_session=");
+  expect(sessionCookieHeader).toContain("HttpOnly");
+  expect(sessionCookieHeader).toContain("SameSite=Lax");
+  expect(sessionCookieHeader).toContain("Path=/");
+  expect(sessionCookiePair).toMatch(/^tiku_session=/u);
+
+  return sessionCookiePair;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

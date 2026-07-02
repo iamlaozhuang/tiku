@@ -358,6 +358,153 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: session-cookie-contract-login-and-e2e-alignment-2026-07-02
+    title: Session cookie contract login and e2e alignment
+    phase: session-cookie-contract-login-and-e2e-alignment-2026-07-02
+    sourceStory: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    humanApprovalBoundary: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    targetClosureItem: Align login UI and local e2e fixtures with cookie-backed session contract before further AI acceptance
+    behaviorBoundary: local_login_session_contract_and_same_stage3_e2e_only_no_ai_provider_env_direct_db_dependency_schema_deploy_release_claim
+    taskKind: local_source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: completed_session_cookie_contract_baseline_restored
+    priority: p1
+    claimedAt: "2026-07-02T10:00:00-07:00"
+    plannedAt: "2026-07-02T10:00:00-07:00"
+    implementedAt: "2026-07-02T10:30:00-07:00"
+    validatedAt: "2026-07-02T10:30:00-07:00"
+    reviewedAt: "2026-07-02T10:30:00-07:00"
+    closedAt: "2026-07-02T10:30:00-07:00"
+    dependsOn:
+      - role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    branch: codex/session-cookie-contract-login-and-e2e-alignment
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    allowedFiles:
+      - src/app/(auth)/login/page.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/local-full-loop-baseline-accounts-auth-db.spec.ts
+      - e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - tests/unit/student-login-ui.test.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/server/auth/session-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - src/server/auth/session-route.ts
+      - playwright.config.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved_task_scoped_login_session_contract_only
+      focusedUnitTest: approved
+      localhostBrowserE2E: approved_same_stage3_specs_only
+      localDevServer: approved_localhost_only
+      testOwnedLoginInput: approved_existing_local_specs_only_no_evidence
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      aiFeatureAcceptanceRerun: blocked_until_session_baseline_restored
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Login UI and selected e2e helpers follow the cookie-backed session contract and no longer require response data.token.
+      - Admin role denial fixture validates current-session workspace denial without synthetic bearer tokens.
+      - The exact same stage 3 Playwright spec set is rerun after repair.
+      - Evidence contains only redacted status/count/failure-class summaries and no raw sensitive runtime material.
+      - No AI Provider, AI功能验收, release readiness, final Pass, production usability, Cost Calibration, env, direct DB, dependency, schema, or deploy claim is made.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts src/server/auth/session-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts tests/unit/student-login-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/auth/session-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - npm.cmd exec -- prettier --check --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts tests/unit/student-login-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/auth/session-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    validationSummary:
+      status: passed
+      focusedUnitFiles: 3
+      focusedUnitTests: 27
+      stage3SpecFiles: 5
+      stage3Tests: 6
+      stage3Passed: 6
+      staleLocalhostServerObservedAndRestarted: true
+      loginUiCookieBackedSessionAligned: true
+      e2eClientVisibleSessionTokenOmitted: true
+      adminWorkspaceDenialCurrentSessionValidated: true
+      personalAiSurfaceOnlyNoSubmit: true
+      organizationAiPostSubsegmentsSkipped: true
+      aiProviderCallExecuted: false
+      aiProviderConfigurationRead: false
+      aiFunctionalAcceptanceExecuted: false
+      directDatabaseActionByAgent: false
+      envSecretAccessed: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      sensitiveEvidenceRecorded: false
+      rawDomScreenshotTraceRecorded: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
   - id: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
     title: Role workflow experience walkthrough from code baseline
     phase: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02

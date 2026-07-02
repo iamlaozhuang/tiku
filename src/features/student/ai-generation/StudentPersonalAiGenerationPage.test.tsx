@@ -17,6 +17,7 @@ const studentRuntimeApiMock = vi.hoisted(() => ({
   fetchPersonalAiGenerationRequestHistory: vi.fn(),
   fetchStudentApi: vi.fn(),
   getStoredStudentSessionToken: vi.fn(),
+  hasStoredStudentSessionSignal: vi.fn(),
   isStudentUnauthorizedResponse: vi.fn((payload: { code: number }) => {
     return payload.code === 401001;
   }),
@@ -237,6 +238,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     studentRuntimeApiMock.getStoredStudentSessionToken.mockReturnValue(
       "local-session-token",
     );
+    studentRuntimeApiMock.hasStoredStudentSessionSignal.mockReturnValue(true);
     studentRuntimeApiMock.fetchPersonalAiGenerationRequestHistory.mockResolvedValue(
       {
         code: 0,

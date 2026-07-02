@@ -11,16 +11,15 @@ import {
   createPostLoginSessionBoundary,
   type PostLoginSessionUser,
 } from "@/server/contracts/user-auth/session-boundary";
-import {
-  persistCookieBackedSessionMarker,
-  persistLocalAutomationStudentSessionToken,
-} from "@/features/student/studentRuntimeApi";
+import { persistCookieBackedSessionMarker } from "@/features/student/studentRuntimeApi";
 
 type SessionLoginPayload = {
   code: number;
   message: string;
   data: {
-    token: string;
+    session: {
+      expiresAt: string;
+    };
     user: PostLoginSessionUser;
   } | null;
 };
@@ -95,11 +94,7 @@ export default function LoginPage() {
       }
 
       const sessionBoundary = createPostLoginSessionBoundary(payload.data.user);
-      if (payload.data.user.userType === "personal") {
-        persistLocalAutomationStudentSessionToken(payload.data.token);
-      } else {
-        persistCookieBackedSessionMarker();
-      }
+      persistCookieBackedSessionMarker();
       router.replace(sessionBoundary.redirectPath);
     } catch {
       setLoginState("error");
