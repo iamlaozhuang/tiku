@@ -1,8 +1,145 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-goal-completion-audit-2026-07-02
-updatedAt: "2026-07-02T06:25:00-07:00"
+currentPhase: ai-generation-acceptance-baseline-normalization-2026-07-02
+updatedAt: "2026-07-02T06:45:00-07:00"
+aiGenerationAcceptanceBaselineNormalization20260702:
+  taskId: ai-generation-acceptance-baseline-normalization-2026-07-02
+  phase: ai-generation-acceptance-baseline-normalization-2026-07-02
+  status: closed
+  result: completed_single_ai_generation_acceptance_baseline
+  priority: p1
+  taskKind: docs_state_acceptance_baseline_normalization
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-goal-completion-audit-2026-07-02
+    - ai-generation-20-fix-quick-acceptance-2026-07-02
+    - ops-admin-local-login-residual-2026-07-02
+    - owner-preview-resource-pack-addendum-2026-07-02
+    - marketing-monopoly-logistics-provider-rerun-2026-07-02
+  sourceStory: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+  targetClosureItem: Normalize current AI出题 and AI组卷 evidence and state into one current baseline
+  behaviorBoundary: docs_state_evidence_baseline_normalization_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_commit_prefix_validation_status_count_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  branch: codex/ai-generation-acceptance-baseline-normalization
+  claimedAt: "2026-07-02T06:45:00-07:00"
+  plannedAt: "2026-07-02T06:45:00-07:00"
+  implementedAt: "2026-07-02T06:45:00-07:00"
+  validatedAt: "2026-07-02T06:45:00-07:00"
+  reviewedAt: "2026-07-02T06:45:00-07:00"
+  closedAt: "2026-07-02T06:45:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: blocked_not_needed_docs_state_only
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Current AI出题 and AI组卷 acceptance baseline is expressed as one current state.
+    - Quick acceptance ops_admin local login residual is marked closed by later local login residual evidence.
+    - Quick acceptance logistics non-covered wording is superseded for the declared AI generation acceptance scope by later resource-pack and Provider evidence, without claiming broad production/full logistics coverage.
+    - MML-RERUN-01 and MML-RERUN-02 are closed or superseded by later monopoly OCR/runtime RAG, parser, and Provider count evidence.
+    - MML-RERUN-03 remains only a diagnostic wording inconsistency outside the current Provider acceptance blocker set.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+  validationSummary:
+    status: passed
+    singleAiGenerationAcceptanceBaselineRecorded: true
+    oldOpsAdminResidualClosedByLaterEvidence: true
+    oldLogisticsNonCoveredResidualSupersededForCurrentAcceptanceScope: true
+    mmlRerun01Closed: true
+    mmlRerun02Superseded: true
+    mmlRerun03OutsideCurrentProviderBlockerSet: true
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 aiGenerationGoalCompletionAudit20260702:
   taskId: ai-generation-goal-completion-audit-2026-07-02
   phase: ai-generation-goal-completion-audit-2026-07-02
@@ -16143,9 +16280,147 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9794175f6b812ad6122a59ee06a53eaad10d334d
-  lastKnownOriginMasterSha: 9794175f6b812ad6122a59ee06a53eaad10d334d
+  lastKnownMasterSha: 12e7bef1aa168f593faa05e6dbc79dd635d87b63
+  lastKnownOriginMasterSha: 12e7bef1aa168f593faa05e6dbc79dd635d87b63
 currentTask:
+  id: ai-generation-acceptance-baseline-normalization-2026-07-02
+  status: closed
+  result: completed_single_ai_generation_acceptance_baseline
+  taskKind: docs_state_acceptance_baseline_normalization
+  validationPolicy: docs_state_prettier_diff_module_run_v2
+  moduleRunVersion: 2
+  priority: p1
+  branch: codex/ai-generation-acceptance-baseline-normalization
+  humanApproval: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+  claimedAt: "2026-07-02T06:45:00-07:00"
+  plannedAt: "2026-07-02T06:45:00-07:00"
+  implementedAt: "2026-07-02T06:45:00-07:00"
+  validatedAt: "2026-07-02T06:45:00-07:00"
+  reviewedAt: "2026-07-02T06:45:00-07:00"
+  closedAt: "2026-07-02T06:45:00-07:00"
+  dependsOn:
+    - ai-generation-goal-completion-audit-2026-07-02
+    - ai-generation-20-fix-quick-acceptance-2026-07-02
+    - ops-admin-local-login-residual-2026-07-02
+    - owner-preview-resource-pack-addendum-2026-07-02
+    - marketing-monopoly-logistics-provider-rerun-2026-07-02
+  sourceStory: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+  targetClosureItem: Normalize current AI出题 and AI组卷 evidence and state into one current baseline
+  behaviorBoundary: docs_state_evidence_baseline_normalization_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_commit_prefix_validation_status_count_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: blocked_not_needed_docs_state_only
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Current AI出题 and AI组卷 acceptance baseline is expressed as one current state.
+    - Quick acceptance ops_admin local login residual is marked closed by later local login residual evidence.
+    - Quick acceptance logistics non-covered wording is superseded for the declared AI generation acceptance scope by later resource-pack and Provider evidence, without claiming broad production/full logistics coverage.
+    - MML-RERUN-01 and MML-RERUN-02 are closed or superseded by later monopoly OCR/runtime RAG, parser, and Provider count evidence.
+    - MML-RERUN-03 remains only a diagnostic wording inconsistency outside the current Provider acceptance blocker set.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+  validationSummary:
+    status: passed
+    singleAiGenerationAcceptanceBaselineRecorded: true
+    oldOpsAdminResidualClosedByLaterEvidence: true
+    oldLogisticsNonCoveredResidualSupersededForCurrentAcceptanceScope: true
+    mmlRerun01Closed: true
+    mmlRerun02Superseded: true
+    mmlRerun03OutsideCurrentProviderBlockerSet: true
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+previousCurrentTaskBeforeAiGenerationAcceptanceBaselineNormalization20260702:
   id: ai-generation-goal-completion-audit-2026-07-02
   status: closed
   result: completed_ai_question_and_paper_generation_goal_problem_list
