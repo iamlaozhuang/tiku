@@ -1,8 +1,154 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-employee-ai-visible-result-closure-repair-2026-07-02
-updatedAt: "2026-07-02T04:40:00-07:00"
+currentPhase: owner-preview-resource-pack-addendum-2026-07-02
+updatedAt: "2026-07-02T05:45:00-07:00"
+ownerPreviewResourcePackAddendum20260702:
+  taskId: owner-preview-resource-pack-addendum-2026-07-02
+  phase: owner-preview-resource-pack-addendum-2026-07-02
+  status: closed
+  result: completed_owner_preview_resource_pack_addendum
+  priority: p1
+  taskKind: local_private_resource_pack_addendum
+  executionProfile: local_private_fixture_pack_copy_convert_inventory_dry_run
+  moduleRunVersion: 2
+  dependsOn:
+    - learner-employee-ai-visible-result-closure-repair-2026-07-02
+  sourceStory: current_user_approved_integrating_new_textbook_assessment_point_materials_into_owner_preview_fixture_pack_2026_07_02
+  targetClosureItem: augment owner preview fixture pack with marketing monopoly logistics textbook and assessment-point sources for later AI generation validation
+  behaviorBoundary: local_private_fixture_pack_only_no_db_execute_no_provider_call_no_env_secret_no_schema_dependency_deploy_release_claim
+  sourceInputBoundary:
+    rawfilesRoot: D:\tiku\rawfiles\教材与鉴定点细则
+    fixturePackRoot: D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated
+    contentHandling: metadata_and_local_private_copy_or_conversion_only_no_full_content_in_repo_or_evidence
+  evidenceMode: task_id_status_label_file_count_profession_level_subject_coverage_extractability_summary_command_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_material_content
+  branch: codex/owner-preview-resource-pack-addendum
+  claimedAt: "2026-07-02T05:10:00-07:00"
+  plannedAt: "2026-07-02T05:10:00-07:00"
+  implementedAt: "2026-07-02T05:30:00-07:00"
+  validatedAt: "2026-07-02T05:40:00-07:00"
+  reviewedAt: "2026-07-02T05:45:00-07:00"
+  closedAt: "2026-07-02T05:45:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+    - D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated\**
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - scripts/db/Import-OwnerPreviewResourcePackage.ps1
+    - scripts/db/Import-OwnerPreviewRuntimeRagResources.ps1
+    - src/db/owner-preview-resource-import.ts
+    - src/db/owner-preview-runtime-rag-resource-import.ts
+    - tests/unit/owner-preview-resource-import.test.ts
+    - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+    - D:\tiku\rawfiles\教材与鉴定点细则\**
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localPrivateFixturePackReadWrite: approved
+    rawfilesReadOnly: approved
+    documentMetadataExtraction: approved_no_raw_content_evidence
+    pdfTextExtractabilityProbe: approved_no_raw_content_evidence
+    localResourceImportDryRun: approved
+    localRuntimeRagImportDryRun: approved
+    localResourceImportExecute: blocked
+    localRuntimeRagImportExecute: approved_after_dry_run_pass
+    databaseConnection: blocked
+    databaseMutation: blocked
+    providerCall: blocked
+    envSecretAccess: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    browserRuntime: blocked
+    devServer: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-preview-resource-pack-addendum-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-preview-resource-pack-addendum-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+  validationSummary:
+    status: pass_with_residual_followups
+    privateFixturePackUpdated: true
+    addedInventoryRowCount: 31
+    generatedMarkdownFileCount: 22
+    copiedOrConvertedDocxFileCount: 3
+    knowledgeNodeCandidateCount: 2973
+    skippedSourceCount: 2
+    resourcePackageDryRun: pass_usable
+    runtimeRagDryRun: pass
+    runtimeRagExecute: pass_local_catalog_only
+    runtimeRagImportedResourceCount: 43
+    runtimeRagImportedChunkCount: 519
+    runtimeCoverage:
+      logisticsAllRagReady: 11
+      marketingAllRagReady: 28
+      monopolyAllRagReady: 4
+    focusedUnitTests: pass_2_files_10_tests
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    databaseConnectionOrMutationExecuted: false
+    resourcePackageDbImportExecuted: false
+    providerCallExecuted: false
+    envFileReadOrModified: false
+    packageOrLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    browserOrE2eRuntimeExecuted: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    residualFollowups:
+      - monopoly_scanned_pdf_ocr_needed_before_runtime_rag
+      - runtime_rag_logistics_coverage_label_cleanup
+      - knowledge_node_candidates_need_taxonomy_review_before_canonical_import
+    nextRecommendedTaskId: marketing-monopoly-logistics-provider-rerun-2026-07-02
 learnerEmployeeAiVisibleResultClosureRepair20260702:
   taskId: learner-employee-ai-visible-result-closure-repair-2026-07-02
   phase: learner-employee-ai-visible-result-closure-repair-2026-07-02
@@ -13979,46 +14125,38 @@ repository:
   lastKnownMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
   lastKnownOriginMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
 currentTask:
-  id: learner-employee-ai-visible-result-closure-repair-2026-07-02
+  id: owner-preview-resource-pack-addendum-2026-07-02
   status: closed
-  result: completed_learner_employee_ai_visible_result_closure_repair
-  taskKind: focused_source_test_repair
-  executionProfile: local_source_test_repair_only
-  validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
+  result: completed_owner_preview_resource_pack_addendum
+  taskKind: local_private_resource_pack_addendum
+  executionProfile: local_private_fixture_pack_copy_convert_inventory_dry_run
+  validationPolicy: focused_unit_prettier_diff_module_run_v2
   moduleRunVersion: 2
   priority: p1
-  branch: codex/learner-employee-ai-visible-result-closure-repair
-  humanApproval: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
-  claimedAt: "2026-07-02T04:20:00-07:00"
-  plannedAt: "2026-07-02T04:20:00-07:00"
-  implementedAt: "2026-07-02T04:35:00-07:00"
-  validatedAt: "2026-07-02T04:40:00-07:00"
-  reviewedAt: "2026-07-02T04:40:00-07:00"
-  closedAt: "2026-07-02T04:40:00-07:00"
+  branch: codex/owner-preview-resource-pack-addendum
+  humanApproval: current_user_approved_resource_pack_addendum_execution_2026_07_02
+  claimedAt: "2026-07-02T05:10:00-07:00"
+  plannedAt: "2026-07-02T05:10:00-07:00"
+  implementedAt: "2026-07-02T05:30:00-07:00"
+  validatedAt: "2026-07-02T05:40:00-07:00"
+  reviewedAt: "2026-07-02T05:45:00-07:00"
+  closedAt: "2026-07-02T05:45:00-07:00"
   dependsOn:
-    - marketing-monopoly-provider-rerun-2026-07-02
-  sourceStory: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
-  targetClosureItem: close personal advanced and organization advanced employee AI question and paper submit into visible current generated result
-  behaviorBoundary: local_source_test_repair_only_no_provider_call_no_env_no_db_no_resource_import_no_schema_dependency_deploy_release_claim
-  evidenceMode: task_id_status_label_command_result_test_count_redacted_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+    - learner-employee-ai-visible-result-closure-repair-2026-07-02
+  sourceStory: current_user_approved_integrating_new_textbook_assessment_point_materials_into_owner_preview_fixture_pack_2026_07_02
+  targetClosureItem: augment owner preview fixture pack with marketing monopoly logistics textbook and assessment-point sources for later AI generation validation
+  behaviorBoundary: local_private_fixture_pack_only_no_db_execute_no_provider_call_no_env_secret_no_schema_dependency_deploy_release_claim
+  evidenceMode: task_id_status_label_file_count_profession_level_subject_coverage_extractability_summary_command_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_material_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
-    - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
-    - src/server/services/personal-ai-generation-request-route.ts
-    - src/server/services/personal-ai-generation-local-browser-experience-service.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.ts
-    - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
-    - src/app/api/v1/personal-ai-generation-requests/route.ts
-    - src/server/services/personal-ai-generation-request-route.test.ts
-    - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
-    - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+    - D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated\**
   blockedFiles:
     - .env*
     - package.json
@@ -14033,14 +14171,17 @@ currentTask:
     - playwright-report/**
     - test-results/**
     - .next/**
-    - D:/tiku-local-private/**
-    - D:\tiku-local-private\**
   capabilities:
-    localSourceChange: approved
-    focusedUnitTest: approved
+    localPrivateFixturePackReadWrite: approved
+    rawfilesReadOnly: approved
+    documentMetadataExtraction: approved_no_raw_content_evidence
+    pdfTextExtractabilityProbe: approved_no_raw_content_evidence
+    localResourceImportDryRun: approved
+    localRuntimeRagImportDryRun: approved
+    localResourceImportExecute: blocked
+    localRuntimeRagImportExecute: approved_after_dry_run_pass
     databaseConnection: blocked
     databaseMutation: blocked
-    resourceImport: blocked
     providerCall: blocked
     envSecretAccess: blocked
     dependencyIntroduction: blocked
@@ -14053,25 +14194,39 @@ currentTask:
     pr: blocked
     costCalibrationGate: blocked
   closeoutSummary:
-    status: pass
-    focusedUnitTests: pass_4_files_39_tests
-    lint: pass
-    typecheck: pass
+    status: pass_with_residual_followups
+    privateFixturePackUpdated: true
+    addedInventoryRowCount: 31
+    generatedMarkdownFileCount: 22
+    copiedOrConvertedDocxFileCount: 3
+    knowledgeNodeCandidateCount: 2973
+    skippedSourceCount: 2
+    resourcePackageDryRun: pass_usable
+    runtimeRagDryRun: pass
+    runtimeRagExecute: pass_local_catalog_only
+    runtimeRagImportedResourceCount: 43
+    runtimeRagImportedChunkCount: 519
+    runtimeCoverage:
+      logisticsAllRagReady: 11
+      marketingAllRagReady: 28
+      monopolyAllRagReady: 4
+    focusedUnitTests: pass_2_files_10_tests
     scopedPrettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
+    databaseConnectionOrMutationExecuted: false
+    resourcePackageDbImportExecuted: false
     providerCallExecuted: false
     envFileReadOrModified: false
-    databaseConnectionOrMutationExecuted: false
-    resourceImportExecuted: false
+    packageOrLockfileChanged: false
     schemaMigrationSeedExecuted: false
-    dependencyPackageLockfileChanged: false
-    e2eExecuted: false
+    browserOrE2eRuntimeExecuted: false
     stagingProdDeployExecuted: false
+    costCalibrationExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    nextRecommendedTaskId: monopoly-ai-paper-runtime-rag-coverage-repair-2026-07-02
+    nextRecommendedTaskId: marketing-monopoly-logistics-provider-rerun-2026-07-02
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:
   taskId: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
   phase: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
