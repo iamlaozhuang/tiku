@@ -126,6 +126,7 @@ async function listDraftResults(
   query: PersonalAiGenerationResultHistoryQuery,
 ): Promise<PersonalAiGenerationResultDto[]> {
   return repository.listDraftResults({
+    ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
     taskType: query.taskType,
     page: query.page,
@@ -140,6 +141,7 @@ async function findDraftResultDetail(
   query: PersonalAiGenerationResultDetailQuery,
 ): Promise<PersonalAiGenerationResultDto | null> {
   const draftResults = await listDraftResults(repository, {
+    ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
   });
 
@@ -174,6 +176,7 @@ export function createPersonalAiGenerationResultHistoryService(
           repository.countDraftResults === undefined
             ? results.length
             : await repository.countDraftResults({
+                ownerType: normalizedQuery.value.ownerType,
                 ownerPublicId: normalizedQuery.value.ownerPublicId,
                 taskType: normalizedQuery.value.taskType,
               });

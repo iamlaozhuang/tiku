@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
+import type { AiGenerationTaskRequestOwnerType } from "../models/ai-generation-task-request";
 import type { AiFuncType, EvidenceStatus } from "../models/ai-rag";
 import {
   mapPersonalAiGenerationRequestRowToHistoryDto,
@@ -21,7 +22,13 @@ export type PersonalAiGenerationTaskType = Exclude<
   "organization_training_generation"
 >;
 
+export type PersonalAiGenerationRequestOwnerType = Extract<
+  AiGenerationTaskRequestOwnerType,
+  "personal" | "organization"
+>;
+
 export type ListPersonalAiGenerationRequestHistoryQuery = {
+  ownerType?: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   taskType?: PersonalAiGenerationTaskType;
   page?: number;
@@ -37,8 +44,10 @@ export type CreatePersonalAiGenerationRequestInput = {
   aiFuncType: Exclude<AiFuncType, "scoring">;
   authorizationPublicId: string;
   actorPublicId: string;
+  ownerType: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   organizationPublicId: string | null;
+  quotaOwnerType: PersonalAiGenerationRequestOwnerType;
   quotaOwnerPublicId: string;
   effectiveEdition: string;
   questionPublicId: string;
@@ -76,6 +85,7 @@ export type PersonalAiGenerationRequestRepository = {
 
 export type PersonalAiGenerationRequestTaskGateway = {
   listRequestRows(query: {
+    ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     taskType?: PersonalAiGenerationTaskType;
     page: number;
@@ -84,10 +94,12 @@ export type PersonalAiGenerationRequestTaskGateway = {
     offset: number;
   }): Promise<PersonalAiGenerationRequestPersistenceRow[]>;
   countRequestRows?(query: {
+    ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     taskType?: PersonalAiGenerationTaskType;
   }): Promise<number>;
   findRequestByIdempotencyKey(query: {
+    ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     idempotencyKeyHash: string;
   }): Promise<PersonalAiGenerationRequestPersistenceRow | null>;
@@ -116,11 +128,12 @@ const personalAiGenerationRequestSelection = {
 };
 
 export function createPersonalAiGenerationRequestHistoryCondition(query: {
+  ownerType?: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   taskType?: PersonalAiGenerationTaskType;
 }): SQL {
   return and(
-    eq(aiGenerationTask.owner_type, "personal"),
+    eq(aiGenerationTask.owner_type, query.ownerType ?? "personal"),
     eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
     query.taskType === undefined
       ? inArray(aiGenerationTask.task_type, PERSONAL_AI_GENERATION_TASK_TYPES)
@@ -129,11 +142,12 @@ export function createPersonalAiGenerationRequestHistoryCondition(query: {
 }
 
 export function createPersonalAiGenerationRequestIdempotencyCondition(query: {
+  ownerType?: PersonalAiGenerationRequestOwnerType;
   ownerPublicId: string;
   idempotencyKeyHash: string;
 }): SQL {
   return and(
-    eq(aiGenerationTask.owner_type, "personal"),
+    eq(aiGenerationTask.owner_type, query.ownerType ?? "personal"),
     eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
     eq(aiGenerationTask.idempotency_key_hash, query.idempotencyKeyHash),
     inArray(aiGenerationTask.task_type, PERSONAL_AI_GENERATION_TASK_TYPES),
@@ -150,6 +164,7 @@ export function createPersonalAiGenerationRequestRepository(
         query.pageSize ?? query.limit,
       );
       const rows = await gateway.listRequestRows({
+        ownerType: query.ownerType,
         ownerPublicId: query.ownerPublicId,
         taskType: query.taskType,
         page,
@@ -164,6 +179,7 @@ export function createPersonalAiGenerationRequestRepository(
     },
     async createOrReuseRequest(input) {
       const existingRow = await gateway.findRequestByIdempotencyKey({
+        ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
         idempotencyKeyHash: input.idempotencyKeyHash,
       });
@@ -182,6 +198,7 @@ export function createPersonalAiGenerationRequestRepository(
       const resolvedRow =
         insertedRow ??
         (await gateway.findRequestByIdempotencyKey({
+          ownerType: input.ownerType,
           ownerPublicId: input.ownerPublicId,
           idempotencyKeyHash: input.idempotencyKeyHash,
         }));
@@ -200,6 +217,7 @@ export function createPersonalAiGenerationRequestRepository(
         ? undefined
         : async (query) =>
             gateway.countRequestRows?.({
+              ownerType: query.ownerType,
               ownerPublicId: query.ownerPublicId,
               taskType: query.taskType,
             }) ?? 0,
@@ -235,6 +253,7 @@ export function createPostgresPersonalAiGenerationRequestRepository(
         .from(aiGenerationTask)
         .where(
           createPersonalAiGenerationRequestHistoryCondition({
+            ownerType: query.ownerType,
             ownerPublicId: query.ownerPublicId,
             taskType: query.taskType,
           }),
@@ -254,6 +273,7 @@ export function createPostgresPersonalAiGenerationRequestRepository(
         .from(aiGenerationTask)
         .where(
           createPersonalAiGenerationRequestHistoryCondition({
+            ownerType: query.ownerType,
             ownerPublicId: query.ownerPublicId,
             taskType: query.taskType,
           }),
@@ -276,10 +296,10 @@ export function createPostgresPersonalAiGenerationRequestRepository(
           ai_func_type: input.aiFuncType,
           authorization_public_id: input.authorizationPublicId,
           actor_public_id: input.actorPublicId,
-          owner_type: "personal",
+          owner_type: input.ownerType,
           owner_public_id: input.ownerPublicId,
           organization_public_id: input.organizationPublicId,
-          quota_owner_type: "personal",
+          quota_owner_type: input.quotaOwnerType,
           quota_owner_public_id: input.quotaOwnerPublicId,
           effective_edition: input.effectiveEdition,
           question_public_id: input.questionPublicId,
@@ -319,6 +339,7 @@ export function createPostgresPersonalAiGenerationRequestRepository(
 async function findRequestByIdempotencyKey(
   database: RuntimeDatabase,
   query: {
+    ownerType?: PersonalAiGenerationRequestOwnerType;
     ownerPublicId: string;
     idempotencyKeyHash: string;
   },

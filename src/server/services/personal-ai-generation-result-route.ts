@@ -5,6 +5,7 @@ import {
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { AuthContextDto } from "../contracts/auth-contract";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type { PersonalAiGenerationResultOwnerType } from "../models/personal-ai-generation-result";
 import type { SessionService } from "./session-service";
 import { createPersonalAiGenerationResultHistoryService } from "./personal-ai-generation-result-history-service";
 import {
@@ -27,6 +28,11 @@ export type PersonalAiGenerationResultRouteDependencies = {
     PersonalAiGenerationResultRepository,
     "listDraftResults"
   >;
+};
+
+type PersonalAiGenerationResultOwnerScope = {
+  ownerType: PersonalAiGenerationResultOwnerType;
+  ownerPublicId: string;
 };
 
 type ResultDetailRouteContext = {
@@ -73,6 +79,25 @@ function isPersonalAiGenerationResultUserContext(
   return "userPublicId" in value;
 }
 
+function resolvePersonalAiGenerationResultOwnerScope(
+  userContext: PersonalAiGenerationResultUserContext,
+): PersonalAiGenerationResultOwnerScope {
+  if (
+    userContext.userType === "employee" &&
+    userContext.organizationPublicId !== null
+  ) {
+    return {
+      ownerType: "organization",
+      ownerPublicId: userContext.organizationPublicId,
+    };
+  }
+
+  return {
+    ownerType: "personal",
+    ownerPublicId: userContext.userPublicId,
+  };
+}
+
 function readPositiveIntegerInput(
   searchParams: URLSearchParams,
   name: string,
@@ -116,9 +141,11 @@ function createResultHistoryQuery(
       : typeof limit === "number"
         ? limit
         : 10;
+  const ownerScope = resolvePersonalAiGenerationResultOwnerScope(userContext);
 
   return {
-    ownerPublicId: userContext.userPublicId,
+    ownerType: ownerScope.ownerType,
+    ownerPublicId: ownerScope.ownerPublicId,
     taskType: readTaskTypeInput(searchParams),
     page,
     pageSize,
@@ -135,9 +162,11 @@ async function createResultDetailQuery(
   userContext: PersonalAiGenerationResultUserContext,
 ) {
   const { publicId } = await context.params;
+  const ownerScope = resolvePersonalAiGenerationResultOwnerScope(userContext);
 
   return {
-    ownerPublicId: userContext.userPublicId,
+    ownerType: ownerScope.ownerType,
+    ownerPublicId: ownerScope.ownerPublicId,
     resultPublicId: publicId,
   };
 }

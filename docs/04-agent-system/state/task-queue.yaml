@@ -358,6 +358,126 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: learner-employee-ai-history-closure-2026-07-02
+    title: Learner and employee AI generation history closure
+    phase: learner-employee-ai-history-closure-2026-07-02
+    sourceStory: current_user_approved_repair_for_learner_employee_ai_history_closure_residual_2026_07_02
+    humanApprovalBoundary: current_user_approved_plan_then_execute_and_closeout_2026_07_02
+    targetClosureItem: close learner and employee AI generation request/result history after local visible Provider submit
+    behaviorBoundary: local_source_test_repair_only_for_personal_employee_ai_request_result_history_and_redacted_materialization_no_resource_import_no_provider_call_no_env_schema_dependency_deploy
+    taskKind: focused_source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: completed_learner_employee_ai_history_closure
+    priority: p1
+    claimedAt: "2026-07-02T02:20:00-07:00"
+    plannedAt: "2026-07-02T02:20:00-07:00"
+    implementedAt: "2026-07-02T02:35:00-07:00"
+    validatedAt: "2026-07-02T02:40:00-07:00"
+    reviewedAt: "2026-07-02T02:40:00-07:00"
+    closedAt: "2026-07-02T02:40:00-07:00"
+    dependsOn:
+      - marketing-monopoly-provider-acceptance-2026-07-02
+    branch: codex/learner-employee-ai-history-closure
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
+      - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
+      - src/server/models/personal-ai-generation-result-history.ts
+      - src/server/models/personal-ai-generation-result.ts
+      - src/server/validators/personal-ai-generation-result-history.ts
+      - src/server/validators/personal-ai-generation-result-persistence.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/repositories/personal-ai-generation-result-repository.test.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_exact_history_closure_scope_only
+      focusedUnitTest: approved
+      localDevServer: blocked
+      localhostBrowser: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      resourceImport: blocked
+      logisticsResourceImport: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md src/server/models/personal-ai-generation-result-history.ts src/server/models/personal-ai-generation-result.ts src/server/validators/personal-ai-generation-result-history.ts src/server/validators/personal-ai-generation-result-persistence.ts src/server/repositories/personal-ai-generation-request-repository.ts src/server/repositories/personal-ai-generation-result-repository.ts src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-result-route.ts src/server/services/personal-ai-generation-result-history-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts src/server/services/personal-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-employee-ai-history-closure-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-employee-ai-history-closure-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_learner_employee_ai_history_closure
+      redTestObserved: true
+      focusedUnitTests: pass_5_files_56_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass_after_allowed_files_scope_materialization
+      moduleRunV2PrePushReadiness: pass_after_closeout_state_update
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      resourceImportExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
   - id: marketing-monopoly-provider-acceptance-2026-07-02
     title: Marketing and monopoly resource coverage plus fuller 8-role Provider acceptance
     phase: marketing-monopoly-provider-acceptance-2026-07-02

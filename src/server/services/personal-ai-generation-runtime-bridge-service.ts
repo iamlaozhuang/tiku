@@ -176,6 +176,15 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       requestFlow,
       providerExecutionControl,
     );
+  const resultMaterializationSummary =
+    resultMaterializationControl !== undefined &&
+    executionOutcome.providerCallExecuted &&
+    executionOutcome.executionSummary.resultStatus === "pass"
+      ? await materializeRouteIntegratedRedactedResult(
+          requestFlow,
+          resultMaterializationControl,
+        )
+      : createDefaultBlockedRouteIntegratedResultMaterializationSummary();
 
   return {
     bridgeStatus: mapRuntimeBridgeOutcomeToStatus(executionOutcome),
@@ -195,8 +204,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerMetadata: qwenRouteIntegratedProviderMetadata,
     redactionProbe: createRuntimeBridgeRedactionProbe(requestFlow),
     providerExecutionSummary: executionOutcome.executionSummary,
-    resultMaterializationSummary:
-      createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
+    resultMaterializationSummary,
     visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
     blockedReasons: executionOutcome.providerCallExecuted
       ? []

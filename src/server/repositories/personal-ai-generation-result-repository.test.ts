@@ -246,6 +246,7 @@ describe("personal AI generation result repository", () => {
     const result = await repository.createOrReuseDraftResult({
       resultPublicId: "personal_ai_result_public_new",
       taskPublicId: "ai_generation_task_public_existing",
+      ownerType: "personal",
       ownerPublicId: "student_public_173",
       taskType: "ai_question_generation",
       contentRedactedSnapshot: { redactionStatus: "redacted" },
@@ -295,6 +296,7 @@ describe("personal AI generation result repository", () => {
     const result = await repository.createOrReuseDraftResult({
       resultPublicId: "personal_ai_result_public_created",
       taskPublicId: "ai_generation_task_public_created",
+      ownerType: "personal",
       ownerPublicId: "student_public_174",
       taskType: "ai_question_generation",
       contentRedactedSnapshot: {
@@ -311,6 +313,7 @@ describe("personal AI generation result repository", () => {
     });
 
     expect(findTaskByPublicId).toHaveBeenCalledWith({
+      ownerType: "personal",
       ownerPublicId: "student_public_174",
       taskPublicId: "ai_generation_task_public_created",
     });
@@ -323,6 +326,7 @@ describe("personal AI generation result repository", () => {
       }),
     );
     expect(attachResultToTask).toHaveBeenCalledWith({
+      ownerType: "personal",
       ownerPublicId: "student_public_174",
       taskPublicId: "ai_generation_task_public_created",
       resultPublicId: "personal_ai_result_public_created",

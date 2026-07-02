@@ -1,4 +1,5 @@
 import type { AiGenerationTaskType } from "./ai-generation-task";
+import type { AiGenerationTaskRequestOwnerType } from "./ai-generation-task-request";
 import type { EvidenceStatus, RedactedJsonObject } from "./ai-rag";
 
 export const personalAiGenerationResultStatusValues = [
@@ -14,6 +15,11 @@ export type PersonalAiGenerationResultTaskType = Extract<
   "ai_question_generation" | "ai_paper_generation"
 >;
 
+export type PersonalAiGenerationResultOwnerType = Extract<
+  AiGenerationTaskRequestOwnerType,
+  "personal" | "organization"
+>;
+
 export type PersonalAiGenerationResultContentVisibility = "redacted_snapshot";
 
 export type PersonalAiGenerationResultRedactionStatus = "redacted";
@@ -23,6 +29,7 @@ export type PersonalAiGenerationResultFormalAdoptionStatus = "blocked";
 export type PersonalAiGenerationResultPersistenceInput = {
   resultPublicId: string;
   taskPublicId: string;
+  ownerType: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
   taskType: PersonalAiGenerationResultTaskType;
   contentRedactedSnapshot: RedactedJsonObject;

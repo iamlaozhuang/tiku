@@ -1,5 +1,6 @@
 import type {
   PersonalAiGenerationResultContentVisibility,
+  PersonalAiGenerationResultOwnerType,
   PersonalAiGenerationResultRedactionStatus,
   PersonalAiGenerationResultTaskType,
 } from "./personal-ai-generation-result";
@@ -11,6 +12,7 @@ export type PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus =
   "blocked_without_follow_up_task";
 
 export type PersonalAiGenerationResultHistoryQuery = {
+  ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
   taskType?: PersonalAiGenerationResultTaskType;
   page?: number;
@@ -20,6 +22,7 @@ export type PersonalAiGenerationResultHistoryQuery = {
 };
 
 export type PersonalAiGenerationResultDetailQuery = {
+  ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
   resultPublicId: string;
 };

@@ -10,6 +10,7 @@ import type {
   PersonalAiGenerationRequestPersistenceResult,
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
+import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { SessionService } from "./session-service";
 
 const userContext = {
@@ -17,6 +18,37 @@ const userContext = {
   userType: "personal",
   organizationPublicId: null,
 } as const;
+
+const employeeUserContext = {
+  userPublicId: "employee_session_user_public_123",
+  userType: "employee",
+  organizationPublicId: "organization_public_123",
+} as const;
+
+const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    generationParameters: {
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      knowledgeNode: "synthetic knowledge node",
+      questionType: "single_choice",
+      questionCount: 10,
+      difficulty: "medium",
+      learningObjective: "synthetic learning goal",
+    },
+    evidenceStatus: "sufficient",
+    citationCount: 1,
+    citations: [
+      {
+        resourceTitle: "synthetic resource title",
+        headingPath: ["synthetic heading"],
+        chunkIndex: 0,
+        chunkText: "synthetic bounded grounding evidence",
+        score: 0.91,
+      },
+    ],
+  };
 
 function createBaseBody() {
   const omittedTextA = ["OMITTED", "A"].join("-");
@@ -359,6 +391,66 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it("persists employee local browser POST metadata under the organization owner", async () => {
+    const requestedAt = new Date("2026-06-12T18:30:00.000Z");
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        now: () => requestedAt,
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_public_123",
+        authorizationSource: "personal_auth",
+        ownerType: "personal",
+        ownerPublicId: "stale_personal_owner_public_999",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "stale_quota_owner_public_999",
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        requestFlow: {
+          taskRequest: {
+            authorizationSource: "org_auth",
+            actorPublicId: employeeUserContext.userPublicId,
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+          },
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toEqual([
+      expect.objectContaining({
+        authorizationPublicId: "org_auth_public_123",
+        actorPublicId: employeeUserContext.userPublicId,
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+        requestedAt,
+      }),
+    ]);
+    expect(serializedPayload).not.toContain("stale_personal_owner_public_999");
+    expect(serializedPayload).not.toContain("stale_quota_owner_public_999");
+  });
+
   it("merges resolver user context and returns a redacted local request contract", async () => {
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
@@ -459,6 +551,7 @@ describe("personal AI generation request route handlers", () => {
     });
     expect(requestRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: undefined,
         page: 1,
@@ -469,6 +562,51 @@ describe("personal AI generation request route handlers", () => {
     ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
     expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("queries employee request history with the organization owner scope", async () => {
+    const staleQueryUserPublicId = "query_stale_employee_user_public_999";
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(
+      createGetRequest(
+        `?userPublicId=${staleQueryUserPublicId}&taskType=ai_question_generation&page=2&pageSize=5`,
+      ),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "requestedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(requestRepository.calls).toEqual([
+      {
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        taskType: "ai_question_generation",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(serializedPayload).not.toContain(staleQueryUserPublicId);
   });
 
   it("passes task type and pagination query to personal request history repository", async () => {
@@ -487,6 +625,7 @@ describe("personal AI generation request route handlers", () => {
 
     expect(requestRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: "ai_paper_generation",
         page: 2,
@@ -563,6 +702,7 @@ describe("personal AI generation request route handlers", () => {
     });
     expect(requestRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: undefined,
         page: 1,
@@ -764,6 +904,7 @@ describe("personal AI generation request route handlers", () => {
             maxRetries: 0,
             maxOutputTokens: 220,
             timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
             readProviderCredential: async () => "synthetic-test-credential",
             executeProviderRequest: async (executionInput) => {
               providerExecutorCalls.push(executionInput);
@@ -1016,8 +1157,10 @@ describe("personal AI generation request route handlers", () => {
         aiFuncType: "explanation",
         authorizationPublicId: "personal_auth_public_123",
         actorPublicId: userContext.userPublicId,
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         organizationPublicId: null,
+        quotaOwnerType: "personal",
         quotaOwnerPublicId: userContext.userPublicId,
         effectiveEdition: "advanced",
         questionPublicId: "question_public_123",

@@ -2,7 +2,10 @@ import type {
   PersonalAiGenerationResultDetailQuery,
   PersonalAiGenerationResultHistoryQuery,
 } from "../models/personal-ai-generation-result-history";
-import type { PersonalAiGenerationResultTaskType } from "../models/personal-ai-generation-result";
+import type {
+  PersonalAiGenerationResultOwnerType,
+  PersonalAiGenerationResultTaskType,
+} from "../models/personal-ai-generation-result";
 
 export type PersonalAiGenerationResultHistoryValidationResult =
   | {
@@ -75,6 +78,16 @@ function normalizeTaskType(
     : null;
 }
 
+function normalizeOwnerType(
+  value: unknown,
+): PersonalAiGenerationResultOwnerType | undefined | null {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  return value === "personal" || value === "organization" ? value : null;
+}
+
 export function normalizePersonalAiGenerationResultHistoryQuery(
   input: unknown,
 ): PersonalAiGenerationResultHistoryValidationResult {
@@ -86,6 +99,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   }
 
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const ownerType = normalizeOwnerType(input.ownerType);
   const taskType = normalizeTaskType(input.taskType);
   const page = normalizeLimit(input.page);
   const pageSize = normalizeLimit(input.pageSize);
@@ -94,6 +108,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
 
   if (
     ownerPublicId === null ||
+    ownerType === null ||
     taskType === null ||
     page === null ||
     pageSize === null ||
@@ -109,6 +124,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   return {
     success: true,
     value: {
+      ownerType,
       ownerPublicId,
       taskType,
       page,
@@ -130,9 +146,10 @@ export function normalizePersonalAiGenerationResultDetailQuery(
   }
 
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const ownerType = normalizeOwnerType(input.ownerType);
   const resultPublicId = normalizeRequiredText(input.resultPublicId);
 
-  if (ownerPublicId === null || resultPublicId === null) {
+  if (ownerPublicId === null || ownerType === null || resultPublicId === null) {
     return {
       success: false,
       message: INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_MESSAGE,
@@ -142,6 +159,7 @@ export function normalizePersonalAiGenerationResultDetailQuery(
   return {
     success: true,
     value: {
+      ownerType,
       ownerPublicId,
       resultPublicId,
     },

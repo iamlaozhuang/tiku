@@ -15,6 +15,12 @@ const userContext = {
   organizationPublicId: null,
 } as const;
 
+const employeeUserContext = {
+  userPublicId: "employee_result_user_public_123",
+  userType: "employee",
+  organizationPublicId: "organization_public_123",
+} as const;
+
 function createGetRequest(query = ""): Request {
   return new Request(
     `http://localhost/api/v1/personal-ai-generation-results${query}`,
@@ -379,6 +385,7 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(resultRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,
@@ -390,6 +397,49 @@ describe("personal AI generation result route handlers", () => {
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
     expect(serializedPayload).not.toMatch(/"id":/);
     expect(serializedPayload).not.toContain(omittedText);
+  });
+
+  it("queries employee result history with the organization owner scope", async () => {
+    const staleQueryUserPublicId = "query_stale_employee_result_public_999";
+    const resultRepository = createResultRepository();
+    const { collection } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultHistoryRouteHandler(collection)(
+      createGetRequest(
+        `?userPublicId=${staleQueryUserPublicId}&taskType=ai_paper_generation&page=2&pageSize=5`,
+      ),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 2,
+        pageSize: 5,
+        total: 0,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(resultRepository.calls).toEqual([
+      {
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        taskType: "ai_paper_generation",
+        page: 2,
+        pageSize: 5,
+        limit: 5,
+        offset: 5,
+      },
+    ]);
+    expect(serializedPayload).not.toContain(staleQueryUserPublicId);
   });
 
   it("passes task type and pagination query to personal result history repository", async () => {
@@ -408,6 +458,7 @@ describe("personal AI generation result route handlers", () => {
 
     expect(resultRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: "ai_paper_generation",
         page: 2,
@@ -547,6 +598,7 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(resultRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,
@@ -559,6 +611,51 @@ describe("personal AI generation result route handlers", () => {
     expect(serializedPayload).not.toMatch(/"id":/);
     expect(serializedPayload).not.toContain(generatedContentKey);
     expect(serializedPayload).not.toContain(omittedGeneratedText);
+  });
+
+  it("queries employee result detail with the organization owner scope", async () => {
+    const resultRepository = createResultRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_employee_detail",
+      }),
+    ]);
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => employeeUserContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest("personal_ai_result_public_employee_detail"),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_employee_detail",
+        }),
+      },
+    );
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        result: {
+          resultPublicId: "personal_ai_result_public_employee_detail",
+        },
+      },
+    });
+    expect(resultRepository.calls).toEqual([
+      {
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        taskType: undefined,
+        page: undefined,
+        pageSize: undefined,
+        limit: undefined,
+        offset: undefined,
+      },
+    ]);
   });
 
   it("rejects non-personal sessions from the personal result detail path", async () => {
@@ -611,6 +708,7 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(resultRepository.calls).toEqual([
       {
+        ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,

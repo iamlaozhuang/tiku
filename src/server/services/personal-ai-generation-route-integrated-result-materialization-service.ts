@@ -6,6 +6,7 @@ import type { EvidenceStatus, RedactedJsonObject } from "../models/ai-rag";
 import {
   isPersonalAiGenerationResultTaskType,
   type PersonalAiGenerationResultPersistenceInput,
+  type PersonalAiGenerationResultOwnerType,
 } from "../models/personal-ai-generation-result";
 
 export type PersonalAiGenerationRouteIntegratedResultMaterializationControl = {
@@ -66,9 +67,18 @@ export async function materializeRouteIntegratedRedactedResult(
     return createBlockedMaterializationSummary("unsupported_task_type");
   }
 
+  const ownerType = resolvePersonalAiGenerationResultOwnerType(
+    requestFlow.taskRequest.ownerType,
+  );
+
+  if (ownerType === null) {
+    return createBlockedMaterializationSummary("unsupported_task_type");
+  }
+
   const persistenceInput: PersonalAiGenerationResultPersistenceInput = {
     resultPublicId: control.resultPublicId,
     taskPublicId: requestFlow.resultReference.taskPublicId,
+    ownerType,
     ownerPublicId: requestFlow.taskRequest.ownerPublicId,
     taskType: requestFlow.resultReference.taskType,
     contentRedactedSnapshot: createContentRedactedSnapshot(
@@ -154,6 +164,14 @@ function createBlockedMaterializationSummary(
     ),
     materializationStatus: "blocked",
   };
+}
+
+function resolvePersonalAiGenerationResultOwnerType(
+  ownerType: string,
+): PersonalAiGenerationResultOwnerType | null {
+  return ownerType === "personal" || ownerType === "organization"
+    ? ownerType
+    : null;
 }
 
 function createContentRedactedSnapshot(

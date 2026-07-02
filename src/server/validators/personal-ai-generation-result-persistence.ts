@@ -6,6 +6,7 @@ import { evidenceStatusValues, type EvidenceStatus } from "../models/ai-rag";
 import {
   isPersonalAiGenerationResultTaskType,
   type PersonalAiGenerationResultPersistenceInput,
+  type PersonalAiGenerationResultOwnerType,
   type PersonalAiGenerationResultTaskType,
 } from "../models/personal-ai-generation-result";
 
@@ -59,6 +60,18 @@ function normalizeTaskType(
   const taskType = text as AiGenerationTaskType;
 
   return isPersonalAiGenerationResultTaskType(taskType) ? taskType : null;
+}
+
+function normalizeOwnerType(
+  value: unknown,
+): PersonalAiGenerationResultOwnerType | null {
+  if (value === null || value === undefined) {
+    return "personal";
+  }
+
+  const text = normalizeRequiredText(value);
+
+  return text === "personal" || text === "organization" ? text : null;
 }
 
 function normalizeEvidenceStatus(value: unknown): EvidenceStatus | null {
@@ -117,6 +130,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
 
   const resultPublicId = normalizeRequiredText(input.resultPublicId);
   const taskPublicId = normalizeRequiredText(input.taskPublicId);
+  const ownerType = normalizeOwnerType(input.ownerType);
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
   const taskType = normalizeTaskType(input.taskType);
   const contentRedactedSnapshot = normalizeRedactedSnapshot(
@@ -136,6 +150,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
   if (
     resultPublicId === null ||
     taskPublicId === null ||
+    ownerType === null ||
     ownerPublicId === null ||
     taskType === null ||
     contentRedactedSnapshot === null ||
@@ -156,6 +171,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
     value: {
       resultPublicId,
       taskPublicId,
+      ownerType,
       ownerPublicId,
       taskType,
       contentRedactedSnapshot,

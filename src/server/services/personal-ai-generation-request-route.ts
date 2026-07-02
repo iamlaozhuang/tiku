@@ -8,6 +8,7 @@ import { getRequestAuthorization } from "../auth/session-cookie";
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
 import type {
   CreatePersonalAiGenerationRequestInput,
+  PersonalAiGenerationRequestOwnerType,
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
@@ -39,6 +40,11 @@ type PersonalAiGenerationRequestRouteRepository = Pick<
       "countRequestHistory" | "createOrReuseRequest"
     >
   >;
+
+type PersonalAiGenerationRequestOwnerScope = {
+  ownerType: PersonalAiGenerationRequestOwnerType;
+  ownerPublicId: string;
+};
 
 export type PersonalAiGenerationRequestRouteDependencies = {
   requestRepository?: PersonalAiGenerationRequestRouteRepository;
@@ -90,6 +96,25 @@ function isPersonalAiGenerationRequestUserContext(
   value: PersonalAiGenerationRequestUserContext | ApiResponse<null>,
 ): value is PersonalAiGenerationRequestUserContext {
   return "userPublicId" in value;
+}
+
+function resolvePersonalAiGenerationRequestOwnerScope(
+  userContext: PersonalAiGenerationRequestUserContext,
+): PersonalAiGenerationRequestOwnerScope {
+  if (
+    userContext.userType === "employee" &&
+    userContext.organizationPublicId !== null
+  ) {
+    return {
+      ownerType: "organization",
+      ownerPublicId: userContext.organizationPublicId,
+    };
+  }
+
+  return {
+    ownerType: "personal",
+    ownerPublicId: userContext.userPublicId,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -214,6 +239,42 @@ function isEvidenceStatus(
   return value === "sufficient" || value === "weak" || value === "none";
 }
 
+function isPersonalAiGenerationRequestOwnerType(
+  value: string | null,
+): value is PersonalAiGenerationRequestOwnerType {
+  return value === "personal" || value === "organization";
+}
+
+function matchesPersistentAuthorizationBoundary(input: {
+  authorizationSource: string;
+  ownerType: PersonalAiGenerationRequestOwnerType;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
+  quotaOwnerType: PersonalAiGenerationRequestOwnerType;
+  quotaOwnerPublicId: string;
+}): boolean {
+  if (input.authorizationSource === "personal_auth") {
+    return (
+      input.ownerType === "personal" &&
+      input.organizationPublicId === null &&
+      input.quotaOwnerType === "personal" &&
+      input.quotaOwnerPublicId === input.ownerPublicId
+    );
+  }
+
+  if (input.authorizationSource !== "org_auth") {
+    return false;
+  }
+
+  return (
+    input.ownerType === "organization" &&
+    input.organizationPublicId !== null &&
+    input.ownerPublicId === input.organizationPublicId &&
+    input.quotaOwnerType === "organization" &&
+    input.quotaOwnerPublicId === input.organizationPublicId
+  );
+}
+
 function createRequestInputWithUserContext(
   input: unknown,
   userContext: PersonalAiGenerationRequestUserContext,
@@ -304,9 +365,9 @@ function createPersistentRequestInput(
     authorizationPublicId === null ||
     actorPublicId === null ||
     authorizationSource === null ||
-    ownerType === null ||
+    !isPersonalAiGenerationRequestOwnerType(ownerType) ||
     ownerPublicId === null ||
-    quotaOwnerType === null ||
+    !isPersonalAiGenerationRequestOwnerType(quotaOwnerType) ||
     quotaOwnerPublicId === null ||
     effectiveEdition === null ||
     questionPublicId === null ||
@@ -322,10 +383,14 @@ function createPersistentRequestInput(
   }
 
   if (
-    authorizationSource !== "personal_auth" ||
-    ownerType !== "personal" ||
-    organizationPublicId !== null ||
-    quotaOwnerType !== "personal"
+    !matchesPersistentAuthorizationBoundary({
+      authorizationSource,
+      ownerType,
+      ownerPublicId,
+      organizationPublicId,
+      quotaOwnerType,
+      quotaOwnerPublicId,
+    })
   ) {
     return null;
   }
@@ -337,8 +402,10 @@ function createPersistentRequestInput(
     aiFuncType,
     authorizationPublicId,
     actorPublicId,
+    ownerType,
     ownerPublicId,
     organizationPublicId,
+    quotaOwnerType,
     quotaOwnerPublicId,
     effectiveEdition,
     questionPublicId,
@@ -472,8 +539,11 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               );
             }
 
+            const ownerScope =
+              resolvePersonalAiGenerationRequestOwnerScope(userContext);
             const history = await requestRepository.listRequestHistory({
-              ownerPublicId: userContext.userPublicId,
+              ownerType: ownerScope.ownerType,
+              ownerPublicId: ownerScope.ownerPublicId,
               taskType: historyQuery.taskType,
               page: historyQuery.page,
               pageSize: historyQuery.pageSize,
@@ -484,7 +554,8 @@ export function createPersonalAiGenerationRequestRouteHandlers(
               requestRepository.countRequestHistory === undefined
                 ? history.length
                 : await requestRepository.countRequestHistory({
-                    ownerPublicId: userContext.userPublicId,
+                    ownerType: ownerScope.ownerType,
+                    ownerPublicId: ownerScope.ownerPublicId,
                     taskType: historyQuery.taskType,
                   });
 
