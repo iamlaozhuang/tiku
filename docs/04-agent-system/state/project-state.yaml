@@ -1,8 +1,139 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ops-admin-local-login-residual-2026-07-02
-updatedAt: "2026-07-02T01:25:00-07:00"
+currentPhase: marketing-monopoly-provider-acceptance-2026-07-02
+updatedAt: "2026-07-02T02:10:00-07:00"
+marketingMonopolyProviderAcceptance20260702:
+  taskId: marketing-monopoly-provider-acceptance-2026-07-02
+  phase: marketing-monopoly-provider-acceptance-2026-07-02
+  status: closed
+  result: completed_with_follow_up_findings
+  priority: p1
+  taskKind: local_resource_import_and_bounded_provider_acceptance
+  moduleRunVersion: 2
+  dependsOn:
+    - ops-admin-local-login-residual-2026-07-02
+  sourceStory: current_user_requested_marketing_monopoly_resource_coverage_and_fuller_8_role_provider_acceptance_2026_07_02
+  targetClosureItem: import or verify marketing and monopoly local resources, then run fuller 8-role localhost real Provider acceptance
+  behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_no_logistics_no_source_dependency_schema_env_deploy_release_claim
+  logisticsBoundary: excluded_until_material_exists
+  evidenceMode: role_label_profession_label_route_label_status_category_count_duration_bucket_failure_category_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_or_generated_content
+  branch: codex/marketing-monopoly-provider-acceptance
+  claimedAt: "2026-07-02T01:45:00-07:00"
+  plannedAt: "2026-07-02T01:45:00-07:00"
+  implementedAt: "2026-07-02T02:05:00-07:00"
+  validatedAt: "2026-07-02T02:10:00-07:00"
+  reviewedAt: "2026-07-02T02:10:00-07:00"
+  closedAt: "2026-07-02T02:10:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    - src/db/owner-preview-resource-import.ts
+    - src/db/owner-preview-runtime-rag-resource-import.ts
+    - src/db/owner-preview-empty-baseline.ts
+    - tests/unit/owner-preview-resource-import.test.ts
+    - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+    - src/**/ai-generation*/**
+    - src/**/resource*/**
+    - src/**/knowledge*/**
+    - scripts/**
+    - D:\tiku-local-private\owner-facing-fixtures\**
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - .env.local
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: blocked
+    focusedUnitTest: approved_existing_tests_only
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_bounded_localhost_ui_only
+    providerMaxSubmitAttemptsTotal: 8
+    providerMaxSubmitAttemptsPerRoleRoute: 1
+    providerRetries: 0
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+    databaseConnection: approved_local_aggregate_counts_only
+    databaseMutation: approved_local_resource_import_marketing_monopoly_only
+    resourceImport: approved_marketing_monopoly_only
+    logisticsResourceImport: blocked_material_missing
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationSummary:
+    status: pass
+    result: completed_with_follow_up_findings
+    resourcePackageStatus: usable
+    logisticsExcluded: true
+    catalogImportStatus: executed
+    runtimeRagImportStatus: executed
+    importedResourceCount: 62
+    importedRuntimeResourceCount: 14
+    importedRuntimeChunkCount: 375
+    runtimeCoverage: marketing_rag_ready_13_monopoly_rag_ready_1
+    roleLabelsAttempted: 8
+    browserRouteChecks: 13
+    providerSubmitAttempts: 8
+    providerRetries: 0
+    standardRoleProviderSubmits: 0
+    learnerAdvancedVisibleSubmit: true
+    organizationAdvancedVisibleSubmit: true
+    contentAdminVisibleSubmit: true
+    opsAdminLocalAcceptanceSession: pass
+    followUpFindingCount: 5
+    followUpFindings:
+      - learner_employee_visible_state_history_closure_mismatch
+      - org_advanced_employee_empty_history_after_submit
+      - logistics_option_visible_while_package_missing
+      - admin_question_generation_provider_failure_categories_present
+      - insufficient_material_and_review_state_combined_in_ui
+    focusedUnitTests: pass_3_files_16_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_after_state_sha_sync
+    sourceOrTestChanged: false
+    envFileModified: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 opsAdminLocalLoginResidual20260702:
   taskId: ops-admin-local-login-residual-2026-07-02
   phase: ops-admin-local-login-residual-2026-07-02
@@ -13427,42 +13558,35 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e6015f95fc5caaacfe0d5e9a516bf20cc3897ed9
-  lastKnownOriginMasterSha: e6015f95fc5caaacfe0d5e9a516bf20cc3897ed9
+  lastKnownMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
+  lastKnownOriginMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
 currentTask:
-  id: ops-admin-local-login-residual-2026-07-02
+  id: marketing-monopoly-provider-acceptance-2026-07-02
   status: closed
-  result: pass_ops_admin_local_login_helper_repair
-  taskKind: local_browser_account_role_mapping_login_helper_check
+  result: completed_with_follow_up_findings
+  taskKind: local_resource_import_and_bounded_provider_acceptance
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ops-admin-local-login-residual
-  humanApproval: current_user_approved_ops_login_residual_first_and_marketing_monopoly_next_2026_07_02
-  claimedAt: "2026-07-02T01:05:00-07:00"
-  plannedAt: "2026-07-02T01:05:00-07:00"
-  implementedAt: "2026-07-02T01:20:00-07:00"
-  validatedAt: "2026-07-02T01:25:00-07:00"
-  reviewedAt: "2026-07-02T01:25:00-07:00"
-  closedAt: "2026-07-02T01:25:00-07:00"
+  branch: codex/marketing-monopoly-provider-acceptance
+  humanApproval: current_user_approved_marketing_monopoly_resource_provider_acceptance_and_excluded_logistics_2026_07_02
+  claimedAt: "2026-07-02T01:45:00-07:00"
+  plannedAt: "2026-07-02T01:45:00-07:00"
   dependsOn:
-    - ai-generation-20-fix-quick-acceptance-2026-07-02
-  sourceStory: current_user_requested_ops_admin_login_residual_before_resource_provider_expansion_2026_07_02
-  targetClosureItem: resolve or classify ops_admin localhost login residual without touching AI main chain
-  behaviorBoundary: local_browser_account_role_mapping_login_helper_only_no_ai_main_chain_provider_resource_db_mutation_schema_dependency_env_deploy
-  expansionNote: later resource coverage should start with marketing_and_monopoly_only_because_logistics_material_is_currently_missing
-  evidenceMode: role_label_route_label_status_category_error_category_only_no_credentials_no_raw_dom_no_screenshots_no_db_rows_no_env_no_session
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+    - ops-admin-local-login-residual-2026-07-02
+  sourceStory: current_user_requested_marketing_monopoly_resource_coverage_and_fuller_8_role_provider_acceptance_2026_07_02
+  targetClosureItem: import or verify marketing and monopoly local resources, then run fuller 8-role localhost real Provider acceptance
+  behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_no_logistics_no_source_dependency_schema_env_deploy_release_claim
+  logisticsBoundary: excluded_until_material_exists
+  evidenceMode: role_label_profession_label_route_label_status_category_count_duration_bucket_failure_category_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_or_generated_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
-    - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
-    - src/server/contracts/local-acceptance-session-contract.ts
-    - src/server/services/local-acceptance-session-service.ts
-    - tests/unit/local-acceptance-session-bootstrap.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
   blockedFiles:
     - .env*
     - package.json
@@ -13478,16 +13602,20 @@ currentTask:
     - test-results/**
     - .next/**
   capabilities:
-    localSourceChange: approved_exact_login_helper_scope_only
-    focusedUnitTest: approved
+    localSourceChange: blocked
+    focusedUnitTest: approved_existing_tests_only
     localDevServer: approved
     localhostBrowser: approved
-    providerCall: blocked
+    providerCall: approved_bounded_localhost_ui_only
+    providerMaxSubmitAttemptsTotal: 8
+    providerMaxSubmitAttemptsPerRoleRoute: 1
+    providerRetries: 0
     credentialReadForLocalhostLogin: approved_no_evidence
-    envSecretAccess: blocked
-    databaseConnection: blocked
-    databaseMutation: blocked
-    resourceImport: blocked
+    envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+    databaseConnection: approved_local_aggregate_counts_only
+    databaseMutation: approved_local_resource_import_marketing_monopoly_only
+    resourceImport: approved_marketing_monopoly_only
+    logisticsResourceImport: blocked_material_missing
     dependencyIntroduction: blocked
     schemaMigration: blocked
     e2eRuntime: blocked
@@ -13497,31 +13625,12 @@ currentTask:
     costCalibrationGate: blocked
   closeoutSummary:
     status: pass
-    result: pass_ops_admin_local_login_helper_repair
-    rootCause: local_acceptance_session_helper_only_allowed_content_admin
-    ordinaryOpsAdminPasswordLoginApi: pass
-    ordinaryOpsAdminBrowserFormLogin: pass
-    localAcceptanceOpsAdminBeforeRepair: blocked_invalid_request
-    localAcceptanceOpsAdminAfterRepair: pass_cookie_mode
-    redTestObserved: true
-    focusedUnitTests: pass_1_file_6_tests
-    lint: pass
-    typecheck: pass
-    prettierCheck: pass
-    gitDiffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
-    sourceOrTestChanged: true
-    providerCallExecuted: false
-    envFileReadOrModified: false
-    directDatabaseConnectionOrMutationExecuted: false
-    resourceImportExecuted: false
-    schemaMigrationSeedExecuted: false
-    dependencyPackageLockfileChanged: false
-    costCalibrationExecuted: false
-    stagingProdDeployExecuted: false
-    releaseReadinessClaimed: false
-    finalPassClaimed: false
+    result: completed_with_follow_up_findings
+    roleLabelsAttempted: 8
+    providerSubmitAttempts: 8
+    providerRetries: 0
+    followUpFindingCount: 5
+    validationStatus: pass
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:
   taskId: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
   phase: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
