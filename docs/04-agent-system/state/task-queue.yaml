@@ -80,6 +80,7 @@ standingApprovals:
       - ai-generation-post-application-closure-rerun-2026-07-02
       - ai-generation-bounded-provider-closure-rerun-2026-07-02
       - ai-generation-learner-retry-terminal-state-repair-2026-07-02
+      - ai-generation-post-retry-repair-rerun-2026-07-02
     executionRule: >-
       This central approval does not permit unbounded execution. Each covered task must first create a short branch,
       materialize exact allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential
@@ -355,6 +356,85 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-post-retry-repair-rerun-2026-07-02
+    title: AI generation post retry repair rerun
+    phase: ai-generation-post-retry-repair-rerun-2026-07-02
+    sourceStory: current_goal_after_learner_retry_terminal_state_repair_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: rerun learner AI generation pending retry gate after retry terminal-state repair
+    behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    taskKind: local_bounded_provider_owner_preview_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: pass_post_retry_repair_rerun
+    priority: p1
+    claimedAt: "2026-07-01T22:15:00-07:00"
+    plannedAt: "2026-07-01T22:15:00-07:00"
+    walkedThroughAt: "2026-07-01T22:30:00-07:00"
+    reviewedAt: "2026-07-01T22:35:00-07:00"
+    closedAt: "2026-07-01T22:35:00-07:00"
+    dependsOn:
+      - ai-generation-learner-retry-terminal-state-repair-2026-07-02
+    branch: codex/ai-generation-post-retry-repair-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    aiProviderBoundary: bounded_localhost_ui_only_max_two_submits_no_prompt_payload_raw_ai_io_evidence_no_retries
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-post-retry-repair-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-post-retry-repair-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_post_retry_repair_rerun
+      providerCallExecuted: bounded_localhost_ui_2_submits_no_retries
+      learnerPendingRetryGate: pass_retry_enabled_count_zero_start_practice_enabled_count_zero
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-learner-retry-terminal-state-repair-2026-07-02
     title: AI generation learner retry terminal-state repair
     phase: ai-generation-learner-retry-terminal-state-repair-2026-07-02
