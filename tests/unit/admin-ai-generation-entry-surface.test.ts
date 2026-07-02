@@ -935,9 +935,10 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent(businessAdminGeneratedResultFallback);
-    expect(
-      screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("草稿快照");
+    const historyPanel = screen.getByTestId("admin-ai-generation-task-history");
+    expect(historyPanel).toHaveTextContent("草稿快照");
+    expect(historyPanel).toHaveTextContent("需审核后采用");
+    expect(historyPanel).not.toHaveTextContent("已阻断");
     expect(document.body.textContent).not.toContain(
       "redacted generated result summary for content history",
     );

@@ -350,6 +350,150 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-cross-surface-closure-2026-07-02
+    title: AI generation cross-surface closure
+    phase: ai-generation-cross-surface-closure-2026-07-02
+    sourceStory: current_user_cross_surface_grounding_and_ui_leakage_reminder_2026_07_02
+    humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+    targetClosureItem: close remaining cross-role AI 出题 / AI 组卷 resource grounding and ordinary UI technical wording risks with source/tests before the next browser/provider rerun
+    behaviorBoundary: local_source_test_docs_only_no_db_provider_env_browser_dependency_schema_deploy
+    executionProfile: systematic_debugging_tdd_first_shared_contract_reuse
+    evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
+    taskKind: source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ai_generation_cross_surface_closure_source_tests
+    priority: p1
+    claimedAt: "2026-07-02T00:10:00-07:00"
+    plannedAt: "2026-07-02T00:10:00-07:00"
+    implementedAt: "2026-07-02T00:25:00-07:00"
+    validatedAt: "2026-07-02T00:25:00-07:00"
+    reviewedAt: "2026-07-02T00:25:00-07:00"
+    closedAt: "2026-07-02T00:25:00-07:00"
+    dependsOn:
+      - ai-generation-eight-role-credential-backed-rerun-2026-07-01
+    branch: codex/ai-generation-cross-surface-closure
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-cross-surface-closure.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-closure.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-closure.md
+    crossCuttingScanGate:
+      roleSurfaces:
+        - personal_advanced_student_ai_question_generation
+        - personal_advanced_student_ai_paper_generation
+        - organization_advanced_employee_ai_question_generation
+        - organization_advanced_employee_ai_paper_generation
+        - organization_advanced_admin_ai_question_generation
+        - organization_advanced_admin_ai_paper_generation
+        - content_admin_ai_question_generation
+        - content_admin_ai_paper_generation
+        - ops_admin_ai_audit_exception_only
+      requiredChecks:
+        - resource_pack_rag_grounding_required_or_generation_blocked_when_evidence_insufficient
+        - ordinary_ui_must_not_render_local_contract_redaction_or_raw_governance_terms
+        - ordinary_ui_must_not_render_internal_field_names_or_raw_status_enums
+        - shared_components_and_services_must_be_reused_instead_of_role_specific_duplicates
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-cross-surface-closure.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-closure.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-closure.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+    readOnlyOrRuntimeAllowed:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-07-01-ai-generation-*.md
+      - docs/05-execution-logs/task-plans/2026-07-01-ai-generation-*.md
+      - src/app/**/ai-generation*/**
+      - src/app/api/v1/*ai-generation*/**
+      - src/server/contracts/*ai-generation*
+      - src/server/services/*ai-generation*
+      - src/server/repositories/*ai-generation*
+      - .runtime/uploads/dev/resource/catalog.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      browserRuntime: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-cross-surface-closure.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-closure.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-closure.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-cross-surface-closure-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-cross-surface-closure-2026-07-02 -SkipRemoteAheadCheck
+    validationSummary:
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_7_files_76_tests
+      ordinaryUiWordingScan: pass_shared_admin_student_surfaces
+      groundingGateScan: pass_shared_provider_services
+      runtimeResourceAggregateScan: marketing_level_3_present_non_marketing_follow_up_required
+      prettierCheck: pass
+      lint: pass
+      typecheck: pass_after_missing_type_import_fix
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_update
+      sourceOrTestChanged: true
+      databaseConnectionOrMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      browserRuntimeExecuted: false
+      envFileReadOrModified: false
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessOrFinalPassClaimed: false
+
   - id: ai-generation-post-repair-localhost-rerun-2026-07-01
     title: AI generation post-repair localhost rerun
     phase: ai-generation-post-repair-localhost-rerun-2026-07-01

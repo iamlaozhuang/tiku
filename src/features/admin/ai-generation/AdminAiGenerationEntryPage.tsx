@@ -15,6 +15,7 @@ import type {
   AdminAiGenerationFormalQuestionDraftPayload,
 } from "@/server/contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type {
+  AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationTaskHistoryDto,
   AdminAiGenerationTaskHistoryItemDto,
@@ -282,6 +283,19 @@ function getVisibilityLabel(
   visibility: "summary_only" | "redacted_snapshot",
 ): string {
   return visibility === "summary_only" ? "结果摘要" : "草稿快照";
+}
+
+function getFormalAdoptionStatusLabel(
+  status: AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
+): string {
+  const labels = {
+    blocked: "需审核后采用",
+  } satisfies Record<
+    AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
+    string
+  >;
+
+  return labels[status];
 }
 
 function formatRequestedAt(requestedAt: string): string {
@@ -1027,10 +1041,9 @@ function AdminAiGenerationTaskHistoryPanel({
                     <div>
                       <dt className="text-text-secondary">正式采用</dt>
                       <dd className="text-text-primary mt-1">
-                        {taskItem.generatedResult.formalAdoptionStatus ===
-                        "blocked"
-                          ? "已阻断"
-                          : taskItem.generatedResult.formalAdoptionStatus}
+                        {getFormalAdoptionStatusLabel(
+                          taskItem.generatedResult.formalAdoptionStatus,
+                        )}
                       </dd>
                     </div>
                   </dl>
