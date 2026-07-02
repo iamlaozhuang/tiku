@@ -8,6 +8,10 @@ It is an audit and traceability artifact only. It does not create a use case cat
 matrix, code audit, implementation queue, schema, migration, provider work, env/secret work, e2e work, deployment, PR,
 force-push, payment, external-service work, or Cost Calibration Gate execution.
 
+## 2026-07-02 AI Generation SSOT Supplement
+
+For AI出题 / AI组卷, read `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md` before interpreting older `blocked_until_gate_approved` rows. The catalog rows below remain valid as provenance and gate context, but they are not the starting point for reopening residuals already closed or superseded by the 2026-07-02 baseline evidence.
+
 ## Field Model
 
 | Field                    | Meaning                                                                                                                    |

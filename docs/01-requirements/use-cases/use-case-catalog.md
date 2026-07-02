@@ -11,6 +11,10 @@ It is an audit and traceability artifact only. It does not create a technical la
 implementation queue, schema, migration, provider work, env/secret work, e2e work, deployment, PR, force-push, payment,
 external-service work, or Cost Calibration Gate execution.
 
+## 2026-07-02 AI Generation SSOT Supplement
+
+For AI出题 / AI组卷, read `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md` before interpreting older AI generation use-case rows. `blocked_until_gate_approved` remains valid for future high-risk implementation gates, but it does not override the current 2026-07-02 local owner-preview / bounded Provider acceptance baseline.
+
 ## Field Model
 
 | Field                    | Meaning                                                                                                              |

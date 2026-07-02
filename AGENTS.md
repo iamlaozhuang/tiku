@@ -175,5 +175,6 @@
 9. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
 10. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。
 11. **Fresh checkout 门禁**：格式化、行尾、质量门禁类修正必须在基于目标分支的新 worktree 中验证。仓库行尾策略由 `.gitattributes` 的 `* text=auto eol=lf` 固化，禁止依赖某个本地 Git 配置或旧 worktree 状态声称 `format:check` 健康。
+12. **AI 生成需求与验收基线恢复规则**：任何 AI出题 / AI组卷 任务必须先读 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`、最新 AI 生成 baseline evidence 和 goal-completion audit，再读取更早的 quick acceptance、MML rerun、能力目录或用例目录残留。若旧文档写有 blocked/gap，但后续基线已明确 closed/superseded，必须按后续基线记录 supersession，不得直接重开旧残留。若稳定需求文档与最新 traceability 无法通过时间序和来源层级消解，必须停止并请用户决策。
 
 DO NOT send optional commentary

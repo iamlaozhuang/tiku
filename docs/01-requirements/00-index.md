@@ -56,12 +56,24 @@
 - [Standard Advanced Next UX Polish Queue Planning](./traceability/2026-06-28-standard-advanced-next-ux-polish-queue-planning.md)
 - [Standard Advanced UX Polish Queue Planning](./traceability/2026-06-28-standard-advanced-ux-polish-queue-planning.md)
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
+- [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
 
 上述补充不改变标准版基础 MVP 的排除范围；它只明确标准/高级版合并验收中已经确认进入修复范围的能力：角色分离后台工作区、企业标准/高级管理员边界、高级学员 `AI训练`、高级企业员工 `AI训练` 与 `企业训练`、内容后台 `AI出题`/`AI组卷` 草稿评审、运营后台 `redeem_code` 和 `org_auth` 开通/升级/多范围授权治理。
 
 该补充仍不批准代码、数据库、Provider、Cost Calibration、staging/prod、支付、外部服务或最终验收 Pass。
+
+### 2.2 AI 出题 / AI 组卷当前 SSOT 基线
+
+2026-07-02 起，AI出题 / AI组卷 后续任务必须先读取 [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md) 和对应 baseline evidence，再使用更早的 quick acceptance、MML rerun、能力目录或用例目录残留。
+
+当前口径：
+
+- 标准版基础 MVP 的“AI 出题 / 智能组卷不做”仍成立，不能被解释成标准版学员自动拥有 AI 生成能力。
+- 统一标准/高级版修复范围中，`content_admin` 的内容后台 `AI出题` / `AI组卷` 草稿评审能力、`personal_advanced_student` 和 `org_advanced_employee` 的 `AI训练`、`org_advanced_admin` 的组织后台 AI 生成能力仍属于当前需求范围。
+- 旧文档中的 blocked/gap 行如果已被 2026-07-02 baseline 标记为 closed 或 superseded，只能作为历史证据，不得作为新的默认阻塞项。
+- 仍不声明 release readiness、final Pass、production usability、Cost Calibration、staging/prod 或广义生产全覆盖。
 
 ---
 

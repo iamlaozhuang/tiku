@@ -23,6 +23,15 @@ Define how advanced organization admins use AI question generation and AI `paper
 - `org_advanced_admin` must see organization AI generation entries from the organization backend navigation or equivalent primary workspace surface.
 - Organization-owned AI generation consumes organization quota according to the approved quota owner rules; exact point values remain under the Cost Calibration Gate.
 
+## Current SSOT Baseline
+
+2026-07-02 后续组织 AI出题 / AI组卷 任务必须读取 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md` 作为当前需求恢复入口。
+
+- `org_advanced_admin` 的组织后台入口为 `AI出题` 和 `AI组卷`。
+- `org_standard_admin` 不获得组织 AI 生成能力；直接路由必须拒绝或展示标准版不可用状态。
+- 组织 AI 生成输出属于 `organization` 草稿域，不直接写入平台正式 `question`、`paper`、`practice`、`mock_exam`、`exam_report` 或 `mistake_book`。
+- 当前验收基线只覆盖已记录的 local owner-preview / bounded Provider 范围，不声明生产可用、发布就绪、最终 Pass 或 Cost Calibration。
+
 ## Acceptance Boundaries
 
 - Organization admins can find an organization AI generation entry from the organization backend.

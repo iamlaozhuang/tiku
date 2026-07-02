@@ -14,6 +14,19 @@ authorization, quota, AI generation, organization training, and role-separated a
 `docs/05-execution-logs/` may explain why a gap was observed, but advanced edition implementation scope must map back to
 this index, the relevant advanced module or story, and the latest traceability decision.
 
+## Current AI Generation Baseline
+
+For AI出题 / AI组卷 work, the current recovery entry is
+`docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`.
+
+Use it before older quick acceptance, MML rerun, capability-catalog, or use-case-catalog residual wording. It preserves these requirements:
+
+- `personal_advanced_student` and `org_advanced_employee` use learner `AI训练` for AI出题 and AI组卷.
+- `org_advanced_admin` uses organization backend `AI出题` and `AI组卷`.
+- `content_admin` uses content backend `AI出题` and `AI组卷` for isolated draft/review content.
+- Standard learners, `org_standard_employee`, and `org_standard_admin` remain denied, hidden, upgrade-guided, or unavailable for advanced AI generation.
+- Release readiness, final Pass, production usability, Cost Calibration, and broad production/full coverage remain unclaimed.
+
 ## Source Documents
 
 Primary sources:
@@ -22,6 +35,7 @@ Primary sources:
 - `docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md`
 - `docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md`
 - `docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md`
+- `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`
 - `docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md`
 - `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`

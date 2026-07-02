@@ -1,8 +1,157 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-acceptance-baseline-normalization-2026-07-02
-updatedAt: "2026-07-02T06:45:00-07:00"
+currentPhase: ai-generation-requirements-ssot-alignment-2026-07-02
+updatedAt: "2026-07-02T07:30:00-07:00"
+aiGenerationRequirementsSsotAlignment20260702:
+  taskId: ai-generation-requirements-ssot-alignment-2026-07-02
+  phase: ai-generation-requirements-ssot-alignment-2026-07-02
+  status: closed
+  result: completed_ai_generation_requirements_ssot_alignment
+  priority: p1
+  taskKind: docs_requirement_alignment
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-acceptance-baseline-normalization-2026-07-02
+    - ai-generation-goal-completion-audit-2026-07-02
+    - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+  sourceStory: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+  targetClosureItem: Align AI出题 and AI组卷 requirements SSOT with the current 2026-07-02 acceptance baseline
+  behaviorBoundary: docs_requirement_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: docs_requirement_mapping_and_validation_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  branch: codex/ai-generation-requirements-ssot-alignment
+  claimedAt: "2026-07-02T07:30:00-07:00"
+  plannedAt: "2026-07-02T07:30:00-07:00"
+  implementedAt: "2026-07-02T07:30:00-07:00"
+  validatedAt: "2026-07-02T07:30:00-07:00"
+  reviewedAt: "2026-07-02T07:30:00-07:00"
+  closedAt: "2026-07-02T07:30:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  allowedFiles:
+    - AGENTS.md
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    - docs/01-requirements/traceability/capability-catalog.md
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  readOnlyAllowedFiles:
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+    - docs/01-requirements/modules/02-question-paper.md
+    - docs/01-requirements/modules/04-ai-scoring.md
+    - docs/01-requirements/modules/05-rag-knowledge.md
+    - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: blocked_not_needed_docs_requirement_alignment_only
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Current AI出题 and AI组卷 requirement reading is expressed as one dated traceability overlay.
+    - Standard-only AI generation non-goal remains preserved while unified standard/advanced repair scope remains explicit.
+    - Content admin, advanced learner, advanced organization employee, and advanced organization admin AI generation boundaries are mapped to current docs.
+    - Older blocked/gap wording is marked historical or superseded where the 2026-07-02 baseline already covers it.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+  validationSummary:
+    status: passed
+    requirementOverlayCreated: true
+    standardBaseNonGoalPreserved: true
+    unifiedAdvancedAiGenerationScopeMapped: true
+    historicalResidualSupersessionRuleRecorded: true
+    noUnresolvedProductConflict: true
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 aiGenerationAcceptanceBaselineNormalization20260702:
   taskId: ai-generation-acceptance-baseline-normalization-2026-07-02
   phase: ai-generation-acceptance-baseline-normalization-2026-07-02
@@ -16280,9 +16429,159 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 12e7bef1aa168f593faa05e6dbc79dd635d87b63
-  lastKnownOriginMasterSha: 12e7bef1aa168f593faa05e6dbc79dd635d87b63
+  lastKnownMasterSha: 4022c2e3e087d29fc0ca0bec4db5f74f2d95cdb2
+  lastKnownOriginMasterSha: 4022c2e3e087d29fc0ca0bec4db5f74f2d95cdb2
 currentTask:
+  id: ai-generation-requirements-ssot-alignment-2026-07-02
+  status: closed
+  result: completed_ai_generation_requirements_ssot_alignment
+  taskKind: docs_requirement_alignment
+  validationPolicy: docs_requirement_alignment_prettier_diff_module_run_v2
+  moduleRunVersion: 2
+  priority: p1
+  branch: codex/ai-generation-requirements-ssot-alignment
+  humanApproval: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+  claimedAt: "2026-07-02T07:30:00-07:00"
+  plannedAt: "2026-07-02T07:30:00-07:00"
+  implementedAt: "2026-07-02T07:30:00-07:00"
+  validatedAt: "2026-07-02T07:30:00-07:00"
+  reviewedAt: "2026-07-02T07:30:00-07:00"
+  closedAt: "2026-07-02T07:30:00-07:00"
+  dependsOn:
+    - ai-generation-acceptance-baseline-normalization-2026-07-02
+    - ai-generation-goal-completion-audit-2026-07-02
+    - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+  sourceStory: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+  targetClosureItem: Align AI出题 and AI组卷 requirements SSOT with the current 2026-07-02 acceptance baseline
+  behaviorBoundary: docs_requirement_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: docs_requirement_mapping_and_validation_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  allowedFiles:
+    - AGENTS.md
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    - docs/01-requirements/traceability/capability-catalog.md
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+  readOnlyAllowedFiles:
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+    - docs/01-requirements/modules/02-question-paper.md
+    - docs/01-requirements/modules/04-ai-scoring.md
+    - docs/01-requirements/modules/05-rag-knowledge.md
+    - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+    - docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    focusedUnitTest: blocked_not_needed_docs_requirement_alignment_only
+    localSourceChange: blocked
+    providerCall: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Current AI出题 and AI组卷 requirement reading is expressed as one dated traceability overlay.
+    - Standard-only AI generation non-goal remains preserved while unified standard/advanced repair scope remains explicit.
+    - Content admin, advanced learner, advanced organization employee, and advanced organization admin AI generation boundaries are mapped to current docs.
+    - Older blocked/gap wording is marked historical or superseded where the 2026-07-02 baseline already covers it.
+    - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+  validationSummary:
+    status: passed
+    requirementOverlayCreated: true
+    standardBaseNonGoalPreserved: true
+    unifiedAdvancedAiGenerationScopeMapped: true
+    historicalResidualSupersessionRuleRecorded: true
+    noUnresolvedProductConflict: true
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2ModuleCloseout: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+previousCurrentTaskBeforeAiGenerationRequirementsSsotAlignment20260702:
   id: ai-generation-acceptance-baseline-normalization-2026-07-02
   status: closed
   result: completed_single_ai_generation_acceptance_baseline

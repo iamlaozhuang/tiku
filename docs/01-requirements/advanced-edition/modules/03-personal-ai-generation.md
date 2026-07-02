@@ -25,6 +25,15 @@ Define the learner-facing experience for AI question generation and AI `paper` g
 - `org_standard_employee` must not see learner `AI训练` from organization context.
 - `org_advanced_employee` must see learner `AI训练` when valid advanced `org_auth` and organization context permit it.
 
+## Current SSOT Baseline
+
+2026-07-02 后续 AI出题 / AI组卷 任务必须读取 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md` 作为当前需求恢复入口。
+
+- `personal_advanced_student` 使用学员端 `AI训练`，包含 `AI出题` 和 `AI组卷`。
+- `org_advanced_employee` 使用组织授权上下文中的学员端 `AI训练`，包含 `AI出题` 和 `AI组卷`。
+- `personal_standard_student` 和 `org_standard_employee` 不获得高级 AI 生成能力；可接受结果仍是隐藏、升级引导、清晰拒绝或不可用状态。
+- 当前验收基线只覆盖已记录的 local owner-preview / bounded Provider 范围，不声明生产可用、发布就绪、最终 Pass 或 Cost Calibration。
+
 ## Acceptance Boundaries
 
 - The learner entry is visible and obvious for eligible advanced learners; requiring manual URL input is not acceptable.
