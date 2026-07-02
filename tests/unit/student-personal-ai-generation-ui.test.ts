@@ -934,6 +934,27 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("keeps retry disabled while the current accepted generation is still pending", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal("fetch", createPersonalAiGenerationFetchMock());
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
+    expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
+    expect(
+      screen.getByText("生成后可进入练习、提交作答并查看学习反馈"),
+    ).toBeInTheDocument();
+  });
+
   it("posts an organization-context local route contract payload for employee sessions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const submittedBodies: Record<string, unknown>[] = [];

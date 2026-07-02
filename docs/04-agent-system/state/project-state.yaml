@@ -1,8 +1,103 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-bounded-provider-closure-rerun-2026-07-02
-updatedAt: "2026-07-01T21:15:00-07:00"
+currentPhase: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+updatedAt: "2026-07-01T21:45:00-07:00"
+aiGenerationLearnerRetryTerminalStateRepair20260702:
+  taskId: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+  phase: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+  status: closed
+  result: pass_learner_retry_terminal_state_repair
+  priority: p1
+  taskKind: source_test_repair
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-bounded-provider-closure-rerun-2026-07-02
+  sourceStory: bounded_provider_closure_rerun_found_learner_retry_enabled_while_current_result_not_usable_2026_07_02
+  targetClosureItem: gate learner AI generation retry action to terminal failed or insufficient current-result states
+  behaviorBoundary: local_source_focused_tests_docs_state_only_no_db_provider_env_dependency_schema_e2e_deploy
+  evidenceMode: redacted_status_count_validation_summary_only_no_credentials_no_prompt_payload_raw_ai_output_generated_content_db_rows_or_pii
+  branch: codex/ai-generation-learner-retry-terminal-state-repair
+  claimedAt: "2026-07-01T21:45:00-07:00"
+  plannedAt: "2026-07-01T21:45:00-07:00"
+  implementedAt: "2026-07-01T22:05:00-07:00"
+  validatedAt: "2026-07-01T22:05:00-07:00"
+  reviewedAt: "2026-07-01T22:05:00-07:00"
+  closedAt: "2026-07-01T22:05:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+    - tests/unit/student-personal-ai-generation-ui.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - tests/unit/student-personal-ai-generation-ui.test.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: approved
+    focusedUnitTest: approved
+    staticSourceScan: approved
+    localDevServer: blocked
+    localhostBrowser: blocked
+    providerCall: blocked
+    credentialReadForLocalhostLogin: blocked
+    envSecretAccess: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationSummary:
+    status: pass
+    result: pass_learner_retry_terminal_state_repair
+    redTestsAddedAndObservedFailing: true
+    focusedUnitTests: pass_2_files_30_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: true
+    providerCallExecuted: false
+    envFileReadOrModified: false
+    databaseConnectionOrMutationExecuted: false
+    schemaMigrationSeedExecuted: false
+    dependencyPackageLockfileChanged: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 aiGenerationBoundedProviderClosureRerun20260702:
   taskId: ai-generation-bounded-provider-closure-rerun-2026-07-02
   phase: ai-generation-bounded-provider-closure-rerun-2026-07-02
@@ -12965,13 +13060,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 33bc8802bff05ee66f3b9c8a4da7165ad08a1fcb
-  lastKnownOriginMasterSha: 33bc8802bff05ee66f3b9c8a4da7165ad08a1fcb
+  lastKnownMasterSha: 5099d3887c5df1dbd4148e2dc68cb3d86b836328
+  lastKnownOriginMasterSha: 5099d3887c5df1dbd4148e2dc68cb3d86b836328
 currentTask:
-  id: ai-generation-bounded-provider-closure-rerun-2026-07-02
+  id: ai-generation-learner-retry-terminal-state-repair-2026-07-02
   status: closed
-  result: completed_with_findings_learner_retry_pending_state_repair_required
-  taskKind: local_bounded_provider_owner_preview_rerun
+  result: pass_learner_retry_terminal_state_repair
+  taskKind: source_test_repair
   moduleRunVersion: 2
   priority: p1
   branch: codex/ai-generation-post-adoption-closure-rerun

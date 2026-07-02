@@ -983,6 +983,26 @@ function canUseCurrentGeneratedPractice(
   );
 }
 
+function canRetryCurrentGeneratedPractice(
+  experience: PersonalAiGenerationLocalBrowserExperienceDto,
+): boolean {
+  if (experience.flowStatus !== "accepted") {
+    return false;
+  }
+
+  if (
+    experience.resultState.status === "failed" ||
+    experience.resultState.status === "cancelled"
+  ) {
+    return true;
+  }
+
+  return (
+    experience.resultState.status === "succeeded" &&
+    !canUseCurrentGeneratedPractice(experience)
+  );
+}
+
 function StudentPersonalAiGenerationHistorySummary({
   historyState,
   historyRows,
@@ -2056,7 +2076,9 @@ export function StudentPersonalAiGenerationPage() {
     hasLocalAiGenerationExperience &&
     canUseCurrentGeneratedPractice(experience);
   const isRetryGenerationDisabled =
-    isAiGenerationActionDisabled || !hasLocalAiGenerationExperience;
+    isAiGenerationActionDisabled ||
+    !hasLocalAiGenerationExperience ||
+    !canRetryCurrentGeneratedPractice(experience);
   const practiceFeedbackStateForCurrentResult =
     hasLocalAiGenerationExperience &&
     experience.flowStatus === "accepted" &&
