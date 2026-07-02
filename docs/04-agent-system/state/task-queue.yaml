@@ -358,6 +358,132 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: marketing-monopoly-logistics-provider-rerun-2026-07-02
+    title: Marketing monopoly logistics Provider rerun with updated runtime RAG catalog
+    phase: marketing-monopoly-logistics-provider-rerun-2026-07-02
+    sourceStory: current_user_requested_marketing_monopoly_logistics_provider_rerun_with_updated_runtime_rag_catalog_2026_07_02
+    humanApprovalBoundary: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+    targetClosureItem: rerun marketing monopoly logistics AI question and AI paper small Provider samples using updated runtime RAG catalog
+    behaviorBoundary: local_only_updated_runtime_rag_catalog_provider_acceptance_rerun_no_source_dependency_schema_deploy_release_claim
+    taskKind: local_resource_import_and_bounded_provider_acceptance_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: completed_provider_rerun_with_monopoly_ocr_followup
+    priority: p1
+    claimedAt: "2026-07-02T06:00:00-07:00"
+    plannedAt: "2026-07-02T06:00:00-07:00"
+    implementedAt: "2026-07-02T06:15:00-07:00"
+    validatedAt: "2026-07-02T06:20:00-07:00"
+    reviewedAt: "2026-07-02T06:20:00-07:00"
+    closedAt: "2026-07-02T06:20:00-07:00"
+    dependsOn:
+      - owner-preview-resource-pack-addendum-2026-07-02
+    branch: codex/marketing-monopoly-logistics-provider-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved_existing_tests_only
+      localDevServer: approved
+      localhostBrowser: approved
+      providerCall: approved_bounded_localhost_ui_only
+      providerMaxSubmitAttemptsTotal: 6
+      providerMaxSubmitAttemptsPerProfessionFunction: 1
+      providerRetries: 0
+      credentialReadForLocalhostLogin: approved_no_evidence
+      envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+      databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+      databaseMutation: approved_local_resource_import_if_needed_after_dry_run_pass
+      resourceImport: approved_marketing_monopoly_logistics_only_if_needed_after_dry_run_pass
+      runtimeRagImport: approved_marketing_monopoly_logistics_execute_after_dry_run_pass
+      ocrRepair: blocked_defer_to_separate_task_if_monopoly_weak
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId marketing-monopoly-logistics-provider-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId marketing-monopoly-logistics-provider-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+    validationSummary:
+      status: pass_with_residual_followups
+      result: completed_provider_rerun_with_monopoly_ocr_followup
+      focusedUnitTests: pass_3_files_16_tests
+      lint: pass
+      typecheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_anchor_sync
+      resourceImportDryRun: pass
+      resourceImportExecute: pass_local_loopback
+      runtimeRagImportDryRun: pass
+      runtimeRagImportExecute: pass
+      localhostDevServer: pass_http_200
+      contentAdminLocalAcceptanceSession: pass_no_credentials_recorded
+      providerAttemptCount: 6
+      providerRetryCount: 0
+      providerVisibleSuccessCount: 5
+      providerSafeFailureCount: 1
+      residualFindings:
+        - monopoly_ai_question_safe_failure_requires_ocr_followup
+        - ai_paper_structured_question_count_not_recognized
+        - runtime_rag_logistics_diagnostic_wording_inconsistent
+      sourceOrTestChanged: false
+      envFileModifiedOrValueRecorded: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      e2eRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedTaskId: monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
   - id: owner-preview-resource-pack-addendum-2026-07-02
     title: Owner preview resource pack addendum for textbook and assessment point materials
     phase: owner-preview-resource-pack-addendum-2026-07-02
