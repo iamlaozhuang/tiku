@@ -82,6 +82,7 @@ standingApprovals:
       - ai-generation-learner-retry-terminal-state-repair-2026-07-02
       - ai-generation-post-retry-repair-rerun-2026-07-02
       - ai-generation-owner-preview-closeout-audit-2026-07-02
+      - ai-generation-20-fix-quick-acceptance-2026-07-02
     executionRule: >-
       This central approval does not permit unbounded execution. Each covered task must first create a short branch,
       materialize exact allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential
@@ -357,6 +358,97 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-20-fix-quick-acceptance-2026-07-02
+    title: AI generation 20 fix quick acceptance
+    phase: ai-generation-20-fix-quick-acceptance-2026-07-02
+    sourceStory: current_user_approved_quick_acceptance_for_20_ai_generation_repairs_2026_07_02
+    humanApprovalBoundary: current_user_fresh_approved_quick_acceptance_2026_07_02
+    targetClosureItem: quick acceptance for the 20 repaired AI出题 / AI组卷 issue classes
+    behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    taskKind: local_browser_owner_preview_quick_acceptance
+    moduleRunVersion: 2
+    status: closed
+    result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
+    priority: p1
+    claimedAt: "2026-07-02T00:15:00-07:00"
+    plannedAt: "2026-07-02T00:15:00-07:00"
+    walkedThroughAt: "2026-07-02T00:45:00-07:00"
+    reviewedAt: "2026-07-02T00:50:00-07:00"
+    closedAt: "2026-07-02T00:50:00-07:00"
+    dependsOn:
+      - ai-generation-owner-preview-closeout-audit-2026-07-02
+    branch: codex/ai-generation-20-fix-quick-acceptance
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-20-fix-quick-acceptance-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-20-fix-quick-acceptance-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
+      roleLabelsAttempted: 8
+      aiRelevantRoleLoginPassed: 7
+      opsAdminLogin: blocked_after_retry
+      routeScans: 16
+      authExpiredVisibleCount: 0
+      technicalWordingLeakRoutes: 0
+      legacyLevelRoutes: 0
+      standardAiEnabledRoutes: 0
+      providerSubmitAttempts: 8
+      providerRetries: 0
+      providerClickedSamples: 8
+      providerFailedSamples: 0
+      learnerPrematurePracticeOrRetryEnabled: false
+      adminDraftBoundaryVisible: true
+      twentyIssueClassesAccepted: true
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-owner-preview-closeout-audit-2026-07-02
     title: AI generation owner preview closeout audit
     phase: ai-generation-owner-preview-closeout-audit-2026-07-02
