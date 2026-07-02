@@ -1,8 +1,139 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: session-cookie-contract-login-and-e2e-alignment-2026-07-02
-updatedAt: "2026-07-02T10:30:00-07:00"
+currentPhase: phase4-requirements-agent-baseline-alignment-2026-07-02
+updatedAt: "2026-07-02T11:00:00-07:00"
+phase4RequirementsAgentBaselineAlignment20260702:
+  taskId: phase4-requirements-agent-baseline-alignment-2026-07-02
+  phase: phase4-requirements-agent-baseline-alignment-2026-07-02
+  status: closed
+  result: completed_phase4_requirements_agent_baseline_alignment
+  priority: p1
+  taskKind: docs_requirement_agent_baseline_alignment
+  moduleRunVersion: 2
+  dependsOn:
+    - session-cookie-contract-login-and-e2e-alignment-2026-07-02
+    - ai-generation-acceptance-baseline-normalization-2026-07-02
+    - ai-generation-goal-completion-audit-2026-07-02
+  sourceStory: current_user_approved_phase4_requirements_agent_baseline_alignment_no_repeat_repair_2026_07_02
+  targetClosureItem: Normalize Stage4 requirement and AGENTS recovery baseline so already closed AI generation residuals are not reopened.
+  behaviorBoundary: docs_requirement_agent_state_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim_no_repeat_repair
+  evidenceMode: redacted_status_scope_path_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_provider_payload_no_prompt_no_ai_output_no_full_content
+  branch: codex/phase4-requirements-agent-baseline-alignment
+  claimedAt: "2026-07-02T11:00:00-07:00"
+  plannedAt: "2026-07-02T11:00:00-07:00"
+  implementedAt: "2026-07-02T11:00:00-07:00"
+  validatedAt: "2026-07-02T11:00:00-07:00"
+  reviewedAt: "2026-07-02T11:00:00-07:00"
+  closedAt: "2026-07-02T11:00:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  requirementTraceabilityPath: docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  allowedFiles:
+    - AGENTS.md
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  readOnlyAllowedFiles:
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    - docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    - docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    requirementTraceabilityUpdate: approved
+    agentsRecoveryRuleUpdate: approved
+    localSourceChange: blocked
+    focusedUnitTest: blocked_docs_only
+    localhostBrowserE2E: blocked
+    localDevServer: blocked
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    aiFeatureAcceptanceRerun: blocked_no_repeat_repair
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Stage4 baseline records that the first 20 AI generation issue classes are closed or superseded and must not be repeated as repair work without fresh current-baseline evidence.
+    - The AI generation goal-completion audit and acceptance-baseline normalization remain the active closeout records for old AI出题 / AI组卷 residuals.
+    - The original Stage3 role-workflow blocked evidence remains historical, while the session-cookie follow-up is the active local session/e2e baseline for future walkthrough work.
+    - Requirement indexes and AGENTS point to the same recovery order and do not replace the requirement SSOT.
+    - No source, test, Provider, browser, DB, dependency, schema, deploy, release readiness, final Pass, production usability, Cost Calibration, prompt, payload, AI output, or full-content evidence is introduced.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase4-requirements-agent-baseline-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase4-requirements-agent-baseline-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase4-requirements-agent-baseline-alignment-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_phase4_requirements_agent_baseline_alignment_no_repeat_repair_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_phase4_requirements_agent_baseline_alignment_no_repeat_repair_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_phase4_requirements_agent_baseline_alignment_no_repeat_repair_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+  validationSummary:
+    docsOnlyBaselineAlignment: true
+    first20AiGenerationIssueClassesNotReopened: true
+    goalCompletionAuditRemainsActiveCloseout: true
+    acceptanceBaselineNormalizationRemainsActiveCloseout: true
+    sessionCookieFollowupActiveForStage3LocalSessionBaseline: true
+    originalStage3BlockedEvidenceKeptAsHistoricalOnly: true
+    sourceFilesChanged: false
+    testsChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDbAccessExecuted: false
+    dependencyChanged: false
+    schemaMigrationChanged: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 sessionCookieContractLoginAndE2eAlignment20260702:
   taskId: session-cookie-contract-login-and-e2e-alignment-2026-07-02
   phase: session-cookie-contract-login-and-e2e-alignment-2026-07-02
@@ -17252,6 +17383,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: phase4-requirements-agent-baseline-alignment-2026-07-02
+  status: closed
+  result: completed_phase4_requirements_agent_baseline_alignment
+  taskKind: docs_requirement_agent_baseline_alignment
+  moduleRunVersion: 2
+  branch: codex/phase4-requirements-agent-baseline-alignment
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+previousCurrentTaskBeforePhase4RequirementsAgentBaselineAlignment20260702:
   id: session-cookie-contract-login-and-e2e-alignment-2026-07-02
   status: closed
   result: completed_session_cookie_contract_baseline_restored

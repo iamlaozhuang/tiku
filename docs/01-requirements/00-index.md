@@ -57,6 +57,7 @@
 - [Standard Advanced UX Polish Queue Planning](./traceability/2026-06-28-standard-advanced-ux-polish-queue-planning.md)
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
 - [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
+- [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
 
@@ -67,6 +68,8 @@
 ### 2.2 AI 出题 / AI 组卷当前 SSOT 基线
 
 2026-07-02 起，AI出题 / AI组卷 后续任务必须先读取 [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md) 和对应 baseline evidence，再使用更早的 quick acceptance、MML rerun、能力目录或用例目录残留。
+
+阶段4恢复和验收口径归一见 [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)。它只固化读取顺序和 supersession 口径，不新增 AI 出题 / AI 组卷修复范围。
 
 当前口径：
 

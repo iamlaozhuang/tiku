@@ -18,6 +18,8 @@ this index, the relevant advanced module or story, and the latest traceability d
 
 For AI出题 / AI组卷 work, the current recovery entry is
 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`.
+The Stage4 recovery guard is
+`docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md`.
 
 Use it before older quick acceptance, MML rerun, capability-catalog, or use-case-catalog residual wording. It preserves these requirements:
 
