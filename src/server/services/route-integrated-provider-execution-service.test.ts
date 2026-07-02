@@ -191,6 +191,66 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it.each([
+    ["questionDrafts", "questionDrafts"],
+    ["question_drafts", "question_drafts"],
+  ] as const)(
+    "builds a parsed question-set structured preview from %s",
+    (_label, questionArrayKey) => {
+      const content = JSON.stringify({
+        [questionArrayKey]: Array.from({ length: 3 }, () => ({
+          questionType: "single_choice",
+          difficulty: "medium",
+          knowledgeNodeLabels: ["redacted_knowledge_node"],
+        })),
+      });
+
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(content, {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        }),
+      ).toMatchObject({
+        structuredPreview: {
+          kind: "question_set",
+          parseStatus: "parsed",
+          requestedQuestionCount: 3,
+          actualQuestionCount: 3,
+          draftCount: 3,
+        },
+      });
+    },
+  );
+
+  it("reports a safe missing-questions failure for unsupported question roots", () => {
+    const content = JSON.stringify({
+      items: Array.from({ length: 3 }, () => ({
+        questionType: "single_choice",
+      })),
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "question_set",
+          requestedQuestionCount: 3,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        requestedQuestionCount: 3,
+        actualQuestionCount: null,
+        failureCategory: "missing_questions",
+        draftCount: 0,
+        draftSummaries: [],
+      },
+    });
+  });
+
   it("derives question-set preview counts from task generation parameters", () => {
     expect(
       createRouteIntegratedStructuredPreviewOptionsForTask(
@@ -268,6 +328,163 @@ describe("shared route-integrated Provider execution primitives", () => {
         questionTypeDistributionCount: 2,
         knowledgeCoverageCount: 2,
         reviewStatus: "draft_review_required",
+      },
+    });
+  });
+
+  it.each([
+    [
+      "top-level questionCount",
+      {
+        paperSections: [{ paperSectionType: "single_choice" }],
+        questionCount: 50,
+      },
+      50,
+    ],
+    [
+      "top-level totalQuestionCount",
+      {
+        paperSections: [{ paperSectionType: "single_choice" }],
+        totalQuestionCount: 50,
+      },
+      50,
+    ],
+    [
+      "section questionCount",
+      {
+        paperSections: [
+          { paperSectionType: "single_choice", questionCount: 20 },
+          { paperSectionType: "judge", questionCount: 30 },
+        ],
+      },
+      50,
+    ],
+    [
+      "nested questions",
+      {
+        paperSections: [
+          {
+            paperSectionType: "single_choice",
+            questions: Array.from({ length: 20 }, () => ({
+              redactedDraftSummary: "synthetic question summary",
+            })),
+          },
+          {
+            paperSectionType: "judge",
+            questions: Array.from({ length: 30 }, () => ({
+              redactedDraftSummary: "synthetic question summary",
+            })),
+          },
+        ],
+      },
+      50,
+    ],
+    [
+      "nested questionDrafts",
+      {
+        paperSections: [
+          {
+            paperSectionType: "single_choice",
+            questionDrafts: Array.from({ length: 20 }, () => ({
+              redactedDraftSummary: "synthetic question summary",
+            })),
+          },
+          {
+            paperSectionType: "judge",
+            questionDrafts: Array.from({ length: 30 }, () => ({
+              redactedDraftSummary: "synthetic question summary",
+            })),
+          },
+        ],
+      },
+      50,
+    ],
+    [
+      "question type distribution totals",
+      {
+        paperSections: [{ paperSectionType: "single_choice" }],
+        questionTypeDistribution: {
+          single_choice: 20,
+          judge: 30,
+        },
+      },
+      50,
+    ],
+  ] as const)(
+    "recognizes paper question count from %s",
+    (_label, contentObject, expectedQuestionCount) => {
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(
+          JSON.stringify(contentObject),
+          {
+            structuredPreview: {
+              kind: "paper_draft",
+              requestedQuestionCount: expectedQuestionCount,
+            },
+          },
+        ),
+      ).toMatchObject({
+        structuredPreview: {
+          kind: "paper_draft",
+          parseStatus: "parsed",
+          paperSectionCount: expect.any(Number) as number,
+          questionCount: expectedQuestionCount,
+          reviewStatus: "draft_review_required",
+        },
+      });
+    },
+  );
+
+  it("reports a safe paper count mismatch failure when requested count differs", () => {
+    const content = JSON.stringify({
+      paperSections: [
+        { paperSectionType: "single_choice", questionCount: 20 },
+        { paperSectionType: "judge", questionCount: 29 },
+      ],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 50,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "question_count_mismatch",
+        requestedQuestionCount: 50,
+        questionCount: 49,
+        paperSectionCount: 2,
+        reviewStatus: "structured_parse_failed",
+      },
+    });
+  });
+
+  it("reports a safe missing-count failure when paper count cannot be derived", () => {
+    const content = JSON.stringify({
+      paperSections: [{ paperSectionType: "single_choice" }],
+      knowledgeCoverage: ["redacted_knowledge_node"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 50,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "missing_question_count",
+        requestedQuestionCount: 50,
+        questionCount: null,
+        paperSectionCount: 1,
+        reviewStatus: "structured_parse_failed",
       },
     });
   });

@@ -178,11 +178,16 @@ export type AiGenerationRouteIntegratedStructuredPreview =
   | {
       kind: "paper_draft";
       parseStatus: "failed";
-      failureCategory: "invalid_json" | "missing_paper_sections";
-      paperSectionCount: 0;
-      questionCount: null;
-      questionTypeDistributionCount: null;
-      knowledgeCoverageCount: null;
+      failureCategory:
+        | "invalid_json"
+        | "missing_paper_sections"
+        | "missing_question_count"
+        | "question_count_mismatch";
+      requestedQuestionCount?: number | null;
+      paperSectionCount: number;
+      questionCount: number | null;
+      questionTypeDistributionCount: number | null;
+      knowledgeCoverageCount: number | null;
       reviewStatus: "structured_parse_failed";
     };
 

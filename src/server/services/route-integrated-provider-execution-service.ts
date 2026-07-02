@@ -271,7 +271,7 @@ function createRouteIntegratedStructuredPreview(
     return createQuestionSetStructuredPreview(parsedContent, options);
   }
 
-  return createPaperDraftStructuredPreview(parsedContent);
+  return createPaperDraftStructuredPreview(parsedContent, options);
 }
 
 function createQuestionSetStructuredPreview(
@@ -354,12 +354,17 @@ function createQuestionSetStructuredPreview(
 
 function createPaperDraftStructuredPreview(
   parsedContent: Record<string, unknown> | null,
+  options: Extract<
+    AiGenerationRouteIntegratedStructuredPreviewOptions,
+    { kind: "paper_draft" }
+  >,
 ): AiGenerationRouteIntegratedStructuredPreview {
   if (parsedContent === null) {
     return {
       kind: "paper_draft",
       parseStatus: "failed",
       failureCategory: "invalid_json",
+      requestedQuestionCount: options.requestedQuestionCount ?? null,
       paperSectionCount: 0,
       questionCount: null,
       questionTypeDistributionCount: null,
@@ -379,6 +384,7 @@ function createPaperDraftStructuredPreview(
       kind: "paper_draft",
       parseStatus: "failed",
       failureCategory: "missing_paper_sections",
+      requestedQuestionCount: options.requestedQuestionCount ?? null,
       paperSectionCount: 0,
       questionCount: null,
       questionTypeDistributionCount: null,
@@ -387,21 +393,58 @@ function createPaperDraftStructuredPreview(
     };
   }
 
+  const questionCount = readPaperQuestionCount(parsedContent, paperSections);
+  const questionTypeDistributionCount = readCollectionCount(parsedContent, [
+    "questionTypeDistribution",
+    "question_type_distribution",
+  ]);
+  const knowledgeCoverageCount = readCollectionCount(parsedContent, [
+    "knowledgeCoverage",
+    "knowledge_coverage",
+    "knowledgeNodes",
+    "knowledge_node",
+  ]);
+  const requestedQuestionCount = options.requestedQuestionCount ?? null;
+
+  if (requestedQuestionCount !== null && questionCount === null) {
+    return {
+      kind: "paper_draft",
+      parseStatus: "failed",
+      failureCategory: "missing_question_count",
+      requestedQuestionCount,
+      paperSectionCount: paperSections.length,
+      questionCount: null,
+      questionTypeDistributionCount,
+      knowledgeCoverageCount,
+      reviewStatus: "structured_parse_failed",
+    };
+  }
+
+  if (
+    requestedQuestionCount !== null &&
+    questionCount !== null &&
+    questionCount !== requestedQuestionCount
+  ) {
+    return {
+      kind: "paper_draft",
+      parseStatus: "failed",
+      failureCategory: "question_count_mismatch",
+      requestedQuestionCount,
+      paperSectionCount: paperSections.length,
+      questionCount,
+      questionTypeDistributionCount,
+      knowledgeCoverageCount,
+      reviewStatus: "structured_parse_failed",
+    };
+  }
+
   return {
     kind: "paper_draft",
     parseStatus: "parsed",
     paperSectionCount: paperSections.length,
-    questionCount: sumQuestionCounts(paperSections),
-    questionTypeDistributionCount: readCollectionCount(parsedContent, [
-      "questionTypeDistribution",
-      "question_type_distribution",
-    ]),
-    knowledgeCoverageCount: readCollectionCount(parsedContent, [
-      "knowledgeCoverage",
-      "knowledge_coverage",
-      "knowledgeNodes",
-      "knowledge_node",
-    ]),
+    questionCount,
+    questionTypeDistributionCount,
+    knowledgeCoverageCount,
     reviewStatus: "draft_review_required",
   };
 }
@@ -487,6 +530,37 @@ function readCollectionCount(
   return null;
 }
 
+function readRecordProperty(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): Record<string, unknown> | null {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (isRecord(value)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function readPaperQuestionCount(
+  parsedContent: Record<string, unknown>,
+  paperSections: unknown[],
+): number | null {
+  return (
+    normalizeQuestionCount(
+      parsedContent.questionCount ??
+        parsedContent.question_count ??
+        parsedContent.totalQuestionCount ??
+        parsedContent.total_question_count,
+    ) ??
+    sumQuestionCounts(paperSections) ??
+    sumQuestionTypeDistributionCounts(parsedContent)
+  );
+}
+
 function sumQuestionCounts(paperSections: unknown[]): number | null {
   let totalQuestionCount = 0;
   let sectionWithQuestionCount = false;
@@ -508,6 +582,35 @@ function sumQuestionCounts(paperSections: unknown[]): number | null {
   }
 
   return sectionWithQuestionCount ? totalQuestionCount : null;
+}
+
+function sumQuestionTypeDistributionCounts(
+  parsedContent: Record<string, unknown>,
+): number | null {
+  const distribution = readRecordProperty(parsedContent, [
+    "questionTypeDistribution",
+    "question_type_distribution",
+  ]);
+
+  if (distribution === null) {
+    return null;
+  }
+
+  let totalQuestionCount = 0;
+  let distributionWithQuestionCount = false;
+
+  for (const value of Object.values(distribution)) {
+    const questionCount = normalizeQuestionCount(value);
+
+    if (questionCount === null) {
+      continue;
+    }
+
+    distributionWithQuestionCount = true;
+    totalQuestionCount += questionCount;
+  }
+
+  return distributionWithQuestionCount ? totalQuestionCount : null;
 }
 
 function readNestedSectionQuestionCount(

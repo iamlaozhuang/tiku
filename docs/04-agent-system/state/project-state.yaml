@@ -1,8 +1,131 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-shared-task-spec-contract-2026-07-02
-updatedAt: "2026-07-02T03:05:21-07:00"
+currentPhase: ai-generation-structured-preview-parser-hardening-2026-07-02
+updatedAt: "2026-07-02T03:18:57-07:00"
+aiGenerationStructuredPreviewParserHardening20260702:
+  taskId: ai-generation-structured-preview-parser-hardening-2026-07-02
+  phase: ai-generation-structured-preview-parser-hardening-2026-07-02
+  status: closed
+  result: completed_structured_preview_parser_hardening
+  priority: p1
+  taskKind: implementation
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-shared-task-spec-contract-2026-07-02
+  sourceStory: seeded_by_ai_generation_shared_structured_contract_goal_plan_2026_07_02
+  targetClosureItem: Harden parser acceptance for common Provider JSON variants without accepting raw or ungrounded content
+  behaviorBoundary: local_source_test_parser_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_file_path_status_category_count_validation_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  branch: codex/ai-generation-structured-preview-parser-hardening
+  claimedAt: "2026-07-02T03:11:24-07:00"
+  plannedAt: "2026-07-02T03:11:24-07:00"
+  implementedAt: "2026-07-02T03:18:57-07:00"
+  validatedAt: "2026-07-02T03:18:57-07:00"
+  reviewedAt: "2026-07-02T03:18:57-07:00"
+  closedAt: "2026-07-02T03:18:57-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    - src/server/contracts/route-integrated-provider-execution-contract.ts
+    - src/server/services/route-integrated-provider-execution-service.ts
+    - src/server/services/route-integrated-provider-execution-service.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/**
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/stories/epic-06-admin-ops.md
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+    - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+    - docs/01-requirements/traceability/2026-06-28-content-admin-local-safe-role-bootstrap-stage-c-repair.md
+    - docs/01-requirements/traceability/2026-06-28-ai-generation-detail-controls-source-repair.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: approved
+    focusedUnitTest: approved
+    providerCall: blocked
+    databaseConnection: blocked
+    browserRuntime: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-structured-preview-parser-hardening-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-structured-preview-parser-hardening-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+  validationSummary:
+    status: passed
+    sourceOrTestChanged: true
+    focusedUnitTests: 1_file_24_tests_passed
+    lint: passed
+    typecheck: passed
+    prettierWrite: passed
+    prettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed_files_scanned_8
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    databaseConnectionOrMutationExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    nextRecommendedTaskId: ai-generation-provider-instruction-unification-2026-07-02
 aiGenerationSharedTaskSpecContract20260702:
   taskId: ai-generation-shared-task-spec-contract-2026-07-02
   phase: ai-generation-shared-task-spec-contract-2026-07-02
@@ -14699,45 +14822,40 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e9644f024576d5b1de1e60cba99042b083d5d51a
-  lastKnownOriginMasterSha: e9644f024576d5b1de1e60cba99042b083d5d51a
+  lastKnownMasterSha: 10645915e49f1c8102da97ba75f4901a3330f238
+  lastKnownOriginMasterSha: 10645915e49f1c8102da97ba75f4901a3330f238
 currentTask:
-  id: ai-generation-shared-task-spec-contract-2026-07-02
+  id: ai-generation-structured-preview-parser-hardening-2026-07-02
   status: closed
-  result: completed_shared_task_spec_contract
+  result: completed_structured_preview_parser_hardening
   taskKind: implementation
   validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-shared-task-spec-contract
+  branch: codex/ai-generation-structured-preview-parser-hardening
   humanApproval: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
-  claimedAt: "2026-07-02T02:48:33-07:00"
-  plannedAt: "2026-07-02T02:48:33-07:00"
-  implementedAt: "2026-07-02T03:05:21-07:00"
-  validatedAt: "2026-07-02T03:05:21-07:00"
-  reviewedAt: "2026-07-02T03:05:21-07:00"
-  closedAt: "2026-07-02T03:05:21-07:00"
+  claimedAt: "2026-07-02T03:11:24-07:00"
+  plannedAt: "2026-07-02T03:11:24-07:00"
+  implementedAt: "2026-07-02T03:18:57-07:00"
+  validatedAt: "2026-07-02T03:18:57-07:00"
+  reviewedAt: "2026-07-02T03:18:57-07:00"
+  closedAt: "2026-07-02T03:18:57-07:00"
   dependsOn:
-    - ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    - ai-generation-shared-task-spec-contract-2026-07-02
   sourceStory: seeded_by_ai_generation_shared_structured_contract_goal_plan_2026_07_02
-  targetClosureItem: Create the single source of truth for AI出题 and AI组卷 task semantics
-  behaviorBoundary: local_source_test_contract_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
+  targetClosureItem: Harden parser acceptance for common Provider JSON variants without accepting raw or ungrounded content
+  behaviorBoundary: local_source_test_parser_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
   evidenceMode: task_id_file_path_status_category_count_validation_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
-    - src/server/contracts/ai-generation-task-spec-contract.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
     - src/server/contracts/route-integrated-provider-execution-contract.ts
-    - src/server/services/admin-ai-generation-local-contract-route.ts
-    - src/server/services/admin-ai-generation-local-contract-route.test.ts
-    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
-    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
     - src/server/services/route-integrated-provider-execution-service.ts
     - src/server/services/route-integrated-provider-execution-service.test.ts
   blockedFiles:
@@ -14772,13 +14890,13 @@ currentTask:
   validationSummary:
     status: passed
     sourceOrTestChanged: true
-    focusedUnitTests: 5_files_59_tests_passed
+    focusedUnitTests: 1_file_24_tests_passed
     lint: passed
     typecheck: passed
-    prettierWrite: passed_unchanged
+    prettierWrite: passed
     prettierCheck: passed
     gitDiffCheck: passed
-    moduleRunV2PreCommit: passed_files_scanned_12
+    moduleRunV2PreCommit: passed_files_scanned_8
     moduleRunV2PrePush: passed_skip_remote_ahead_check
     providerCallExecuted: false
     browserRuntimeExecuted: false
@@ -14788,7 +14906,7 @@ currentTask:
     stagingProdDeployExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    nextRecommendedTaskId: ai-generation-structured-preview-parser-hardening-2026-07-02
+    nextRecommendedTaskId: ai-generation-provider-instruction-unification-2026-07-02
 previousCurrentTaskBeforeAiGenerationSharedTaskSpecContract20260702:
   id: ai-generation-shared-structured-contract-goal-plan-2026-07-02
   status: closed
