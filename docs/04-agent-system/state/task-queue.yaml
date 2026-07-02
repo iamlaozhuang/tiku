@@ -1213,9 +1213,15 @@ tasks:
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
     taskKind: local_owner_preview_matrix_rerun
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: completed_eight_role_credential_backed_ai_generation_rerun
     priority: p1
+    claimedAt: "2026-07-01T19:40:00-07:00"
+    plannedAt: "2026-07-01T19:40:00-07:00"
+    executedAt: "2026-07-01T19:55:00-07:00"
+    validatedAt: "2026-07-01T19:55:00-07:00"
+    reviewedAt: "2026-07-01T19:55:00-07:00"
+    closedAt: "2026-07-01T19:55:00-07:00"
     dependsOn:
       - ai-generation-resource-grounding-enforcement-repair-2026-07-01
     branch: codex/ai-generation-eight-role-credential-backed-rerun
@@ -1283,7 +1289,19 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-eight-role-credential-backed-rerun-2026-07-01
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-eight-role-credential-backed-rerun-2026-07-01 -SkipRemoteAheadCheck
     validationSummary:
-      status: pending
+      status: pass
+      browserMatrixRerun: pass_16_cells_blocked_8_not_applicable_8
+      localhostUiSubmitAttempts: 8
+      internalUiWordingLeakCount: 0
+      obviousOffDomainSignalCount: 0
+      groundingResult: pass_all_submit_attempts_blocked_by_insufficient_grounding
+      prettierCheck: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+    nextRecommendedTask: ai-generation-resource-grounded-provider-sample-2026-07-01
   - id: ai-generation-cross-role-grounding-ui-rerun-2026-07-01
     title: AI generation cross-role grounding and UI wording rerun
     phase: ai-generation-cross-role-grounding-ui-rerun-2026-07-01
