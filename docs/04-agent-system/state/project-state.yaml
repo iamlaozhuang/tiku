@@ -1,8 +1,142 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: requirements-code-implementation-alignment-audit-2026-07-02
-updatedAt: "2026-07-02T09:00:00-07:00"
+currentPhase: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+updatedAt: "2026-07-02T09:30:00-07:00"
+roleWorkflowExperienceWalkthroughFromCodeBaseline20260702:
+  taskId: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+  phase: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+  status: closed
+  result: blocked_runtime_walkthrough_session_contract_mismatch
+  priority: p1
+  taskKind: acceptance_runtime_walkthrough
+  moduleRunVersion: 2
+  dependsOn:
+    - requirements-code-implementation-alignment-audit-2026-07-02
+  sourceStory: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+  targetClosureItem: Run bounded local role and workflow walkthrough from current requirement-code baseline
+  behaviorBoundary: localhost_e2e_runtime_walkthrough_only_no_source_test_provider_env_direct_db_dependency_schema_deploy_release_claim
+  evidenceMode: redacted_role_route_workflow_status_count_summaries_only_no_credentials_no_sessions_no_raw_dom_no_provider_payload_no_prompt_no_ai_output_no_full_content
+  branch: codex/role-workflow-experience-walkthrough-from-code-baseline
+  claimedAt: "2026-07-02T09:30:00-07:00"
+  plannedAt: "2026-07-02T09:30:00-07:00"
+  validatedAt: "2026-07-02T09:30:00-07:00"
+  reviewedAt: "2026-07-02T09:30:00-07:00"
+  closedAt: "2026-07-02T09:45:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    - docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/**
+    - docs/04-agent-system/sop/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - src/**
+    - tests/**
+    - e2e/**
+    - package.json
+    - playwright.config.ts
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    localhostBrowserE2E: approved
+    localDevServer: approved_if_started_by_playwright_webserver_only
+    testOwnedLoginInput: approved_existing_local_specs_only_no_evidence
+    apiWriteViaExistingLocalE2E: approved_metadata_only_no_raw_rows
+    localSourceChange: blocked
+    focusedUnitTest: approved_not_primary_gate
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Existing local browser/e2e coverage exercises selected role allow/deny and workflow paths without Provider execution.
+    - Organization standard/advanced admin, employee, ops/content denial, personal AI, and student learning observations are recorded as redacted summaries.
+    - Any runtime failure is classified as a gap and does not trigger source repair in this task.
+    - No release readiness, final Pass, production usability, Cost Calibration, Provider, env, direct DB, dependency, schema, or deploy claim is made.
+  validationCommands:
+    - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+  validationSummary:
+    status: blocked
+    runtimeWalkthroughExecuted: true
+    selectedPlaywrightSpecs: 5
+    selectedPlaywrightTests: 6
+    selectedPlaywrightPassed: 0
+    setupFailurePortInUseObserved: true
+    existingLocalServerReused: true
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    providerConfigurationRead: false
+    directDatabaseActionByAgent: false
+    envSecretAccessed: false
+    sensitiveEvidenceRecorded: false
+    rawDomScreenshotTraceRecorded: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+    blockingFindings:
+      - STAGE3-01
+      - STAGE3-02
+      - STAGE3-03
+      - STAGE3-04
 requirementsCodeImplementationAlignmentAudit20260702:
   taskId: requirements-code-implementation-alignment-audit-2026-07-02
   phase: requirements-code-implementation-alignment-audit-2026-07-02
@@ -16831,8 +16965,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7e4c6274612ba802297d1acf0b61e0e834ddfd84
-  lastKnownOriginMasterSha: 7e4c6274612ba802297d1acf0b61e0e834ddfd84
+  lastKnownMasterSha: 4de8569e0940c6ceaa6279dedc81acaa5e833ae0
+  lastKnownOriginMasterSha: 4de8569e0940c6ceaa6279dedc81acaa5e833ae0
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -16972,6 +17106,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+  status: closed
+  result: blocked_runtime_walkthrough_session_contract_mismatch
+  taskKind: acceptance_runtime_walkthrough
+  moduleRunVersion: 2
+  branch: codex/role-workflow-experience-walkthrough-from-code-baseline
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+previousCurrentTaskBeforeRoleWorkflowExperienceWalkthroughFromCodeBaseline20260702:
   id: requirements-code-implementation-alignment-audit-2026-07-02
   status: closed
   result: completed_requirements_code_implementation_alignment_audit
