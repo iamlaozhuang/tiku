@@ -1,8 +1,158 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-employee-ai-history-closure-2026-07-02
-updatedAt: "2026-07-02T02:40:00-07:00"
+currentPhase: marketing-monopoly-provider-rerun-2026-07-02
+updatedAt: "2026-07-02T04:05:00-07:00"
+marketingMonopolyProviderRerun20260702:
+  taskId: marketing-monopoly-provider-rerun-2026-07-02
+  phase: marketing-monopoly-provider-rerun-2026-07-02
+  status: closed
+  result: completed_acceptance_rerun_with_residual_findings
+  priority: p1
+  taskKind: local_resource_import_and_bounded_provider_acceptance_rerun
+  moduleRunVersion: 2
+  dependsOn:
+    - learner-employee-ai-history-closure-2026-07-02
+  sourceStory: current_user_requested_marketing_monopoly_resource_provider_rerun_excluding_logistics_2026_07_02
+  targetClosureItem: rerun marketing and monopoly resource-backed 8-role localhost real Provider acceptance after learner employee history closure repair
+  behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_rerun_no_logistics_no_source_dependency_schema_deploy_release_claim
+  logisticsBoundary: excluded_until_material_exists
+  evidenceMode: role_label_profession_label_route_label_workflow_label_status_category_error_category_count_duration_bucket_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_or_generated_content
+  branch: codex/marketing-monopoly-provider-rerun
+  claimedAt: "2026-07-02T03:00:00-07:00"
+  plannedAt: "2026-07-02T03:00:00-07:00"
+  implementedAt: "2026-07-02T03:55:00-07:00"
+  validatedAt: "2026-07-02T04:05:00-07:00"
+  reviewedAt: "2026-07-02T04:05:00-07:00"
+  closedAt: "2026-07-02T04:05:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+    - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
+    - scripts/db/Import-OwnerPreviewResourcePackage.ps1
+    - scripts/db/Import-OwnerPreviewRuntimeRagResources.ps1
+    - src/db/owner-preview-resource-import.ts
+    - src/db/owner-preview-runtime-rag-resource-import.ts
+    - tests/unit/owner-preview-resource-import.test.ts
+    - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+    - tests/unit/local-acceptance-session-bootstrap.test.ts
+    - src/**/ai-generation*/**
+    - src/**/resource*/**
+    - src/**/knowledge*/**
+    - src/**/local-acceptance*/**
+    - D:\tiku-local-private\owner-facing-fixtures\**
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - .env.local
+  blockedFiles:
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: blocked
+    focusedUnitTest: approved_existing_tests_only
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_bounded_localhost_ui_only
+    providerMaxSubmitAttemptsTotal: 8
+    providerMaxSubmitAttemptsPerRoleRoute: 1
+    providerRetries: 0
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+    databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+    databaseMutation: approved_local_resource_import_marketing_monopoly_only
+    resourceImport: approved_marketing_monopoly_only
+    logisticsResourceImport: blocked_material_missing
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId marketing-monopoly-provider-rerun-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId marketing-monopoly-provider-rerun-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+  validationSummary:
+    status: pass_with_residual_findings
+    result: completed_acceptance_rerun_with_residual_findings
+    logisticsExcluded: true
+    focusedUnitTests: pass_3_files_16_tests
+    lint: pass
+    typecheck: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    resourceImportDryRun: pass
+    resourceImportExecute: pass
+    runtimeRagImportDryRun: pass
+    runtimeRagImportExecute: pass
+    localhostDevServer: pass_http_200
+    roleMatrix: completed_8_roles
+    providerAttemptCount: 8
+    providerRetryCount: 0
+    providerVisibleSuccessCount: 2
+    providerAcceptedNoVisibleResultCount: 4
+    providerInsufficientOrFailedCount: 2
+    residualFindings:
+      - learner_employee_advanced_accepts_without_visible_result
+      - monopoly_ai_paper_insufficient_runtime_rag_coverage
+      - logistics_option_visible_while_material_missing
+      - current_result_status_can_be_confused_with_historical_failure_marker
+    nextRecommendedTaskId: learner-employee-ai-visible-result-closure-repair-2026-07-02
+    sourceOrTestChanged: false
+    envFileModified: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 learnerEmployeeAiHistoryClosure20260702:
   taskId: learner-employee-ai-history-closure-2026-07-02
   phase: learner-employee-ai-history-closure-2026-07-02
@@ -13696,57 +13846,43 @@ repository:
   lastKnownMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
   lastKnownOriginMasterSha: 2c8df60925ccd7c153c5943bcc0c90cb31da17ce
 currentTask:
-  id: learner-employee-ai-history-closure-2026-07-02
+  id: marketing-monopoly-provider-rerun-2026-07-02
   status: closed
-  result: completed_learner_employee_ai_history_closure
-  taskKind: focused_source_test_repair
+  result: completed_acceptance_rerun_with_residual_findings
+  taskKind: local_resource_import_and_bounded_provider_acceptance_rerun
   moduleRunVersion: 2
   priority: p1
-  branch: codex/learner-employee-ai-history-closure
-  humanApproval: current_user_approved_plan_then_execute_and_closeout_2026_07_02
-  claimedAt: "2026-07-02T02:20:00-07:00"
-  plannedAt: "2026-07-02T02:20:00-07:00"
-  implementedAt: "2026-07-02T02:35:00-07:00"
-  validatedAt: "2026-07-02T02:40:00-07:00"
-  reviewedAt: "2026-07-02T02:40:00-07:00"
-  closedAt: "2026-07-02T02:40:00-07:00"
+  branch: codex/marketing-monopoly-provider-rerun
+  humanApproval: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+  claimedAt: "2026-07-02T03:00:00-07:00"
+  plannedAt: "2026-07-02T03:00:00-07:00"
+  implementedAt: "2026-07-02T03:55:00-07:00"
+  validatedAt: "2026-07-02T04:05:00-07:00"
+  reviewedAt: "2026-07-02T04:05:00-07:00"
+  closedAt: "2026-07-02T04:05:00-07:00"
   dependsOn:
-    - marketing-monopoly-provider-acceptance-2026-07-02
-  sourceStory: current_user_approved_repair_for_learner_employee_ai_history_closure_residual_2026_07_02
-  targetClosureItem: close learner and employee AI generation request/result history after local visible Provider submit
-  behaviorBoundary: local_source_test_repair_only_for_personal_employee_ai_request_result_history_and_redacted_materialization_no_resource_import_no_provider_call_no_env_schema_dependency_deploy
-  evidenceMode: task_id_status_label_command_result_test_count_redacted_summary_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
+    - learner-employee-ai-history-closure-2026-07-02
+  sourceStory: current_user_requested_marketing_monopoly_resource_provider_rerun_excluding_logistics_2026_07_02
+  targetClosureItem: rerun marketing and monopoly resource-backed 8-role localhost real Provider acceptance after learner employee history closure repair
+  behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_rerun_no_logistics_no_source_dependency_schema_deploy_release_claim
+  logisticsBoundary: excluded_until_material_exists
+  evidenceMode: role_label_profession_label_route_label_workflow_label_status_category_error_category_count_duration_bucket_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_or_generated_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
-    - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
-    - src/server/models/personal-ai-generation-result-history.ts
-    - src/server/models/personal-ai-generation-result.ts
-    - src/server/validators/personal-ai-generation-result-history.ts
-    - src/server/validators/personal-ai-generation-result-persistence.ts
-    - src/server/repositories/personal-ai-generation-request-repository.ts
-    - src/server/repositories/personal-ai-generation-result-repository.ts
-    - src/server/repositories/personal-ai-generation-request-repository.test.ts
-    - src/server/repositories/personal-ai-generation-result-repository.test.ts
-    - src/server/services/personal-ai-generation-request-route.ts
-    - src/server/services/personal-ai-generation-result-history-service.ts
-    - src/server/services/personal-ai-generation-result-route.ts
-    - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.ts
-    - src/server/services/personal-ai-generation-request-route.test.ts
-    - src/server/services/personal-ai-generation-result-route.test.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
   blockedFiles:
-    - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
     - pnpm-lock.yaml
+    - src/**
+    - tests/**
     - src/db/schema/**
     - drizzle/**
     - migrations/**
@@ -13755,19 +13891,21 @@ currentTask:
     - playwright-report/**
     - test-results/**
     - .next/**
-    - D:/tiku-local-private/**
-    - D:\tiku-local-private\**
   capabilities:
-    localSourceChange: approved_exact_history_closure_scope_only
-    focusedUnitTest: approved
-    localDevServer: blocked
-    localhostBrowser: blocked
-    providerCall: blocked
-    envSecretAccess: blocked
-    databaseConnection: blocked
-    databaseMutation: blocked
-    resourceImport: blocked
-    logisticsResourceImport: blocked
+    localSourceChange: blocked
+    focusedUnitTest: approved_existing_tests_only
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: approved_bounded_localhost_ui_only
+    providerMaxSubmitAttemptsTotal: 8
+    providerMaxSubmitAttemptsPerRoleRoute: 1
+    providerRetries: 0
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+    databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+    databaseMutation: approved_local_resource_import_marketing_monopoly_only
+    resourceImport: approved_marketing_monopoly_only
+    logisticsResourceImport: blocked_material_missing
     dependencyIntroduction: blocked
     schemaMigration: blocked
     e2eRuntime: blocked
@@ -13776,17 +13914,18 @@ currentTask:
     pr: blocked
     costCalibrationGate: blocked
   closeoutSummary:
-    status: pass
-    result: pass_learner_employee_ai_history_closure
-    focusedUnitTests: pass_5_files_56_tests
+    status: pass_with_residual_findings
+    result: completed_acceptance_rerun_with_residual_findings
+    logisticsExcluded: true
+    providerSubmitBudget: max_8_zero_retries
+    focusedUnitTests: pass_3_files_16_tests
     lint: pass
     typecheck: pass
-    prettierCheck: pass
+    scopedPrettierCheck: pass
     gitDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
-    providerCallExecuted: false
-    databaseConnectionOrMutationExecuted: false
+    nextRecommendedTaskId: learner-employee-ai-visible-result-closure-repair-2026-07-02
 remainingTerminalActiveQueueArchiveIndexCleanup20260630:
   taskId: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
   phase: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
